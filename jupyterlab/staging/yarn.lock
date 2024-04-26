@@ -420,26 +420,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/application-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/application-extension@npm:4.1.7"
+"@jupyterlab/application-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/application-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/property-inspector": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/property-inspector": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: d8043e20cc9653ad84d3a79df30b72eedb36477ca1e6c053b6995b9235c5d168b44cd2e09418488d773ae193d4d3c9d43ac7b4d95856bfaa9d1b90d645457f56
+  checksum: 5f6d8bd0b022e1f0a4f2a0c7ac7d8d9e7d5d0011a8b9c479e87fe5b5931702fcdd1c7010160a378a30c5755ca9f0e050b944a2cb15adb5706168687d1bc41518
   languageName: node
   linkType: hard
 
@@ -447,56 +447,56 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-top@workspace:."
   dependencies:
-    "@jupyterlab/application": ~4.1.7
-    "@jupyterlab/application-extension": ~4.1.7
-    "@jupyterlab/apputils-extension": ~4.1.7
-    "@jupyterlab/builder": ^4.1.7
-    "@jupyterlab/buildutils": ^4.1.7
-    "@jupyterlab/cell-toolbar-extension": ~4.1.7
-    "@jupyterlab/celltags-extension": ~4.1.7
-    "@jupyterlab/codemirror-extension": ~4.1.7
-    "@jupyterlab/completer-extension": ~4.1.7
-    "@jupyterlab/console-extension": ~4.1.7
-    "@jupyterlab/coreutils": ~6.1.7
-    "@jupyterlab/csvviewer-extension": ~4.1.7
-    "@jupyterlab/debugger-extension": ~4.1.7
-    "@jupyterlab/docmanager-extension": ~4.1.7
-    "@jupyterlab/documentsearch-extension": ~4.1.7
-    "@jupyterlab/extensionmanager-extension": ~4.1.7
-    "@jupyterlab/filebrowser-extension": ~4.1.7
-    "@jupyterlab/fileeditor-extension": ~4.1.7
-    "@jupyterlab/help-extension": ~4.1.7
-    "@jupyterlab/htmlviewer-extension": ~4.1.7
-    "@jupyterlab/hub-extension": ~4.1.7
-    "@jupyterlab/imageviewer-extension": ~4.1.7
-    "@jupyterlab/inspector-extension": ~4.1.7
-    "@jupyterlab/javascript-extension": ~4.1.7
-    "@jupyterlab/json-extension": ~4.1.7
-    "@jupyterlab/launcher-extension": ~4.1.7
-    "@jupyterlab/logconsole-extension": ~4.1.7
-    "@jupyterlab/lsp-extension": ~4.1.7
-    "@jupyterlab/mainmenu-extension": ~4.1.7
-    "@jupyterlab/markdownviewer-extension": ~4.1.7
-    "@jupyterlab/markedparser-extension": ~4.1.7
-    "@jupyterlab/mathjax-extension": ~4.1.7
-    "@jupyterlab/mermaid-extension": ~4.1.7
-    "@jupyterlab/metadataform-extension": ~4.1.7
-    "@jupyterlab/notebook-extension": ~4.1.7
-    "@jupyterlab/pdf-extension": ~4.1.7
-    "@jupyterlab/pluginmanager-extension": ~4.1.7
-    "@jupyterlab/rendermime-extension": ~4.1.7
-    "@jupyterlab/running-extension": ~4.1.7
-    "@jupyterlab/settingeditor-extension": ~4.1.7
-    "@jupyterlab/shortcuts-extension": ~4.1.7
-    "@jupyterlab/statusbar-extension": ~4.1.7
-    "@jupyterlab/terminal-extension": ~4.1.7
-    "@jupyterlab/theme-dark-extension": ~4.1.7
-    "@jupyterlab/theme-light-extension": ~4.1.7
-    "@jupyterlab/toc-extension": ~6.1.7
-    "@jupyterlab/tooltip-extension": ~4.1.7
-    "@jupyterlab/translation-extension": ~4.1.7
-    "@jupyterlab/ui-components-extension": ~4.1.7
-    "@jupyterlab/vega5-extension": ~4.1.7
+    "@jupyterlab/application": ~4.1.8
+    "@jupyterlab/application-extension": ~4.1.8
+    "@jupyterlab/apputils-extension": ~4.1.8
+    "@jupyterlab/builder": ^4.1.8
+    "@jupyterlab/buildutils": ^4.1.8
+    "@jupyterlab/cell-toolbar-extension": ~4.1.8
+    "@jupyterlab/celltags-extension": ~4.1.8
+    "@jupyterlab/codemirror-extension": ~4.1.8
+    "@jupyterlab/completer-extension": ~4.1.8
+    "@jupyterlab/console-extension": ~4.1.8
+    "@jupyterlab/coreutils": ~6.1.8
+    "@jupyterlab/csvviewer-extension": ~4.1.8
+    "@jupyterlab/debugger-extension": ~4.1.8
+    "@jupyterlab/docmanager-extension": ~4.1.8
+    "@jupyterlab/documentsearch-extension": ~4.1.8
+    "@jupyterlab/extensionmanager-extension": ~4.1.8
+    "@jupyterlab/filebrowser-extension": ~4.1.8
+    "@jupyterlab/fileeditor-extension": ~4.1.8
+    "@jupyterlab/help-extension": ~4.1.8
+    "@jupyterlab/htmlviewer-extension": ~4.1.8
+    "@jupyterlab/hub-extension": ~4.1.8
+    "@jupyterlab/imageviewer-extension": ~4.1.8
+    "@jupyterlab/inspector-extension": ~4.1.8
+    "@jupyterlab/javascript-extension": ~4.1.8
+    "@jupyterlab/json-extension": ~4.1.8
+    "@jupyterlab/launcher-extension": ~4.1.8
+    "@jupyterlab/logconsole-extension": ~4.1.8
+    "@jupyterlab/lsp-extension": ~4.1.8
+    "@jupyterlab/mainmenu-extension": ~4.1.8
+    "@jupyterlab/markdownviewer-extension": ~4.1.8
+    "@jupyterlab/markedparser-extension": ~4.1.8
+    "@jupyterlab/mathjax-extension": ~4.1.8
+    "@jupyterlab/mermaid-extension": ~4.1.8
+    "@jupyterlab/metadataform-extension": ~4.1.8
+    "@jupyterlab/notebook-extension": ~4.1.8
+    "@jupyterlab/pdf-extension": ~4.1.8
+    "@jupyterlab/pluginmanager-extension": ~4.1.8
+    "@jupyterlab/rendermime-extension": ~4.1.8
+    "@jupyterlab/running-extension": ~4.1.8
+    "@jupyterlab/settingeditor-extension": ~4.1.8
+    "@jupyterlab/shortcuts-extension": ~4.1.8
+    "@jupyterlab/statusbar-extension": ~4.1.8
+    "@jupyterlab/terminal-extension": ~4.1.8
+    "@jupyterlab/theme-dark-extension": ~4.1.8
+    "@jupyterlab/theme-light-extension": ~4.1.8
+    "@jupyterlab/toc-extension": ~6.1.8
+    "@jupyterlab/tooltip-extension": ~4.1.8
+    "@jupyterlab/translation-extension": ~4.1.8
+    "@jupyterlab/ui-components-extension": ~4.1.8
+    "@jupyterlab/vega5-extension": ~4.1.8
     chokidar: ^3.4.0
     css-loader: ^6.7.1
     duplicate-package-checker-webpack-plugin: ^3.0.0
@@ -522,20 +522,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/application@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/application@npm:4.1.7"
+"@jupyterlab/application@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/application@npm:4.1.8"
   dependencies:
     "@fortawesome/fontawesome-free": ^5.12.0
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/application": ^2.3.0
     "@lumino/commands": ^2.2.0
@@ -546,27 +546,27 @@ __metadata:
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 4bb3f2411e8786f466d6b87604cb970d99a4900bea8230ec0aa2ce6852651b6170b905fcf11bfccab010be0dcdf5a559401abae36efc1d237cb20e80a4a9a6ab
+  checksum: 33c57c7e825f72f8aca146bfb2ade9c91e55ac5218410ff4472b0e4cf0de0305ec34f94a9ff3ab5e8982c37a170225dbfe47b4ac900980837ecaf00b7effb0fc
   languageName: node
   linkType: hard
 
-"@jupyterlab/apputils-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/apputils-extension@npm:4.1.7"
+"@jupyterlab/apputils-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/apputils-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -577,23 +577,23 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     react-toastify: ^9.0.8
-  checksum: beec07f28c68bbc025a9e614df586dec0459d76f3f93c087bde2381cb8e7a3323c4d6e50d94cab212d0350d3558e65f75a61318f026be0c873a30e41669d37b0
+  checksum: e54528be15abc6ef1b85e512f5ca216bb68f24dec85acab0501ca48996c299ed3ccb2eb39e28f2827891b1d49a5ac618cc50bb28c31e014efbf855e447429e38
   languageName: node
   linkType: hard
 
-"@jupyterlab/apputils@npm:~4.2.7":
-  version: 4.2.7
-  resolution: "@jupyterlab/apputils@npm:4.2.7"
+"@jupyterlab/apputils@npm:~4.2.8":
+  version: 4.2.8
+  resolution: "@jupyterlab/apputils@npm:4.2.8"
   dependencies:
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -606,27 +606,27 @@ __metadata:
     "@types/react": ^18.0.26
     react: ^18.2.0
     sanitize-html: ~2.7.3
-  checksum: 95ff30660dbc276942918f2aa4c7953b2f126407258d18a0ed5c921287677e267763a2af6be2b9a0857bce60564c9ae8ec16848d1813de2151fde41ebf059f5c
+  checksum: 253b3a21f292b19791e149926014e90eb0e6e074b86422a63ce2fbfaebc53c6e16c6cd628f79d91eb7e66b60357df79b9dc6de683b5293562f9fcbe39bcd0522
   languageName: node
   linkType: hard
 
-"@jupyterlab/attachments@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/attachments@npm:4.1.7"
+"@jupyterlab/attachments@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/attachments@npm:4.1.8"
   dependencies:
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
-  checksum: 4d7c28843db44e230341e7725e3bb6e4775b08fb3574614cb9a2d17561323433652481aeee6d6d4f0c3916440eb890cfeadcea7cc9edcd7113728b13eb8fc395
+  checksum: 496eb41e8335d237f7c88b5ce7d1194292d4e6ab8952a3a62883bf4daea36dc6e426ce97b039583ea0e9b9a3ec72e755b2d842e3fc562747efe517e34930f25e
   languageName: node
   linkType: hard
 
-"@jupyterlab/builder@npm:^4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/builder@npm:4.1.7"
+"@jupyterlab/builder@npm:^4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/builder@npm:4.1.8"
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/application": ^2.3.0
@@ -661,13 +661,13 @@ __metadata:
     worker-loader: ^3.0.2
   bin:
     build-labextension: lib/build-labextension.js
-  checksum: e858c70fdb2bf4472918ca81672bbc55a5d5a5cf9f448c11e5673c7e861ecb8632428c87407be10957c9652338675f33c759f5a3fb0f8a24e900ecb39904d4a1
+  checksum: e727e4fddbfd4e8f7d4c83e5c5aaf9be41b67771f6a4ef10b44bbc0e51bb21966b2fa1ad33eacf58420ca3a2cda2ab410331a1543e6f945b9ca0a59e109f240b
   languageName: node
   linkType: hard
 
-"@jupyterlab/buildutils@npm:^4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/buildutils@npm:4.1.7"
+"@jupyterlab/buildutils@npm:^4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/buildutils@npm:4.1.8"
   dependencies:
     "@yarnpkg/core": ^3.0.0
     "@yarnpkg/parsers": ^2.0.0
@@ -695,65 +695,65 @@ __metadata:
     update-dependency: lib/update-dependency.js
     update-dist-tag: lib/update-dist-tag.js
     update-staging-lock: lib/update-staging-lock.js
-  checksum: 73dba9b36c29c51d4bc4ca1164a2751497e5858281f3949cc69f7652778d646ca3f744c3aabcff503f2c61e500cb935b74b2d29724bde824ee2b23d4c14b6777
+  checksum: 68f9c47c745cdd2bf51b97ea55ce3677f06c6be5430bcef16d580aee04761482471df12015d190c640e0c10fe73a8db1a33b735bb6edbf5e732b53c2a92b08bd
   languageName: node
   linkType: hard
 
-"@jupyterlab/cell-toolbar-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/cell-toolbar-extension@npm:4.1.7"
+"@jupyterlab/cell-toolbar-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/cell-toolbar-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cell-toolbar": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 800ff23b8c3876bdfe7086164d2e82c6e0a3c683431bd381a0f2236d3f843bf438183c38d35598a67c28992a158a3d8339aa06f6a34631e2a1ca03e29d45a5c3
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cell-toolbar": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: ddd48b2367b60cabf7e07b319abd137b7ee175361c3b60ecdba543593dbadbc4a19812c7c424814ac1a2a1dac729c60f3042accc0370d8d1a2b75a7ca30c3187
   languageName: node
   linkType: hard
 
-"@jupyterlab/cell-toolbar@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/cell-toolbar@npm:4.1.7"
+"@jupyterlab/cell-toolbar@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/cell-toolbar@npm:4.1.8"
   dependencies:
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cells": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cells": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 94ee61e28ee6892ba9dc526f33bc2846835df4b1b1bed5465e94a552eabe0bf875722755e87eff84cae09aca9bf807ccd8c52d6f1b244d77ce0da775224ff007
+  checksum: 59adc6d8a0f477bd206cc0a48b317ca09f8699216e923eee27eee114f22f74ea1f6d9228b9d573211600c27450ac1983b8149d2b0c14d2519c9289f72f8391a0
   languageName: node
   linkType: hard
 
-"@jupyterlab/cells@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/cells@npm:4.1.7"
+"@jupyterlab/cells@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/cells@npm:4.1.8"
   dependencies:
     "@codemirror/state": ^6.2.0
     "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/attachments": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/outputarea": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/attachments": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/outputarea": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/domutils": ^2.0.1
@@ -764,38 +764,38 @@ __metadata:
     "@lumino/virtualdom": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 6a0d31052e3ea00f0b936de0a934fde9a0249ddc9d35879a1e0ce05b483b2a97eb305ef9a1b1311643305fe93ac089070f962446cf3a98326ff3bc2d7efa76bb
+  checksum: feb2aa9b681acaae78aadffce6d9c61c6b7d4c15da23f11accf98a5d36891918a7304260f73e6b39512fadb8cc31b433bf8619cbb8d7c5c410d5c14b78558364
   languageName: node
   linkType: hard
 
-"@jupyterlab/celltags-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/celltags-extension@npm:4.1.7"
+"@jupyterlab/celltags-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/celltags-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@rjsf/utils": ^5.13.4
     react: ^18.2.0
-  checksum: d96c4d6d97e76fc2e0d6687f8efa0f9f852b5ed46d646dd0331781dbb6487906cda6708399d52167ac526b5fc8be55e02179371ccc88bc6c91876f5b49dcac23
+  checksum: 3210e85668fba9bb7a257ad8d73192281d161beb6e685b062960d002f756d09f9b76d025301be59792c6501d417374fd242dd41df56b57cc5ecb24deadae69e1
   languageName: node
   linkType: hard
 
-"@jupyterlab/codeeditor@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/codeeditor@npm:4.1.7"
+"@jupyterlab/codeeditor@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/codeeditor@npm:4.1.8"
   dependencies:
     "@codemirror/state": ^6.2.0
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/dragdrop": ^2.1.4
@@ -803,37 +803,37 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: b97f56fb05d7e25b0339631249afdf144cd33a6d8bb111ff875bcf5c022edd959e73ff2195c6b462d330b4b13dcfbb9cd75fab1e9f2ae09afe681d4abea92a7b
+  checksum: e5d3b0f5c94775017b044528843596ce7f5616cede5555a6a32b3a8e9ae583775f83a6448717fd15e2cf254ef50209861da06821f67267ebe2ef67b34860f7d6
   languageName: node
   linkType: hard
 
-"@jupyterlab/codemirror-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/codemirror-extension@npm:4.1.7"
+"@jupyterlab/codemirror-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/codemirror-extension@npm:4.1.8"
   dependencies:
     "@codemirror/lang-markdown": ^6.1.1
     "@codemirror/language": ^6.6.0
     "@codemirror/legacy-modes": ^6.3.2
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
     "@rjsf/utils": ^5.13.4
     "@rjsf/validator-ajv8": ^5.13.4
     react: ^18.2.0
-  checksum: 2593e905955efbd9109d1b01e7a579ada832b3d98029fa041e7c905fdf237901b9294c80fa53c6375c452b866b4fddff637dba3c5ee26c01fc33f2264e651cf4
+  checksum: 679b2a5511546f32a56d180437bc56418cd5e0711b2c753f933f924ca7997c5387a1fc23cf95c775eceb3370573cbe59f37d6d6ea0cad11274bc60bc8f8b9c15
   languageName: node
   linkType: hard
 
-"@jupyterlab/codemirror@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/codemirror@npm:4.1.7"
+"@jupyterlab/codemirror@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/codemirror@npm:4.1.8"
   dependencies:
     "@codemirror/autocomplete": ^6.5.1
     "@codemirror/commands": ^6.2.3
@@ -856,11 +856,11 @@ __metadata:
     "@codemirror/state": ^6.2.0
     "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lezer/common": ^1.0.2
     "@lezer/generator": ^1.2.2
     "@lezer/highlight": ^1.1.4
@@ -869,44 +869,44 @@ __metadata:
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
     yjs: ^13.5.40
-  checksum: 51b9d9fb558fa3f310ea618118d889f507770112077f8befbb77f6e06448929a6d88d4c6582182dacd2e75b3366ef851105f3ec75b9ff4642cc62fccfd015680
+  checksum: 0a56b6855b6dd4999e9816938f7546c2f1c46c629f05cf246813d58700f3c283e068b9c86dba275374756536472b598a19a0e5e12cfffd365817fbcc8333c795
   languageName: node
   linkType: hard
 
-"@jupyterlab/completer-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/completer-extension@npm:4.1.7"
+"@jupyterlab/completer-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/completer-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/completer": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/completer": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@rjsf/utils": ^5.13.4
     react: ^18.2.0
-  checksum: c456903bc9fc896222aa7e2541dc25f835a259f685236eb5214574cb3701086a2f3ec314980d392f4ef57afd4283ebc6a641142fff877a971ddf9592dc919b59
+  checksum: fe50d349fba4ee839e0677acc2a01767de10d8f912ee239c5ae75c4404b4f83084fb9979a15f775dc81a74d4e26c9a2d9baceb133c4cab46d78b25dde048badf
   languageName: node
   linkType: hard
 
-"@jupyterlab/completer@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/completer@npm:4.1.7"
+"@jupyterlab/completer@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/completer@npm:4.1.8"
   dependencies:
     "@codemirror/state": ^6.2.0
     "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -914,65 +914,65 @@ __metadata:
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 6927b9c71523a205619ed8a46cec8018dda301dcf69be445e822ba7d1ef6de6431b516eee156bb24275d22171f741fc8daf4922ea60f9f7c9a0e0ca84ec3c0d3
+  checksum: 255958e8a3e61f7de2efa231c2389d27169f26829cf34d3780eac7e65d89a5790ac2190af2c3cc7c05bdcdceef0de6acba6d8f6b8fdcb994e735f1e8f68bfcb8
   languageName: node
   linkType: hard
 
-"@jupyterlab/console-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/console-extension@npm:4.1.7"
+"@jupyterlab/console-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/console-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/completer": ^4.1.7
-    "@jupyterlab/console": ^4.1.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/launcher": ^4.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/completer": ^4.1.8
+    "@jupyterlab/console": ^4.1.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/launcher": ^4.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/properties": ^2.0.1
     "@lumino/widgets": ^2.3.1
-  checksum: 6b90f18cf9d23d9bd39b9270a152bb4b3d90644d367cd072c4535bf5210b521a09855a8fb526f129ca504bfd86505fd184970148cf501a0288250c53c0722145
+  checksum: 35c20d6b53b5e9a14856811fe7ebc7783e16a60bbfd4dd8b1aa5cd9874cb486af62a4f858a331ebdf0c0d29d07a50a4d0b8dd03c12210e8a640f766cc3c47e8e
   languageName: node
   linkType: hard
 
-"@jupyterlab/console@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/console@npm:4.1.7"
+"@jupyterlab/console@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/console@npm:4.1.8"
   dependencies:
     "@codemirror/state": ^6.2.0
     "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cells": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cells": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/dragdrop": ^2.1.4
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 76f028d771c1e84baf6fe4772299d1f6c42afb332843aeabf908ff7d261e8f3fa6a7fe0109548b54477f654b58d52a3409c4167192c3c8e6805f14b91e51d370
+  checksum: 7ebfa8f1d90369722bcb3b15407be69d48280e5846048396f802d74317b537b2d951a0da5ca7a9685d02b24cdc9dd347b254a0d19138d80d281c2262124c53a2
   languageName: node
   linkType: hard
 
-"@jupyterlab/coreutils@npm:~6.1.7":
-  version: 6.1.7
-  resolution: "@jupyterlab/coreutils@npm:6.1.7"
+"@jupyterlab/coreutils@npm:~6.1.8":
+  version: 6.1.8
+  resolution: "@jupyterlab/coreutils@npm:6.1.8"
   dependencies:
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -980,92 +980,92 @@ __metadata:
     minimist: ~1.2.0
     path-browserify: ^1.0.0
     url-parse: ~1.5.4
-  checksum: 5a92ad16db3841193112ae39581e3b2546c0a1af45abe1f95c4ee797721c9c642ee0ad59bf967ca6a8813d0b62b471fb1018bdb3214662a6200c83f9c61f79ad
+  checksum: 1049c78bdbffb247fe7e7be4e082fe15711ca0d8da997d6da7042e0299d7ebbf1d0341d830ae0ab451bf8dfbfc30027bf3f063fc7e35210409a7aa56fe94cee9
   languageName: node
   linkType: hard
 
-"@jupyterlab/csvviewer-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/csvviewer-extension@npm:4.1.7"
+"@jupyterlab/csvviewer-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/csvviewer-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/csvviewer": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/csvviewer": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/datagrid": ^2.3.0
     "@lumino/widgets": ^2.3.1
-  checksum: f4a5d5c71b83589a2716dcdee437c34ff186b343167f732a6fa70379dc125a36cb271acaab14b3255da248a0f0bfea02ea008cb18eae90c926d2c3a28b02c18b
+  checksum: e4be21990eadfd9a24470d36f5f7a2b65f0e091611b4b3102856412d5b04656fc162e67db90ad1d43e7748c26ec381b621792f3e38c7bac1274340fd1d7710ec
   languageName: node
   linkType: hard
 
-"@jupyterlab/csvviewer@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/csvviewer@npm:4.1.7"
+"@jupyterlab/csvviewer@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/csvviewer@npm:4.1.8"
   dependencies:
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/datagrid": ^2.3.0
     "@lumino/disposable": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 15d93337ef9962ea5c91a0393110c7ec136c1116814e19280154a4d1dc9eb278a7ee7a44b984db8051cd302589e8417299792ff8512087efa68079f01ef0e32e
+  checksum: afa8c9e99e50575b623b8b752ac99e96af7da6c9aaa690bda3f311c22acd754a082fc1927e707a6595e07462528acd50c9f3c08612870d36f2d651e8bc15ba03
   languageName: node
   linkType: hard
 
-"@jupyterlab/debugger-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/debugger-extension@npm:4.1.7"
+"@jupyterlab/debugger-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/debugger-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cells": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/console": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/debugger": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/fileeditor": ^4.1.7
-    "@jupyterlab/logconsole": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 3a599e18188d506fb8562bc24b7456cf8233e8b88a8ddb6a4b456074b9023684bf1e5dcb3fab12cc9453b4a373edf00ad21d1a8590cc4e6bd603f74f81e10aa5
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cells": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/console": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/debugger": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/fileeditor": ^4.1.8
+    "@jupyterlab/logconsole": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 684cc7e3409890d154e915d082e9ff40e119123f813ecf9e315d37c8c1685ac7d1b09c8d4d06867bd3ca9fd017013e2a99394616d864f69141dd470eeed55d18
   languageName: node
   linkType: hard
 
-"@jupyterlab/debugger@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/debugger@npm:4.1.7"
+"@jupyterlab/debugger@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/debugger@npm:4.1.8"
   dependencies:
     "@codemirror/state": ^6.2.0
     "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cells": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/console": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/fileeditor": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cells": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/console": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/fileeditor": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -1077,24 +1077,24 @@ __metadata:
     "@lumino/widgets": ^2.3.1
     "@vscode/debugprotocol": ^1.51.0
     react: ^18.2.0
-  checksum: 504bf2ab07bb321ff03b878f2c664a597d6d3c08f26ef612634624a6190ba8ff1e2f21839292e4d1fd4cbab8e9e62ba61b2d63d04827b1a4387de7bf0b85a464
+  checksum: fdfbc117952227ae189a39f733286fca2614f172913419a55a7b7db2a8243cd893008338af822bc29f904240202d6e414aa25f253b9522c525437def190e0f9a
   languageName: node
   linkType: hard
 
-"@jupyterlab/docmanager-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/docmanager-extension@npm:4.1.7"
+"@jupyterlab/docmanager-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/docmanager-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docmanager": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docmanager": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -1102,21 +1102,21 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: d0b511c881d24f48ae19bc3ea630d867f093539dc66753a3d6c52082048082e2c63fae567c96fd20e847a0f0895018c4b43be84fcc928e2efb5953223e565488
+  checksum: bac417fb2bf395afd3df6efbf44c115ef8631aaf2264c444072caa3a5d7bd36b0c1a44fc2e13df31cab4cdda8cb2ed559e9abfa0eb3c2c475104a25da80efb35
   languageName: node
   linkType: hard
 
-"@jupyterlab/docmanager@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/docmanager@npm:4.1.7"
+"@jupyterlab/docmanager@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/docmanager@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -1125,24 +1125,24 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 89de534c683cf7a20d1922a2c038624c043d023f3429c3bdabd439ed01640c073e635a87f0c08c8e7c34dbd5b16e19581b4c11a5d7e7b3edb008752d3ba77d5e
+  checksum: d0d1316a885d1e72891d9b9cd61c36c7f8db4a4e53ae4cc8f105931e0dcdc262ebd5e76d3a145517bcc009cb3f8ab23e4e4ce84191f2f09c5df3d2a3294cfe9a
   languageName: node
   linkType: hard
 
-"@jupyterlab/docregistry@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/docregistry@npm:4.1.7"
+"@jupyterlab/docregistry@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/docregistry@npm:4.1.8"
   dependencies:
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -1151,32 +1151,32 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: a0c388b621cc088648e9d54f7717b502cc07f54f54b0107f336cb94c15f22bf2d7d9eb06001183ac0fa9df51b287211fbca673e1e1936278af5f33d4576b0224
+  checksum: d65aef500ab8d9d761490cf2a6902e897475173727cd3676691789e6d2609aefc8c98c0a4d4e57c670721409cb58925eeb162dbd101c9b6a473ecd20cf7efe78
   languageName: node
   linkType: hard
 
-"@jupyterlab/documentsearch-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/documentsearch-extension@npm:4.1.7"
+"@jupyterlab/documentsearch-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/documentsearch-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/commands": ^2.2.0
     "@lumino/widgets": ^2.3.1
-  checksum: 7da3b91b52d987c289c79e7bab7c75fd8f95dfb1d5d7ceb731989be987b9857592cbdd9e9c7e6e0b59a7320cf63dfbd8bd641414737cc35a48150bfcfd761896
+  checksum: 929ee06ffb0a4c693cbc8de78cb5b8e0f965d779f8e8f9a0ebdc4f99ff913b729b2370599a890a8a882c914ae75eba4745d2e2a42997c1986fc16588e8f593c3
   languageName: node
   linkType: hard
 
-"@jupyterlab/documentsearch@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/documentsearch@npm:4.1.7"
+"@jupyterlab/documentsearch@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/documentsearch@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -1185,79 +1185,79 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: a8d00d2fec47eb4c15dcb435b8b67a3fd691591fb17e2f89e3ed114d3966c4c284fce5e9d4f1f470df2d60a47ded6e7400090ee0d37899435db60b4e6b99386a
+  checksum: c8f05403435c8613c599ea54512f4a8bb865e3836f336e2258cba60291b101f35515eb6e8a33d88973d22fffe2b9772d1b0d9d177a5b7a396ff64b046b211580
   languageName: node
   linkType: hard
 
-"@jupyterlab/extensionmanager-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/extensionmanager-extension@npm:4.1.7"
+"@jupyterlab/extensionmanager-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/extensionmanager-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/extensionmanager": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
-  checksum: e9a0a070a428bd8c8326a9732541a087ce1de2f86ba74df12f72d47f4661b6a8bb2a2fa2e9efcdc9cb3b9024663d4f886ba442e2af4cd3a328a876a982e12b8c
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/extensionmanager": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
+  checksum: 6551234f6dde340c8acb0a0df1d6d1bc9e2217c2a6c9a7ddc98441d5a013d373d5bdc930bf3293203b7b46e0e96e48979450dc8f62818f8905027d23d0dff990
   languageName: node
   linkType: hard
 
-"@jupyterlab/extensionmanager@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/extensionmanager@npm:4.1.7"
+"@jupyterlab/extensionmanager@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/extensionmanager@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/messaging": ^2.0.1
     "@lumino/polling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
     react-paginate: ^6.3.2
     semver: ^7.3.2
-  checksum: 65d948c2ca170e51caaf13f2198c280b3d703fc007c08cb5b65757c588a75ebd9bce2dafa66d23e08b71534d9b07c0afcad3a663753f4c423ba59261b8bfb4ef
+  checksum: 01f3de84a5c4166a4e10eadb558499b7a0e68bf29d5dd6069d015d5a9dc143336c99a4186be433b997f9ee5847e59f0cc5dc5c2623f8e838587a30778cc69d02
   languageName: node
   linkType: hard
 
-"@jupyterlab/filebrowser-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/filebrowser-extension@npm:4.1.7"
+"@jupyterlab/filebrowser-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/filebrowser-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docmanager": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docmanager": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/widgets": ^2.3.1
-  checksum: 1b67a458cda0dd5e80681b4fb32b44cdc98816faff07dc7f60b794f5819aeb19a47da3775507f0436011b749990497cd35596e0d4ec5d4efe97b99352abc256d
+  checksum: 1d75a4d3c9080537708bf7923ef9e7ef21d711e358c354f41d668adc802b5117176a4f55737d70277d91bb6c46797396cefc2c154fb490ec4a9b6a36c2dc8ef8
   languageName: node
   linkType: hard
 
-"@jupyterlab/filebrowser@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/filebrowser@npm:4.1.7"
+"@jupyterlab/filebrowser@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/filebrowser@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docmanager": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docmanager": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -1269,221 +1269,221 @@ __metadata:
     "@lumino/virtualdom": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 8890986df2e234f37c0d7cd1f3f15fb68c6fe91479790365f6b0e3578fd176be844e6bef3bb36614593fca0119bf9a40ae3bd7cda63131fc47c0b8bae2efaf83
+  checksum: 51ae88c5fabb2fad341cd3ea7b94750c373d5b3d251287f0bcbc7f1357b11f7a4e9ec08ee92512a46435fccee0c7c647cdf2185db9459a55845d15410f0dcf1c
   languageName: node
   linkType: hard
 
-"@jupyterlab/fileeditor-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/fileeditor-extension@npm:4.1.7"
+"@jupyterlab/fileeditor-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/fileeditor-extension@npm:4.1.8"
   dependencies:
     "@codemirror/commands": ^6.2.3
     "@codemirror/search": ^6.3.0
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/completer": ^4.1.7
-    "@jupyterlab/console": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/fileeditor": ^4.1.7
-    "@jupyterlab/launcher": ^4.1.7
-    "@jupyterlab/lsp": ^4.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/completer": ^4.1.8
+    "@jupyterlab/console": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/fileeditor": ^4.1.8
+    "@jupyterlab/launcher": ^4.1.8
+    "@jupyterlab/lsp": ^4.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 6ea5e304b51666fabfd78f1855620fb75bce17c168e4f14342258b25e7db5d60c9f5e8e5f5ac1491b188c686d23c16c61c5a7fe399f9cda028906633c63503a3
+  checksum: bfb5b51929e856c35f2fd5ebbe7deb52d36c2e4ca30030cceedc759447f62b0b5a8719e2eb8695cf616ccaec6ae0e9609cf6c6b68e6c846e09ab53f42ac68d5d
   languageName: node
   linkType: hard
 
-"@jupyterlab/fileeditor@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/fileeditor@npm:4.1.7"
+"@jupyterlab/fileeditor@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/fileeditor@npm:4.1.8"
   dependencies:
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/lsp": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/lsp": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
     regexp-match-indices: ^1.0.2
-  checksum: 1297b75ed1b52ca223d311fc74ca19c0d978eded2e6dcada3d65833fcd27ce3279fe182317598cdc26ee48b196e3e993a3f79f596046921efdc47346a4b711bd
+  checksum: 1d5c67721ebd57d2a30e3ae8de51b6c967b23110730298205289dd8365c9145e69da4f8edf2fc84c3b5ab32feeee45bb65cdfb428b3a8a3c42b7c068e0d2d024
   languageName: node
   linkType: hard
 
-"@jupyterlab/help-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/help-extension@npm:4.1.7"
+"@jupyterlab/help-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/help-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/virtualdom": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 65932f8a63456c3822a9264815fa873d8cd3b043ae9e79516b8085c1b082f1b296ce53ac2f9a11180e4008498e6812a5267ac83ae7d8276846382b769e3a87cd
+  checksum: b5e5a77bedc28eefc457108cb857a9ce8598b53e19b190de056a1c31a82b5f354a19122b59de6665844f278b4341097d3f07a29de9d648f83dccaff371e78e58
   languageName: node
   linkType: hard
 
-"@jupyterlab/htmlviewer-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/htmlviewer-extension@npm:4.1.7"
+"@jupyterlab/htmlviewer-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/htmlviewer-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/htmlviewer": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
-  checksum: 8d1ede6ae8cddd265d985dda41244faaa8f7aec8e5f13b64585a67fc38196fa9b22b0cdc39cb31148175808a503546d3e1b7e3a67f48c4f3e213b5a9cfa3b65b
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/htmlviewer": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
+  checksum: a67e8de32040af80a6b389cc30cc2faea14b8bc8e88823232a43c42ceddb748f3adf721fa66f8a16701109826ec4028961ec9de64c438b3f5d5db802e1723b6a
   languageName: node
   linkType: hard
 
-"@jupyterlab/htmlviewer@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/htmlviewer@npm:4.1.7"
+"@jupyterlab/htmlviewer@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/htmlviewer@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: f46f4d17f95309f72f22605f6b85d6045e2b0d21c10512dd890fc8dc8715d8f0791d549a3a84b78ebc53129e03d973b5c57e40a6f4f134ff48126ee5adea9279
+  checksum: c917e76a7cd2f8a98add3e94b2f06292f8b504e3e6d438fb461e5b44a1e11a7cd14c8c505a24d35f3e5d3bc770579f62dabf46e6732761995b5710fe78a23bf7
   languageName: node
   linkType: hard
 
-"@jupyterlab/hub-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/hub-extension@npm:4.1.7"
+"@jupyterlab/hub-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/hub-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: f40bc8ac2fda3a5826f46dfae16b37884ddd7e883fe5cd9bdca8aaa30308d2370d13497d5afacea5d4e84e3ce1c08cd99b85bcb7f66fe00e0465c41ca840e4ef
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: ac586925c603d0a9c3c6e617dc398c01995ca5bf02cf3eda703393bcfd9909d043bf65e5e390fa722644e9a389358b5d0ce5d81e7627d191709612047a317108
   languageName: node
   linkType: hard
 
-"@jupyterlab/imageviewer-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/imageviewer-extension@npm:4.1.7"
+"@jupyterlab/imageviewer-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/imageviewer-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/imageviewer": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 105e8f1bc7674b338346aa118e07d9ce8140bb2d808985d001f0e29b826dd94808a0c5f025e25e28a6bd4abdfe069b3753dceffdcd0078c6cb69fa43ec05d53c
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/imageviewer": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 022151ba42d6973403270c5f9a1c7d3eb58b3bafa093688fd004e41d51bd18690458c62094af818bf9c892f5ebe8d5be87d417fb4ecbd97b248af8ccb0e158be
   languageName: node
   linkType: hard
 
-"@jupyterlab/imageviewer@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/imageviewer@npm:4.1.7"
+"@jupyterlab/imageviewer@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/imageviewer@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1
-  checksum: 4869ccc4ef38a7e1e26a2db621d369e4dfc06fbe9108cf829e306585a40ce0a0d45fbe6581ac270d198fad8df3422c94d194bee02fd7b17a690cd83f55acc3cb
+  checksum: 63a3246719fc0b58c8f5b24ef9b65e8f293df981ea1bb3d123311830d0277317cd9434ea6819a7460d278f8a5f60d89458ba1f89b9b6c022fb940e77149a085b
   languageName: node
   linkType: hard
 
-"@jupyterlab/inspector-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/inspector-extension@npm:4.1.7"
+"@jupyterlab/inspector-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/inspector-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/console": ^4.1.7
-    "@jupyterlab/inspector": ^4.1.7
-    "@jupyterlab/launcher": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/console": ^4.1.8
+    "@jupyterlab/inspector": ^4.1.8
+    "@jupyterlab/launcher": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/widgets": ^2.3.1
-  checksum: 2197cc1a5cfc62828876de18f367c04ccd55803f5cbfddbd6ab0326ff86d00313c2cbb99e7a6fec05fea0f94d246c3628edf15e9ecb6f51b49e3ab64025b3b03
+  checksum: 235ac98a68b0f5ecdd1786585090f019c09d79a7ba083c5e8a368ac03ac7eea060980111baca64a4e30c74abc2dcb21ff7629f87b62d39495a9a81fe72750eec
   languageName: node
   linkType: hard
 
-"@jupyterlab/inspector@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/inspector@npm:4.1.7"
+"@jupyterlab/inspector@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/inspector@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/polling": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 11198701eaf5e1be6a482549da21310d582ea380a68b1f0b37d3a1a8dc49eaaff66fc008fcbe1d3e1d8470bf0d9ad4a8713bae6834c70a2f910447f7a47db5c1
+  checksum: 13bc350e989ba8bc20b5c9550161ff9dca7be6aded0ff1dd0b4b79d2b57c0794b1ad80e9b5c8c1ba778a508c4ee3cc03f95861b5510c780c12a1df3800ac65b1
   languageName: node
   linkType: hard
 
-"@jupyterlab/javascript-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/javascript-extension@npm:4.1.7"
+"@jupyterlab/javascript-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/javascript-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-  checksum: d2bfb22b2624173a82f91662c82b2544144b0c755cec2996b65e91a0d27a785522eb47fccee2a07a6367222580a6d3e3bd8c63b6c67073c37fbb8be2e48a804d
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+  checksum: 6b542c07e4190cd21f8cf9b3166682a1f5138c88bfc6fcdda5d876b2cb7d3bf18ba2cd07d9c655986f1f99337034434b0e675a6d7f043cbfcfcfb5a2466a13d5
   languageName: node
   linkType: hard
 
-"@jupyterlab/json-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/json-extension@npm:4.1.7"
+"@jupyterlab/json-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/json-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lezer/highlight": ^1.1.4
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
@@ -1493,34 +1493,34 @@ __metadata:
     react-highlight-words: ^0.20.0
     react-json-tree: ^0.18.0
     style-mod: ^4.0.0
-  checksum: b4adb8dad3365ccfe785db06060c480ab1ce84daf28f118f5e6ae3ead4e241714465528e9df55f4b9d93397b348cc1a07849c519ae786f78c3a15edaba665895
+  checksum: 863706f9a52e87d801e28a0c1e733325feee66b78043a739d3f1c3077a64b7bdc30045564568a3a6dc8d44a2f20f7f72f645ebfc8a26a91a98b0dab7d944e920
   languageName: node
   linkType: hard
 
-"@jupyterlab/launcher-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/launcher-extension@npm:4.1.7"
+"@jupyterlab/launcher-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/launcher-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/launcher": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/launcher": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: f01eba74a2f4a7a9b8547c9652ac0733db89d1c2658c5b9f5571a5a80d1c0caabb3f6baddafb9dcd1d8cf095c0b4ffbd0c7c8be9cb645f1602bfb51b108ab5fc
+  checksum: 4add2e6be7cfd165a78fea9c0603e43227b55467f29f2eaedead1fd71d0f9f4351a3858b8c6be12ebdc65c753605a211f5e0271119aa889651b52086851269d2
   languageName: node
   linkType: hard
 
-"@jupyterlab/launcher@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/launcher@npm:4.1.7"
+"@jupyterlab/launcher@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/launcher@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -1528,81 +1528,81 @@ __metadata:
     "@lumino/properties": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: d152362167d807619653e32e6a883a2c07f9fc018128df915004dc33f69241af93c1cf7990229f1ae0e001d9be2fc0229b83d105c644c8be1a7939199e83f863
+  checksum: f98bfd3da5346729fbd54f569d65ba255e3695af02a712f5a153115463168a116147bb4c9388d8f8a4132cf1f6a9f580e94b0058bea162181b80654246356026
   languageName: node
   linkType: hard
 
-"@jupyterlab/logconsole-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/logconsole-extension@npm:4.1.7"
+"@jupyterlab/logconsole-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/logconsole-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/logconsole": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/logconsole": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 67734e84c32e50f8e8e9c8f3c7eb249ad65835f8ef5918d12728c6a985c1131dfbb6013cdd4eb6a0639ebe84943f7a9b127c7fd14edbbedd803f6a948a1fed80
+  checksum: 5768e405d5db5d02ffa5a000fda091aa209158f9c3ee2a75a6c84239317c929a232e98064d786a11c109721d1c2efb195f96926e762159541bfb462e1911a990
   languageName: node
   linkType: hard
 
-"@jupyterlab/logconsole@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/logconsole@npm:4.1.7"
+"@jupyterlab/logconsole@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/logconsole@npm:4.1.8"
   dependencies:
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/outputarea": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/outputarea": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 875451b5ba16ecbf4c07b0a876d996d2ec1d075223e3b2ed27ba1273e612e1a3d13d096a4e9e56f856ba15755907ee60634a5ff942ff0edbd76ec76d305e47f6
+  checksum: a8a48c17c4ebb29081d58b95da6c0302c91707706e21566d3a9d4942e5707aefa87cd3ad4329f2616486b3fb084f05f92b12d48a2371c2fcf3c0dc4d7e744d24
   languageName: node
   linkType: hard
 
-"@jupyterlab/lsp-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/lsp-extension@npm:4.1.7"
+"@jupyterlab/lsp-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/lsp-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/lsp": ^4.1.7
-    "@jupyterlab/running": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/lsp": ^4.1.8
+    "@jupyterlab/running": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/polling": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@rjsf/utils": ^5.13.4
     react: ^18.2.0
-  checksum: 86fbd3789fc76ce919b3ff6c2a0e5033510fd8d083df0db7b4b4d02f51dc2bfcf8da3c107460d177c743ff920c1d77da1a914dd44e661cb5e5acd7ce21de4192
+  checksum: 1d158b156116e22cabc7472a7e6a931069d34f5b812035988b5a28e52327fb890e5880c5432d8b32c715aa755ca105a09600d9db841d92d8f52e63b78e84d8e1
   languageName: node
   linkType: hard
 
-"@jupyterlab/lsp@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/lsp@npm:4.1.7"
+"@jupyterlab/lsp@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/lsp@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
@@ -1611,160 +1611,160 @@ __metadata:
     vscode-jsonrpc: ^6.0.0
     vscode-languageserver-protocol: ^3.17.0
     vscode-ws-jsonrpc: ~1.0.2
-  checksum: 1c3c2cf67da4124fcafe821b362ed0dd5d416efe35346017e3b89d0ab1585595c0a8592d245ca838b3e2538b63da54a524cbef52fefce0c471c01daf34afd12b
+  checksum: 535786735c28c8cd6b3a39c2ae0d8e7b4d7b39c96346595fea6c39f4c81b55c986025e27b6a5f874d16319eab09022eb3d9ae7114ecbdcf688712838858f1590
   languageName: node
   linkType: hard
 
-"@jupyterlab/mainmenu-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/mainmenu-extension@npm:4.1.7"
+"@jupyterlab/mainmenu-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/mainmenu-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 06b549b540b735eff8ec21a26379c88eb48a5b32042e20237d8bcf9c05ac25d44c64407975240de1edcea511857f7fb063443436476d3af2eabd2566c3c505ca
+  checksum: 25a9c9799ae9091f4d019fb79fd7b70ec0f78b0e168e16a9ece14ea4dd2310560d49e569a349f94f0cc55c3a185e5b53f3f12e35ce492827db8515e676f5e9d0
   languageName: node
   linkType: hard
 
-"@jupyterlab/mainmenu@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/mainmenu@npm:4.1.7"
+"@jupyterlab/mainmenu@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/mainmenu@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: ad35fefe3ff003bfdc7af2ac120a1e6d29afddf9835129f56acaad626b13ecfd776d9ff2d2b22b06cfc273fac1aa00d9fa699bcae9bdfc734ded4394536d6d3c
+  checksum: 8ef36427492ec8605479e714ed0941bacb13ed9140907c31d589d78889c6a60f3adbf23ea1f466839d6edef44d9e4313671ff2e099f8a69feea248aa38e482f2
   languageName: node
   linkType: hard
 
-"@jupyterlab/markdownviewer-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/markdownviewer-extension@npm:4.1.7"
+"@jupyterlab/markdownviewer-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/markdownviewer-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/markdownviewer": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: eb973d0009eee040d4d8eeb0025949c11c235c575a14f818c6d57ef17f3cbeafcb8fd90d37cf0b84383fef316eacba97e66e1d73eeb46aac2b3a9b16c07f5f9b
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/markdownviewer": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 77f41e37ddcf9777a8dbaf9c4b3c4e117eeb83567e4287d57964dee9d481e568138492ccee979ff1b7911de36c97c50ee63c43b7d547de65a6487b4f20fd5a94
   languageName: node
   linkType: hard
 
-"@jupyterlab/markdownviewer@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/markdownviewer@npm:4.1.7"
+"@jupyterlab/markdownviewer@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/markdownviewer@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: d7e267a2cfaa9b50f2a6c340b556ebcbe9a2c11785ec8bfdc652eb9cc2c3d2a07042aa1d77b13b6325f85366f35df7b9118699b1c889eb09f2e1e22c07d64664
+  checksum: 1128d7b171062e24ae002001b367d61edb0a720394346a6f30c32b214e4840e4c29c8fe78da01632f10cd5c9dd09e48050e1999ea2e172dab8892f68e32e2d4d
   languageName: node
   linkType: hard
 
-"@jupyterlab/markedparser-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/markedparser-extension@npm:4.1.7"
+"@jupyterlab/markedparser-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/markedparser-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/mermaid": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/mermaid": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     marked: ^9.1.2
     marked-gfm-heading-id: ^3.1.0
     marked-mangle: ^1.1.4
-  checksum: 7615182615dd81b02dfccfae027b613b5f1aaa6cac2bed88ac290fdc9d04bcb3a92650ded9b00b72ad4247a084dcf015cdaa0a7af9b1a52d4a21312d33f63d94
+  checksum: af2e19fca6a5204fb360c313427bc03f20a4ca0f3df6872fe07e6848fae02d9d3f7489e71b65462698304b8ad4e2fe4f86e2022a52db40b884dc32c83c683238
   languageName: node
   linkType: hard
 
-"@jupyterlab/mathjax-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/mathjax-extension@npm:4.1.7"
+"@jupyterlab/mathjax-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/mathjax-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     mathjax-full: ^3.2.2
-  checksum: 90d438ffa1baede9511a3fcccb30d8d0a301c5ba3e4f9272c10ad8153487eeb64cb1c6144bd1b629383c3d39b197e0dce679a61401056e93e51682e5a2c7e230
+  checksum: e0dbb1eedb2c35d41095a61cfe72fd6b5eb0859541c4d946de3d30d97a41a9964ff3d8d8a21d3bc5447519400c2be49a57fb695d1e5f678d828aceca43be4e39
   languageName: node
   linkType: hard
 
-"@jupyterlab/mermaid-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/mermaid-extension@npm:4.1.7"
+"@jupyterlab/mermaid-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/mermaid-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/mermaid": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 7cfe031533b1d1e1dcd5261dd8eea74a2307eee84768720ea23ca4f69c9086b6461cdb89a455d846112970b78d301cc15ee996114338db1588b2b75530a9cfe3
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/mermaid": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 0571afa3d9f5816b07c6f2dff63a68932eba30d06773eab53c76e9b335ee9b33e56384783784c67022ba746d81b0e37c286dc8a3cf45e873774bae14a7361e95
   languageName: node
   linkType: hard
 
-"@jupyterlab/mermaid@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/mermaid@npm:4.1.7"
+"@jupyterlab/mermaid@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/mermaid@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
     mermaid: ^10.7.0
-  checksum: 94d6eafc295c761ea46b49b173f0307c1c7eaafae7beff6f317b1c0cf4f1057eeff8bc0144483d16a945913e98f6056a550b31a7fad35f209a8833de86c596a1
+  checksum: 5175f316677018d4fc00c8afb88ad5b38ad27d9f2feea6ec07f84002fdf79f92aa54589482e568ab4ee4f171fd110a484615d93779ec5d916ef2b0e40415e879
   languageName: node
   linkType: hard
 
-"@jupyterlab/metadataform-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/metadataform-extension@npm:4.1.7"
+"@jupyterlab/metadataform-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/metadataform-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/metadataform": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/metadataform": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
-  checksum: 5a07cb14dd18c5839d109210f48977a0e55a46770c2bc7a69479b67453b0fd4453438f83a104b0f8643315cd20f40b887c2db447db3a014ebf424bfa3cfa7266
+  checksum: 2a3b996886f99d3a1f04aff20db5c9f6ca3b855b7b9e414a6b871bf5291dcc94332ee80fde025e40f0a11df07a39059d4b0144a26ca543a8309cf1acad740510
   languageName: node
   linkType: hard
 
-"@jupyterlab/metadataform@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/metadataform@npm:4.1.7"
+"@jupyterlab/metadataform@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/metadataform@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1
@@ -1772,53 +1772,53 @@ __metadata:
     "@rjsf/validator-ajv8": ^5.13.4
     json-schema: ^0.4.0
     react: ^18.2.0
-  checksum: 58c732cacc083ffe634310f3329e11ce105a3ad09ae305ae065af8a5ccd14cf2ec97e3ab0277bd9860b832e87bce840e69ebf807ef74f746ac5f574c12b8e00e
+  checksum: eb056d32fa04c7d31e6e7252ee5d6ec93a86b3bad886e90efac9756803ca6a1ac47f27b93e9d23c1eb525a355642a703f40e8e6ea4a63ee9c33fb07847cca869
   languageName: node
   linkType: hard
 
-"@jupyterlab/nbformat@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/nbformat@npm:4.1.7"
+"@jupyterlab/nbformat@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/nbformat@npm:4.1.8"
   dependencies:
     "@lumino/coreutils": ^2.1.2
-  checksum: e54f3e7d59ecbd2f4d4ca8164ebef25affc8cf0f6cbb1500b7130a813c9eb8b86d6b0e8acc09b7cc3fead430c6af8ff110b38a76cad40b38fe23bee297d23273
+  checksum: 11d89ae6fb2385a00e60ab84defc61e3cf28510b029ffbe9ffe27a75bc84f85e64a0d0d16b6deb7b57256fdd651d842a0626128def511e7755121a5a0a71f078
   languageName: node
   linkType: hard
 
-"@jupyterlab/notebook-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/notebook-extension@npm:4.1.7"
+"@jupyterlab/notebook-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/notebook-extension@npm:4.1.8"
   dependencies:
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cells": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/completer": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docmanager": ^4.1.7
-    "@jupyterlab/docmanager-extension": ^4.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/filebrowser": ^4.1.7
-    "@jupyterlab/launcher": ^4.1.7
-    "@jupyterlab/logconsole": ^4.1.7
-    "@jupyterlab/lsp": ^4.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/metadataform": ^4.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/property-inspector": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cells": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/completer": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docmanager": ^4.1.8
+    "@jupyterlab/docmanager-extension": ^4.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/filebrowser": ^4.1.8
+    "@jupyterlab/launcher": ^4.1.8
+    "@jupyterlab/logconsole": ^4.1.8
+    "@jupyterlab/lsp": ^4.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/metadataform": ^4.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/property-inspector": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -1828,32 +1828,32 @@ __metadata:
     "@lumino/widgets": ^2.3.1
     "@rjsf/utils": ^5.13.4
     react: ^18.2.0
-  checksum: fa415de391dd7d526962a8fa2e328ef21332374c03f23324493990fcc4c4a754f5596023fab4b990c0917743da2dee8f2185515a574dd79b019029a52b69817d
+  checksum: 9c99a077c497275e2014843f414ee222428de3a25d8e5a1e1b2238d46b2abd75d4f473ec8b5c8d4cfa0ff3bc8e529d6c817a6882b8c1e98d87aff98cc0829b55
   languageName: node
   linkType: hard
 
-"@jupyterlab/notebook@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/notebook@npm:4.1.7"
+"@jupyterlab/notebook@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/notebook@npm:4.1.8"
   dependencies:
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/cells": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/codemirror": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/documentsearch": ^4.1.7
-    "@jupyterlab/lsp": ^4.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/cells": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/codemirror": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/documentsearch": ^4.1.8
+    "@jupyterlab/lsp": ^4.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -1865,34 +1865,34 @@ __metadata:
     "@lumino/virtualdom": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 3154944a3e1a13dc353788dba62bd5883d5107e6ebc1b54c7f2fdfbd1eccd44e817bd20ff26ed02635452b1f95bf2b4a68eef39459851b5ab37db1714b3288f6
+  checksum: ec1044f23cbbcaa5a6d1057f2f26640630a3c31f4d2fc9930da5dc6665fcf041ab4472952f13dd863eb29a91ed3af2e8a4eee5eff2d329b381b8f0a5865f52ef
   languageName: node
   linkType: hard
 
-"@jupyterlab/observables@npm:~5.1.7":
-  version: 5.1.7
-  resolution: "@jupyterlab/observables@npm:5.1.7"
+"@jupyterlab/observables@npm:~5.1.8":
+  version: 5.1.8
+  resolution: "@jupyterlab/observables@npm:5.1.8"
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
-  checksum: 94330741342b5d4bb1dc42760c0690236a3dd1b28c7ef027fa8f93dee2608c00775a7fa654218b1c279009a240a573dfac0dee89c43d90b01ca1edebc88db835
+  checksum: c349b4fea92ef28019c0b3f5a100abdd4384554188d6741234e90e03f3f18b343a22ea8560f9d2eea1a00d4cd9514074d195ec850e930785f28a2f8a624a0f4d
   languageName: node
   linkType: hard
 
-"@jupyterlab/outputarea@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/outputarea@npm:4.1.7"
+"@jupyterlab/outputarea@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/outputarea@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -1900,201 +1900,201 @@ __metadata:
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: f038c6cd0b26919b8a21677a56ff88582b44e192b739cd353ff061b44324c012fd1f77dc9206f194a2536b29579e3bb080d58c68b149023131ea9c7825c303e8
+  checksum: deb86addc7c43794442cdec2097946be949accd081aec51029cf0c6b53e4a950be1cfd9d9621059e580b9e45255a8bf971966ae8ecebec2358579462f7396b8b
   languageName: node
   linkType: hard
 
-"@jupyterlab/pdf-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/pdf-extension@npm:4.1.7"
+"@jupyterlab/pdf-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/pdf-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 8aad12601b61898d38adaf920ce676328286352bb088a6e307498012b752eecda09d0063d4ac6f95c136724316235b0c00a212a35649cbbad45cdfc085a1647d
+  checksum: 3eb19ccd1ec613457198dd869ac0fe642677624f2656dab89e87f53ad4a5c212dfade6820cbde2669fdf2ac4d2421b8a281b6f508a9fdb3ca65460a8787f483f
   languageName: node
   linkType: hard
 
-"@jupyterlab/pluginmanager-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/pluginmanager-extension@npm:4.1.7"
+"@jupyterlab/pluginmanager-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/pluginmanager-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/pluginmanager": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/pluginmanager": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
-  checksum: 064f8cb05794fb052914092dab4d9bcd9982423d5367550035833d7538ef46260ccc91eff0a3a670ec6de4c02c1374b1e086c7d64e11a4c07a5558d1a4de7f35
+  checksum: 90e91dbf0b929acccc3389f54cfbbab916c53d36a1d2cf8b68dec6b1ec9751c97e3c6201c8f26a30ce1d4055ad2c935b1322a52658dcc63fa1353afdaff9c4fd
   languageName: node
   linkType: hard
 
-"@jupyterlab/pluginmanager@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/pluginmanager@npm:4.1.7"
+"@jupyterlab/pluginmanager@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/pluginmanager@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 0444a821facbf7380b55ed2e09d4770ba81f4d0256c2c68572a20914144edc3d418b5c66222b8f7c6a8e27b6274c376ab0975f97c56ea3e80c36abac307bf54e
+  checksum: 238b6be396ae9cfd6d59453416103072eb8c6c319639719bb07b7e649148ae6dfcbd1f34e5bcce529c338a840ba1423bfea822dbd7b49df1673f047632b5bad6
   languageName: node
   linkType: hard
 
-"@jupyterlab/property-inspector@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/property-inspector@npm:4.1.7"
+"@jupyterlab/property-inspector@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/property-inspector@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: d9b20722cd97edcb965b11f5ad659a3642e97be515977040f18cceb6780a6c5cf1e9d291b2db4db4ec9556bd2026e66c70f35567dc37dd26fad09a8906f2fe9a
+  checksum: 629690f5404f35e795f99fbac8e15ce12485690a673e43575d4bbc0138ed0fb6c1517e4db1894b55fc17add13ddb775d559699585b635c319721086da36056ed
   languageName: node
   linkType: hard
 
-"@jupyterlab/rendermime-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/rendermime-extension@npm:4.1.7"
+"@jupyterlab/rendermime-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/rendermime-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/docmanager": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 4c44e13b6ae3783e16ea750b7ea80e40be83cdfe87ed627d246dc1bd72bc4f60126d7ce00c1d77f368f88d8df61937804a13411889509e8e334e3ce08fa395d3
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/docmanager": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 994a9ac7764f59e03c0646f1d576bf89cdec50c1b00f78b346a652a678a024bdc5d823d349299585587bf47b241e249316939a7e3f47813f64bb16382dd04cdc
   languageName: node
   linkType: hard
 
-"@jupyterlab/rendermime-interfaces@npm:~3.9.7":
-  version: 3.9.7
-  resolution: "@jupyterlab/rendermime-interfaces@npm:3.9.7"
+"@jupyterlab/rendermime-interfaces@npm:~3.9.8":
+  version: 3.9.8
+  resolution: "@jupyterlab/rendermime-interfaces@npm:3.9.8"
   dependencies:
     "@lumino/coreutils": ^1.11.0 || ^2.1.2
     "@lumino/widgets": ^1.37.2 || ^2.3.1
-  checksum: 09a53fb6f6764f55122cdb1b6130584232c4ee3ae46a8ce42c90edb692402e870ca4ccad7f35b772d6cad99014186dfea77d06731d2e70d51d1b47278c4c20c7
+  checksum: d08bcecdf37a48de5c22bbb5b62a4ebe756408aaa27ae18b3a99d13863e5776c861db69ee1066b2262a1a93ce59f475b549a8d56fe5bc087d4a6ba27afbc168a
   languageName: node
   linkType: hard
 
-"@jupyterlab/rendermime@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/rendermime@npm:4.1.7"
+"@jupyterlab/rendermime@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/rendermime@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     lodash.escape: ^4.0.1
-  checksum: 2bd9a359e6919c58683a9a6207249875463ce0e55cfd091c78960e889cea00b49a33ed1394a219db9f413b178b82bc71f0d2f1f8cfb6917f8574d0778ca43cad
+  checksum: 3c750598c212e2df43f45c32deba9d4b96dd676781e348771dd7d18c4c23e64e9bf3d25906a68be5368d898a4c81e48ff4215607c46df7934b17dc1ba672a697
   languageName: node
   linkType: hard
 
-"@jupyterlab/running-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/running-extension@npm:4.1.7"
+"@jupyterlab/running-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/running-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/running": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/running": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/commands": ^2.2.0
     "@lumino/polling": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: ca1381553360e02fd31f3a038633cef071635a8b5c4ed8b5a0aa360834553957475422632eb469f21925161dbddc1bb87c133583242c3472b298386aed0d615e
+  checksum: d73039cb896568a65acf276b8f57fa1385f20dedc36535159248e7bfdafc89a9f660bf8c933173d7d76f0caaaf0a0bef1404e099359ca8f627ba414eed1946f0
   languageName: node
   linkType: hard
 
-"@jupyterlab/running@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/running@npm:4.1.7"
+"@jupyterlab/running@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/running@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 9e7e70343f083b3f5b2848d32f6b3aad5f5dcaf003880b589ec59813c6c8e23871c8010ccfe214303b7eae36b8114a0a94ab926f269b7e84e091d0d989b3e3e4
+  checksum: 21c121d978c8d4eaf12b2a2117f1a113aa68de1f6ac03e4d8b575aa3c8ba24db1548e987d69f9ee49d4874abef9dd2a4c1a07b2441d4aa7f870e08db24830bcb
   languageName: node
   linkType: hard
 
-"@jupyterlab/services@npm:~7.1.7":
-  version: 7.1.7
-  resolution: "@jupyterlab/services@npm:7.1.7"
+"@jupyterlab/services@npm:~7.1.8":
+  version: 7.1.8
+  resolution: "@jupyterlab/services@npm:7.1.8"
   dependencies:
     "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/polling": ^2.1.2
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
     ws: ^8.11.0
-  checksum: 5c15ca3efc110a9885b2417b45b63e2954f13a91e73d9c378cd49a1dde261961c8a0a93c05fd019686a8f713865fc63719877352dd4f0f488feb075555579ca6
+  checksum: 56143631829ee1081f6ad2f03343a47d83549d2463f9c4bfddb34e4770c74cf78cbcc5f54aca5338a0d5ce4d28e9b8d8301e6e04b4fb7f66570c49d1ceaf19e5
   languageName: node
   linkType: hard
 
-"@jupyterlab/settingeditor-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/settingeditor-extension@npm:4.1.7"
+"@jupyterlab/settingeditor-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/settingeditor-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/pluginmanager": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/settingeditor": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/pluginmanager": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/settingeditor": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/disposable": ^2.1.2
-  checksum: 53464979aeab0096b9594a784dddfd34876a81c7924a26bc1e6da21ab82faa78176fc3c9945395e5ca8472faf1dd787ca373ad36443a300454d5bc9139ee9bef
+  checksum: 39a0cf34178daca7b9654e158b29c8f52e8fcd98297aafa8db7ed4fbf36414ded134a0c7655b60b07ef30ae9ad942389271328f9c3ef5473f396d83d50b1d9d0
   languageName: node
   linkType: hard
 
-"@jupyterlab/settingeditor@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/settingeditor@npm:4.1.7"
+"@jupyterlab/settingeditor@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/settingeditor@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/inspector": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/inspector": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -2108,16 +2108,16 @@ __metadata:
     "@rjsf/validator-ajv8": ^5.13.4
     json-schema: ^0.4.0
     react: ^18.2.0
-  checksum: 1a19d9ebe62b1f00fe8b8d0faf18101d7e4a374aa371c8d2fd71f063f6406b8fa856d01aa4da8db500b25376a2b329b64dcb452f4a29cf80ad2475e01998f71c
+  checksum: 983596d08bb57cba2f031a5352c8f3b078bb99b206d3df7958567ceccef3db84f1d3382e785a02898b2e8f75e1865611875465350564592b4f83330960f2e2de
   languageName: node
   linkType: hard
 
-"@jupyterlab/settingregistry@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/settingregistry@npm:4.1.7"
+"@jupyterlab/settingregistry@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/settingregistry@npm:4.1.8"
   dependencies:
-    "@jupyterlab/nbformat": ^4.1.7
-    "@jupyterlab/statedb": ^4.1.7
+    "@jupyterlab/nbformat": ^4.1.8
+    "@jupyterlab/statedb": ^4.1.8
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -2127,18 +2127,18 @@ __metadata:
     json5: ^2.2.3
   peerDependencies:
     react: ">=16"
-  checksum: 2361a561315172ff23547294eb430d57aa7c1635e5f99fffc2e52035ed453a84358f8aa3283832d7c8e90ccd0f1c8dbcdb28460bf79050b445c2892bcc9c6e5d
+  checksum: 90067142211fdaf6e9a6e0029fe1bc4c9ae05fa8e88e37f912373a0365bc8d507ef44e0bf83deb1e0bd0855a2cf05b0f541db38fafe3bc37d83422df8671e56a
   languageName: node
   linkType: hard
 
-"@jupyterlab/shortcuts-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/shortcuts-extension@npm:4.1.7"
+"@jupyterlab/shortcuts-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/shortcuts-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -2147,41 +2147,41 @@ __metadata:
     "@lumino/keyboard": ^2.0.1
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: c1d978dc5bc41d6f496e50a211bc26dfeb8c5ebd37c10aa87accadb7325ec60385b7245a5399eb33e11e323e3c1c4b931b3ea24c3f509b4414c653182a5b44f3
+  checksum: 79fe5ed0fdbc08651c67b61cdcf14393ac74a5112de15fde4cafce93f1b2fb70b39a21422134e9bceab52da4454957b7b5186f92be9573f136d6a81cff87ec93
   languageName: node
   linkType: hard
 
-"@jupyterlab/statedb@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/statedb@npm:4.1.7"
+"@jupyterlab/statedb@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/statedb@npm:4.1.8"
   dependencies:
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
-  checksum: 5bf9ac95790373208c4e305ba573fd009577311386b6d6f7b71426177a6b5ddc3f511cdabd46deeefb560cd07aa1b68dc1d4013c0cc10a18ab926e11239968f0
+  checksum: 28983e98affec8b8d6bb8e0cbacfe2c74d1ae48af8e69fddc7f457dcd87210adf5e39dafd21bcad24cfe572f45758c7531cd8d991e9eda894e63392b544bf09d
   languageName: node
   linkType: hard
 
-"@jupyterlab/statusbar-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/statusbar-extension@npm:4.1.7"
+"@jupyterlab/statusbar-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/statusbar-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/statusbar": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 0eb2cf2a82adc1760df6fb99a203b53c06b74bd7c6812f7c525ab5bd8b1050b2c328edde73467e06d904768aef1453269ebbe5ef5c8c2bdd367f63ac911db06b
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/statusbar": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: a1c6ea976f62f7bb3cd543339468f69309db1b2ce06010519282c94a8e7346b62c7b29e19b519a439f30dce562cbdecd9332a56df33a067dfd9707bd1b95d744
   languageName: node
   linkType: hard
 
-"@jupyterlab/statusbar@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/statusbar@npm:4.1.7"
+"@jupyterlab/statusbar@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/statusbar@npm:4.1.8"
   dependencies:
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -2189,36 +2189,36 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: 2a9c81f15c4d2d2c2db6ea931dd6b70b42899f62c25cc8a29788c7a47382275e474ce735f14d5b3e9f84dc26f3d716f54f1573db581c3fba97c7281ff155c4b6
+  checksum: eb3094b9511334a82b92686ad7010763fc8c101a9631ee558462cc71d6ca3e7ad485a927e777da1f2c1aba8398c5c2d1ec65c48daae69317267944255197dbe7
   languageName: node
   linkType: hard
 
-"@jupyterlab/terminal-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/terminal-extension@npm:4.1.7"
+"@jupyterlab/terminal-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/terminal-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/launcher": ^4.1.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/running": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/terminal": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/launcher": ^4.1.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/running": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/terminal": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/widgets": ^2.3.1
-  checksum: 1604bd2041c4c8eb52651f58846bfbf7e04703d7e27beac39a1f4ddf2a5154406e594ceb540c525f404350ee9ed20dc47f58572c369ce91250e5751a584ec118
+  checksum: 801e4bd73e59323ebd844ef4e32ed3521253aaae03141c4d20a6942851b22a2248e6bc83a5a1c4dde03c349ffd2ddb8c853add4ccc9818969f4a56c3e962e0e5
   languageName: node
   linkType: hard
 
-"@jupyterlab/terminal@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/terminal@npm:4.1.7"
+"@jupyterlab/terminal@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/terminal@npm:4.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/domutils": ^2.0.1
     "@lumino/messaging": ^2.0.1
@@ -2228,149 +2228,149 @@ __metadata:
     xterm-addon-fit: ~0.7.0
     xterm-addon-web-links: ~0.8.0
     xterm-addon-webgl: ~0.14.0
-  checksum: ca3cfd7f85390bf7395c657750b1a6153937b1bca3e7ca06c5ea0f661b1d3789878594f3a6c317b7c0522742c6811148f04577bcd1ad76532d3fe8e824f8d6c2
+  checksum: 575023ebb481ffba5b218cef2fd2dc815cad790e1131f761d640c8baae42c57146d1333aba0a344fa971bb2700f7fd55024c655b9bb8ccdd03197ee85e66b1e6
   languageName: node
   linkType: hard
 
-"@jupyterlab/theme-dark-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/theme-dark-extension@npm:4.1.7"
+"@jupyterlab/theme-dark-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/theme-dark-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 9676a02b4d960bb9a334e0b9782a7ddd7e896ea12ce2ae1605e6a81a0c940add16d72fb145da76e1a0f89a9fbf4d117e98b521c438bad0e538237bfd2e393db7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 444c863c35820476538f62c47106a343519a0918411d999faae20a0c433a3df8157bda25b186f2bf1e09b0291d2313e3285acf32a331da79e74f63716083e3a4
   languageName: node
   linkType: hard
 
-"@jupyterlab/theme-light-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/theme-light-extension@npm:4.1.7"
+"@jupyterlab/theme-light-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/theme-light-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 1e63b40e9ad05ea8a6fe9f24a9bb7f5fead995a509238ea9b97525cec68b9eea7c85118742f60174bc7fe049783459bd7d052e116f8f8959dd097e0346d38c80
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: 20c558c3fc0315fed895ab937828aaa923a859682fa1ced89a6218fbc9fa40a7507a621fb9b0c7e14e29255cdd0adcf39ccc1ac4c684b7dacec5243bbb50f4da
   languageName: node
   linkType: hard
 
-"@jupyterlab/toc-extension@npm:~6.1.7":
-  version: 6.1.7
-  resolution: "@jupyterlab/toc-extension@npm:6.1.7"
+"@jupyterlab/toc-extension@npm:~6.1.8":
+  version: 6.1.8
+  resolution: "@jupyterlab/toc-extension@npm:6.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/toc": ^6.1.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
-  checksum: 56e8204d612a9034ff27b60de00c8a5a5e817d6baf3b28329c4b6e48e168460ca08989954c444907d3254a8effc61d08298b6d57449b0eabbe72a4655ff15d69
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/toc": ^6.1.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
+  checksum: a5197f94ca4922693493e6cea79f5b55eb8638274b8e41e1b57f3e86867c01e1488c2269a685b700f016a689c5fa1ab27172dae83d66db00f1bc86e0fa00b79c
   languageName: node
   linkType: hard
 
-"@jupyterlab/toc@npm:~6.1.7":
-  version: 6.1.7
-  resolution: "@jupyterlab/toc@npm:6.1.7"
+"@jupyterlab/toc@npm:~6.1.8":
+  version: 6.1.8
+  resolution: "@jupyterlab/toc@npm:6.1.8"
   dependencies:
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/docregistry": ^4.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/translation": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/docregistry": ^4.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/translation": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
     react: ^18.2.0
-  checksum: f003cdb01b0d235e24baceb781e6e0a69093f6ffd4bb75d12de9208e7225c04bbdd5575b4f9fd7daea50f65aa4d76c39962c2a7aa0cda645e944649e6275c902
+  checksum: 6dadf19c32fadeccc19df6ba31287c929a7a09ac41ecaf53fbc88471d4c62a16193555c3fb391ecc4e495c9f6cdde7d0519c77ed0b69fbc90da9e5b16bb924d3
   languageName: node
   linkType: hard
 
-"@jupyterlab/tooltip-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/tooltip-extension@npm:4.1.7"
+"@jupyterlab/tooltip-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/tooltip-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/console": ^4.1.7
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/fileeditor": ^4.1.7
-    "@jupyterlab/notebook": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/tooltip": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/console": ^4.1.8
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/fileeditor": ^4.1.8
+    "@jupyterlab/notebook": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/tooltip": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
-  checksum: 84f2099e4381b9c859965a9c88e0308e5d085002e9dd3cae5662b6b5bbcab76eb689789b96ffa467b46ca10e9e7f9bb325813e2b879b3f627b376a0b124df45a
+  checksum: 9640f509254a493d7b3cc9541512799e14f657c52fccfbaa2f4f48750cccb39be00ee858e7affbe64a5cf48f1a42602f78a82e6cf5398373e01c07782e35a36a
   languageName: node
   linkType: hard
 
-"@jupyterlab/tooltip@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/tooltip@npm:4.1.7"
+"@jupyterlab/tooltip@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/tooltip@npm:4.1.8"
   dependencies:
-    "@jupyterlab/codeeditor": ^4.1.7
-    "@jupyterlab/rendermime": ^4.1.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/ui-components": ^4.1.7
+    "@jupyterlab/codeeditor": ^4.1.8
+    "@jupyterlab/rendermime": ^4.1.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/ui-components": ^4.1.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1
-  checksum: 05f4bf0d6e38890df6e8aa9cdf599dd40dc8ae030f39da962b4f4c466a1e8e0fd89d485d6a7a39517f222a7cecca3f5e314ffddf2f4042f70b8c6abf9e94d47f
+  checksum: 1b0e7ee5db9ec12e7e47416b905b0c04d78e4d3552c75e41c5acd9d86a445bd902fe1bcfbeb43689649b18765453d10d330346eee9c0d71c14dc090840a58564
   languageName: node
   linkType: hard
 
-"@jupyterlab/translation-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/translation-extension@npm:4.1.7"
+"@jupyterlab/translation-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/translation-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/apputils": ^4.2.7
-    "@jupyterlab/mainmenu": ^4.1.7
-    "@jupyterlab/settingregistry": ^4.1.7
-    "@jupyterlab/translation": ^4.1.7
-  checksum: 0de4523c8bcc5191485b8dcb64cc5b8800dd7f8d02192dde56555cd3904a43e1bdf81a6e5c2a9dbd833a144ef4cfdc2bc0a6f792975b09eecac8ce88ac8ab7c3
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/apputils": ^4.2.8
+    "@jupyterlab/mainmenu": ^4.1.8
+    "@jupyterlab/settingregistry": ^4.1.8
+    "@jupyterlab/translation": ^4.1.8
+  checksum: b8e14caca5dc4e32e2ae2f724f45fe819433153d3063375e599499a5008658523faeacf2f87a2579daeb0afd8fa75f160bf8d1463c02c2afffa666851e38b3cd
   languageName: node
   linkType: hard
 
-"@jupyterlab/translation@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/translation@npm:4.1.7"
+"@jupyterlab/translation@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/translation@npm:4.1.8"
   dependencies:
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/services": ^7.1.7
-    "@jupyterlab/statedb": ^4.1.7
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/services": ^7.1.8
+    "@jupyterlab/statedb": ^4.1.8
     "@lumino/coreutils": ^2.1.2
-  checksum: c28ed1451e68501078b1de1f665552beb56adc522ecb0e63a6e96293abd19c8638cbbe1c7974d9b57663bf5aca95e393ed81877e46d2cc8aaa9f072091f66969
+  checksum: 7de872e52ffa0d2e4579c26b906ae7f98fcab6767ff85a4ce157f70be26d9edcf3410e94931ea9c8c1a1c48f4fc5f5e410b396761164dc8314ec1157314bcb9e
   languageName: node
   linkType: hard
 
-"@jupyterlab/ui-components-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/ui-components-extension@npm:4.1.7"
+"@jupyterlab/ui-components-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/ui-components-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/application": ^4.1.7
-    "@jupyterlab/ui-components": ^4.1.7
-  checksum: ce3923ed57759bfba65137392c7b56cbe6dbf8440d09fb982d7b9faf6c7b6d87b4172517801a394990ec38cd6d1f3abaaeefc691b68acc0ac4b9762c2e77fd17
+    "@jupyterlab/application": ^4.1.8
+    "@jupyterlab/ui-components": ^4.1.8
+  checksum: 4251ae76514a910e270315263ebaeab4a677689a0be48209935ad4ed5067586824c62c0739611678ef7db7200c7974a71b1dc1590f1aa4f2e22922a3c0001924
   languageName: node
   linkType: hard
 
-"@jupyterlab/ui-components@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/ui-components@npm:4.1.7"
+"@jupyterlab/ui-components@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/ui-components@npm:4.1.8"
   dependencies:
     "@jupyter/react-components": ^0.15.2
     "@jupyter/web-components": ^0.15.2
-    "@jupyterlab/coreutils": ^6.1.7
-    "@jupyterlab/observables": ^5.1.7
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
-    "@jupyterlab/translation": ^4.1.7
+    "@jupyterlab/coreutils": ^6.1.8
+    "@jupyterlab/observables": ^5.1.8
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
+    "@jupyterlab/translation": ^4.1.8
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -2388,21 +2388,21 @@ __metadata:
     typestyle: ^2.0.4
   peerDependencies:
     react: ^18.2.0
-  checksum: 4ec9069dc49e5a5f6b6801654dfa76cd93aac593285ccf5982c3742f34d1537d17e1a5724d870379f23a7b854de048bd0dbf5ad77566a12e4a09c1591e3e81ef
+  checksum: 6a95597b8c71cd31b3f7a39cc61dc094fc6fede5b0b6bac61ff9df0a5757542d419e653f3a2527a15cb0dc9e7b7fcd2568101e9063878ce260f6adb486787e69
   languageName: node
   linkType: hard
 
-"@jupyterlab/vega5-extension@npm:~4.1.7":
-  version: 4.1.7
-  resolution: "@jupyterlab/vega5-extension@npm:4.1.7"
+"@jupyterlab/vega5-extension@npm:~4.1.8":
+  version: 4.1.8
+  resolution: "@jupyterlab/vega5-extension@npm:4.1.8"
   dependencies:
-    "@jupyterlab/rendermime-interfaces": ^3.9.7
+    "@jupyterlab/rendermime-interfaces": ^3.9.8
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
     vega: ^5.20.0
     vega-embed: ^6.2.1
     vega-lite: ^5.6.1-next.1
-  checksum: c07da97e68149fd1e2121c3fae501dbece27e28dd4ea6d403def4c98b7363e2459fa774ae9919226c8755c2a811dbb4e0d43010bfb98c80249dce741af3c4139
+  checksum: e56c29ee7ba5517969c4aa485fe161e39882101e33455cbf6ea5c1708e846b6bfc12472f67fb629505c8fd1a71b2dba78326017a9099cf57839f9a66e34f2753
   languageName: node
   linkType: hard
 
