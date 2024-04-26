@@ -232,7 +232,7 @@
       {
         "command": "recentmenu:reopen-last",
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
-        "rank": 10
+        "rank": 6
       }
     ]
   },
