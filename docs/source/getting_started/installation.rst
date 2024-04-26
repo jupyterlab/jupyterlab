@@ -112,6 +112,12 @@ You can install ``jupyverse`` with ``pip``:
 
     pip install jupyverse[auth, jupyterlab]
 
+or with ``conda``:
+
+.. code:: bash
+
+    conda install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
 or with ``mamba``:
 
 .. code:: bash
