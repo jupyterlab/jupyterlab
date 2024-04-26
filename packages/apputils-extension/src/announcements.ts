@@ -100,7 +100,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
       if (mustFetchNews === 'none') {
         const notificationId = Notification.emit(
           trans.__(
-            'Would you like to receive official Jupyter news?\nPlease read the privacy policy.'
+            'Would you like to get notified about official Jupyter news?'
           ),
           'default',
           {

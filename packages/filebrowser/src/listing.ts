@@ -209,7 +209,7 @@ export class DirListing extends Widget {
   /**
    * Construct a new file browser directory listing widget.
    *
-   * @param model - The file browser view model.
+   * @param options The constructor options
    */
   constructor(options: DirListing.IOptions) {
     super({
@@ -226,6 +226,9 @@ export class DirListing extends Widget {
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
+
+    // Get the width of the "modified" column
+    this._updateModifiedSize(this.node);
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     // hide the file size column by default
@@ -806,6 +809,100 @@ export class DirListing extends Widget {
     }
   }
 
+  // Update the modified column's size
+  private _updateModifiedSize(node: HTMLElement) {
+    // Look for the modified column's header
+    const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+    this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
+    this._modifiedStyle =
+      this._modifiedWidth < 100
+        ? 'narrow'
+        : this._modifiedWidth > 120
+        ? 'long'
+        : 'short';
+  }
+
+  // Update only the modified dates.
+  protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      if (node && item.last_modified) {
+        const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+        if (this.renderer.updateItemModified !== undefined) {
+          this.renderer.updateItemModified(
+            modified,
+            item.last_modified,
+            this._modifiedStyle
+          );
+        } else {
+          DirListing.defaultRenderer.updateItemModified(
+            modified,
+            item.last_modified,
+            this._modifiedStyle
+          );
+        }
+      }
+    });
+  }
+
+  // Update item nodes based on widget state.
+  protected updateNodes(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      const ft = this._manager.registry.getFileTypeForModel(item);
+      this.renderer.updateItemNode(
+        node,
+        item,
+        ft,
+        this.translator,
+        this._hiddenColumns,
+        this.selection[item.path],
+        this._modifiedStyle
+      );
+      if (
+        this.selection[item.path] &&
+        this._isCut &&
+        this._model.path === this._prevPath
+      ) {
+        node.classList.add(CUT_CLASS);
+      }
+
+      // add metadata to the node
+      node.setAttribute(
+        'data-isdir',
+        item.type === 'directory' ? 'true' : 'false'
+      );
+    });
+
+    // Handle the selectors on the widget node.
+    const selected = Object.keys(this.selection).length;
+    if (selected) {
+      this.addClass(SELECTED_CLASS);
+      if (selected > 1) {
+        this.addClass(MULTI_SELECTED_CLASS);
+      }
+    }
+
+    // Handle file session statuses.
+    const paths = items.map(item => item.path);
+    for (const session of this._model.sessions()) {
+      const index = ArrayExt.firstIndexOf(paths, session.path);
+      const node = nodes[index];
+      // Node may have been filtered out.
+      if (node) {
+        let name = session.kernel?.name;
+        const specs = this._model.specs;
+
+        node.classList.add(RUNNING_CLASS);
+        if (specs && name) {
+          const spec = specs.kernelspecs[name];
+          name = spec ? spec.display_name : this._trans.__('unknown');
+        }
+        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
+      }
+    }
+  }
+
   /**
    * A handler invoked on an `'update-request'` message.
    */
@@ -879,60 +976,7 @@ export class DirListing extends Widget {
       );
     }
 
-    // Update item nodes based on widget state.
-    items.forEach((item, i) => {
-      const node = nodes[i];
-      const ft = this._manager.registry.getFileTypeForModel(item);
-      renderer.updateItemNode(
-        node,
-        item,
-        ft,
-        this.translator,
-        this._hiddenColumns,
-        this.selection[item.path]
-      );
-      if (
-        this.selection[item.path] &&
-        this._isCut &&
-        this._model.path === this._prevPath
-      ) {
-        node.classList.add(CUT_CLASS);
-      }
-
-      // add metadata to the node
-      node.setAttribute(
-        'data-isdir',
-        item.type === 'directory' ? 'true' : 'false'
-      );
-    });
-
-    // Handle the selectors on the widget node.
-    const selected = Object.keys(this.selection).length;
-    if (selected) {
-      this.addClass(SELECTED_CLASS);
-      if (selected > 1) {
-        this.addClass(MULTI_SELECTED_CLASS);
-      }
-    }
-
-    // Handle file session statuses.
-    const paths = items.map(item => item.path);
-    for (const session of this._model.sessions()) {
-      const index = ArrayExt.firstIndexOf(paths, session.path);
-      const node = nodes[index];
-      // Node may have been filtered out.
-      if (node) {
-        let name = session.kernel?.name;
-        const specs = this._model.specs;
-
-        node.classList.add(RUNNING_CLASS);
-        if (specs && name) {
-          const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : this._trans.__('unknown');
-        }
-        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
-      }
-    }
+    this.updateNodes(items, nodes);
 
     this._prevPath = this._model.path;
   }
@@ -941,6 +985,14 @@ export class DirListing extends Widget {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
+
+    // Rerender item nodes' modified dates, if the modified style has changed.
+    const oldModifiedStyle = this._modifiedStyle;
+    // Update both size and style
+    this._updateModifiedSize(this.node);
+    if (oldModifiedStyle !== this._modifiedStyle) {
+      this.updateModified(this._sortedItems, this._items);
+    }
   }
 
   setColumnVisibility(
@@ -2094,6 +2146,9 @@ export class DirListing extends Widget {
   private _sortNotebooksFirst = false;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
+  // Width of the "last modified" column for an individual file
+  private _modifiedWidth: number;
+  private _modifiedStyle: Time.HumanStyle;
 }
 
 /**
@@ -2202,11 +2257,28 @@ export namespace DirListing {
     ): HTMLElement;
 
     /**
+     * Update an item's last modified date.
+     *
+     * @param modified - Element containing the file's last modified date.
+     *
+     * @param modifiedDate - String representation of the last modified date.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     */
+    updateItemModified?(
+      modified: HTMLElement,
+      modifiedDate: string,
+      modifiedStyle: Time.HumanStyle
+    ): void;
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
      *
      * @param fileType - The file type of the item, if applicable.
      */
@@ -2216,7 +2288,8 @@ export namespace DirListing {
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      selected?: boolean
+      selected?: boolean,
+      modifiedStyle?: Time.HumanStyle
     ): void;
 
     /**
@@ -2297,7 +2370,10 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNode(trans.__('Last Modified'));
+      const modified = this._createHeaderItemNodeWithSizes({
+        small: trans.__('Modified'),
+        large: trans.__('Last Modified')
+      });
       const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
@@ -2525,6 +2601,32 @@ export namespace DirListing {
     }
 
     /**
+     * Update an item's last modified date.
+     *
+     * @param modified - Element containing the file's last modified date.
+     *
+     * @param modifiedDate - String representation of the last modified date.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     */
+    updateItemModified(
+      modified: HTMLElement,
+      modifiedDate: string,
+      modifiedStyle: Time.HumanStyle
+    ): void {
+      let modText = '';
+      let modTitle = '';
+
+      const parsedDate = new Date(modifiedDate);
+      // Render the date in one of multiple formats, depending on the container's size
+      modText = Time.formatHuman(parsedDate, modifiedStyle);
+      modTitle = Time.format(parsedDate);
+
+      modified.textContent = modText;
+      modified.title = modTitle;
+    }
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
@@ -2540,7 +2642,8 @@ export namespace DirListing {
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      selected?: boolean
+      selected?: boolean,
+      modifiedStyle?: Time.HumanStyle
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -2660,14 +2763,13 @@ export namespace DirListing {
         checkbox.checked = selected ?? false;
       }
 
-      let modText = '';
-      let modTitle = '';
       if (model.last_modified) {
-        modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified));
+        this.updateItemModified(
+          modified,
+          model.last_modified,
+          modifiedStyle ?? 'short'
+        );
       }
-      modified.textContent = modText;
-      modified.title = modTitle;
     }
 
     /**
@@ -2745,6 +2847,29 @@ export namespace DirListing {
       icon.className = HEADER_ITEM_ICON_CLASS;
       text.textContent = label;
       node.appendChild(text);
+      node.appendChild(icon);
+      return node;
+    }
+
+    /**
+     * Create a node for a header item with multiple sizes.
+     */
+    private _createHeaderItemNodeWithSizes(labels: {
+      [k: string]: string;
+    }): HTMLElement {
+      const node = document.createElement('div');
+      node.className = HEADER_ITEM_CLASS;
+      const icon = document.createElement('span');
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      for (let k of Object.keys(labels)) {
+        const text = document.createElement('span');
+        text.classList.add(
+          HEADER_ITEM_TEXT_CLASS,
+          HEADER_ITEM_TEXT_CLASS + '-' + k
+        );
+        text.textContent = labels[k];
+        node.appendChild(text);
+      }
       node.appendChild(icon);
       return node;
     }

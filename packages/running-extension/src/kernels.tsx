@@ -325,13 +325,17 @@ namespace Private {
 
     private get _summary(): string {
       const children = this.children;
-      return children.length == 1
-        ? children[0].label()
-        : this.trans.__(
-            '%1 and %2 more',
-            children[0].label(),
-            children.length - 1
-          );
+      if (children.length === 0) {
+        return this.trans.__('No sessions connected');
+      } else if (children.length == 1) {
+        return children[0].label();
+      } else {
+        return this.trans.__(
+          '%1 and %2 more',
+          children[0].label(),
+          children.length - 1
+        );
+      }
     }
   }
 

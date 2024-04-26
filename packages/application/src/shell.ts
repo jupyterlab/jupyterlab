@@ -296,17 +296,24 @@ export namespace ILabShell {
       };
     };
   }
+
+  /**
+   * The restorable description of the top area in the user interface.
+   */
+  export interface ITopArea {
+    /**
+     * Top area visibility in simple mode.
+     */
+    readonly simpleVisibility: boolean;
+  }
 }
 
 /**
  * The restorable description of the top area in the user interface.
+ *
+ * @deprecated It has been moved to {@link ILabShell.ITopArea} for consistency.
  */
-export interface ITopArea {
-  /**
-   * Top area visibility in simple mode.
-   */
-  readonly simpleVisibility: boolean;
-}
+export interface ITopArea extends ILabShell.ITopArea {}
 
 /**
  * The application shell for JupyterLab.

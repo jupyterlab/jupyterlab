@@ -1,4 +1,5 @@
 {
-  "out": "../../docs/api/theme-light-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "name": "theme-light-extension"
 }

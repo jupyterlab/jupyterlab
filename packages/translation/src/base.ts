@@ -8,7 +8,7 @@ import { ITranslator, TranslationBundle } from './tokens';
  * A translator that loads a dummy language bundle that returns the same input
  * strings.
  */
-class NullTranslator implements ITranslator {
+export class NullTranslator implements ITranslator {
   constructor(bundle: TranslationBundle) {
     this._languageBundle = bundle;
   }
