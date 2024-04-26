@@ -1122,12 +1122,15 @@ class _AppHandler:
         app_settings_dir = osp.join(self.app_dir, "settings")
 
         # If extension is locked at a higher level, we don't toggle it.
-        allowed = get_allowed_levels()
-        if self._is_extension_locked(
-            extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
-        ):
-            self.logger.info("Extension locked at a higher level, cannot toggle status")
-            return False
+        # The highest level at which an extension can be locked is system,
+        # so we do not need to check levels above that one.
+        if level != "system":
+            allowed = get_allowed_levels()
+            if self._is_extension_locked(
+                extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+            ):
+                self.logger.info("Extension locked at a higher level, cannot toggle status")
+                return False
 
         page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
@@ -1177,12 +1180,16 @@ class _AppHandler:
     def toggle_extension_lock(self, extension, value, level="sys_prefix"):
         """Lock or unlock a lab extension (/plugin)."""
         app_settings_dir = osp.join(self.app_dir, "settings")
-        allowed = get_allowed_levels()
-        if self._is_extension_locked(
-            extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
-        ):
-            self.logger.info("Extension locked at a higher level, cannot toggle")
-            return
+
+        # The highest level at which an extension can be locked is system,
+        # so we do not need to check levels above that one.
+        if level != "system":
+            allowed = get_allowed_levels()
+            if self._is_extension_locked(
+                extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+            ):
+                self.logger.info("Extension locked at a higher level, cannot toggle")
+                return False
 
         page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
