@@ -148,4 +148,3 @@ packages/lsp/src/_*
 # generated reports
 webpack-bundle-analyzer.html
 examples/**/test-results/
-docker/start.sh
