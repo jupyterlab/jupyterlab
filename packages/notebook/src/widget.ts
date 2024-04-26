@@ -37,6 +37,7 @@ import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
+import { CodeCellModel } from '../../cells/src/model';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -398,6 +399,8 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
 
     const viewModel: { [k: string]: any }[] = new Array(n);
+    let dirtyState: boolean[] = new Array(n);
+
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
       const oldCell = this.widgets[from + i];
@@ -406,6 +409,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           // @ts-expect-error Cell has no index signature
           viewModel[i][k] = oldCell[k];
         }
+      } else if (oldCell.model.type === 'code') {
+        const oldCodeCell = oldCell.model as ICodeCellModel;
+        dirtyState[i] = oldCodeCell.isDirty;
       }
     }
 
@@ -417,6 +423,17 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
+      }
+
+      if (from > to) {
+        if (this.widgets[to + i].model.type === 'code') {
+          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+        }
+      } else {
+        if (this.widgets[to + i - n + 1].model.type === 'code') {
+          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+            dirtyState[i];
+        }
       }
     }
   }
