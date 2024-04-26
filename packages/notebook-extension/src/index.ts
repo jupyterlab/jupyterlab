@@ -2417,7 +2417,7 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
-    label: trans.__('Close and Shut Down Notebook'),
+    label: trans.__('Close and Shut Down Notebook…'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 

@@ -650,7 +650,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.displayShortcuts, {
-      label: trans.__('Show Keyboard Shortcuts'),
+      label: trans.__('Show Keyboard Shortcuts…'),
       caption: trans.__(
         'Show relevant keyboard shortcuts for the current active widget'
       ),
