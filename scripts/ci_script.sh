@@ -205,6 +205,21 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
     jupyter labextension enable @jupyterlab/notebook-extension --debug
 
+    # Test enable/disable on system level
+    JUPYTER_BIN=$(which jupyter)
+    sudo $JUPYTER_BIN labextension disable @jupyterlab/console-extension --level system --debug
+    sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1 --debug
+    cat labextensions | grep "@jupyterlab/console-extension (all plugins)"
+    sudo $JUPYTER_BIN labextension enable @jupyterlab/console-extension --level system --debug
+    sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1 --debug
+    ! cat labextensions | grep -L "@jupyterlab/console-extension (all plugins)"
+
+    # Test locking at higher level
+    jupyter labextension lock @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension disable @jupyterlab/notebook-extension --level user 2>&1 | grep "Extension locked at a higher level, cannot toggle status"
+    jupyter labextension unlock @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension disable @jupyterlab/notebook-extension --level user
+
     # Test with a prebuilt install
     jupyter labextension develop extension --debug
     jupyter labextension build extension

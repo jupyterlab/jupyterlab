@@ -219,12 +219,7 @@ export class ShortcutItem extends React.Component<
 
   getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element[] {
     return binding.keys.map((keyboardKey: string, index: number) => (
-      <div
-        className="jp-Shortcuts-ShortcutKeysContainer"
-        key={index}
-        data-keybinding={index}
-        data-shortcut={this.props.shortcut.id}
-      >
+      <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
         <div className="jp-Shortcuts-ShortcutKeys">
           {this.toSymbols(keyboardKey)}
         </div>
@@ -248,6 +243,8 @@ export class ShortcutItem extends React.Component<
       <div
         className="jp-Shortcuts-ShortcutContainer"
         key={this.props.shortcut.id + '_' + index}
+        data-keybinding={index}
+        data-shortcut={this.props.shortcut.id}
         onClick={() => this.toggleInputReplaceMethod(index)}
       >
         {this.isLocationBeingEdited(index)

@@ -664,10 +664,7 @@ function addCommands(
 
   const readonlyNotification = (contextPath: string) => {
     return Notification.warning(
-      trans.__(
-        `%1 is permissioned as read-only. Use "save as..." instead.`,
-        contextPath
-      ),
+      trans.__(`%1 is read-only. Use "Save as…" instead.`, contextPath),
       { autoClose: 5000 }
     );
   };
@@ -852,7 +849,7 @@ function addCommands(
       }
       if (!isWritable()) {
         return trans.__(
-          `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+          `Document is read-only. "Save" is disabled; use "Save as…" instead`
         );
       }
     }

@@ -633,7 +633,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
+    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
     "shortcuts": [
       "Ctrl S"
     ]

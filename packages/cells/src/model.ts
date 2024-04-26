@@ -650,6 +650,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * Public Set whether the cell is dirty or not.
+   */
+  set isDirty(dirty: boolean) {
+    this._setDirty(dirty);
+  }
+
+  /**
    * The cell outputs.
    */
   get outputs(): IOutputAreaModel {
