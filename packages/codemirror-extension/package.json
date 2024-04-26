@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.3.3",
+    "@codemirror/commands": "^6.5.0",
     "@codemirror/lang-markdown": "^6.2.4",
     "@codemirror/language": "^6.10.1",
     "@codemirror/legacy-modes": "^6.3.3",

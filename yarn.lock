@@ -1355,15 +1355,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/commands@npm:^6.3.3":
-  version: 6.3.3
-  resolution: "@codemirror/commands@npm:6.3.3"
+"@codemirror/commands@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@codemirror/commands@npm:6.5.0"
   dependencies:
     "@codemirror/language": ^6.0.0
     "@codemirror/state": ^6.4.0
     "@codemirror/view": ^6.0.0
     "@lezer/common": ^1.1.0
-  checksum: 7d23aecc973823969434b839aefa9a98bb47212d2ce0e6869ae903adbb5233aad22a760788fb7bb6eb45b00b01a4932fb93ad43bacdcbc0215e7500cf54b17bb
+  checksum: 27e49c5e0cb918b95d6a9f741bcc0e72cb76f963b0c829308edfb4491a37d8b12ae6fb96f9f1886b3189a22c82fec4434fbe65547dc3cd3e8dfb5222dfead2e7
   languageName: node
   linkType: hard
 
@@ -2518,7 +2518,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/codemirror-extension@workspace:packages/codemirror-extension"
   dependencies:
-    "@codemirror/commands": ^6.3.3
+    "@codemirror/commands": ^6.5.0
     "@codemirror/lang-markdown": ^6.2.4
     "@codemirror/language": ^6.10.1
     "@codemirror/legacy-modes": ^6.3.3
@@ -2548,7 +2548,7 @@ __metadata:
   resolution: "@jupyterlab/codemirror@workspace:packages/codemirror"
   dependencies:
     "@codemirror/autocomplete": ^6.15.0
-    "@codemirror/commands": ^6.3.3
+    "@codemirror/commands": ^6.5.0
     "@codemirror/lang-cpp": ^6.0.2
     "@codemirror/lang-css": ^6.2.1
     "@codemirror/lang-html": ^6.4.8
@@ -3396,7 +3396,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor-extension@workspace:packages/fileeditor-extension"
   dependencies:
-    "@codemirror/commands": ^6.3.3
+    "@codemirror/commands": ^6.5.0
     "@codemirror/search": ^6.5.6
     "@jupyterlab/application": ^4.2.0-beta.3
     "@jupyterlab/apputils": ^4.3.0-beta.3

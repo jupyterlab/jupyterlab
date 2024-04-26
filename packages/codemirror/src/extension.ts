@@ -35,7 +35,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { StateCommands } from './commands';
+import { CommandFacets, StateCommands } from './commands';
 import { customTheme, CustomTheme, rulers } from './extensions';
 import {
   IConfigurableExtension,
@@ -745,6 +745,21 @@ export namespace EditorExtensionRegistry {
         ],
         factory: () =>
           createConfigurableExtension<KeyBinding[]>(value => keymap.of(value))
+      }),
+      Object.freeze({
+        name: 'continueIndentation',
+        default: false,
+        factory: () =>
+          createConfigurableExtension((value: boolean) =>
+            CommandFacets.continueIndentation.of(value)
+          ),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Continue Indentation'),
+          description: trans.__(
+            'Whether to always continue indentation when inserting a new line. When disabled, the editor will follow language-specific heuristics if available.'
+          )
+        }
       }),
       Object.freeze({
         name: 'lineNumbers',

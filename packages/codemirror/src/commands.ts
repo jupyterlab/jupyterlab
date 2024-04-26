@@ -8,10 +8,11 @@ import {
   indentMore,
   insertBlankLine,
   insertNewlineAndIndent,
+  insertNewlineKeepIndent,
   insertTab,
   simplifySelection
 } from '@codemirror/commands';
-import { EditorState, Transaction } from '@codemirror/state';
+import { EditorState, Facet, Transaction } from '@codemirror/state';
 import {
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS
@@ -33,6 +34,19 @@ const TOOLTIP_OPENER_SELECTOR =
  */
 const ACTIVE_CELL_IN_EDIT_MODE_SELECTOR =
   '.jp-mod-editMode .jp-Cell.jp-mod-active';
+
+/**
+ * CodeMirror facets namespace
+ */
+export namespace CommandFacets {
+  /**
+   * Whether to always continue indentation when inserting a new line.
+   */
+  export const continueIndentation = Facet.define<boolean, boolean>({
+    combine: values => values.some(v => v),
+    static: true
+  });
+}
 
 /**
  * CodeMirror commands namespace
@@ -79,7 +93,11 @@ export namespace StateCommands {
     }
 
     const arg = { state: target.state, dispatch: target.dispatch };
-    return insertNewlineAndIndent(arg);
+    if (target.state.facet(CommandFacets.continueIndentation)) {
+      return insertNewlineKeepIndent(arg);
+    } else {
+      return insertNewlineAndIndent(arg);
+    }
   }
 
   /**
