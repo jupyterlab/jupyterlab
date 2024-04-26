@@ -455,7 +455,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.save, {
-      label: trans.__('Save Current Workspace…'),
+      label: trans.__('Save Current Workspace'),
       execute: async () => {
         const { contents } = app.serviceManager;
         const data = app.serviceManager.workspaces.fetch(resolver.name);
