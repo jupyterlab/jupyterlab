@@ -28,6 +28,9 @@ jobs:
       - name: Setup firefox
         run: brew install --cask firefox
 
+      - name: Setup cairo and pango
+        run: brew install cairo pango
+
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
