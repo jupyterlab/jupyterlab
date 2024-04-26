@@ -26,7 +26,10 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Setup firefox
-        uses: browser-actions/setup-firefox@latest
+        run: brew install --cask firefox
+
+      - name: Setup cairo and pango
+        run: brew install cairo pango
 
       - name: Install dependencies
         env:
