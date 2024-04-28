@@ -174,7 +174,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    */
   get matches(): IHTMLSearchMatch[] {
     // Ensure that no other fn can overwrite matches index property
-    // We shallow clone each node    
+    // We shallow clone each node
     return this._matches
       ? this._matches.map(m => Object.assign({}, m))
       : this._matches;
