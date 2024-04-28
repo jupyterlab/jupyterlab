@@ -174,6 +174,11 @@ export interface ISearchMatch {
    * Start location of the match (in a text, this is the column)
    */
   position: number;
+
+  /**
+   * Node containing the match
+   */
+  node?: Text;
 }
 
 /**

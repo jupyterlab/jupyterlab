@@ -11,7 +11,7 @@ import { SearchProvider } from '../searchprovider';
 import { ITranslator } from '@jupyterlab/translation';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
-const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
+const SELECTED_CLASSES = ['CodeMirror-selectedtext', 'jp-current-match'];
 
 /**
  * HTML search engine
@@ -174,7 +174,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    */
   get matches(): IHTMLSearchMatch[] {
     // Ensure that no other fn can overwrite matches index property
-    // We shallow clone each node
+    // We shallow clone each node    
     return this._matches
       ? this._matches.map(m => Object.assign({}, m))
       : this._matches;
@@ -367,12 +367,17 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     if (this._currentMatchIndex === -1) {
       this._currentMatchIndex = reverse ? this.matches.length - 1 : 0;
     } else {
+      // Update the CSS classes for the current match
       const hit = this._markNodes[this._currentMatchIndex];
       hit.classList.remove(...SELECTED_CLASSES);
+      hit.classList.add(...FOUND_CLASSES);
 
+      // Update the index for the next match
       this._currentMatchIndex = reverse
         ? this._currentMatchIndex - 1
         : this._currentMatchIndex + 1;
+
+      // If we have looping enabled and are out of bounds after the index update
       if (
         loop &&
         (this._currentMatchIndex < 0 ||
@@ -390,6 +395,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       this._currentMatchIndex < this._matches.length
     ) {
       const hit = this._markNodes[this._currentMatchIndex];
+      hit.classList.remove(...FOUND_CLASSES);
       hit.classList.add(...SELECTED_CLASSES);
       // If not in view, scroll just enough to see it
       if (!elementInViewport(hit)) {
