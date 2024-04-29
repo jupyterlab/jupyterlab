@@ -24,15 +24,15 @@ the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb
 
-By default, the file browser will navigate to the directory containing the requested
+By default, the file browser will navigate to the folder containing the requested
 file. This behavior can be changed with the optional ``file-browser-path`` query parameter:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?file-browser-path=/
 
-Entering the above URL will show the workspace root directory instead of the ``/path/to/``
-directory in the file browser.
+Entering the above URL will show the workspace root folder instead of the ``/path/to/``
+folder in the file browser.
 
 
 Linking Notebook Sections
@@ -70,10 +70,10 @@ using ``#cell-id=<cell-id>`` Fragment Identification Syntax.
     The ``cell-id`` fragment locator is not part of a formal Jupyter standard and subject to change.
     To leave feedback, please comment in the discussion: `nbformat#317 <https://github.com/jupyter/nbformat/issues/317>`_.
 
-.. _url-workspaces-ui:
+.. _url-workspaces:
 
-Managing Workspaces (UI)
-------------------------
+Managing Workspaces (URL)
+-------------------------
 
 JupyterLab sessions always reside in a workspace. Workspaces contain the state
 of JupyterLab: the files that are currently open, the layout of the application
@@ -168,86 +168,3 @@ To reset the contents of the default workspace and load a notebook:
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?reset
-
-.. _url-workspaces-cli:
-
-Managing Workspaces (CLI)
--------------------------
-
-JupyterLab provides a command-line interface for workspace ``import`` and
-``export``:
-
-.. code-block:: bash
-
-  $ # Exports the default JupyterLab workspace
-  $ jupyter lab workspaces export
-  {"data": {}, "metadata": {"id": "/lab"}}
-  $
-  $ # Exports the workspaces named `foo`
-  $ jupyter lab workspaces export foo
-  {"data": {}, "metadata": {"id": "/lab/workspaces/foo"}}
-  $
-  $ # Exports the workspace named `foo` into a file called `file_name.json`
-  $ jupyter lab workspaces export foo > file_name.json
-  $
-  $ # Imports the workspace file `file_name.json`.
-  $ jupyter lab workspaces import file_name.json
-  Saved workspace: <workspaces-directory>/labworkspacesfoo-54d5.jupyterlab-workspace
-
-The ``export`` functionality is as friendly as possible: if a workspace does not
-exist, it will still generate an empty workspace for export.
-
-The ``import`` functionality validates the structure of the workspace file and
-validates the ``id`` field in the workspace ``metadata`` to make sure its URL is
-compatible with either the ``workspaces_url`` configuration or the ``page_url``
-configuration to verify that it is a correctly named workspace or it is the
-default workspace.
-
-
-Workspace File Format
----------------------
-
-A workspace file in a JSON file with a specific spec.
-
-
-There are two top level keys requires, `data`, and `metadata`.
-
-The `metadata` must be a mapping with an `id`
-key that has the same value as the ID of the workspace. This should also be the relative URL path to access the workspace,
-like `/lab/workspaces/foo`.
-
-The `data` key maps to the initial state of the `IStateDB`. Many plugins look in the State DB for the configuration.
-Also any plugins that register with the `ILayoutRestorer` will look up all keys in the State DB
-that start with the `namespace` of their tracker before the first `:`. The values of these keys should have a `data`
-attribute that maps.
-
-For example, if your workspace looks like this:
-
-.. code-block:: json
-
-  {
-    "data": {
-      "application-mimedocuments:package.json:JSON": {
-        "data": { "path": "package.json", "factory": "JSON" }
-      }
-    }
-  }
-
-It will run the `docmanager:open` with the `{ "path": "package.json", "factory": "JSON" }` args, because the `application-mimedocuments` tracker is registered with the `docmanager:open` command, like this:
-
-
-.. code-block:: typescript
-
-  const namespace = 'application-mimedocuments';
-  const tracker = new WidgetTracker<MimeDocument>({ namespace });
-  void restorer.restore(tracker, {
-    command: 'docmanager:open',
-    args: widget => ({
-      path: widget.context.path,
-      factory: Private.factoryNameProperty.get(widget)
-    }),
-    name: widget =>
-      `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
-  });
-
-Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.

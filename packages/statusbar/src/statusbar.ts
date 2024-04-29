@@ -38,8 +38,9 @@ export class StatusBar extends Widget implements IStatusBar {
    * Register a new status item.
    *
    * @param id - a unique id for the status item.
-   *
    * @param statusItem - The item to add to the status bar.
+   *
+   * @returns Disposable status bar item
    */
   registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable {
     if (id in this._statusItems) {

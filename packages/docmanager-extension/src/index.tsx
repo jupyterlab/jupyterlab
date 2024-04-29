@@ -31,6 +31,7 @@ import {
   DocumentManager,
   IDocumentManager,
   IDocumentWidgetOpener,
+  IRecentsManager,
   PathStatus,
   renameDialog,
   SavingStatus
@@ -52,6 +53,7 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { recentsManagerPlugin } from './recents';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -168,14 +170,21 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   description: 'Provides the document manager.',
   provides: IDocumentManager,
   requires: [IDocumentWidgetOpener],
-  optional: [ITranslator, ILabStatus, ISessionContextDialogs, JupyterLab.IInfo],
+  optional: [
+    ITranslator,
+    ILabStatus,
+    ISessionContextDialogs,
+    JupyterLab.IInfo,
+    IRecentsManager
+  ],
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
     translator_: ITranslator | null,
     status: ILabStatus | null,
     sessionDialogs_: ISessionContextDialogs | null,
-    info: JupyterLab.IInfo | null
+    info: JupyterLab.IInfo | null,
+    recentsManager: IRecentsManager | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
@@ -196,7 +205,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
           return info.isConnected;
         }
         return true;
-      }
+      },
+      recentsManager: recentsManager ?? undefined
     });
 
     return docManager;
@@ -491,6 +501,10 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.download);
+    });
+
     const category = trans.__('File Operations');
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category });
@@ -556,7 +570,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   savingStatusPlugin,
   downloadPlugin,
   openBrowserTabPlugin,
-  openerPlugin
+  openerPlugin,
+  recentsManagerPlugin
 ];
 export default plugins;
 
@@ -649,10 +664,7 @@ function addCommands(
 
   const readonlyNotification = (contextPath: string) => {
     return Notification.warning(
-      trans.__(
-        `%1 is permissioned as read-only. Use "save as..." instead.`,
-        contextPath
-      ),
+      trans.__(`%1 is read-only. Use "Save as…" instead.`, contextPath),
       { autoClose: 5000 }
     );
   };
@@ -837,7 +849,7 @@ function addCommands(
       }
       if (!isWritable()) {
         return trans.__(
-          `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+          `Document is read-only. "Save" is disabled; use "Save as…" instead`
         );
       }
     }
@@ -1035,6 +1047,18 @@ function addCommands(
     }
   });
 
+  app.shell.currentChanged?.connect(() => {
+    [
+      CommandIDs.reload,
+      CommandIDs.restoreCheckpoint,
+      CommandIDs.save,
+      CommandIDs.saveAll,
+      CommandIDs.saveAs
+    ].forEach(cmd => {
+      app.commands.notifyCommandChanged(cmd);
+    });
+  });
+
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: trans.__('Autosave Documents'),
     isToggled: () => docManager.autosave,
@@ -1191,6 +1215,18 @@ function addLabCommands(
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
+  });
+
+  labShell.currentChanged.connect(() => {
+    [
+      CommandIDs.clone,
+      CommandIDs.rename,
+      CommandIDs.duplicate,
+      CommandIDs.del,
+      CommandIDs.showInFileBrowser
+    ].forEach(cmd => {
+      app.commands.notifyCommandChanged(cmd);
+    });
   });
 }
 

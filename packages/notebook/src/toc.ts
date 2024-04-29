@@ -296,6 +296,23 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
+   * Test if two headings are equal or not.
+   *
+   * @param heading1 First heading
+   * @param heading2 Second heading
+   * @returns Whether the headings are equal.
+   */
+  protected override isHeadingEqual(
+    heading1: INotebookHeading,
+    heading2: INotebookHeading
+  ): boolean {
+    return (
+      super.isHeadingEqual(heading1, heading2) &&
+      heading1.cellRef === heading2.cellRef
+    );
+  }
+
+  /**
    * Read table of content configuration from notebook metadata.
    *
    * @returns ToC configuration from metadata

@@ -4,6 +4,35 @@
   "jupyter.lab.transform": true,
   "title": "Keyboard Shortcuts",
   "description": "Keyboard shortcut settings.",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "command": "shortcuts:edit-keybinding",
+        "selector": ".jp-Shortcuts-ShortcutKeysContainer",
+        "rank": 0
+      },
+      {
+        "command": "shortcuts:delete-keybinding",
+        "selector": ".jp-Shortcuts-ShortcutKeysContainer",
+        "rank": 1
+      },
+      {
+        "command": "shortcuts:add-keybinding",
+        "selector": ".jp-Shortcuts-Row",
+        "rank": 2
+      },
+      {
+        "command": "shortcuts:toggle-selectors",
+        "selector": ".jp-Shortcuts-Top",
+        "rank": 3
+      },
+      {
+        "command": "shortcuts:reset-all",
+        "selector": ".jp-Shortcuts-Top",
+        "rank": 4
+      }
+    ]
+  },
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -35,7 +64,8 @@
           "items": { "type": "string" },
           "type": "array"
         },
-        "selector": { "type": "string" }
+        "selector": { "type": "string" },
+        "preventDefault": { "type": "boolean" }
       },
       "required": ["command", "keys", "selector"],
       "type": "object"

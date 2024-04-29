@@ -29,7 +29,11 @@ import {
   IPositionModel
 } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import {
+  ConsolePanel,
+  IConsoleCellExecutor,
+  IConsoleTracker
+} from '@jupyterlab/console';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -53,6 +57,7 @@ import {
 import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
+import { cellExecutor } from './cellexecutor';
 
 /**
  * The command IDs used by the console plugin.
@@ -84,10 +89,6 @@ namespace CommandIDs {
 
   export const getKernel = 'console:get-kernel';
 
-  export const enterToExecute = 'console:enter-to-execute';
-
-  export const shiftEnterToExecute = 'console:shift-enter-to-execute';
-
   export const interactionMode = 'console:interaction-mode';
 
   export const redo = 'console:redo';
@@ -113,6 +114,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   requires: [
     ConsolePanel.IContentFactory,
     IEditorServices,
+    IConsoleCellExecutor,
     IRenderMimeRegistry,
     ISettingRegistry
   ],
@@ -241,7 +243,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   foreign,
   kernelStatus,
   lineColStatus,
-  completerPlugin
+  completerPlugin,
+  cellExecutor
 ];
 export default plugins;
 
@@ -252,6 +255,7 @@ async function activateConsole(
   app: JupyterFrontEnd,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
+  executor: IConsoleCellExecutor,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
@@ -380,6 +384,7 @@ async function activateConsole(
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
       sessionDialogs,
+      executor,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
@@ -494,8 +499,7 @@ async function activateConsole(
     activate?: boolean;
   }
 
-  let command = CommandIDs.open;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.open, {
     label: trans.__('Open a console for the provided `path`.'),
     execute: (args: IOpenOptions) => {
       const path = args['path'];
@@ -521,8 +525,7 @@ async function activateConsole(
     }
   });
 
-  command = CommandIDs.create;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.create, {
     label: args => {
       if (args['isPalette']) {
         return trans.__('New Console');
@@ -808,6 +811,17 @@ async function activateConsole(
     },
     isEnabled
   });
+
+  // All commands with isEnabled defined directly or in a semantic commands
+
+  const skip = [CommandIDs.create];
+  const notify = () => {
+    Object.values(CommandIDs)
+      .filter(id => !skip.includes(id))
+      .forEach(id => app.commands.notifyCommandChanged(id));
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     // Add command palette items

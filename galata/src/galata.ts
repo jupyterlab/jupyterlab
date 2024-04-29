@@ -449,8 +449,9 @@ export namespace galata {
      * The space name can be found in the named group `id`.
      *
      * The id will be prefixed by '/'.
+     * The id will be undefined for workspaces listing route.
      */
-    export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+    export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)?/;
 
     /**
      * User API
@@ -962,11 +963,25 @@ export namespace galata {
     ): Promise<void> {
       return page.route(Routes.workspaces, (route, request) => {
         switch (request.method()) {
-          case 'GET':
-            return route.fulfill({
-              status: 200,
-              body: JSON.stringify(workspace)
-            });
+          case 'GET': {
+            const id = Routes.workspaces.exec(request.url())?.groups?.id;
+            if (id) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(workspace)
+              });
+            } else {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify({
+                  workspaces: {
+                    ids: [workspace.metadata.id],
+                    values: [workspace]
+                  }
+                })
+              });
+            }
+          }
           case 'PUT': {
             const data = request.postDataJSON();
             workspace.data = { ...workspace.data, ...data.data };

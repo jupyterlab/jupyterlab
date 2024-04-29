@@ -1,4 +1,5 @@
 {
-  "out": "../../docs/api/application-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.tsx"],
+  "name": "application-extension"
 }

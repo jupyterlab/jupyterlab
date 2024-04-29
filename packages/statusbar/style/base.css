@@ -60,6 +60,8 @@
 }
 
 .jp-StatusBar-HoverItem {
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
 }
 

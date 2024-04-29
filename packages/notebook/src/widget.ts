@@ -37,6 +37,7 @@ import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
+import { CodeCellModel } from '../../cells/src/model';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -196,7 +197,7 @@ if ((window as any).requestIdleCallback === undefined) {
  * `null` model, and may want to listen to the `modelChanged`
  * signal.
  */
-export class StaticNotebook extends WindowedList {
+export class StaticNotebook extends WindowedList<NotebookViewModel> {
   /**
    * Construct a notebook widget.
    */
@@ -398,6 +399,8 @@ export class StaticNotebook extends WindowedList {
     }
 
     const viewModel: { [k: string]: any }[] = new Array(n);
+    let dirtyState: boolean[] = new Array(n);
+
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
       const oldCell = this.widgets[from + i];
@@ -406,6 +409,9 @@ export class StaticNotebook extends WindowedList {
           // @ts-expect-error Cell has no index signature
           viewModel[i][k] = oldCell[k];
         }
+      } else if (oldCell.model.type === 'code') {
+        const oldCodeCell = oldCell.model as ICodeCellModel;
+        dirtyState[i] = oldCodeCell.isDirty;
       }
     }
 
@@ -417,6 +423,17 @@ export class StaticNotebook extends WindowedList {
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
+      }
+
+      if (from > to) {
+        if (this.widgets[to + i].model.type === 'code') {
+          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+        }
+      } else {
+        if (this.widgets[to + i - n + 1].model.type === 'code') {
+          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+            dirtyState[i];
+        }
       }
     }
   }
@@ -895,13 +912,18 @@ export class StaticNotebook extends WindowedList {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        switch (this.notebookConfig.windowingMode) {
-          case 'defer':
-            await this._updateForDeferMode(cell, cellIdx);
-            break;
-          case 'full':
-            this._renderCSSAndJSOutputs(cell, cellIdx);
-            break;
+        if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
+          await this._updateForDeferMode(cell, cellIdx);
+          if (this.notebookConfig.windowingMode === 'full') {
+            // We need to delay slightly the removal to let codemirror properly initialize
+            requestAnimationFrame(() => {
+              this.viewModel.setEstimatedWidgetSize(
+                cell.model.id,
+                cell.node.getBoundingClientRect().height
+              );
+              this.layout.removeWidget(cell);
+            });
+          }
         }
       }
       cellIdx++;
@@ -935,34 +957,6 @@ export class StaticNotebook extends WindowedList {
     cell.dataset.windowedListIndex = `${cellIdx}`;
     this.layout.insertWidget(cellIdx, cell);
     await cell.ready;
-  }
-
-  private _renderCSSAndJSOutputs(
-    cell: Cell<ICellModel>,
-    cellIdx: number
-  ): void {
-    // Only render cell with text/html outputs containing scripts or/and styles
-    // Note:
-    //   We don't need to render JavaScript mimetype outputs because they get
-    //   directly evaluate without adding DOM elements (see @jupyterlab/javascript-extension)
-    if (cell instanceof CodeCell) {
-      for (
-        let outputIdx = 0;
-        outputIdx < (cell.model.outputs?.length ?? 0);
-        outputIdx++
-      ) {
-        const output = cell.model.outputs.get(outputIdx);
-        const html = (output.data['text/html'] as string) ?? '';
-        if (
-          html.match(
-            /(<style[^>]*>[^<]*<\/style[^>]*>|<script[^>]*>.*?<\/script[^>]*>)/gims
-          )
-        ) {
-          this.renderCellOutputs(cellIdx);
-          break;
-        }
-      }
-    }
   }
 
   /**
@@ -2132,6 +2126,37 @@ export class Notebook extends StaticNotebook {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
       }
     });
+    cell.scrollRequested.connect((_emitter, scrollRequest) => {
+      if (cell !== this.activeCell) {
+        // Do nothing for cells other than the active cell
+        // to avoid scroll requests from editor extensions
+        // stealing user focus (this may be revisited).
+        return;
+      }
+      if (!scrollRequest.defaultPrevented) {
+        // Nothing to do if scroll request was already handled.
+        return;
+      }
+      // Node which allows to scroll the notebook
+      const scroller = this.outerNode;
+
+      if (cell.inViewport) {
+        // If cell got scrolled to the viewport in the meantime,
+        // proceed with scrolling within the cell.
+        return scrollRequest.scrollWithinCell({ scroller });
+      }
+      // If cell is not in the viewport and needs scrolling,
+      // first scroll to the cell and then scroll within the cell.
+      this.scrollToItem(this.activeCellIndex)
+        .then(() => {
+          void cell.ready.then(() => {
+            scrollRequest.scrollWithinCell({ scroller });
+          });
+        })
+        .catch(reason => {
+          // no-op
+        });
+    });
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -2212,7 +2237,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
-      if (activeCell.editor?.hasFocus() !== true || !activeCell.inViewport) {
+      if (activeCell.editor?.hasFocus() !== true) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {

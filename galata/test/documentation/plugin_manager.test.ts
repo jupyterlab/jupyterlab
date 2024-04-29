@@ -20,9 +20,11 @@ test.describe('Advanced Plugin Manager', () => {
       });
     });
 
-    expect(
-      await page.locator('.jp-pluginmanager .jp-FilterBox input').inputValue()
-    ).toEqual('Notebook');
+    const value = await page
+      .locator('.jp-pluginmanager jp-search')
+      .evaluate(elem => elem.value);
+
+    expect(value).toEqual('Notebook');
 
     const pluginManager = page.locator('.jp-pluginmanager');
     await page.sidebar.close('left');

@@ -30,6 +30,7 @@ from urllib.request import Request, quote, urljoin, urlopen
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
+    get_allowed_levels,
     get_federated_extensions,
     get_package_url,
     get_page_config,
@@ -367,6 +368,8 @@ class AppOptions(HasTraits):
         ),
     )
 
+    verbose = Bool(False, help="Increase verbosity level.")
+
     @default("logger")
     def _default_logger(self):
         return logging.getLogger("jupyterlab")
@@ -632,6 +635,7 @@ class _AppHandler:
         # Make a deep copy of the core data so we don't influence the original copy
         self.core_data = deepcopy(options.core_config._data)
         self.labextensions_path = options.labextensions_path
+        self.verbose = options.verbose
         self.kill_event = options.kill_event
         self.registry = options.registry
         self.skip_full_build_check = options.skip_full_build_check
@@ -1101,6 +1105,18 @@ class _AppHandler:
         self._write_build_config(config)
         return True
 
+    def _is_extension_locked(self, extension, level="sys_prefix", include_higher_levels=True):
+        app_settings_dir = osp.join(self.app_dir, "settings")
+        page_config = get_static_page_config(
+            app_settings_dir=app_settings_dir,
+            logger=self.logger,
+            level=level,
+            include_higher_levels=True,
+        )
+
+        locked = page_config.get("lockedExtensions", {})
+        return locked.get(extension, False)
+
     def toggle_extension(self, extension, value, level="sys_prefix"):
         """Enable or disable a lab extension.
 
@@ -1108,23 +1124,40 @@ class _AppHandler:
         """
         app_settings_dir = osp.join(self.app_dir, "settings")
 
-        page_config = get_static_page_config(
+        # If extension is locked at a higher level, we don't toggle it.
+        # The highest level at which an extension can be locked is system,
+        # so we do not need to check levels above that one.
+        if level != "system":
+            allowed = get_allowed_levels()
+            if self._is_extension_locked(
+                extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+            ):
+                self.logger.info("Extension locked at a higher level, cannot toggle status")
+                return False
+
+        complete_page_config = get_static_page_config(
+            app_settings_dir=app_settings_dir, logger=self.logger, level="all"
+        )
+
+        level_page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
 
-        disabled = page_config.get("disabledExtensions", {})
+        disabled = complete_page_config.get("disabledExtensions", {})
+        disabled_at_level = level_page_config.get("disabledExtensions", {})
         did_something = False
         is_disabled = disabled.get(extension, False)
+
         if value and not is_disabled:
-            disabled[extension] = True
+            disabled_at_level[extension] = True
             did_something = True
         elif not value and is_disabled:
-            disabled[extension] = False
+            disabled_at_level[extension] = False
             did_something = True
 
         if did_something:
-            page_config["disabledExtensions"] = disabled
-            write_page_config(page_config, level=level)
+            level_page_config["disabledExtensions"] = disabled_at_level
+            write_page_config(level_page_config, level=level)
         return did_something
 
     def _maybe_mirror_disabled_in_locked(self, level="sys_prefix"):
@@ -1156,13 +1189,23 @@ class _AppHandler:
         """Lock or unlock a lab extension (/plugin)."""
         app_settings_dir = osp.join(self.app_dir, "settings")
 
+        # The highest level at which an extension can be locked is system,
+        # so we do not need to check levels above that one.
+        if level != "system":
+            allowed = get_allowed_levels()
+            if self._is_extension_locked(
+                extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+            ):
+                self.logger.info("Extension locked at a higher level, cannot toggle")
+                return False
+
         page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
 
         locked = page_config.get("lockedExtensions", {})
         locked[extension] = value
-
+        page_config["lockedExtensions"] = locked
         write_page_config(page_config, level=level)
 
     def check_extension(self, extension, check_installed_only=False):
@@ -1683,7 +1726,7 @@ class _AppHandler:
                 error_accumulator[name] = (version, errors)
 
         # Write all errors at end:
-        _log_multiple_compat_errors(logger, error_accumulator)
+        _log_multiple_compat_errors(logger, error_accumulator, self.verbose)
 
         # Write a blank line separator
         logger.info("")
@@ -1721,7 +1764,7 @@ class _AppHandler:
             logger.info("")
 
         # Write all errors at end:
-        _log_multiple_compat_errors(logger, error_accumulator)
+        _log_multiple_compat_errors(logger, error_accumulator, self.verbose)
 
     def _compose_extra_status(self, name: str, info: dict, data: dict, errors) -> str:
         extra = ""
@@ -2409,32 +2452,37 @@ def _format_compatibility_errors(name, version, errors):
     return msg
 
 
-def _log_multiple_compat_errors(logger, errors_map):
+def _log_multiple_compat_errors(logger, errors_map, verbose: bool):
     """Log compatibility errors for multiple extensions at once"""
 
     outdated = []
-    others = []
 
     for name, (_, errors) in errors_map.items():
         age = _compat_error_age(errors)
         if age > 0:
             outdated.append(name)
-        else:
-            others.append(name)
 
     if outdated:
         logger.warning(
             "\n        ".join(
                 [
-                    "\n   The following extensions are outdated:",
+                    "\n   The following extensions may be outdated or specify dependencies that are incompatible with the current version of jupyterlab:",
                     *outdated,
-                    "\n   Consider checking if an update is available for these packages.\n",
+                    "\n   If you are a user, check if an update is available for these packages.\n"
+                    + (
+                        "   If you are a developer, re-run with `--verbose` flag for more details.\n"
+                        if not verbose
+                        else "   See below for the details.\n"
+                    ),
                 ]
             )
         )
 
-    for name in others:
-        version, errors = errors_map[name]
+    # Print out compatibility errors for all extensions, even the ones inferred
+    # to be possibly outdated, to guide developers upgrading their extensions.
+    for name, (version, errors) in errors_map.items():
+        if name in outdated and not verbose:
+            continue
         msg = _format_compatibility_errors(name, version, errors)
         logger.warning(f"{msg}\n")
 

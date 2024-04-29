@@ -64,8 +64,8 @@
 }
 
 .jp-lineFormWrapperFocusWithin {
-  border: var(--jp-border-width) solid var(--md-blue-500);
-  box-shadow: inset 0 0 4px var(--md-blue-300);
+  border: var(--jp-border-width) solid var(--md-blue-500, #2196f3);
+  box-shadow: inset 0 0 4px var(--md-blue-300, #64b5f6);
 }
 
 .jp-lineFormInput {
