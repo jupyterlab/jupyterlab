@@ -83,14 +83,20 @@ test('should update window height on resize', async ({ page, tmpPath }) => {
 
 test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+  let initialHeight = 0;
+  let previousHeight = 0;
+  let counter = 0;
 
   // Wait to ensure the rendering logic is stable.
-  await page.waitForTimeout(200);
+  do {
+    previousHeight = initialHeight;
+    await page.waitForTimeout(200);
 
-  const notebook = await page.notebook.getNotebookInPanelLocator();
-  const initialHeight = await getInnerHeight(notebook!);
+    initialHeight = await getInnerHeight(notebook!);
+  } while (previousHeight !== initialHeight && counter++ < 10);
 
-  expect(initialHeight).toBeGreaterThan(0);
+  expect.soft(initialHeight).toBeGreaterThan(0);
 
   // Add a new launcher covering the notebook.
   await page.menu.clickMenuItem('File>New Launcher');
@@ -214,42 +220,42 @@ const scrollOnKeyPressCases: {
   times: number;
   enterEditor: boolean;
 }[] = [
-  {
-    // When pressing arrow down the second cell should become selected.
-    key: 'ArrowDown',
-    showCell: 'second',
-    times: 1,
-    enterEditor: false
-  },
-  {
-    // Pressing Alt does not cause any input nor cursor movement so it should
-    // not cause any scrolling. This test in particular tests against an easy
-    // mistake of force-focusing the active editor which is out of view which
-    // can cause partial scrolling in the direction of the editor. Because the
-    // scrolling is only partial multiple presses are needed.
-    key: 'Alt',
-    showCell: 'neither',
-    times: 10,
-    enterEditor: true
-  },
-  {
-    // Because the cursor starts at the beginning of the first cell, a single
-    // press of PageDown should just move the cursor to the end, which should
-    // reveal the editor by scrolling to the first cell.
-    key: 'PageDown',
-    showCell: 'first',
-    times: 1,
-    enterEditor: true
-  },
-  {
-    // Pressing `PageDown` multiple times should scroll the notebook in a way
-    // which hides both cells (even though the first press would reveal them).
-    key: 'PageDown',
-    showCell: 'neither',
-    times: 10,
-    enterEditor: true
-  }
-];
+    {
+      // When pressing arrow down the second cell should become selected.
+      key: 'ArrowDown',
+      showCell: 'second',
+      times: 1,
+      enterEditor: false
+    },
+    {
+      // Pressing Alt does not cause any input nor cursor movement so it should
+      // not cause any scrolling. This test in particular tests against an easy
+      // mistake of force-focusing the active editor which is out of view which
+      // can cause partial scrolling in the direction of the editor. Because the
+      // scrolling is only partial multiple presses are needed.
+      key: 'Alt',
+      showCell: 'neither',
+      times: 10,
+      enterEditor: true
+    },
+    {
+      // Because the cursor starts at the beginning of the first cell, a single
+      // press of PageDown should just move the cursor to the end, which should
+      // reveal the editor by scrolling to the first cell.
+      key: 'PageDown',
+      showCell: 'first',
+      times: 1,
+      enterEditor: true
+    },
+    {
+      // Pressing `PageDown` multiple times should scroll the notebook in a way
+      // which hides both cells (even though the first press would reveal them).
+      key: 'PageDown',
+      showCell: 'neither',
+      times: 10,
+      enterEditor: true
+    }
+  ];
 test.describe('Scrolling on keyboard interaction when active editor is above the viewport', () => {
   for (const testCase of scrollOnKeyPressCases) {
     test(`Show ${testCase.showCell} cell on pressing ${testCase.key} ${testCase.times} times`, async ({
@@ -455,7 +461,7 @@ test('should rendered injected styles of out-of-viewport cells', async ({
     for (const cell of document.querySelectorAll('.jp-Notebook-cell')) {
       count +=
         window.getComputedStyle(cell, '::after').content ==
-        '"CSS ::after element"'
+          '"CSS ::after element"'
           ? 1
           : 0;
     }
