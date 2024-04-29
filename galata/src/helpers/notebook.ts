@@ -1126,11 +1126,16 @@ export class NotebookHelper {
     const gutter = gutters.nth(line);
     for (let i = 0; i < 3; i++) {
       await gutter.click({ position: { x: 5, y: 5 } });
-      await Utils.waitForCondition(
-        async () => ((await gutter.textContent())?.length ?? 0) > 0,
-        500
-      );
-      if ((await gutter.textContent())?.length) {
+      let break_ = true;
+      try {
+        await Utils.waitForCondition(
+          async () => ((await gutter.textContent())?.length ?? 0) > 0,
+          1000
+        );
+      } catch (reason) {
+        break_ = false;
+      }
+      if (break_) {
         break;
       }
     }

@@ -34,6 +34,7 @@ test.describe('Debugger Tests', () => {
   test('Start debug session', async ({ page, tmpPath }) => {
     await openNotebook(page, tmpPath, 'code_notebook.ipynb');
 
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
 
@@ -80,6 +81,7 @@ test.describe('Debugger Tests', () => {
 
     await openNotebook(page, tmpPath, notebookName);
 
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
 
@@ -135,6 +137,8 @@ test.describe('Debugger Tests', () => {
     const option = select.locator('option:has-text("ipykernel")');
     await select.selectOption(await option.textContent());
     await page.click('div.jp-Dialog-content >> button:has-text("Select")');
+
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     // activate the script tab
     await page.click('.jp-FileEditor');
