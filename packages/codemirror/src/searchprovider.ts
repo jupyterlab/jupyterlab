@@ -375,7 +375,7 @@ export abstract class EditorSearchProvider<
                 }
                 // Move the highlight forward from the previous match, not looping.
                 // Also move the codemirror handler forward.
-                this.cmHandler.highlightNext();
+                void this.cmHandler.highlightNext();
                 void this.highlightNext(false, { from: 'previous-match' });
               }
               resolve(true);
