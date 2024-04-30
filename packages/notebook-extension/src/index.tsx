@@ -1149,18 +1149,14 @@ export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
 
           const selectButton = Dialog.okButton({
             label: trans._n(
-              'Filter Cell',
-              'Filter Cells',
+              'Collapse Cell',
+              'Collapse Cells',
               current.content.widgets.length ?? 1
             ),
             actions: ['select']
           });
           const clearButton = Dialog.warnButton({
-            label: trans._n(
-              'Clear Filter',
-              'Clear Filters',
-              model.filters.size
-            ),
+            label: trans._n('Clear', 'Clear', model.filters.size),
             actions: ['clear']
           });
           const view = new CellFiltersView({ model, translator });

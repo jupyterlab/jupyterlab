@@ -66,7 +66,7 @@ test.describe('Notebook tags', () => {
       .click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cells' })
+      .getByRole('button', { name: 'Collapse Cells' })
       .click();
 
     const visibleCells = page.locator(
@@ -98,7 +98,7 @@ test.describe('Notebook tags', () => {
     await page.getByLabel('markdown', { exact: true }).click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cells' })
+      .getByRole('button', { name: 'Collapse Cells' })
       .click();
 
     const visibleCells = page.locator('.jp-MarkdownCell');
@@ -133,7 +133,7 @@ test.describe('Notebook tags', () => {
       .click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cells' })
+      .getByRole('button', { name: 'Collapse Cells' })
       .click();
 
     const visibleCells = page.locator(
@@ -171,7 +171,7 @@ test.describe('Notebook tags', () => {
       .click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cells' })
+      .getByRole('button', { name: 'Collapse Cells' })
       .click();
 
     await expect.soft(page.locator('.jp-InputArea')).toHaveCount(1);
@@ -179,7 +179,7 @@ test.describe('Notebook tags', () => {
     await page.getByTitle('Open the filtering tool').click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Clear Filters' })
+      .getByRole('button', { name: 'Clear' })
       .click();
 
     await expect(page.locator('.jp-InputArea')).toHaveCount(9);
