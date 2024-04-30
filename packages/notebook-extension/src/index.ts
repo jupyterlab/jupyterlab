@@ -5,7 +5,7 @@
  * @module notebook-extension
  */
 
-import type { FieldProps } from '@rjsf/utils';
+import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 
 import {
   ILabShell,
@@ -121,6 +121,7 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -135,6 +136,7 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
+import { DialogWidget } from './customKernelWidget';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1955,11 +1957,45 @@ function activateNotebookHandler(
     }
   };
 
+  const showDialog = async (parameters: RJSFSchema, cwd:string, kernelId: string, kernelName:string)=>{
+
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
+    ];
+
+   // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
+
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new DialogWidget(parameters),
+      buttons,
+    });
+
+    const result = await dialog.launch();
+
+   if (!result.button.accept) {
+      return;
+   }
+   console.log(`result.value`);
+   console.dir(result.value);
+  
+  }
+
+
+  
   // Add a command for creating a new notebook.
   commands.addCommand(CommandIDs.createNew, {
     label: args => {
       const kernelName = (args['kernelName'] as string) || '';
       if (args['isLauncher'] && args['kernelName'] && services.kernelspecs) {
+        //
         return (
           services.kernelspecs.specs?.kernelspecs[kernelName]?.display_name ??
           ''
@@ -1973,12 +2009,21 @@ function activateNotebookHandler(
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
-      const currentBrowser =
-        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+    const currentBrowser =
+      filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+        console.log(`args-->${args}`);
+        console.dir(args);
+        //if has enum then calll 
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
+      const metadata = args['metadata'] as ReadonlyJSONObject;
+      if (metadata?.parameters) {
+        let schema = metadata.parameters as RJSFSchema;
+        showDialog(schema, cwd, kernelId, kernelName);
+      } else {
       return createNew(cwd, kernelId, kernelName);
+      }
     }
   });
 
@@ -1996,26 +2041,29 @@ function activateNotebookHandler(
           return;
         }
         disposables = new DisposableSet();
-
-        for (const name in specs.kernelspecs) {
-          const rank = name === specs.default ? 0 : Infinity;
-          const spec = specs.kernelspecs[name]!;
-          const kernelIconUrl =
-            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
-          disposables.add(
-            launcher.add({
-              command: CommandIDs.createNew,
-              args: { isLauncher: true, kernelName: name },
-              category: trans.__('Notebook'),
-              rank,
-              kernelIconUrl,
-              metadata: {
-                kernel: JSONExt.deepCopy(
-                  spec.metadata || {}
-                ) as ReadonlyJSONValue
-              }
-            })
-          );
+      
+          for (const name in specs.kernelspecs) {
+            const rank = name === specs.default ? 0 : Infinity;
+            const spec = specs.kernelspecs[name]!;
+            const kernelIconUrl =
+              spec.resources['logo-svg'] || spec.resources['logo-64x64'];
+              //if has enum then add one icon
+             
+            disposables.add(
+              launcher.add({
+                command: CommandIDs.createNew,
+                args: { isLauncher: true, kernelName: name, metadata: spec.metadata as ReadonlyJSONObject },
+                category: trans.__('Notebook'),
+                rank,
+                kernelIconUrl,
+                metadata: {
+                  kernel: JSONExt.deepCopy(
+                    spec.metadata || {}
+                  ) as ReadonlyJSONValue
+                }
+              })
+            );
+          
         }
       };
       onSpecsChanged();
