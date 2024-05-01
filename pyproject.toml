@@ -76,7 +76,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
 docs = [
-    "sphinx>=1.8,<7.3.0",
+    "sphinx>=1.8,<7.4.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
     "pytest",
@@ -91,10 +91,10 @@ docs-screenshots = [
     "ipywidgets==8.1.2",
     "jupyterlab-geojson==3.4.0",
     "jupyterlab-language-pack-zh-CN==4.1.post2",
-    "matplotlib==3.8.3",
+    "matplotlib==3.8.4",
     "nbconvert>=7.0.0",
-    "pandas==2.2.1",
-    "scipy==1.12.0",
+    "pandas==2.2.2",
+    "scipy==1.13.0",
     "vega_datasets==0.9.0",
 ]
 test = [
@@ -118,13 +118,13 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.3.5",
+    "ruff==0.4.2",
 ]
 upgrade-extension = [
-    "pyyaml-include<2.0",
+    "pyyaml-include<3.0",
     "copier>=8,<10",
     "jinja2-time<0.3",
-    "pydantic<2.0",
+    "pydantic<3.0",
     "tomli-w<2.0"
 ]
 
