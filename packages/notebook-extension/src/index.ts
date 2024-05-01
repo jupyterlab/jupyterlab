@@ -3567,7 +3567,7 @@ function addCommands(
   const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
   const notify = () => {
     Object.values(CommandIDs)
-      .filter(id => !skip.includes(id))
+      .filter(id => !skip.includes(id) && app.commands.hasCommand(id))
       .forEach(id => app.commands.notifyCommandChanged(id));
   };
   tracker.currentChanged.connect(notify);
