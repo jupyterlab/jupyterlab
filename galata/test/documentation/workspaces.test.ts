@@ -7,7 +7,8 @@ import { positionMouseOver } from './utils';
 
 test.use({
   viewport: { height: 720, width: 1280 },
-  mockState: false
+  mockState: false,
+  tmpPath: 'workspaces-sidebar'
 });
 
 test.describe('Workspaces sidebar', () => {

@@ -1135,24 +1135,29 @@ class _AppHandler:
                 self.logger.info("Extension locked at a higher level, cannot toggle status")
                 return False
 
-        page_config = get_static_page_config(
+        complete_page_config = get_static_page_config(
+            app_settings_dir=app_settings_dir, logger=self.logger, level="all"
+        )
+
+        level_page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
 
-        disabled = page_config.get("disabledExtensions", {})
+        disabled = complete_page_config.get("disabledExtensions", {})
+        disabled_at_level = level_page_config.get("disabledExtensions", {})
         did_something = False
         is_disabled = disabled.get(extension, False)
 
         if value and not is_disabled:
-            disabled[extension] = True
+            disabled_at_level[extension] = True
             did_something = True
         elif not value and is_disabled:
-            disabled[extension] = False
+            disabled_at_level[extension] = False
             did_something = True
 
         if did_something:
-            page_config["disabledExtensions"] = disabled
-            write_page_config(page_config, level=level)
+            level_page_config["disabledExtensions"] = disabled_at_level
+            write_page_config(level_page_config, level=level)
         return did_something
 
     def _maybe_mirror_disabled_in_locked(self, level="sys_prefix"):

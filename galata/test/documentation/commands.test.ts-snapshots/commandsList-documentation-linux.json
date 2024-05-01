@@ -177,7 +177,7 @@
   },
   {
     "id": "apputils:display-shortcuts",
-    "label": "Show Keyboard Shortcuts",
+    "label": "Show Keyboard Shortcuts…",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
@@ -1586,7 +1586,7 @@
   },
   {
     "id": "notebook:close-and-shutdown",
-    "label": "Close and Shut Down Notebook",
+    "label": "Close and Shut Down Notebook…",
     "caption": "",
     "shortcuts": []
   },
@@ -2515,7 +2515,7 @@
   },
   {
     "id": "workspace-ui:save",
-    "label": "Save Current Workspace…",
+    "label": "Save Current Workspace",
     "caption": "",
     "shortcuts": []
   },

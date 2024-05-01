@@ -10,8 +10,8 @@ Opening Files
 -------------
 
 The file browser and File menu enable you to work with files and
-directories on your system. This includes opening, creating, deleting,
-renaming, downloading, copying, and sharing files and directories.
+folders on your system. This includes opening, creating, deleting,
+renaming, downloading, copying, and sharing files and folders.
 
 The file browser is in the left sidebar Files tab:
 
@@ -75,7 +75,7 @@ they will remain in sync:
 .. _file-navigation:
 
 The file system can be navigated by double-clicking on folders in the
-listing or clicking on the folders at the top of the directory listing:
+listing or clicking on the folders at the top of the folder listing:
 
 .. raw:: html
 
@@ -85,9 +85,9 @@ listing or clicking on the folders at the top of the directory listing:
 
 .. _file-share:
 
-Right-click on a file or directory and select "Copy Shareable Link" to
+Right-click on a file or folder and select "Copy Shareable Link" to
 copy a URL that can be used to open JupyterLab with that file or
-directory open.
+folder open.
 
 .. image:: ../images/files-shareable-link.png
    :align: center
@@ -96,7 +96,7 @@ directory open.
 
 .. _file-copy-path:
 
-Right-click on a file or directory and select "Copy Path" to copy the
+Right-click on a file or folder and select "Copy Path" to copy the
 filesystem relative path. This can be used for passing arguments to open
 files in functions called in various kernels.
 If you want to copy the filesystem absolute path, you must add the jupyterlab server config `LabServerApp.copy_absolute_path=True` and `ServerApp.root_dir = 'xxx'`.
@@ -127,8 +127,8 @@ You can also create new documents or activities using the File menu:
 
 .. _current-directory:
 
-The current working directory of a new activity or document will be the
-directory listed in the file browser (except for a terminal, which
+The current working folder of a new activity or document will be the
+folder listed in the file browser (except for a terminal, which
 always starts in the root directory of the file browser):
 
 .. raw:: html
@@ -154,7 +154,7 @@ Uploading and Downloading
 
 .. _file-upload:
 
-Files can be uploaded to the current directory of the file browser by
+Files can be uploaded to the current folder of the file browser by
 dragging and dropping files onto the file browser, or by clicking the
 "Upload Files" button at the top of the file browser:
 
