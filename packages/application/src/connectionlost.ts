@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IConnectionLost } from './tokens';
+
+let displayConnectionLost = true;
+const connectionLostCachePromise: { [key: string]: Promise<any> } = {};
 
 /**
  * A default connection lost handler, which brings up an error dialog.
@@ -22,6 +25,45 @@ export const ConnectionLost: IConnectionLost = async function (
       'JupyterLab will continue trying to reconnect.\n' +
       'Check your network connection or Jupyter server configuration.\n'
   );
+  const buttons = [Dialog.okButton({ label: trans.__('Dismiss') })];
 
-  return showErrorMessage(title, { message: networkMsg });
+  if (!displayConnectionLost) {
+    return;
+  }
+
+  const key = title + '----' + networkMsg;
+  const promise = connectionLostCachePromise[key];
+
+  if (promise) {
+    return promise;
+  } else {
+    try {
+      const errorDialogPromise: any = showDialog({
+        title: title,
+        body: networkMsg,
+        checkbox: {
+          label: trans.__('Do not show this message again.'),
+          caption: trans.__(
+            'If checked, you will not see a dialog informing you about an issue with server connection in the future.'
+          )
+        },
+        buttons: buttons
+      }).then(result => {
+        if (result.button.accept && !result.isChecked) {
+          delete connectionLostCachePromise[key];
+        }
+
+        if (result.isChecked) {
+          displayConnectionLost = false;
+        }
+        return;
+      });
+
+      connectionLostCachePromise[key] = errorDialogPromise;
+      await errorDialogPromise;
+      return;
+    } catch (error) {
+      console.error('An error occurred while showing the dialog:', error);
+    }
+  }
 };
