@@ -9,6 +9,7 @@ import {
   ServerConnection,
   Session
 } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -287,11 +288,6 @@ export namespace ISessionContext {
      * found (default `false`).
      */
     readonly autoStartDefault?: boolean;
-
-    /**
-     * Skip showing the kernel restart dialog if checked (default `false`).
-     */
-    readonly skipKernelRestartDialog?: boolean;
   }
 
   export type KernelDisplayStatus =
@@ -331,6 +327,8 @@ export namespace ISessionContext {
      * Application translator object
      */
     translator?: ITranslator;
+
+    settingRegistry?: ISettingRegistry;
   }
 }
 
@@ -1324,6 +1322,7 @@ export namespace SessionContext {
 export class SessionContextDialogs implements ISessionContext.IDialogs {
   constructor(options: ISessionContext.IDialogsOptions = {}) {
     this._translator = options.translator ?? nullTranslator;
+    this._settingRegistry = options.settingRegistry;
   }
 
   /**
@@ -1421,9 +1420,12 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     }
 
     // Skip the dialog and restart the kernel
-    const skipKernelRestartDialog =
-      sessionContext.kernelPreference?.skipKernelRestartDialog ?? false;
-    if (skipKernelRestartDialog) {
+    const kernelPluginId = '@jupyterlab/notebook-extension:kernel-status';
+    const skipKernelRestartDialogSetting = (await this._settingRegistry.get(
+      kernelPluginId,
+      'skipKernelRestartDialog'
+    )).composite as boolean;
+    if (skipKernelRestartDialogSetting) {
       await sessionContext.restartKernel();
       return true;
     }
@@ -1454,11 +1456,18 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       return false;
     }
     if (result.button.accept) {
-      if (result.isChecked) {
-        sessionContext.kernelPreference = {
-          ...sessionContext.kernelPreference,
-          skipKernelRestartDialog: true
-        };
+      if (result.isChecked === skipKernelRestartDialogSetting) {
+        this._settingRegistry
+          .set(
+            kernelPluginId,
+            'skipKernelRestartDialog',
+            !result.isChecked
+          )
+          .catch(reason => {
+            console.error(
+              `Fail to set 'skipKernelRestartDialog:\n${reason}`
+            );
+          });
       }
       await sessionContext.restartKernel();
       return true;
@@ -1467,6 +1476,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
   }
 
   private _translator: ITranslator;
+  private _settingRegistry: ISettingRegistry;
 }
 
 /**
