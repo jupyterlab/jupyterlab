@@ -467,7 +467,7 @@ def clean(app_options=None):
     logger = app_options.logger
     app_dir = app_options.app_dir
 
-    logger.info("Cleaning %s...", app_dir)
+    logger.info(f"Cleaning {app_dir}...")
     if app_dir == pjoin(HERE, "dev"):
         msg = "Cannot clean the dev app"
         raise ValueError(msg)
@@ -476,7 +476,7 @@ def clean(app_options=None):
         raise ValueError(msg)
 
     if getattr(app_options, "all", False):
-        logger.info("Removing everything in %s...", app_dir)
+        logger.info(f"Removing everything in {app_dir}...")
         _rmtree_star(app_dir, logger)
     else:
         possible_targets = ["extensions", "settings", "staging", "static"]
@@ -485,10 +485,10 @@ def clean(app_options=None):
         for name in targets:
             target = pjoin(app_dir, name)
             if osp.exists(target):
-                logger.info("Removing %s...", name)
+                logger.info(f"Removing {name}...")
                 _rmtree(target, logger)
             else:
-                logger.info("%s not present, skipping...", name)
+                logger.info(f"{name} not present, skipping...")
 
     logger.info("Success!")
     if getattr(app_options, "all", False) or getattr(app_options, "extensions", False):
@@ -870,8 +870,8 @@ class _AppHandler:
         if not static_version.endswith("-spliced"):
             core_version = old_jlab["version"]
             if Version(static_version) != Version(core_version):
-                msg = "Version mismatch: %s (built), %s (current)"
-                return [msg % (static_version, core_version)]
+                msg = f"Version mismatch: {static_version} (built), {core_version} (current)"
+                return [msg]
 
         shadowed_exts = self.info["shadowed_exts"]
 
@@ -1099,7 +1099,8 @@ class _AppHandler:
                 os.remove(path)
 
         if not found:
-            raise ValueError(f"No linked package for {path}")
+            msg = f"No linked package for {path}"
+            raise ValueError(msg)
 
         self._write_build_config(config)
         return True
@@ -1330,7 +1331,7 @@ class _AppHandler:
         app_dir = self.app_dir
         staging = pjoin(app_dir, "staging")
         if clean and osp.exists(staging):
-            self.logger.info("Cleaning %s", staging)
+            self.logger.info(f"Cleaning {staging}")
             _rmtree(staging, self.logger)
 
         self._ensure_app_dirs()
@@ -1837,8 +1838,8 @@ class _AppHandler:
         # Verify that the package is an extension.
         messages = _validate_extension(data)
         if messages:
-            msg = '"%s" is not a valid extension:\n%s'
-            msg = msg % (extension, "\n".join(messages))
+            all_messages = "\n".join(messages)
+            msg = f'"{extension}" is not a valid extension:\n{all_messages}'
             if allow_fallback:
                 try:
                     version = self._latest_compatible_package_version(name)
@@ -1860,8 +1861,8 @@ class _AppHandler:
                     raise ValueError(msg) from None
 
                 if version and name:
-                    self.logger.debug("Incompatible extension:\n%s", name)
-                    self.logger.debug("Found compatible version: %s", version)
+                    self.logger.debug(f"Incompatible extension:\n{name}")
+                    self.logger.debug(f"Found compatible version: {version}")
                     with TemporaryDirectory() as tempdir2:
                         return self._install_extension(f"{name}@{version}", tempdir2)
 
@@ -1991,8 +1992,8 @@ class _AppHandler:
         with TemporaryDirectory() as tempdir:
             ret = self._run([which("npm"), "pack", *keys], cwd=tempdir)
             if ret != 0:
-                msg = '"%s" is not a valid npm package'
-                raise ValueError(msg % keys)
+                msg = f'"{keys}" is not a valid npm package'
+                raise ValueError(msg)
 
             for key in keys:
                 fname = (
@@ -2437,8 +2438,7 @@ def _format_compatibility_errors(name, version, errors):
         l0 = max(l0, len(pkg) + 1)
         l1 = max(l1, len(jlab) + 1)
 
-    msg = '\n"%s@%s" is not compatible with the current JupyterLab'
-    msg = msg % (name, version)
+    msg = f'\n"{name}@{version}" is not compatible with the current JupyterLab'
     msg += "\nConflicting Dependencies:\n"
     msg += "JupyterLab".ljust(l0)
     msg += "Extension".ljust(l1)
@@ -2490,7 +2490,7 @@ def _log_single_compat_errors(logger, name, version, errors):
 
     age = _compat_error_age(errors)
     if age > 0:
-        logger.warning('The extension "%s" is outdated.\n', name)
+        logger.warning(f'The extension "{name}" is outdated.\n')
     else:
         msg = _format_compatibility_errors(name, version, errors)
         logger.warning(f"{msg}\n")

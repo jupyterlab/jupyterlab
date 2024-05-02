@@ -187,7 +187,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     def deprecation_warning(self, msg):
         return self.log.warning(
-            "\033[33m(Deprecated) %s\n\n%s \033[0m", msg, LABEXTENSION_COMMAND_WARNING
+            f"\033[33m(Deprecated) {msg}\n\n{LABEXTENSION_COMMAND_WARNING} \033[0m"
         )
 
     def _log_format_default(self):

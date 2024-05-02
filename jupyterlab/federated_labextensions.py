@@ -129,7 +129,8 @@ def develop_labextension(  # noqa
                 raise
 
         elif not os.path.islink(full_dest):
-            raise ValueError(f"{full_dest} exists and is not a symlink")
+            msg = f"{full_dest} exists and is not a symlink"
+            raise ValueError(msg)
 
     elif os.path.isdir(path):
         path = pjoin(os.path.abspath(path), "")  # end in path separator
@@ -268,9 +269,8 @@ def _ensure_builder(ext_path, core_path):
     dep_version2 = ext_data.get("devDependencies", {}).get("@jupyterlab/builder")
     dep_version2 = dep_version2 or ext_data.get("dependencies", {}).get("@jupyterlab/builder")
     if dep_version2 is None:
-        raise ValueError(
-            f"Extensions require a devDependency on @jupyterlab/builder@{dep_version1}"
-        )
+        msg = f"Extensions require a devDependency on @jupyterlab/builder@{dep_version1}"
+        raise ValueError(msg)
 
     # if we have installed from disk (version is a path), assume we know what
     # we are doing and do not check versions.

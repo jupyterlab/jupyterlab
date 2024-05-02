@@ -64,7 +64,7 @@ url = "https://api.github.com/graphql"
 json = {
     "query": """
 query test($cursor: String) {
-  search(first: 50, after: $cursor, type: ISSUE, query: "repo:jupyterlab/jupyterlab milestone:{milestone} is:pr is:merged ") {
+  search(first: 50, after: $cursor, type: ISSUE, query: "repo:jupyterlab/jupyterlab milestone:%s is:pr is:merged ") {
     issueCount
     pageInfo {
       endCursor
@@ -89,12 +89,13 @@ query test($cursor: String) {
     }
   }
 }
-""".format(milestone=MILESTONE),
+"""
+    % MILESTONE,  # noqa UP031
     "variables": {"cursor": None},
 }
 
 
-headers = {f"Authorization": "token {api_token}"}
+headers = {"Authorization": f"token {api_token}"}
 # construct a commit to PR dictionary
 prs = {}
 large_prs = []
@@ -169,9 +170,9 @@ for prnumber in large_prs:
 
     prs[prnumber] = {"mergeCommit": pr["mergeCommit"]["oid"], "commits": pr_commits}
     if total_commits > len(pr_commits):
+        oid = pr["mergeCommit"]["oid"]
         print(
-            "WARNING: PR %d (merge %s) has %d commits, but GitHub is only giving us %d of them"
-            % (prnumber, pr["mergeCommit"]["oid"], total_commits, len(pr_commits))
+            f"WARNING: PR {prnumber} (merge {oid}) has {total_commits} commits, but GitHub is only giving us {len(pr_commits)} of them"
         )
 
 
@@ -196,7 +197,7 @@ for c in commits:
 
 prs_not_represented = set(prs.keys()) - good
 
-print("Milestone: %s, %d merged PRs, %d commits in history" % (MILESTONE, total_prs, len(commits)))
+print(f"Milestone: {MILESTONE}, {total_prs} merged PRs, {len(commits)} commits in history")
 
 print()
 print("-" * 40)
@@ -211,7 +212,7 @@ These PRs probably belong in a different milestone.
     )
     print(
         "\n".join(
-            "https://github.com/jupyterlab/jupyterlab/pull/%d" % i for i in prs_not_represented
+            f"https://github.com/jupyterlab/jupyterlab/pull/{i}" for i in prs_not_represented
         )
     )
 else:
