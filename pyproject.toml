@@ -303,7 +303,7 @@ lint.ignore = [
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/tests/echo_kernel.py" = ["RUF012"]
 # T201 `print` found
-"scripts/milestone_check.py" = ["T201"]
+"scripts/milestone_check.py" = ["T201", "UP031"]
 # N806 Variable `tM` in function should be lowercase
 # N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
 # PLC1901 test can be simplified as an empty string is falsey

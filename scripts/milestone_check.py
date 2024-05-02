@@ -90,7 +90,7 @@ query test($cursor: String) {
   }
 }
 """
-    % MILESTONE,  # noqa UP031
+    % MILESTONE,
     "variables": {"cursor": None},
 }
 
