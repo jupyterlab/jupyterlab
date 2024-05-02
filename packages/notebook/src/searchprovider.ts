@@ -466,7 +466,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop);
+        await this.highlightNext(loop, { from: 'previous-match' });
       }
     }
 
@@ -658,44 +658,59 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
-    const startIndex = this._currentProviderIndex;
-    do {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
+    // If we're looking for the next match after the previous match,
+    // and we've reached the end of the current cell, start at the next one, if possible
+    const from = options?.from ?? '';
+    const atEndOfCurrentCell =
+      from === 'previous-match' &&
+      this._searchProviders[this._currentProviderIndex].currentMatchIndex ===
+        null;
 
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+    if (
+      from !== 'previous-match' ||
+      !atEndOfCurrentCell ||
+      this._currentProviderIndex + 1 < this._searchProviders.length
+    ) {
+      const startIndex = this._currentProviderIndex;
+      this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
+      do {
+        const searchEngine = this._searchProviders[this._currentProviderIndex];
 
-      if (match) {
-        await activateNewMatch(match);
-        return match;
-      } else {
-        this._currentProviderIndex =
-          this._currentProviderIndex + (reverse ? -1 : 1);
+        const match = reverse
+          ? await searchEngine.highlightPrevious(false, options)
+          : await searchEngine.highlightNext(false, options);
 
-        if (loop) {
+        if (match) {
+          await activateNewMatch(match);
+          return match;
+        } else {
           this._currentProviderIndex =
-            (this._currentProviderIndex + this._searchProviders.length) %
-            this._searchProviders.length;
-        }
-      }
-    } while (
-      loop
-        ? // We looped on all cells, no hit found
-          this._currentProviderIndex !== startIndex
-        : 0 <= this._currentProviderIndex &&
-          this._currentProviderIndex < this._searchProviders.length
-    );
+            this._currentProviderIndex + (reverse ? -1 : 1);
 
-    if (loop) {
-      // try the first provider again
-      const searchEngine = this._searchProviders[startIndex];
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
-      if (match) {
-        await activateNewMatch(match);
-        return match;
+          if (loop) {
+            this._currentProviderIndex =
+              (this._currentProviderIndex + this._searchProviders.length) %
+              this._searchProviders.length;
+          }
+        }
+      } while (
+        loop
+          ? // We looped on all cells, no hit found
+            this._currentProviderIndex !== startIndex
+          : 0 <= this._currentProviderIndex &&
+            this._currentProviderIndex < this._searchProviders.length
+      );
+
+      if (loop) {
+        // try the first provider again
+        const searchEngine = this._searchProviders[startIndex];
+        const match = reverse
+          ? await searchEngine.highlightPrevious(false, options)
+          : await searchEngine.highlightNext(false, options);
+        if (match) {
+          await activateNewMatch(match);
+          return match;
+        }
       }
     }
 
