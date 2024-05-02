@@ -589,7 +589,7 @@ class LabExtensionApp(JupyterApp):
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.
         subcmds = ", ".join(sorted(self.subcommands))
-        self.exit("Please supply at least one subcommand: %s" % subcmds)
+        self.exit(f"Please supply at least one subcommand: {subcmds}")
 
 
 main = LabExtensionApp.launch_instance

@@ -102,7 +102,7 @@ def develop_labextension(  # noqa
     full_dest = normpath(pjoin(labext, destination))
     if overwrite and os.path.lexists(full_dest):
         if logger:
-            logger.info("Removing: %s" % full_dest)
+            logger.info(f"Removing: {full_dest}")
         if os.path.isdir(full_dest) and not os.path.islink(full_dest):
             shutil.rmtree(full_dest)
         else:
@@ -129,7 +129,7 @@ def develop_labextension(  # noqa
                 raise
 
         elif not os.path.islink(full_dest):
-            raise ValueError("%s exists and is not a symlink" % full_dest)
+            raise ValueError(f"{full_dest} exists and is not a symlink")
 
     elif os.path.isdir(path):
         path = pjoin(os.path.abspath(path), "")  # end in path separator
@@ -137,7 +137,7 @@ def develop_labextension(  # noqa
             dest_dir = pjoin(full_dest, parent[len(path) :])
             if not os.path.exists(dest_dir):
                 if logger:
-                    logger.info("Making directory: %s" % dest_dir)
+                    logger.info(f"Making directory: {dest_dir}")
                 os.makedirs(dest_dir)
             for file_name in files:
                 src = pjoin(parent, file_name)
@@ -202,7 +202,7 @@ def build_labextension(
     ext_path = str(Path(path).resolve())
 
     if logger:
-        logger.info("Building extension in %s" % path)
+        logger.info(f"Building extension in {path}")
 
     builder = _ensure_builder(ext_path, core_path)
 
@@ -225,7 +225,7 @@ def watch_labextension(
     ext_path = str(Path(path).resolve())
 
     if logger:
-        logger.info("Building extension in %s" % path)
+        logger.info(f"Building extension in {path}")
 
     # Check to see if we need to create a symlink
     federated_extensions = get_federated_extensions(labextensions_path)
@@ -269,7 +269,7 @@ def _ensure_builder(ext_path, core_path):
     dep_version2 = dep_version2 or ext_data.get("dependencies", {}).get("@jupyterlab/builder")
     if dep_version2 is None:
         raise ValueError(
-            "Extensions require a devDependency on @jupyterlab/builder@%s" % dep_version1
+            f"Extensions require a devDependency on @jupyterlab/builder@{dep_version1}"
         )
 
     # if we have installed from disk (version is a path), assume we know what
@@ -331,10 +331,10 @@ def _should_copy(src, dest, logger=None):
         # we add a fudge factor to work around a bug in python 2.x
         # that was fixed in python 3.x: https://bugs.python.org/issue12904
         if logger:
-            logger.warning("Out of date: %s" % dest)
+            logger.warning(f"Out of date: {dest}")
         return True
     if logger:
-        logger.info("Up to date: %s" % dest)
+        logger.info(f"Up to date: {dest}")
     return False
 
 

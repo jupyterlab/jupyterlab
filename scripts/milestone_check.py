@@ -64,7 +64,7 @@ url = "https://api.github.com/graphql"
 json = {
     "query": """
 query test($cursor: String) {
-  search(first: 50, after: $cursor, type: ISSUE, query: "repo:jupyterlab/jupyterlab milestone:%s is:pr is:merged ") {
+  search(first: 50, after: $cursor, type: ISSUE, query: "repo:jupyterlab/jupyterlab milestone:{milestone} is:pr is:merged ") {
     issueCount
     pageInfo {
       endCursor
@@ -89,13 +89,12 @@ query test($cursor: String) {
     }
   }
 }
-"""
-    % MILESTONE,
+""".format(milestone=MILESTONE),
     "variables": {"cursor": None},
 }
 
 
-headers = {"Authorization": "token %s" % api_token}
+headers = {f"Authorization": "token {api_token}"}
 # construct a commit to PR dictionary
 prs = {}
 large_prs = []
