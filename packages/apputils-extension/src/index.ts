@@ -575,11 +575,16 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   description: 'Provides the session context dialogs.',
   provides: ISessionContextDialogs,
-  optional: [ITranslator],
+  optional: [ITranslator, ISettingRegistry],
   autoStart: true,
-  activate: async (app: JupyterFrontEnd, translator: ITranslator | null) => {
+  activate: async (
+    app: JupyterFrontEnd,
+    translator: ITranslator | null,
+    settingRegistry: ISettingRegistry
+  ) => {
     return new SessionContextDialogs({
-      translator: translator ?? nullTranslator
+      translator: translator ?? nullTranslator,
+      settingRegistry: settingRegistry
     });
   }
 };
