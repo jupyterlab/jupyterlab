@@ -669,10 +669,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (
       from !== 'previous-match' ||
       !atEndOfCurrentCell ||
-      this._currentProviderIndex + 1 < this._searchProviders.length
+      (!loop && this._currentProviderIndex + 1 < this._searchProviders.length)
     ) {
       const startIndex = this._currentProviderIndex;
-      this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
+      // If we're at the end of the last cell in the provider list and we need to loop, do so
+      if (
+        loop &&
+        atEndOfCurrentCell &&
+        this._currentProviderIndex + 1 >= this._searchProviders.length
+      ) {
+        this._currentProviderIndex = 0;
+      } else {
+        this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
+      }
       do {
         const searchEngine = this._searchProviders[this._currentProviderIndex];
 
