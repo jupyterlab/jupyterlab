@@ -580,11 +580,11 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   activate: async (
     app: JupyterFrontEnd,
     translator: ITranslator | null,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry | null
   ) => {
     return new SessionContextDialogs({
       translator: translator ?? nullTranslator,
-      settingRegistry: settingRegistry
+      settingRegistry: settingRegistry ?? null
     });
   }
 };

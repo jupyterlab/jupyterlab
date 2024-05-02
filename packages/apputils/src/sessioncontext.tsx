@@ -328,7 +328,7 @@ export namespace ISessionContext {
      */
     translator?: ITranslator;
 
-    settingRegistry?: ISettingRegistry;
+    settingRegistry?: ISettingRegistry | null;
   }
 }
 
@@ -1322,7 +1322,7 @@ export namespace SessionContext {
 export class SessionContextDialogs implements ISessionContext.IDialogs {
   constructor(options: ISessionContext.IDialogsOptions = {}) {
     this._translator = options.translator ?? nullTranslator;
-    this._settingRegistry = options.settingRegistry;
+    this._settingRegistry = options.settingRegistry || null;
   }
 
   /**
@@ -1422,8 +1422,11 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     // Skip the dialog and restart the kernel
     const kernelPluginId = '@jupyterlab/apputils-extension:sessionDialogs';
     const skipKernelRestartDialogSetting = (
-      await this._settingRegistry.get(kernelPluginId, 'skipKernelRestartDialog')
-    ).composite as boolean;
+      await this._settingRegistry?.get(
+        kernelPluginId,
+        'skipKernelRestartDialog'
+      )
+    )?.composite as boolean;
     if (skipKernelRestartDialogSetting) {
       await sessionContext.restartKernel();
       return true;
@@ -1457,7 +1460,8 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (result.button.accept) {
       if (
         typeof result.isChecked === 'boolean' &&
-        result.isChecked === skipKernelRestartDialogSetting
+        result.isChecked == true &&
+        this._settingRegistry
       ) {
         this._settingRegistry
           .set(kernelPluginId, 'skipKernelRestartDialog', !result.isChecked)
@@ -1472,7 +1476,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
   }
 
   private _translator: ITranslator;
-  private _settingRegistry: ISettingRegistry;
+  private _settingRegistry: ISettingRegistry | null;
 }
 
 /**
