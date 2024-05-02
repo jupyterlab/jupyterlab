@@ -364,6 +364,7 @@ export abstract class EditorSearchProvider<
               const allMatches = this.cmHandler.matches;
               const positionAfterReplacement =
                 match!.position + insertText.length;
+              let nextMatchFound = false;
               for (
                 let matchIdx = this.currentIndex || 0;
                 matchIdx < allMatches.length;
@@ -371,12 +372,15 @@ export abstract class EditorSearchProvider<
               ) {
                 if (allMatches[matchIdx].position >= positionAfterReplacement) {
                   this.currentIndex = matchIdx;
+                  nextMatchFound = true;
                   break;
                 }
+
                 // Move the highlight forward from the previous match, not looping.
-                // Also move the codemirror handler forward.
-                void this.cmHandler.highlightNext();
                 void this.highlightNext(false, { from: 'previous-match' });
+              }
+              if (!nextMatchFound) {
+                this.currentIndex = null; // No more matches in this string
               }
               resolve(true);
             })
