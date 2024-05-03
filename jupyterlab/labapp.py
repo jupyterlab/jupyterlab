@@ -257,9 +257,7 @@ class LabCleanApp(JupyterApp):
 
     app_dir = Unicode("", config=True, help="The app directory to clean")
 
-    extensions = Bool(
-        False, config=True, help=f"Also delete <app-dir>/extensions.\n{ext_warn_msg}"
-    )
+    extensions = Bool(False, config=True, help=f"Also delete <app-dir>/extensions.\n{ext_warn_msg}")
 
     settings = Bool(False, config=True, help="Also delete <app-dir>/settings")
 

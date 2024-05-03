@@ -211,9 +211,7 @@ These PRs probably belong in a different milestone.
 """
     )
     print(
-        "\n".join(
-            f"https://github.com/jupyterlab/jupyterlab/pull/{i}" for i in prs_not_represented
-        )
+        "\n".join(f"https://github.com/jupyterlab/jupyterlab/pull/{i}" for i in prs_not_represented)
     )
 else:
     print(
