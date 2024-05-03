@@ -669,7 +669,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     const startIndex = this._currentProviderIndex;
     // If we need to move to the next cell or loop, reset the position of the current search provider.
     if (atEndOfCurrentCell) {
-      this._searchProviders[this._currentProviderIndex].clearHighlight();
+      void this._searchProviders[this._currentProviderIndex].clearHighlight();
     }
 
     // If we're at the end of the last cell in the provider list and we need to loop, do so
