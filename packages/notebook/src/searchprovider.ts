@@ -666,60 +666,54 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._searchProviders[this._currentProviderIndex].currentMatchIndex ===
         null;
 
+    const startIndex = this._currentProviderIndex;
+    // If we're at the end of the last cell in the provider list and we need to loop, do so
     if (
-      from !== 'previous-match' ||
-      !atEndOfCurrentCell ||
-      (!loop && this._currentProviderIndex + 1 < this._searchProviders.length)
+      loop &&
+      atEndOfCurrentCell &&
+      this._currentProviderIndex + 1 >= this._searchProviders.length
     ) {
-      const startIndex = this._currentProviderIndex;
-      // If we're at the end of the last cell in the provider list and we need to loop, do so
-      if (
-        loop &&
-        atEndOfCurrentCell &&
-        this._currentProviderIndex + 1 >= this._searchProviders.length
-      ) {
-        this._currentProviderIndex = 0;
+      this._currentProviderIndex = 0;
+    } else {
+      this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
+    }
+    do {
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
+
+      const match = reverse
+        ? await searchEngine.highlightPrevious(false, options)
+        : await searchEngine.highlightNext(false, options);
+
+      if (match) {
+        await activateNewMatch(match);
+        return match;
       } else {
-        this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
-      }
-      do {
-        const searchEngine = this._searchProviders[this._currentProviderIndex];
+        this._currentProviderIndex =
+          this._currentProviderIndex + (reverse ? -1 : 1);
 
-        const match = reverse
-          ? await searchEngine.highlightPrevious(false, options)
-          : await searchEngine.highlightNext(false, options);
-
-        if (match) {
-          await activateNewMatch(match);
-          return match;
-        } else {
+        if (loop) {
           this._currentProviderIndex =
-            this._currentProviderIndex + (reverse ? -1 : 1);
-
-          if (loop) {
-            this._currentProviderIndex =
-              (this._currentProviderIndex + this._searchProviders.length) %
-              this._searchProviders.length;
-          }
+            (this._currentProviderIndex + this._searchProviders.length) %
+            this._searchProviders.length;
         }
-      } while (
-        loop
-          ? // We looped on all cells, no hit found
-            this._currentProviderIndex !== startIndex
-          : 0 <= this._currentProviderIndex &&
-            this._currentProviderIndex < this._searchProviders.length
-      );
+      }
+    } while (
+      loop
+        ? // We looped on all cells, no hit found
+          this._currentProviderIndex !== startIndex
+        : 0 <= this._currentProviderIndex &&
+          this._currentProviderIndex < this._searchProviders.length
+    );
 
-      if (loop) {
-        // try the first provider again
-        const searchEngine = this._searchProviders[startIndex];
-        const match = reverse
-          ? await searchEngine.highlightPrevious(false, options)
-          : await searchEngine.highlightNext(false, options);
-        if (match) {
-          await activateNewMatch(match);
-          return match;
-        }
+    if (loop) {
+      // try the first provider again
+      const searchEngine = this._searchProviders[startIndex];
+      const match = reverse
+        ? await searchEngine.highlightPrevious(false, options)
+        : await searchEngine.highlightNext(false, options);
+      if (match) {
+        await activateNewMatch(match);
+        return match;
       }
     }
 
