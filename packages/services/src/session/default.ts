@@ -391,6 +391,8 @@ export class SessionConnection implements Session.ISessionConnection {
   private async _patch(
     body: DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
+    console.log('_patch-body');
+    console.dir(body);
     const model = await updateSession(
       { ...body, id: this._id },
       this.serverSettings

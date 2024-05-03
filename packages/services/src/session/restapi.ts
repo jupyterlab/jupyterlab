@@ -104,11 +104,17 @@ export async function startSession(
   options: Session.ISessionOptions,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
+
   const url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
   const init = {
     method: 'POST',
     body: JSON.stringify(options)
   };
+
+  console.log(`url-->${url}`);
+  console.log(`options`);
+  console.dir(options);
+
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
     const err = await ServerConnection.ResponseError.create(response);
@@ -128,6 +134,9 @@ export async function updateSession(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
   const url = getSessionUrl(settings.baseUrl, model.id);
+
+  console.log('updaye session - model');
+  console.dir(model);
   const init = {
     method: 'PATCH',
     body: JSON.stringify(model)

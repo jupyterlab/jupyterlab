@@ -1,9 +1,12 @@
 import { ReactWidget } from '@jupyterlab/ui-components';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import Form, { IChangeEvent } from '@rjsf/core';
 import { RJSFSchema, UiSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
+import { PartialJSONObject } from '@lumino/coreutils';
+
+type FormDataProps = IChangeEvent<any, RJSFSchema, any> | undefined | PartialJSONObject | {};
 
 /**
  * Form to select custom properties of kernel
@@ -12,18 +15,13 @@ import validator from '@rjsf/validator-ajv8';
  */
 
 const FormComponent = (props: {
-  schema: RJSFSchema;
-  getFormData: (
-    formData: IChangeEvent<any, RJSFSchema, any> | undefined
+  schema: RJSFSchema,
+  kernelConfigurarion: FormDataProps,
+  updateFormData: (
+    formData: FormDataProps
   ) => void;
 }): JSX.Element => {
-  const [data, setFormData] = useState<
-    IChangeEvent<any, RJSFSchema, any> | undefined
-  >(undefined);
 
-  useEffect(() => {
-      props.getFormData(data);
-  }, [data]);
 
   const uiSchema: UiSchema = {
     'ui:options': {
@@ -37,7 +35,8 @@ const FormComponent = (props: {
   };
 
   const onChange = ({ formData }: IChangeEvent<any, RJSFSchema, any>) => {
-    setFormData(formData);
+    console.log('+++');
+    props.updateFormData(formData);
   };
 
   return (
@@ -55,28 +54,32 @@ const FormComponent = (props: {
  */
 export class DialogWidget extends ReactWidget {
   schema: RJSFSchema;
-  formData: IChangeEvent<any, RJSFSchema, any> | undefined;
+  formData: FormDataProps | {};
+  updateFormData: (formData: FormDataProps) => void;
+  kernelConfigurarion: FormDataProps;
   /**
    * Constructs a new FormWidget.
    */
-  constructor(schema: RJSFSchema) {
+  constructor(schema: RJSFSchema, kernelConfigurarion: FormDataProps, updateFormData: (
+    formData: FormDataProps
+  ) => void) {
     super();
     this.schema = schema;
     this.formData = undefined;
+    this.kernelConfigurarion = kernelConfigurarion;
+    this.updateFormData = updateFormData;
   }
 
-  getValue(): IChangeEvent<any, RJSFSchema, any> | undefined {
-    return this.formData;
+  getValue(): FormDataProps | {} {
+    console.log(`kernelConfigurarion`);
+    console.dir(this.kernelConfigurarion);
+    return this.kernelConfigurarion;
   }
 
-  getFormData(formData: IChangeEvent<any, RJSFSchema, any> | undefined): void {
-    console.log(`formData-->${formData}`);
-    this.formData = formData;
-  }
 
   render(): JSX.Element {
     return (
-      <FormComponent schema={this.schema} getFormData={this.getFormData} />
+      <FormComponent schema={this.schema} kernelConfigurarion={this.kernelConfigurarion} updateFormData={this.updateFormData} />
     );
   }
 }

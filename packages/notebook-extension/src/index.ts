@@ -121,6 +121,7 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
+  PartialJSONObject,
   ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
@@ -1845,6 +1846,53 @@ function activateNotebookHandler(
       });
     }
   }
+  
+  const showKernelSpecDialog = async (parameters: RJSFSchema, cwd:string, kernelId: string, kernelName:string)=>{
+    let kernelConfigurarion: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
+    ];
+
+   // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
+
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new DialogWidget(parameters, kernelConfigurarion, (formData)=>{
+        kernelConfigurarion = formData as PartialJSONObject;
+      }),
+      buttons,
+    });
+
+    const result = await dialog.launch();
+
+   if (!result.button.accept) {
+      return;
+   }
+   console.log(`result.value`);
+   console.dir(result.value);
+   if (result.value) {
+    console.log(`value--kernelConfigurarion`);
+    console.dir(kernelConfigurarion);
+    let customKernelSpecs = undefined;
+   // let customKernelName = kernelConfigurarion ? kernelConfigurarion?.cpp_version : kernelName;
+    if(kernelConfigurarion) {
+      customKernelSpecs = kernelConfigurarion;
+      if (customKernelSpecs.kernelName) {
+        kernelName = customKernelSpecs.kernelName as string;
+      } 
+    }
+   
+   createNew(cwd, kernelId, kernelName, customKernelSpecs);
+  }
+}
+
 
   /**
    * Update the setting values.
@@ -1940,7 +1988,8 @@ function activateNotebookHandler(
   const createNew = async (
     cwd: string,
     kernelId: string,
-    kernelName: string
+    kernelName: string,
+    customKernelSpecs?: undefined | PartialJSONObject | {}
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -1950,43 +1999,14 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName }
+        kernel: { id: kernelId, name: kernelName, custom_kernel_specs: customKernelSpecs }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
     }
   };
 
-  const showDialog = async (parameters: RJSFSchema, cwd:string, kernelId: string, kernelName:string)=>{
 
-    let label = trans.__('Cancel');
-    const buttons = [
-      Dialog.cancelButton({
-        label
-      }),
-      Dialog.okButton({
-        label: trans.__('Select'),
-        ariaLabel: trans.__('Select Kernel')
-      })
-    ];
-
-   // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
-
-    const dialog = new Dialog({
-      title: trans.__('Select Kernel'),
-      body: new DialogWidget(parameters),
-      buttons,
-    });
-
-    const result = await dialog.launch();
-
-   if (!result.button.accept) {
-      return;
-   }
-   console.log(`result.value`);
-   console.dir(result.value);
-  
-  }
 
 
   
@@ -2019,8 +2039,8 @@ function activateNotebookHandler(
       const kernelName = (args['kernelName'] as string) || '';
       const metadata = args['metadata'] as ReadonlyJSONObject;
       if (metadata?.parameters) {
-        let schema = metadata.parameters as RJSFSchema;
-        showDialog(schema, cwd, kernelId, kernelName);
+       let schema = metadata.parameters as RJSFSchema;
+       showKernelSpecDialog(schema, cwd, kernelId, kernelName);
       } else {
       return createNew(cwd, kernelId, kernelName);
       }

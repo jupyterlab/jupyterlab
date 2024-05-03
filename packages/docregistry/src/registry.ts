@@ -643,6 +643,7 @@ export class DocumentRegistry implements IDisposable {
     const language = modelFactory.preferredLanguage(PathExt.basename(path));
     const name = kernel && kernel.name;
     const id = kernel && kernel.id;
+    const customKernelSpecs = kernel && kernel.custom_kernel_specs;
     return {
       id,
       name,
@@ -650,7 +651,8 @@ export class DocumentRegistry implements IDisposable {
       shouldStart: widgetFactory.preferKernel,
       canStart: widgetFactory.canStartKernel,
       shutdownOnDispose: widgetFactory.shutdownOnClose,
-      autoStartDefault: widgetFactory.autoStartDefault
+      autoStartDefault: widgetFactory.autoStartDefault,
+      customKernelSpecs: customKernelSpecs ? customKernelSpecs : undefined
     };
   }
 

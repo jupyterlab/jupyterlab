@@ -15,7 +15,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
+import { JSONExt, PartialJSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -287,6 +287,13 @@ export namespace ISessionContext {
      * found (default `false`).
      */
     readonly autoStartDefault?: boolean;
+
+     /**
+     * Kernel custom specs defined by kernel name
+     */
+    customKernelSpecs?: {
+      [key:string]: undefined | PartialJSONObject | {};
+    } | undefined
   }
 
   export type KernelDisplayStatus =
@@ -670,7 +677,9 @@ export class SessionContext implements ISessionContext {
    */
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
-
+    const specs = this.specsManager.specs;
+//
+console.log('startKernel - options');
     if (!preference.autoStartDefault && preference.shouldStart === false) {
       return true;
     }
@@ -679,15 +688,27 @@ export class SessionContext implements ISessionContext {
     if (preference.id) {
       options = { id: preference.id };
     } else {
+      console.log('getDefaultKernel');
       const name = Private.getDefaultKernel({
-        specs: this.specsManager.specs,
+        specs,
         sessions: this.sessionManager.running(),
         preference
       });
       if (name) {
-        options = { name };
+        if (preference.customKernelSpecs) {
+          options = {
+            name,
+            custom_kernel_specs: preference.customKernelSpecs
+          }
+        } else {
+          options = { name };
+        }
       }
     }
+
+    console.dir(options);
+    console.dir(preference);
+    console.log('end startKernel - options');
 
     if (options) {
       try {
@@ -886,6 +907,9 @@ export class SessionContext implements ISessionContext {
     if (model.name) {
       this._pendingKernelName = model.name;
     }
+
+    console.log('_changeKernel');
+    console.dir(model);
 
     if (!this._session) {
       this._kernelChanged.emit({
@@ -1369,18 +1393,26 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
+//
+    const model = result.value;
 
     if (hasCheckbox && result.isChecked !== null) {
+      // if there is a new kernel than kernel custom specs should be deleted
+      if (model && sessionContext.kernelPreference?.customKernelSpecs && !sessionContext.kernelPreference?.customKernelSpecs[model.name]) {
+        sessionContext.kernelPreference.customKernelSpecs = undefined;
+      }
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
         autoStartDefault: result.isChecked
       };
     }
 
-    const model = result.value;
+   
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
+    console.log('model');
+    console.dir(model);
     if (model) {
       await sessionContext.changeKernel(model);
     }

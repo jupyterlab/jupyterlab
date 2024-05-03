@@ -4,6 +4,7 @@
 import { ServerConnection } from '../serverconnection';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel, validateModels } from './validate';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The kernel model provided by the server.
@@ -47,6 +48,11 @@ export interface IModel {
    * The traceback for a dead kernel, if applicable.
    */
   readonly traceback?: string;
+
+  /**
+   * Custom kernel specifications for running a kernel
+   */
+  custom_kernel_specs?: undefined | PartialJSONObject | {};
 }
 
 /**
@@ -101,6 +107,7 @@ export async function startNew(
     method: 'POST',
     body: JSON.stringify(options)
   };
+  //
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
     const err = await ServerConnection.ResponseError.create(response);

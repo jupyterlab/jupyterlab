@@ -651,6 +651,12 @@ export class DocumentManager implements IDocumentManager {
       kernel
     );
 
+    console.log('_createOrOpenDocument--preference');
+    console.dir(preference);
+
+    console.log('_createOrOpenDocument-kernel');
+    console.dir(kernel);
+
     let context: Private.IContext | null;
     let ready: Promise<void> = Promise.resolve(undefined);
 
