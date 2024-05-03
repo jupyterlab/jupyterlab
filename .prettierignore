@@ -33,8 +33,6 @@ jupyterlab/staging/yarn.lock
 jupyterlab/staging/index.js
 jupyterlab/staging/webpack.config.js
 packages/ui-components/src/icon/iconimports.ts
-tsconfigdoc.json
-typedoc-theme
 yarn.lock
 
 # jetbrains IDE stuff

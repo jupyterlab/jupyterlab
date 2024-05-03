@@ -4,6 +4,60 @@
 
 # JupyterLab Changelog
 
+## v4.2
+
+### Workspaces UI
+
+It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/latest/user/workspaces.html) from within JupyterLab.
+
+<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manage the workspace over which it was opened - clone, rename, reset, delete, export, and import." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
+
+### Recently opened/closed files
+
+The [jupyterlab-recents](https://github.com/jupyterlab-contrib/jupyterlab-recents) extension was integrated into JupyterLab.
+
+Users are now able to:
+
+- re-open recently used files from the main menu:
+
+   <img alt="An 'Open Recent' sub-menu in the 'File' menu allowing to re-open recently used files" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-recent-submenu.png" class="jp-screenshot">
+
+- re-open recently closed files from the sidebar:
+
+   <img alt="A new 'Recently Closed' section in the 'Running' sidebar" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-recent-sidebar.png" class="jp-screenshot">
+
+- quickly jump to open tabs/recently closed files by using a new searchable modal dialog (press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd> to open the dialog, or click on the \[↗\] icon in the sidebar):
+
+   <img alt="A modal dialog for quickly jumping to open/closed files" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-recent-modal.png" class="jp-screenshot">
+
+### Full notebook windowing mode by default
+
+Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. One limitation of `full` mode is that the search function in your browser may produce false negatives; using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/latest/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1, go to Settings → Settings Editor → Notebook, scroll to "Windowing mode", and choose `defer`.
+
+### Improved Shortcuts Editor
+
+Among the numerous improvements and bug fixes for the keyboard shortcuts editor:
+
+- it is now possible to remove the default shortcuts,
+- shortcuts are correctly sorted when using a language pack,
+- shortcuts with different arguments are now correctly displayed as individual entries.
+
+<img alt="A context menu opened over a keybinding in the Keyboard Shortcuts setting panel within the Settings widget" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-delete-shortcut.png" class="jp-screenshot">
+
+### Dark high contrast theme
+
+A new theme, JupyterLab Dark High Contrast, which is intended to benefit users with the need for higher contrast, following the WCAG AAA accessibility standard for color contrast.
+To select this theme, from the menu bar, choose Settings → Theme → JupyterLab Dark High Contrast. Please provide feedback and suggestions on further improvements to this theme.
+
+<img alt="A dark high contrast theme" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.2-dark-high-contrast.png" class="jp-screenshot">
+
+### Keyboard shortcuts improvements
+
+Following feedback from users, implementation of certain shortcuts was moved from the CodeMirror editor to JupyterLab shortcut system, allowing for better integration:
+
+- the shortcut for deleting a line was restored to <kbd>Ctrl</kbd>+<kbd>D</kbd> as in JupyterLab 3.x; the shortcut for extending (multi-cursor) selection was remapped to <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>. The <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd> shortcut can also be used for deleting lines for compatibility with other editors.
+- the shortcuts for toggling line comments (by default <kbd>Ctrl</kbd>+<kbd>/</kbd>) and block comments (by default <kbd>Alt</kbd>+<kbd>A</kbd>) can be customized in the Shortcuts Editor, enabling users of non-US keyboards to adjust the keybinding to one optimal on their keyboard layout. Please note that the block comment only works in languages which have a dedicated block comment syntax defined in the CodeMirror language data (e.g. C, JavaScript, but not Python). The line comment shortcut can be also used to comment out multiple lines.
+
 ## v4.1
 
 JupyterLab 4.1 includes a number of new features (described below), bug fixes, and enhancements for extension developers. This release is compatible with extensions supporting JupyterLab 4.0. Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-0-to-4-1) which lists deprecations and changes to the public API.
@@ -266,6 +320,107 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.2.0rc0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b3...d84e8e09bd2577d7113cd36aa7bf67817ad52727))
+
+### Enhancements made
+
+- Update wording from directory to folder in user interface [#16234](https://github.com/jupyterlab/jupyterlab/pull/16234) ([@Rob-P-Smith](https://github.com/Rob-P-Smith))
+
+### Bugs fixed
+
+- Consider higher levels when toggling plugin [#16251](https://github.com/jupyterlab/jupyterlab/pull/16251) ([@divyansshhh](https://github.com/divyansshhh))
+- Fix toggling extension at system level [#16241](https://github.com/jupyterlab/jupyterlab/pull/16241) ([@krassowski](https://github.com/krassowski))
+- Harmonize the use of ellipses in command and menu items [#16237](https://github.com/jupyterlab/jupyterlab/pull/16237) ([@Rob-P-Smith](https://github.com/Rob-P-Smith))
+- Update notification box styling, content [#16236](https://github.com/jupyterlab/jupyterlab/pull/16236) ([@JasonWeill](https://github.com/JasonWeill))
+- Use the application name instead of hard-coded "JupyterLab" in dialogs/commands [#16230](https://github.com/jupyterlab/jupyterlab/pull/16230) ([@sawickid](https://github.com/sawickid))
+- Fix dirty dots not preserved when moving multiple cells [#16225](https://github.com/jupyterlab/jupyterlab/pull/16225) ([@Alanhou1222](https://github.com/Alanhou1222))
+- Add missing translation wrapper in debugger filter box [#16224](https://github.com/jupyterlab/jupyterlab/pull/16224) ([@itsmevichu](https://github.com/itsmevichu))
+- Dynamic label for toggle sidebar element in keyboard shortcuts [#16218](https://github.com/jupyterlab/jupyterlab/pull/16218) ([@itsmevichu](https://github.com/itsmevichu))
+- Migrate shortcuts search to use `FilterBox` [#16216](https://github.com/jupyterlab/jupyterlab/pull/16216) ([@krassowski](https://github.com/krassowski))
+- Fix logic for changing keybindings in shortcut editor [#16214](https://github.com/jupyterlab/jupyterlab/pull/16214) ([@krassowski](https://github.com/krassowski))
+- Clear output area when empty [#16208](https://github.com/jupyterlab/jupyterlab/pull/16208) ([@NexVeridian](https://github.com/NexVeridian))
+- Last modified header for wide layouts [#16207](https://github.com/jupyterlab/jupyterlab/pull/16207) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix extension toggling at different level [#16102](https://github.com/jupyterlab/jupyterlab/pull/16102) ([@divyansshhh](https://github.com/divyansshhh))
+- Update highlight when replace string matches search expression [#15881](https://github.com/jupyterlab/jupyterlab/pull/15881) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Maintenance and upkeep improvements
+
+- Install Firefox from brew on Mac on CI [#16245](https://github.com/jupyterlab/jupyterlab/pull/16245) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Update wording from directory to folder in user interface [#16234](https://github.com/jupyterlab/jupyterlab/pull/16234) ([@Rob-P-Smith](https://github.com/Rob-P-Smith))
+- Last modified header for wide layouts [#16207](https://github.com/jupyterlab/jupyterlab/pull/16207) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-19&to=2024-04-26&type=c))
+
+[@Alanhou1222](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAlanhou1222+updated%3A2024-04-19..2024-04-26&type=Issues) | [@divyansshhh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adivyansshhh+updated%3A2024-04-19..2024-04-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-19..2024-04-26&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2024-04-19..2024-04-26&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-04-19..2024-04-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-19..2024-04-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-19..2024-04-26&type=Issues) | [@kolibril13](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akolibril13+updated%3A2024-04-19..2024-04-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-19..2024-04-26&type=Issues) | [@NexVeridian](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ANexVeridian+updated%3A2024-04-19..2024-04-26&type=Issues) | [@Rob-P-Smith](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARob-P-Smith+updated%3A2024-04-19..2024-04-26&type=Issues) | [@sawickid](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asawickid+updated%3A2024-04-19..2024-04-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-19..2024-04-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
+## 4.2.0b3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b2...b3f0b44b1136e50b757ad23db4b02d44ccd80740))
+
+### Bugs fixed
+
+- Update resolution for jupyter-ui-toolkit [#16204](https://github.com/jupyterlab/jupyterlab/pull/16204) ([@fcollonval](https://github.com/fcollonval))
+- Ensure that input in recently open files modal is focused [#16199](https://github.com/jupyterlab/jupyterlab/pull/16199) ([@krassowski](https://github.com/krassowski))
+- Fix updating search value on input [#16198](https://github.com/jupyterlab/jupyterlab/pull/16198) ([@fcollonval](https://github.com/fcollonval))
+- Fix error in kernels sidebar when switching kernels, remove unused prop [#16188](https://github.com/jupyterlab/jupyterlab/pull/16188) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Bump follow-redirects from 1.15.4 to 1.15.6 [#16172](https://github.com/jupyterlab/jupyterlab/pull/16172) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-18&to=2024-04-19&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-18..2024-04-19&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-18..2024-04-19&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-18..2024-04-19&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-18..2024-04-19&type=Issues)
+
+## 4.2.0b2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b1...6898c5ec3b3bcc0ae473f39b48eca5b94a80b58d))
+
+### Enhancements made
+
+- Use toolkit search input for all search inputs: filebrowser, extension manager, debugger kernel source [#16046](https://github.com/jupyterlab/jupyterlab/pull/16046) ([@Mehak261124](https://github.com/Mehak261124))
+- Much smaller "Last Modified" column, date [#15948](https://github.com/jupyterlab/jupyterlab/pull/15948) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Bugs fixed
+
+- Remove unused `IDefaultFileBrowser` dependency from `launcher-extension` [#16173](https://github.com/jupyterlab/jupyterlab/pull/16173) ([@milinm](https://github.com/milinm))
+- Fix accepting completion with `Enter` [#16156](https://github.com/jupyterlab/jupyterlab/pull/16156) ([@krassowski](https://github.com/krassowski))
+- Fix recents menu not getting updated after loading history [#16149](https://github.com/jupyterlab/jupyterlab/pull/16149) ([@krassowski](https://github.com/krassowski))
+- Adjust text alignment in the menu bar [#16142](https://github.com/jupyterlab/jupyterlab/pull/16142) ([@JasonWeill](https://github.com/JasonWeill))
+- Improve the keybinding input guard using proposed lumino features [#15927](https://github.com/jupyterlab/jupyterlab/pull/15927) ([@krassowski](https://github.com/krassowski))
+- Move the cell toolbar widget from the cell to the cell input [#15422](https://github.com/jupyterlab/jupyterlab/pull/15422) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Fix documentation snapshots test [#16159](https://github.com/jupyterlab/jupyterlab/pull/16159) ([@krassowski](https://github.com/krassowski))
+- Bump the actions group with 2 updates [#16081](https://github.com/jupyterlab/jupyterlab/pull/16081) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Clarify the LSP documentation [#16160](https://github.com/jupyterlab/jupyterlab/pull/16160) ([@krassowski](https://github.com/krassowski))
+- Add information about configuration Windows 11 for building an extension [#16154](https://github.com/jupyterlab/jupyterlab/pull/16154) ([@AnastasiaSliusar](https://github.com/AnastasiaSliusar))
+- Removed broken gif links in README.md files [#16151](https://github.com/jupyterlab/jupyterlab/pull/16151) ([@Tanmay-Deshmukh](https://github.com/Tanmay-Deshmukh))
+- Improve API documentation [#16140](https://github.com/jupyterlab/jupyterlab/pull/16140) ([@fcollonval](https://github.com/fcollonval))
+- User-facing changelog for JupyterLab 4.2 [#16103](https://github.com/jupyterlab/jupyterlab/pull/16103) ([@krassowski](https://github.com/krassowski))
+- Move the cell toolbar widget from the cell to the cell input [#15422](https://github.com/jupyterlab/jupyterlab/pull/15422) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-09&to=2024-04-18&type=c))
+
+[@AnastasiaSliusar](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAnastasiaSliusar+updated%3A2024-04-09..2024-04-18&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2024-04-09..2024-04-18&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-04-09..2024-04-18&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-04-09..2024-04-18&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-09..2024-04-18&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-09..2024-04-18&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-09..2024-04-18&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-04-09..2024-04-18&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-09..2024-04-18&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-09..2024-04-18&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-09..2024-04-18&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-04-09..2024-04-18&type=Issues) | [@Mehak261124](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMehak261124+updated%3A2024-04-09..2024-04-18&type=Issues) | [@milinm](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amilinm+updated%3A2024-04-09..2024-04-18&type=Issues) | [@Tanmay-Deshmukh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ATanmay-Deshmukh+updated%3A2024-04-09..2024-04-18&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-09..2024-04-18&type=Issues)
+
 ## 4.2.0b1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b0...130274fc34869de92b6d1ae476d19c9827897d94))
@@ -309,8 +464,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-02&to=2024-04-09&type=c))
 
 [@Alanhou1222](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAlanhou1222+updated%3A2024-04-02..2024-04-09&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-04-02..2024-04-09&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-04-02..2024-04-09&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-02..2024-04-09&type=Issues) | [@e218736](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ae218736+updated%3A2024-04-02..2024-04-09&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2024-04-02..2024-04-09&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-02..2024-04-09&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-04-02..2024-04-09&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2024-04-02..2024-04-09&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-02..2024-04-09&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2024-04-02..2024-04-09&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-02..2024-04-09&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-02..2024-04-09&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-02..2024-04-09&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-04-02..2024-04-09&type=Issues) | [@m158261](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Am158261+updated%3A2024-04-02..2024-04-09&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2024-04-02..2024-04-09&type=Issues) | [@Susilkessav](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASusilkessav+updated%3A2024-04-02..2024-04-09&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-02..2024-04-09&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.2.0b0
 

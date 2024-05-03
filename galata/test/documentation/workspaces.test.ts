@@ -7,7 +7,8 @@ import { positionMouseOver } from './utils';
 
 test.use({
   viewport: { height: 720, width: 1280 },
-  mockState: false
+  mockState: false,
+  tmpPath: 'workspaces-sidebar'
 });
 
 test.describe('Workspaces sidebar', () => {
@@ -84,6 +85,23 @@ test.describe('Workspaces sidebar', () => {
     );
 
     await page.launcher.waitFor();
+
+    // Force the kernel sidebar to "empty" state to avoid flaky snapshots;
+    // mocking the kernel session state does not help here, possibly due to
+    // concurrent test execution, so we manipulate the DOM directly.
+    const kernelsSection = page.locator('[aria-label="Kernels Section"]');
+    for (const buttonName of ['collapse-expand', 'switch-view']) {
+      const button = kernelsSection.locator(
+        `.jp-ToolbarButton[data-jp-item-name="${buttonName}"]`
+      );
+      if (await button.isVisible()) {
+        await button.evaluate(node => (node.style.display = 'none'));
+      }
+    }
+    const button = kernelsSection.locator('.jp-RunningSessions-shutdownAll');
+    await button.evaluate(
+      node => ((node as HTMLButtonElement).disabled = true)
+    );
 
     expect(
       await page.screenshot({ clip: { y: 0, x: 0, width: 400, height: 420 } })

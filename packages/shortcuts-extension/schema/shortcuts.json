@@ -64,7 +64,8 @@
           "items": { "type": "string" },
           "type": "array"
         },
-        "selector": { "type": "string" }
+        "selector": { "type": "string" },
+        "preventDefault": { "type": "boolean" }
       },
       "required": ["command", "keys", "selector"],
       "type": "object"

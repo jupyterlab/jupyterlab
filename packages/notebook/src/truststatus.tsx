@@ -50,7 +50,7 @@ function cellTrust(
 /**
  * A pure function for a notebook trust status component.
  *
- * @param props: the props for the component.
+ * @param props the props for the component.
  *
  * @returns a tsx component for notebook trust.
  */

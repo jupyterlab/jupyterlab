@@ -117,7 +117,7 @@ a ``Promise`` resolving in a ``Dialog.IResult`` object.
 File Dialogs
 ^^^^^^^^^^^^
 
-Two helper functions to ask a user to open a file or a directory are
+Two helper functions to ask a user to open a file or a folder are
 available in the ``filebrowser`` package under the namespace ``FileDialog``.
 
 Here is an example to request a file.

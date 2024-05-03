@@ -99,6 +99,10 @@
   display: none;
 }
 
+.jp-FileBrowser-toolbar > .jp-FileBrowser-filterBox {
+  width: 100%;
+}
+
 .jp-Open-Dialog > .jp-FileBrowser {
   min-height: 200px;
 }
@@ -140,13 +144,48 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 84px;
+  flex: 1 1 126px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 112px;
+  flex: 1 0 70px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
+  /* stylelint-disable */
+  container-type: inline-size;
+  /* stylelint-enable */
+}
+
+/**
+ * Use container queries (not yet supported by our version of stylelint)
+ * to display either a small or large header for the last-modified column.
+ */
+/* stylelint-disable */
+@container (max-width: 300px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (min-width: 300px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    display: inline;
+  }
 }
 
 .jp-DirListing-headerItem.jp-id-filesize {
@@ -272,7 +311,7 @@
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 64px;
+  flex: 1 1 106px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -297,7 +336,7 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 125px;
+  flex: 1 0 83px;
   text-align: right;
 }
 

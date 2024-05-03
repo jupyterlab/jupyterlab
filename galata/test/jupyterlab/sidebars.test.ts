@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+
 import { Locator } from '@playwright/test';
 
 const sidebarElementIds = {
@@ -71,7 +72,6 @@ test.describe('Sidebars', () => {
     await page.notebook.createNew('notebook.ipynb');
 
     const unusedRules = await page.style.findUnusedStyleRules({
-      page,
       fragments: ['jp-DirListing', 'jp-FileBrowser'],
       exclude: [
         // active during renaming

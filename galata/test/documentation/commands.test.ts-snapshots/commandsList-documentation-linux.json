@@ -177,7 +177,7 @@
   },
   {
     "id": "apputils:display-shortcuts",
-    "label": "Show Keyboard Shortcuts",
+    "label": "Show Keyboard Shortcuts…",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
@@ -256,6 +256,38 @@
     "label": "Open Code Viewer",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "codemirror:delete-line",
+    "label": "Delete the current line",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl D"
+    ]
+  },
+  {
+    "id": "codemirror:select-next-occurrence",
+    "label": "Select Next Occurrence",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift D"
+    ]
+  },
+  {
+    "id": "codemirror:toggle-block-comment",
+    "label": "Toggle Block Comment",
+    "caption": "Toggles block commends in languages which support it (e.g. C, JavaScript)",
+    "shortcuts": [
+      "Alt A"
+    ]
+  },
+  {
+    "id": "codemirror:toggle-comment",
+    "label": "Toggle Comment",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl /"
+    ]
   },
   {
     "id": "completer:invoke-console",
@@ -601,7 +633,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
+    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -1554,7 +1586,7 @@
   },
   {
     "id": "notebook:close-and-shutdown",
-    "label": "Close and Shut Down Notebook",
+    "label": "Close and Shut Down Notebook…",
     "caption": "",
     "shortcuts": []
   },
@@ -2216,6 +2248,36 @@
     "shortcuts": []
   },
   {
+    "id": "shortcuts:add-keybinding",
+    "label": "Add Keybinding",
+    "caption": "Add new keybinding for existing shortcut target",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:delete-keybinding",
+    "label": "Delete Keybinding",
+    "caption": "Delete chosen keybinding",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:edit-keybinding",
+    "label": "Edit Keybinding",
+    "caption": "Edit existing keybinding",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:reset-all",
+    "label": "Reset All",
+    "caption": "Reset all shortcuts",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:toggle-selectors",
+    "label": "Toggle Selectors",
+    "caption": "Toggle command selectors",
+    "shortcuts": []
+  },
+  {
     "id": "sidebar:switch",
     "label": "Switch Sidebar Side",
     "caption": "",
@@ -2453,7 +2515,7 @@
   },
   {
     "id": "workspace-ui:save",
-    "label": "Save Current Workspace…",
+    "label": "Save Current Workspace",
     "caption": "",
     "shortcuts": []
   },

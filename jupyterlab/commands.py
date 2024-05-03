@@ -30,6 +30,7 @@ from urllib.request import Request, quote, urljoin, urlopen
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
+    get_allowed_levels,
     get_federated_extensions,
     get_package_url,
     get_page_config,
@@ -1104,6 +1105,18 @@ class _AppHandler:
         self._write_build_config(config)
         return True
 
+    def _is_extension_locked(self, extension, level="sys_prefix", include_higher_levels=True):
+        app_settings_dir = osp.join(self.app_dir, "settings")
+        page_config = get_static_page_config(
+            app_settings_dir=app_settings_dir,
+            logger=self.logger,
+            level=level,
+            include_higher_levels=True,
+        )
+
+        locked = page_config.get("lockedExtensions", {})
+        return locked.get(extension, False)
+
     def toggle_extension(self, extension, value, level="sys_prefix"):
         """Enable or disable a lab extension.
 
@@ -1111,23 +1124,40 @@ class _AppHandler:
         """
         app_settings_dir = osp.join(self.app_dir, "settings")
 
-        page_config = get_static_page_config(
+        # If extension is locked at a higher level, we don't toggle it.
+        # The highest level at which an extension can be locked is system,
+        # so we do not need to check levels above that one.
+        if level != "system":
+            allowed = get_allowed_levels()
+            if self._is_extension_locked(
+                extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+            ):
+                self.logger.info("Extension locked at a higher level, cannot toggle status")
+                return False
+
+        complete_page_config = get_static_page_config(
+            app_settings_dir=app_settings_dir, logger=self.logger, level="all"
+        )
+
+        level_page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
 
-        disabled = page_config.get("disabledExtensions", {})
+        disabled = complete_page_config.get("disabledExtensions", {})
+        disabled_at_level = level_page_config.get("disabledExtensions", {})
         did_something = False
         is_disabled = disabled.get(extension, False)
+
         if value and not is_disabled:
-            disabled[extension] = True
+            disabled_at_level[extension] = True
             did_something = True
         elif not value and is_disabled:
-            disabled[extension] = False
+            disabled_at_level[extension] = False
             did_something = True
 
         if did_something:
-            page_config["disabledExtensions"] = disabled
-            write_page_config(page_config, level=level)
+            level_page_config["disabledExtensions"] = disabled_at_level
+            write_page_config(level_page_config, level=level)
         return did_something
 
     def _maybe_mirror_disabled_in_locked(self, level="sys_prefix"):
@@ -1159,13 +1189,23 @@ class _AppHandler:
         """Lock or unlock a lab extension (/plugin)."""
         app_settings_dir = osp.join(self.app_dir, "settings")
 
+        # The highest level at which an extension can be locked is system,
+        # so we do not need to check levels above that one.
+        if level != "system":
+            allowed = get_allowed_levels()
+            if self._is_extension_locked(
+                extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+            ):
+                self.logger.info("Extension locked at a higher level, cannot toggle")
+                return False
+
         page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
 
         locked = page_config.get("lockedExtensions", {})
         locked[extension] = value
-
+        page_config["lockedExtensions"] = locked
         write_page_config(page_config, level=level)
 
     def check_extension(self, extension, check_installed_only=False):

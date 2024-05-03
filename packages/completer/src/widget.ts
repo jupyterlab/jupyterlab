@@ -1052,13 +1052,13 @@ export namespace Completer {
 
     /**
      * Lazy load missing data of an item.
-     * @param indexOrValue - the item or its index
+     * @param activeIndex - the item or its index
      * @remarks
      * Resolving item by index will be deprecated in
      * the next major release.
      *
-     * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
-     *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
+     * @return Return `undefined` if the completion item with {@link activeIndex} index can not be found.
+     *  Return a promise of `null` if another {@link resolveItem} is called. Otherwise return the
      * promise of resolved completion item.
      */
     resolveItem(

@@ -491,9 +491,9 @@ export class DocumentRegistry implements IDisposable {
    * IWidgetFactoryOptions. This function can be used to override that after
    * the fact.
    *
-   * @param fileType: The name of the file type.
+   * @param fileType The name of the file type.
    *
-   * @param factory: The name of the factory.
+   * @param factory The name of the factory.
    *
    * #### Notes
    * If `factory` is undefined, then any override will be unset, and the
