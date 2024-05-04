@@ -843,6 +843,9 @@ export function ToolbarButtonComponent(
     }
   };
 
+  const title = getTooltip();
+  const disabled = props.enabled === false;
+
   return (
     <Button
       appearance="stealth"
@@ -851,14 +854,15 @@ export function ToolbarButtonComponent(
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
+      aria-disabled={disabled}
+      aria-label={props.label || title}
       aria-pressed={props.pressed}
-      aria-disabled={props.enabled === false}
       {...props.dataset}
-      disabled={props.enabled === false}
+      disabled={disabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
-      title={getTooltip()}
+      title={title}
       minimal
     >
       {(props.icon || props.iconClass) && (
