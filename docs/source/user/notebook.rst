@@ -82,7 +82,7 @@ Create multiple synchronized views of a single notebook:
 .. _collapse-code:
 
 Collapse and expand code and output using the View menu or the blue
-collapser button on left of each cell. While collapsed, only the 
+collapser button on left of each cell. While collapsed, only the
 first line of the cell is displayed:
 
 .. raw:: html
