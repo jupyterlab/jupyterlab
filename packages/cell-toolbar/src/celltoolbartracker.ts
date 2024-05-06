@@ -278,7 +278,7 @@ export class CellToolbarTracker implements IDisposable {
     this._updateCellForToolbarOverlap(activeCell);
   }
 
-  private async _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
+  private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
     // When we do change in cell, the browser might not have completed the layout
     // update if we don't wait, resulting in the previous width being returned
     // using `getBoundingClientRect().width` in later functions. This also wait for
