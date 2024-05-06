@@ -203,6 +203,9 @@ export class CellToolbarTracker implements IDisposable {
             return;
           }
 
+          // Hide the toolbar by default, to avoid temporary overlapping.
+          cell.node.classList.add(TOOLBAR_OVERLAP_CLASS);
+
           (cell.inputArea!.layout as PanelLayout).insertWidget(
             0,
             toolbarWidget
@@ -275,11 +278,13 @@ export class CellToolbarTracker implements IDisposable {
     this._updateCellForToolbarOverlap(activeCell);
   }
 
-  private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
-    // When we do change in cell, If we don't wait the browser might not have
-    // completed the layout update, resulting in the previous width being returned
-    // using `getBoundingClientRect().width` in later functions.
-    requestAnimationFrame(() => {
+  private async _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
+    // When we do change in cell, the browser might not have completed the layout
+    // update if we don't wait, resulting in the previous width being returned
+    // using `getBoundingClientRect().width` in later functions. This also wait for
+    // the toolbar to be rendered the first time (on page reload), allowing us to
+    // retrieve the right widgets width.
+    requestIdleCallback(() => {
       // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
       const activeCellElement = activeCell.node;
       activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
