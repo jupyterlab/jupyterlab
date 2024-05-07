@@ -572,6 +572,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     changes: Record<string, any>
   ): void {
     configurator.reconfigureExtensions(this._editor, changes);
+    // when customStyles change and the editor is not initialized
+    if (changes['customStyles'] && !changes['fontSize']) {
+      // update the state to change the gutter height
+      this.editor.setState(this.editor.state);
+    }
   }
 
   /**
