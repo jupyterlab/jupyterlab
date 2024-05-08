@@ -175,10 +175,17 @@ class GhostTextWidget extends WidgetType {
     if (this.options.isError) {
       this._mountErrorAnimation(dom);
 
-      setTimeout(() => {
+      this._clearErrorTimeout = setTimeout(() => {
         this._removeErrorAnimation(dom);
+        this._clearErrorTimeout = null;
       }, 2000);
       return;
+    }
+    // If not in an error anymore, clear the error indicator
+    if (this._clearErrorTimeout !== null) {
+      clearTimeout(this._clearErrorTimeout);
+      this._removeErrorAnimation(dom);
+      this._clearErrorTimeout = null;
     }
 
     const content = this.content;
@@ -213,6 +220,8 @@ class GhostTextWidget extends WidgetType {
     }
     super.destroy(dom);
   }
+
+  private _clearErrorTimeout: number | null = null;
 }
 
 export namespace GhostTextManager {
