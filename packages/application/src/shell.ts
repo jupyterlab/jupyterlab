@@ -609,6 +609,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.toggleClass('jp-mod-presentationMode', value);
   }
 
+    /**
+   * Whether JupyterLab is in fullscreen mode with the
+   * `jp-mod-fullscreenMode` CSS class.
+   */
+    get fullscreenMode(): boolean {
+      return this.hasClass('jp-mod-fullscreenMode');
+    }
+    set fullscreenMode(value: boolean) {
+      this.toggleClass('jp-mod-fullscreenMode', value);
+    }
+
   /**
    * The main dock area's user interface mode.
    */

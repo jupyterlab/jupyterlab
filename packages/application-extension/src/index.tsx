@@ -86,6 +86,8 @@ namespace CommandIDs {
 
   export const closeRightTabs = 'application:close-right-tabs';
 
+  export const fullscreenThisTab = 'application:fullscreen-this-tab';
+
   export const closeAll: string = 'application:close-all';
 
   export const setMode: string = 'application:set-mode';
@@ -109,6 +111,9 @@ namespace CommandIDs {
 
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
+    
+  export const toggleFullscreenMode: string =
+    'application:toggle-fullscreen-mode';
 
   export const tree: string = 'router:tree';
 
@@ -292,6 +297,42 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     });
 
     if (labShell) {
+
+      commands.addCommand(CommandIDs.fullscreenThisTab, {
+        label: () => trans.__('Set Tab fullScreen'),
+        // isEnabled: () =>
+        //   !!contextMenuWidget() && labShell?.fullscreenMode,
+        execute: () => {
+            const widget = contextMenuWidget();
+            if (!widget) {
+              return;
+            }
+            // Toggle Left Area
+            if (!labShell.leftCollapsed) {
+              commands
+                .execute(CommandIDs.toggleLeftArea)
+                .catch(reason => {
+                  console.error('Failed to toggle left area.', reason);
+                });
+            }
+            // Toggle Right Area
+            if (!labShell.rightCollapsed) {
+              commands
+                .execute(CommandIDs.toggleRightArea)
+                .catch(reason => {
+                  console.error('Failed to toggle right area.', reason);
+                });
+            }
+            // if (!labShell.rightCollapsed) {
+            //   commands
+            //     .execute(CommandIDs.toggleRightArea)
+            //     .catch(reason => {
+            //       console.error('Failed to toggle right area.', reason);
+            //     });
+            // }
+          }
+      });
+
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
         execute: () => {
@@ -371,20 +412,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
-        label: args =>
-          args === undefined ||
-          args.side === undefined ||
-          args.index === undefined
-            ? trans.__('Toggle Sidebar Element')
-            : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+        label: trans.__('Toggle Sidebar Element'),
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -445,6 +473,24 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isVisible: () => true
       });
 
+      commands.addCommand(CommandIDs.toggleFullscreenMode, {
+        label: () => trans.__('Fullscreen Mode'),
+        execute: () => {
+          labShell.fullscreenMode = !labShell.fullscreenMode;
+          
+          if(labShell.fullscreenMode){
+            document.documentElement.requestFullscreen(); 
+            document.onfullscreenchange = ()=> {
+              !document.fullscreenElement ? labShell.fullscreenMode = false : null;
+            };
+          } else {
+            
+            document.exitFullscreen();
+          }
+        },
+        isToggled: () => labShell.fullscreenMode,
+      });
+
       commands.addCommand(CommandIDs.setMode, {
         label: args =>
           args['mode']
@@ -490,6 +536,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 console.error('Failed to undo presentation mode.', reason);
               });
           }
+          // Turn off fullscreen mode
+          if (labShell.fullscreenMode){
+            commands
+             .execute(CommandIDs.toggleFullscreenMode)
+             .catch(reason => {
+                console.error('Failed to undo fullscreen mode.', reason);
+              });
+          }
           // Display top header
           if (
             labShell.mode === 'single-document' &&
@@ -529,10 +583,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
+        CommandIDs.fullscreenThisTab,
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
+        CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
         CommandIDs.resetLayout
       ].forEach(command => palette.addItem({ command, category }));
