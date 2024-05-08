@@ -59,7 +59,7 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
  * - `'selection-start'` - search from selection head/anchor whichever is smaller
  * - `'start'` - from start of the editor
  */
-type SearchStartAnchor =
+export type SearchStartAnchor =
   | 'auto'
   | 'selection'
   | 'selection-start'
@@ -278,7 +278,7 @@ export abstract class EditorSearchProvider<
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
         // Note: the loop logic is only used in single-editor (e.g. file editor)
-        // provider sub-classes, notebook has it's own loop logic and ignores
+        // provider sub-classes, notebook has its own loop logic and ignores
         // `currentIndex` as set here.
         this.currentIndex = loop ? 0 : null;
       }
@@ -319,9 +319,9 @@ export abstract class EditorSearchProvider<
    *
    * The caller of this method is expected to call `highlightNext` if after
    * calling `replaceCurrentMatch()` attribute `this.currentIndex` is null.
-   * It is necesary to let the caller handle highlighting because this
+   * It is necessary to let the caller handle highlighting because this
    * method is used in composition pattern (search engine of notebook cells)
-   * and highligthing on the composer (notebook) level needs to switch to next
+   * and highlighting on the composer (notebook) level needs to switch to next
    * engine (cell) with matches.
    *
    * @param newText The replacement text.
@@ -336,38 +336,64 @@ export abstract class EditorSearchProvider<
       return Promise.resolve(false);
     }
 
-    let occurred = false;
-
     if (
       this.currentIndex !== null &&
       this.currentIndex < this.cmHandler.matches.length
     ) {
       const match = this.getCurrentMatch();
-      // If cursor there is no match selected, highlight the next match
       if (!match) {
         this.currentIndex = null;
       } else {
-        this.cmHandler.matches.splice(this.currentIndex, 1);
-        this.currentIndex =
-          this.currentIndex < this.cmHandler.matches.length
-            ? Math.max(this.currentIndex - 1, 0)
-            : null;
         const substitutedText = options?.regularExpression
           ? match!.text.replace(this.query!, newText)
           : newText;
         const insertText = options?.preserveCase
           ? GenericSearchProvider.preserveCase(match.text, substitutedText)
           : substitutedText;
+
         this.model.sharedModel.updateSource(
           match!.position,
           match!.position + match!.text.length,
           insertText
         );
-        occurred = true;
+
+        // Regenerate the match list, then iterate through it.
+        return new Promise((resolve, reject) => {
+          this.updateCodeMirror(this.model.sharedModel.getSource())
+            .then(() => {
+              const allMatches = this.cmHandler.matches;
+              const positionAfterReplacement =
+                match!.position + insertText.length;
+              let nextMatchFound = false;
+              for (
+                let matchIdx = this.currentIndex || 0;
+                matchIdx < allMatches.length;
+                matchIdx++
+              ) {
+                if (allMatches[matchIdx].position >= positionAfterReplacement) {
+                  this.currentIndex = matchIdx;
+                  nextMatchFound = true;
+                  break;
+                }
+
+                // Move the highlight forward from the previous match, not looping.
+                void this.highlightNext(false, { from: 'previous-match' });
+              }
+              if (!nextMatchFound) {
+                this.currentIndex = null; // No more matches in this string
+              }
+              resolve(true);
+            })
+            .catch(err => {
+              const errorMessage = `Failed to regenerate match list: ${err}`;
+              console.error(errorMessage);
+              reject(errorMessage);
+            });
+        });
       }
     }
 
-    return Promise.resolve(occurred);
+    return Promise.resolve(false);
   }
 
   /**
@@ -813,8 +839,17 @@ export class CodeMirrorSearchHighlighter {
       return null;
     }
 
+    // If the editor has not be instantiated yet (e.g. a cell that has not yet be seen in the viewport),
+    // force the behavior
+    if (!this._cm && !['previous-match', 'start'].includes(from)) {
+      from = 'previous-match';
+    }
+
     let lastPosition = 0;
-    if ((from === 'auto' && this._cm!.hasFocus()) || from === 'selection') {
+    if (
+      (from === 'auto' && (this._cm?.hasFocus() ?? false)) ||
+      from === 'selection'
+    ) {
       const cursor = this._cm!.state.selection.main;
       lastPosition = reverse ? cursor.anchor : cursor.head;
     } else if (from === 'selection-start') {
@@ -829,7 +864,10 @@ export class CodeMirrorSearchHighlighter {
     }
     if (lastPosition === 0 && reverse && this.currentIndex === null) {
       // The default position is (0, 0) but we want to start from the end in that case
-      lastPosition = this._cm!.doc.length;
+      // Fallback to the end of the latest match if the editor is not instantiated
+      lastPosition =
+        this._cm?.doc.length ??
+        endLastMatch(this._matches[this._matches.length - 1]);
     }
 
     const position = lastPosition;
@@ -855,6 +893,10 @@ export class CodeMirrorSearchHighlighter {
     }
 
     return found;
+
+    function endLastMatch(lastMatch?: ISearchMatch): number {
+      return lastMatch ? lastMatch.position + lastMatch.text.length : 0;
+    }
   }
 
   private _cm: CodeMirrorEditor | null;

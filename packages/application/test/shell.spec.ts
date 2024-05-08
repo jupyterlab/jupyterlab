@@ -525,7 +525,7 @@ describe('LabShell', () => {
       shell.add(widget, 'main');
       const menu = document.getElementById('jp-menu-panel');
       expect(menu?.getAttribute('role')).toEqual('navigation');
-      expect(menu?.getAttribute('aria-label')).toEqual('main');
+      expect(menu?.getAttribute('aria-label')).toEqual('main menu');
     });
 
     it('top handler should have a role of banner', () => {

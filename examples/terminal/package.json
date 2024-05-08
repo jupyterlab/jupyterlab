@@ -1,28 +1,28 @@
 {
   "name": "@jupyterlab/example-terminal",
-  "version": "4.1.0-alpha.2",
+  "version": "4.2.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.1.0-alpha.2",
-    "@jupyterlab/coreutils": "^6.1.0-alpha.2",
-    "@jupyterlab/services": "^7.1.0-alpha.2",
-    "@jupyterlab/terminal": "^4.1.0-alpha.2",
-    "@jupyterlab/theme-light-extension": "^4.1.0-alpha.2",
-    "@lumino/widgets": "^2.3.1-alpha.0"
+    "@jupyter/web-components": "^0.15.3",
+    "@jupyterlab/application": "^4.2.0",
+    "@jupyterlab/coreutils": "^6.2.0",
+    "@jupyterlab/services": "^7.2.0",
+    "@jupyterlab/terminal": "^4.2.0",
+    "@jupyterlab/theme-light-extension": "^4.2.0",
+    "@lumino/widgets": "^2.3.2"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
     "mini-css-extract-plugin": "^2.7.0",
     "mini-svg-data-uri": "^1.4.4",
-    "rimraf": "~3.0.0",
+    "rimraf": "~5.0.5",
     "style-loader": "~3.3.1",
-    "typescript": "~5.0.4",
+    "typescript": "~5.1.6",
     "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1",
-    "whatwg-fetch": "^3.0.0"
+    "webpack-cli": "^5.0.1"
   }
 }

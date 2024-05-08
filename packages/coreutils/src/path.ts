@@ -21,6 +21,16 @@ export namespace PathExt {
   }
 
   /**
+   * Join all arguments together and normalize the resulting path and preserve the leading slash.
+   *
+   * @param paths - The string paths to join.
+   */
+  export function joinWithLeadingSlash(...paths: string[]): string {
+    const path = posix.join(...paths);
+    return path === '.' ? '' : path;
+  }
+
+  /**
    * Return the last portion of a path. Similar to the Unix basename command.
    * Often used to extract the file name from a fully qualified path.
    *
@@ -127,7 +137,7 @@ export namespace PathExt {
   /**
    * Remove the leading slash from a path.
    *
-   * @param path: the path from which to remove a leading slash.
+   * @param path the path from which to remove a leading slash.
    */
   export function removeSlash(path: string): string {
     if (path.indexOf('/') === 0) {

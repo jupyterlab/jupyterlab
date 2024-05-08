@@ -300,6 +300,10 @@ const print: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.print);
+    });
   }
 };
 
@@ -336,6 +340,11 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.toggleHeader);
+    });
+
     if (palette) {
       palette.addItem({ command: CommandIDs.toggleHeader, category });
     }
@@ -641,7 +650,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.displayShortcuts, {
-      label: trans.__('Show Keyboard Shortcuts'),
+      label: trans.__('Show Keyboard Shortcuts…'),
       caption: trans.__(
         'Show relevant keyboard shortcuts for the current active widget'
       ),

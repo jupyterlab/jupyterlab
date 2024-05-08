@@ -23,7 +23,7 @@ const HALF_SPACING = 4;
 /**
  * A pure function component for a FileUpload status item.
  *
- * @param props: the props for the component.
+ * @param props the props for the component.
  *
  * @returns a tsx component for the file upload status.
  */

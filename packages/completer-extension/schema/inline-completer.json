@@ -8,28 +8,32 @@
     {
       "command": "inline-completer:next",
       "keys": ["Alt ]"],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-completer-enabled",
+      "preventDefault": false
     },
     {
       "command": "inline-completer:previous",
       "keys": ["Alt ["],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-completer-enabled",
+      "preventDefault": false
     },
     {
       "command": "inline-completer:accept",
       "keys": ["Alt End"],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-inline-completer-active"
     },
     {
       "command": "inline-completer:invoke",
       "keys": ["Alt \\"],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-completer-enabled",
+      "preventDefault": false
     }
   ],
   "properties": {
     "providers": {
       "title": "Inline completion providers",
-      "type": "object"
+      "type": "object",
+      "default": {}
     },
     "showWidget": {
       "title": "Show widget",

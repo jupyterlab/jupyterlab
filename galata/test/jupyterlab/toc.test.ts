@@ -6,7 +6,7 @@ import * as path from 'path';
 
 const fileName = 'toc_notebook.ipynb';
 
-test.use({ tmpPath: 'test-toc' });
+test.use({ tmpPath: 'test-toc-general' });
 
 test.describe('Table of Contents', () => {
   test.beforeAll(async ({ request, tmpPath }) => {
@@ -37,8 +37,8 @@ test.describe('Table of Contents', () => {
 
   test('Open Table of Contents panel', async ({ page }) => {
     const imageName = 'toc-panel.png';
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
@@ -47,16 +47,16 @@ test.describe('Table of Contents', () => {
   test('Toggle list', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
-    const numberingButton = await tocPanel.$$(
-      'button[data-command="toc:display-numbering"]'
+    const numberingButton = tocPanel.locator(
+      'jp-button[data-command="toc:display-numbering"]'
     );
-    expect(numberingButton.length).toBe(1);
+    await expect(numberingButton).toHaveCount(1);
 
     const imageName = 'toggle-numbered-list.png';
-    await numberingButton[0].click();
+    await numberingButton.click();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
   });
@@ -64,8 +64,8 @@ test.describe('Table of Contents', () => {
   test('Notebook context menu', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
 
     await Promise.all([
@@ -79,11 +79,11 @@ test.describe('Table of Contents', () => {
         })
     ]);
 
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
 
-    await (
-      await menu.$('text=Select and Run Cell(s) for this Heading')
-    ).click();
+    await menu
+      ?.locator('text=Select and Run Cell(s) for this Heading')
+      ?.click();
 
     await page
       .locator('.jp-TableOfContents-tree >> text="2. HTML title"')

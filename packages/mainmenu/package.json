@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mainmenu",
-  "version": "4.1.0-alpha.2",
+  "version": "4.2.0",
   "description": "JupyterLab - Main Menu",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,7 +34,6 @@
     "build": "tsc -b",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
     "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
@@ -42,21 +41,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.2.0-alpha.2",
-    "@jupyterlab/translation": "^4.1.0-alpha.2",
-    "@jupyterlab/ui-components": "^4.1.0-alpha.2",
+    "@jupyterlab/apputils": "^4.3.0",
+    "@jupyterlab/translation": "^4.2.0",
+    "@jupyterlab/ui-components": "^4.2.0",
     "@lumino/algorithm": "^2.0.1",
-    "@lumino/commands": "^2.1.3",
+    "@lumino/commands": "^2.3.0",
     "@lumino/coreutils": "^2.1.2",
-    "@lumino/widgets": "^2.3.1-alpha.0"
+    "@lumino/widgets": "^2.3.2"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.1.0-alpha.2",
+    "@jupyterlab/testing": "^4.2.0",
     "@types/jest": "^29.2.0",
     "jest": "^29.2.0",
-    "rimraf": "~3.0.0",
-    "typedoc": "~0.24.7",
-    "typescript": "~5.0.4"
+    "rimraf": "~5.0.5",
+    "typescript": "~5.1.6"
   },
   "publishConfig": {
     "access": "public"

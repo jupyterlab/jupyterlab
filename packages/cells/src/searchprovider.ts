@@ -131,11 +131,20 @@ class CodeCellSearchProvider extends CellSearchProvider {
     loop?: boolean,
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    if (this.matchesCount === 0 || !this.isActive) {
+    // If we're scanning from the previous match, test whether we're
+    // at the end of the matches list.
+    const from = options?.from ?? '';
+    if (
+      this.matchesCount === 0 ||
+      (from === 'previous-match' &&
+        this.currentIndex !== null &&
+        this.currentIndex + 1 >= this.cmHandler.matches.length) ||
+      !this.isActive
+    ) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
-        const match = await super.highlightNext(true, options);
+        const match = await super.highlightNext(loop, options);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
           return match;
@@ -317,7 +326,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * @returns The next match if there is one.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(
+    loop = true,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
     if (!this.isActive) {
       return match;
@@ -326,13 +338,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cell = this.cell as MarkdownCell;
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell
-      this._unrenderedByHighligh = true;
+      this._unrenderedByHighlight = true;
       const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
       await waitForRendered;
     }
 
-    match = await super.highlightNext();
+    match = await super.highlightNext(loop, options);
 
     return match;
   }
@@ -347,7 +359,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cell = this.cell as MarkdownCell;
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell if there are matches within the cell
-      this._unrenderedByHighligh = true;
+      this._unrenderedByHighlight = true;
       const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
       await waitForRendered;
@@ -397,10 +409,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param rendered New rendered value
    */
   protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
-    if (!this._unrenderedByHighligh) {
+    if (!this._unrenderedByHighlight) {
       this.currentIndex = null;
     }
-    this._unrenderedByHighligh = false;
+    this._unrenderedByHighlight = false;
     if (this.isActive) {
       if (rendered) {
         void this.renderedProvider.startQuery(this.query);
@@ -413,7 +425,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   protected renderedProvider: GenericSearchProvider;
-  private _unrenderedByHighligh = false;
+  private _unrenderedByHighlight = false;
 }
 
 /**

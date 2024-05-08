@@ -3,9 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Page } from '@playwright/test';
+import { ElementHandle, Locator, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+
+/**
+ * Filter directory content
+ *
+ * @param array Array of content models
+ * @returns Filtered array
+ */
+export function filterContent(array: any[]): any[] {
+  return array.filter(
+    item =>
+      item['type'] !== 'directory' ||
+      !(item['name'] as string).startsWith('test-')
+  );
+}
 
 /**
  * Generate a SVG arrow to inject in a HTML document.
@@ -74,12 +88,12 @@ export interface IPositionInElement {
 /**
  * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
  *
- * @param element A playwright handle for the target DOM element
+ * @param element A playwright handle or locator for the target DOM element
  * @param position A position within the target element (default: bottom right quarter).
  * @returns The svg to inject in the page
  */
 export async function positionMouseOver(
-  element: ElementHandle,
+  element: ElementHandle | Locator,
   position: IPositionInElement = {}
 ): Promise<string> {
   const top = position.top ?? 0.75;
@@ -91,39 +105,6 @@ export async function positionMouseOver(
     x: bBox.x + bBox.width * left + offsetLeft,
     y: bBox.y + bBox.height * top + offsetTop
   });
-}
-
-/**
- * Set the sidebar width
- *
- * @param page Page object
- * @param width Sidebar width in pixels
- * @param side Which sidebar to set: 'left' or 'right'
- */
-export async function setSidebarWidth(
-  page: Page,
-  width = 251,
-  side: 'left' | 'right' = 'left'
-): Promise<void> {
-  const handles = page.locator(
-    '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
-  );
-  const splitHandle =
-    side === 'left'
-      ? await handles.first().elementHandle()
-      : await handles.last().elementHandle();
-  const handleBBox = await splitHandle.boundingBox();
-
-  await page.mouse.move(
-    handleBBox.x + 0.5 * handleBBox.width,
-    handleBBox.y + 0.5 * handleBBox.height
-  );
-  await page.mouse.down();
-  await page.mouse.move(
-    side === 'left' ? 33 + width : page.viewportSize().width - 33 - width,
-    handleBBox.y + 0.5 * handleBBox.height
-  );
-  await page.mouse.up();
 }
 
 export async function stubGitHubUserIcons(page: Page): Promise<void> {

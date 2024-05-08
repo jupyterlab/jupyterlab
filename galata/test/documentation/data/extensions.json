@@ -5,7 +5,7 @@
     "homepage_url": "https://github.com/jupyterlab/jupyter-renderers",
     "enabled": true,
     "core": false,
-    "latest_version": "3.2.0",
+    "latest_version": "3.2.1",
     "installed_version": "3.2.0",
     "status": "ok",
     "pkg_type": "prebuilt",

@@ -20,6 +20,7 @@ import { CompletionHandler } from './handler';
 import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
+const INLINE_COMPLETER_ACTIVE_CLASS = 'jp-mod-inline-completer-active';
 const HOVER_CLASS = 'jp-InlineCompleter-hover';
 const PROGRESS_BAR_CLASS = 'jp-InlineCompleter-progressBar';
 
@@ -310,6 +311,8 @@ export class InlineCompleter extends Widget {
       // Cancel removing ghost text if our node is receiving focus
       return false;
     }
+    // The ghost text will be removed, so nothing to accept
+    this._editor?.host.classList.remove(INLINE_COMPLETER_ACTIVE_CLASS);
     // Hide the widget if editor was blurred.
     this.hide();
   }
@@ -328,6 +331,7 @@ export class InlineCompleter extends Widget {
       const editor = this.editor;
       if (editor) {
         this._ghostManager.clearGhosts((editor as CodeMirrorEditor).editor);
+        editor.host.classList.remove(INLINE_COMPLETER_ACTIVE_CLASS);
       }
     }
     this._updateStreamTracking();
@@ -414,6 +418,7 @@ export class InlineCompleter extends Widget {
       onPointerLeave: this._onPointerLeaveGhost.bind(this),
       isError: item.isError
     });
+    editor.host.classList.add(INLINE_COMPLETER_ACTIVE_CLASS);
   }
 
   private _onPointerOverGhost() {
@@ -496,9 +501,9 @@ export class InlineCompleter extends Widget {
 /**
  * Map between old and new inline completion position in the list.
  */
-type IndexMap = Map<number, number>;
+export type IndexMap = Map<number, number>;
 
-interface ISuggestionsChangedArgs {
+export interface ISuggestionsChangedArgs {
   /**
    * Whether completions were set (new query) or appended (for existing query)
    */

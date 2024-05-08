@@ -18,7 +18,7 @@ Code completer widget
 The code completer widget can be activated by pressing :kbd:`Tab` in a non-empty line of a code cell.
 
 To cycle completion candidates use:
-- :kbd:`Up`/:kbd:`Down` arrow keys or :kbd:`Tab`/:kbd:`Shift`+:kbd:`Shift` for cycling one item at a time
+- :kbd:`Up`/:kbd:`Down` arrow keys or :kbd:`Tab`/:kbd:`Shift` + :kbd:`Tab` for cycling one item at a time
 - :kbd:`Page Up`/:kbd:`Page Down` keys for jumping over multiple items at once
 
 To accept the active completion candidate pressing :kbd:`Enter`, or click on it with your mouse/pointer.

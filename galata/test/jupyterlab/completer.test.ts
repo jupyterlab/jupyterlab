@@ -13,7 +13,9 @@ test.describe('Completer', () => {
       await page.notebook.createNew(fileName);
     });
 
-    test('Open completer on notebook', async ({ page }) => {
+    test('Open completer on notebook and accept suggestion', async ({
+      page
+    }) => {
       await page.notebook.setCell(
         0,
         'code',
@@ -35,7 +37,11 @@ test.describe('Completer', () => {
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
       const imageName = 'completer.png';
-      expect(await completer.screenshot()).toMatchSnapshot(imageName);
+      expect.soft(await completer.screenshot()).toMatchSnapshot(imageName);
+      // Accept the completion
+      await page.keyboard.press('Enter');
+      const textAfter = await page.notebook.getCellTextInput(1);
+      expect(textAfter).toBe('option_1');
     });
 
     test('Show documentation panel', async ({ page, tmpPath }) => {
@@ -71,13 +77,21 @@ test.describe('Completer', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
+
+      // Throttle requests to catch loading bar
+      const session = await page.performance.throttleNetwork({
+        downloadThroughput: (500 * 1024) / 8,
+        uploadThroughput: (500 * 1024) / 8,
+        latency: 300
+      });
+
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
-      await page.waitForSelector('.jp-Completer-loading-bar');
-      await page.waitForSelector('.jp-Completer-loading-bar', {
-        state: 'detached'
-      });
+      await page
+        .locator('.jp-Completer-loading-bar')
+        .waitFor({ state: 'detached' });
+      await session?.detach();
       const imageName = 'completer-with-doc-panel.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
@@ -149,8 +163,8 @@ test.describe('Completer', () => {
 
       await page.click('button:has-text("Select")');
 
-      await page.waitForSelector('[aria-label="Code Cell Content"]');
-      await page.waitForSelector('text=| Idle');
+      await page.locator('[aria-label="Code Cell Content"]').waitFor();
+      await page.locator('text=| Idle').waitFor();
 
       await page.keyboard.type('import getopt\ngetopt.');
       await page.keyboard.press('Tab');

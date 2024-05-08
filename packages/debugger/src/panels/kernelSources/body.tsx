@@ -5,7 +5,7 @@ import React from 'react';
 
 import { openKernelSourceIcon } from '../../icons';
 
-import { ReactWidget, ToolbarButtonComponent } from '@jupyterlab/ui-components';
+import { classes, LabIcon, ReactWidget } from '@jupyterlab/ui-components';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
@@ -26,6 +26,11 @@ const FILTERBOX_CLASS = 'jp-DebuggerKernelSource-filterBox';
  * The class name added to hide the filterbox node.
  */
 const FILTERBOX_HIDDEN_CLASS = 'jp-DebuggerKernelSource-filterBox-hidden';
+
+/**
+ * The class for each source row.
+ */
+const SOURCE_CLASS = 'jp-DebuggerKernelSource-source';
 
 /**
  * The body for a Sources Panel.
@@ -53,7 +58,7 @@ export class KernelSourcesBody extends ReactWidget {
     return (
       <React.Fragment>
         <div className={filterClass} key={'filter'}>
-          <KernelSourcesFilter model={this._model} />
+          <KernelSourcesFilter model={this._model} trans={this._trans} />
         </div>
         <UseSignal signal={this._model.changed}>
           {(_, kernelSources) => {
@@ -63,12 +68,11 @@ export class KernelSourcesBody extends ReactWidget {
               const path = module.path;
               const key =
                 name + (keymap[name] = (keymap[name] ?? 0) + 1).toString();
-              const button = (
-                <ToolbarButtonComponent
+              return (
+                <div
                   key={key}
-                  icon={openKernelSourceIcon}
-                  label={name}
-                  tooltip={path}
+                  title={path}
+                  className={SOURCE_CLASS}
                   onClick={() => {
                     this._debuggerService
                       .getSource({
@@ -89,9 +93,15 @@ export class KernelSourcesBody extends ReactWidget {
                         );
                       });
                   }}
-                />
+                >
+                  <LabIcon.resolveReact
+                    icon={openKernelSourceIcon}
+                    iconClass={classes('jp-Icon')}
+                    tag={null}
+                  />
+                  {name}
+                </div>
               );
-              return button;
             });
           }}
         </UseSignal>

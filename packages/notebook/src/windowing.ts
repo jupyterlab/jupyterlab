@@ -3,13 +3,14 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Cell, CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import {
   WindowedLayout,
   WindowedList,
   WindowedListModel
 } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
+import { Debouncer } from '@lumino/polling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 
@@ -49,15 +50,49 @@ export class NotebookViewModel extends WindowedListModel {
    * @returns Cell height in pixels
    */
   estimateWidgetSize = (index: number): number => {
-    // TODO could be improved, takes only into account the editor height
-    const nLines = this.cells[index].model.sharedModel
-      .getSource()
-      .split('\n').length;
+    const model = this.cells[index].model;
+    const height = this.cellsEstimatedHeight.get(model.id);
+    if (typeof height === 'number') {
+      return height;
+    }
+
+    const nLines = model.sharedModel.getSource().split('\n').length;
+    let outputsLines = 0;
+    if (model instanceof CodeCellModel) {
+      for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
+        const output = model.outputs.get(outputIdx);
+        outputsLines = ((output.data['text/plain'] as string) ?? '').split(
+          '\n'
+        ).length;
+      }
+    }
     return (
-      NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * nLines +
+      NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * (nLines + outputsLines) +
       NotebookViewModel.DEFAULT_CELL_MARGIN
     );
   };
+
+  /**
+   * Set an estimated height for a cell
+   *
+   * @param cellId Cell ID
+   * @param size Cell height
+   */
+  setEstimatedWidgetSize(cellId: string, size: number | null): void {
+    if (size === null) {
+      if (this.cellsEstimatedHeight.has(cellId)) {
+        this.cellsEstimatedHeight.delete(cellId);
+      }
+    } else {
+      this.cellsEstimatedHeight.set(cellId, size);
+      this._emitEstimatedHeightChanged.invoke().catch(error => {
+        console.error(
+          'Fail to trigger an update following a estimated height update.',
+          error
+        );
+      });
+    }
+  }
 
   /**
    * Render the cell at index.
@@ -68,6 +103,37 @@ export class NotebookViewModel extends WindowedListModel {
   widgetRenderer = (index: number): Widget => {
     return this.cells[index];
   };
+
+  /**
+   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
+   * Defaults to scrolling when less than a full line of the cell is visible.
+   */
+  readonly scrollDownThreshold =
+    NotebookViewModel.DEFAULT_CELL_MARGIN / 2 +
+    NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT;
+
+  /**
+   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
+   * Defaults to scrolling when the cell margin or more is invisible.
+   */
+  readonly scrollUpThreshold = NotebookViewModel.DEFAULT_CELL_MARGIN / 2;
+
+  /**
+   * Mapping between the cell ids and the cell estimated heights
+   *
+   * This height is not refreshed with the changes to the document.
+   * It is only used to measure cells outside the viewport on CPU
+   * idle cycle to improve UX scrolling.
+   */
+  protected cellsEstimatedHeight = new Map<string, number>();
+
+  private _emitEstimatedHeightChanged = new Debouncer(() => {
+    this._stateChanged.emit({
+      name: 'estimatedWidgetSize',
+      newValue: null,
+      oldValue: null
+    });
+  });
 }
 
 /**
@@ -105,7 +171,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
     this._footer = footer;
     if (this._footer && this.parent?.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 
@@ -247,7 +313,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
     // Note: `index` is relative to the displayed cells, not all cells,
     // hence we compare with the widget itself.
-    if (widget === this.activeCell) {
+    if (widget === this.activeCell && widget !== this._willBeRemoved) {
       // Do not change display of the active cell to allow user to continue providing input
       // into the code mirror editor when out of view. We still hide the cell so to prevent
       // minor visual glitches when scrolling.
@@ -353,7 +419,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
       );
     }
     if (this._footer && !this._footer.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 

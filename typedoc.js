@@ -64,22 +64,20 @@ const packages = [
   'tooltip',
   'translation',
   'ui-components',
-  'vega5-extension'
+  'vega5-extension',
+  'workspaces'
 ];
 
 const entryPoints = packages
-  .flatMap(p => [`packages/${p}/src/index.ts`, `packages/${p}/src/index.tsx`])
+  .map(p => `packages/${p}`)
   .filter(function (path) {
     return fs.existsSync(path);
   });
 
-const exclude =
-  packages.flatMap(p => [`packages/${p}/test`]) +
-  ['packages/application-extension'];
-
 module.exports = {
   entryPoints,
-  exclude,
+  entryPointStrategy: 'packages',
+  includeVersion: false,
   externalSymbolLinkMappings: {
     '@codemirror/language': {
       LanguageSupport:
@@ -138,6 +136,12 @@ module.exports = {
       IPlugin:
         'https://lumino.readthedocs.io/en/latest/api/interfaces/application.IPlugin.html'
     },
+    '@lumino/commands': {
+      CommandRegistry:
+        'https://lumino.readthedocs.io/en/latest/api/classes/commands.CommandRegistry-1.html',
+      'CommandRegistry.ICommandOptions':
+        'https://lumino.readthedocs.io/en/latest/api/interfaces/commands.CommandRegistry.ICommandOptions.html'
+    },
     '@lumino/coreutils': {
       JSONObject:
         'https://lumino.readthedocs.io/en/latest/api/interfaces/coreutils.JSONObject.html',
@@ -179,6 +183,10 @@ module.exports = {
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.DockPanel-1.html',
       'DockPanel.IOptions':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.DockPanel.IOptions.html',
+      FocusTracker:
+        'https://lumino.readthedocs.io/en/latest/api/classes/widgets.FocusTracker-1.html',
+      'FocusTracker.IChangedArgs':
+        'https://lumino.readthedocs.io/en/latest/api/interfaces/widgets.FocusTracker.IChangedArgs.html',
       Menu: 'https://lumino.readthedocs.io/en/stable/api/classes/widgets.Menu-1.html',
       'Menu.IItem':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.Menu.IItem.html',
@@ -226,6 +234,5 @@ module.exports = {
   out: 'docs/source/api',
   readme: 'README.md',
   theme: 'default',
-  titleLink: 'https://jupyterlab.readthedocs.io/en/latest',
-  tsconfig: 'tsconfigdoc.json'
+  titleLink: 'https://jupyterlab.readthedocs.io/en/latest'
 };

@@ -27,14 +27,13 @@ jupyterlab/geckodriver
 jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
 jupyterlab/staging/webpack.config.js
+packages/codemirror/test/foo*.js
 packages/extensionmanager-extension/examples/listings
 packages/nbconvert-css/raw.js
 packages/services/dist
 packages/ui-components/src/icon/iconimports.ts
-tsconfigdoc.json
 
 #TypeDoc
-typedoc-theme/
 
 # jetbrains IDE stuff
 .idea/

@@ -228,6 +228,11 @@
         "command": "filemenu:create-console",
         "selector": "[data-type=\"document-title\"].jp-mod-current",
         "rank": 10
+      },
+      {
+        "command": "recentmenu:reopen-last",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
+        "rank": 6
       }
     ]
   },
@@ -270,22 +275,22 @@
     {
       "command": "kernelmenu:interrupt",
       "keys": ["I", "I"],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "kernelmenu:restart",
       "keys": ["0", "0"],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "kernelmenu:restart-and-clear",
       "keys": [""],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "kernelmenu:shutdown",
       "keys": [""],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "runmenu:restart-and-run-all",
@@ -305,6 +310,11 @@
     {
       "command": "tabsmenu:activate-previously-used-tab",
       "keys": ["Accel Shift '"],
+      "selector": "body"
+    },
+    {
+      "command": "recentmenu:reopen-last",
+      "keys": ["Accel Shift T"],
       "selector": "body"
     }
   ],

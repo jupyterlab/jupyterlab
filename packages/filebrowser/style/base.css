@@ -12,25 +12,21 @@
   --jp-private-filebrowser-button-width: 48px;
 }
 
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-
 .jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  flex-wrap: wrap;
-  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
   box-shadow: none;
   padding: 0;
-  justify-content: flex-start;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar::part(positioning-region) {
+  row-gap: 12px;
 }
 
 .jp-FileBrowser-Panel {
@@ -71,7 +67,6 @@
 .jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
-  padding-right: 2px;
   align-items: center;
   height: unset;
 }
@@ -102,6 +97,18 @@
 
 .jp-FileBrowser .lm-AccordionPanel > h3:first-child {
   display: none;
+}
+
+.jp-FileBrowser-toolbar > .jp-FileBrowser-filterBox {
+  width: 100%;
+}
+
+.jp-Open-Dialog > .jp-FileBrowser {
+  min-height: 200px;
+}
+
+.jp-Open-Dialog-label {
+  overflow: visible;
 }
 
 /*-----------------------------------------------------------------------------
@@ -137,13 +144,48 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 84px;
+  flex: 1 1 126px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 112px;
+  flex: 1 0 70px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
+  /* stylelint-disable */
+  container-type: inline-size;
+  /* stylelint-enable */
+}
+
+/**
+ * Use container queries (not yet supported by our version of stylelint)
+ * to display either a small or large header for the last-modified column.
+ */
+/* stylelint-disable */
+@container (max-width: 300px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (min-width: 300px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    display: inline;
+  }
 }
 
 .jp-DirListing-headerItem.jp-id-filesize {
@@ -269,26 +311,32 @@
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 64px;
+  flex: 1 1 106px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
 }
 
-.jp-DirListing-itemText:focus {
+.jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
+  /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
+  when it gets replaced with `jp-DirListing-editor` when editing the file name */
   outline-width: 2px;
   outline-color: var(--jp-inverse-layout-color1);
   outline-style: solid;
-  outline-offset: 1px;
+  outline-offset: -4px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+.jp-DirListing-item.jp-mod-selected:focus-within {
   outline-color: var(--jp-layout-color1);
 }
 
+.jp-DirListing-item > .jp-DirListing-itemText:focus {
+  outline: 0;
+}
+
 .jp-DirListing-itemModified {
-  flex: 0 0 125px;
+  flex: 1 0 83px;
   text-align: right;
 }
 

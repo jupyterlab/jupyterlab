@@ -6,6 +6,42 @@
 Extension Migration Guide
 ================================================
 
+
+JupyterLab 4.1 to 4.2
+---------------------
+
+API updates
+^^^^^^^^^^^
+
+- The ``CodeEditor.ICoordinate`` interface was corrected to not include ``toJSON()``, ``x``, ``y``,
+  ``width`` and ``height``; these properties were never set by methods returning ``ICoordinate``
+  and they were never used by methods accepting it.
+- ``CodeEditor.getCoordinateForPosition`` return type was corrected to clarify that it can return
+  ``null``; previously ``null`` could be returned despite the return type indicating it would always
+  return a non-null ``ICoordinate`` value.
+- The commands ``workspace-ui:save`` and ``workspace-ui:save-as`` were moved
+  from the ``@jupyterlab/apputils-extension:workspaces`` plugin to a new dedicated
+  ``@jupyterlab/workspaces-extension`` package and can be explicitly required by
+  requesting the ``IWorkspaceCommands`` token. This token is by default provided
+  by the new ``@jupyterlab/workspaces-extension:commands`` plugin.
+  The ``@jupyterlab/apputils-extension:workspaces`` plugin now only defines the
+  workspace MIME type renderer used to open files with ``.jupyterlab-workspace``
+  extension as JupyterLab workspaces.
+- The cell toolbar node has been moved from the cell node to the cell input node.
+  Therefore the parent of the cell toolbar has changed and can not be used directly to
+  retrieve the corresponding cell node anymore.
+
+Shortcuts extension rework
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``@jupyterlab/shortcuts-extension`` package was reworked to fix multiple bugs and increase type safety.
+While this package does not expose any programmatic APIs, and changes to the theming were minimal,
+the major version of the package was increased to 5.0 to reflect the extend of the changes.
+
+No action is required from extension authors (unless you used non-public components from `/lib`),
+however the authors of applications built on top of JupyterLab components are encouraged to upgrade
+to this new version as it can significantly improve the user experience.
+
 JupyterLab 4.0 to 4.1
 ---------------------
 
@@ -26,6 +62,104 @@ lock individual plugins as required.
 If your extension previously included a custom enable/disable setting, you may be able to replace it
 with instructions pointing users to the Plugin Manager. However, please consider whether your extension
 may be used in distributions which do not include Plugin Manager or have it disabled.
+
+Use of UI toolkit for Toolbar and ToolbarButtonComponent
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now relies on the external library
+`jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
+This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
+and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
+
+See https://github.com/jupyterlab/frontends-team-compass/issues/143 for more context on the change.
+
+- Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
+
+  - The DOM of ``Toolbar`` is now a ``jp-toolbar`` component instead of a ``div``.
+
+  - The DOM of ``ToolbarButtonComponent`` is now ``jp-button`` element instead of a ``button``.
+
+    This must be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
+    and cannot be accessed as a child of the toolbar component.
+
+  - The icon in the ``ToolbarButtonComponent`` is a direct child of the ``jp-button`` component.
+
+    The icon was previously encapsulated in a span with the class ``.jp-ToolbarButtonComponent-icon``.
+    Accessing that icon to change its properties require now something like ``jp-button > svg``.
+
+- If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+
+  They need to be ignored when transforming the code with Jest. You will need to update the
+  ``transformIgnorePatterns`` to add:
+
+  .. code::
+
+    const esModules = [
+      '@microsoft',
+      '@jupyter/react-components',
+      '@jupyter/web-components',
+      'exenv-es6',
+      ...
+    ].join('|');
+
+- Some CSS rules for ``button`` with the class ``.jp-ToolbarButtonComponent`` has been kept for backward compatibility.
+
+  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  The ``button`` elements in toolbars must be updated to ``jp-button``, from
+  `jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
+CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- The class ``.jp-WindowedPanel-window`` has been renamed to ``.jp-WindowedPanel-viewport``.
+- The notebook scroll container is now ``.jp-WindowedPanel-outer`` rather than ``.jp-Notebook``
+- Galata notebook helpers `getCell` and `getCellCount` were updated accordingly
+
+
+Change of notebook focus handling impacting command-mode shortcut selectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Previously, focus in the notebook would revert to the notebook HTML node
+when switching to command mode, which was preventing :kbd:`Tab` navigation
+between cells, especially impacting users with accessibility needs.
+In JupyterLab 4.1+ the focus stays on the active cell when switching to command
+mode; this requires all shortcut selectors to be adjusted as follows:
+
+- ``.jp-Notebook:focus.jp-mod-commandMode``, ``.jp-Notebook:focus``, and ``[data-jp-traversable]:focus`` should be replaced with:
+  - ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus`` for JupyterLab 4.1.1+
+- ``[data-jp-kernel-user]:focus`` should be replaced with:
+  - ``[data-jp-kernel-user] :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)`` for JupyterLab 4.1.1+
+
+Please note that ``:not(:read-write)`` fragment disables shortcuts
+when text fields  (such as cell editor) are focused to avoid intercepting
+characters typed by the user into the text fields, however if your shortcut
+does not correspond to any key/typographic character (e.g. most shortcuts
+with :kbd:`Ctrl` modifier) you may prefer to drop this fragment
+if you want the shortcut to be active in text fields.
+
+Further, JupyterLab 4.1.1 introduced indicator class ``.jp-mod-readWrite``
+that is applied to the notebook node when the active element accepts
+keyboard input as defined by ``:read-write`` selector. This indicator
+class is required to detect ``:read-write`` elements which are nested
+within an *open* shadow DOM (such as Panel framework widgets).
+
+If your framework uses a *closed* shadow DOM, or expects keyboard
+interactions on elements that are not recognised as editable by browser
+heuristics of ``:read-write`` selector, you need to set a data attribute
+`lm-suppress-shortcuts` on the outer host element to suppress shortcuts.
+
+To prevent breaking the user experience these changes are made transparently
+in the background, but will emit a warning and extension developers should
+make the change at the source before the next major JupyterLab release.
+
+
+Visibility of ``StatusBar`` elements at high magnifications
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Statusbar items are now hidden by default at high magnification/low resolution to prevent overlap for those using the application at high magnifications.
+- An additional ``priority`` property has been added to the options of ``IStatusBar.registerStatusItem`` method to allow the status bar item to remain visible;
+  the intended usage is for small statusbar items that either add functionality that would be particularly useful at high zoom or is inaccessible otherwise.
 
 JupyterLab 3.x to 4.x
 ---------------------
@@ -48,15 +182,14 @@ First, make sure to update to JupyterLab 4 and install ``copier`` and some depen
 
 .. code:: bash
 
-   pip install -U jupyterlab
-   pip install "copier~=8.0" jinja2-time tomli-w
+   pip install -U jupyterlab[upgrade-extension]
 
 
 Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=4 "copier=8" jinja2-time tomli-w
+   conda install -c conda-forge jupyterlab=4 "copier=8" jinja2-time tomli-w "pydantic<2" "pyyaml-include<2.0"
 
 
 Then at the root folder of the extension, run:
@@ -104,7 +237,7 @@ package configuration.
 .. note::
 
    You can find more information on upgrading Yarn from version 1 to version 3 in
-   [Yarn documentation](https://v3.yarnpkg.com/getting-started/migration).
+   `Yarn documentation <https://v3.yarnpkg.com/getting-started/migration>`_.
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
 TypeScript may complain that the types are not matching. One possible solution

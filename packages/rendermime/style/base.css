@@ -31,17 +31,17 @@
   padding: 0;
 }
 
-.jp-RenderedText pre a:link {
+.jp-RenderedText pre a[href]:link {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }
 
-.jp-RenderedText pre a:hover {
+.jp-RenderedText pre a[href]:hover {
   text-decoration: underline;
   color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
 }
 
-.jp-RenderedText pre a:visited {
+.jp-RenderedText pre a[href]:visited {
   text-decoration: none;
   color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
 }
@@ -283,6 +283,7 @@
   font-style: normal;
   margin: var(--jp-content-heading-margin-top) 0
     var(--jp-content-heading-margin-bottom) 0;
+  scroll-margin-top: var(--jp-content-heading-margin-top);
 }
 
 .jp-RenderedHTMLCommon h1:first-child,
@@ -292,6 +293,7 @@
 .jp-RenderedHTMLCommon h5:first-child,
 .jp-RenderedHTMLCommon h6:first-child {
   margin-top: calc(0.5 * var(--jp-content-heading-margin-top));
+  scroll-margin-top: calc(0.5 * var(--jp-content-heading-margin-top));
 }
 
 .jp-RenderedHTMLCommon h1:last-child,
@@ -585,7 +587,7 @@
 a.jp-InternalAnchorLink {
   visibility: hidden;
   margin-left: 8px;
-  color: var(--md-blue-800);
+  color: var(--md-blue-800, #1565c0);
 }
 
 h1:hover .jp-InternalAnchorLink,

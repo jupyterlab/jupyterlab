@@ -423,7 +423,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-
         searchViews.get(currentWidget.id)?.close();
       }
     });
@@ -448,6 +447,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         const currentValue = model.filters['selection'];
         return model.setFilter('selection', !currentValue);
       }
+    });
+
+    app.shell.currentChanged?.connect(() => {
+      Object.values(CommandIDs).forEach(cmd => {
+        app.commands.notifyCommandChanged(cmd);
+      });
     });
 
     // Add the command to the palette.

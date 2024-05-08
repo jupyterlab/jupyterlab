@@ -37,25 +37,8 @@
   display: block;
 }
 
-.jp-Notebook-toolbarCellTypeDropdown span {
-  top: 5px !important;
-}
-
-.jp-Toolbar-responsive-popup {
-  position: absolute;
-  height: fit-content;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
-  box-shadow: var(--jp-toolbar-box-shadow);
-  background: var(--jp-toolbar-background);
-  min-height: var(--jp-toolbar-micro-height);
-  padding: var(--jp-notebook-toolbar-padding);
-  z-index: 1;
-  right: 0;
-  top: 0;
+.jp-Notebook-toolbarCellTypeDropdown select:focus-visible {
+  outline-color: var(--accent-fill-focus);
 }
 
 .jp-Toolbar > .jp-Toolbar-responsive-opener {

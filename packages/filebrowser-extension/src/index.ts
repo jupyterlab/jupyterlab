@@ -40,7 +40,7 @@ import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
   closeIcon,
@@ -62,13 +62,12 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { find, map } from '@lumino/algorithm';
+import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
-
 /**
  * The class name added to the filebrowser filterbox node.
  */
@@ -135,6 +134,8 @@ namespace CommandIDs {
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
+  export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
+
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
   export const toggleSortNotebooksFirst =
@@ -155,7 +156,7 @@ const namespace = 'filebrowser';
 /**
  * The default file browser extension.
  */
-const browser: JupyterFrontEndPlugin<void> = {
+const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
   id: FILE_BROWSER_PLUGIN_ID,
   description: 'Set up the default file browser (commands, settings,...).',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
@@ -176,7 +177,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
-  ): Promise<void> => {
+  ): Promise<IFileBrowserCommands> => {
     const browser = defaultFileBrowser;
 
     // Let the application restorer track the primary file browser (that is
@@ -204,7 +205,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       commandPalette
     );
 
-    return void Promise.all([app.restored, browser.model.restored]).then(() => {
+    void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
           treePathUpdater(args.newValue);
@@ -222,7 +223,8 @@ const browser: JupyterFrontEndPlugin<void> = {
             showFileSizeColumn: false,
             showHiddenFiles: false,
             showFileCheckboxes: false,
-            sortNotebooksFirst: false
+            sortNotebooksFirst: false,
+            showFullPath: false
           };
           const fileBrowserModelConfig = {
             filterDirectories: true
@@ -248,6 +250,9 @@ const browser: JupyterFrontEndPlugin<void> = {
         });
       }
     });
+    return {
+      openPath: CommandIDs.openPath
+    };
   }
 };
 
@@ -310,21 +315,50 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
-  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
+  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell, ITranslator],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    translator: ITranslator | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
 
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
       restore: false
     });
+
+    // Set attributes when adding the browser to the UI
+    defaultBrowser.node.setAttribute('role', 'region');
+    defaultBrowser.node.setAttribute(
+      'aria-label',
+      trans.__('File Browser Section')
+    );
+    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
+    defaultBrowser.title.icon = folderIcon;
+
+    // Show the current file browser shortcut in its title.
+    const updateBrowserTitle = () => {
+      const binding = app.commands.keyBindings.find(
+        b => b.command === CommandIDs.toggleBrowser
+      );
+      if (binding) {
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
+        defaultBrowser.title.caption = trans.__('File Browser (%1)', ks);
+      } else {
+        defaultBrowser.title.caption = trans.__('File Browser');
+      }
+    };
+    updateBrowserTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateBrowserTitle();
+    });
+
     void Private.restoreBrowser(
       defaultBrowser,
       commands,
@@ -430,29 +464,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
-
-    // Set attributes when adding the browser to the UI
-    browser.node.setAttribute('role', 'region');
-    browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
-    browser.title.icon = folderIcon;
-
-    // Show the current file browser shortcut in its title.
-    const updateBrowserTitle = () => {
-      const binding = find(
-        app.commands.keyBindings,
-        b => b.command === CommandIDs.toggleBrowser
-      );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        browser.title.caption = trans.__('File Browser (%1)', ks);
-      } else {
-        browser.title.caption = trans.__('File Browser');
-      }
-    };
-    updateBrowserTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateBrowserTitle();
-    });
 
     // Toolbar
     toolbarRegistry.addFactory(
@@ -1214,7 +1225,7 @@ function addCommands(
       }
 
       if (PageConfig.getOption('copyAbsolutePath') === 'true') {
-        const absolutePath = PathExt.join(
+        const absolutePath = PathExt.joinWithLeadingSlash(
           PageConfig.getOption('serverRoot') ?? '',
           item.value.path
         );
@@ -1250,6 +1261,22 @@ function addCommands(
     execute: () => {
       const value = !browser.showLastModifiedColumn;
       const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleShowFullPath, {
+    label: trans.__('Show Full Path'),
+    isToggled: () => browser.showFullPath,
+    execute: () => {
+      const value = !browser.showFullPath;
+      const key = 'showFullPath';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)

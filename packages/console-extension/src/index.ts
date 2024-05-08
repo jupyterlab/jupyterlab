@@ -29,14 +29,23 @@ import {
   IPositionModel
 } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import {
+  ConsolePanel,
+  IConsoleCellExecutor,
+  IConsoleTracker
+} from '@jupyterlab/console';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { consoleIcon, IFormRendererRegistry } from '@jupyterlab/ui-components';
+import {
+  consoleIcon,
+  IFormRendererRegistry,
+  redoIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import {
   JSONExt,
@@ -48,6 +57,7 @@ import {
 import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
+import { cellExecutor } from './cellexecutor';
 
 /**
  * The command IDs used by the console plugin.
@@ -79,15 +89,15 @@ namespace CommandIDs {
 
   export const getKernel = 'console:get-kernel';
 
-  export const enterToExecute = 'console:enter-to-execute';
-
-  export const shiftEnterToExecute = 'console:shift-enter-to-execute';
-
   export const interactionMode = 'console:interaction-mode';
+
+  export const redo = 'console:redo';
 
   export const replaceSelection = 'console:replace-selection';
 
   export const shutdown = 'console:shutdown';
+
+  export const undo = 'console:undo';
 
   export const invokeCompleter = 'completer:invoke-console';
 
@@ -104,6 +114,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   requires: [
     ConsolePanel.IContentFactory,
     IEditorServices,
+    IConsoleCellExecutor,
     IRenderMimeRegistry,
     ISettingRegistry
   ],
@@ -232,7 +243,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   foreign,
   kernelStatus,
   lineColStatus,
-  completerPlugin
+  completerPlugin,
+  cellExecutor
 ];
 export default plugins;
 
@@ -243,6 +255,7 @@ async function activateConsole(
   app: JupyterFrontEnd,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
+  executor: IConsoleCellExecutor,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
@@ -371,6 +384,7 @@ async function activateConsole(
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
       sessionDialogs,
+      executor,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
@@ -485,8 +499,7 @@ async function activateConsole(
     activate?: boolean;
   }
 
-  let command = CommandIDs.open;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.open, {
     label: trans.__('Open a console for the provided `path`.'),
     execute: (args: IOpenOptions) => {
       const path = args['path'];
@@ -512,8 +525,7 @@ async function activateConsole(
     }
   });
 
-  command = CommandIDs.create;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.create, {
     label: args => {
       if (args['isPalette']) {
         return trans.__('New Console');
@@ -549,6 +561,74 @@ async function activateConsole(
     }
     return widget ?? null;
   }
+
+  /**
+   * Add undo command
+   */
+  commands.addCommand(CommandIDs.undo, {
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (!current) {
+        return;
+      }
+
+      const editor = current.console.promptCell?.editor;
+      if (!editor) {
+        return;
+      }
+      editor.undo();
+    },
+    isEnabled: args => {
+      if (!isEnabled()) {
+        return false;
+      }
+
+      const editor = getCurrent(args)?.console?.promptCell?.editor;
+
+      if (!editor) {
+        return false;
+      }
+
+      return editor.model.sharedModel.canUndo();
+    },
+    icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Undo')
+  });
+
+  /**
+   * Add redo command
+   */
+  commands.addCommand(CommandIDs.redo, {
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (!current) {
+        return;
+      }
+
+      const editor = current.console.promptCell?.editor;
+      if (!editor) {
+        return;
+      }
+      editor.redo();
+    },
+    isEnabled: args => {
+      if (!isEnabled()) {
+        return false;
+      }
+
+      const editor = getCurrent(args)?.console?.promptCell?.editor;
+
+      if (!editor) {
+        return false;
+      }
+
+      return editor.model.sharedModel.canRedo();
+    },
+    icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Redo')
+  });
 
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
@@ -732,6 +812,17 @@ async function activateConsole(
     isEnabled
   });
 
+  // All commands with isEnabled defined directly or in a semantic commands
+
+  const skip = [CommandIDs.create];
+  const notify = () => {
+    Object.values(CommandIDs)
+      .filter(id => !skip.includes(id))
+      .forEach(id => app.commands.notifyCommandChanged(id));
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
+
   if (palette) {
     // Add command palette items
     [
@@ -787,6 +878,16 @@ async function activateConsole(
     // Add a clearer to the edit menu
     mainMenu.editMenu.clearers.clearCurrent.add({
       id: CommandIDs.clear,
+      isEnabled
+    });
+
+    // Add undo/redo hooks to the edit menu.
+    mainMenu.editMenu.undoers.redo.add({
+      id: CommandIDs.redo,
+      isEnabled
+    });
+    mainMenu.editMenu.undoers.undo.add({
+      id: CommandIDs.undo,
       isEnabled
     });
 

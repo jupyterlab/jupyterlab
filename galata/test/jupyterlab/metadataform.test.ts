@@ -17,9 +17,7 @@ test.use({
   tmpPath: 'metadataform-test',
   waitForApplication: async ({ baseURL }, use, testInfo) => {
     const simpleWait = async (page: Page): Promise<void> => {
-      await page.waitForSelector('#jupyterlab-splash', {
-        state: 'detached'
-      });
+      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
     };
     void use(simpleWait);
   }
@@ -544,6 +542,10 @@ test.describe('Notebook level and cell type metadata', () => {
     // Open the Notebook.
     await page.goto(baseURL);
     await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+
+    // Close the sidebar to avoid clicking on the cell toolbar when expecting
+    // clicking in the cell editor.
+    await page.sidebar.close('left');
 
     // Create a Markdown cell and select it.
     await page.notebook.addCell('markdown', 'Markdown cell');

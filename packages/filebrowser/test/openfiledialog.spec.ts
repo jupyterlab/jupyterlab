@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
+import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
@@ -21,6 +21,7 @@ describe('@jupyterlab/filebrowser', () => {
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
+  let testDirectory: string;
 
   beforeAll(async () => {
     const opener = new DocumentWidgetOpenerMock();
@@ -36,9 +37,14 @@ describe('@jupyterlab/filebrowser', () => {
     });
 
     const contents = serviceManager.contents;
-    await contents.newUntitled({ type: 'directory' });
+    const directory = await contents.newUntitled({ type: 'directory' });
     await contents.newUntitled({ type: 'file' });
     await contents.newUntitled({ type: 'notebook' });
+
+    // Place a notebook and directory within the test directory (to test defaultPath)
+    testDirectory = directory.path;
+    await contents.newUntitled({ type: 'notebook', path: testDirectory });
+    await contents.newUntitled({ type: 'directory', path: testDirectory });
   });
 
   describe('FilterFileBrowserModel', () => {
@@ -223,6 +229,56 @@ describe('@jupyterlab/filebrowser', () => {
       expect(items[0].type).toBe('directory');
       expect(items[0].path).toBe('');
     });
+
+    it('should return one selected file whose path matches default path', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const dialog = FileDialog.getOpenFiles({
+        manager,
+        title: 'Select a notebook',
+        host: node,
+        defaultPath: testDirectory,
+        filter: (value: Contents.IModel) =>
+          value.type === 'notebook' ? {} : null
+      });
+
+      await waitForDialog();
+      await framePromise();
+
+      let counter = 0;
+      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      expect(listing).toBeTruthy();
+
+      let items = listing.getElementsByTagName('li');
+      counter = 0;
+      // Wait for the directory listing to be populated
+      while (items.length === 0 && counter < 100) {
+        await sleep(10);
+        items = listing.getElementsByTagName('li');
+        counter++;
+      }
+
+      // Fails if there is no items shown
+      expect(items.length).toBeGreaterThan(0);
+
+      // Emulate notebook file selection
+      const item = listing.querySelector('li[data-file-type="notebook"]')!;
+      simulate(item, 'mousedown');
+
+      await acceptDialog();
+      const result = await dialog;
+      const files = result.value!;
+      expect(files.length).toBe(1);
+      expect(files[0].type).toBe('notebook');
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
+
+      const fileDirectory = PathExt.dirname(files[0].path);
+      expect(fileDirectory).toEqual(testDirectory);
+
+      document.body.removeChild(node);
+    });
   });
 
   describe('FileDialog.getExistingDirectory()', () => {
@@ -317,6 +373,54 @@ describe('@jupyterlab/filebrowser', () => {
       expect(items.length).toBe(1);
       expect(items[0].type).toBe('directory');
       expect(items[0].path).toBe('');
+    });
+
+    it('should return one selected directory whose path matches default path', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const dialog = FileDialog.getExistingDirectory({
+        manager,
+        title: 'Select a folder',
+        host: node,
+        defaultPath: testDirectory
+      });
+
+      await waitForDialog();
+      await framePromise();
+
+      let counter = 0;
+      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      expect(listing).toBeTruthy();
+
+      let items = listing.getElementsByTagName('li');
+      // Wait for the directory listing to be populated
+      while (items.length === 0 && counter < 100) {
+        await sleep(10);
+        items = listing.getElementsByTagName('li');
+        counter++;
+      }
+
+      // Fails if there is no items shown
+      expect(items.length).toBeGreaterThan(0);
+
+      // Emulate notebook file selection
+      simulate(items.item(items.length - 1)!, 'mousedown');
+
+      await acceptDialog();
+      const result = await dialog;
+      const files = result.value!;
+      expect(files.length).toBe(1);
+      expect(files[0].type).toBe('directory');
+      expect(files[0].name).toEqual(
+        expect.stringMatching(/Untitled Folder( \d+)?/)
+      );
+
+      const parentDirectory = PathExt.dirname(files[0].path);
+      expect(parentDirectory).toEqual(testDirectory);
+
+      document.body.removeChild(node);
     });
   });
 });

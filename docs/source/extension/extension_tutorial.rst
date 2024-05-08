@@ -66,7 +66,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=18 git copier=7 jinja2-time
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=20 git copier=7 jinja2-time
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -196,9 +196,14 @@ JupyterLab:
 
     jupyter labextension develop --overwrite .
 
-.. note::
+.. _important-for-windows-users:
 
-   On Windows, symbolic links can be activated on Windows 10 or above for Python version 3.8 or higher
+Important for Windows users
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. important::
+
+   On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
    by activating the 'Developer Mode'. That may not be allowed by your administrators.
    See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
    for instructions.

@@ -1,29 +1,40 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, Handle, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
-const sidebarIds: galata.SidebarTabId[] = [
-  'filebrowser',
-  'jp-property-inspector',
-  'jp-running-sessions',
-  'table-of-contents',
-  'extensionmanager.main-view'
-];
+import { Locator } from '@playwright/test';
+
+const sidebarElementIds = {
+  'left-sidebar': [
+    'filebrowser',
+    'jp-running-sessions',
+    'table-of-contents',
+    'extensionmanager.main-view'
+  ],
+  'right-sidebar': ['jp-property-inspector', 'jp-debugger-sidebar']
+};
+
+const sidebarIds: galata.SidebarTabId[] = sidebarElementIds[
+  'left-sidebar'
+].concat(sidebarElementIds['right-sidebar']);
+
+test.use({
+  mockState: true
+});
 
 /**
  * Add provided text as label on first tab in given tabbar.
  * By default we only have icons, but we should test for the
  * styling of labels which are used downstream (e.g. sidecar).
  */
-async function mockLabelOnFirstTab(tabbar: Handle, text: string) {
-  await tabbar.$eval(
-    '.lm-TabBar-tabLabel',
-    (node: HTMLElement, text: string) => {
+async function mockLabelOnFirstTab(tabbar: Locator, text: string) {
+  await tabbar
+    .locator('.lm-TabBar-tabLabel')
+    .first()
+    .evaluate((node: HTMLElement, text: string) => {
       node.innerText = text;
-    },
-    text
-  );
+    }, text);
 }
 
 test.describe('Sidebars', () => {
@@ -34,7 +45,9 @@ test.describe('Sidebars', () => {
 
       const imageName = `opened-sidebar-${sidebarId.replace('.', '-')}.png`;
       const position = await page.sidebar.getTabPosition(sidebarId);
-      const sidebar = await page.sidebar.getContentPanel(position);
+      const sidebar = page.sidebar.getContentPanelLocator(
+        position ?? undefined
+      );
       expect(await sidebar.screenshot()).toMatchSnapshot(
         imageName.toLowerCase()
       );
@@ -44,11 +57,14 @@ test.describe('Sidebars', () => {
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
     const clickMenuItem = async (command): Promise<void> => {
-      const contextmenu = await page.menu.openContextMenu(
+      const contextmenu = await page.menu.openContextMenuLocator(
         '.jp-DirListing-headerItem'
       );
-      const item = await page.menu.getMenuItemInMenu(contextmenu, command);
-      await item.click();
+      const item = await page.menu.getMenuItemLocatorInMenu(
+        contextmenu,
+        command
+      );
+      await item?.click();
     };
     await clickMenuItem('Show File Checkboxes');
     await clickMenuItem('Show File Size Column');
@@ -56,7 +72,6 @@ test.describe('Sidebars', () => {
     await page.notebook.createNew('notebook.ipynb');
 
     const unusedRules = await page.style.findUnusedStyleRules({
-      page,
       fragments: ['jp-DirListing', 'jp-FileBrowser'],
       exclude: [
         // active during renaming
@@ -66,7 +81,9 @@ test.describe('Sidebars', () => {
         // filtering results
         '.jp-DirListing-content mark',
         // only added after resizing
-        'jp-DirListing-narrow'
+        'jp-DirListing-narrow',
+        // used in "open file" dialog containing a file browser
+        '.jp-Open-Dialog'
       ]
     });
     expect(unusedRules.length).toEqual(0);
@@ -75,7 +92,7 @@ test.describe('Sidebars', () => {
   test('Left light tabbar (with text)', async ({ page }) => {
     await page.theme.setLightTheme();
     const imageName = 'left-light-tabbar-with-text.png';
-    const tabbar = await page.sidebar.getTabBar();
+    const tabbar = page.sidebar.getTabBarLocator();
     await mockLabelOnFirstTab(tabbar, 'File Browser');
     expect(await tabbar.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
@@ -83,7 +100,7 @@ test.describe('Sidebars', () => {
   test('Right dark tabbar (with text)', async ({ page }) => {
     await page.theme.setDarkTheme();
     const imageName = 'right-dark-tabbar-with-text.png';
-    const tabbar = await page.sidebar.getTabBar('right');
+    const tabbar = page.sidebar.getTabBarLocator('right');
     await mockLabelOnFirstTab(tabbar, 'Property Inspector');
     expect(await tabbar.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
@@ -132,9 +149,8 @@ test.describe('Sidebars', () => {
     const runningSessionsWidget = page.locator('#jp-running-sessions');
     const runningSessionsElementAriaLabel =
       await runningSessionsWidget.getAttribute('aria-label');
-    const runningSessionsElementRole = await runningSessionsWidget.getAttribute(
-      'role'
-    );
+    const runningSessionsElementRole =
+      await runningSessionsWidget.getAttribute('role');
     expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
     expect(runningSessionsElementRole).toEqual('region');
   });
@@ -161,9 +177,8 @@ test.describe('Sidebars', () => {
   }) => {
     await page.sidebar.open('left');
     const fileBrowserWidget = page.locator('#filebrowser');
-    const fileBrowserElementAriaLabel = await fileBrowserWidget.getAttribute(
-      'aria-label'
-    );
+    const fileBrowserElementAriaLabel =
+      await fileBrowserWidget.getAttribute('aria-label');
     const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
     expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
     expect(fileBrowserElementRole).toEqual('region');
@@ -174,9 +189,8 @@ test.describe('Sidebars', () => {
   }) => {
     await page.sidebar.open('right');
     const debuggerWidget = page.locator('#jp-debugger-sidebar');
-    const debuggerElementAriaLabel = await debuggerWidget.getAttribute(
-      'aria-label'
-    );
+    const debuggerElementAriaLabel =
+      await debuggerWidget.getAttribute('aria-label');
     const debuggerElementRole = await debuggerWidget.getAttribute('role');
     expect(debuggerElementAriaLabel).toEqual('Debugger section');
     expect(debuggerElementRole).toEqual('region');
@@ -189,12 +203,84 @@ test.describe('Sidebars', () => {
     const tableOfContentsWidget = page.locator('#table-of-contents');
     const tableOfContentsElementAriaLabel =
       await tableOfContentsWidget.getAttribute('aria-label');
-    const tableOfContentsElementRole = await tableOfContentsWidget.getAttribute(
-      'role'
-    );
+    const tableOfContentsElementRole =
+      await tableOfContentsWidget.getAttribute('role');
     expect(tableOfContentsElementAriaLabel).toEqual(
       'Table of Contents section'
     );
     expect(tableOfContentsElementRole).toEqual('region');
+  });
+});
+
+const elementAriaLabels = {
+  'jp-running-sessions': [
+    'Open Tabs Section',
+    'Kernels Section',
+    'Language servers Section',
+    'Recently Closed Section',
+    'Workspaces Section',
+    'Terminals Section'
+  ],
+  'jp-debugger-sidebar': [
+    'Variables Section',
+    'Callstack Section',
+    'Breakpoints Section',
+    'Source Section',
+    'Kernel Sources Section'
+  ],
+  'extensionmanager.main-view': [
+    'Warning Section',
+    'Installed Section',
+    'Discover Section'
+  ]
+};
+
+test.describe('Sidebar keyboard navigation @a11y', () => {
+  Object.keys(sidebarElementIds).forEach(sideBar => {
+    test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
+      const keyValueArray: string[] = sidebarElementIds[sideBar];
+
+      for (let dataId of keyValueArray) {
+        await page.goto();
+        await page.sidebar.close('right');
+        await page.sidebar.close('left');
+        await page.activity.keyToElement(
+          `[data-id='${keyValueArray[0]}']`,
+          'Tab'
+        );
+
+        await page.activity.keyToElement(`[data-id='${dataId}']`, 'ArrowDown');
+
+        await page.keyboard.press('Enter');
+
+        expect(await page.sidebar.isTabOpen(dataId)).toEqual(true);
+      }
+    });
+  });
+
+  Object.keys(elementAriaLabels).forEach(tabName => {
+    test(`Open accordion panels ${tabName} via keyboard navigation`, async ({
+      page
+    }) => {
+      await page.sidebar.openTab(tabName);
+
+      const keyValueArray: string[] = elementAriaLabels[tabName];
+
+      for (let ariaLabel of keyValueArray) {
+        const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
+        let initialState = await elementLocator.getAttribute('aria-expanded');
+
+        await page.activity.keyToElement(`[aria-label='${ariaLabel}']`, 'Tab');
+        await page.keyboard.press('Enter');
+        let stateAfter = await elementLocator.getAttribute('aria-expanded');
+
+        expect(initialState).not.toEqual(stateAfter);
+
+        await page.keyboard.press('Enter');
+        let finalState = await elementLocator.getAttribute('aria-expanded');
+
+        expect(initialState).toEqual(finalState);
+      }
+    });
   });
 });

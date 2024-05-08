@@ -104,6 +104,9 @@ namespace CommandIDs {
 
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
+  export const toggleSidebarWidget: string =
+    'application:toggle-sidebar-widget';
+
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
 
@@ -201,6 +204,37 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       return widgets.slice(index + 1);
     };
 
+    // Gets and returns the dataId of currently active tab in the specified sidebar (left or right)
+    // or an empty string
+    const activeSidePanelWidget = (side: string): string => {
+      // default active element is luancher (luancher-0)
+      let activeTab;
+      if (side != 'left' && side != 'right') {
+        throw Error(`Unsupported sidebar: ${side}`);
+      }
+      if (side === 'left') {
+        activeTab = document.querySelector('.lm-TabBar-tab.lm-mod-current');
+      } else {
+        const query = document.querySelectorAll(
+          '.lm-TabBar-tab.lm-mod-current'
+        );
+        activeTab = query[query.length - 1];
+      }
+      const activeTabDataId = activeTab?.getAttribute('data-id');
+      if (activeTabDataId) {
+        return activeTabDataId?.toString();
+      } else {
+        return '';
+      }
+    };
+
+    // Sets tab focus on the element
+    function setTabFocus(focusElement: HTMLElement | null) {
+      if (focusElement) {
+        focusElement.focus();
+      }
+    }
+
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
       isEnabled: () => {
@@ -247,6 +281,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         }
         closeWidgets(widgetsRightOf(widget));
       }
+    });
+
+    shell.currentChanged?.connect(() => {
+      [
+        CommandIDs.close,
+        CommandIDs.closeOtherTabs,
+        CommandIDs.closeRightTabs
+      ].forEach(cmd => commands.notifyCommandChanged(cmd));
     });
 
     if (labShell) {
@@ -326,6 +368,50 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         isToggled: () => !labShell.rightCollapsed,
         isEnabled: () => !labShell.isEmpty('right')
+      });
+
+      commands.addCommand(CommandIDs.toggleSidebarWidget, {
+        label: args =>
+          args === undefined ||
+          args.side === undefined ||
+          args.index === undefined
+            ? trans.__('Toggle Sidebar Element')
+            : args.side === 'right'
+            ? trans.__(
+                'Toggle Element %1 in Right Sidebar',
+                parseInt(args.index as string, 10) + 1
+              )
+            : trans.__(
+                'Toggle Element %1 in Left Sidebar',
+                parseInt(args.index as string, 10) + 1
+              ),
+        execute: args => {
+          const index = parseInt(args.index as string, 10);
+          if (args.side != 'left' && args.side != 'right') {
+            throw Error(`Unsupported sidebar: ${args.side}`);
+          }
+          const widgets = Array.from(labShell.widgets(args.side));
+          if (index >= widgets.length) {
+            return;
+          }
+          const widgetId = widgets[index].id;
+          const focusElement: HTMLElement | null = document.querySelector(
+            "[data-id='" + widgetId + "']"
+          );
+          if (activeSidePanelWidget(args.side) === widgetId) {
+            if (args.side == 'left') {
+              labShell.collapseLeft();
+              setTabFocus(focusElement);
+            }
+            if (args.side == 'right') {
+              labShell.collapseRight();
+              setTabFocus(focusElement);
+            }
+          } else {
+            labShell.activateById(widgetId);
+            setTabFocus(focusElement);
+          }
+        }
       });
 
       commands.addCommand(CommandIDs.toggleSideTabBar, {
@@ -528,12 +614,6 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         message: body
       });
     }
-
-    // If the application shell layout is modified,
-    // trigger a refresh of the commands.
-    app.shell.layoutModified.connect(() => {
-      app.commands.notifyCommandChanged();
-    });
 
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
@@ -1181,6 +1261,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
     modeSwitch.label = trans.__('Simple');
 
     statusBar.registerStatusItem(modeSwitchPlugin.id, {
+      priority: 1,
       item: modeSwitch,
       align: 'left',
       rank: -1

@@ -59,7 +59,10 @@
 }
 
 .jp-Notification-Header {
-  padding: 0 4px;
+  display: flex;
+  font-size: var(--jp-ui-font-size1);
+  padding-left: 8px;
+  padding-right: 4px;
   margin: 0;
   align-items: center;
   user-select: none;

@@ -40,8 +40,8 @@ test.describe('test kernel history keybindings', () => {
     // input 1+2
 
     const imageName = 'history.png';
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });

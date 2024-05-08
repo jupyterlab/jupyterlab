@@ -294,6 +294,7 @@ describe('@jupyterlab/ui-components', () => {
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).toBe(true);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.getAttribute('aria-pressed')).toBe('true');
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(true);
         button.dispose();
       });
@@ -310,6 +311,7 @@ describe('@jupyterlab/ui-components', () => {
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).toBe(true);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.getAttribute('aria-pressed')).toBe('true');
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(true);
         enabled = true;
         visible = true;
@@ -318,6 +320,7 @@ describe('@jupyterlab/ui-components', () => {
         await button.renderPromise;
         expect(buttonNode.disabled).toBe(false);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.getAttribute('aria-pressed')).toBe('true');
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(false);
         enabled = false;
         visible = false;
@@ -423,6 +426,39 @@ describe('@jupyterlab/ui-components', () => {
         ).toEqual(-1);
       });
     });
+
+    describe('#storedPositions', () => {
+      it('should store the correct position of items', () => {
+        const w = new Widget();
+        const names = ['test0', 'test1', 'test2', 'test3'];
+        for (let i = 0; i < 3; i++) {
+          toolbar.insertItem(i, names[i], w);
+        }
+        toolbar.insertItem(1, names[3], w);
+        const positions = (toolbar as any)._widgetPositions;
+        let stored: number[] = [];
+        for (let i = 0; i < 4; i++) {
+          stored.push(positions.get(names[i]));
+        }
+        expect(stored).toEqual([0, 2, 3, 1]);
+      });
+
+      it('should not store unexpected index', () => {
+        const w = new Widget();
+        const names = ['test0', 'test1', 'test2', 'test3'];
+        for (let i = 0; i < 2; i++) {
+          toolbar.insertItem(i, names[i], w);
+        }
+        toolbar.insertItem(-5, names[2], w);
+        toolbar.insertItem(10, names[3], w);
+        const positions = (toolbar as any)._widgetPositions;
+        let stored: number[] = [];
+        for (let i = 0; i < 4; i++) {
+          stored.push(positions.get(names[i]));
+        }
+        expect(stored).toEqual([1, 2, 0, 3]);
+      });
+    });
   });
 
   describe('ToolbarButton', () => {
@@ -443,6 +479,8 @@ describe('@jupyterlab/ui-components', () => {
         });
         Widget.attach(widget, document.body);
         await framePromise();
+        await widget.renderPromise;
+
         const button = widget.node.firstChild as HTMLElement;
         expect(button.classList.contains('foo')).toBe(true);
         expect(button.querySelector('.iconFoo')).toBeDefined();
@@ -476,6 +514,7 @@ describe('@jupyterlab/ui-components', () => {
           });
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(called).toBe(true);
           button.dispose();

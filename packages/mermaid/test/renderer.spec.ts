@@ -12,7 +12,7 @@ import {
   SVG_DATA_ATTR
 } from './utils';
 
-describe('@jupyterlab/mermaid-extension', () => {
+describe('@jupyterlab/mermaid', () => {
   describe('RenderedMermaid', () => {
     it('should attach an SVG and version if parsing succeeds', async () => {
       const model = new MimeModel({

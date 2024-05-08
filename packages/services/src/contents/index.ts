@@ -112,6 +112,17 @@ export namespace Contents {
      * The indices of the matched characters in the name.
      */
     indices?: ReadonlyArray<number> | null;
+
+    /**
+     * The hexdigest hash string of content, if requested (otherwise null).
+     * It cannot be null if hash_algorithm is defined.
+     */
+    readonly hash?: string;
+
+    /**
+     * The algorithm used to compute hash value. It cannot be null if hash is defined.
+     */
+    readonly hash_algorithm?: string;
   }
 
   /**
@@ -153,6 +164,13 @@ export namespace Contents {
      * The default is `true`.
      */
     content?: boolean;
+
+    /**
+     * Whether to include a hash in the response.
+     *
+     * The default is `false`.
+     */
+    hash?: boolean;
   }
 
   /**
@@ -286,7 +304,7 @@ export namespace Contents {
      * Given a path of the form `drive:local/portion/of/it.txt`
      * get the local part of it.
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The local part of the path.
      */
@@ -297,7 +315,7 @@ export namespace Contents {
      * leading slashes from the local part of the path, while retaining
      * the drive name if it exists.
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The normalized path.
      */
@@ -310,7 +328,7 @@ export namespace Contents {
      *  - if root has a drive name, the result is prefixed with "<drive>:"
      *  - before adding drive name, leading slashes are removed
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The normalized path.
      */
@@ -321,7 +339,7 @@ export namespace Contents {
      * get the name of the drive. If the path is missing
      * a drive portion, returns an empty string.
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The drive name for the path, or the empty string.
      */
@@ -337,9 +355,9 @@ export namespace Contents {
     /**
      * Get a file or directory.
      *
-     * @param path: The path to the file.
+     * @param path The path to the file.
      *
-     * @param options: The options used to fetch the file.
+     * @param options The options used to fetch the file.
      *
      * @returns A promise which resolves with the file content.
      */
@@ -359,7 +377,7 @@ export namespace Contents {
     /**
      * Create a new untitled file or directory in the specified directory path.
      *
-     * @param options: The options used to create the file.
+     * @param options The options used to create the file.
      *
      * @returns A promise which resolves with the created file content when the
      *    file is created.
@@ -484,9 +502,9 @@ export namespace Contents {
     /**
      * Get a file or directory.
      *
-     * @param localPath: The path to the file.
+     * @param localPath The path to the file.
      *
-     * @param options: The options used to fetch the file.
+     * @param options The options used to fetch the file.
      *
      * @returns A promise which resolves with the file content.
      */
@@ -506,7 +524,7 @@ export namespace Contents {
     /**
      * Create a new untitled file or directory in the specified directory path.
      *
-     * @param options: The options used to create the file.
+     * @param options The options used to create the file.
      *
      * @returns A promise which resolves with the created file content when the
      *    file is created.
@@ -675,7 +693,7 @@ export class ContentsManager implements Contents.IManager {
    * Given a path of the form `drive:local/portion/of/it.txt`
    * get the local part of it.
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The local part of the path.
    */
@@ -693,7 +711,7 @@ export class ContentsManager implements Contents.IManager {
    * leading slashes from the local part of the path, while retaining
    * the drive name if it exists.
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The normalized path.
    */
@@ -712,7 +730,7 @@ export class ContentsManager implements Contents.IManager {
    *  - if root has a drive name, the result is prefixed with "<drive>:"
    *  - before adding drive name, leading slashes are removed
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The normalized path.
    */
@@ -728,7 +746,7 @@ export class ContentsManager implements Contents.IManager {
    * get the name of the drive. If the path is missing
    * a drive portion, returns an empty string.
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The drive name for the path, or the empty string.
    */
@@ -747,9 +765,9 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Get a file or directory.
    *
-   * @param path: The path to the file.
+   * @param path The path to the file.
    *
-   * @param options: The options used to fetch the file.
+   * @param options The options used to fetch the file.
    *
    * @returns A promise which resolves with the file content.
    */
@@ -798,7 +816,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Create a new untitled file or directory in the specified directory path.
    *
-   * @param options: The options used to create the file.
+   * @param options The options used to create the file.
    *
    * @returns A promise which resolves with the created file content when the
    *    file is created.
@@ -975,9 +993,9 @@ export class ContentsManager implements Contents.IManager {
    * Given a drive and a local path, construct a fully qualified
    * path. The inverse of `_driveForPath`.
    *
-   * @param drive: an `IDrive`.
+   * @param drive an `IDrive`.
    *
-   * @param localPath: the local path on the drive.
+   * @param localPath the local path on the drive.
    *
    * @returns the fully qualified path.
    */
@@ -995,7 +1013,7 @@ export class ContentsManager implements Contents.IManager {
    * `'driveName:path/to/file'`. If there is no `driveName`
    * prepended to the path, it returns the default drive.
    *
-   * @param path: a path to a file.
+   * @param path a path to a file.
    *
    * @returns A tuple containing an `IDrive` object for the path,
    * and a local path for that drive.
@@ -1103,13 +1121,13 @@ export class Drive implements Contents.IDrive {
   /**
    * Get a file or directory.
    *
-   * @param localPath: The path to the file.
+   * @param localPath The path to the file.
    *
-   * @param options: The options used to fetch the file.
+   * @param options The options used to fetch the file.
    *
    * @returns A promise which resolves with the file content.
    *
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async get(
     localPath: string,
@@ -1122,7 +1140,8 @@ export class Drive implements Contents.IDrive {
         delete options['format'];
       }
       const content = options.content ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content };
+      const hash = options.hash ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content, hash };
       url += URLExt.objectToQueryString(params);
     }
 
@@ -1150,7 +1169,13 @@ export class Drive implements Contents.IDrive {
   getDownloadUrl(localPath: string): Promise<string> {
     const baseUrl = this.serverSettings.baseUrl;
     let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
-    const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
+    let cookie = '';
+    try {
+      cookie = document.cookie;
+    } catch (e) {
+      // e.g. SecurityError in case of CSP Sandbox
+    }
+    const xsrfTokenMatch = cookie.match('\\b_xsrf=([^;]*)\\b');
     if (xsrfTokenMatch) {
       const fullUrl = new URL(url);
       fullUrl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
@@ -1162,13 +1187,13 @@ export class Drive implements Contents.IDrive {
   /**
    * Create a new untitled file or directory in the specified directory path.
    *
-   * @param options: The options used to create the file.
+   * @param options The options used to create the file.
    *
    * @returns A promise which resolves with the created file content when the
    *    file is created.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async newUntitled(
     options: Contents.ICreateOptions = {}
@@ -1210,7 +1235,7 @@ export class Drive implements Contents.IDrive {
    * @returns A promise which resolves when the file is deleted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async delete(localPath: string): Promise<void> {
     const url = this._getUrl(localPath);
@@ -1241,7 +1266,7 @@ export class Drive implements Contents.IDrive {
    *   the file is renamed.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async rename(
     oldLocalPath: string,
@@ -1281,7 +1306,7 @@ export class Drive implements Contents.IDrive {
    * #### Notes
    * Ensure that `model.content` is populated for the file.
    *
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async save(
     localPath: string,
@@ -1322,7 +1347,7 @@ export class Drive implements Contents.IDrive {
    * #### Notes
    * The server will select the name of the copied file.
    *
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
     const settings = this.serverSettings;
@@ -1355,7 +1380,7 @@ export class Drive implements Contents.IDrive {
    *   checkpoint is created.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async createCheckpoint(
     localPath: string
@@ -1385,7 +1410,7 @@ export class Drive implements Contents.IDrive {
    *    the file.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async listCheckpoints(
     localPath: string
@@ -1420,7 +1445,7 @@ export class Drive implements Contents.IDrive {
    * @returns A promise which resolves when the checkpoint is restored.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async restoreCheckpoint(
     localPath: string,
@@ -1449,7 +1474,7 @@ export class Drive implements Contents.IDrive {
    * @returns A promise which resolves when the checkpoint is deleted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async deleteCheckpoint(
     localPath: string,
@@ -1524,7 +1549,7 @@ export namespace Drive {
     /**
      * A REST endpoint for drive requests.
      * If not given, defaults to the Jupyter
-     * REST API given by [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+     * REST API given by [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
      */
     apiEndpoint?: string;
   }

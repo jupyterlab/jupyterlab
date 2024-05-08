@@ -15,6 +15,7 @@ import {
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
+import { JSONExt } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
@@ -63,13 +64,14 @@ export class BreadCrumbs extends Widget {
   /**
    * Construct a new file browser crumb widget.
    *
-   * @param model - The file browser view model.
+   * @param options Constructor options.
    */
   constructor(options: BreadCrumbs.IOptions) {
     super();
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
+    this._fullPath = options.fullPath || false;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
@@ -115,6 +117,17 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Whether to show the full path in the breadcrumbs
+   */
+  get fullPath(): boolean {
+    return this._fullPath;
+  }
+
+  set fullPath(value: boolean) {
+    this._fullPath = value;
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -148,12 +161,16 @@ export class BreadCrumbs extends Widget {
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
-    Private.updateCrumbs(
-      this._crumbs,
-      this._crumbSeps,
-      localPath,
-      this._hasPreferred
-    );
+    const state = {
+      path: localPath,
+      hasPreferred: this._hasPreferred,
+      fullPath: this._fullPath
+    };
+    if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
+      return;
+    }
+    this._previousState = state;
+    Private.updateCrumbs(this._crumbs, this._crumbSeps, state);
   }
 
   /**
@@ -184,12 +201,20 @@ export class BreadCrumbs extends Widget {
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
-        const index = ArrayExt.findFirstIndex(
+        let index = ArrayExt.findFirstIndex(
           this._crumbs,
           value => value === node
         );
+        let destination = BREAD_CRUMB_PATHS[index];
+        if (
+          this._fullPath &&
+          index < 0 &&
+          !node.classList.contains(BREADCRUMB_ROOT_CLASS)
+        ) {
+          destination = node.title;
+        }
         this._model
-          .cd(BREAD_CRUMB_PATHS[index])
+          .cd(destination)
           .catch(error =>
             showErrorMessage(this._trans.__('Open Error'), error)
           );
@@ -309,6 +334,8 @@ export class BreadCrumbs extends Widget {
   private _hasPreferred: boolean;
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
+  private _fullPath: boolean;
+  private _previousState: Private.ICrumbsState | null = null;
 }
 
 /**
@@ -328,6 +355,11 @@ export namespace BreadCrumbs {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Show the full file browser path in breadcrumbs
+     */
+    fullPath?: boolean;
   }
 }
 
@@ -347,13 +379,22 @@ namespace Private {
   }
 
   /**
+   * Breadcrumbs state.
+   */
+  export interface ICrumbsState {
+    [key: string]: string | boolean;
+    path: string;
+    hasPreferred: boolean;
+    fullPath: boolean;
+  }
+
+  /**
    * Populate the breadcrumb node.
    */
   export function updateCrumbs(
     breadcrumbs: ReadonlyArray<HTMLElement>,
     separators: ReadonlyArray<HTMLElement>,
-    path: string,
-    hasPreferred: boolean
+    state: ICrumbsState
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
@@ -363,33 +404,47 @@ namespace Private {
       node.removeChild(firstChild.nextSibling);
     }
 
-    if (hasPreferred) {
+    if (state.hasPreferred) {
       node.appendChild(breadcrumbs[Crumb.Home]);
       node.appendChild(separators[0]);
     } else {
       node.appendChild(separators[0]);
     }
 
-    const parts = path.split('/');
-    if (parts.length > 2) {
+    const parts = state.path.split('/');
+    if (!state.fullPath && parts.length > 2) {
       node.appendChild(breadcrumbs[Crumb.Ellipsis]);
       const grandParent = parts.slice(0, parts.length - 2).join('/');
       breadcrumbs[Crumb.Ellipsis].title = grandParent;
       node.appendChild(separators[1]);
     }
 
-    if (path) {
-      if (parts.length >= 2) {
-        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
-        node.appendChild(breadcrumbs[Crumb.Parent]);
-        const parent = parts.slice(0, parts.length - 1).join('/');
-        breadcrumbs[Crumb.Parent].title = parent;
-        node.appendChild(separators[2]);
+    if (state.path) {
+      if (!state.fullPath) {
+        if (parts.length >= 2) {
+          breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
+          node.appendChild(breadcrumbs[Crumb.Parent]);
+          const parent = parts.slice(0, parts.length - 1).join('/');
+          breadcrumbs[Crumb.Parent].title = parent;
+          node.appendChild(separators[2]);
+        }
+        breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
+        node.appendChild(breadcrumbs[Crumb.Current]);
+        breadcrumbs[Crumb.Current].title = state.path;
+        node.appendChild(separators[3]);
+      } else {
+        for (let i = 0; i < parts.length; i++) {
+          const elem = document.createElement('span');
+          elem.className = BREADCRUMB_ITEM_CLASS;
+          elem.textContent = parts[i];
+          const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
+          elem.title = elemPath;
+          node.appendChild(elem);
+          const separator = document.createElement('span');
+          separator.textContent = '/';
+          node.appendChild(separator);
+        }
       }
-      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
-      node.appendChild(breadcrumbs[Crumb.Current]);
-      breadcrumbs[Crumb.Current].title = path;
-      node.appendChild(separators[3]);
     }
   }
 

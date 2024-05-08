@@ -17,6 +17,7 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
+import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
@@ -26,8 +27,10 @@ import { every, findIndex } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
+import { runCell as defaultRunCell } from './cellexecutor';
 import { Notebook, StaticNotebook } from './widget';
 import { NotebookWindowedLayout } from './windowing';
+import { INotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -107,6 +110,13 @@ export class NotebookActions {
     { notebook: Notebook; lastCell: Cell }
   > {
     return Private.selectionExecuted;
+  }
+
+  /**
+   * A signal that emits when a cell's output is cleared.
+   */
+  static get outputCleared(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+    return Private.outputCleared;
   }
 
   /**
@@ -192,8 +202,9 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
+    const cellCountAfterSplit = offsets.length - 1;
     const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata } = child.model.sharedModel.toJSON();
+      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
 
       return {
         cell_type,
@@ -201,7 +212,11 @@ export namespace NotebookActions {
         source: orig
           .slice(offset, offsets[offsetIdx + 1])
           .replace(/^\n+/, '')
-          .replace(/\n+$/, '')
+          .replace(/\n+$/, ''),
+        outputs:
+          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
+            ? outputs
+            : undefined
       };
     });
 
@@ -222,7 +237,7 @@ export namespace NotebookActions {
         // no-op
       });
 
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -337,7 +352,7 @@ export namespace NotebookActions {
       (notebook.activeCell as MarkdownCell).rendered = false;
     }
 
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -358,7 +373,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -395,7 +410,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = newIndex;
 
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -432,7 +447,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = newIndex;
 
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   function move(notebook: Notebook, shift: number): void {
@@ -461,7 +476,7 @@ export namespace NotebookActions {
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
 
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -486,8 +501,8 @@ export namespace NotebookActions {
    * Change the selected cell type(s).
    *
    * @param notebook - The target notebook widget.
-   *
    * @param value - The target cell type.
+   * @param translator - The application translator.
    *
    * #### Notes
    * It should preserve the widget mode.
@@ -497,7 +512,8 @@ export namespace NotebookActions {
    */
   export function changeCellType(
     notebook: Notebook,
-    value: nbformat.CellType
+    value: nbformat.CellType,
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -505,8 +521,8 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value);
-    Private.handleState(notebook, state);
+    Private.changeCellType(notebook, value, translator);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -541,7 +557,46 @@ export namespace NotebookActions {
       translator
     );
 
-    Private.handleRunState(notebook, state, false);
+    void Private.handleRunState(notebook, state);
+    return promise;
+  }
+
+  /**
+   * Run specified cells.
+   *
+   * @param notebook - The target notebook widget.
+   * @param cells - The cells to run.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
+   *
+   * #### Notes
+   * The existing selection will be preserved.
+   * The mode will be changed to command.
+   * An execution error will prevent the remaining code cells from executing.
+   * All markdown cells will be rendered.
+   */
+  export function runCells(
+    notebook: Notebook,
+    cells: readonly Cell[],
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
+  ): Promise<boolean> {
+    if (!notebook.model) {
+      return Promise.resolve(false);
+    }
+
+    const state = Private.getState(notebook);
+    const promise = Private.runCells(
+      notebook,
+      cells,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
+
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -606,7 +661,13 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    Private.handleState(notebook, state, true);
+    // If a cell is outside of viewport and scrolling is needed, the `smart`
+    // logic in `handleRunState` will choose appropriate alignment, except
+    // for the case of a small cell less than one viewport away for which it
+    // would use the `auto` heuristic, for which we set the preferred alignment
+    // to `center` as in most cases there will be space below and above a cell
+    // that is smaller than (or approximately equal to) the viewport size.
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -663,7 +724,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    Private.handleState(notebook, state, true);
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -692,19 +753,20 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const lastIndex = notebook.widgets.length;
 
-    notebook.widgets.forEach(child => {
-      notebook.select(child);
-    });
-
-    const promise = Private.runSelected(
+    const promise = Private.runCells(
       notebook,
+      notebook.widgets,
       sessionContext,
       sessionDialogs,
       translator
     );
 
-    Private.handleRunState(notebook, state, true);
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
+
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -727,7 +789,7 @@ export namespace NotebookActions {
     }
     const promise = Private.runSelected(notebook);
     notebook.activeCellIndex = previousIndex;
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -759,21 +821,17 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    notebook.activeCellIndex--;
-    notebook.deselectAll();
-    for (let i = 0; i < notebook.activeCellIndex; ++i) {
-      notebook.select(notebook.widgets[i]);
-    }
-
-    const promise = Private.runSelected(
+    const promise = Private.runCells(
       notebook,
+      notebook.widgets.slice(0, notebook.activeCellIndex),
       sessionContext,
       sessionDialogs,
       translator
     );
 
-    notebook.activeCellIndex++;
-    Private.handleRunState(notebook, state, true);
+    notebook.deselectAll();
+
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -802,20 +860,20 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const lastIndex = notebook.widgets.length;
 
-    notebook.deselectAll();
-    for (let i = notebook.activeCellIndex; i < notebook.widgets.length; ++i) {
-      notebook.select(notebook.widgets[i]);
-    }
-
-    const promise = Private.runSelected(
+    const promise = Private.runCells(
       notebook,
+      notebook.widgets.slice(notebook.activeCellIndex),
       sessionContext,
       sessionDialogs,
       translator
     );
 
-    Private.handleRunState(notebook, state, true);
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
+
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -870,10 +928,9 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -900,6 +957,7 @@ export namespace NotebookActions {
     ) {
       maxCellIndex -= 1;
     }
+
     if (notebook.activeCellIndex === maxCellIndex) {
       const footer = (notebook.layout as NotebookWindowedLayout).footer;
       footer?.node.focus();
@@ -918,10 +976,9 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /** Insert new heading of same level above active cell.
@@ -1013,7 +1070,7 @@ export namespace NotebookActions {
     }
     // clear selection and handle state
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1045,7 +1102,7 @@ export namespace NotebookActions {
       }
     }
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1079,7 +1136,7 @@ export namespace NotebookActions {
     } else {
       notebook.extendContiguousSelectionTo(notebook.activeCellIndex - 1);
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1113,7 +1170,7 @@ export namespace NotebookActions {
     } else {
       notebook.extendContiguousSelectionTo(notebook.activeCellIndex + 1);
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1193,6 +1250,7 @@ export namespace NotebookActions {
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
+    void focusActiveCell(notebook);
   }
 
   /**
@@ -1328,7 +1386,7 @@ export namespace NotebookActions {
     if (cellsFromClipboard) {
       notebook.lastClipboardInteraction = 'paste';
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1349,7 +1407,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
     notebook.deselectAll();
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1370,7 +1428,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
     notebook.deselectAll();
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1401,7 +1459,7 @@ export namespace NotebookActions {
     };
 
     notebook.editorConfig = newConfig;
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1427,9 +1485,10 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1455,9 +1514,10 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1477,7 +1537,7 @@ export namespace NotebookActions {
         cell.inputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1497,7 +1557,7 @@ export namespace NotebookActions {
         cell.inputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1517,13 +1577,13 @@ export namespace NotebookActions {
         cell.inputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
    * Show the code on all code cells.
    *
-   * @param widget - The target notebook widget.
+   * @param notebook The target notebook widget.
    */
   export function showAllCode(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -1537,7 +1597,7 @@ export namespace NotebookActions {
         cell.inputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1557,7 +1617,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1577,7 +1637,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1597,7 +1657,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1635,7 +1695,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1655,7 +1715,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1675,7 +1735,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1719,8 +1779,8 @@ export namespace NotebookActions {
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.
-   *
    * @param level - The header level.
+   * @param translator - The application translator.
    *
    * #### Notes
    * All selected cells will be switched to markdown.
@@ -1729,7 +1789,11 @@ export namespace NotebookActions {
    * There will always be one blank space after the header.
    * The cells will be unrendered.
    */
-  export function setMarkdownHeader(notebook: Notebook, level: number): void {
+  export function setMarkdownHeader(
+    notebook: Notebook,
+    level: number,
+    translator?: ITranslator
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1743,8 +1807,8 @@ export namespace NotebookActions {
         Private.setMarkdownHeader(cells.get(index), level);
       }
     });
-    Private.changeCellType(notebook, 'markdown');
-    Private.handleState(notebook, state);
+    Private.changeCellType(notebook, 'markdown', translator);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1753,12 +1817,15 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function collapseAllHeadings(notebook: Notebook): any {
+    const state = Private.getState(notebook);
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);
         NotebookActions.setCellCollapse(cell, true);
       }
     }
+    notebook.activeCellIndex = 0;
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2014,6 +2081,7 @@ export namespace NotebookActions {
    * Trust the notebook after prompting the user.
    *
    * @param notebook - The target notebook widget.
+   * @param translator - The application translator.
    *
    * @returns a promise that resolves when the transaction is finished.
    *
@@ -2085,6 +2153,44 @@ export namespace NotebookActions {
   }
 
   /**
+   * If the notebook has an active cell, focus it.
+   *
+   * @param notebook The target notebook widget
+   * @param options Optional options to change the behavior of this function
+   * @param options.waitUntilReady If true, do not call focus until activeCell.ready is resolved
+   * @param options.preventScroll If true, do not scroll the active cell into view
+   *
+   * @returns a promise that resolves when focus has been called on the active
+   * cell's node.
+   *
+   * #### Notes
+   * By default, waits until after the active cell has been attached unless
+   * called with { waitUntilReady: false }
+   */
+  export async function focusActiveCell(
+    notebook: Notebook,
+    options: {
+      waitUntilReady?: boolean;
+      preventScroll?: boolean;
+    } = { waitUntilReady: true, preventScroll: false }
+  ): Promise<void> {
+    const { activeCell } = notebook;
+    const { waitUntilReady, preventScroll } = options;
+    if (!activeCell) {
+      return;
+    }
+    if (waitUntilReady) {
+      await activeCell.ready;
+    }
+    if (notebook.isDisposed || activeCell.isDisposed) {
+      return;
+    }
+    activeCell.node.focus({
+      preventScroll
+    });
+  }
+
+  /*
    * Access last notebook history.
    *
    * @param notebook - The target notebook widget.
@@ -2124,9 +2230,24 @@ export namespace NotebookActions {
 }
 
 /**
+ * Set the notebook cell executor and the related signals.
+ */
+export function setCellExecutor(executor: INotebookCellExecutor): void {
+  if (Private.executor) {
+    throw new Error('Cell executor can only be set once.');
+  }
+  Private.executor = executor;
+}
+
+/**
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Notebook cell executor
+   */
+  export let executor: INotebookCellExecutor;
+
   /**
    * A signal that emits whenever a cell completes execution.
    */
@@ -2154,6 +2275,14 @@ namespace Private {
   export const selectionExecuted = new Signal<
     any,
     { notebook: Notebook; lastCell: Cell }
+  >({});
+
+  /**
+   * A signal that emits when one notebook's cells are all executed.
+   */
+  export const outputCleared = new Signal<
+    any,
+    { notebook: Notebook; cell: Cell }
   >({});
 
   /**
@@ -2187,45 +2316,140 @@ namespace Private {
   /**
    * Handle the state of a widget after running an action.
    */
-  export function handleState(
+  export async function handleState(
     notebook: Notebook,
     state: IState,
     scrollIfNeeded = false
-  ): void {
+  ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
-
-    if (state.wasFocused || notebook.mode === 'edit') {
-      notebook.activate();
-    }
-
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex, 'smart', 0.05).catch(reason => {
+      await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
         // no-op
       });
+    }
+    if (state.wasFocused || notebook.mode === 'edit') {
+      notebook.activate();
     }
   }
 
   /**
    * Handle the state of a widget after running a run action.
    */
-  export function handleRunState(
+  export async function handleRunState(
     notebook: Notebook,
     state: IState,
-    scroll = false
-  ): void {
+    alignPreference?: 'start' | 'end' | 'center' | 'top-center'
+  ): Promise<void> {
+    const { activeCell, activeCellIndex } = notebook;
+
+    if (activeCell) {
+      await notebook
+        .scrollToItem(activeCellIndex, 'smart', 0, alignPreference)
+        .catch(reason => {
+          // no-op
+        });
+    }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCellId) {
-      const index = notebook.widgets.findIndex(
-        w => w.model.id === state.activeCellId
-      );
-      if (notebook.widgets[index]?.inputArea) {
-        notebook.scrollToItem(index).catch(reason => {
-          // no-op
+  }
+
+  /**
+   * Run the selected cells.
+   *
+   * @param notebook Notebook
+   * @param cells Cells to run
+   * @param sessionContext Notebook session context
+   * @param sessionDialogs Session dialogs
+   * @param translator Application translator
+   */
+  export function runCells(
+    notebook: Notebook,
+    cells: readonly Cell[],
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
+  ): Promise<boolean> {
+    const lastCell = cells[-1];
+    notebook.mode = 'command';
+
+    let initializingDialogShown = false;
+    return Promise.all(
+      cells.map(cell => {
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          sessionContext &&
+          sessionContext.kernelDisplayStatus === 'initializing' &&
+          !initializingDialogShown
+        ) {
+          initializingDialogShown = true;
+          translator = translator || nullTranslator;
+          const trans = translator.load('jupyterlab');
+          Notification.emit(
+            trans.__(
+              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
+            ),
+            'warning',
+            {
+              autoClose: false
+            }
+          );
+          return Promise.resolve(false);
+        }
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          initializingDialogShown
+        ) {
+          return Promise.resolve(false);
+        }
+        return runCell(
+          notebook,
+          cell,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      })
+    )
+      .then(results => {
+        if (notebook.isDisposed) {
+          return false;
+        }
+        selectionExecuted.emit({
+          notebook,
+          lastCell
         });
-      }
-    }
+        // Post an update request.
+        notebook.update();
+
+        return results.every(result => result);
+      })
+      .catch(reason => {
+        if (reason.message.startsWith('KernelReplyNotOK')) {
+          cells.map(cell => {
+            // Remove '*' prompt from cells that didn't execute
+            if (
+              cell.model.type === 'code' &&
+              (cell as CodeCell).model.executionCount == null
+            ) {
+              cell.setPrompt('');
+            }
+          });
+        } else {
+          throw reason;
+        }
+
+        selectionExecuted.emit({
+          notebook,
+          lastCell
+        });
+
+        notebook.update();
+
+        return false;
+      });
   }
 
   /**
@@ -2258,48 +2482,13 @@ namespace Private {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    return Promise.all(
-      selected.map(child =>
-        runCell(notebook, child, sessionContext, sessionDialogs, translator)
-      )
-    )
-      .then(results => {
-        if (notebook.isDisposed) {
-          return false;
-        }
-        selectionExecuted.emit({
-          notebook,
-          lastCell: notebook.widgets[lastIndex]
-        });
-        // Post an update request.
-        notebook.update();
-
-        return results.every(result => result);
-      })
-      .catch(reason => {
-        if (reason.message.startsWith('KernelReplyNotOK')) {
-          selected.map(cell => {
-            // Remove '*' prompt from cells that didn't execute
-            if (
-              cell.model.type === 'code' &&
-              (cell as CodeCell).model.executionCount == null
-            ) {
-              cell.setPrompt('');
-            }
-          });
-        } else {
-          throw reason;
-        }
-
-        selectionExecuted.emit({
-          notebook,
-          lastCell: notebook.widgets[lastIndex]
-        });
-
-        notebook.update();
-
-        return false;
-      });
+    return runCells(
+      notebook,
+      selected,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
   }
 
   /**
@@ -2312,172 +2501,26 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    switch (cell.model.type) {
-      case 'markdown':
-        (cell as MarkdownCell).rendered = true;
-        cell.inputHidden = false;
-        executed.emit({ notebook, cell, success: true });
-        break;
-      case 'code':
-        if (sessionContext) {
-          if (sessionContext.isTerminating) {
-            await showDialog({
-              title: trans.__('Kernel Terminating'),
-              body: trans.__(
-                'The kernel for %1 appears to be terminating. You can not run any cell for now.',
-                sessionContext.session?.path
-              ),
-              buttons: [Dialog.okButton()]
-            });
-            break;
-          }
-          if (sessionContext.pendingInput) {
-            await showDialog({
-              title: trans.__('Cell not executed due to pending input'),
-              body: trans.__(
-                'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
-              ),
-              buttons: [Dialog.okButton()]
-            });
-            return false;
-          }
-          if (sessionContext.hasNoKernel) {
-            const shouldSelect = await sessionContext.startKernel();
-            if (shouldSelect && sessionDialogs) {
-              await sessionDialogs.selectKernel(sessionContext);
-            }
-          }
-
-          if (sessionContext.hasNoKernel) {
-            cell.model.sharedModel.transact(() => {
-              (cell.model as ICodeCellModel).clearExecution();
-            });
-            return true;
-          }
-
-          const deletedCells = notebook.model?.deletedCells ?? [];
-          executionScheduled.emit({ notebook, cell });
-
-          let ran = false;
-          try {
-            const reply = await CodeCell.execute(
-              cell as CodeCell,
-              sessionContext,
-              {
-                deletedCells,
-                recordTiming: notebook.notebookConfig.recordTiming
-              }
-            );
-            deletedCells.splice(0, deletedCells.length);
-
-            ran = (() => {
-              if (cell.isDisposed) {
-                return false;
-              }
-
-              if (!reply) {
-                return true;
-              }
-              if (reply.content.status === 'ok') {
-                const content = reply.content;
-
-                if (content.payload && content.payload.length) {
-                  handlePayload(content, notebook, cell);
-                }
-
-                return true;
-              } else {
-                throw new KernelError(reply.content);
-              }
-            })();
-          } catch (reason) {
-            if (cell.isDisposed || reason.message.startsWith('Canceled')) {
-              ran = false;
-            } else {
-              executed.emit({
-                notebook,
-                cell,
-                success: false,
-                error: reason
-              });
-              throw reason;
-            }
-          }
-
-          if (ran) {
-            executed.emit({ notebook, cell, success: true });
-          }
-
-          return ran;
-        }
-        cell.model.sharedModel.transact(() => {
-          (cell.model as ICodeCellModel).clearExecution();
-        }, false);
-        break;
-      default:
-        break;
+    if (!executor) {
+      console.warn(
+        'Requesting cell execution without any cell executor defined. Falling back to default execution.'
+      );
     }
-
-    return Promise.resolve(true);
-  }
-
-  /**
-   * Handle payloads from an execute reply.
-   *
-   * #### Notes
-   * Payloads are deprecated and there are no official interfaces for them in
-   * the kernel type definitions.
-   * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
-   */
-  function handlePayload(
-    content: KernelMessage.IExecuteReply,
-    notebook: Notebook,
-    cell: Cell
-  ) {
-    const setNextInput = content.payload?.filter(i => {
-      return (i as any).source === 'set_next_input';
-    })[0];
-
-    if (!setNextInput) {
-      return;
-    }
-
-    const text = setNextInput.text as string;
-    const replace = setNextInput.replace;
-
-    if (replace) {
-      cell.model.sharedModel.setSource(text);
-      return;
-    }
-
-    // Create a new code cell and add as the next cell.
-    const notebookModel = notebook.model!.sharedModel;
-    const cells = notebook.model!.cells;
-    const index = findIndex(cells, model => model === cell.model);
-
-    // While this cell has no outputs and could be trusted following the letter
-    // of Jupyter trust model, its content comes from kernel and hence is not
-    // necessarily controlled by the user; if we set it as trusted, a user
-    // executing cells in succession could end up with unwanted trusted output.
-    if (index === -1) {
-      notebookModel.insertCell(notebookModel.cells.length, {
-        cell_type: 'code',
-        source: text,
-        metadata: {
-          trusted: false
-        }
-      });
-    } else {
-      notebookModel.insertCell(index + 1, {
-        cell_type: 'code',
-        source: text,
-        metadata: {
-          trusted: false
-        }
-      });
-    }
+    const options = {
+      cell,
+      notebook: notebook.model!,
+      notebookConfig: notebook.notebookConfig,
+      onCellExecuted: args => {
+        executed.emit({ notebook, ...args });
+      },
+      onCellExecutionScheduled: args => {
+        executionScheduled.emit({ notebook, ...args });
+      },
+      sessionContext,
+      sessionDialogs,
+      translator
+    } satisfies INotebookCellExecutor.IRunCellOptions;
+    return executor ? executor.runCell(options) : defaultRunCell(options);
   }
 
   /**
@@ -2530,7 +2573,7 @@ namespace Private {
     } else {
       notebook.lastClipboardInteraction = 'copy';
     }
-    handleState(notebook, state);
+    void handleState(notebook, state);
   }
 
   /**
@@ -2548,11 +2591,28 @@ namespace Private {
    */
   export function changeCellType(
     notebook: Notebook,
-    value: nbformat.CellType
+    value: nbformat.CellType,
+    translator?: ITranslator
   ): void {
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
+        return;
+      }
+      if (
+        child.model.type === 'code' &&
+        (child as CodeCell).outputArea.pendingInput
+      ) {
+        translator = translator || nullTranslator;
+        const trans = translator.load('jupyterlab');
+        // Do not permit changing cell type when input is pending
+        void showDialog({
+          title: trans.__('Cell type not changed due to pending input'),
+          body: trans.__(
+            'The cell type has not been changed to avoid kernel deadlock as this cell has pending input! Submit your pending input and try again.'
+          ),
+          buttons: [Dialog.okButton()]
+        });
         return;
       }
       if (child.model.type !== value) {
@@ -2862,7 +2922,8 @@ namespace Private {
         );
       }
       notebook.deselectAll();
-      Private.handleState(notebook, state, true);
+
+      void Private.handleState(notebook, state, true);
       notebook.mode = 'edit';
       notebook.widgets[cellIndex].setHidden(false);
     }

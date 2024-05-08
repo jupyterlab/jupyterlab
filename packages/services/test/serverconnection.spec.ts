@@ -5,6 +5,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer } from '@jupyterlab/testing';
 import { ServerConnection } from '../src';
 import { getRequestHandler } from './utils';
+import { KernelMessage } from '../src/kernel';
 
 const server = new JupyterServer();
 
@@ -25,7 +26,7 @@ describe('ServerConnection', () => {
         {},
         settings
       );
-      expect(response.statusText).toBe('OK');
+      expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toBe('hello');
     });
@@ -63,6 +64,17 @@ describe('ServerConnection', () => {
       expect(settings.token).toBe(defaults.token);
       expect(settings.init.credentials).toBe(defaults.init!.credentials);
     });
+
+    it('should allow swapping serializer', () => {
+      const defaults: Partial<ServerConnection.ISettings> = {
+        serializer: {
+          serialize: (_msg: KernelMessage.IMessage) => '',
+          deserialize: (_data: ArrayBuffer) => ({}) as KernelMessage.IMessage
+        }
+      };
+      const settings = ServerConnection.makeSettings(defaults);
+      expect(settings.serializer).toBe(defaults.serializer);
+    });
   });
 
   describe('.makeError()', () => {
@@ -75,7 +87,7 @@ describe('ServerConnection', () => {
         settings
       );
       const err = new ServerConnection.ResponseError(response);
-      expect(err.message).toBe('Invalid response: 200 OK');
+      expect(err.message).toBe('Invalid response: 200 ');
     });
   });
 

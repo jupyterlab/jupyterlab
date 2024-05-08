@@ -53,7 +53,8 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate extends DOMRectReadOnly {}
+  export interface ICoordinate
+    extends Pick<DOMRectReadOnly, 'left' | 'right' | 'top' | 'bottom'> {}
 
   /**
    * A range.
@@ -257,11 +258,15 @@ export namespace CodeEditor {
      * Set the primary position of the cursor.
      *
      * @param position - The new primary position.
+     * @param options - Adjustment options allowing to disable scrolling.
      *
      * #### Notes
      * This will remove any secondary cursors.
      */
-    setCursorPosition(position: IPosition): void;
+    setCursorPosition(
+      position: IPosition,
+      options?: { scroll?: boolean }
+    ): void;
 
     /**
      * Returns the primary selection, never `null`.
@@ -458,7 +463,7 @@ export namespace CodeEditor {
      *
      * @returns The coordinates of the position.
      */
-    getCoordinateForPosition(position: IPosition): ICoordinate;
+    getCoordinateForPosition(position: IPosition): ICoordinate | null;
 
     /**
      * Get the cursor position given window coordinates.

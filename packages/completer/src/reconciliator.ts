@@ -17,7 +17,8 @@ import { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
 
 // Shorthand for readability.
-type InlineResult = IInlineCompletionList<CompletionHandler.IInlineItem> | null;
+export type InlineResult =
+  IInlineCompletionList<CompletionHandler.IInlineItem> | null;
 
 /**
  * The reconciliator which is used to fetch and merge responses from multiple completion providers.

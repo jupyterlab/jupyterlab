@@ -561,7 +561,7 @@ export abstract class WidgetLSPAdapter<
    * @param context information about the foreign VirtualDocument
    */
   protected async onForeignDocumentOpened(
-    _: VirtualDocument,
+    host: VirtualDocument,
     context: Document.IForeignContext
   ): Promise<void> {
     const { foreignDocument } = context;

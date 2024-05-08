@@ -177,10 +177,9 @@ for (let pkg of extensionPackages) {
 const extraShared = [];
 for (let pkg of extensionPackages) {
   let pkgShared = {};
-  let {
-    dependencies = {},
-    jupyterlab: { sharedPackages = {} } = {}
-  } = require(`${pkg}/package.json`);
+  let { dependencies = {}, jupyterlab: { sharedPackages = {} } = {} } = require(
+    `${pkg}/package.json`
+  );
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
       pkgShared[dep] = { requiredVersion };
@@ -281,7 +280,7 @@ module.exports = [
   merge(baseConfig, {
     mode: 'development',
     entry: {
-      main: ['./publicpath', 'whatwg-fetch', entryPoint]
+      main: ['./publicpath', entryPoint]
     },
     output: {
       path: path.resolve(buildDir),

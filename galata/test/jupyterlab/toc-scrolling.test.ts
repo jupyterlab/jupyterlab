@@ -6,7 +6,7 @@ import * as path from 'path';
 
 const fileName = 'toc_scrolling_notebook.ipynb';
 
-test.use({ tmpPath: 'test-toc' });
+test.use({ tmpPath: 'test-toc-scrolling' });
 
 test.describe('Table of Contents scrolling to heading', () => {
   test.beforeAll(async ({ request, tmpPath }) => {
@@ -36,18 +36,44 @@ test.describe('Table of Contents scrolling to heading', () => {
   test('Notebook scrolls to heading', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    await page.keyboard.press('Enter');
+    await page.getByText('Mode: Edit').waitFor();
+
+    const contentPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
+    await contentPanel.waitFor();
 
     await page
-      .locator('.jp-TableOfContents-tree >> text="the last one"')
-      .click({
-        button: 'left'
-      });
+      .locator('.jp-TableOfContents-tree')
+      .getByText('the last one')
+      .click();
+    await page.waitForTimeout(100);
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    // Should switch to command mode
+    await expect.soft(page.getByText('Mode: Command')).toBeVisible();
+
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    expect
+      .soft(await nbPanel!.screenshot())
+      .toMatchSnapshot('scrolled-to-bottom-heading.png');
+
+    // Scroll up
+    const bbox = await nbPanel!.boundingBox();
+    await page.mouse.move(
+      bbox!.x + 0.5 * bbox!.width,
+      bbox!.y + 0.5 * bbox!.height
+    );
+    await page.mouse.wheel(0, -1200);
+    await page.waitForTimeout(100);
+
+    await page
+      .locator('.jp-TableOfContents-tree')
+      .getByText('the last one')
+      .click();
+    await page.waitForTimeout(100);
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'scrolled-to-bottom-heading.png'
     );
   });

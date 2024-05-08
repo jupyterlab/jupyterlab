@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import { Locator } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'windowed_notebook.ipynb';
@@ -27,32 +28,82 @@ test.beforeEach(async ({ page, tmpPath }) => {
   );
 });
 
-test('should not update height when hiding', async ({ page, tmpPath }) => {
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-
-  // Wait to ensure the rendering logic is stable.
-  await page.waitForTimeout(200);
-
-  const h = await page.notebook.getNotebookInPanel();
-  const initialHeight = parseInt(
-    (await h?.$$eval(
-      '.jp-WindowedPanel-inner',
-      nodes => nodes[0].style.height
-    )) ?? '0',
+async function getInnerHeight(panel: Locator) {
+  return parseInt(
+    await panel
+      .locator('.jp-WindowedPanel-inner')
+      .evaluate(node => (node as HTMLElement).style.height),
     10
   );
+}
+async function getWindowHeight(panel: Locator) {
+  return parseInt(
+    await panel
+      .locator('.jp-WindowedPanel-viewport')
+      .evaluate(node => (node as HTMLElement).style.minHeight),
+    10
+  );
+}
 
-  expect(initialHeight).toBeGreaterThan(0);
+test('should update window height on resize', async ({ page, tmpPath }) => {
+  // Note: this needs many small cells so that they get added during resize changing height.
+  const notebookName = '20_empty_cells.ipynb';
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `notebooks/${notebookName}`),
+    `${tmpPath}/${notebookName}`
+  );
+  await page.notebook.openByPath(`${tmpPath}/${notebookName}`);
 
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+
+  // Measure height when the notebook is open but launcher closed
+  const fullHeight = await getWindowHeight(notebook!);
+
+  // Add a new launcher below the notebook
+  await page.evaluate(async () => {
+    const widget = await window.jupyterapp.commands.execute('launcher:create');
+    window.jupyterapp.shell.add(widget, 'main', { mode: 'split-bottom' });
+  });
+  // Measure height after splitting the dock area
+  const heightAfterSplit = await getWindowHeight(notebook!);
+
+  expect(heightAfterSplit).toBeLessThan(fullHeight);
+
+  // Resize the dock panel, increasing the notebook height/decreasing the launcher height.
+  const resizeHandle = page.locator(
+    '.lm-DockPanel-handle[data-orientation="vertical"]:visible'
+  );
+  await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
+
+  // Measure height after resizing
+  const heightAfterResize = await getWindowHeight(notebook!);
+
+  expect(heightAfterResize).toBeGreaterThan(heightAfterSplit);
+});
+
+test('should not update height when hiding', async ({ page, tmpPath }) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+  let initialHeight = 0;
+  let previousHeight = 0;
+  let counter = 0;
+
+  // Wait to ensure the rendering logic is stable.
+  do {
+    previousHeight = initialHeight;
+    await page.waitForTimeout(200);
+
+    initialHeight = await getInnerHeight(notebook!);
+  } while (previousHeight !== initialHeight && counter++ < 10);
+
+  expect.soft(initialHeight).toBeGreaterThan(0);
+
+  // Add a new launcher covering the notebook.
   await page.menu.clickMenuItem('File>New Launcher');
 
-  const innerHeight =
-    (await h?.$$eval(
-      '.jp-WindowedPanel-inner',
-      nodes => nodes[0].style.height
-    )) ?? '-1';
+  const innerHeight = await getInnerHeight(notebook!);
 
-  expect(parseInt(innerHeight, 10)).toEqual(initialHeight);
+  expect(innerHeight).toEqual(initialHeight);
 });
 
 test('should hide first inactive code cell when scrolling down', async ({
@@ -64,14 +115,14 @@ test('should hide first inactive code cell when scrolling down', async ({
   // Activate >second< cell
   await page.notebook.selectCells(1);
   // Test if the >first< (now inactive) cell gets detached
-  const h = await page.notebook.getNotebookInPanel();
-  const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
-  const firstCell = await h!.waitForSelector(firstCellSelector);
+  const h = await page.notebook.getNotebookInPanelLocator();
+  const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
+  await firstCell.waitFor();
 
   const bbox = await h!.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
   await Promise.all([
-    firstCell.waitForElementState('hidden'),
+    firstCell.waitFor({ state: 'hidden' }),
     page.mouse.wheel(0, 600)
   ]);
 
@@ -88,25 +139,25 @@ test('should reattached inactive code cell when scrolling back into the viewport
   // Activate >second< cell
   await page.notebook.selectCells(1);
   // Test if the >first< (now inactive) cell gets re-attached
-  const h = await page.notebook.getNotebookInPanel();
-  const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
-  const firstCell = await h!.waitForSelector(firstCellSelector);
+  const h = await page.notebook.getNotebookInPanelLocator();
+  const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
+  await firstCell.waitFor();
 
   const bbox = await h!.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
   await Promise.all([
-    firstCell.waitForElementState('hidden'),
-    h!.waitForSelector('.jp-MarkdownCell[data-windowed-list-index="6"]'),
+    firstCell.waitFor({ state: 'hidden' }),
+    h!.locator('.jp-MarkdownCell[data-windowed-list-index="6"]').waitFor(),
     page.mouse.wheel(0, 1200)
   ]);
 
   await Promise.all([
-    firstCell.waitForElementState('visible'),
+    firstCell.waitFor({ state: 'visible' }),
     page.mouse.wheel(0, -1200)
   ]);
 
   // Check that the input area is back
-  expect(await firstCell.waitForSelector('.jp-InputArea')).toBeDefined();
+  await expect(firstCell.locator('.jp-InputArea')).toHaveCount(1);
 });
 
 test('should not detach active code cell input when scrolling down', async ({
@@ -116,19 +167,19 @@ test('should not detach active code cell input when scrolling down', async ({
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   await page.notebook.selectCells(0);
-  const h = await page.notebook.getNotebookInPanel();
-  const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
-  const firstCell = await h!.waitForSelector(firstCellSelector);
+  const h = await page.notebook.getNotebookInPanelLocator();
+  const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
+  await firstCell.waitFor();
 
   const bbox = await h!.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
   await Promise.all([
-    firstCell.waitForElementState('hidden'),
+    firstCell.waitFor({ state: 'hidden' }),
     page.mouse.wheel(0, 1200)
   ]);
 
   // Check the input is still defined
-  expect(await firstCell.waitForSelector('.jp-InputArea')).toBeDefined();
+  await expect(firstCell.locator('.jp-InputArea')).toHaveCount(1);
 });
 
 for (const cellType of ['code', 'markdown']) {
@@ -140,14 +191,14 @@ for (const cellType of ['code', 'markdown']) {
 
     await page.notebook.setCellType(0, cellType);
     await page.notebook.enterCellEditingMode(0);
-    const h = await page.notebook.getNotebookInPanel();
-    const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
-    const firstCell = await h!.waitForSelector(firstCellSelector);
+    const h = await page.notebook.getNotebookInPanelLocator();
+    const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
+    await firstCell.waitFor();
 
     const bbox = await h!.boundingBox();
     await page.mouse.move(bbox!.x, bbox!.y);
     await Promise.all([
-      firstCell.waitForElementState('hidden'),
+      firstCell.waitFor({ state: 'hidden' }),
       page.mouse.wheel(0, 1200)
     ]);
 
@@ -155,43 +206,109 @@ for (const cellType of ['code', 'markdown']) {
     await page.keyboard.type('TEST', { delay: 150 });
 
     // Expect the cell to become visible again
-    await firstCell.waitForElementState('visible');
+    await firstCell.waitFor({ state: 'visible' });
 
     // Expect the text to populate the cell editor
-    const firstCellInput = await page.notebook.getCellInput(0);
-    expect(await firstCellInput.textContent()).toContain('TEST');
+    const firstCellInput = await page.notebook.getCellInputLocator(0);
+    expect(await firstCellInput!.textContent()).toContain('TEST');
   });
 }
 
-test('should scroll back to the cell below the active cell on arrow down key', async ({
-  page,
-  tmpPath
-}) => {
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+const scrollOnKeyPressCases: {
+  key: string;
+  showCell: 'first' | 'second' | 'neither';
+  times: number;
+  enterEditor: boolean;
+}[] = [
+  {
+    // When pressing arrow down the second cell should become selected.
+    key: 'ArrowDown',
+    showCell: 'second',
+    times: 1,
+    enterEditor: false
+  },
+  {
+    // Pressing Alt does not cause any input nor cursor movement so it should
+    // not cause any scrolling. This test in particular tests against an easy
+    // mistake of force-focusing the active editor which is out of view which
+    // can cause partial scrolling in the direction of the editor. Because the
+    // scrolling is only partial multiple presses are needed.
+    key: 'Alt',
+    showCell: 'neither',
+    times: 10,
+    enterEditor: true
+  },
+  {
+    // Because the cursor starts at the beginning of the first cell, a single
+    // press of PageDown should just move the cursor to the end, which should
+    // reveal the editor by scrolling to the first cell.
+    key: 'PageDown',
+    showCell: 'first',
+    times: 1,
+    enterEditor: true
+  },
+  {
+    // Pressing `PageDown` multiple times should scroll the notebook in a way
+    // which hides both cells (even though the first press would reveal them).
+    key: 'PageDown',
+    showCell: 'neither',
+    times: 10,
+    enterEditor: true
+  }
+];
+test.describe('Scrolling on keyboard interaction when active editor is above the viewport', () => {
+  for (const testCase of scrollOnKeyPressCases) {
+    test(`Show ${testCase.showCell} cell on pressing ${testCase.key} ${testCase.times} times`, async ({
+      page,
+      tmpPath
+    }) => {
+      await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  // Activate the first cell.
-  await page.notebook.selectCells(0);
-  const h = await page.notebook.getNotebookInPanel();
-  const firstCell = await h!.waitForSelector(
-    '.jp-Cell[data-windowed-list-index="0"]'
-  );
-  const secondCell = await h!.waitForSelector(
-    '.jp-Cell[data-windowed-list-index="1"]'
-  );
+      // Activate the first cell.
+      await page.notebook.selectCells(0);
+      const h = await page.notebook.getNotebookInPanelLocator();
+      const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
+      const secondCell = h!.locator('.jp-Cell[data-windowed-list-index="1"]');
+      await firstCell.waitFor();
+      await secondCell.waitFor();
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
-  await Promise.all([
-    firstCell.waitForElementState('hidden'),
-    secondCell.waitForElementState('hidden'),
-    page.mouse.wheel(0, 1200)
-  ]);
+      if (testCase.enterEditor) {
+        await page.notebook.enterCellEditingMode(0);
+        // Move cursor in the first cell to the beginning of the source code
+        await page.keyboard.press('Home');
+      }
 
-  // Select cell below the active cell
-  await page.keyboard.press('ArrowDown');
+      // Position the mouse in the bounding box to allow for scrolling with mouse wheel
+      const bbox = await h!.boundingBox();
+      await page.mouse.move(bbox!.x, bbox!.y);
 
-  // Expect the second cell to become visible again.
-  await secondCell.waitForElementState('visible');
+      // Scroll down to hide the first and second cell
+      await Promise.all([
+        firstCell.waitFor({ state: 'hidden' }),
+        secondCell.waitFor({ state: 'hidden' }),
+        page.mouse.wheel(0, 1200)
+      ]);
+
+      // Press the key as many times as requested
+      for (let i = 0; i < testCase.times; i++) {
+        await page.keyboard.press(testCase.key);
+        // Allow for small delay between pressing keys
+        await page.waitForTimeout(100);
+      }
+
+      if (testCase.showCell === 'neither') {
+        // For negative test case we need to add an explicit timeout to test
+        // against the possibility of the scroll happening with a small delay.
+        await page.waitForTimeout(400);
+        await expect(firstCell).toBeHidden();
+        await expect(secondCell).toBeHidden();
+      } else {
+        const cell = testCase.showCell === 'first' ? firstCell : secondCell;
+        // Expect the cell to become visible again.
+        await cell.waitFor({ state: 'visible' });
+      }
+    });
+  }
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
@@ -200,20 +317,20 @@ test('should detach a markdown code cell when scrolling out of the viewport', as
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  const h = await page.notebook.getNotebookInPanel();
-  const mdCellSelector = '.jp-MarkdownCell[data-windowed-list-index="2"]';
-  const mdCell = await h!.waitForSelector(mdCellSelector);
+  const h = await page.notebook.getNotebookInPanelLocator();
+  const mdCell = h!.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
+  await mdCell.waitFor();
 
   const bbox = await h!.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
   await Promise.all([
-    mdCell.waitForElementState('hidden'),
+    mdCell.waitFor({ state: 'hidden' }),
     page.mouse.wheel(0, 1200)
   ]);
 
   let found = true;
   try {
-    await h!.waitForSelector(mdCellSelector, { timeout: 150 });
+    await mdCell.waitFor({ timeout: 150 });
   } catch (r) {
     found = false;
   }
@@ -226,15 +343,15 @@ test('should reattach a markdown code cell when scrolling back into the viewport
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  const h = await page.notebook.getNotebookInPanel();
-  const mdCellSelector = '.jp-MarkdownCell[data-windowed-list-index="2"]';
-  const mdCell = await h!.waitForSelector(mdCellSelector);
+  const h = await page.notebook.getNotebookInPanelLocator();
+  const mdCell = h!.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
+  await mdCell.waitFor();
 
   const bbox = await h!.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
   await Promise.all([
-    mdCell.waitForElementState('hidden'),
-    h!.waitForSelector('.jp-MarkdownCell[data-windowed-list-index="6"]'),
+    mdCell.waitFor({ state: 'hidden' }),
+    h!.locator('.jp-MarkdownCell[data-windowed-list-index="6"]').waitFor(),
     page.mouse.wheel(0, 1200)
   ]);
 
@@ -242,7 +359,7 @@ test('should reattach a markdown code cell when scrolling back into the viewport
 
   await page.mouse.wheel(0, -1200);
 
-  expect(await h!.waitForSelector(mdCellSelector)).toBeDefined();
+  await expect(mdCell).toBeVisible();
 });
 
 test('should remove all cells including hidden outputs artifacts', async ({
@@ -251,12 +368,12 @@ test('should remove all cells including hidden outputs artifacts', async ({
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  const h = await page.notebook.getNotebookInPanel();
+  const h = await page.notebook.getNotebookInPanelLocator();
 
   const bbox = await h!.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
   await Promise.all([
-    h!.waitForSelector('.jp-MarkdownCell[data-windowed-list-index="6"]'),
+    h!.locator('.jp-MarkdownCell[data-windowed-list-index="6"]').waitFor(),
     page.mouse.wheel(0, 1200)
   ]);
 
@@ -267,49 +384,52 @@ test('should remove all cells including hidden outputs artifacts', async ({
   await page.keyboard.press('d');
 
   // Check that the notebook only contains one cell
-  expect(await (await h!.$('.jp-WindowedPanel-inner'))!.textContent()).toEqual(
+  expect(await h!.locator('.jp-WindowedPanel-inner')!.textContent()).toEqual(
     '[ ]:'
   );
 
   // Check there are no hidden cells
   let found = true;
   try {
-    await h!.waitForSelector('.jp-Cell', { state: 'hidden', timeout: 150 });
+    await h!.locator('.jp-Cell').waitFor({ state: 'hidden', timeout: 150 });
   } catch (r) {
     found = false;
   }
   expect(found).toEqual(false);
 });
 
-test('should scroll past end when running and inserting a cell at the viewport bottom', async ({
+test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-
-  const h = await page.notebook.getNotebookInPanel();
-  const mdCellSelector = '.jp-MarkdownCell[data-windowed-list-index="2"]';
-  const mdCell = await h!.waitForSelector(mdCellSelector);
+  const mdCell = page.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
+  const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
+  const fourthCell = page.locator('.jp-RawCell[data-windowed-list-index="4"]');
 
   await page
     .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
     .waitFor();
 
-  await mdCell.click();
+  // Un-render markdown cell
+  await page.notebook.enterCellEditingMode(2);
 
-  await expect
-    .soft(
-      page
-        .getByRole('main')
-        .locator('.jp-RawCell[data-windowed-list-index="4"]')
-    )
-    .not.toBeInViewport();
+  // The next cells should not be (significantly) visible (yet)
+  await expect.soft(thirdCell).not.toBeInViewport({ ratio: 0.1 });
+  await expect.soft(fourthCell).not.toBeInViewport();
 
+  // Render current (markdown) cell and advance
   await page.keyboard.press('Shift+Enter');
 
-  await expect(
-    page.getByRole('main').locator('.jp-RawCell[data-windowed-list-index="4"]')
-  ).toBeInViewport();
+  // The notebook should advance to next (third) cell and make it fully visible
+  await expect(thirdCell).toBeInViewport({ ratio: 1 });
+
+  // Because the third cell is not larger than the notebook viewport,
+  // the surrounding cells should be visible after it got centered:
+  // - the previous cell should still be visible
+  await expect(mdCell).toBeInViewport({ ratio: 1 });
+  // - the next cell should now be visible too
+  await expect(fourthCell).toBeInViewport({ ratio: 1 });
 });
 
 test('should rendered injected styles of out-of-viewport cells', async ({
@@ -385,4 +505,42 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   expect(
     await page.getByText('JavaScript injected header').count()
   ).toBeGreaterThan(1);
+});
+
+test('should navigate to a search hit in a out-of-viewport cell', async ({
+  page,
+  tmpPath
+}) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  // Open search box
+  await page.keyboard.press('Control+f');
+
+  await page.getByPlaceholder('Find').fill('IFrame');
+  await page.getByText('1/2').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
+    .not.toBeVisible();
+
+  await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
+
+  await page.locator('.jp-Cell[data-windowed-list-index="11"]').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
+    .toContainText('IFrame');
+
+  await page.getByPlaceholder('Find').fill('Final');
+  await page.getByText('1/1').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
+    .not.toBeVisible();
+
+  await page
+    .getByRole('button', { name: 'Previous Match (Ctrl+Shift+G)' })
+    .click();
+
+  await page.locator('.jp-Cell[data-windowed-list-index="18"]').waitFor();
+  await expect(
+    page.locator('.jp-Cell[data-windowed-list-index="18"]')
+  ).toContainText('Final');
 });

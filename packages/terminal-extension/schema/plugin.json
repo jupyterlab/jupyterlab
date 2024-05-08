@@ -108,6 +108,12 @@
       "description": "Option key on macOS can be used as meta key. This enables to use shortcuts such as option + f to move cursor forward one word",
       "type": "boolean",
       "default": false
+    },
+    "cursorBlink": {
+      "title": "Blinking cursor",
+      "description": "Whether to blink the cursor. Changes require reopening the terminal.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

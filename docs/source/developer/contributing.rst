@@ -86,9 +86,11 @@ breaking changes. Consider documenting your maintenance plans to users in these 
 You may also wish to consider pinning the major version of JupyterLab when developing
 extensions (in your package metadata).
 
-We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
-All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+We maintain a major version of JupyterLab for **one year after its successor's first release**.
+See `version lifecycle <../getting_started/lifecycle.html>`__ for details.
+JupyterLab v4 was released on May 15, 2023, so JupyterLab v3 will be maintained
+until May 15, 2024. JupyterLab v1 and v2 are no longer maintained.
+All JupyterLab v2 and v3 users are strongly advised to upgrade as soon as possible.
 
 Languages, Tools and Processes
 ------------------------------
@@ -97,11 +99,11 @@ All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `ruff <https://docs.astral.sh/ruff>`__.
 When code is modified and committed, all staged files will be
 automatically formatted using pre-commit git hooks (with help from
 `pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
-using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
+using a code formatters like ``prettier`` and ``ruff`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
 
@@ -121,7 +123,7 @@ You can invoke the pre-commit hook by hand at any time with::
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
-You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+You may also install `ruff integration <https://docs.astral.sh/ruff/integrations>`__
 into your text editor to format code automatically.
 
 If you have already committed files before setting up the pre-commit
@@ -227,7 +229,7 @@ furthers the goals of the Jupyter project.
 * The issue represents work that one developer can commit to owning, even if
   they collaborate with other developers for feedback. Excessively large issues
   should be split into multiple issues, each triaged individually, or into
-  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  `team-compass <https://github.com/jupyterlab/frontends-team-compass>`__ issues to discuss
   more substantive changes.
 
 Labels Used by Triagers
@@ -277,13 +279,17 @@ Contributing from within the browser
 Contributing to JupyterLab codebase is also possible without setting up
 a local environment, directly from the Web browser:
 
--  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
-   however it is not actively maintained,
+-  GitHub's
+   `codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository>`__
+   is available (free account have
+   `limited monthly resources <https://docs.github.com/en/billing/managing-billing-for-github-codespaces/about-billing-for-github-codespaces#monthly-included-storage-and-core-hours-for-personal-accounts>`__).
 -  GitHub's
    `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
    is suitable for contributing very small fixes,
 -  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
    editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
+-  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
+   however it is not actively maintained,
 -  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
@@ -300,14 +306,21 @@ about 7 minutes again.
 
 Setting up a local development environment
 ------------------------------------------
+
+.. note::
+
+   Look at the :ref:`automated dev environment <automatic_local_dev_env>` section,
+   for some automation ways to set up a local development environment.
+
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__
+and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 18+, as defined in the
+development version requires Node.js version 20+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
@@ -315,7 +328,7 @@ If you use `conda <https://conda.io>`__, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge nodejs
+   conda install -c conda-forge nodejs=20
 
 If you use `Homebrew <https://brew.sh>`__ on macOS:
 
@@ -350,19 +363,48 @@ With Homebrew:
 
    brew install pkg-config cairo pango libpng jpeg giflib librsvg
 
+.. _automatic_local_dev_env:
+
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+While there is a lot to learn by following the steps above, they can be automated to save time.
+The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
-This section shows how to do that using Docker and Vagrant.
+This section shows how to do that using VS Code dev containers, Docker and Vagrant.
+
+**Setup for VS Code**
+"""""""""""""""""""""
+
+To start a local development environment for JupyterLab using VS Code dev containers,
+you need to:
+
+1. Install the VS Code `Dev Containers extension <https://code.visualstudio.com/docs/devcontainers/tutorial>`__.
+
+2. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
+
+3. Clone your fork locally:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+
+4. Open the local clone with VS Code.
+
+5. Open the repository in a container.
+   VS Code should prompt you with a pop-up to do so. In case it does not, you can click on the
+   icon ``><`` on the bottom left. Then choose *Reopen in container*.
+
+.. note::
+
+   It will take quite some times the first time.
 
 **Setup using Docker**
-""""""""""""""""""""""""
+""""""""""""""""""""""
 
 To start a JupyterLab development container in a UNIX system with docker installed:
 
-1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab>`__.
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
 
 2. Start the container:
 
@@ -399,7 +441,7 @@ To add TypeScript dependencies to the project, you need to log into the containe
    bash docker/start.sh build
 
 **Setup using Vagrant**
-""""""""""""""""""""""""""""
+"""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.
@@ -436,15 +478,10 @@ Notes:
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  Some of the packages used in the development environment require
-   Python 3.0 or higher. If you encounter an ImportError during the
-   installation, make sure Python 3.0+ is installed. Also, try using the
-   Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
-   install JupyterLab from the forked repository.
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see `Installing Node.js and jlpm section`_
+   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
    of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
@@ -477,15 +514,7 @@ Notes:
    However, it takes a bit longer to build the sources, so is used only
    to build for production by default.
 
-If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab server
-extension:
-
-.. code:: bash
-
-   jupyter serverextension enable --py --sys-prefix jupyterlab
-
-For installation instructions to write documentation, please see
+For installation instructions for contributors who want to write documentation, please see
 `Writing Documentation <#writing-documentation>`__
 
 Run JupyterLab

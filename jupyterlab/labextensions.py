@@ -79,6 +79,12 @@ uninstall_flags["all"] = (
     "Uninstall all extensions",
 )
 
+list_flags = copy(flags)
+list_flags["verbose"] = (
+    {"ListLabExtensionsApp": {"verbose": True}},
+    "Increase verbosity level",
+)
+
 aliases = dict(base_aliases)
 aliases["app-dir"] = "BaseExtensionApp.app_dir"
 aliases["dev-build"] = "BaseExtensionApp.dev_build"
@@ -308,9 +314,9 @@ class WatchLabExtensionApp(BaseExtensionApp):
     )
 
     aliases = {
-        "development": "BuildLabExtensionApp.development",
-        "source-map": "BuildLabExtensionApp.source_map",
-        "core-path": "BuildLabExtensionApp.core_path",
+        "core-path": "WatchLabExtensionApp.core_path",
+        "development": "WatchLabExtensionApp.development",
+        "source-map": "WatchLabExtensionApp.source_map",
     }
 
     def run_task(self):
@@ -330,7 +336,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
-    all = Bool(False, config=True, help="Whether to update all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to update all extensions")
 
     def run_task(self):
         self.deprecation_warning(
@@ -391,7 +397,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
     flags = uninstall_flags
 
-    all = Bool(False, config=True, help="Whether to uninstall all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to uninstall all extensions")
 
     def run_task(self):
         self.deprecation_warning(
@@ -412,6 +418,8 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
+    verbose = Bool(False, help="Increase verbosity level.").tag(config=True)
+    flags = list_flags
 
     def run_task(self):
         list_extensions(
@@ -420,6 +428,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
                 logger=self.log,
                 core_config=self.core_config,
                 labextensions_path=self.labextensions_path,
+                verbose=self.verbose,
             )
         )
 

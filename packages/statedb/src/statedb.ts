@@ -85,7 +85,7 @@ export class StateDB<
   /**
    * Retrieve all the saved bundles for a namespace.
    *
-   * @param filter - The namespace prefix to retrieve.
+   * @param namespace The namespace prefix to retrieve.
    *
    * @returns A promise that bears a collection of payloads for a namespace.
    *
