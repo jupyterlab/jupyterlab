@@ -43,7 +43,12 @@ export interface IGhostText {
   /**
    * An error occurred in the request.
    */
-  isError?: boolean;
+  error?: {
+    /**
+     * A message explaining the error.
+     */
+    message?: string;
+  };
   /**
    * Callback to execute when pointer enters the boundary of the ghost text.
    */
@@ -153,11 +158,15 @@ class GhostTextWidget extends WidgetType {
   }
 
   /**
-   * Mount the error animation dom and delete all displayed ghost text dom.
+   * Mount the error animation DOM and remove the streaming indicator if any.
    */
   private _mountErrorAnimation(dom: HTMLElement) {
     const errorIndicator = document.createElement('span');
     errorIndicator.className = ERROR_INDICATOR_CLASS;
+    const error = this.options.error;
+    if (error?.message) {
+      errorIndicator.title = error?.message;
+    }
 
     // Delete stream and previous error animation
     const elementsToRemove = dom.querySelectorAll(
@@ -172,7 +181,7 @@ class GhostTextWidget extends WidgetType {
   }
 
   private _updateDOM(dom: HTMLElement) {
-    if (this.options.isError) {
+    if (this.options.error) {
       this._mountErrorAnimation(dom);
 
       this._clearErrorTimeout = setTimeout(() => {
