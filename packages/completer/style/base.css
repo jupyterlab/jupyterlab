@@ -284,7 +284,7 @@
 .jp-GhostText-errorIndicator::after {
   animation: jp-GhostText-error 2s infinite;
   animation-delay: 400ms;
-  content: ' ';
+  content: '⚠';
   background: rgba(255, 0, 0, 0.5);
 }
 
