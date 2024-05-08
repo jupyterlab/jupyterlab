@@ -231,7 +231,7 @@ class GhostTextWidget extends WidgetType {
     super.destroy(dom);
   }
 
-  private _clearErrorTimeout: number | null = null;
+  private _clearErrorTimeout: ReturnType<typeof setTimeout> | null = null;
 }
 
 export namespace GhostTextManager {
