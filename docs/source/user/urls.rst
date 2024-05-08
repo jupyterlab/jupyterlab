@@ -207,7 +207,7 @@ default workspace.
 Workspace File Format
 ---------------------
 
-A workspace file in a JSON file with a specific spec.
+A workspace file is a JSON file with a specific spec.
 
 
 There are two top level keys requires, `data`, and `metadata`.
