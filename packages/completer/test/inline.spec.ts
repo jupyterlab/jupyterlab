@@ -127,7 +127,6 @@ describe('completer/inline', () => {
         item.isIncomplete = false;
         stream.emit(CompletionHandler.StraemEvent.closed);
 
-        streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
         const errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`);
         expect(ghost.innerText).toBe('this is a test');
         expect(errorIndicator).toBeNull();
@@ -135,6 +134,7 @@ describe('completer/inline', () => {
         // but behold jsdom which does not implement innerText as of 2024 and thus
         // setting innerText on an element does not clear its children in tests, see
         // https://github.com/jsdom/jsdom/issues/1245
+        // streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
         // expect(streamingIndicator).toBeNull();
       });
 
