@@ -188,7 +188,7 @@ class GhostTextWidget extends WidgetType {
       this._clearErrorTimeout = setTimeout(() => {
         this._removeErrorAnimation(dom);
         this._clearErrorTimeout = null;
-      }, 2000);
+      }, 5000);
       return;
     }
     // If not in an error anymore, clear the error indicator

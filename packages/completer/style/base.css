@@ -282,15 +282,22 @@
 }
 
 .jp-GhostText-errorIndicator::after {
-  animation: jp-GhostText-error 2s infinite;
-  animation-delay: 400ms;
+  animation: jp-GhostText-error 500ms 1;
+  animation-delay: 3500ms;
+  color: var(--jp-error-color1);
+  font-size: 150%;
+  line-height: 10px;
+  margin-left: 2px;
+  padding: 0 4px;
   content: '⚠';
-  background: rgba(255, 0, 0, 0.5);
+  cursor: help;
+  position: relative;
+  top: 2px;
 }
 
 @keyframes jp-GhostText-error {
   0% {
-    opacity: 0.5;
+    opacity: 1;
   }
 
   100% {
