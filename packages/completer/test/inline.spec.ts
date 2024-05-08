@@ -7,12 +7,16 @@ import {
 } from '@jupyterlab/completer';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { nullTranslator } from '@jupyterlab/translation';
-import { simulate } from '@jupyterlab/testing';
+import { framePromise, simulate } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { MessageLoop } from '@lumino/messaging';
 import { Doc, Text } from 'yjs';
+
+const GHOST_TEXT_CLASS = 'jp-GhostText';
+const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
+const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
 
 describe('completer/inline', () => {
   const exampleProvider: IInlineCompletionProvider = {
@@ -39,6 +43,10 @@ describe('completer/inline', () => {
 
     beforeEach(() => {
       editorWidget = createEditorWidget();
+      // Mock coordinate for position as jest does not implement layout
+      editorWidget.editor.getCoordinateForPosition = () => {
+        return { left: 0, top: 0, right: 0, bottom: 0 };
+      };
       model = new InlineCompleter.Model();
       model.cursor = {
         line: 0,
@@ -75,6 +83,105 @@ describe('completer/inline', () => {
         expect(editorWidget.editor.model.sharedModel.source).toBe(
           'suggestion a'
         );
+      });
+    });
+
+    describe('#_setText()', () => {
+      const findInHost = (selector: string) =>
+        editorWidget.editor.host.querySelector(selector);
+
+      it('should render the completion as it is streamed', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        const stream = new Signal<any, CompletionHandler.StraemEvent>(
+          {} as any
+        );
+        const item: CompletionHandler.IInlineItem = {
+          insertText: 'this',
+          streaming: true,
+          provider: exampleProvider,
+          isIncomplete: true,
+          stream
+        };
+        model.setCompletions({ items: [item] });
+        await framePromise();
+
+        stream.emit(CompletionHandler.StraemEvent.opened);
+
+        let ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        let streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+
+        expect(ghost.innerText).toBe('this');
+        expect(streamingIndicator).toBeDefined();
+
+        item.insertText = 'this is';
+        stream.emit(CompletionHandler.StraemEvent.update);
+        expect(ghost.innerText).toBe('this is');
+
+        item.insertText = 'this is a';
+        stream.emit(CompletionHandler.StraemEvent.update);
+        expect(ghost.innerText).toBe('this is a');
+
+        item.insertText = 'this is a test';
+        item.streaming = false;
+        item.isIncomplete = false;
+        stream.emit(CompletionHandler.StraemEvent.closed);
+
+        streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+        const errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`);
+        expect(ghost.innerText).toBe('this is a test');
+        expect(errorIndicator).toBeNull();
+        // On runtime streaming indicator gets removed because innerText gets called,
+        // but behold jsdom which does not implement innerText as of 2024 and thus
+        // setting innerText on an element does not clear its children in tests, see
+        // https://github.com/jsdom/jsdom/issues/1245
+        // expect(streamingIndicator).toBeNull();
+      });
+
+      it('should render the error if stream errors out', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        const stream = new Signal<any, CompletionHandler.StraemEvent>(
+          {} as any
+        );
+        const item: CompletionHandler.IInlineItem = {
+          insertText: 'this',
+          streaming: true,
+          provider: exampleProvider,
+          isIncomplete: true,
+          stream
+        };
+        model.setCompletions({ items: [item] });
+        await framePromise();
+
+        stream.emit(CompletionHandler.StraemEvent.opened);
+
+        let ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        let streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+        let errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`) as
+          | HTMLElement
+          | undefined;
+
+        expect(ghost.innerText).toBe('this');
+        expect(streamingIndicator).toBeDefined();
+        expect(errorIndicator).toBeNull();
+
+        item.insertText = 'this is';
+        stream.emit(CompletionHandler.StraemEvent.update);
+
+        item.error = { message: 'Completion generation failed' };
+        stream.emit(CompletionHandler.StraemEvent.update);
+        errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`) as HTMLElement;
+        streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+        // should not remove suggestion
+        expect(ghost.innerText).toBe('this is');
+        // should show error indicator
+        expect(errorIndicator).toBeDefined();
+        // should hide streaming indicator
+        expect(streamingIndicator).toBeNull();
+
+        // the error indicator should include the title
+        expect(errorIndicator.title).toBe('Completion generation failed');
       });
     });
 

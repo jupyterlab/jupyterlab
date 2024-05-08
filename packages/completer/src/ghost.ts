@@ -117,7 +117,8 @@ class GhostTextWidget extends WidgetType {
   eq(other: GhostTextWidget) {
     return (
       other.content == this.content &&
-      other.options.streaming === this.options.streaming
+      other.options.streaming === this.options.streaming &&
+      other.options.error === this.options.error
     );
   }
 

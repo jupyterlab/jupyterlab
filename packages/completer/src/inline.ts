@@ -453,7 +453,11 @@ export class InlineCompleter extends Widget {
 
     let anchor: DOMRect;
     try {
-      anchor = editor.getCoordinateForPosition(model.cursor) as DOMRect;
+      const maybeAnchor = editor.getCoordinateForPosition(model.cursor);
+      if (!maybeAnchor) {
+        throw Error('No coordinates for cursor position');
+      }
+      anchor = maybeAnchor as DOMRect;
     } catch {
       // if coordinate is no longer in editor (e.g. after deleting a line), hide widget
       this.hide();
