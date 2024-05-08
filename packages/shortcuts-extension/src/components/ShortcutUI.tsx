@@ -384,12 +384,12 @@ export class ShortcutUI
           });
         }
         found = true;
-      } else if (keybinding && !JSONExt.deepEqual(keybinding.keys, keys)) {
-        newUserShortcuts.push({
-          command: shortcut.command,
-          selector: shortcut.selector,
-          keys: keys
-        });
+      } else if (
+        keybinding &&
+        !JSONExt.deepEqual(keybinding.keys, shortcut.keys) &&
+        keys.length === 0
+      ) {
+        continue;
       } else {
         newUserShortcuts.push(shortcut);
       }
