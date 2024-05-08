@@ -156,8 +156,8 @@ class GhostTextWidget extends WidgetType {
    * Mount the error animation dom and delete all displayed ghost text dom.
    */
   private _mountErrorAnimation(dom: HTMLElement) {
-    const streamingIndicator = document.createElement('span');
-    streamingIndicator.className = ERROR_INDICATOR_CLASS;
+    const errorIndicator = document.createElement('span');
+    errorIndicator.className = ERROR_INDICATOR_CLASS;
 
     // Delete stream and previous error animation
     const elementsToRemove = dom.querySelectorAll(
@@ -168,7 +168,7 @@ class GhostTextWidget extends WidgetType {
       element.remove();
     });
 
-    dom.appendChild(streamingIndicator);
+    dom.appendChild(errorIndicator);
   }
 
   private _updateDOM(dom: HTMLElement) {
