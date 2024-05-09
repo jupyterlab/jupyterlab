@@ -63,7 +63,7 @@ export const ConnectionLost: IConnectionLost = async function (
       await errorDialogPromise;
       return;
     } catch (error) {
-      console.error('An error occurred while showing the dialog:', error);
+      console.error('An error occurred while showing the dialog: ', error);
     }
   }
 };
