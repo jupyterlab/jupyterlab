@@ -31,7 +31,7 @@ export const ConnectionLost: IConnectionLost = async function (
     return;
   }
 
-  const key = title + '----' + networkMsg;
+  const key = 'server-connection-error';
   const promise = connectionLostCachePromise[key];
 
   if (promise) {
