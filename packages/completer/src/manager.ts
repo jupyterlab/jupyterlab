@@ -10,6 +10,7 @@ import { CompletionHandler } from './handler';
 import { CompleterModel } from './model';
 import { InlineCompleter } from './inline';
 import {
+  ICompleterSelection,
   ICompletionContext,
   ICompletionProvider,
   ICompletionProviderManager,
@@ -36,7 +37,10 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
-    this._selected = new Signal<ICompletionProviderManager, string>(this);
+    this._selected = new Signal<
+      ICompletionProviderManager,
+      ICompleterSelection
+    >(this);
     this._inlineCompleterFactory = null;
   }
 
@@ -50,7 +54,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Signal emitted when a selection is made from a completer menu.
    */
-  get selected(): ISignal<ICompletionProviderManager, string> {
+  get selected(): ISignal<ICompletionProviderManager, ICompleterSelection> {
     return this._selected;
   }
 
@@ -180,8 +184,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       // Create a new handler.
       const handler = await this._generateHandler(newCompleterContext, options);
       this._panelHandlers.set(widget.id, handler);
-      handler.completer.selected.connect((sender, value) =>
-        this._selected.emit(value)
+      handler.completer.selected.connect((completer, text) =>
+        this._selected.emit({ text })
       );
       widget.disposed.connect(old => {
         this.disposeHandler(old.id, handler);
@@ -421,7 +425,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _autoCompletion: boolean;
 
   private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
-  private _selected: Signal<ICompletionProviderManager, string>;
+  private _selected: Signal<ICompletionProviderManager, ICompleterSelection>;
   private _inlineCompleterFactory: IInlineCompleterFactory | null;
   private _inlineCompleterSettings = InlineCompleter.defaultSettings;
 }

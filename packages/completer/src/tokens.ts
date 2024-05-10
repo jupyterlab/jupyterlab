@@ -370,7 +370,7 @@ export interface ICompletionProviderManager {
   /**
    * Signal emitted when a selection is made from a completer menu.
    */
-  selected: ISignal<ICompletionProviderManager, string>;
+  selected: ISignal<ICompletionProviderManager, ICompleterSelection>;
 
   /**
    * Inline completer actions.
@@ -381,6 +381,13 @@ export interface ICompletionProviderManager {
    * Inline providers information.
    */
   inlineProviders?: IInlineCompletionProviderInfo[];
+}
+
+export interface ICompleterSelection {
+  /**
+   * The text selected by the completer.
+   */
+  text: string;
 }
 
 export interface IInlineCompleterActions {
