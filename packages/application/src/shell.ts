@@ -1315,6 +1315,26 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Toggle the fullscreen mode based on user inputs
+   */
+  setFullscreenMode(): void {
+    if (this.fullscreenMode) {
+      document.documentElement.requestFullscreen().catch(reason => {
+        console.error('Failed to enter fullscreen mode.', reason);
+      });
+    } else if (!this.fullscreenMode && document.fullscreenElement !== null) {
+      document.exitFullscreen().catch(reason => {
+        console.error('Failed to exit fullscreen mode.', reason);
+      });
+    }
+    document.addEventListener('fullscreenchange', () => {
+      if (this.fullscreenMode && document.fullscreenElement === null) {
+        this.fullscreenMode = false;
+      }
+    });
+  }
+
+  /**
    * Toggle top header visibility in simple mode
    *
    * Note: Does nothing in multi-document mode
