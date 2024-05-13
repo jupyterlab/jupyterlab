@@ -288,6 +288,11 @@ export namespace ISessionContext {
      * found (default `false`).
      */
     readonly autoStartDefault?: boolean;
+
+    /**
+     * Skip showing the kernel restart dialog if checked (default `false`).
+     */
+    readonly skipKernelRestartDialog?: boolean;
   }
 
   export type KernelDisplayStatus =
@@ -1421,13 +1426,15 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     // Skip the dialog and restart the kernel
     const kernelPluginId = '@jupyterlab/apputils-extension:sessionDialogs';
+    const skipKernelRestartDialog =
+      sessionContext.kernelPreference?.skipKernelRestartDialog ?? false;
     const skipKernelRestartDialogSetting = (
       await this._settingRegistry?.get(
         kernelPluginId,
         'skipKernelRestartDialog'
       )
     )?.composite as boolean;
-    if (skipKernelRestartDialogSetting) {
+    if (skipKernelRestartDialogSetting || skipKernelRestartDialog) {
       await sessionContext.restartKernel();
       return true;
     }
@@ -1458,17 +1465,13 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       return false;
     }
     if (result.button.accept) {
-      if (
-        typeof result.isChecked === 'boolean' &&
-        result.isChecked == true &&
-        this._settingRegistry
-      ) {
-        this._settingRegistry
-          .set(kernelPluginId, 'skipKernelRestartDialog', !result.isChecked)
-          .catch(reason => {
-            console.error(`Fail to set 'skipKernelRestartDialog:\n${reason}`);
-          });
+      if (typeof result.isChecked === 'boolean' && result.isChecked == true) {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          skipKernelRestartDialog: true
+        };
       }
+
       await sessionContext.restartKernel();
       return true;
     }
