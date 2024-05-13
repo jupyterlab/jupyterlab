@@ -3609,7 +3609,8 @@ function populatePalette(
     CommandIDs.collapseAllCmd,
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
-    CommandIDs.accessNextHistory
+    CommandIDs.accessNextHistory,
+    CommandIDs.virtualScrollbar
   ].forEach(command => {
     palette.addItem({ command, category });
   });
