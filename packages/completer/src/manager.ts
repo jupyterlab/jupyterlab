@@ -184,8 +184,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       // Create a new handler.
       const handler = await this._generateHandler(newCompleterContext, options);
       this._panelHandlers.set(widget.id, handler);
-      handler.completer.selected.connect((completer, text) =>
-        this._selected.emit({ text })
+      handler.completer.selected.connect((completer, insertText) =>
+        this._selected.emit({ insertText })
       );
       widget.disposed.connect(old => {
         this.disposeHandler(old.id, handler);

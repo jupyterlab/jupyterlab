@@ -387,7 +387,7 @@ export interface ICompleterSelection {
   /**
    * The text selected by the completer.
    */
-  text: string;
+  insertText: string;
 }
 
 export interface IInlineCompleterActions {
