@@ -24,6 +24,8 @@ import { createStandaloneCell } from '@jupyter/ydoc';
 
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import { MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 
 const DEFAULT_PROVIDER_ID = 'CompletionProvider:context';
 const SAMPLE_PROVIDER_ID = 'CompletionProvider:sample';
@@ -239,6 +241,33 @@ describe('completer/manager', () => {
         // update after providers changed
         await manager.updateCompleter(completerContext);
         expect(handler.completer.model).toBeInstanceOf(CustomCompleterModel);
+      });
+    });
+
+    describe('#selected', () => {
+      let completerContext: ICompletionContext;
+      let widget: NotebookPanel;
+
+      beforeEach(() => {
+        const context = contextFactory();
+        widget = NBTestUtils.createNotebookPanel(context);
+        completerContext = { widget };
+      });
+
+      it('should emit `selected` signal', async () => {
+        const callback = jest.fn();
+        await manager.updateCompleter(completerContext);
+        const handler = manager['_panelHandlers'].get(
+          widget.id
+        ) as CompletionHandler;
+        handler.completer.model!.setCompletionItems([{ label: 'foo' }]);
+        MessageLoop.sendMessage(handler.completer, Widget.Msg.UpdateRequest);
+
+        manager.selected.connect(callback);
+        expect(callback).toHaveBeenCalledTimes(0);
+        manager.select(widget.id);
+        expect(callback).toHaveBeenCalledTimes(1);
+        manager.selected.disconnect(callback);
       });
     });
   });
