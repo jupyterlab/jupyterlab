@@ -90,6 +90,8 @@ export class HTMLViewer
     });
     this.translator = options.translator || nullTranslator;
     this.content.addClass(CSS_CLASS);
+    //sets loading to lazy
+    this.content.node.querySelector('iframe')?.setAttribute('loading', 'lazy');
 
     void this.context.ready.then(() => {
       this.update();
@@ -184,7 +186,7 @@ export class HTMLViewer
    */
   private async _setupDocument(data: string): Promise<string> {
     const doc = this._parser.parseFromString(data, 'text/html');
-    let base = doc.querySelector('base');
+    let base = doc.querySelector('base'); 
     if (!base) {
       base = doc.createElement('base');
       doc.head.insertBefore(base, doc.head.firstChild);

@@ -233,6 +233,8 @@ const open: JupyterFrontEndPlugin<void> = {
       content.title.label = text;
       content.id = `${namespace}-${++counter}`;
       const widget = new MainAreaWidget({ content });
+      //sets loading to lazy
+      this.content.node.querySelector('iframe')?.setAttribute('loading', 'lazy');
       widget.addClass('jp-Help');
       return widget;
     }
