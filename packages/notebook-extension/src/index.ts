@@ -1867,7 +1867,7 @@ function activateNotebookHandler(
       title: trans.__('Select Kernel'),
       body: new DialogWidget(parameters, kernelConfigurarion, (formData)=>{
         kernelConfigurarion = formData as PartialJSONObject;
-      }),
+      }, trans),
       buttons,
     });
 

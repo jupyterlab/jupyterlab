@@ -26,7 +26,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
-import { DialogWidget, ReactWidget } from '@jupyterlab/ui-components';
+//import { DialogWidget, ReactWidget } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
@@ -1585,8 +1585,8 @@ namespace Private {
 
         const customContainer = document.createElement('div');
         customContainer.setAttribute("id","#js-kernel-custom-kernel-selector-container");
-        let kernelConfigurarion: PartialJSONObject = {};
-        let test = new DialogWidget(kernelParameters, kernelConfigurarion, (formData) => {
+       // let kernelConfigurarion: PartialJSONObject = {};
+        /*let test = new DialogWidget(kernelParameters, kernelConfigurarion, (formData) => {
           kernelConfigurarion = formData as PartialJSONObject;
         })
 
@@ -1611,7 +1611,7 @@ namespace Private {
         } else {
           customContainer.append(test.node);
         }
-        body.append(customContainer);
+        body.append(customContainer);*/
       }
     }
 
