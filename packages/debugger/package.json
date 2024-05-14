@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@codemirror/state": "^6.4.1",
-    "@codemirror/view": "^6.26.0",
+    "@codemirror/view": "^6.26.3",
     "@jupyter/react-components": "^0.15.3",
     "@jupyter/ydoc": "^2.0.1",
     "@jupyterlab/application": "^4.2.0",
