@@ -114,7 +114,8 @@ import {
   refreshIcon,
   runIcon,
   stopIcon,
-  tableRowsIcon
+  tableRowsIcon,
+  DialogWidget
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -137,7 +138,7 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
-import { DialogWidget } from './customKernelWidget';
+//import { CustomKernelSpecForm } from '@jupyterlab/services/src/kernelspec/kernelspec';
 
 /**
  * The command IDs used by the notebook plugin.
