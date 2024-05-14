@@ -200,6 +200,17 @@ interface IInlineCompletionItemLSP {
 }
 
 /**
+ * A representation of an error that occurred in completion generation.
+ * @alpha
+ */
+export interface IInlineCompletionError {
+  /**
+   * The optional message which may be shown in the user interface.
+   */
+  message?: string;
+}
+
+/**
  * An inline completion item represents a text snippet that is proposed inline
  * to complete text that is being typed.
  * @alpha
@@ -212,6 +223,11 @@ export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
    * with `token` which has to be set for incomplete completions.
    */
   isIncomplete?: boolean;
+
+  /**
+   * This field is marked when an error occurs during a stream or fetch request.
+   */
+  error?: IInlineCompletionError;
 }
 
 export interface IInlineCompletionList<
