@@ -54,7 +54,7 @@ Development
 
 
 -  `How can you
-   contribute? <https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md>`__
+   contribute? <https://github.com/jupyterlab/jupyterlab/blob/4.2.x/CONTRIBUTING.md>`__
 -  :ref:`How can you extend or customize JupyterLab? <user_extensions>`
 -  In the classic Notebook, I could use custom Javascript outputted by a cell to programmatically
    control the Notebook. Can I do the same thing in JupyterLab?
