@@ -271,19 +271,6 @@ Notes:
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  Some of the packages used in the development environment require
-   Python 3.0 or higher. If you encounter an ImportError during the
-   installation, make sure Python 3.0+ is installed. Also, try using the
-   Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
-   install JupyterLab from the forked repository.
--  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
-   returned exit status 127 while in binding.gyp`` while running the 
-   ``pip install`` command above, you may be missing packages required
-   by ``canvas``. On macOS with Homebrew, you can add these packages by
-   running 
-   ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
-   If you are using mamba or conda, you can install the necessary packages
-   with `conda install -c conda-forge pkg-config glib pango pixman`.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when

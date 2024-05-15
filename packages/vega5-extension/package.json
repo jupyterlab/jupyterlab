@@ -49,6 +49,7 @@
     "@types/jest": "^26.0.10",
     "@types/webpack-env": "^1.14.1",
     "jest": "^26.4.2",
+    "jest-canvas-mock": "^2.5.2",
     "rimraf": "~3.0.0",
     "typedoc": "~0.21.2",
     "typescript": "~4.1.3"
