@@ -29,7 +29,7 @@
     },
     {
       "command": "application:toggle-mode",
-      "keys": ["Accel Shift D"],
+      "keys": ["Accel Shift D"] ,
       "selector": "body"
     },
     {
@@ -45,6 +45,11 @@
     {
       "command": "application:toggle-presentation-mode",
       "keys": [""],
+      "selector": "body"
+    },
+    {
+      "command": "application:toggle-fullscreen-mode",
+      "keys": ["Alt F"],
       "selector": "body"
     },
     {
