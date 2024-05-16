@@ -29,7 +29,7 @@
     },
     {
       "command": "application:toggle-mode",
-      "keys": ["Accel Shift D"] ,
+      "keys": ["Accel Shift D"],
       "selector": "body"
     },
     {
