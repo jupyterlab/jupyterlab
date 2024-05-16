@@ -188,12 +188,12 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
             core_config=self.core_config,
             splice_source=self.splice_source,
         )
-        self.log.info("JupyterLab %s", version)
+        self.log.info(f"JupyterLab {version}")
         with self.debug_logging():
             if self.pre_clean:
-                self.log.info("Cleaning %s" % app_dir)
+                self.log.info(f"Cleaning {app_dir}")
                 clean(app_options=app_options)
-            self.log.info("Building in %s", app_dir)
+            self.log.info(f"Building in {app_dir}")
             try:
                 production = None if self.dev_build is None else not self.dev_build
                 build(
@@ -216,7 +216,7 @@ ext_warn_msg = "WARNING: this will delete all of your extensions, which will nee
 clean_flags = dict(base_flags)
 clean_flags["extensions"] = (
     {"LabCleanApp": {"extensions": True}},
-    "Also delete <app-dir>/extensions.\n%s" % ext_warn_msg,
+    f"Also delete <app-dir>/extensions.\n{ext_warn_msg}",
 )
 clean_flags["settings"] = (
     {"LabCleanApp": {"settings": True}},
@@ -228,7 +228,7 @@ clean_flags["static"] = (
 )
 clean_flags["all"] = (
     {"LabCleanApp": {"all": True}},
-    "Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
+    f"Delete the entire contents of the app directory.\n{ext_warn_msg}",
 )
 
 
@@ -257,9 +257,7 @@ class LabCleanApp(JupyterApp):
 
     app_dir = Unicode("", config=True, help="The app directory to clean")
 
-    extensions = Bool(
-        False, config=True, help="Also delete <app-dir>/extensions.\n%s" % ext_warn_msg
-    )
+    extensions = Bool(False, config=True, help=f"Also delete <app-dir>/extensions.\n{ext_warn_msg}")
 
     settings = Bool(False, config=True, help="Also delete <app-dir>/settings")
 
@@ -268,7 +266,7 @@ class LabCleanApp(JupyterApp):
     all = Bool(
         False,
         config=True,
-        help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
+        help=f"Delete the entire contents of the app directory.\n{ext_warn_msg}",
     )
 
     def start(self):
@@ -300,9 +298,9 @@ class LabPathApp(JupyterApp):
     """
 
     def start(self):
-        print("Application directory:   %s" % get_app_dir())
-        print("User Settings directory: %s" % get_user_settings_dir())
-        print("Workspaces directory: %s" % get_workspaces_dir())
+        print(f"Application directory:   {get_app_dir()}")
+        print(f"User Settings directory: {get_user_settings_dir()}")
+        print(f"Workspaces directory: {get_workspaces_dir()}")
 
 
 class LabWorkspaceExportApp(WorkspaceExportApp):
@@ -742,8 +740,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config["notebookVersion"] = json.dumps(jpserver_version_info)
 
-        self.log.info("JupyterLab extension loaded from %s" % HERE)
-        self.log.info("JupyterLab application directory is %s" % self.app_dir)
+        self.log.info(f"JupyterLab extension loaded from {HERE!s}")
+        self.log.info(f"JupyterLab application directory is {self.app_dir!s}")
 
         if self.custom_css:
             handlers.append(
