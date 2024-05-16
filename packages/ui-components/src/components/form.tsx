@@ -16,10 +16,11 @@ import {
   getTemplate,
   ObjectFieldTemplateProps,
   Registry,
+  RJSFSchema,
   UiSchema
 } from '@rjsf/utils';
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import {
   addIcon,
   caretDownIcon,
@@ -617,7 +618,7 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
 /**
  * Generic rjsf form component for JupyterLab UI.
  */
-export function FormComponent(props: IFormComponentProps): JSX.Element {
+export const FormComponent = forwardRef(function FormComponent(props: IFormComponentProps, ref:React.RefObject<Form<ReadonlyJSONObject, RJSFSchema, any>> | null): JSX.Element {
   const {
     buttonStyle,
     compact,
@@ -677,6 +678,6 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
   };
 
   return (
-    <Form templates={templates} formContext={formContext as any} {...others} />
+    <Form templates={templates} formContext={formContext as any} {...others} ref={ref}/>
   );
-}
+})
