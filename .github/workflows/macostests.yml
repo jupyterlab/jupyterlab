@@ -15,6 +15,9 @@ jobs:
       matrix:
         group: [integrity, python, usage, usage2]
         python-version: [3.11]
+        include:
+          - group: python
+            python-version: 3.12
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest

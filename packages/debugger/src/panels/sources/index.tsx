@@ -43,7 +43,7 @@ export class Sources extends PanelWithToolbar {
       })
     );
     const sourcePath = ReactWidget.create(
-      <SourcePathComponent model={model} />
+      <SourcePathComponent model={model} trans={trans} />
     );
 
     this.toolbar.addItem('sourcePath', sourcePath);
