@@ -291,6 +291,10 @@
                   "rank": 0
                 },
                 {
+                  "command": "application:toggle-fullscreen-mode",
+                  "rank": 0
+                },
+                {
                   "type": "separator",
                   "rank": 10
                 },
