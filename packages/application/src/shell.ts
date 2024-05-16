@@ -608,7 +608,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   set presentationMode(value: boolean) {
     this.toggleClass('jp-mod-presentationMode', value);
   }
-  
+
   /**
    * The main dock area's user interface mode.
    */
@@ -1306,20 +1306,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Toggle the fullscreen mode based on user inputs
    */
-    setFullscreenMode(): void {
-      if (
-        document.fullscreenElement === null ||
-        document.fullscreenElement === undefined
-      ) {
-        document.documentElement.requestFullscreen().catch(reason => {
-          console.error('Failed to enter fullscreen mode.', reason);
-        });
-      } else if (document.fullscreenElement !== null) {
-        document.exitFullscreen().catch(reason => {
-          console.error('Failed to exit fullscreen mode.', reason);
-        });
-      }
+  setFullscreenMode(): void {
+    if (
+      document.fullscreenElement === null ||
+      document.fullscreenElement === undefined
+    ) {
+      document.documentElement.requestFullscreen().catch(reason => {
+        console.error('Failed to enter fullscreen mode.', reason);
+      });
+    } else if (document.fullscreenElement !== null) {
+      document.exitFullscreen().catch(reason => {
+        console.error('Failed to exit fullscreen mode.', reason);
+      });
     }
+  }
 
   /**
    * Toggle top header visibility in simple mode

@@ -502,12 +502,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               });
           }
           // Turn off fullscreen mode
-          if (document.fullscreenElement!==null || document.fullscreenElement!==undefined) {
-            commands
-              .execute(CommandIDs.toggleFullscreenMode)
-              .catch(reason => {
-                console.error('Failed to exit fullscreen mode.', reason);
-              });
+          if (
+            document.fullscreenElement !== null ||
+            document.fullscreenElement !== undefined
+          ) {
+            commands.execute(CommandIDs.toggleFullscreenMode).catch(reason => {
+              console.error('Failed to exit fullscreen mode.', reason);
+            });
           }
           // Display top header
           if (
