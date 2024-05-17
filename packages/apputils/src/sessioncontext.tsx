@@ -26,7 +26,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
-//import { DialogWidget, ReactWidget } from '@jupyterlab/ui-components';
+import { DialogWidget, ReactWidget } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
@@ -298,9 +298,11 @@ export namespace ISessionContext {
     /**
      * Kernel custom specs defined by kernel name
      */
-    customKernelSpecs?: {
-      [key:string]: undefined | PartialJSONObject | {};
-    } | undefined
+    customKernelSpecs?:
+      | {
+          [key: string]: undefined | PartialJSONObject | {};
+        }
+      | undefined;
   }
 
   export type KernelDisplayStatus =
@@ -1386,12 +1388,12 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       buttons,
       checkbox: hasCheckbox
         ? {
-          label: trans.__('Always start the preferred kernel'),
-          caption: trans.__(
-            'Remember my choice and always start the preferred kernel'
-          ),
-          checked: autoStartDefault
-        }
+            label: trans.__('Always start the preferred kernel'),
+            caption: trans.__(
+              'Remember my choice and always start the preferred kernel'
+            ),
+            checked: autoStartDefault
+          }
         : null
     });
 
@@ -1494,11 +1496,13 @@ namespace Private {
    * A widget that provides a kernel selection.
    */
   export class KernelSelector extends Widget {
+    kernelSpecWidget: Widget;
     /**
      * Create a new kernel selector widget.
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
+      this.kernelSpecWidget;
     }
 
     /**
@@ -1522,11 +1526,23 @@ namespace Private {
     const trans = translator.load('jupyterlab');
 
     const body = document.createElement('div');
+
     const container = document.createElement('div');
+
+    const kernelSpecsContainer = document.createElement('div');
+
     container.setAttribute('id', 'js-kernel-selector-container');
+
+    kernelSpecsContainer.setAttribute(
+      'id',
+      'js-kernel-specs-selector-container'
+    );
+
     const text = document.createElement('label');
-    text.textContent = `${trans.__('Select kernel for:')} "${sessionContext.name
-      }"`;
+    text.textContent = `${trans.__('Select kernel for:')} "${
+      sessionContext.name
+    }"`;
+
     container.appendChild(text);
 
     const options = getKernelSearch(sessionContext);
@@ -1544,6 +1560,7 @@ namespace Private {
     );
     container.append(selector);
     body.append(container);
+    body.append(kernelSpecsContainer);
     return body;
   }
 
@@ -1552,12 +1569,21 @@ namespace Private {
     body: HTMLDivElement,
     trans: IRenderMime.TranslationBundle
   ) {
-    let selectedKernel = "javascript";//body.querySelector("selector#js-kernel-selector");//
+    let kernelSelect = document.querySelector(
+      'selector#js-kernel-selector'
+    ) as HTMLSelectElement;
+
+    console.log(`kernelSelect`);
+    console.dir(kernelSelect);
+
+    let selectedKernel = kernelSelect.value;
+
+    console.log(`selectedKernel-->${selectedKernel}`);
 
     //clear
-    body.querySelector("#js-kernel-custom-kernel-selector-container")?.remove();
+    // body.querySelector("#js-kernel-custom-kernel-selector-container")?.remove();
 
-    const kernelSelectorContainer = body.querySelector(
+    const kernelSelectorContainer = document.querySelector(
       '#js-kernel-selector-container'
     );
 
@@ -1565,59 +1591,50 @@ namespace Private {
     console.dir(kernelSelectorContainer);
 
     // let test;
+    const kernelSpecsContainer = document.querySelector(
+      '#js-kernel-specs-selector-container'
+    ) as HTMLElement;
+ console.log(`kernelSpecsContainer`);
+    console.dir(kernelSpecsContainer);
 
-    let kernel = sessionContext.specsManager.specs?.kernelspecs[selectedKernel];
-    if (kernel?.metadata && kernel?.metadata?.parameters) {
+    let kernel =
+      selectedKernel &&
+      sessionContext.specsManager.specs?.kernelspecs[selectedKernel];
+    if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
       console.log(`sessioncontext parameters`);
 
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
       if (kernelParameters) {
         console.log(`kernelParameters`);
-        console.dir(kernelParameters)
+        console.dir(kernelParameters);
         //clean preavious a custom kernel specs selector
 
-
+        if (this.kernelSpecsContainer) {
+          Widget.detach(this.kernelSpecWidget);
+        }
 
         //hide selector for kernels
         if (kernelSelectorContainer) {
-          kernelSelectorContainer.setAttribute('style', '{display: none}');
+          kernelSelectorContainer.setAttribute('style', 'display: none;');
         }
 
-        const customContainer = document.createElement('div');
-        customContainer.setAttribute("id","#js-kernel-custom-kernel-selector-container");
-       // let kernelConfigurarion: PartialJSONObject = {};
-        /*let test = new DialogWidget(kernelParameters, kernelConfigurarion, (formData) => {
-          kernelConfigurarion = formData as PartialJSONObject;
-        })
+        let kernelConfigurarion: PartialJSONObject = {};
+        this.kernelSpecWidget = new DialogWidget(
+          kernelParameters,
+          kernelConfigurarion,
+          formData => {
+            kernelConfigurarion = formData as PartialJSONObject;
+          },
+          trans
+        );
 
-        if ((test as ReactWidget).renderPromise) {
-          console.log('yes');
-        } else {
-          console.log('no');
+        //Update widget
+        if (kernelSpecsContainer) {
+          Widget.attach(this.kernelSpecWidget, kernelSpecsContainer);
         }
-        //set hidden div
-        if (
-          test instanceof ReactWidget &&
-          (test as ReactWidget).renderPromise !== undefined
-        ) {
-          (this.test as ReactWidget)
-            .renderPromise!.then(() => {
-              console.log('CustomKernelSpecForm');
-              //setFocus();
-            })
-            .catch(() => {
-              console.error("Error while loading Dialog's body");
-            });
-        } else {
-          customContainer.append(test.node);
-        }
-        body.append(customContainer);*/
       }
     }
-
   }
-
-
 
   /**
    * Get the default kernel name given select options.
@@ -1663,12 +1680,12 @@ namespace Private {
       const specName = matches[0];
       console.warn(
         'No exact match found for ' +
-        specName +
-        ', using kernel ' +
-        specName +
-        ' that matches ' +
-        'language=' +
-        language
+          specName +
+          ', using kernel ' +
+          specName +
+          ' that matches ' +
+          'language=' +
+          language
       );
       return specName;
     }

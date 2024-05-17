@@ -1,4 +1,4 @@
-import React, { RefObject, createRef } from 'react';
+import React, { RefObject, createRef, useState } from 'react';
 import Form, { IChangeEvent } from '@rjsf/core';
 import { RJSFSchema, UiSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
@@ -24,8 +24,15 @@ const FormComponentWrapper = (props: {
   ) => void;
 }): JSX.Element => {
 
+  const [errorList, setErrors] = useState();
+
   const formRef = createRef() as RefObject<Form<any, RJSFSchema, any>>;
-  const onError = (errors: any) => alert(errors);
+  const onError = (errors: any) => 
+    {
+      setErrors(errors)
+      console.log('errors');
+      console.log("errors");
+    };
   const uiSchema: UiSchema = {
     'ui:options': {
       submitButtonOptions: {
@@ -38,9 +45,14 @@ const FormComponentWrapper = (props: {
   };
 
   const onChange = ({ formData }: IChangeEvent<any, RJSFSchema, any>) => {
-    if (formRef.current && formRef.current.validateForm()) {
+   // if (formRef.current && formRef.current.validateForm()) {
+    console.log('onChange and errorList');
+    console.dir(errorList);
+    if (!errorList) {
+      console.log('update data');
       props.updateFormData(formData);
     }
+   // }
   };
   
   const formData: Record<string, any> = {};
@@ -52,6 +64,7 @@ const FormComponentWrapper = (props: {
       uiSchema={uiSchema}
       validator={validator}
       onChange={onChange}
+      liveValidate
       ref={formRef}
       onError={onError}
       idPrefix={`jp-CustomKernel-test`}
