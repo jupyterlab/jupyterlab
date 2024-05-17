@@ -4,8 +4,9 @@
  * @packageDocumentation
  * @module running
  */
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { KernelAPI } from '@jupyterlab/services';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITranslator,
   nullTranslator,
@@ -31,7 +32,6 @@ import {
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
@@ -597,6 +597,44 @@ class Section extends PanelWithToolbar {
       });
     };
 
+    const killDanglingKernelsButton = new ToolbarButton({
+      label: this._trans.__('Kill Dangling Kernels'),
+      className: 'jp-KillDanglingKernelsButton',
+      enabled,
+      onClick: async () => {
+        const kernels = await KernelAPI.listRunning();
+
+        // Identify dangling kernels
+        const danglingKernels = kernels.filter(
+          kernel => kernel.connections !== undefined && kernel.connections < 1
+        );
+
+        if (danglingKernels.length === 0) {
+          void showDialog({
+            title: this._trans.__('No Dangling Kernels'),
+            body: this._trans.__('There are no dangling kernels to kill.'),
+            buttons: [Dialog.okButton()]
+          });
+          return;
+        }
+
+        const confirmed = await showDialog({
+          title: this._trans.__('Kill Dangling Kernels'),
+          body: this._trans.__(
+            `Are you sure you want to kill the following dangling kernels?\n\n${danglingKernels
+              .map(kernel => kernel.name)
+              .join('\n')}`
+          ),
+          buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+        });
+
+        if (confirmed.button.accept) {
+          for (const kernel of danglingKernels) {
+            await KernelAPI.shutdownKernel(kernel.id);
+          }
+        }
+      }
+    });
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
       className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
@@ -631,13 +669,19 @@ class Section extends PanelWithToolbar {
     this._buttons = {
       'switch-view': switchViewButton,
       'collapse-expand': collapseExpandAllButton,
+      'kill-dangling': killDanglingKernelsButton,
       'shutdown-all': shutdownAllButton
     };
     // Update buttons once defined and before adding to DOM
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
 
-    for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
+    for (const name of [
+      'collapse-expand',
+      'switch-view',
+      'kill-dangling',
+      'shutdown-all'
+    ]) {
       this.toolbar.addItem(
         name,
         this._buttons[name as keyof typeof this._buttons]
@@ -686,12 +730,14 @@ class Section extends PanelWithToolbar {
 
     this._buttons['collapse-expand'].enabled = enabled;
     this._buttons['switch-view'].enabled = enabled;
+    this._buttons['kill-dangling'].enabled = enabled;
     this._buttons['shutdown-all'].enabled = enabled;
   }
 
   private _buttons: {
     'collapse-expand': ToolbarButton;
     'switch-view': ToolbarButton;
+    'kill-dangling': ToolbarButton;
     'shutdown-all': ToolbarButton;
   } | null = null;
   private _manager: IRunningSessions.IManager;
