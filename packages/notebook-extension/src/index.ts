@@ -3554,8 +3554,8 @@ function addCommands(
         (settings?.composite.windowingMode === 'full' ?? false);
       return enabled;
     },
-    isToggled: args => {
-      const current = getCurrent(tracker, shell, args);
+    isToggled: () => {
+      const current = tracker.currentWidget;
       return current?.content.scrollbar ?? false;
     },
     isVisible: args => {
