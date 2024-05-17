@@ -3536,9 +3536,9 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
-    label: trans.__('Virtual Scrollbar'),
+    label: trans.__('Show Virtual Scrollbar'),
     caption: trans.__(
-      'Toggle virtual scrollbar (enabled with windowing mode: full)'
+      'Show virtual scrollbar (enabled with windowing mode: full)'
     ),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
@@ -3553,6 +3553,10 @@ function addCommands(
         (args.toolbar ? true : isEnabled()) &&
         (settings?.composite.windowingMode === 'full' ?? false);
       return enabled;
+    },
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, args);
+      return current?.content.scrollbar ?? false;
     },
     isVisible: args => {
       const visible =
