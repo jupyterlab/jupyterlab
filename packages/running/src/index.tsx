@@ -86,6 +86,11 @@ const ITEM_DETAIL_CLASS = 'jp-RunningSessions-itemDetail';
 const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
 
 /**
+ * The class name to a running session item unused shutdown button.
+ */
+const SHUTDOWN_UNUSED_BUTTON_CLASS = 'jp-RunningSessions-shutdownUnused';
+
+/**
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
@@ -581,6 +586,7 @@ class Section extends PanelWithToolbar {
     const shutdownAllConfirmationText =
       this._manager.shutdownAllConfirmationText ||
       `${shutdownAllLabel} ${this._manager.name}`;
+    const shutdownUnusedLabel = this._trans.__('Shut Down Unused');
 
     const onShutdown = () => {
       void showDialog({
@@ -596,7 +602,7 @@ class Section extends PanelWithToolbar {
         }
       });
     };
-    const onShutDownUnused = async () => {
+    const onShutdownUnused = async () => {
       const kernels = await KernelAPI.listRunning();
 
       // Identify unused kernels
@@ -614,7 +620,7 @@ class Section extends PanelWithToolbar {
       }
 
       const confirmed = await showDialog({
-        title: this._trans.__('Shut Down Unused'),
+        title: shutdownUnusedLabel,
         body: this._trans.__(
           `Are you sure you want to shut down the following unused kernels?\n\n${unusedKernels
             .map(kernel => kernel.name)
@@ -622,9 +628,7 @@ class Section extends PanelWithToolbar {
         ),
         buttons: [
           Dialog.cancelButton(),
-          Dialog.warnButton({
-            label: this._trans.__('Shut Down Unused')
-          })
+          Dialog.warnButton({ label: shutdownUnusedLabel })
         ]
       });
 
@@ -635,11 +639,12 @@ class Section extends PanelWithToolbar {
       }
     };
 
-    const shutDownUnusedButton = new ToolbarButton({
-      label: this._trans.__('Shut Down Unused'),
-      className: 'jp-ShutDownUnusedButton',
+    const shutdownUnusedButton = new ToolbarButton({
+      label: shutdownUnusedLabel,
+      className: `${SHUTDOWN_UNUSED_BUTTON_CLASS}${`
+        `}${!enabled ? ' jp-mod-disabled' : ''}`,
       enabled,
-      onClick: async () => await onShutDownUnused()
+      onClick: async () => await onShutdownUnused()
     });
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
@@ -675,7 +680,7 @@ class Section extends PanelWithToolbar {
     this._buttons = {
       'switch-view': switchViewButton,
       'collapse-expand': collapseExpandAllButton,
-      'kill-dangling': shutDownUnusedButton,
+      'shutdown-unused': shutdownUnusedButton,
       'shutdown-all': shutdownAllButton
     };
     // Update buttons once defined and before adding to DOM
@@ -685,7 +690,7 @@ class Section extends PanelWithToolbar {
     for (const name of [
       'collapse-expand',
       'switch-view',
-      'kill-dangling',
+      'shutdown-unused',
       'shutdown-all'
     ]) {
       this.toolbar.addItem(
@@ -736,14 +741,14 @@ class Section extends PanelWithToolbar {
 
     this._buttons['collapse-expand'].enabled = enabled;
     this._buttons['switch-view'].enabled = enabled;
-    this._buttons['kill-dangling'].enabled = enabled;
+    this._buttons['shutdown-unused'].enabled = enabled;
     this._buttons['shutdown-all'].enabled = enabled;
   }
 
   private _buttons: {
     'collapse-expand': ToolbarButton;
     'switch-view': ToolbarButton;
-    'kill-dangling': ToolbarButton;
+    'shutdown-unused': ToolbarButton;
     'shutdown-all': ToolbarButton;
   } | null = null;
   private _manager: IRunningSessions.IManager;
