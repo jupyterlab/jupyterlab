@@ -596,44 +596,50 @@ class Section extends PanelWithToolbar {
         }
       });
     };
+    const onShutDownUnused = async () => {
+      const kernels = await KernelAPI.listRunning();
 
-    const killDanglingKernelsButton = new ToolbarButton({
-      label: this._trans.__('Kill Dangling Kernels'),
-      className: 'jp-KillDanglingKernelsButton',
-      enabled,
-      onClick: async () => {
-        const kernels = await KernelAPI.listRunning();
+      // Identify unused kernels
+      const unusedKernels = kernels.filter(
+        kernel => kernel.connections !== undefined && kernel.connections < 1
+      );
 
-        // Identify dangling kernels
-        const danglingKernels = kernels.filter(
-          kernel => kernel.connections !== undefined && kernel.connections < 1
-        );
-
-        if (danglingKernels.length === 0) {
-          void showDialog({
-            title: this._trans.__('No Dangling Kernels'),
-            body: this._trans.__('There are no dangling kernels to kill.'),
-            buttons: [Dialog.okButton()]
-          });
-          return;
-        }
-
-        const confirmed = await showDialog({
-          title: this._trans.__('Kill Dangling Kernels'),
-          body: this._trans.__(
-            `Are you sure you want to kill the following dangling kernels?\n\n${danglingKernels
-              .map(kernel => kernel.name)
-              .join('\n')}`
-          ),
-          buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      if (unusedKernels.length === 0) {
+        void showDialog({
+          title: this._trans.__('No Unused Kernels'),
+          body: this._trans.__('There are no unused kernels to shut down.'),
+          buttons: [Dialog.okButton()]
         });
+        return;
+      }
 
-        if (confirmed.button.accept) {
-          for (const kernel of danglingKernels) {
-            await KernelAPI.shutdownKernel(kernel.id);
-          }
+      const confirmed = await showDialog({
+        title: this._trans.__('Shut Down Unused'),
+        body: this._trans.__(
+          `Are you sure you want to shut down the following unused kernels?\n\n${unusedKernels
+            .map(kernel => kernel.name)
+            .join('\n')}`
+        ),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({
+            label: this._trans.__('Shut Down Unused')
+          })
+        ]
+      });
+
+      if (confirmed.button.accept) {
+        for (const kernel of unusedKernels) {
+          await KernelAPI.shutdownKernel(kernel.id);
         }
       }
+    };
+
+    const shutDownUnusedButton = new ToolbarButton({
+      label: this._trans.__('Shut Down Unused'),
+      className: 'jp-ShutDownUnusedButton',
+      enabled,
+      onClick: async () => await onShutDownUnused()
     });
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
@@ -669,7 +675,7 @@ class Section extends PanelWithToolbar {
     this._buttons = {
       'switch-view': switchViewButton,
       'collapse-expand': collapseExpandAllButton,
-      'kill-dangling': killDanglingKernelsButton,
+      'kill-dangling': shutDownUnusedButton,
       'shutdown-all': shutdownAllButton
     };
     // Update buttons once defined and before adding to DOM
