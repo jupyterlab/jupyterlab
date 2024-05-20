@@ -25,13 +25,14 @@ const FormComponentWrapper = (props: {
 }): JSX.Element => {
 
   const [errorList, setErrors] = useState();
+  const [isUpdate, setUpdate] = useState(0);
 
   const formRef = createRef() as RefObject<Form<any, RJSFSchema, any>>;
   const onError = (errors: any) => 
     {
-      setErrors(errors)
       console.log('errors');
-      console.log("errors");
+      console.log(errors);
+      setErrors(errors);
     };
   const uiSchema: UiSchema = {
     'ui:options': {
@@ -48,10 +49,15 @@ const FormComponentWrapper = (props: {
    // if (formRef.current && formRef.current.validateForm()) {
     console.log('onChange and errorList');
     console.dir(errorList);
-    if (!errorList) {
-      console.log('update data');
+    if(!isUpdate) {
       props.updateFormData(formData);
     }
+    if (formRef.current && formRef?.current.validateForm()) {
+      console.log('update datallll');
+      props.updateFormData(formData);
+    }
+    let update = isUpdate+1;
+    setUpdate(update);
    // }
   };
   
@@ -64,7 +70,6 @@ const FormComponentWrapper = (props: {
       uiSchema={uiSchema}
       validator={validator}
       onChange={onChange}
-      liveValidate
       ref={formRef}
       onError={onError}
       idPrefix={`jp-CustomKernel-test`}

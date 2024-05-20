@@ -26,7 +26,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
-import { DialogWidget, ReactWidget } from '@jupyterlab/ui-components';
+import { DialogWidget } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
@@ -298,11 +298,7 @@ export namespace ISessionContext {
     /**
      * Kernel custom specs defined by kernel name
      */
-    customKernelSpecs?:
-      | {
-          [key: string]: undefined | PartialJSONObject | {};
-        }
-      | undefined;
+    customKernelSpecs?: undefined | PartialJSONObject | {};
   }
 
   export type KernelDisplayStatus =
@@ -739,6 +735,9 @@ export class SessionContext implements ISessionContext {
    */
   async restartKernel(): Promise<void> {
     const kernel = this.session?.kernel || null;
+
+    console.log('restrating kernel');
+    console.dir(kernel);
     if (this._isRestarting) {
       return;
     }
@@ -1398,22 +1397,31 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     });
 
     const result = await dialog.launch();
+    
 
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
-    //
-    const model = result.value;
+    
+    const dialogResult = result.value as Kernel.IModel;
+   
+    if (dialogResult) {
+    const model = {
+      'name': dialogResult.name
+    } 
 
     if (hasCheckbox && result.isChecked !== null) {
-      // if there is a new kernel than kernel custom specs should be deleted
       if (
         model &&
-        sessionContext.kernelPreference?.customKernelSpecs &&
-        !sessionContext.kernelPreference?.customKernelSpecs[model.name]
+        sessionContext.kernelPreference?.customKernelSpecs
       ) {
         sessionContext.kernelPreference.customKernelSpecs = undefined;
       }
+      
+      if(model && dialogResult.custom_kernel_specs){
+        sessionContext.kernelPreference.customKernelSpecs = dialogResult.custom_kernel_specs;
+      }
+
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
         autoStartDefault: result.isChecked
@@ -1423,11 +1431,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
-    console.log('model');
-    console.dir(model);
     if (model) {
       await sessionContext.changeKernel(model);
     }
+  }
   }
 
   /**
@@ -1496,21 +1503,24 @@ namespace Private {
    * A widget that provides a kernel selection.
    */
   export class KernelSelector extends Widget {
-    kernelSpecWidget: Widget;
     /**
      * Create a new kernel selector widget.
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
-      this.kernelSpecWidget;
     }
 
     /**
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select') as HTMLSelectElement;
-      return JSON.parse(selector.value) as Kernel.IModel;
+      const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
+      const selectorKernelSpecs = selector.getAttribute('data-kernel-spec');
+      let kernelData = JSON.parse(selector.value) as Kernel.IModel;
+      if(selectorKernelSpecs){
+        kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs) ;
+      }
+      return kernelData;
     }
   }
 
@@ -1569,68 +1579,53 @@ namespace Private {
     body: HTMLDivElement,
     trans: IRenderMime.TranslationBundle
   ) {
+    let kernelConfiguration: PartialJSONObject = {};
     let kernelSelect = document.querySelector(
-      'selector#js-kernel-selector'
+      'select#js-kernel-selector'
     ) as HTMLSelectElement;
 
-    console.log(`kernelSelect`);
-    console.dir(kernelSelect);
-
-    let selectedKernel = kernelSelect.value;
-
-    console.log(`selectedKernel-->${selectedKernel}`);
-
-    //clear
-    // body.querySelector("#js-kernel-custom-kernel-selector-container")?.remove();
-
+    let selectedKernel =JSON.parse(kernelSelect.value) as Kernel.IModel;
     const kernelSelectorContainer = document.querySelector(
       '#js-kernel-selector-container'
     );
 
-    console.log(`kernelSelectorContainer`);
-    console.dir(kernelSelectorContainer);
-
-    // let test;
     const kernelSpecsContainer = document.querySelector(
       '#js-kernel-specs-selector-container'
     ) as HTMLElement;
- console.log(`kernelSpecsContainer`);
-    console.dir(kernelSpecsContainer);
 
+    let kernelName = selectedKernel && selectedKernel.name ? selectedKernel.name  : ''
     let kernel =
-      selectedKernel &&
-      sessionContext.specsManager.specs?.kernelspecs[selectedKernel];
+    kernelName &&
+      sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
-      console.log(`sessioncontext parameters`);
 
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
       if (kernelParameters) {
-        console.log(`kernelParameters`);
-        console.dir(kernelParameters);
         //clean preavious a custom kernel specs selector
 
-        if (this.kernelSpecsContainer) {
-          Widget.detach(this.kernelSpecWidget);
-        }
+      //  if (this.kernelSpecWidget) {
+       //   Widget.detach(this.kernelSpecWidget);
+      //  }
 
         //hide selector for kernels
         if (kernelSelectorContainer) {
           kernelSelectorContainer.setAttribute('style', 'display: none;');
         }
 
-        let kernelConfigurarion: PartialJSONObject = {};
-        this.kernelSpecWidget = new DialogWidget(
+      
+        let kernelSpecWidget = new DialogWidget(
           kernelParameters,
-          kernelConfigurarion,
+          kernelConfiguration,
           formData => {
-            kernelConfigurarion = formData as PartialJSONObject;
+            kernelConfiguration = formData as PartialJSONObject;
+            kernelSelect.setAttribute('data-kernel-spec', JSON.stringify(kernelConfiguration));
           },
           trans
         );
 
         //Update widget
         if (kernelSpecsContainer) {
-          Widget.attach(this.kernelSpecWidget, kernelSpecsContainer);
+          Widget.attach(kernelSpecWidget, kernelSpecsContainer);
         }
       }
     }
