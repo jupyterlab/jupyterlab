@@ -52,8 +52,12 @@ class ProxiedTransport(xmlrpc.client.Transport):
 xmlrpc_transport_override = None
 
 all_proxy_url = environ.get("ALL_PROXY")
-http_proxy_url = environ.get("HTTP_PROXY") or all_proxy_url
-https_proxy_url = environ.get("HTTPS_PROXY") or all_proxy_url or http_proxy_url
+# For historical reasons, we also support the lowercase environment variables.
+# Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
+http_proxy_url = environ.get("http_proxy") or environ.get("HTTP_PROXY") or all_proxy_url
+https_proxy_url = (
+    environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
+)
 proxies = None
 
 if http_proxy_url:

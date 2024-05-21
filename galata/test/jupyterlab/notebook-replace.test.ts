@@ -111,75 +111,157 @@ test.describe('Notebook Search and Replace', () => {
     expect(await nbPanel!.screenshot()).toMatchSnapshot('replace-all.png');
   });
 
-  test('Replace step-by-step across cell boundaries', async ({ page }) => {
-    // Create a small test notebook
-    await page.notebook.createNew();
-    await page.notebook.setCell(0, 'code', 'test\ntest');
-    await page.notebook.addCell('code', 'test\ntest');
+  ['code', 'markdown', 'raw'].forEach(cell1Type => {
+    ['code', 'markdown', 'raw'].forEach(cell2Type => {
+      test(`Replace step-by-step across ${cell1Type} and ${cell2Type} cell boundaries`, async ({
+        page
+      }) => {
+        // Create a small test notebook
+        await page.notebook.createNew();
+        await page.notebook.setCell(0, cell1Type, 'test\ntest');
+        await page.notebook.addCell(cell2Type, 'test\ntest');
 
-    await page.keyboard.press('Control+f');
-    await page.fill('[placeholder="Find"]', 'test');
+        await page.keyboard.press('Control+f');
+        await page.fill('[placeholder="Find"]', 'test');
 
-    await page.click('button[title="Show Replace"]');
-    await page.fill('[placeholder="Replace"]', 'egg');
+        await page.click('button[title="Show Replace"]');
+        await page.fill('[placeholder="Replace"]', 'egg');
 
-    // TODO: Next Match press count should be one less
-    // (the -/4 state should not be necessary).
-    await page.locator('text=-/4').waitFor();
-    await page.click('button[title^="Next Match"]', {
-      clickCount: 3
+        // TODO: Next Match press count should be one less
+        // (the -/4 state should not be necessary).
+        await page.locator('text=-/4').waitFor();
+        await page.click('button[title^="Next Match"]', {
+          clickCount: 3
+        });
+
+        await page.locator('text=1/4').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        await page.locator('text=1/3').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        // At this point we should be in the second cell
+        await page.locator('text=1/2').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        await page.locator('text=1/1').waitFor();
+
+        await page.click('button:has-text("Replace")');
+        await page.locator('text=-/-').waitFor();
+      });
+
+      test(`Replace in a ${cell1Type} cell and a ${cell2Type} cell with a string containing the query string`, async ({
+        page
+      }) => {
+        // Create a small test notebook
+        await page.notebook.createNew();
+        await page.notebook.setCell(0, cell1Type, 'test\ntest');
+        await page.notebook.addCell(cell2Type, 'test\ntest');
+
+        await page.keyboard.press('Control+f');
+        await page.fill('[placeholder="Find"]', 'test');
+
+        await page.click('button[title="Show Replace"]');
+        await page.fill('[placeholder="Replace"]', 'tester');
+
+        // TODO: Next Match press count should be one less
+        // (the -/4 state should not be necessary).
+        await page.locator('text=-/4').waitFor();
+        await page.click('button[title^="Next Match"]', {
+          clickCount: 3
+        });
+
+        await page.locator('text=1/4').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        await page.locator('text=2/4').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        // At this point we should be in the second cell
+        await page.locator('text=3/4').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        await page.locator('text=4/4').waitFor();
+
+        await page.click('button:has-text("Replace")');
+        await page.locator('text=1/4').waitFor();
+      });
+
+      test(`Replace in a ${cell1Type} cell and a ${cell2Type} cell with a string containing the query string twice`, async ({
+        page
+      }) => {
+        // Create a small test notebook
+        await page.notebook.createNew();
+        await page.notebook.setCell(0, cell1Type, 'test\ntest');
+        await page.notebook.addCell(cell2Type, 'test\ntest');
+
+        await page.keyboard.press('Control+f');
+        await page.fill('[placeholder="Find"]', 'test');
+
+        await page.click('button[title="Show Replace"]');
+        await page.fill('[placeholder="Replace"]', 'testtest');
+
+        // TODO: Next Match press count should be one less
+        // (the -/4 state should not be necessary).
+        await page.locator('text=-/4').waitFor();
+        await page.click('button[title^="Next Match"]', {
+          clickCount: 3
+        });
+
+        await page.locator('text=1/4').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        // We should move to the first match after the first replacement.
+        await page.locator('text=3/5').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        // At this point we should be in the second cell
+        await page.locator('text=5/6').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        await page.locator('text=7/7').waitFor();
+
+        await page.click('button:has-text("Replace")');
+        await page.locator('text=1/8').waitFor();
+      });
+
+      test(`Replace in a ${cell1Type} cell and a ${cell2Type} cell with a string containing the query string three times`, async ({
+        page
+      }) => {
+        // Create a small test notebook
+        await page.notebook.createNew();
+        await page.notebook.setCell(0, cell1Type, 'test\ntest');
+        await page.notebook.addCell(cell2Type, 'test\ntest');
+
+        await page.keyboard.press('Control+f');
+        await page.fill('[placeholder="Find"]', 'test');
+
+        await page.click('button[title="Show Replace"]');
+        await page.fill('[placeholder="Replace"]', 'testtesttest');
+
+        // TODO: Next Match press count should be one less
+        // (the -/4 state should not be necessary).
+        await page.locator('text=-/4').waitFor();
+        await page.click('button[title^="Next Match"]', {
+          clickCount: 3
+        });
+
+        await page.locator('text=1/4').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        // We should move to the first match after the first replacement.
+        await page.locator('text=4/6').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        // At this point we should be in the second cell
+        await page.locator('text=7/8').waitFor();
+        await page.click('button:has-text("Replace")');
+
+        await page.locator('text=10/10').waitFor();
+
+        await page.click('button:has-text("Replace")');
+        await page.locator('text=1/12').waitFor();
+      });
     });
-
-    await page.locator('text=1/4').waitFor();
-    await page.click('button:has-text("Replace")');
-
-    await page.locator('text=1/3').waitFor();
-    await page.click('button:has-text("Replace")');
-
-    // At this point we should be in the second cell
-    await page.locator('text=1/2').waitFor();
-    await page.click('button:has-text("Replace")');
-
-    await page.locator('text=1/1').waitFor();
-
-    await page.click('button:has-text("Replace")');
-    await page.locator('text=-/-').waitFor();
-  });
-
-  test('Replace with a string containing the query string', async ({
-    page
-  }) => {
-    // Create a small test notebook
-    await page.notebook.createNew();
-    await page.notebook.setCell(0, 'code', 'test\ntest');
-    await page.notebook.addCell('code', 'test\ntest');
-
-    await page.keyboard.press('Control+f');
-    await page.fill('[placeholder="Find"]', 'test');
-
-    await page.click('button[title="Show Replace"]');
-    await page.fill('[placeholder="Replace"]', 'tester');
-
-    // TODO: Next Match press count should be one less
-    // (the -/4 state should not be necessary).
-    await page.locator('text=-/4').waitFor();
-    await page.click('button[title^="Next Match"]', {
-      clickCount: 3
-    });
-
-    await page.locator('text=1/4').waitFor();
-    await page.click('button:has-text("Replace")');
-
-    await page.locator('text=2/4').waitFor();
-    await page.click('button:has-text("Replace")');
-
-    // At this point we should be in the second cell
-    await page.locator('text=3/4').waitFor();
-    await page.click('button:has-text("Replace")');
-
-    await page.locator('text=4/4').waitFor();
-
-    await page.click('button:has-text("Replace")');
-    await page.locator('text=1/4').waitFor();
   });
 });

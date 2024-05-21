@@ -278,7 +278,7 @@ export abstract class EditorSearchProvider<
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
         // Note: the loop logic is only used in single-editor (e.g. file editor)
-        // provider sub-classes, notebook has it's own loop logic and ignores
+        // provider sub-classes, notebook has its own loop logic and ignores
         // `currentIndex` as set here.
         this.currentIndex = loop ? 0 : null;
       }
@@ -375,6 +375,7 @@ export abstract class EditorSearchProvider<
                   nextMatchFound = true;
                   break;
                 }
+
                 // Move the highlight forward from the previous match, not looping.
                 void this.highlightNext(false, { from: 'previous-match' });
               }

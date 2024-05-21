@@ -326,7 +326,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * @returns The next match if there is one.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(
+    loop = true,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
     if (!this.isActive) {
       return match;
@@ -341,7 +344,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       await waitForRendered;
     }
 
-    match = await super.highlightNext();
+    match = await super.highlightNext(loop, options);
 
     return match;
   }
