@@ -451,7 +451,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleFullscreenMode, {
         label: trans.__('Fullscreen Mode'),
         execute: () => {
-          labShell.setFullscreenMode();
+          labShell.toggleFullscreenMode();
         },
         isToggled: () => document.fullscreenElement !== null
       });
