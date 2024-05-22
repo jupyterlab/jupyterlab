@@ -2670,8 +2670,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/console@workspace:packages/console"
   dependencies:
-    "@codemirror/state": ^6.4.1
-    "@codemirror/view": ^6.26.3
     "@jupyter/ydoc": ^2.0.1
     "@jupyterlab/apputils": ^4.3.0
     "@jupyterlab/cells": ^4.2.0
