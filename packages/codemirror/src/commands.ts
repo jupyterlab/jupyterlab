@@ -150,7 +150,7 @@ export namespace StateCommands {
     dispatch: (transaction: Transaction) => void;
   }): boolean {
     if (target.dom.closest(TOOLTIP_OPENER_SELECTOR)) {
-      return true;
+      return false;
     }
     return indentLess(target);
   }
