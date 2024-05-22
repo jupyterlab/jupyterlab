@@ -3536,9 +3536,9 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
-    label: trans.__('Virtual Scrollbar'),
+    label: trans.__('Show Virtual Scrollbar'),
     caption: trans.__(
-      'Toggle virtual scrollbar (enabled with windowing mode: full)'
+      'Show virtual scrollbar (enabled with windowing mode: full)'
     ),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
@@ -3553,6 +3553,10 @@ function addCommands(
         (args.toolbar ? true : isEnabled()) &&
         (settings?.composite.windowingMode === 'full' ?? false);
       return enabled;
+    },
+    isToggled: () => {
+      const current = tracker.currentWidget;
+      return current?.content.scrollbar ?? false;
     },
     isVisible: args => {
       const visible =
@@ -3609,7 +3613,8 @@ function populatePalette(
     CommandIDs.collapseAllCmd,
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
-    CommandIDs.accessNextHistory
+    CommandIDs.accessNextHistory,
+    CommandIDs.virtualScrollbar
   ].forEach(command => {
     palette.addItem({ command, category });
   });
