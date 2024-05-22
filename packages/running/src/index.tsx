@@ -5,7 +5,6 @@
  * @module running
  */
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { KernelAPI } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITranslator,
@@ -84,11 +83,6 @@ const ITEM_DETAIL_CLASS = 'jp-RunningSessions-itemDetail';
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
-
-/**
- * The class name to a running session item unused shutdown button.
- */
-const SHUTDOWN_UNUSED_BUTTON_CLASS = 'jp-RunningSessions-shutdownUnused';
 
 /**
  * The class name added to a running session item shutdown button.
@@ -545,6 +539,12 @@ class Section extends PanelWithToolbar {
         ...options
       })
     );
+
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(button.id, button)
+      );
+    }
   }
 
   /**
@@ -586,7 +586,6 @@ class Section extends PanelWithToolbar {
     const shutdownAllConfirmationText =
       this._manager.shutdownAllConfirmationText ||
       `${shutdownAllLabel} ${this._manager.name}`;
-    const shutdownUnusedLabel = this._trans.__('Shut Down Unused');
 
     const onShutdown = () => {
       void showDialog({
@@ -602,50 +601,7 @@ class Section extends PanelWithToolbar {
         }
       });
     };
-    const onShutdownUnused = async () => {
-      const kernels = await KernelAPI.listRunning();
 
-      // Identify unused kernels
-      const unusedKernels = kernels.filter(
-        kernel => kernel.connections !== undefined && kernel.connections < 1
-      );
-
-      if (unusedKernels.length === 0) {
-        void showDialog({
-          title: this._trans.__('No Unused Kernels'),
-          body: this._trans.__('There are no unused kernels to shut down.'),
-          buttons: [Dialog.okButton()]
-        });
-        return;
-      }
-
-      const confirmed = await showDialog({
-        title: shutdownUnusedLabel,
-        body: this._trans.__(
-          `Are you sure you want to shut down the following unused kernels?\n\n${unusedKernels
-            .map(kernel => kernel.name)
-            .join('\n')}`
-        ),
-        buttons: [
-          Dialog.cancelButton(),
-          Dialog.warnButton({ label: shutdownUnusedLabel })
-        ]
-      });
-
-      if (confirmed.button.accept) {
-        for (const kernel of unusedKernels) {
-          await KernelAPI.shutdownKernel(kernel.id);
-        }
-      }
-    };
-
-    const shutdownUnusedButton = new ToolbarButton({
-      label: shutdownUnusedLabel,
-      className: `${SHUTDOWN_UNUSED_BUTTON_CLASS}${`
-        `}${!enabled ? ' jp-mod-disabled' : ''}`,
-      enabled,
-      onClick: async () => await onShutdownUnused()
-    });
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
       className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
@@ -680,19 +636,13 @@ class Section extends PanelWithToolbar {
     this._buttons = {
       'switch-view': switchViewButton,
       'collapse-expand': collapseExpandAllButton,
-      'shutdown-unused': shutdownUnusedButton,
       'shutdown-all': shutdownAllButton
     };
     // Update buttons once defined and before adding to DOM
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
 
-    for (const name of [
-      'collapse-expand',
-      'switch-view',
-      'shutdown-unused',
-      'shutdown-all'
-    ]) {
+    for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
       this.toolbar.addItem(
         name,
         this._buttons[name as keyof typeof this._buttons]
@@ -741,14 +691,12 @@ class Section extends PanelWithToolbar {
 
     this._buttons['collapse-expand'].enabled = enabled;
     this._buttons['switch-view'].enabled = enabled;
-    this._buttons['shutdown-unused'].enabled = enabled;
     this._buttons['shutdown-all'].enabled = enabled;
   }
 
   private _buttons: {
     'collapse-expand': ToolbarButton;
     'switch-view': ToolbarButton;
-    'shutdown-unused': ToolbarButton;
     'shutdown-all': ToolbarButton;
   } | null = null;
   private _manager: IRunningSessions.IManager;
@@ -1206,6 +1154,11 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Used to add arbitrary buttons to this section
+     */
+    toolbarButtons?: ToolbarButton[];
   }
 
   /**

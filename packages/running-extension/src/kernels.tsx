@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
+import { Kernel, KernelAPI, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   closeIcon,
@@ -15,7 +16,8 @@ import {
   kernelIcon,
   LabIcon,
   notebookIcon,
-  RankedMenu
+  RankedMenu,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
@@ -27,6 +29,7 @@ const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
 const KERNELSPEC_ITEM_CLASS = 'jp-mod-kernelspec';
 const WIDGET_ITEM_CLASS = 'jp-mod-kernel-widget';
 const KERNEL_LABEL_ID = 'jp-RunningSessions-item-label-kernel-id';
+const SHUTDOWN_UNUSED_BUTTON_CLASS = 'jp-RunningSessions-shutdownUnused';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -41,6 +44,9 @@ export async function addKernelRunningSessionManager(
   const { runningChanged, RunningKernel } = Private;
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
   const trans = translator.load('jupyterlab');
+  const shutdownUnusedLabel = trans.__('Shut Down Unused');
+  const runningKernels = await KernelAPI.listRunning();
+  const enabled = runningKernels.length > 0;
 
   // Throttle signal emissions from the kernel and session managers.
   kernels.runningChanged.connect(() => void throttler.invoke());
@@ -48,6 +54,41 @@ export async function addKernelRunningSessionManager(
 
   // Wait until the relevant services are ready.
   await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
+
+  const onShutdownUnused = async () => {
+    // Identify unused kernels
+    const unusedKernels = runningKernels.filter(
+      kernel => kernel.connections !== undefined && kernel.connections < 1
+    );
+
+    if (unusedKernels.length === 0) {
+      void showDialog({
+        title: trans.__('No Unused Kernels'),
+        body: trans.__('There are no unused kernels to shut down.'),
+        buttons: [Dialog.okButton()]
+      });
+      return;
+    }
+
+    const confirmed = await showDialog({
+      title: shutdownUnusedLabel,
+      body: trans.__(
+        `Are you sure you want to shut down the following unused kernels?\n\n${unusedKernels
+          .map(kernel => kernel.name)
+          .join('\n')}`
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: shutdownUnusedLabel })
+      ]
+    });
+
+    if (confirmed.button.accept) {
+      for (const kernel of unusedKernels) {
+        await KernelAPI.shutdownKernel(kernel.id);
+      }
+    }
+  };
 
   // Add the kernels pane to the running sidebar.
   managers.add({
@@ -87,7 +128,16 @@ export async function addKernelRunningSessionManager(
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
       'Are you sure you want to permanently shut down all running kernels?'
-    )
+    ),
+    toolbarButtons: [
+      new ToolbarButton({
+        label: shutdownUnusedLabel,
+        className: `${SHUTDOWN_UNUSED_BUTTON_CLASS}${
+          !enabled ? ' jp-mod-disabled' : ''
+        }`,
+        onClick: async () => await onShutdownUnused()
+      })
+    ]
   });
 
   // Add running kernels commands to the registry.
