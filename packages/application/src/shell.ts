@@ -1306,7 +1306,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     /**
    * Toggle the fullscreen mode based on user inputs
    */
-    setFullscreenMode(): void {
+    toggleFullscreenMode(): void {
       if (
         document.fullscreenElement === null ||
         document.fullscreenElement === undefined
