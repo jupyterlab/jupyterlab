@@ -1355,9 +1355,9 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       buttons,
       checkbox: hasCheckbox
         ? {
-            label: trans.__('Always start the preferred kernel'),
+            label: trans.__('For the duration of this session start the selected kernel'),
             caption: trans.__(
-              'Remember my choice and always start the preferred kernel'
+              'Remember my choice and always start the selected kernel'
             ),
             checked: autoStartDefault
           }

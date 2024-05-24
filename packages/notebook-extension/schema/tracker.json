@@ -694,8 +694,8 @@
       "default": "code"
     },
     "autoStartDefaultKernel": {
-      "title": "Automatically Start Preferred Kernel",
-      "description": "Whether to automatically start the preferred kernel.",
+      "title": "Automatically Start Selected Kernel",
+      "description": "Whether to automatically start the selected kernel.",
       "type": "boolean",
       "default": false
     },
