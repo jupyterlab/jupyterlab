@@ -253,10 +253,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
+    let customKernelSpecs = this.context.sessionContext.kernelPreference?.customKernelSpecs;
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,
-      language: spec?.language
+      language: spec?.language,
+      ...customKernelSpecs ? { customKernelSpecs: customKernelSpecs}: {}
     });
   }
 
