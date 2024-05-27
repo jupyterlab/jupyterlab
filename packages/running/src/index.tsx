@@ -16,6 +16,7 @@ import {
   caretRightIcon,
   closeIcon,
   collapseAllIcon,
+  CommandToolbarButton,
   expandAllIcon,
   FilterBox,
   IScore,
@@ -1158,7 +1159,7 @@ export namespace IRunningSessions {
     /**
      * Used to add arbitrary buttons to this section
      */
-    toolbarButtons?: ToolbarButton[];
+    toolbarButtons?: ToolbarButton[] | CommandToolbarButton[];
   }
 
   /**
