@@ -90,6 +90,7 @@ export async function addKernelRunningSessionManager(
         for (const kernel of unusedKernels) {
           await KernelAPI.shutdownKernel(kernel.id);
         }
+        Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]);
       }
     }
   });
