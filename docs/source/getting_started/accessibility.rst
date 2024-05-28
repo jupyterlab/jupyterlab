@@ -73,7 +73,7 @@ JupyterLab is not compatible with
 
 **Assistive technology:**
 
-* `JAWS <https://www.freedomscientific.com/products/software/jaws/>`_
+* `JAWS <https://en.wikipedia.org/wiki/JAWS_(screen_reader)>`_
 * `NVDA <https://assistivlabs.com/assistive-tech/screen-readers/nvda>`_
 * `VoiceOver <https://www.apple.com/accessibility/vision/>`_
 * Narrator
