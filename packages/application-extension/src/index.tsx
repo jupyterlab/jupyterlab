@@ -451,7 +451,18 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleFullscreenMode, {
         label: trans.__('Fullscreen Mode'),
         execute: () => {
-          labShell.toggleFullscreenMode();
+          if (
+            document.fullscreenElement === null ||
+            document.fullscreenElement === undefined
+          ) {
+            document.documentElement.requestFullscreen().catch(reason => {
+              console.error('Failed to enter fullscreen mode.', reason);
+            });
+          } else if (document.fullscreenElement !== null) {
+            document.exitFullscreen().catch(reason => {
+              console.error('Failed to exit fullscreen mode.', reason);
+            });
+          }
         },
         isToggled: () => document.fullscreenElement !== null
       });
