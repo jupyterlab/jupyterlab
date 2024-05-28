@@ -5,20 +5,20 @@
 
 .jp-Notebook-footer {
   height: 27px;
+  margin-top: 16px;
   margin-left: calc(
     var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
-      var(--jp-cell-padding)
+      var(--jp-cell-padding) + var(--jp-notebook-padding)
   );
   width: calc(
     100% -
       (
-        var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
-          var(--jp-cell-padding) + var(--jp-cell-padding)
+        var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) + 2 *
+          var(--jp-cell-padding) + 2 * var(--jp-notebook-padding)
       )
   );
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border: 0.8px solid var(--jp-cell-editor-border-color);
   color: var(--jp-ui-font-color3);
-  margin-top: 6px;
   background: none;
   cursor: pointer;
 }
