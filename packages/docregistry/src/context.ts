@@ -23,7 +23,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import { PartialJSONObject, PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -528,7 +528,7 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private async _populate(): Promise<void> {
+  private async _populate(customKernelSpecs?:undefined | PartialJSONObject | {}): Promise<void> {
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
@@ -538,6 +538,11 @@ export class Context<
     if (this.isDisposed) {
       return;
     }
+
+    if ((!customKernelSpecs || Object.keys(customKernelSpecs).length === 0) && this.sessionContext.kernelPreference.customKernelSpecs) {
+      customKernelSpecs = this.sessionContext.kernelPreference.customKernelSpecs;
+    }
+
     // Update the kernel preference.
     const name =
       this._model.defaultKernelName ||
@@ -545,7 +550,8 @@ export class Context<
     this.sessionContext.kernelPreference = {
       ...this.sessionContext.kernelPreference,
       name,
-      language: this._model.defaultKernelLanguage
+      language: this._model.defaultKernelLanguage,
+      customKernelSpecs: customKernelSpecs
     };
     // Note: we don't wait on the session to initialize
     // so that the user can be shown the content before
@@ -642,10 +648,14 @@ export class Context<
         return this._manager.contents.get(path, opts);
       })
       .then(contents => {
+        let customKernelSpecs = {};
         if (this.isDisposed) {
           return;
         }
         if (contents.content) {
+          if (contents.content.metadata && contents.content.metadata.kernelspec && contents.content.metadata.kernelspec.customKernelSpecs) {
+            customKernelSpecs = contents.content.metadata.kernelspec.customKernelSpecs;
+          }
           if (contents.format === 'json') {
             model.fromJSON(contents.content);
           } else {
@@ -668,7 +678,7 @@ export class Context<
         this._updateContentsModel(contents);
         model.dirty = false;
         if (!this._isPopulated) {
-          return this._populate();
+          return this._populate(customKernelSpecs);
         }
       })
       .catch(async err => {
