@@ -17,7 +17,7 @@
           var(--jp-cell-padding) + 2 * var(--jp-notebook-padding)
       )
   );
-  border: 0.8px solid var(--jp-cell-editor-border-color);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   color: var(--jp-ui-font-color3);
   background: none;
   cursor: pointer;
