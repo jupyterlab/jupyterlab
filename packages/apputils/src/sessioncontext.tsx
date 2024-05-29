@@ -197,6 +197,11 @@ export interface ISessionContext extends IObservableDisposable {
   readonly prevKernelName: string;
 
   /**
+   * The kernel manager
+   */
+  readonly kernelManager: Kernel.IManager;
+
+  /**
    * The session manager used by the session.
    */
   readonly sessionManager: Session.IManager;
@@ -337,6 +342,7 @@ export class SessionContext implements ISessionContext {
    * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
+    this.kernelManager = options.kernelManager;
     this.sessionManager = options.sessionManager;
     this.specsManager = options.specsManager;
     this.translator = options.translator || nullTranslator;
@@ -512,6 +518,11 @@ export class SessionContext implements ISessionContext {
   get isRestarting(): boolean {
     return this._isRestarting;
   }
+
+  /**
+   * The kernel manager
+   */
+  readonly kernelManager: Kernel.IManager;
 
   /**
    * The session manager used by the session.
@@ -1238,6 +1249,11 @@ export namespace SessionContext {
    */
   export interface IOptions {
     /**
+     * A kernel manager instance.
+     */
+    kernelManager: Kernel.IManager;
+
+    /**
      * A session manager instance.
      */
     sessionManager: Session.IManager;
@@ -1328,7 +1344,8 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
-    const trans = this._translator.load('jupyterlab');
+    const translator = this._translator;
+    const trans = translator.load('jupyterlab');
 
     // If there is no existing kernel, offer the option
     // to keep no kernel.
@@ -1351,7 +1368,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: new Private.KernelSelector(sessionContext, this._translator),
+      body: new Private.KernelSelector({ sessionContext, translator }),
       buttons,
       checkbox: hasCheckbox
         ? {
@@ -1455,8 +1472,11 @@ namespace Private {
     /**
      * Create a new kernel selector widget.
      */
-    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
+    constructor({ sessionContext, translator }: KernelSelector.IOptions) {
       super({ node: createSelectorNode(sessionContext, translator) });
+      console.log('kernel manager', sessionContext.kernelManager);
+      console.log('kernelspec manager', sessionContext.specsManager);
+      console.log('session manager', sessionContext.sessionManager);
     }
 
     /**
@@ -1465,6 +1485,13 @@ namespace Private {
     getValue(): Kernel.IModel {
       const selector = this.node.querySelector('select') as HTMLSelectElement;
       return JSON.parse(selector.value) as Kernel.IModel;
+    }
+  }
+
+  export namespace KernelSelector {
+    export interface IOptions {
+      sessionContext: ISessionContext;
+      translator?: ITranslator;
     }
   }
 
