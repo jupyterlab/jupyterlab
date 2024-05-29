@@ -330,6 +330,11 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 - Fix workspace context menu incorrectly showing up in other sidebar sections [#16346](https://github.com/jupyterlab/jupyterlab/pull/16346) ([@krassowski](https://github.com/krassowski))
 - Fix execution in console in terminal interaction mode [#16348](https://github.com/jupyterlab/jupyterlab/pull/16348) ([@krassowski](https://github.com/krassowski))
 - Reactive toolbar: avoid simultaneous calls to \_onResize() [#16335](https://github.com/jupyterlab/jupyterlab/pull/16335) ([@brichet](https://github.com/brichet))
+- Resetting a shortcut does not restore and enable the default if it was modified [#16304](https://github.com/jupyterlab/jupyterlab/pull/16304) ([@itsmevichu](https://github.com/itsmevichu))
+- Allow to invoke inline completer anywhere (not only at the end of line) [#16298](https://github.com/jupyterlab/jupyterlab/pull/16298) ([@ajbozarth](https://github.com/ajbozarth))
+- Search and replace with substring in markdown and raw cells [#16293](https://github.com/jupyterlab/jupyterlab/pull/16293) ([@JasonWeill](https://github.com/JasonWeill))
+- Wait for the cell toolbar items to be rendered the first time before looking for overlap [#16291](https://github.com/jupyterlab/jupyterlab/pull/16291) ([@brichet](https://github.com/brichet))
+- Add lowercase proxy vars and make priority consistent with other tools [#16287](https://github.com/jupyterlab/jupyterlab/pull/16287) ([@jgoodson](https://github.com/jgoodson))
 
 ### Maintenance and upkeep improvements
 
