@@ -44,7 +44,7 @@ export class IFrame extends Widget {
    * ### Notes
    * By default, 'eager' loading is chosen
    *
-   * For more info, see
+   * For more information, see
    * https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/loading
    */
   get loading(): IFrame.Loading {
