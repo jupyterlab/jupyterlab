@@ -226,14 +226,13 @@ const open: JupyterFrontEndPlugin<void> = {
       // can prevent some content from being loaded onto the
       // help pages.
       const content = new IFrame({
-        sandbox: ['allow-scripts', 'allow-forms']
+        sandbox: ['allow-scripts', 'allow-forms'],
+        loading: 'lazy'
       });
       content.url = url;
       content.addClass(HELP_CLASS);
       content.title.label = text;
       content.id = `${namespace}-${++counter}`;
-      //sets loading to lazy
-      content.node.querySelector('iframe')?.setAttribute('loading', 'lazy');
       const widget = new MainAreaWidget({ content });
       widget.addClass('jp-Help');
       return widget;

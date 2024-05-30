@@ -86,13 +86,12 @@ export class HTMLViewer
   constructor(options: DocumentWidget.IOptionsOptionalContent) {
     super({
       ...options,
-      content: new IFrame({ sandbox: ['allow-same-origin'] })
+      content: new IFrame({
+        sandbox: ['allow-same-origin'],
+        loading: 'lazy'})
     });
     this.translator = options.translator || nullTranslator;
     this.content.addClass(CSS_CLASS);
-    //sets loading to lazy
-    this.content.node.querySelector('iframe')?.setAttribute('loading', 'lazy');
-
     void this.context.ready.then(() => {
       this.update();
       // Throttle the rendering rate of the widget.
