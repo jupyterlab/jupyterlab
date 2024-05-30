@@ -1299,6 +1299,11 @@ export namespace SessionContext {
    */
   export interface IKernelSearch {
     /**
+     * The current running kernels.
+     */
+    kernels?: Iterable<Kernel.IModel>;
+
+    /**
      * The Kernel specs.
      */
     specs: KernelSpec.ISpecModels | null;
@@ -1347,16 +1352,13 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     const translator = this._translator;
     const trans = translator.load('jupyterlab');
 
-    // If there is no existing kernel, offer the option
-    // to keep no kernel.
+    // If there is no existing kernel, offer the option to keep no kernel.
     let label = trans.__('Cancel');
     if (sessionContext.hasNoKernel) {
       label = sessionContext.kernelDisplayName;
     }
     const buttons = [
-      Dialog.cancelButton({
-        label
-      }),
+      Dialog.cancelButton({ label }),
       Dialog.okButton({
         label: trans.__('Select'),
         ariaLabel: trans.__('Select Kernel')
@@ -1474,9 +1476,6 @@ namespace Private {
      */
     constructor({ sessionContext, translator }: KernelSelector.IOptions) {
       super({ node: createSelectorNode(sessionContext, translator) });
-      console.log('kernel manager', sessionContext.kernelManager);
-      console.log('kernelspec manager', sessionContext.specsManager);
-      console.log('session manager', sessionContext.sessionManager);
     }
 
     /**
@@ -1513,8 +1512,13 @@ namespace Private {
     }"`;
     body.appendChild(text);
 
-    const options = getKernelSearch(sessionContext);
     const selector = document.createElement('select');
+    const options = {
+      kernels: sessionContext.kernelManager.running(),
+      specs: sessionContext.specsManager.specs,
+      sessions: sessionContext.sessionManager.running(),
+      preference: sessionContext.kernelPreference
+    };
     populateKernelSelect(
       selector,
       options,
@@ -1592,6 +1596,7 @@ namespace Private {
     translator?: ITranslator,
     currentKernelDisplayName: string | null = null
   ): void {
+    console.log('options.kernels', Array.from(options.kernels!));
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
@@ -1746,19 +1751,6 @@ namespace Private {
         );
       }
     }
-  }
-
-  /**
-   * Get the kernel search options given a session context and session manager.
-   */
-  function getKernelSearch(
-    sessionContext: ISessionContext
-  ): SessionContext.IKernelSearch {
-    return {
-      specs: sessionContext.specsManager.specs,
-      sessions: sessionContext.sessionManager.running(),
-      preference: sessionContext.kernelPreference
-    };
   }
 
   /**
