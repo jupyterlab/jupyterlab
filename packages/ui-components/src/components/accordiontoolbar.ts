@@ -64,8 +64,7 @@ class AccordionToolbarLayout extends AccordionLayout {
   }
 
   /**
-   * Function is called when updating the title. Updating the title build a new Title
-   * widget, we need to attach again the toolbar node to it.
+   * Called when a title attribute has changed, to attach again the toolbar node.
    */
   updateTitle(index: number, widget: Widget): void {
     super.updateTitle(index, widget);
