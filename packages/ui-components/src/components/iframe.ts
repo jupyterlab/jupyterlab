@@ -40,6 +40,12 @@ export class IFrame extends Widget {
 
   /**
    * Loading for the iFrame
+   *
+   * ### Notes
+   * By default, 'eager' loading is chosen
+   *
+   * For more info, see
+   * https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/loading
    */
   get loading(): IFrame.Loading {
     return this._loading;
