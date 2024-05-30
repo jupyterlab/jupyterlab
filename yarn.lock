@@ -2467,6 +2467,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~5.0.5
     typescript: ~5.1.6
+    yjs: ^13.5.40
   languageName: unknown
   linkType: soft
 
