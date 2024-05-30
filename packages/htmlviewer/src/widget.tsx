@@ -88,7 +88,8 @@ export class HTMLViewer
       ...options,
       content: new IFrame({
         sandbox: ['allow-same-origin'],
-        loading: 'lazy'})
+        loading: 'lazy'
+      })
     });
     this.translator = options.translator || nullTranslator;
     this.content.addClass(CSS_CLASS);
