@@ -64,6 +64,14 @@ class AccordionToolbarLayout extends AccordionLayout {
   }
 
   /**
+   * Called when a title attribute has changed, to attach again the toolbar node.
+   */
+  updateTitle(index: number, widget: Widget): void {
+    super.updateTitle(index, widget);
+    this._addToolbar(index, widget);
+  }
+
+  /**
    * Attach a widget to the parent's DOM node.
    *
    * @param index - The current index of the widget in the layout.
@@ -72,22 +80,7 @@ class AccordionToolbarLayout extends AccordionLayout {
    */
   protected attachWidget(index: number, widget: Widget): void {
     super.attachWidget(index, widget);
-
-    const toolbar = this._toolbars.get(widget);
-    if (toolbar) {
-      // Send a `'before-attach'` message if the parent is attached.
-      if (this.parent!.isAttached) {
-        MessageLoop.sendMessage(toolbar, Widget.Msg.BeforeAttach);
-      }
-
-      // Insert the toolbar in the title node.
-      this.titles[index].appendChild(toolbar.node);
-
-      // Send an `'after-attach'` message if the parent is attached.
-      if (this.parent!.isAttached) {
-        MessageLoop.sendMessage(toolbar, Widget.Msg.AfterAttach);
-      }
-    }
+    this._addToolbar(index, widget);
   }
 
   /**
@@ -175,6 +168,27 @@ class AccordionToolbarLayout extends AccordionLayout {
   protected onAfterDetach(msg: Message): void {
     super.onAfterDetach(msg);
     this.notifyToolbars(msg);
+  }
+
+  /**
+   * Add the toolbar to the title widget.
+   */
+  private _addToolbar(index: number, widget: Widget): void {
+    const toolbar = this._toolbars.get(widget);
+    if (toolbar) {
+      // Send a `'before-attach'` message if the parent is attached.
+      if (this.parent!.isAttached) {
+        MessageLoop.sendMessage(toolbar, Widget.Msg.BeforeAttach);
+      }
+
+      // Insert the toolbar in the title node.
+      this.titles[index].appendChild(toolbar.node);
+
+      // Send an `'after-attach'` message if the parent is attached.
+      if (this.parent!.isAttached) {
+        MessageLoop.sendMessage(toolbar, Widget.Msg.AfterAttach);
+      }
+    }
   }
 
   private notifyToolbars(msg: Message): void {
