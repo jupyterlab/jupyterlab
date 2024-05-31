@@ -83,11 +83,9 @@ export class EventManager implements Event.IManager {
    */
   async emit(event: Event.Request): Promise<void> {
     const { serverSettings } = this;
-    const { baseUrl, token } = serverSettings;
+    const { baseUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
-    const url =
-      URLExt.join(baseUrl, SERVICE_EVENTS_URL) +
-      (token ? `?token=${token}` : '');
+    const url = URLExt.join(baseUrl, SERVICE_EVENTS_URL);
     const init = { body: JSON.stringify(event), method: 'POST' };
     const response = await makeRequest(url, init, serverSettings);
 
@@ -105,10 +103,11 @@ export class EventManager implements Event.IManager {
         return;
       }
 
-      const { token, WebSocket, wsUrl } = this.serverSettings;
-      const url =
-        URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe') +
-        (token ? `?token=${encodeURIComponent(token)}` : '');
+      const { appendToken, token, WebSocket, wsUrl } = this.serverSettings;
+      let url = URLExt.join(wsUrl, SERVICE_EVENTS_URL, 'subscribe');
+      if (appendToken && token !== '') {
+        url += `?token=${encodeURIComponent(token)}`;
+      }
       const socket = (this._socket = new WebSocket(url));
       const stream = this._stream;
 
