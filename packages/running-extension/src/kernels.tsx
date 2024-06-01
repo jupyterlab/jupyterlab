@@ -45,6 +45,11 @@ export async function addKernelRunningSessionManager(
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
   const trans = translator.load('jupyterlab');
   const shutdownUnusedLabel = trans.__('Shut Down Unused');
+  let shutdownUnusedEnabled = false;
+  const shutdownUnusedThrottler = new Throttler(
+    checkShutdownUnusedEnabled,
+    5000
+  );
 
   // Throttle signal emissions from the kernel and session managers.
   kernels.runningChanged.connect(() => void throttler.invoke());
@@ -53,16 +58,23 @@ export async function addKernelRunningSessionManager(
   // Wait until the relevant services are ready.
   await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
 
+  async function getUnusedKernels() {
+    // Identifies unused kernels
+    const runningKernels = await KernelAPI.listRunning();
+    return runningKernels.filter(
+      kernel => kernel.connections !== undefined && kernel.connections < 1
+    );
+  }
+
+  async function checkShutdownUnusedEnabled() {
+    shutdownUnusedEnabled = (await getUnusedKernels()).length > 0;
+    commands.notifyCommandChanged(SHUTDOWN_UNUSED_BUTTON_CLASS);
+  }
+
   commands.addCommand(SHUTDOWN_UNUSED_BUTTON_CLASS, {
     label: shutdownUnusedLabel,
     execute: async () => {
-      const runningKernels = await KernelAPI.listRunning();
-      // const enabled = runningKernels.length > 0;
-
-      // Identify unused kernels
-      const unusedKernels = runningKernels.filter(
-        kernel => kernel.connections !== undefined && kernel.connections < 1
-      );
+      const unusedKernels = await getUnusedKernels();
 
       if (unusedKernels.length === 0) {
         void showDialog({
@@ -92,6 +104,10 @@ export async function addKernelRunningSessionManager(
         }
         Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]);
       }
+    },
+    isEnabled: () => {
+      shutdownUnusedThrottler.invoke();
+      return shutdownUnusedEnabled;
     }
   });
 

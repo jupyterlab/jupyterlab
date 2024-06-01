@@ -2261,16 +2261,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/apputils@workspace:packages/apputils"
   dependencies:
-    "@jupyterlab/coreutils": ^6.2.0
-    "@jupyterlab/observables": ^5.2.0
-    "@jupyterlab/rendermime-interfaces": ^3.10.0
-    "@jupyterlab/services": ^7.2.0
-    "@jupyterlab/settingregistry": ^4.2.0
-    "@jupyterlab/statedb": ^4.2.0
-    "@jupyterlab/statusbar": ^4.2.0
-    "@jupyterlab/testing": ^4.2.0
-    "@jupyterlab/translation": ^4.2.0
-    "@jupyterlab/ui-components": ^4.2.0
+    "@jupyterlab/coreutils": ^6.3.0-alpha.0
+    "@jupyterlab/observables": ^5.3.0-alpha.0
+    "@jupyterlab/rendermime-interfaces": ^3.11.0-alpha.0
+    "@jupyterlab/services": ^7.3.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.3.0-alpha.0
+    "@jupyterlab/statedb": ^4.3.0-alpha.0
+    "@jupyterlab/statusbar": ^4.3.0-alpha.0
+    "@jupyterlab/testing": ^4.3.0-alpha.0
+    "@jupyterlab/translation": ^4.3.0-alpha.0
+    "@jupyterlab/ui-components": ^4.3.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.3.0
     "@lumino/coreutils": ^2.1.2
@@ -4498,10 +4498,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
-    "@jupyterlab/apputils": ^4.3.0
-    "@jupyterlab/statedb": ^4.2.0
-    "@jupyterlab/translation": ^4.2.0
-    "@jupyterlab/ui-components": ^4.2.0
+    "@jupyterlab/apputils": ^4.4.0-alpha.0
+    "@jupyterlab/services": ^7.3.0-alpha.0
+    "@jupyterlab/statedb": ^4.3.0-alpha.0
+    "@jupyterlab/translation": ^4.3.0-alpha.0
+    "@jupyterlab/ui-components": ^4.3.0-alpha.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/domutils": ^2.0.1
