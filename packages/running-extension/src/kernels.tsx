@@ -52,7 +52,10 @@ export async function addKernelRunningSessionManager(
   );
 
   // Throttle signal emissions from the kernel and session managers.
-  kernels.runningChanged.connect(() => void throttler.invoke());
+  kernels.runningChanged.connect(() => {
+    void throttler.invoke();
+    void shutdownUnusedThrottler.invoke();
+  });
   sessions.runningChanged.connect(() => void throttler.invoke());
 
   // Wait until the relevant services are ready.
@@ -60,15 +63,18 @@ export async function addKernelRunningSessionManager(
 
   async function getUnusedKernels() {
     // Identifies unused kernels
-    const runningKernels = await KernelAPI.listRunning();
+    const runningKernels = Array.from(kernels.running());
     return runningKernels.filter(
       kernel => kernel.connections !== undefined && kernel.connections < 1
     );
   }
 
   async function checkShutdownUnusedEnabled() {
+    const wasEnabled = shutdownUnusedEnabled;
     shutdownUnusedEnabled = (await getUnusedKernels()).length > 0;
-    commands.notifyCommandChanged(SHUTDOWN_UNUSED_BUTTON_CLASS);
+    if (wasEnabled !== shutdownUnusedEnabled) {
+      commands.notifyCommandChanged(SHUTDOWN_UNUSED_BUTTON_CLASS);
+    }
   }
 
   commands.addCommand(SHUTDOWN_UNUSED_BUTTON_CLASS, {
@@ -102,11 +108,13 @@ export async function addKernelRunningSessionManager(
         for (const kernel of unusedKernels) {
           await KernelAPI.shutdownKernel(kernel.id);
         }
-        Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]);
+        await Promise.all([
+          kernels.refreshRunning(),
+          sessions.refreshRunning()
+        ]);
       }
     },
     isEnabled: () => {
-      shutdownUnusedThrottler.invoke();
       return shutdownUnusedEnabled;
     }
   });

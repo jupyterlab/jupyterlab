@@ -1159,7 +1159,7 @@ export namespace IRunningSessions {
     /**
      * Used to add arbitrary buttons to this section
      */
-    toolbarButtons?: ToolbarButton[] | CommandToolbarButton[];
+    toolbarButtons?: (ToolbarButton | CommandToolbarButton)[];
   }
 
   /**
