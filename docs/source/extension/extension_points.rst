@@ -905,16 +905,24 @@ interface allows for much more extensive customization of the completer.
 
 .. code:: typescript
 
-    import { ICompletionProviderManager, ICompletionProvider } from '@jupyterlab/completer';
+    import {
+      CompletionHandler,
+      ICompletionProviderManager,
+      IInlineCompletionContext,
+      IInlineCompletionProvider
+    } from '@jupyterlab/completer';
 
     class MyProvider implements ICompletionProvider {
       readonly identifier = 'my-provider';
 
-      async isApplicable(context) {
+      async isApplicable(context: IInlineCompletionContext) {
         return true;
       }
 
-      async fetch(request, context) {
+      async fetch(
+        request: CompletionHandler.IRequest,
+        context: IInlineCompletionContext
+      ) {
         return {
           start: request.offset,
           end: request.offset,
