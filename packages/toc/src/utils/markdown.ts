@@ -75,6 +75,7 @@ export function getHeadings(text: string): IMarkdownHeading[] {
   // Iterate over the lines to get the header level and text for each line:
   const headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
+  let startBackticks = 0;
   let lineIdx = 0;
 
   // Don't check for Markdown headings if in a YAML frontmatter block.
@@ -105,7 +106,16 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 
     // Don't check for Markdown headings if in a code block
     if (line.startsWith('```')) {
-      isCodeBlock = !isCodeBlock;
+      const endBackticks = extractLeadingBackticks(line);
+      if (endBackticks === 0) continue;
+      else if (startBackticks === 0) {
+        isCodeBlock = !isCodeBlock;
+        startBackticks = endBackticks;
+        continue;
+      } else if (endBackticks !== 0 && endBackticks >= startBackticks) {
+        isCodeBlock = !isCodeBlock;
+        startBackticks = 0;
+      }
     }
     if (isCodeBlock) {
       continue;
@@ -121,6 +131,11 @@ export function getHeadings(text: string): IMarkdownHeading[] {
     }
   }
   return headings;
+}
+
+function extractLeadingBackticks(line: string) {
+  const match = line.match(/^(`{3,})/);
+  return match ? match[0].length : 0;
 }
 
 const MARKDOWN_MIME_TYPE = [
