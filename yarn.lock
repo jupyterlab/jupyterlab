@@ -4499,7 +4499,6 @@ __metadata:
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
     "@jupyterlab/apputils": ^4.4.0-alpha.0
-    "@jupyterlab/services": ^7.3.0-alpha.0
     "@jupyterlab/statedb": ^4.3.0-alpha.0
     "@jupyterlab/translation": ^4.3.0-alpha.0
     "@jupyterlab/ui-components": ^4.3.0-alpha.0
