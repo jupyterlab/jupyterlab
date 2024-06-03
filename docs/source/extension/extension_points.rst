@@ -908,20 +908,20 @@ interface allows for much more extensive customization of the completer.
     import {
       CompletionHandler,
       ICompletionProviderManager,
-      IInlineCompletionContext,
-      IInlineCompletionProvider
+      ICompletionContext,
+      ICompletionProvider
     } from '@jupyterlab/completer';
 
     class MyProvider implements ICompletionProvider {
       readonly identifier = 'my-provider';
 
-      async isApplicable(context: IInlineCompletionContext) {
+      async isApplicable(context: ICompletionContext) {
         return true;
       }
 
       async fetch(
         request: CompletionHandler.IRequest,
-        context: IInlineCompletionContext
+        context: ICompletionContext
       ) {
         return {
           start: request.offset,
