@@ -323,6 +323,48 @@ front: matter
       });
     });
 
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+      [
+        '# Title',
+        [
+          {
+            text: 'Title',
+            level: 1,
+            line: 0,
+            raw: '# Title',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ],
+      ['````\n```# Title-1\n```\n````', []],
+      [
+        '````\n```# Title-1\n```\n````\n# Title-2\n````\n`````',
+        [
+          {
+            text: 'Title-2',
+            level: 1,
+            line: 4,
+            raw: '# Title-2',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ]
+    ])('should verify comments in nested codeblocks in %s', (src, headers) => {
+      const headings = TableOfContentsUtils.filterHeadings(
+        TableOfContentsUtils.Markdown.getHeadings(src),
+        {
+          maximalDepth: 6,
+          numberHeaders: true
+        }
+      );
+      expect(headings).toHaveLength(headers.length);
+      for (let i = 0; i < headers.length; i++) {
+        expect(headings[i]).toEqual(headers[i]);
+      }
+    });
+
     it.each<[string]>([
       ['### Title <a class="tocSkip"></a>'],
       ['### Title <a title="noisy title" class="jp-toc-ignore"></a>'],
