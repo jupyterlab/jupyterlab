@@ -351,7 +351,7 @@ front: matter
           }
         ]
       ]
-    ])('should skip the heading from %s', (src, headers) => {
+    ])('should verify comments in nested codeblocks in %s', (src, headers) => {
       const headings = TableOfContentsUtils.filterHeadings(
         TableOfContentsUtils.Markdown.getHeadings(src),
         {

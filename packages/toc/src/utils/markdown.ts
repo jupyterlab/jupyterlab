@@ -106,13 +106,13 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 
     // Don't check for Markdown headings if in a code block
     if (line.startsWith('```')) {
-      const endBackticks = extractLeadingBackticks(line);
-      if (endBackticks === 0) continue;
+      const backticks = extractLeadingBackticks(line);
+      if (backticks === 0) continue;
       else if (startBackticks === 0) {
         isCodeBlock = !isCodeBlock;
-        startBackticks = endBackticks;
+        startBackticks = backticks;
         continue;
-      } else if (endBackticks !== 0 && endBackticks >= startBackticks) {
+      } else if (backticks !== 0 && backticks >= startBackticks) {
         isCodeBlock = !isCodeBlock;
         startBackticks = 0;
       }
