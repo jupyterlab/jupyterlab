@@ -1603,14 +1603,6 @@ namespace Private {
       if (kernelParameters) {
         //clean preavious a custom kernel specs selector
 
-      //  if (this.kernelSpecWidget) {
-       //   Widget.detach(this.kernelSpecWidget);
-      //  }
-
-        //hide selector for kernels
-        if (kernelSelectorContainer) {
-          kernelSelectorContainer.setAttribute('style', 'display: none;');
-        }
 
       
         let kernelSpecWidget = new DialogWidget(

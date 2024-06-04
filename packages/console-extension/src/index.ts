@@ -42,6 +42,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
+  DialogWidget,
   IFormRendererRegistry,
   redoIcon,
   undoIcon
@@ -50,6 +51,8 @@ import { find } from '@lumino/algorithm';
 import {
   JSONExt,
   JSONObject,
+  PartialJSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -58,6 +61,7 @@ import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
+import type { RJSFSchema } from '@rjsf/utils';
 
 /**
  * The command IDs used by the console plugin.
@@ -276,6 +280,51 @@ async function activateConsole(
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
+  const showKernelSpecDialog = async (
+    parameters: RJSFSchema,
+    basePath: string,
+    args: ReadonlyPartialJSONObject
+  ) => {
+    let newArgs = { ...args };
+    let kernelConfigurarion: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
+    ];
+
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new DialogWidget(
+        parameters,
+        kernelConfigurarion,
+        formData => {
+          kernelConfigurarion = formData as PartialJSONObject;
+        },
+        trans
+      ),
+      buttons
+    });
+
+    const result = await dialog.launch();
+
+    if (!result.button.accept) {
+      return;
+    }
+    if (result.value) {
+      if (kernelConfigurarion) {
+        let customKernelSpecs = { customKernelSpecs: kernelConfigurarion }
+        newArgs['kernelPreference'] = customKernelSpecs;
+      }
+     return createConsole({ basePath, ...newArgs });
+    }
+  };
+
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
     namespace: 'console'
@@ -320,7 +369,11 @@ async function activateConsole(
           disposables.add(
             launcher.add({
               command: CommandIDs.create,
-              args: { isLauncher: true, kernelPreference: { name } },
+              args: {
+                isLauncher: true,
+                kernelPreference: { name },
+                metadata: spec.metadata as ReadonlyJSONObject
+              },
               category: trans.__('Console'),
               rank,
               kernelIconUrl,
@@ -517,6 +570,9 @@ async function activateConsole(
             return item.path === path;
           });
           if (model) {
+            //
+            //console.log('open console args');
+            //console.dir(args);
             return createConsole(args);
           }
           return Promise.reject(`No running kernel session for path: ${path}`);
@@ -548,7 +604,14 @@ async function activateConsole(
           (args['cwd'] as string) ||
           filebrowser?.model.path) ??
         '';
-      return createConsole({ basePath, ...args });
+      //
+      const metadata = args['metadata'] as ReadonlyJSONObject;
+      if (metadata?.parameters) {
+        let schema = metadata.parameters as RJSFSchema;
+        return showKernelSpecDialog(schema, basePath, args);
+      } else {
+        return createConsole({ basePath, ...args });
+      }
     }
   });
 
