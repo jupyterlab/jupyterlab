@@ -59,9 +59,7 @@ test.describe('Text Editor Tests', () => {
 
     await page
       .locator('.jp-FileEditorCodeWrapper .cm-content')
-      .pressSequentially(
-        'Not active\nActive line with >>selected text<<\nNot active'
-      );
+      .fill('Not active\nActive line with >>selected text<<\nNot active');
 
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('End');
@@ -81,17 +79,15 @@ test.describe('Text Editor Tests', () => {
 
     await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    await page
-      .locator('.jp-FileEditorCodeWrapper .cm-content')
-      .pressSequentially(
-        `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
+    await page.locator('.jp-FileEditorCodeWrapper .cm-content').fill(
+      `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
 libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum.
 Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia
 Curae; Cras augue tortor, tristique vitae varius nec, dictum eu lectus. Pellentesque
 id eleifend eros. In non odio in lorem iaculis sollicitudin. In faucibus ante ut
 arcu fringilla interdum. Maecenas elit nulla, imperdiet nec blandit et, consequat
 ut elit.`
-      );
+    );
 
     await page.evaluate(async () => {
       await window.jupyterapp.commands.execute('fileeditor:go-to-line', {
