@@ -1589,6 +1589,21 @@ namespace Private {
 
   /**
    * Populate a kernel select node for the session.
+   *
+   * #### Notes
+   * If a `options.preference.language` is set the dropdown returns:
+   *  (Start preferred kernel)
+   *    - { all kernelspecs whose language matches in alphabetical order }
+   *    - { all running kernels whose language matches in alphabetical order }
+   *  (Start other kernel)
+   *    - { all other kernelspecs in alphabetical order }
+   *    - { all other running kernels in alphabetical order }
+   *
+   * If there is no language preference is set the dropdown returns:
+   *  (Kernels)
+   *    - { all kernelspecs in alphabetical order }
+   *  (Running)
+   *    - { all running kernels in alphabetical order  }
    */
   export function populateKernelSelect(
     node: HTMLSelectElement,
