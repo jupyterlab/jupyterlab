@@ -49,10 +49,8 @@ import {
   downloadIcon,
   editIcon,
   fileIcon,
-  FilenameSearcher,
   folderIcon,
   IDisposableMenuItem,
-  IScore,
   linkIcon,
   markdownIcon,
   newFolderIcon,
@@ -66,12 +64,11 @@ import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 
+/**
+ * Toolbar factory for the top toolbar in the widget
+ */
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
-/**
- * The class name added to the filebrowser filterbox node.
- */
-const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -465,34 +462,12 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
 
-    // Toolbar
+    // Top-level toolbar
     toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
       'uploader',
       (browser: FileBrowser) =>
         new Uploader({ model: browser.model, translator })
-    );
-
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'fileNameSearcher',
-      (browser: FileBrowser) => {
-        const searcher = FilenameSearcher({
-          updateFilter: (
-            filterFn: (item: string) => Partial<IScore> | null,
-            query?: string
-          ) => {
-            browser.model.setFilter(value => {
-              return filterFn(value.name.toLowerCase());
-            });
-          },
-          useFuzzyFilter: true,
-          placeholder: trans.__('Filter files by name'),
-          forceRefresh: true
-        });
-        searcher.addClass(FILTERBOX_CLASS);
-        return searcher;
-      }
     );
 
     setToolbar(
