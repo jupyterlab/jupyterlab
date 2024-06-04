@@ -7,7 +7,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IConnectionLost } from './tokens';
 
 let displayConnectionLost = true;
-const connectionLostCachePromise: { [key: string]: Promise<any> } = {};
+let connectionLostCachePromise: Promise<Dialog.IResult<string>> | undefined;
 
 /**
  * A default connection lost handler, which brings up an error dialog.
@@ -31,39 +31,44 @@ export const ConnectionLost: IConnectionLost = async function (
     return;
   }
 
-  const key = 'server-connection-error';
-  const promise = connectionLostCachePromise[key];
+  if (connectionLostCachePromise) {
+    // Wait for the pre-existing promise to complete
+    await connectionLostCachePromise;
+    return;
+  }
 
-  if (promise) {
-    return promise;
-  } else {
-    try {
-      const errorDialogPromise: any = showDialog({
-        title: title,
-        body: networkMsg,
-        checkbox: {
-          label: trans.__('Do not show this message again in this session.'),
-          caption: trans.__(
-            'If checked, you will not see a dialog informing you about an issue with server connection in the future.'
-          )
-        },
-        buttons: buttons
-      }).then(result => {
+  try {
+    const errorDialogPromise: Promise<Dialog.IResult<string>> = showDialog({
+      title: title,
+      body: networkMsg,
+      checkbox: {
+        label: trans.__('Do not show this message again in this session.'),
+        caption: trans.__(
+          'If checked, you will not see a dialog informing you about an issue with server connection in the future.'
+        )
+      },
+      buttons: buttons
+    })
+      .then(result => {
         if (result.button.accept && !result.isChecked) {
-          delete connectionLostCachePromise[key];
+          connectionLostCachePromise = undefined;
         }
 
         if (result.isChecked) {
           displayConnectionLost = false;
         }
-        return;
+        return result as Dialog.IResult<string>;
+      })
+      .finally(() => {
+        connectionLostCachePromise = undefined;
       });
 
-      connectionLostCachePromise[key] = errorDialogPromise;
-      await errorDialogPromise;
-      return;
-    } catch (error) {
-      console.error('An error occurred while showing the dialog: ', error);
-    }
+    connectionLostCachePromise = errorDialogPromise;
+
+    // Wait for the dialog promise to resolve
+    await errorDialogPromise;
+    return;
+  } catch (error) {
+    console.error('An error occurred while showing the dialog: ', error);
   }
 };
