@@ -22,8 +22,8 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
-import { CommandIDs } from '.';
 import React, { ReactNode } from 'react';
+import { CommandIDs } from '.';
 
 const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
 const KERNELSPEC_ITEM_CLASS = 'jp-mod-kernelspec';
@@ -63,7 +63,7 @@ export async function addKernelRunningSessionManager(
 
   async function getUnusedKernels() {
     // Identifies unused kernels
-    const runningKernels = Array.from(kernels.running());
+    const runningKernels = await KernelAPI.listRunning();
     return runningKernels.filter(
       kernel => kernel.connections !== undefined && kernel.connections < 1
     );
