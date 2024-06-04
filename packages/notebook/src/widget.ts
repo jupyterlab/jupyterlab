@@ -85,6 +85,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
 const SELECTED_CLASS = 'jp-mod-selected';
 
 /**
+ * The class name added to the cell when dirty.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
+
+/**
  * The class name added to an active cell when there are other selected cells.
  */
 const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
@@ -1314,13 +1319,27 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       this._element = this._createElement();
       this._notebook.activeCellChanged.connect(this._updateActive);
       this._notebook.selectionChanged.connect(this._updateSelection);
+      if (this._model.type === 'code') {
+        const model = this._model as ICodeCellModel;
+        model.outputs.changed.connect(this._updateOutput);
+        model.stateChanged.connect(this._updateState);
+      }
     }
-    const text = `${props.index + 1}`;
-    if (text != this._element.innerText) {
-      this._element.innerText = text;
+    // Add cell type (code/markdown/raw)
+    if (this._model.type != this._element.dataset.type) {
+      this._element.dataset.type = this._model.type;
     }
+    const source = this._model.sharedModel.source;
+    const trimmedSource =
+      source.length > 10000 ? source.substring(0, 10000) : source;
+    if (trimmedSource !== this._source.textContent) {
+      this._source.textContent = trimmedSource;
+    }
+
     this._updateActive();
     this._updateSelection();
+    this._updateOutput();
+    this._updateDirty();
     return this._element;
   };
 
@@ -1350,11 +1369,100 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     this._isDisposed = true;
     this._notebook.activeCellChanged.disconnect(this._updateActive);
     this._notebook.selectionChanged.disconnect(this._updateSelection);
+    if (this._model.type === 'code') {
+      const model = this._model as ICodeCellModel;
+      if (model.outputs) {
+        model.outputs.changed.disconnect(this._updateOutput);
+        model.stateChanged.disconnect(this._updateState);
+      }
+    }
   };
 
-  private _createElement() {
-    return document.createElement('li');
+  private _updateState = (
+    _: ICellModel,
+    change: IChangedArgs<
+      any,
+      any,
+      'trusted' | 'isDirty' | 'executionCount' | 'executionState'
+    >
+  ) => {
+    switch (change.name) {
+      case 'executionCount':
+      case 'executionState':
+        this._updatePrompt();
+        break;
+      case 'isDirty': {
+        this._updateDirty();
+        break;
+      }
+    }
+  };
+
+  private _updateDirty() {
+    if (this._model.type !== 'code' || !this._element) {
+      return;
+    }
+    const model = this._model as ICodeCellModel;
+    const wasDirty = this._element.classList.contains(DIRTY_CLASS);
+    if (wasDirty !== model.isDirty) {
+      if (model.isDirty) {
+        this._element.classList.add(DIRTY_CLASS);
+      } else {
+        this._element.classList.remove(DIRTY_CLASS);
+      }
+    }
   }
+
+  private _updateOutput = () => {
+    this._updatePrompt();
+  };
+
+  private _updatePrompt() {
+    if (this._model.type !== 'code') {
+      return;
+    }
+    const model = this._model as ICodeCellModel;
+    let hasError = false;
+    for (let i = 0; i < model.outputs.length; i++) {
+      const output = model.outputs.get(i);
+      if (output.type === 'error') {
+        hasError = true;
+        break;
+      }
+    }
+    let content: string;
+    let state: string = '';
+    if (hasError) {
+      content = '[!]';
+      state = 'error';
+    } else if (model.executionState == 'running') {
+      content = '[*]';
+    } else if (model.executionCount) {
+      content = `[${model.executionCount}]`;
+    } else {
+      content = '[ ]';
+    }
+    if (this._executionIndicator.textContent !== content) {
+      this._executionIndicator.textContent = content;
+    }
+    if (this._element!.dataset.output !== state) {
+      this._element!.dataset.output = state;
+    }
+  }
+
+  private _createElement() {
+    const li = document.createElement('li');
+    const executionIndicator = (this._executionIndicator =
+      document.createElement('div'));
+    executionIndicator.className = 'jp-scrollbarItem-executionIndicator';
+    const source = (this._source = document.createElement('div'));
+    source.className = 'jp-scrollbarItem-source';
+    li.append(executionIndicator);
+    li.append(source);
+    return li;
+  }
+  private _executionIndicator: HTMLElement;
+  private _source: HTMLElement;
 
   private _updateActive = () => {
     if (!this._element) {
