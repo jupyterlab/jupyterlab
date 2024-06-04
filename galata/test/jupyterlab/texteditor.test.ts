@@ -57,7 +57,6 @@ test.describe('Text Editor Tests', () => {
 
     await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    await page.pause();
     await page
       .locator('.jp-FileEditorCodeWrapper .cm-content')
       .pressSequentially(
