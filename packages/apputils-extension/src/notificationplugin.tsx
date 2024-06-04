@@ -27,7 +27,6 @@ import {
 } from '@jupyterlab/translation';
 import {
   bellIcon,
-  Button,
   closeIcon,
   deleteIcon,
   LabIcon,
@@ -35,6 +34,7 @@ import {
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
+import { Button } from '@jupyter/react-components';
 import {
   PromiseDelegate,
   ReadonlyJSONObject,
@@ -858,7 +858,7 @@ namespace Private {
         title={action.caption ?? action.label}
         className={classes}
         onClick={clickHandler}
-        small={true}
+        minimal
       >
         {action.label}
       </Button>

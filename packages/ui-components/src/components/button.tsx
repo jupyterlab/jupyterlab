@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { classes } from '../utils';
+import { Button as ToolkitButton} from '@jupyter/react-components';
 
 /**
  * Button component property
@@ -19,6 +20,10 @@ export interface IButtonProps
    * Whether this button should use small styles.
    */
   small?: boolean;
+  /**
+   * Button content
+   */
+  value?: string;
 }
 
 /**
@@ -28,18 +33,17 @@ export interface IButtonProps
  * @returns Component
  */
 export function Button(props: IButtonProps): JSX.Element {
-  const { minimal, small, children, ...others } = props;
+  const {small, children, className, ...others } = props;
   return (
-    <button
+    <ToolkitButton
       {...others}
       className={classes(
-        props.className,
-        minimal ? 'jp-mod-minimal' : '',
+        className,
         small ? 'jp-mod-small' : '',
         'jp-Button'
       )}
     >
       {children}
-    </button>
+    </ToolkitButton>
   );
 }

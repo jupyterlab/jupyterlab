@@ -3,12 +3,12 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  Button,
   closeIcon,
   LabIcon,
   ReactWidget,
   Styling
 } from '@jupyterlab/ui-components';
+import { Button } from '@jupyter/react-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';

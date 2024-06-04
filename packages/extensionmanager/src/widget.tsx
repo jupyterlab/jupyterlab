@@ -3,7 +3,6 @@
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
-  Button,
   FilterBox,
   infoIcon,
   jupyterIcon,
@@ -14,6 +13,7 @@ import {
   ToolbarButton,
   ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
+import { Button } from '@jupyter/react-components';
 import { Message } from '@lumino/messaging';
 import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
@@ -140,7 +140,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                             entry.latest_version
                           )}
                           minimal
-                          small
                         >
                           {trans.__('Update to %1', entry.latest_version)}
                         </Button>
@@ -149,7 +148,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                         onClick={() => props.performAction!('uninstall', entry)}
                         title={trans.__('Uninstall "%1"', entry.name)}
                         minimal
-                        small
                       >
                         {trans.__('Uninstall')}
                       </Button>
@@ -160,7 +158,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       onClick={() => props.performAction!('disable', entry)}
                       title={trans.__('Disable "%1"', entry.name)}
                       minimal
-                      small
                     >
                       {trans.__('Disable')}
                     </Button>
@@ -169,7 +166,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       onClick={() => props.performAction!('enable', entry)}
                       title={trans.__('Enable "%1"', entry.name)}
                       minimal
-                      small
                     >
                       {trans.__('Enable')}
                     </Button>
@@ -181,7 +177,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                     onClick={() => props.performAction!('install', entry)}
                     title={trans.__('Install "%1"', entry.name)}
                     minimal
-                    small
                   >
                     {trans.__('Install')}
                   </Button>
