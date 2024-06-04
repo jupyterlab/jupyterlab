@@ -640,14 +640,14 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     openerWidth: number
   ) {
     const opener = this.popupOpener;
-    const layout = this.layout as ToolbarLayout;
-    const toIndex = layout.widgets.length - 1;
+    const widgets = [...(this.layout as ToolbarLayout).widgets];
+    const toIndex = widgets.length - 1;
 
     const widgetsToRemove = [];
 
     let index = 0;
     while (index < toIndex) {
-      const widget = layout.widgets[index];
+      const widget = widgets[index];
       const name = Private.nameProperty.get(widget);
       // Compute the widget size only if
       // - the zoom has changed.
