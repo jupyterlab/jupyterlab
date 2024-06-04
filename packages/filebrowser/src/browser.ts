@@ -6,7 +6,12 @@ import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { SidePanel } from '@jupyterlab/ui-components';
+import {
+  FilenameSearcher,
+  IScore,
+  SidePanel,
+  Toolbar
+} from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
@@ -33,9 +38,19 @@ const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
 const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
 
 /**
+ * The class name added to the filebrowser folder toolbar node.
+ */
+const FOLDER_TOOLBAR_CLASS = 'jp-FileBrowser-folderToolbar';
+
+/**
  * The class name added to the filebrowser listing node.
  */
 const LISTING_CLASS = 'jp-FileBrowser-listing';
+
+/**
+ * The class name added to the filebrowser filterbox node.
+ */
+const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * A widget which hosts a file browser.
@@ -76,6 +91,26 @@ export class FileBrowser extends SidePanel {
     this.crumbs = new BreadCrumbs({ model, translator });
     this.crumbs.addClass(CRUMBS_CLASS);
 
+    // The folder toolbar appears immediately below the breadcrumbs and above the directory listing.
+    const searcher = FilenameSearcher({
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
+        this.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
+      useFuzzyFilter: true,
+      placeholder: this._trans.__('Filter files by name'),
+      forceRefresh: true
+    });
+    searcher.addClass(FILTERBOX_CLASS);
+
+    this.folderToolbar = new Toolbar();
+    this.folderToolbar.addClass(FOLDER_TOOLBAR_CLASS);
+    this.folderToolbar.addItem('fileNameSearcher', searcher);
+
     this.listing = this.createDirListing({
       model,
       renderer,
@@ -84,6 +119,7 @@ export class FileBrowser extends SidePanel {
     this.listing.addClass(LISTING_CLASS);
 
     this.mainPanel.addWidget(this.crumbs);
+    this.mainPanel.addWidget(this.folderToolbar);
     this.mainPanel.addWidget(this.listing);
 
     this.addWidget(this.mainPanel);
@@ -426,6 +462,7 @@ export class FileBrowser extends SidePanel {
     }
   }
 
+  protected folderToolbar: Toolbar;
   protected listing: DirListing;
   protected crumbs: BreadCrumbs;
   protected mainPanel: Panel;
