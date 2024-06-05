@@ -99,7 +99,13 @@
   display: none;
 }
 
-.jp-FileBrowser-toolbar > .jp-FileBrowser-filterBox {
+.jp-FileBrowser-folderToolbar > .jp-FileBrowser-filterBox {
+  width: 100%;
+}
+
+.jp-FileBrowser-filterBox > .jp-FilterBox {
+  --design-unit: unset;
+
   width: 100%;
 }
 
