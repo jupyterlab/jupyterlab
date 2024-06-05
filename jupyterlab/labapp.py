@@ -927,11 +927,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             except ImportError:
                 self.log.critical(
                     """\
-Juptyer Lab cannot start, because `jupyter_collaboration` was configured but cannot be `import`ed.
+Jupyter Lab cannot start, because `jupyter_collaboration` was configured but cannot be `import`ed.
 
 To fix this, either:
 
-1) install the extension `jupyter_collaboration`; for example: `python -m pip install jupyter_collaboration`
+1) install the extension `jupyter-collaboration`; for example: `python -m pip install jupyter-collaboration`
 
 2) disable collaboration; for example, remove the `--collaborative` flag from the commandline.  To see more ways to adjust the collaborative behavior, see https://jupyterlab-realtime-collaboration.readthedocs.io/en/latest/configuration.html .
 """
