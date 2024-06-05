@@ -9,6 +9,7 @@ import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Kernel, KernelAPI, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import {
+  cleaningIcon,
   closeIcon,
   CommandToolbarButton,
   consoleIcon,
@@ -161,6 +162,7 @@ export async function addKernelRunningSessionManager(
     toolbarButtons: [
       new CommandToolbarButton({
         commands,
+        icon: cleaningIcon,
         id: SHUTDOWN_UNUSED_BUTTON_CLASS,
         label: shutdownUnusedLabel
       })
