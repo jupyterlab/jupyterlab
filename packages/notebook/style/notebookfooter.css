@@ -5,7 +5,6 @@
 
 .jp-Notebook-footer {
   height: 27px;
-  margin-top: 16px;
   margin-left: calc(
     var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
       var(--jp-cell-padding) + var(--jp-notebook-padding)

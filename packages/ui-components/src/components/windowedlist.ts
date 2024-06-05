@@ -1033,8 +1033,10 @@ export class WindowedList<
     }
     this._addListeners();
     this.viewModel.height = this.node.getBoundingClientRect().height;
-    const style = window.getComputedStyle(this._viewport);
-    this.viewModel.paddingTop = parseFloat(style.paddingTop);
+    const viewportStyle = window.getComputedStyle(this._viewport);
+    this.viewModel.paddingTop = parseFloat(viewportStyle.paddingTop);
+    this._viewportPaddingTop = this.viewModel.paddingTop;
+    this._viewportPaddingBottom = parseFloat(viewportStyle.paddingBottom);
     this._scrollbarElement.addEventListener('pointerdown', this);
   }
 
@@ -1480,13 +1482,18 @@ export class WindowedList<
   private _updateTotalSize(): void {
     if (this.viewModel.windowingActive) {
       const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
-
+      const heightWithPadding =
+        estimatedTotalHeight +
+        this._viewportPaddingTop +
+        this._viewportPaddingBottom;
       // Update inner container height
-      this._innerElement.style.height = `${estimatedTotalHeight}px`;
+      this._innerElement.style.height = `${heightWithPadding}px`;
     }
   }
 
   protected _viewModel: T;
+  private _viewportPaddingTop: number = 0;
+  private _viewportPaddingBottom: number = 0;
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
