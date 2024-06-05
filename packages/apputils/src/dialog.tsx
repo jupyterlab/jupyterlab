@@ -888,13 +888,13 @@ export namespace Dialog {
             {title}
             {options.hasClose && (
               <Button
-                appearance="stealth" 
-                className="jp-Dialog-close-button" 
-                onMouseDown={handleMouseDown} 
-                onKeyDown={handleKeyDown} 
-                title={trans.__('Cancel')} 
-                minimal 
-              > 
+                appearance="stealth"
+                className="jp-Dialog-close-button"
+                onMouseDown={handleMouseDown}
+                onKeyDown={handleKeyDown}
+                title={trans.__('Cancel')}
+                minimal
+              >
                 <closeIcon.react tag={null} />
               </Button>
             )}
