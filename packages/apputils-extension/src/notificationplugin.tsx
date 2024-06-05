@@ -679,15 +679,16 @@ namespace Private {
 
   export function CloseButton(props: ICloseButtonProps) {
     return (
-      <button
-        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
+      <Button
+        className={`jp-Button jp-icon-hover ${TOAST_CLOSE_BUTTON_CLASS}${
           props.closeIconMargin ? ` ${TOAST_CLOSE_BUTTON_MARGIN_CLASS}` : ''
         }`}
         title={props.title ?? ''}
         onClick={props.close}
+        minimal
       >
-        <props.closeIcon className="jp-icon-hover" tag="span" />
-      </button>
+        <props.closeIcon tag={null} />
+      </Button>
     );
   }
 

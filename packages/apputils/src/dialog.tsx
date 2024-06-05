@@ -4,7 +4,7 @@
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   closeIcon,
-  LabIcon,
+  // LabIcon,
   ReactWidget,
   Styling
 } from '@jupyterlab/ui-components';
@@ -888,13 +888,14 @@ export namespace Dialog {
             {title}
             {options.hasClose && (
               <Button
-                className="jp-Dialog-close-button"
-                onMouseDown={handleMouseDown}
-                onKeyDown={handleKeyDown}
-                title={trans.__('Cancel')}
-                minimal
-              >
-                <LabIcon.resolveReact icon={closeIcon} tag="span" />
+                appearance="stealth" 
+                className="jp-Dialog-close-button" 
+                onMouseDown={handleMouseDown} 
+                onKeyDown={handleKeyDown} 
+                title={trans.__('Cancel')} 
+                minimal 
+              > 
+                <closeIcon.react tag={null} />
               </Button>
             )}
           </>
@@ -989,7 +990,7 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('button');
+      const e = document.createElement('jp-button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
       e.appendChild(this.renderLabel(button));
