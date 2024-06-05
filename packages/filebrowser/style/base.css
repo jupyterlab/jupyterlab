@@ -104,8 +104,6 @@
 }
 
 .jp-FileBrowser-filterBox > .jp-FilterBox {
-  --design-unit: unset;
-
   width: 100%;
 }
 
