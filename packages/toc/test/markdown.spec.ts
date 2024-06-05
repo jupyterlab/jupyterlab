@@ -110,6 +110,32 @@ describe('TableOfContentsUtils', () => {
           ]
         ],
         [
+          '# <span>Title</span>',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 0,
+              raw: '# <span>Title</span>',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          '## <div>Title</div> 1',
+          [
+            {
+              text: 'Title 1',
+              level: 2,
+              line: 0,
+              raw: '## <div>Title</div> 1',
+              prefix: '0.1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
           'Title\n==',
           [
             {
@@ -131,6 +157,32 @@ describe('TableOfContentsUtils', () => {
               line: 0,
               raw: 'Title\n--',
               prefix: '0.1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          '<span>Title</span>\n==',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 0,
+              raw: '<span>Title</span>\n==',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          '<h1>Title</h1>\n--',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 0,
+              raw: '<h1>Title</h1>',
+              prefix: '1. ',
               skip: false
             }
           ]
