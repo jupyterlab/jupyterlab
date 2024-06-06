@@ -212,13 +212,5 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
  * A widget which hosts a input textbox to filter on file names.
  */
 export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(
-    <FilterBox
-      updateFilter={props.updateFilter}
-      useFuzzyFilter={props.useFuzzyFilter}
-      placeholder={props.placeholder}
-      forceRefresh={props.forceRefresh}
-      caseSensitive={props.caseSensitive}
-    />
-  );
+  return ReactWidget.create(<FilterBox {...props} />);
 };
