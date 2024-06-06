@@ -990,7 +990,7 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('jp-button');
+      const e = document.createElement('button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
       e.appendChild(this.renderLabel(button));
