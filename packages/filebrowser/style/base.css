@@ -29,6 +29,12 @@
   row-gap: 12px;
 }
 
+.jp-FileBrowser-folderToolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
 .jp-FileBrowser-Panel {
   flex: 1 1 auto;
   display: flex;
@@ -64,7 +70,8 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar > .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item,
+.jp-FileBrowser-folderToolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
   align-items: center;
