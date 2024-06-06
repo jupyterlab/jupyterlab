@@ -701,7 +701,7 @@ export class SessionContext implements ISessionContext {
       });
       if (name) {
         if (preference.customKernelSpecs) {
-          options = {
+         options = {
             name,
             custom_kernel_specs: preference.customKernelSpecs
           };
@@ -1585,25 +1585,20 @@ namespace Private {
     ) as HTMLSelectElement;
 
     let selectedKernel =JSON.parse(kernelSelect.value) as Kernel.IModel;
-    const kernelSelectorContainer = document.querySelector(
-      '#js-kernel-selector-container'
-    );
 
     const kernelSpecsContainer = document.querySelector(
       '#js-kernel-specs-selector-container'
     ) as HTMLElement;
 
+    kernelSpecsContainer.innerHTML = '';
     let kernelName = selectedKernel && selectedKernel.name ? selectedKernel.name  : ''
     let kernel =
     kernelName &&
       sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
-
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
+      
       if (kernelParameters) {
-        //clean preavious a custom kernel specs selector
-
-
       
         let kernelSpecWidget = new DialogWidget(
           kernelParameters,
@@ -1630,7 +1625,7 @@ namespace Private {
     options: SessionContext.IKernelSearch
   ): string | null {
     const { specs, preference } = options;
-    const { name, language, canStart, autoStartDefault } = preference;
+        const { name, language, canStart, autoStartDefault } = preference;
 
     if (!specs || canStart === false) {
       return null;

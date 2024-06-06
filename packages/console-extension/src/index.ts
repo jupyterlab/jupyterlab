@@ -318,10 +318,15 @@ async function activateConsole(
     }
     if (result.value) {
       if (kernelConfigurarion) {
-        let customKernelSpecs = { customKernelSpecs: kernelConfigurarion }
-        newArgs['kernelPreference'] = customKernelSpecs;
+        if (args.kernelPreference) {
+          let kernelPreference = args.kernelPreference as ReadonlyPartialJSONObject;
+          newArgs['kernelPreference'] = {
+            ...kernelPreference,
+            customKernelSpecs: kernelConfigurarion
+          };
+        }
       }
-     return createConsole({ basePath, ...newArgs });
+      return createConsole({ basePath, ...newArgs });
     }
   };
 
