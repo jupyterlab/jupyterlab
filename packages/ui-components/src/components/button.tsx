@@ -21,7 +21,7 @@ export interface IButtonProps
    */
   small?: boolean;
   /**
-   * content of the button 
+   * content of the button
    */
   value?: string;
 }
