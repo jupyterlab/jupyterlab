@@ -1196,7 +1196,7 @@ export class WindowedList<
     } else {
       // Reset all styles that may have been touched.
       outer.style.width = '100%';
-      this._innerElement.style.marginRight = '0';
+      this._innerElement.style.marginRight = '';
       outer.style.paddingRight = '0';
       outer.style.boxSizing = '';
     }
@@ -1241,6 +1241,7 @@ export class WindowedList<
   private _applyNoWindowingStyles() {
     this._viewport.style.position = 'relative';
     this._viewport.style.top = '0px';
+    this._innerElement.style.height = '';
   }
   /**
    * Turn on windowing related styles in the viewport.
