@@ -2229,6 +2229,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/apputils-extension@workspace:packages/apputils-extension"
   dependencies:
+    "@jupyter/react-components": ^0.15.3
     "@jupyterlab/application": ^4.3.0-alpha.0
     "@jupyterlab/apputils": ^4.4.0-alpha.0
     "@jupyterlab/coreutils": ^6.3.0-alpha.0
@@ -2261,6 +2262,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/apputils@workspace:packages/apputils"
   dependencies:
+    "@jupyter/react-components": ^0.15.3
     "@jupyterlab/coreutils": ^6.3.0-alpha.0
     "@jupyterlab/observables": ^5.3.0-alpha.0
     "@jupyterlab/rendermime-interfaces": ^3.11.0-alpha.0
@@ -3314,6 +3316,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/extensionmanager@workspace:packages/extensionmanager"
   dependencies:
+    "@jupyter/react-components": ^0.15.3
     "@jupyterlab/apputils": ^4.4.0-alpha.0
     "@jupyterlab/coreutils": ^6.3.0-alpha.0
     "@jupyterlab/services": ^7.3.0-alpha.0
