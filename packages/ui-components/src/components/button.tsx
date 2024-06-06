@@ -33,11 +33,11 @@ export interface IButtonProps
  * @returns Component
  */
 export function Button(props: IButtonProps): JSX.Element {
-  const { small, children, className, ...others } = props;
+  const {minimal, small, children, className, ...others } = props;
   return (
     <ToolkitButton
       {...others}
-      className={classes(className, small ? 'jp-mod-small' : '', 'jp-Button')}
+      className={classes(className, minimal ? 'jp-mod-minimal' : '', small ? 'jp-mod-small' : '', 'jp-Button')}
     >
       {children}
     </ToolkitButton>
