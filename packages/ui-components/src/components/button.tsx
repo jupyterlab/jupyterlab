@@ -33,7 +33,7 @@ export interface IButtonProps
  * @returns Component
  */
 export function Button(props: IButtonProps): JSX.Element {
-  const {small, children, className, ...others } = props;
+  const { small, children, className, ...others } = props;
   return (
     <ToolkitButton
       {...others}
