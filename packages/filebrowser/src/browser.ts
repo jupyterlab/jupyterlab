@@ -14,7 +14,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
-import { Panel } from '@lumino/widgets';
+import { Panel, PanelLayout } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
@@ -92,11 +92,10 @@ export class FileBrowser extends SidePanel {
         // Make icon vary based on state of filter?
         icon: filterIcon,
         onClick: () => {
-          const oldValue = this.showFileFilter;
-          console.log(`Filter files is set to ${oldValue}, flipping`);
-          this.showFileFilter = !oldValue;
+          this.toggleFileFilter();
         },
-        tooltip: this._trans.__('Filter files by name')
+        tooltip: this._trans.__('Filter files by name'),
+        pressed: this._showFileFilter
       })
     );
 
@@ -456,6 +455,19 @@ export class FileBrowser extends SidePanel {
    */
   modelForClick(event: MouseEvent): Contents.IModel | undefined {
     return this.listing.modelForClick(event);
+  }
+
+  toggleFileFilter(): void {
+    const oldValue = this.showFileFilter;
+    console.log(`Filter files is set to ${oldValue}, flipping`);
+    this.showFileFilter = !oldValue;
+    // Toggle button state for the filter button
+    (this.toolbar.layout as PanelLayout).widgets.forEach(widget => {
+      const button = widget as ToolbarButton;
+      if (button.node.getAttribute('data-jp-item-name') === 'toggleFilter') {
+        button.pressed = !oldValue;
+      }
+    });
   }
 
   /**
