@@ -92,7 +92,7 @@ packages:
 
   const subproc = child_process.spawn(
     'npx',
-    ['verdaccio'].concat(args.split(' ')),
+    ['verdaccio@5.31.0'].concat(args.split(' ')),
     options
   );
   subproc.unref();
