@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  closeIcon,
-  ReactWidget,
-  Styling
-} from '@jupyterlab/ui-components';
+import { closeIcon, ReactWidget, Styling } from '@jupyterlab/ui-components';
 import { Button } from '@jupyter/react-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
