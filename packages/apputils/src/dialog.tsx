@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { closeIcon, ReactWidget, Styling } from '@jupyterlab/ui-components';
+import {
+  closeIcon,
+  ReactWidget,
+  Styling
+} from '@jupyterlab/ui-components';
 import { Button } from '@jupyter/react-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -985,11 +989,11 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('button');
+      const e = document.createElement('jp-button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
       e.appendChild(this.renderLabel(button));
-      return e;
+      return e as HTMLButtonElement;
     }
 
     /**
