@@ -8,9 +8,11 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
+  filterIcon,
   IScore,
   SidePanel,
-  Toolbar
+  Toolbar,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
@@ -83,6 +85,21 @@ export class FileBrowser extends SidePanel {
       this._trans.__('file browser')
     );
 
+    // Add a button to toggle the file filter.
+    this.toolbar.addItem(
+      'toggleFilter',
+      new ToolbarButton({
+        // Make icon vary based on state of filter?
+        icon: filterIcon,
+        onClick: () => {
+          const oldValue = this.showFileFilter;
+          console.log(`Filter files is set to ${oldValue}, flipping`);
+          this.showFileFilter = !oldValue;
+        },
+        tooltip: this._trans.__('Filter files by name')
+      })
+    );
+
     // File browser widgets container
     this.mainPanel = new Panel();
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
@@ -111,6 +128,9 @@ export class FileBrowser extends SidePanel {
     this.folderToolbar = new Toolbar();
     this.folderToolbar.addClass(FOLDER_TOOLBAR_CLASS);
     this.folderToolbar.addItem('fileNameSearcher', searcher);
+    this.folderToolbar.node.style['display'] = this.showFileFilter
+      ? 'block'
+      : 'none';
 
     this.listing = this.createDirListing({
       model,
@@ -215,6 +235,31 @@ export class FileBrowser extends SidePanel {
     } else {
       console.warn('Listing does not support toggling column visibility');
     }
+  }
+
+  /**
+   * Whether to show a text box to filter files by name.
+   */
+  get showFileFilter(): boolean {
+    return this._showFileFilter;
+  }
+
+  set showFileFilter(value: boolean) {
+    // TODO: If the old value was true and the new value is false, we need to
+    // clear the filter effect
+    const oldValue = this.showFileFilter;
+    if (oldValue && !value) {
+      // Return a filter that doesn't exclude anything.
+      this.model.setFilter(value => {
+        return { score: 1, indices: null };
+      });
+    }
+    this._showFileFilter = value;
+    // TODO: update widget visibility
+    const folderToolbarNode = this.mainPanel.node.getElementsByClassName(
+      FOLDER_TOOLBAR_CLASS
+    )[0] as HTMLDivElement;
+    folderToolbarNode.style['display'] = this.showFileFilter ? 'block' : 'none';
   }
 
   /**
@@ -468,14 +513,15 @@ export class FileBrowser extends SidePanel {
   protected crumbs: BreadCrumbs;
   protected mainPanel: Panel;
 
-  private _manager: IDocumentManager;
   private _directoryPending: Promise<Contents.IModel> | null = null;
   private _filePending: Promise<Contents.IModel> | null = null;
+  private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
-  private _showLastModifiedColumn: boolean = true;
+  private _showFileCheckboxes: boolean = false;
+  private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
-  private _showFileCheckboxes: boolean = false;
+  private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
 }
 
