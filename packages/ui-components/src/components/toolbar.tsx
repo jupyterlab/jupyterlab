@@ -312,8 +312,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'click':
-        this.handleClick(event);
+      case 'mousedown':
+        this.handleMousedown(event);
         break;
       default:
         break;
@@ -321,11 +321,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
-   * Handle a DOM click event.
+   * Handle a DOM mousedown event.
    */
-  protected handleClick(event: Event): void {
-    // Stop propagating the click outside the toolbar
-    event.stopPropagation();
+  protected handleMousedown(event: Event): void {
+    // Set the focus to the target, to allow a potential WidgetTracker to trigger a
+    // focus change on the widget or a ancestor node.
+    (event.target as HTMLElement)?.focus();
 
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
@@ -351,14 +352,14 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('click', this);
+    this.node.addEventListener('mousedown', this, true);
   }
 
   /**
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('click', this);
+    this.node.removeEventListener('mousedown', this, true);
   }
 }
 
