@@ -1349,6 +1349,8 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
+    await sessionContext.ready;
+
     const translator = this._translator;
     const trans = translator.load('jupyterlab');
 
@@ -1517,7 +1519,11 @@ namespace Private {
       kernels: sessionContext.kernelManager.running(),
       specs: sessionContext.specsManager.specs,
       sessions: sessionContext.sessionManager.running(),
-      preference: sessionContext.kernelPreference
+      preference: {
+        ...sessionContext.kernelPreference,
+        // Use current kernel id to set `selected` in dropdown.
+        id: sessionContext.session?.kernel?.id
+      }
     };
     populateKernelSelect(
       selector,
@@ -1591,18 +1597,27 @@ namespace Private {
    * Populate a kernel select node for the session.
    *
    * #### Notes
-   * If a `options.preference.language` is set the dropdown returns:
-   *  (Start preferred kernel)
+   * If `options.preference.language` is set, the dropdown is populated with the
+   * following option groups and options:
+   *
+   *  (Start %1 Kernel, language)
    *    - { all kernelspecs whose language matches in alphabetical order }
-   *    - { all running kernels whose language matches in alphabetical order }
-   *  (Start other kernel)
+   *  (Use No Kernel)
+   *    - `No Kernel`
+   *  (Start Other Kernel)
    *    - { all other kernelspecs in alphabetical order }
+   *  (Connect to Existing %1 Kernel, language)
+   *    - { all running kernels whose language matches in alphabetical order }
+   *  (Connect to Other Kernel)
    *    - { all other running kernels in alphabetical order }
    *
-   * If there is no language preference is set the dropdown returns:
-   *  (Kernels)
+   * If there no language preference is set the dropdown is populated with:
+   *
+   *  (Start Kernel)
    *    - { all kernelspecs in alphabetical order }
-   *  (Running)
+   *  (Use No Kernel)
+   *    - `No Kernel`
+   *  (Connect to Existing Kernel)
    *    - { all running kernels in alphabetical order  }
    */
   export function populateKernelSelect(
@@ -1611,7 +1626,6 @@ namespace Private {
     translator?: ITranslator,
     currentKernelDisplayName: string | null = null
   ): void {
-    console.log('options.kernels', Array.from(options.kernels!));
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
@@ -1621,6 +1635,16 @@ namespace Private {
 
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
+    const labels = {
+      startPreferred: trans.__('Start %1 Kernel', language),
+      useNoKernel: trans.__('Use No Kernel'),
+      noKernel: trans.__('No Kernel'),
+      startOther: trans.__('Start Other Kernel'),
+      connectToPreferred: trans.__('Connect to Existing %1 Kernel', language),
+      connectToOther: trans.__('Connect to Other Kernel'),
+      startKernel: trans.__('Start Kernel'),
+      connectKernel: trans.__('Connect to Existing Kernel')
+    };
 
     if (!specs || canStart === false) {
       node.appendChild(optionForNone(translator));
@@ -1639,6 +1663,19 @@ namespace Private {
       displayNames[name] = spec.display_name;
       languages[name] = spec.language;
     }
+
+    console.log('options', options);
+    console.log('labels', labels),
+      console.log(
+        'options.kernels',
+        Array.from(options.kernels ?? []).map(kernel => kernel)
+      );
+    console.log('options.specs?.kernelspecs', options.specs?.kernelspecs);
+    console.log(
+      'options.sessions',
+      Array.from(options.sessions ?? []).map(session => session)
+    );
+    console.log('languages', languages);
 
     // Handle a kernel by name.
     const names: string[] = [];
@@ -1663,7 +1700,9 @@ namespace Private {
     // Handle a preferred kernels in order of display name.
     const preferred = document.createElement('optgroup');
     preferred.label = trans.__('Start Preferred Kernel');
-
+    if (language) {
+      preferred.label = [preferred.label, language].join(' – ');
+    }
     names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
     for (const name of names) {
       preferred.appendChild(optionForName(name, displayNames[name]));
@@ -1734,7 +1773,10 @@ namespace Private {
     }
 
     const matching = document.createElement('optgroup');
-    matching.label = trans.__('Use Kernel from Preferred Session');
+    matching.label = trans.__('Connect to Kernel from Preferred Session');
+    if (language) {
+      matching.label = [matching.label, language].join(' – ');
+    }
     node.appendChild(matching);
 
     if (matchingSessions.length) {
