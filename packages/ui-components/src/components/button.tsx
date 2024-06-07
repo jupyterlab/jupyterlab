@@ -21,7 +21,7 @@ export interface IButtonProps
    */
   small?: boolean;
   /**
-   * content of the button
+   * Specifies the button's value for form submission and server parameter passing.
    */
   value?: string;
 }
