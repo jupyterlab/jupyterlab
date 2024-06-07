@@ -1260,7 +1260,7 @@ export class NotebookHelper {
 
     await this._setCellMode(cell, 'Edit');
     await cell.getByRole('textbox').press('Control+A');
-    await cell.getByRole('textbox').type(source, { delay: 0 });
+    await cell.getByRole('textbox').pressSequentially(source);
     await this._setCellMode(cell, 'Command');
 
     if (cellType === 'code') {
