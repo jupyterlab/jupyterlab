@@ -74,9 +74,6 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 
   // Iterate over the lines to get the header level and text for each line:
   const headings = new Array<IMarkdownHeading>();
-  let isCodeBlock;
-  let openingFence = 0;
-  let fenceType;
   let lineIdx = 0;
 
   // Don't check for Markdown headings if in a YAML frontmatter block.
@@ -105,22 +102,26 @@ export function getHeadings(text: string): IMarkdownHeading[] {
       continue;
     }
 
-    // Don't check for Markdown headings if in a code block
-    if (line.startsWith('```') || line.startsWith('~~~')) {
-      const closingFence = extractLeadingFences(line);
-      if (closingFence === 0) continue;
-      if (openingFence === 0) {
-        fenceType = line.charAt(0);
-        isCodeBlock = !isCodeBlock;
-        openingFence = closingFence;
-        continue;
-      } else if (fenceType === line.charAt(0) && closingFence >= openingFence) {
-        isCodeBlock = !isCodeBlock;
-        openingFence = 0;
-        fenceType = '';
+    // Don't check for Markdown headings if in a markdown comment block
+    if (line.startsWith('<!--')) {
+      while (lineIdx < lines.length && !lines[lineIdx].endsWith('-->')) {
+        lineIdx++;
       }
+      continue;
     }
-    if (isCodeBlock) {
+
+    // Don't check for Markdown headings if in a code block
+    else if (line.startsWith('```') || line.startsWith('~~~')) {
+      const openingFence = extractLeadingFences(line);
+      const fenceType = line.charAt(0);
+      while (++lineIdx < lines.length) {
+        if (
+          fenceType === lines[lineIdx].charAt(0) &&
+          extractLeadingFences(lines[lineIdx]) >= openingFence
+        ) {
+          break;
+        }
+      }
       continue;
     }
 
