@@ -689,7 +689,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.newUntitled, {
-    execute: args => {
+    execute: async args => {
       const errorTitle = (args['error'] as string) || trans.__('Error');
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -710,7 +710,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.open, {
-    execute: args => {
+    execute: async args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       const factory = (args['factory'] as string) || void 0;

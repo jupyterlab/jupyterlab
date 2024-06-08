@@ -31,9 +31,9 @@ test.describe('Text Editor Tests', () => {
 
     // Add two rulers
     await page.locator('#root').getByRole('button', { name: 'Add' }).click();
-    await page.locator('input[id="root_rulers_0"]').type('50');
+    await page.locator('input[id="root_rulers_0"]').fill('50');
     await page.locator('#root').getByRole('button', { name: 'Add' }).click();
-    await page.locator('input[id="root_rulers_1"]').type('75');
+    await page.locator('input[id="root_rulers_1"]').fill('75');
 
     await page.activity.activateTab(DEFAULT_NAME);
 
@@ -57,10 +57,9 @@ test.describe('Text Editor Tests', () => {
 
     await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    await page.type(
-      '.cm-content',
-      'Not active\nActive line with >>selected text<<\nNot active'
-    );
+    await page
+      .locator('.jp-FileEditorCodeWrapper .cm-content')
+      .fill('Not active\nActive line with >>selected text<<\nNot active');
 
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('End');
@@ -80,8 +79,7 @@ test.describe('Text Editor Tests', () => {
 
     await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    await page.type(
-      '.cm-content',
+    await page.locator('.jp-FileEditorCodeWrapper .cm-content').fill(
       `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam urna
 libero, dictum a egestas non, placerat vel neque. In imperdiet iaculis fermentum.
 Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia
@@ -118,7 +116,9 @@ ut elit.`
       await page.menu.clickMenuItem('File>New>Text File');
 
       await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
-      await page.type('.cm-content', 'text editor');
+      await page
+        .locator('.jp-FileEditorCodeWrapper .cm-content')
+        .fill('text editor');
     };
     const changeFontSize = async (page: IJupyterLabPageFixture, menuOption) => {
       await page.click('text=Settings');
