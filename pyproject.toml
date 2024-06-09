@@ -123,7 +123,7 @@ dev = [
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
-    "copier>=8,<10",
+    "copier>=9,<10",
     "jinja2-time<0.3",
     "pydantic<3.0",
     "tomli-w<2.0"
