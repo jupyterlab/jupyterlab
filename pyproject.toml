@@ -122,8 +122,8 @@ dev = [
     "ruff==0.3.5",
 ]
 upgrade-extension = [
-    "pyyaml-include<2.0",
-    "copier>=8,<10",
+    "pyyaml-include<3.0",
+    "copier>=9,<10",
     "jinja2-time<0.3",
     "pydantic<2.0",
     "tomli-w<2.0"

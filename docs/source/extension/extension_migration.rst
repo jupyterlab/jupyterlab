@@ -189,7 +189,7 @@ Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=4 "copier=8" jinja2-time tomli-w "pydantic<2" "pyyaml-include<2.0"
+   conda install -c conda-forge jupyterlab=4 "copier=9" jinja2-time
 
 
 Then at the root folder of the extension, run:
