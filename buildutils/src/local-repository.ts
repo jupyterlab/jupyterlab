@@ -173,6 +173,10 @@ packages:
     loginPs.stdout.on('data', (chunk: string) => {
       const data = Buffer.from(chunk, 'utf-8').toString().trim();
       console.log('stdout:', data);
+      if (!data) {
+        console.log('Ignoring empty stdout.');
+        return;
+      }
       if (data.indexOf('Logged in ') !== -1) {
         loginPs.stdin.end();
         // do not accept here yet, the token may not have been written
@@ -203,8 +207,11 @@ packages:
     loginPs.on('close', () => accept());
   });
 
-  await loggedIn;
-  loginPs.kill();
+  try {
+    await loggedIn;
+  } finally {
+    loginPs.kill();
+  }
 
   console.log('Running in', out_dir);
   ps.exit(0);
