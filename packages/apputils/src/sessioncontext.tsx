@@ -1349,7 +1349,6 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
-    await sessionContext.ready;
 
     const translator = this._translator;
     const trans = translator.load('jupyterlab');
@@ -1673,9 +1672,9 @@ namespace Private {
       {} as { [kernel: string]: Session.IModel }
     );
     const language =
-      preference.language ?? (preference.name && languages[preference.name])
-        ? languages[preference.name!]
-        : (preference.id ? languages[sessions[preference.id]?.name] : '');
+      preference.language ||
+      languages[preference.name!] ||
+      (preference.id ? languages[sessions[preference.id]?.name] : '');
     const labels = {
       startPreferred: trans.__('Start %1 Kernel', language),
       startOther: trans.__('Start Kernel'),
@@ -1697,12 +1696,7 @@ namespace Private {
         const option = document.createElement('option');
         option.text = spec.display_name;
         option.value = JSON.stringify({ name: spec.name });
-        if (spec.language === language) {
-          console.log('option', option);
-          preferred.appendChild(option);
-        } else {
-          other.appendChild(option);
-        }
+        (spec.language === language ? preferred : other).appendChild(option);
       }
       node.appendChild(preferred);
       node.appendChild(other);
