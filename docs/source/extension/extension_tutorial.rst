@@ -207,6 +207,7 @@ Important for Windows users
    by activating the 'Developer Mode'. That may not be allowed by your administrators.
    See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
    for instructions.
+.. Note: The same important section is present in the developer/contributing.rst section too. If you modify it here, ensure to update it there as well.
 
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
