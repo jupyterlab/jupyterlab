@@ -985,11 +985,13 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('jp-button');
+      const e = document.createElement('jp-button') as HTMLButtonElement;
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
       e.appendChild(this.renderLabel(button));
-      return e as HTMLButtonElement;
+      const appearance = this.createItemAppearance(button);
+      e.setAttribute('appearance', appearance);
+      return e;
     }
 
     /**
@@ -1025,16 +1027,6 @@ export namespace Dialog {
       // Setup the initial class name.
       let name = 'jp-Dialog-button';
 
-      // Add the other state classes.
-      if (data.accept) {
-        name += ' jp-mod-accept';
-      } else {
-        name += ' jp-mod-reject';
-      }
-      if (data.displayType === 'warn') {
-        name += ' jp-mod-warn';
-      }
-
       // Add the extra class.
       const extra = data.className;
       if (extra) {
@@ -1043,6 +1035,18 @@ export namespace Dialog {
 
       // Return the complete class name.
       return name;
+    }
+
+    createItemAppearance(
+      data: IButton
+    ): 'accent' | 'error' | 'lightweight' | 'neutral' | 'outline' | 'stealth' {
+      if(data.displayType === 'warn') {
+        return 'error';
+      } else if(data.accept) {
+        return 'accent';
+      } else {
+        return 'neutral';
+      }
     }
 
     /**
