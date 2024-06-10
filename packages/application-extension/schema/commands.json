@@ -49,7 +49,7 @@
     },
     {
       "command": "application:toggle-fullscreen-mode",
-      "keys": ["Alt F"],
+      "keys": ["F11"],
       "selector": "body"
     },
     {
