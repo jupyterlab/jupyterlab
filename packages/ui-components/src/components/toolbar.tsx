@@ -802,7 +802,7 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(
   props: ToolbarButtonComponent.IProps
 ): JSX.Element {
-  const actualOnClick = props.actualOnClick ?? false;
+  const actualOnClick = props.actualOnClick ?? true;
 
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
