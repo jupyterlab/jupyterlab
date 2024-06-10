@@ -320,6 +320,49 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.2.2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.1...c72b75307363b2d9620a096c88b2d97b794e26fb))
+
+### Bugs fixed
+
+- Fix width and margins of the notebook footer. [#16383](https://github.com/jupyterlab/jupyterlab/pull/16383) ([@HaudinFlorence](https://github.com/HaudinFlorence))
+- Fix async function display [#16443](https://github.com/jupyterlab/jupyterlab/pull/16443) ([@sanskriti2005](https://github.com/sanskriti2005))
+- Fix code comments in tilde (~) fences incorrectly shown as headings in TOC  [#16437](https://github.com/jupyterlab/jupyterlab/pull/16437) ([@itsmevichu](https://github.com/itsmevichu))
+- Fix typos in `jupyter-collaboration`-missing error message [#16436](https://github.com/jupyterlab/jupyterlab/pull/16436) ([@krishanbhasin-px](https://github.com/krishanbhasin-px))
+- Reactive toolbar computation, again... [#16409](https://github.com/jupyterlab/jupyterlab/pull/16409) ([@brichet](https://github.com/brichet))
+- Fix comments in nested markdown code blocks incorrectly being identified as TOC headings [#16420](https://github.com/jupyterlab/jupyterlab/pull/16420) ([@itsmevichu](https://github.com/itsmevichu))
+- Add the toolbar again when updating the title of PanelWithToolbar [#16390](https://github.com/jupyterlab/jupyterlab/pull/16390) ([@brichet](https://github.com/brichet))
+- Align token usage for events [#16397](https://github.com/jupyterlab/jupyterlab/pull/16397) ([@fcollonval](https://github.com/fcollonval))
+- Fix runtime console error in debugger extension [#16368](https://github.com/jupyterlab/jupyterlab/pull/16368) ([@afshin](https://github.com/afshin))
+
+### Maintenance and upkeep improvements
+
+- Ignore empty stdout data when logging in verdaccio [#16459](https://github.com/jupyterlab/jupyterlab/pull/16459) ([@fcollonval](https://github.com/fcollonval))
+- Fix some flaky ui tests  [#16430](https://github.com/jupyterlab/jupyterlab/pull/16430) ([@brichet](https://github.com/brichet))
+- Do not install cairo/pango on Mac in CI [#16434](https://github.com/jupyterlab/jupyterlab/pull/16434) ([@krassowski](https://github.com/krassowski))
+- Fix usage check job on CI (add `setuptools` dependency) [#16423](https://github.com/jupyterlab/jupyterlab/pull/16423) ([@jtpio](https://github.com/jtpio))
+- Run Python tests on MacOS with Python 12, replace `canvas` with `jest-canvas-mock` [#16314](https://github.com/jupyterlab/jupyterlab/pull/16314) ([@krassowski](https://github.com/krassowski))
+- Fix failing link check (point to  JAWS on Wikipedia) [#16365](https://github.com/jupyterlab/jupyterlab/pull/16365) ([@krassowski](https://github.com/krassowski))
+- Do not check links to Jupyter blog on Medium [#16351](https://github.com/jupyterlab/jupyterlab/pull/16351) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Ensure `api` directory is present to build documentation [#16467](https://github.com/jupyterlab/jupyterlab/pull/16467) ([@Darshan808](https://github.com/Darshan808))
+- Add typings to the inline completer example [#16421](https://github.com/jupyterlab/jupyterlab/pull/16421) ([@jtpio](https://github.com/jtpio))
+- Run Python tests on MacOS with Python 12, replace `canvas` with `jest-canvas-mock` [#16314](https://github.com/jupyterlab/jupyterlab/pull/16314) ([@krassowski](https://github.com/krassowski))
+- Align tutorial with extension template [#16414](https://github.com/jupyterlab/jupyterlab/pull/16414) ([@jtpio](https://github.com/jtpio))
+- Update CHANGELOG.md [#16394](https://github.com/jupyterlab/jupyterlab/pull/16394) ([@fcollonval](https://github.com/fcollonval))
+- Fix failing link check (point to  JAWS on Wikipedia) [#16365](https://github.com/jupyterlab/jupyterlab/pull/16365) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-05-23&to=2024-06-10&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-05-23..2024-06-10&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2024-05-23..2024-06-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-05-23..2024-06-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-05-23..2024-06-10&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-05-23..2024-06-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-05-23..2024-06-10&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-05-23..2024-06-10&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-05-23..2024-06-10&type=Issues) | [@srdas](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asrdas+updated%3A2024-05-23..2024-06-10&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-05-23..2024-06-10&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.2.1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0...7ca9568c7eab6c80a645a82d761a39ca15d4c30f))
@@ -349,8 +392,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-05-06&to=2024-05-23&type=c))
 
 [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-05-06..2024-05-23&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-05-06..2024-05-23&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-05-06..2024-05-23&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-05-06..2024-05-23&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-05-06..2024-05-23&type=Issues) | [@Rob-P-Smith](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARob-P-Smith+updated%3A2024-05-06..2024-05-23&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-05-06..2024-05-23&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.2.0
 
