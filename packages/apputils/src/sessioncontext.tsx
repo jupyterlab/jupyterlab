@@ -1503,11 +1503,25 @@ namespace Private {
    * A widget that provides a kernel selection.
    */
   export class KernelSelector extends Widget {
+    sessionContext: ISessionContext;
     /**
      * Create a new kernel selector widget.
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
+      this.setupDefaultKernelSpecs(translator);
+      this.sessionContext = sessionContext;
+
+    }
+
+    setupDefaultKernelSpecs(translator: ITranslator | undefined) {
+      translator = translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
+      if (this.node) {
+        const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
+        const kernelSpeccSelectorContainer = this.node.querySelector('div#js-kernel-specs-selector-container') as HTMLDivElement;
+        checkCustomKernelSpecs(this.sessionContext, selector, trans, kernelSpeccSelectorContainer);
+      } 
     }
 
     /**
@@ -1559,7 +1573,7 @@ namespace Private {
     const selector = document.createElement('select');
     selector.setAttribute('id', 'js-kernel-selector');
     selector.onchange = () => {
-      checkCustomKernelSpecs(sessionContext, body, trans);
+      checkCustomKernelSpecs(sessionContext, selector, trans);
     };
 
     populateKernelSelect(
@@ -1571,25 +1585,45 @@ namespace Private {
     container.append(selector);
     body.append(container);
     body.append(kernelSpecsContainer);
-    checkCustomKernelSpecs(sessionContext, body, trans);
     return body;
   }
 
   function checkCustomKernelSpecs(
     sessionContext: ISessionContext,
-    body: HTMLDivElement,
-    trans: IRenderMime.TranslationBundle
+    selector: HTMLSelectElement,
+    trans: IRenderMime.TranslationBundle,
+    kernelSpeccSelectorContainer?: HTMLDivElement
   ) {
     let kernelConfiguration: PartialJSONObject = {};
-    let kernelSelect = document.querySelector(
-      'select#js-kernel-selector'
-    ) as HTMLSelectElement;
+   // let kernelSelect = document.querySelector(
+   //   'select#js-kernel-selector'
+   // ) as HTMLSelectElement;
+    let selectedKernel =JSON.parse(selector.value) as Kernel.IModel;
 
-    let selectedKernel =JSON.parse(kernelSelect.value) as Kernel.IModel;
+    console.log('selectedKernel-->');
+    console.dir(selectedKernel);
 
-    const kernelSpecsContainer = document.querySelector(
+   // const kernelSpecsContainer = body.querySelector(
+   //  '#js-kernel-specs-selector-container'
+   // ) as HTMLElement;
+
+    let kernelSpecsContainer = document.querySelector(
       '#js-kernel-specs-selector-container'
-    ) as HTMLElement;
+     ) as HTMLElement;
+
+    console.log('kernelSpecsContainer-->before');
+    console.dir(kernelSpecsContainer);
+
+    if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
+      kernelSpecsContainer = kernelSpeccSelectorContainer;
+    }
+
+    console.log('kernelSpecsContainer-->after');
+    console.dir(kernelSpecsContainer);
+
+    //console.log('kernelSpecsContainer1-->');
+    //console.dir(kernelSpecsContainer1);
+
 
     kernelSpecsContainer.innerHTML = '';
     let kernelName = selectedKernel && selectedKernel.name ? selectedKernel.name  : ''
@@ -1598,6 +1632,8 @@ namespace Private {
       sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
+      console.log('kernelParameters');
+      console.dir(kernelParameters);
       
       if (kernelParameters) {
       
@@ -1606,7 +1642,7 @@ namespace Private {
           kernelConfiguration,
           formData => {
             kernelConfiguration = formData as PartialJSONObject;
-            kernelSelect.setAttribute('data-kernel-spec', JSON.stringify(kernelConfiguration));
+            selector.setAttribute('data-kernel-spec', JSON.stringify(kernelConfiguration));
           },
           trans
         );
