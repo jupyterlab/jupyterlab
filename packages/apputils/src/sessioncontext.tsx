@@ -1571,6 +1571,7 @@ namespace Private {
     container.append(selector);
     body.append(container);
     body.append(kernelSpecsContainer);
+    checkCustomKernelSpecs(sessionContext, body, trans);
     return body;
   }
 
