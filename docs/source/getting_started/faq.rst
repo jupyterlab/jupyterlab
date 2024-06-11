@@ -45,7 +45,7 @@ Tips and Tricks
 
 - How do I start JupyterLab with a clean workspace every time?
 
-Add ``'c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``.
+Add ``c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``.
 See `How to create a jupyter_server_config.py <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`__ for more information.
 
 
