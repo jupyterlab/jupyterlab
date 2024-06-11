@@ -1693,9 +1693,7 @@ namespace Private {
       preferred.label = labels.startPreferred;
       other.label = labels.startOther;
       for (const spec of sorted) {
-        const option = document.createElement('option');
-        option.text = spec.display_name;
-        option.value = JSON.stringify({ name: spec.name });
+        const option = optionForSpec(spec);
         (spec.language === language ? preferred : other).appendChild(option);
       }
       node.appendChild(preferred);
@@ -1732,12 +1730,7 @@ namespace Private {
       // Render kernelspecs first.
       const kernelspecs = document.createElement('optgroup');
       kernelspecs.label = labels.startKernel;
-      for (const spec of sorted) {
-        const option = document.createElement('option');
-        option.text = spec.display_name;
-        option.value = JSON.stringify({ name: spec.name });
-        kernelspecs.appendChild(option);
-      }
+      sorted.forEach(spec => kernelspecs.appendChild(optionForSpec(spec)));
       node.appendChild(kernelspecs);
 
       // Next render the no kernel option.
@@ -1793,16 +1786,6 @@ namespace Private {
   }
 
   /**
-   * Create an option element for a kernel name.
-   */
-  // function optionForKernelSpec(name: string, displayName: string): HTMLOptionElement {
-  //   const option = document.createElement('option');
-  //   option.text = displayName;
-  //   option.value = JSON.stringify({ name });
-  //   return option;
-  // }
-
-  /**
    * Create an option for no kernel.
    */
   function optionForNone(translator?: ITranslator): HTMLOptGroupElement {
@@ -1840,6 +1823,16 @@ namespace Private {
       `${trans.__('Name: %1', sessionName)}\n` +
       `${trans.__('Kernel Name: %1', displayName ?? kernel.name)}\n` +
       `${trans.__('Kernel Id: %1', kernel.id)}`;
+    return option;
+  }
+
+  /**
+   * Create an option element for a kernel spec.
+   */
+  function optionForSpec(spec: KernelSpec.ISpecModel): HTMLOptionElement {
+    const option = document.createElement('option');
+    option.text = spec.display_name;
+    option.value = JSON.stringify({ name: spec.name });
     return option;
   }
 }
