@@ -1514,19 +1514,18 @@ namespace Private {
     body.appendChild(text);
 
     const selector = document.createElement('select');
-    const options = {
-      kernels: sessionContext.kernelManager.running(),
-      specs: sessionContext.specsManager.specs,
-      sessions: sessionContext.sessionManager.running(),
-      preference: {
-        ...sessionContext.kernelPreference,
-        // Use current kernel id to set `selected` in dropdown.
-        id: sessionContext.session?.kernel?.id
-      }
-    };
     populateKernelSelect(
       selector,
-      options,
+      {
+        kernels: sessionContext.kernelManager.running(),
+        specs: sessionContext.specsManager.specs,
+        sessions: sessionContext.sessionManager.running(),
+        preference: {
+          ...sessionContext.kernelPreference,
+          // Use current kernel id to set `selected` in dropdown.
+          id: sessionContext.session?.kernel?.id
+        }
+      },
       translator,
       !sessionContext.hasNoKernel ? sessionContext.kernelDisplayName : null
     );

@@ -63,6 +63,7 @@ function main(): void {
   const specsManager = new KernelSpecManager();
   const sessionManager = new SessionManager({ kernelManager });
   const sessionContext = new SessionContext({
+    kernelManager,
     sessionManager,
     specsManager,
     name: 'Example'

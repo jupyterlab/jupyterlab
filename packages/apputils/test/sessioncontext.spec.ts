@@ -595,7 +595,7 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#selectKernel()', () => {
-      it('should select a kernel for the session', async () => {
+      it('should select the currently running kernel by default', async () => {
         await sessionContext.initialize();
 
         const { id, name } = sessionContext!.session!.kernel!;
@@ -605,7 +605,7 @@ describe('@jupyterlab/apputils', () => {
         await accept;
 
         const session = sessionContext?.session;
-        expect(session!.kernel!.id).not.toBe(id);
+        expect(session!.kernel!.id).toBe(id);
         expect(session!.kernel!.name).toBe(name);
       });
 
