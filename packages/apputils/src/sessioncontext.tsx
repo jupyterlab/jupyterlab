@@ -28,6 +28,7 @@ import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
 import { DialogWidget } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { Message } from '@lumino/messaging';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -1504,23 +1505,28 @@ namespace Private {
    */
   export class KernelSelector extends Widget {
     sessionContext: ISessionContext;
+    translator: ITranslator | undefined;
     /**
      * Create a new kernel selector widget.
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
-      this.setupDefaultKernelSpecs(translator);
-      this.sessionContext = sessionContext;
-
+     this.sessionContext = sessionContext;
+     this.translator = translator;
     }
 
-    setupDefaultKernelSpecs(translator: ITranslator | undefined) {
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.setupDefaultKernelSpecs(this.sessionContext, this.translator);
+    }
+
+    setupDefaultKernelSpecs(sessionContext: ISessionContext, translator: ITranslator | undefined) {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
       if (this.node) {
         const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
         const kernelSpeccSelectorContainer = this.node.querySelector('div#js-kernel-specs-selector-container') as HTMLDivElement;
-        checkCustomKernelSpecs(this.sessionContext, selector, trans, kernelSpeccSelectorContainer);
+        checkCustomKernelSpecs(sessionContext, selector, trans, kernelSpeccSelectorContainer);
       } 
     }
 
@@ -1595,17 +1601,7 @@ namespace Private {
     kernelSpeccSelectorContainer?: HTMLDivElement
   ) {
     let kernelConfiguration: PartialJSONObject = {};
-   // let kernelSelect = document.querySelector(
-   //   'select#js-kernel-selector'
-   // ) as HTMLSelectElement;
     let selectedKernel =JSON.parse(selector.value) as Kernel.IModel;
-
-    console.log('selectedKernel-->');
-    console.dir(selectedKernel);
-
-   // const kernelSpecsContainer = body.querySelector(
-   //  '#js-kernel-specs-selector-container'
-   // ) as HTMLElement;
 
     let kernelSpecsContainer = document.querySelector(
       '#js-kernel-specs-selector-container'
@@ -1617,12 +1613,6 @@ namespace Private {
     if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
       kernelSpecsContainer = kernelSpeccSelectorContainer;
     }
-
-    console.log('kernelSpecsContainer-->after');
-    console.dir(kernelSpecsContainer);
-
-    //console.log('kernelSpecsContainer1-->');
-    //console.dir(kernelSpecsContainer1);
 
 
     kernelSpecsContainer.innerHTML = '';
