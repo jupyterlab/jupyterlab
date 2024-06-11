@@ -59,6 +59,7 @@ describe('@jupyterlab/apputils', () => {
       Dialog.flush();
       path = UUID.uuid4();
       sessionContext = new SessionContext({
+        kernelManager,
         path,
         sessionManager,
         specsManager,
@@ -265,6 +266,7 @@ describe('@jupyterlab/apputils', () => {
         const kernelPreference = { id: other.kernel!.id };
 
         sessionContext = new SessionContext({
+          kernelManager,
           sessionManager,
           specsManager,
           kernelPreference
@@ -303,6 +305,7 @@ describe('@jupyterlab/apputils', () => {
         const mockManager = new SessionManager({ kernelManager });
 
         sessionContext = new SessionContext({
+          kernelManager,
           path,
           sessionManager: mockManager,
           specsManager,
@@ -569,6 +572,7 @@ describe('@jupyterlab/apputils', () => {
       Dialog.flush();
       path = UUID.uuid4();
       sessionContext = new SessionContext({
+        kernelManager,
         path,
         sessionManager,
         specsManager,
