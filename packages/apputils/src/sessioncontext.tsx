@@ -1815,7 +1815,7 @@ namespace Private {
     const sessionName = session
       ? session.name || PathExt.basename(session.path)
       : kernel.name;
-    option.text = sessionName;
+    option.text = `${sessionName} (${kernel.id.split('-')[0]})`;
     option.value = JSON.stringify({ id: kernel.id });
     option.title =
       (session ? `${trans.__('Path: %1', session.path)}\n` : ``) +
