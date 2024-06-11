@@ -1809,7 +1809,7 @@ namespace Private {
   }
 
   /**
-   * Create an option element for a session.
+   * Create an option element for a running kernel.
    */
   function optionForKernel(
     kernel: Kernel.IModel,
@@ -1822,7 +1822,7 @@ namespace Private {
     const option = document.createElement('option');
     const sessionName = session
       ? session.name || PathExt.basename(session.path)
-      : kernel.name;
+      : kernel.name || trans.__('Unknown Kernel');
     option.text = `${sessionName} (${kernel.id.split('-')[0]})`;
     option.value = JSON.stringify({ id: kernel.id });
     option.title =
