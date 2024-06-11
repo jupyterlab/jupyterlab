@@ -1686,7 +1686,7 @@ namespace Private {
     node.selectedIndex = -1;
     // If there is a language preference create a different set of groups.
     if (language) {
-      // Render kernelspecs first.
+      // Render kernelspecs.
       const preferred = document.createElement('optgroup');
       const other = document.createElement('optgroup');
       preferred.label = labels.startPreferred;
@@ -1695,12 +1695,12 @@ namespace Private {
         const option = optionForSpec(spec);
         (spec.language === language ? preferred : other).appendChild(option);
       }
+      // Add preferred language group.
       node.appendChild(preferred);
-      node.appendChild(other);
-
       // Render the no kernel option.
       node.appendChild(optionForNone(translator));
-
+      // Add other kernelspecs.
+      node.appendChild(other);
       // Render running kernels, separate into preferred language kernels et al.
       const preferredRunning = document.createElement('optgroup');
       const otherRunning = document.createElement('optgroup');
@@ -1787,13 +1787,13 @@ namespace Private {
   /**
    * Create an option for no kernel.
    */
-  function optionForNone(translator?: ITranslator): HTMLOptGroupElement {
-    translator = translator || nullTranslator;
+  function optionForNone(
+    translator: ITranslator = nullTranslator
+  ): HTMLOptGroupElement {
     const trans = translator.load('jupyterlab');
-
     const group = document.createElement('optgroup');
-    group.label = trans.__('Use No Kernel');
     const option = document.createElement('option');
+    group.label = trans.__('Use No Kernel');
     option.text = trans.__('No Kernel');
     option.value = 'null';
     group.appendChild(option);
