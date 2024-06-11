@@ -4,6 +4,7 @@
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
+  KernelManager,
   KernelMessage,
   KernelSpec,
   ServerConnection,
@@ -342,7 +343,11 @@ export class SessionContext implements ISessionContext {
    * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
-    this.kernelManager = options.kernelManager;
+    this.kernelManager =
+      options.kernelManager ??
+      new KernelManager({
+        serverSettings: options.sessionManager.serverSettings
+      });
     this.sessionManager = options.sessionManager;
     this.specsManager = options.specsManager;
     this.translator = options.translator || nullTranslator;
@@ -1250,8 +1255,11 @@ export namespace SessionContext {
   export interface IOptions {
     /**
      * A kernel manager instance.
+     *
+     * #### Notes
+     * In the next version of this package, `kernelManager` will be required.
      */
-    kernelManager: Kernel.IManager;
+    kernelManager?: Kernel.IManager;
 
     /**
      * A session manager instance.
