@@ -454,7 +454,16 @@ Additionally, you might want to execute the following optional commands:
    # Build the app dir assets (optional)
    jupyter lab build
 
-Notes:
+Frequent issues
+^^^^^^^^^^^^^^^
+
+.. important::
+
+   On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+   by activating the 'Developer Mode'. That may not be allowed by your administrators.
+   See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
+   for instructions.
+.. Note: The same important section is present in the extension/extension_tutorial.rst too. If you modify it here, ensure to update it there as well.
 
 -  A few of the scripts will run "python". If your target python is
    called something else (such as "python3") then parts of the build
