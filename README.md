@@ -176,7 +176,7 @@ We have videoconference meetings every week where we discuss what we have been w
 
 Anyone is welcome to attend, if they would like to discuss a topic or just listen in.
 
-- When: Wednesdays [9:00 AM Pacific Time (USA)](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
+- When: Wednesdays 9:00 AM Pacific Time (USA)
 - Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 
