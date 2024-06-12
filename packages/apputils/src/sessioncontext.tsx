@@ -1379,7 +1379,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: Private.createKernelSelector({ sessionContext, translator }),
+      body: Private.createKernelSelector(sessionContext, translator),
       buttons,
       checkbox: hasCheckbox
         ? {
@@ -1479,13 +1479,10 @@ namespace Private {
   /**
    * Return a kernel selector widget.
    */
-  export const createKernelSelector = ({
-    sessionContext,
-    translator
-  }: {
-    sessionContext: ISessionContext;
-    translator?: ITranslator;
-  }): KernelSelector =>
+  export const createKernelSelector = (
+    sessionContext: ISessionContext,
+    translator?: ITranslator
+  ) =>
     new KernelSelector({
       node: createSelectorNode(sessionContext, translator)
     });
