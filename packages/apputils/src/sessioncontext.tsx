@@ -1813,7 +1813,7 @@ namespace Private {
    */
   function optionForKernel(
     kernel: Kernel.IModel,
-    displayName: string,
+    displayName?: string,
     session?: Session.IModel,
     translator?: ITranslator
   ): HTMLOptionElement {
