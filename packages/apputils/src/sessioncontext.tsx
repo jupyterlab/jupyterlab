@@ -1520,7 +1520,13 @@ namespace Private {
     populateKernelSelect(
       selector,
       {
-        kernels: sessionContext.kernelManager?.running() ?? [],
+        kernels:
+          sessionContext.kernelManager?.running() ??
+          // If kernel manager is unavailable use kernels from running sessions.
+          // TODO: Remove this (next version) when kernel manager is guaranteed.
+          Array.from(sessionContext.sessionManager.running())
+            .filter(session => !!session.kernel)
+            .map(session => session.kernel!),
         specs: sessionContext.specsManager.specs,
         sessions: sessionContext.sessionManager.running(),
         preference: {
@@ -1726,8 +1732,8 @@ namespace Private {
             : otherRunning
           ).appendChild(node.option)
         );
-      node.appendChild(preferredRunning);
-      node.appendChild(otherRunning);
+      if (preferredRunning.firstChild) node.appendChild(preferredRunning);
+      if (otherRunning.firstChild) node.appendChild(otherRunning);
     } else {
       // Render kernelspecs first.
       const kernelspecs = document.createElement('optgroup');
