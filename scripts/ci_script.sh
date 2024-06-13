@@ -82,7 +82,7 @@ if [[ $GROUP == lint ]]; then
 
     # Python checks
     ruff format .
-    ruff .
+    ruff check .
     pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 

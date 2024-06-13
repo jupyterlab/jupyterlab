@@ -23,6 +23,11 @@ import {
 const CODE_RUNNER_SELECTOR = '[data-jp-code-runner]';
 
 /**
+ * Selector for a widget that can run code in terminal mode.
+ */
+const TERMINAL_CODE_RUNNER_SELECTOR = '[data-jp-interaction-mode="terminal"]';
+
+/**
  * Selector for a widget that can open a tooltip.
  */
 const TOOLTIP_OPENER_SELECTOR =
@@ -75,6 +80,10 @@ export namespace StateCommands {
   }): boolean {
     if (target.dom.parentElement?.classList.contains(COMPLETER_ACTIVE_CLASS)) {
       // do not prevent default to allow completer `enter` action
+      return false;
+    }
+    if (target.dom.closest(TERMINAL_CODE_RUNNER_SELECTOR)) {
+      // do not prevent default to allow for the cell to run
       return false;
     }
 
@@ -141,7 +150,7 @@ export namespace StateCommands {
     dispatch: (transaction: Transaction) => void;
   }): boolean {
     if (target.dom.closest(TOOLTIP_OPENER_SELECTOR)) {
-      return true;
+      return false;
     }
     return indentLess(target);
   }
