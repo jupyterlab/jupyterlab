@@ -4,7 +4,6 @@
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
-  KernelManager,
   KernelMessage,
   KernelSpec,
   ServerConnection,
@@ -199,8 +198,11 @@ export interface ISessionContext extends IObservableDisposable {
 
   /**
    * The kernel manager
+   *
+   * #### Notes
+   * In the next major version of this interface, a kernel manager is required.
    */
-  readonly kernelManager: Kernel.IManager;
+  readonly kernelManager?: Kernel.IManager;
 
   /**
    * The session manager used by the session.
@@ -343,11 +345,7 @@ export class SessionContext implements ISessionContext {
    * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
-    this.kernelManager =
-      options.kernelManager ??
-      new KernelManager({
-        serverSettings: options.sessionManager.serverSettings
-      });
+    this.kernelManager = options.kernelManager;
     this.sessionManager = options.sessionManager;
     this.specsManager = options.specsManager;
     this.translator = options.translator || nullTranslator;
@@ -527,7 +525,7 @@ export class SessionContext implements ISessionContext {
   /**
    * The kernel manager
    */
-  readonly kernelManager: Kernel.IManager;
+  readonly kernelManager?: Kernel.IManager;
 
   /**
    * The session manager used by the session.
@@ -1522,7 +1520,7 @@ namespace Private {
     populateKernelSelect(
       selector,
       {
-        kernels: sessionContext.kernelManager.running(),
+        kernels: sessionContext.kernelManager?.running() ?? [],
         specs: sessionContext.specsManager.specs,
         sessions: sessionContext.sessionManager.running(),
         preference: {
