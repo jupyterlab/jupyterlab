@@ -24,16 +24,10 @@ const FormComponentWrapper = (props: {
   ) => void;
 }): JSX.Element => {
 
-  const [errorList, setErrors] = useState();
   const [isUpdate, setUpdate] = useState(0);
 
   const formRef = createRef() as RefObject<Form<any, RJSFSchema, any>>;
-  const onError = (errors: any) => 
-    {
-      console.log('errors');
-      console.log(errors);
-      setErrors(errors);
-    };
+
   const uiSchema: UiSchema = {
     'ui:options': {
       submitButtonOptions: {
@@ -67,7 +61,6 @@ const FormComponentWrapper = (props: {
       validator={validator}
       onChange={onChange}
       ref={formRef}
-      onError={onError}
       idPrefix={`jp-CustomKernel-test`}
       showModifiedFromDefault={false}
     />
