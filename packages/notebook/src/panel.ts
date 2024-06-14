@@ -268,11 +268,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       for (let key in customKernelSpecs) {
         let properties = kernelParameters.properties as PartialJSONObject;
         let kernelParameter = properties[key] as PartialJSONObject;
-      
+
         if (kernelParameter && kernelParameter?.save) {
-         
+
           let item = customKernelSpecs[key] as PartialJSONObject | {};
-          
+
           data[key] = item;
         }
       }

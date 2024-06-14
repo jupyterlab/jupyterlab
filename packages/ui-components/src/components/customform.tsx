@@ -50,7 +50,7 @@ const FormComponentWrapper = (props: {
     setUpdate(update);
    // }
   };
-  
+
   const formData: Record<string, any> = {};
 
   return (

@@ -1389,19 +1389,19 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     });
 
     const result = await dialog.launch();
-    
+
 
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
-    
+
     const dialogResult = result.value as Kernel.IModel;
-   
+
     if (dialogResult) {
     let model = {
       'name': dialogResult.name,
       'custom_kernel_specs': {}
-    } 
+    }
 
     if (hasCheckbox && result.isChecked !== null) {
       if (
@@ -1410,7 +1410,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       ) {
         sessionContext.kernelPreference.customKernelSpecs = undefined;
       }
-      
+
       if(model && dialogResult.custom_kernel_specs){
         sessionContext.kernelPreference.customKernelSpecs = dialogResult.custom_kernel_specs;
         model['custom_kernel_specs'] = dialogResult.custom_kernel_specs;
@@ -1523,7 +1523,7 @@ namespace Private {
         );
         const kernelSpeccSelectorContainer = this.node.querySelector('div#js-kernel-specs-selector-container') as HTMLDivElement;
         checkCustomKernelSpecs(sessionContext, selector, trans, kernelSpeccSelectorContainer);
-      } 
+      }
     }
 
     /**
@@ -1615,14 +1615,14 @@ namespace Private {
       sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
-      
+
       if (kernelParameters) {
         if (sessionContext.kernelPreference?.customKernelSpecs) {
           let customKernelSpecs = sessionContext.kernelPreference
             ?.customKernelSpecs as PartialJSONObject;
           for (let key in customKernelSpecs) {
             let selectedValue = customKernelSpecs[key] as PartialJSONValue | undefined;
- 
+
             if (kernelParameters.properties) {
             let properties = kernelParameters.properties as PartialJSONObject;
 

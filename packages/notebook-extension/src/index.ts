@@ -1847,7 +1847,7 @@ function activateNotebookHandler(
       });
     }
   }
-  
+
   const showKernelSpecDialog = async (parameters: RJSFSchema, cwd:string, kernelId: string, kernelName:string)=>{
     let kernelConfigurarion: PartialJSONObject = {};
     let label = trans.__('Cancel');
@@ -1881,7 +1881,7 @@ function activateNotebookHandler(
     if(kernelConfigurarion) {
       customKernelSpecs = kernelConfigurarion;
     }
-   
+
    createNew(cwd, kernelId, kernelName, customKernelSpecs);
   }
 }
@@ -2002,7 +2002,7 @@ function activateNotebookHandler(
 
 
 
-  
+
   // Add a command for creating a new notebook.
   commands.addCommand(CommandIDs.createNew, {
     label: args => {
@@ -2024,7 +2024,7 @@ function activateNotebookHandler(
     execute: args => {
     const currentBrowser =
       filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
-        //if has enum then calll 
+        //if has enum then calll
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
@@ -2052,14 +2052,14 @@ function activateNotebookHandler(
           return;
         }
         disposables = new DisposableSet();
-      
+
           for (const name in specs.kernelspecs) {
             const rank = name === specs.default ? 0 : Infinity;
             const spec = specs.kernelspecs[name]!;
             const kernelIconUrl =
               spec.resources['logo-svg'] || spec.resources['logo-64x64'];
               //if has enum then add one icon
-             
+
             disposables.add(
               launcher.add({
                 command: CommandIDs.createNew,
@@ -2074,7 +2074,7 @@ function activateNotebookHandler(
                 }
               })
             );
-          
+
         }
       };
       onSpecsChanged();
