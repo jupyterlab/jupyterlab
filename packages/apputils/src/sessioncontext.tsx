@@ -18,6 +18,7 @@ import { find } from '@lumino/algorithm';
 import {
   JSONExt,
   PartialJSONObject,
+  PartialJSONValue,
   PromiseDelegate,
   UUID
 } from '@lumino/coreutils';
@@ -1407,8 +1408,9 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     const dialogResult = result.value as Kernel.IModel;
    
     if (dialogResult) {
-    const model = {
-      'name': dialogResult.name
+    let model = {
+      'name': dialogResult.name,
+      'custom_kernel_specs': {}
     } 
 
     if (hasCheckbox && result.isChecked !== null) {
@@ -1421,6 +1423,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       
       if(model && dialogResult.custom_kernel_specs){
         sessionContext.kernelPreference.customKernelSpecs = dialogResult.custom_kernel_specs;
+        model['custom_kernel_specs'] = dialogResult.custom_kernel_specs;
       }
 
       sessionContext.kernelPreference = {
@@ -1525,6 +1528,9 @@ namespace Private {
       const trans = translator.load('jupyterlab');
       if (this.node) {
         const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
+        selector.setAttribute(
+          'data-kernel-spec', ''
+        );
         const kernelSpeccSelectorContainer = this.node.querySelector('div#js-kernel-specs-selector-container') as HTMLDivElement;
         checkCustomKernelSpecs(sessionContext, selector, trans, kernelSpeccSelectorContainer);
       } 
@@ -1536,6 +1542,8 @@ namespace Private {
     getValue(): Kernel.IModel {
       const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
       const selectorKernelSpecs = selector.getAttribute('data-kernel-spec');
+      console.log("selectorKernelSpecs");
+      console.dir(selectorKernelSpecs);
       let kernelData = JSON.parse(selector.value) as Kernel.IModel;
       if(selectorKernelSpecs){
         kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs) ;
@@ -1622,17 +1630,53 @@ namespace Private {
       sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
-      console.log('kernelParameters');
+      console.log('kernelParameters before');
       console.dir(kernelParameters);
       
       if (kernelParameters) {
-      
+        if (sessionContext.kernelPreference?.customKernelSpecs) {
+          console.log('sessionContext.kernelPreference?.customKernelSpecs yes');
+          let customKernelSpecs = sessionContext.kernelPreference
+            ?.customKernelSpecs as PartialJSONObject;
+            console.log('customKernelSpecs');
+            console.dir(customKernelSpecs);
+          for (let key in customKernelSpecs) {
+            console.log('key');
+            console.dir(key);
+            let selectedValue = customKernelSpecs[key] as PartialJSONValue | undefined;
+            console.log('selectedValue');
+            console.dir(selectedValue);
+            if (kernelParameters.properties) {
+            let properties = kernelParameters.properties as PartialJSONObject;
+            console.log('properties');
+            console.dir(properties);
+            let kernelParameter = properties[key] as PartialJSONObject;
+            console.log('kernelParameter');
+            console.dir(kernelParameter);
+            if (kernelParameter) {
+              console.log('in if');
+              console.log('selectedValue');
+              console.dir(selectedValue);
+              let kernelParametersTmp = (kernelParameters.properties as PartialJSONObject)[key] as PartialJSONObject;
+              (kernelParameters.properties as PartialJSONObject)[key] = {... kernelParametersTmp, default: selectedValue }
+            }
+          }
+          }
+        }
+        console.log('kernelParameters after');
+        console.dir(kernelParameters);
+
         let kernelSpecWidget = new DialogWidget(
           kernelParameters,
           kernelConfiguration,
           formData => {
+            console.log('formData');
+            console.dir(formData);
             kernelConfiguration = formData as PartialJSONObject;
-            selector.setAttribute('data-kernel-spec', JSON.stringify(kernelConfiguration));
+            selector.setAttribute(
+              'data-kernel-spec',
+              JSON.stringify(kernelConfiguration)
+            );
           },
           trans
         );
