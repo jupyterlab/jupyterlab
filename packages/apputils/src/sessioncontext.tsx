@@ -686,7 +686,6 @@ export class SessionContext implements ISessionContext {
     const preference = this.kernelPreference;
     const specs = this.specsManager.specs;
     //
-    console.log('startKernel - options');
     if (!preference.autoStartDefault && preference.shouldStart === false) {
       return true;
     }
@@ -695,7 +694,6 @@ export class SessionContext implements ISessionContext {
     if (preference.id) {
       options = { id: preference.id };
     } else {
-      console.log('getDefaultKernel');
       const name = Private.getDefaultKernel({
         specs,
         sessions: this.sessionManager.running(),
@@ -713,9 +711,6 @@ export class SessionContext implements ISessionContext {
       }
     }
 
-    console.dir(options);
-    console.dir(preference);
-    console.log('end startKernel - options');
 
     if (options) {
       try {
@@ -738,8 +733,6 @@ export class SessionContext implements ISessionContext {
   async restartKernel(): Promise<void> {
     const kernel = this.session?.kernel || null;
 
-    console.log('restrating kernel');
-    console.dir(kernel);
     if (this._isRestarting) {
       return;
     }
@@ -917,9 +910,6 @@ export class SessionContext implements ISessionContext {
     if (model.name) {
       this._pendingKernelName = model.name;
     }
-
-    console.log('_changeKernel');
-    console.dir(model);
 
     if (!this._session) {
       this._kernelChanged.emit({
@@ -1542,8 +1532,6 @@ namespace Private {
     getValue(): Kernel.IModel {
       const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
       const selectorKernelSpecs = selector.getAttribute('data-kernel-spec');
-      console.log("selectorKernelSpecs");
-      console.dir(selectorKernelSpecs);
       let kernelData = JSON.parse(selector.value) as Kernel.IModel;
       if(selectorKernelSpecs){
         kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs) ;
@@ -1615,9 +1603,6 @@ namespace Private {
       '#js-kernel-specs-selector-container'
      ) as HTMLElement;
 
-    console.log('kernelSpecsContainer-->before');
-    console.dir(kernelSpecsContainer);
-
     if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
       kernelSpecsContainer = kernelSpeccSelectorContainer;
     }
@@ -1630,48 +1615,31 @@ namespace Private {
       sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
-      console.log('kernelParameters before');
-      console.dir(kernelParameters);
       
       if (kernelParameters) {
         if (sessionContext.kernelPreference?.customKernelSpecs) {
-          console.log('sessionContext.kernelPreference?.customKernelSpecs yes');
           let customKernelSpecs = sessionContext.kernelPreference
             ?.customKernelSpecs as PartialJSONObject;
-            console.log('customKernelSpecs');
-            console.dir(customKernelSpecs);
           for (let key in customKernelSpecs) {
-            console.log('key');
-            console.dir(key);
             let selectedValue = customKernelSpecs[key] as PartialJSONValue | undefined;
-            console.log('selectedValue');
-            console.dir(selectedValue);
+ 
             if (kernelParameters.properties) {
             let properties = kernelParameters.properties as PartialJSONObject;
-            console.log('properties');
-            console.dir(properties);
+
             let kernelParameter = properties[key] as PartialJSONObject;
-            console.log('kernelParameter');
-            console.dir(kernelParameter);
+
             if (kernelParameter) {
-              console.log('in if');
-              console.log('selectedValue');
-              console.dir(selectedValue);
               let kernelParametersTmp = (kernelParameters.properties as PartialJSONObject)[key] as PartialJSONObject;
               (kernelParameters.properties as PartialJSONObject)[key] = {... kernelParametersTmp, default: selectedValue }
             }
           }
           }
         }
-        console.log('kernelParameters after');
-        console.dir(kernelParameters);
 
         let kernelSpecWidget = new DialogWidget(
           kernelParameters,
           kernelConfiguration,
           formData => {
-            console.log('formData');
-            console.dir(formData);
             kernelConfiguration = formData as PartialJSONObject;
             selector.setAttribute(
               'data-kernel-spec',

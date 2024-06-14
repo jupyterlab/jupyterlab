@@ -71,8 +71,6 @@ export class DialogWidget extends ReactWidget {
   }
 
   getValue(): FormDataProps | {} {
-    console.log(`kernelConfigurarion`);
-    console.dir(this.kernelConfigurarion);
     return this.kernelConfigurarion;
   }
 

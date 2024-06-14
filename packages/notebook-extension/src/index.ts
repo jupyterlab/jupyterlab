@@ -1876,18 +1876,10 @@ function activateNotebookHandler(
    if (!result.button.accept) {
       return;
    }
-   console.log(`result.value`);
-   console.dir(result.value);
    if (result.value) {
-    console.log(`value--kernelConfigurarion`);
-    console.dir(kernelConfigurarion);
     let customKernelSpecs = undefined;
-   // let customKernelName = kernelConfigurarion ? kernelConfigurarion?.cpp_version : kernelName;
     if(kernelConfigurarion) {
       customKernelSpecs = kernelConfigurarion;
-      if (customKernelSpecs.kernelName) {
-        kernelName = customKernelSpecs.kernelName as string;
-      } 
     }
    
    createNew(cwd, kernelId, kernelName, customKernelSpecs);
@@ -2032,8 +2024,6 @@ function activateNotebookHandler(
     execute: args => {
     const currentBrowser =
       filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
-        console.log(`args-->${args}`);
-        console.dir(args);
         //if has enum then calll 
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';

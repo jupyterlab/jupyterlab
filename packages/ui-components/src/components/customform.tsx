@@ -46,14 +46,10 @@ const FormComponentWrapper = (props: {
   };
 
   const onChange = ({ formData }: IChangeEvent<any, RJSFSchema, any>) => {
-   // if (formRef.current && formRef.current.validateForm()) {
-    console.log('onChange and errorList');
-    console.dir(errorList);
     if(!isUpdate) {
       props.updateFormData(formData);
     }
     if (formRef.current && formRef?.current.validateForm()) {
-      console.log('update datallll');
       props.updateFormData(formData);
     }
     let update = isUpdate+1;
