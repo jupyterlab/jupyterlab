@@ -105,5 +105,29 @@ describe('@jupyterlab/hub-extension', () => {
       await commands.execute(CommandIDs.controlPanel);
       expect(windowOpenSpy).toHaveBeenCalledWith(`${hubPrefix}/home`, '_blank');
     });
+
+    it('should reject on invalid username', async () => {
+      let commands = new CommandRegistry();
+      const callback = async () => {
+        await activateHubExtension(commands, {
+          hubPrefix,
+          hubUser: '../',
+          hubServerName
+        });
+      };
+      await expect(callback).rejects.toThrow();
+    });
+
+    it('should reject on invalid server name', async () => {
+      let commands = new CommandRegistry();
+      const callback = async () => {
+        await activateHubExtension(commands, {
+          hubPrefix,
+          hubUser,
+          hubServerName: '../../'
+        });
+      };
+      await expect(callback).rejects.toThrow();
+    });
   });
 });
