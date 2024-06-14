@@ -11,7 +11,6 @@ describe('@jupyterlab/hub-extension', () => {
   const hubPrefix = '/hub';
   const hubUser = 'test_user';
   const hubServerName = 'test_server';
-  let dummyPaths = {} as JupyterFrontEnd.IPaths;
 
   // Extension in test
   const hubExtension = extensions[0];
@@ -34,19 +33,21 @@ describe('@jupyterlab/hub-extension', () => {
   });
 
   describe('hub commands', () => {
-    it('should add hub commands to registry', async () => {
-      // Override readonly props on the interface
-      (dummyPaths as any)['urls'] = {
-        hubPrefix: hubPrefix
-      };
-      let commands = new CommandRegistry();
-      void hubExtension.activate(
-        {
-          commands: commands
-        } as any,
-        dummyPaths,
+    const activateHubExtension = (
+      commands: CommandRegistry,
+      urls: Partial<JupyterFrontEnd.IPaths['urls']>
+    ) => {
+      return hubExtension.activate(
+        { commands } as JupyterFrontEnd,
+        { urls },
         nullTranslator
       );
+    };
+    it('should add hub commands to registry', async () => {
+      let commands = new CommandRegistry();
+      void activateHubExtension(commands, {
+        hubPrefix
+      });
 
       expect(commands.hasCommand(CommandIDs.controlPanel)).toBeTruthy();
       expect(commands.hasCommand(CommandIDs.restart)).toBeTruthy();
@@ -54,18 +55,10 @@ describe('@jupyterlab/hub-extension', () => {
     });
 
     it('should not add hub commands when hubPrefix is empty', async () => {
-      // Override readonly props on the interface
-      (dummyPaths as any)['urls'] = {
-        hubPrefix: ''
-      };
       let commands = new CommandRegistry();
-      void hubExtension.activate(
-        {
-          commands: commands
-        } as any,
-        dummyPaths,
-        nullTranslator
-      );
+      void activateHubExtension(commands, {
+        hubPrefix: ''
+      });
 
       expect(commands.hasCommand(CommandIDs.controlPanel)).toBeFalsy();
       expect(commands.hasCommand(CommandIDs.restart)).toBeFalsy();
@@ -73,20 +66,12 @@ describe('@jupyterlab/hub-extension', () => {
     });
 
     it('should include hubServerName in restartUrl when it is non empty', async () => {
-      // Override readonly props on the interface
-      (dummyPaths as any)['urls'] = {
-        hubPrefix: hubPrefix,
-        hubUser: hubUser,
-        hubServerName: hubServerName
-      };
       let commands = new CommandRegistry();
-      void hubExtension.activate(
-        {
-          commands: commands
-        } as any,
-        dummyPaths,
-        nullTranslator
-      );
+      void activateHubExtension(commands, {
+        hubPrefix,
+        hubUser,
+        hubServerName
+      });
 
       await commands.execute(CommandIDs.restart);
       expect(windowOpenSpy).toHaveBeenCalledWith(
@@ -95,20 +80,12 @@ describe('@jupyterlab/hub-extension', () => {
       );
     });
 
-    it('should set spawn Url for default server when hubServerName is empty', async () => {
-      // Override readonly props on the interface
-      (dummyPaths as any)['urls'] = {
-        hubPrefix: hubPrefix,
-        hubUser: hubUser
-      };
+    it('should set spawn URL for default server when hubServerName is empty', async () => {
       let commands = new CommandRegistry();
-      void hubExtension.activate(
-        {
-          commands: commands
-        } as any,
-        dummyPaths,
-        nullTranslator
-      );
+      void activateHubExtension(commands, {
+        hubPrefix,
+        hubUser
+      });
 
       await commands.execute(CommandIDs.restart);
       expect(windowOpenSpy).toHaveBeenCalledWith(
@@ -117,21 +94,13 @@ describe('@jupyterlab/hub-extension', () => {
       );
     });
 
-    it('should set correct hub home Url', async () => {
-      // Override readonly props on the interface
-      (dummyPaths as any)['urls'] = {
-        hubPrefix: hubPrefix,
-        hubUser: hubUser,
-        hubServerName: hubServerName
-      };
+    it('should set correct hub home URL', async () => {
       let commands = new CommandRegistry();
-      void hubExtension.activate(
-        {
-          commands: commands
-        } as any,
-        dummyPaths,
-        nullTranslator
-      );
+      void activateHubExtension(commands, {
+        hubPrefix,
+        hubUser,
+        hubServerName
+      });
 
       await commands.execute(CommandIDs.controlPanel);
       expect(windowOpenSpy).toHaveBeenCalledWith(`${hubPrefix}/home`, '_blank');
