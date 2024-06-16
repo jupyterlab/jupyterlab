@@ -218,6 +218,9 @@
   opacity: 0;
   display: inline-block;
   vertical-align: top;
+}
+
+.jp-GhostText-letterSpacer {
   max-width: 0;
 }
 
