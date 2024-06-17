@@ -218,6 +218,8 @@
   opacity: 0;
   display: inline-block;
   vertical-align: top;
+  /* stylelint-disable-next-line csstree/validator */
+  text-wrap: none;
 }
 
 .jp-GhostText-letterSpacer {

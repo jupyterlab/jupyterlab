@@ -201,9 +201,7 @@ class GhostTextWidget extends WidgetType {
     const content = this.content;
 
     if (this.isSpacer) {
-      // Render empty lines (with `_` placeholder) if this is a line spacer
-      const linesCount = (content.match(/\n/g) || '').length;
-      dom.innerText = new Array(linesCount + 1).fill('_').join('\n');
+      dom.innerText = content;
       return;
     }
 
