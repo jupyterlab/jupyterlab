@@ -201,17 +201,17 @@ test.describe('Inline Completer', () => {
     });
 
     test('Ghost text updates on typing', async ({ page }) => {
+      const cellEditor = await page.notebook.getCellInputLocator(2);
       await page.keyboard.press('u');
 
       // Ghost text shows up
-      const ghostText = page.locator(GHOST_SELECTOR);
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
       await ghostText.waitFor();
 
       // Ghost text should be updated from "ggestion" to "estion"
       await page.keyboard.type('gg');
       await expect(ghostText).toHaveText(/estion.*/);
 
-      const cellEditor = await page.notebook.getCellInputLocator(2);
       const imageName = 'editor-with-ghost-text.png';
       expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
 
@@ -230,10 +230,10 @@ test.describe('Inline Completer', () => {
       await page.keyboard.type('uggestion_2');
 
       // Ghost text shows up
-      const ghostText = page.locator(
+      const ghostText = cellEditor.locator(
         `${GHOST_SELECTOR}:not(${GHOST_LINE_SPACER_CLASS})`
       );
-      const lineSpacer = page.locator(GHOST_LINE_SPACER_CLASS);
+      const lineSpacer = cellEditor.locator(GHOST_LINE_SPACER_CLASS);
 
       await ghostText.waitFor();
       await expect(lineSpacer).toBeHidden();
@@ -255,13 +255,13 @@ test.describe('Inline Completer', () => {
       // By default the hiding animation starts after 700ms and lasts for 300ms
 
       // When animation starts the editor height should reduce
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(750);
       const spacerAnimatingHeight = await measureEditorHeight();
       expect(spacerAnimatingHeight).toBeLessThan(ghostTextShownHeight);
 
       // After animation is done the height should be back to the initial height
-      const finalHeight = await measureEditorHeight();
       await page.waitForTimeout(300);
+      const finalHeight = await measureEditorHeight();
       expect(noGhostTextHeight).toEqual(finalHeight);
     });
   });
