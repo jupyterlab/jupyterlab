@@ -459,7 +459,6 @@ export class FileBrowser extends SidePanel {
 
   toggleFileFilter(): void {
     const oldValue = this.showFileFilter;
-    console.log(`Filter files is set to ${oldValue}, flipping`);
     this.showFileFilter = !oldValue;
     // Toggle button state for the filter button
     (this.toolbar.layout as PanelLayout).widgets.forEach(widget => {
@@ -468,6 +467,10 @@ export class FileBrowser extends SidePanel {
         button.pressed = !oldValue;
       }
     });
+    // TODO: If we're going from filtered to unfiltered, clear the filter.
+    if (oldValue) {
+      console.log('Clear the filter');
+    }
   }
 
   /**
