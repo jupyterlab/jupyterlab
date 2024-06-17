@@ -103,6 +103,7 @@ import {
   buildIcon,
   copyIcon,
   cutIcon,
+  DialogWidget,
   duplicateIcon,
   fastForwardIcon,
   IFormRenderer,
@@ -114,8 +115,7 @@ import {
   refreshIcon,
   runIcon,
   stopIcon,
-  tableRowsIcon,
-  DialogWidget
+  tableRowsIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -1848,7 +1848,12 @@ function activateNotebookHandler(
     }
   }
 
-  const showKernelSpecDialog = async (parameters: RJSFSchema, cwd:string, kernelId: string, kernelName:string)=>{
+  const showKernelSpecDialog = async (
+    parameters: RJSFSchema,
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
     let kernelConfigurarion: PartialJSONObject = {};
     let label = trans.__('Cancel');
     const buttons = [
@@ -1861,31 +1866,35 @@ function activateNotebookHandler(
       })
     ];
 
-   // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
+    // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: new DialogWidget(parameters, kernelConfigurarion, (formData)=>{
-        kernelConfigurarion = formData as PartialJSONObject;
-      }, trans),
-      buttons,
+      body: new DialogWidget(
+        parameters,
+        kernelConfigurarion,
+        formData => {
+          kernelConfigurarion = formData as PartialJSONObject;
+        },
+        trans
+      ),
+      buttons
     });
 
     const result = await dialog.launch();
 
-   if (!result.button.accept) {
+    if (!result.button.accept) {
       return;
-   }
-   if (result.value) {
-    let customKernelSpecs = undefined;
-    if(kernelConfigurarion) {
-      customKernelSpecs = kernelConfigurarion;
     }
+    if (result.value) {
+      let customKernelSpecs = undefined;
+      if (kernelConfigurarion) {
+        customKernelSpecs = kernelConfigurarion;
+      }
 
-   createNew(cwd, kernelId, kernelName, customKernelSpecs);
-  }
-}
-
+      createNew(cwd, kernelId, kernelName, customKernelSpecs);
+    }
+  };
 
   /**
    * Update the setting values.
@@ -1982,7 +1991,7 @@ function activateNotebookHandler(
     cwd: string,
     kernelId: string,
     kernelName: string,
-    customKernelSpecs?: undefined | PartialJSONObject | {}
+    customKernelSpecs?: undefined | PartialJSONObject
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -1992,16 +2001,16 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName, custom_kernel_specs: customKernelSpecs }
+        kernel: {
+          id: kernelId,
+          name: kernelName,
+          custom_kernel_specs: customKernelSpecs
+        }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
     }
   };
-
-
-
-
 
   // Add a command for creating a new notebook.
   commands.addCommand(CommandIDs.createNew, {
@@ -2022,18 +2031,18 @@ function activateNotebookHandler(
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
-    const currentBrowser =
-      filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
-        //if has enum then calll
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      //if has enum then calll
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       const metadata = args['metadata'] as ReadonlyJSONObject;
       if (metadata?.parameters) {
-       let schema = metadata.parameters as RJSFSchema;
-       showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+        let schema = metadata.parameters as RJSFSchema;
+        showKernelSpecDialog(schema, cwd, kernelId, kernelName);
       } else {
-      return createNew(cwd, kernelId, kernelName);
+        return createNew(cwd, kernelId, kernelName);
       }
     }
   });
@@ -2053,28 +2062,31 @@ function activateNotebookHandler(
         }
         disposables = new DisposableSet();
 
-          for (const name in specs.kernelspecs) {
-            const rank = name === specs.default ? 0 : Infinity;
-            const spec = specs.kernelspecs[name]!;
-            const kernelIconUrl =
-              spec.resources['logo-svg'] || spec.resources['logo-64x64'];
-              //if has enum then add one icon
+        for (const name in specs.kernelspecs) {
+          const rank = name === specs.default ? 0 : Infinity;
+          const spec = specs.kernelspecs[name]!;
+          const kernelIconUrl =
+            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
+          //if has enum then add one icon
 
-            disposables.add(
-              launcher.add({
-                command: CommandIDs.createNew,
-                args: { isLauncher: true, kernelName: name, metadata: spec.metadata as ReadonlyJSONObject },
-                category: trans.__('Notebook'),
-                rank,
-                kernelIconUrl,
-                metadata: {
-                  kernel: JSONExt.deepCopy(
-                    spec.metadata || {}
-                  ) as ReadonlyJSONValue
-                }
-              })
-            );
-
+          disposables.add(
+            launcher.add({
+              command: CommandIDs.createNew,
+              args: {
+                isLauncher: true,
+                kernelName: name,
+                metadata: spec.metadata as ReadonlyJSONObject
+              },
+              category: trans.__('Notebook'),
+              rank,
+              kernelIconUrl,
+              metadata: {
+                kernel: JSONExt.deepCopy(
+                  spec.metadata || {}
+                ) as ReadonlyJSONValue
+              }
+            })
+          );
         }
       };
       onSpecsChanged();

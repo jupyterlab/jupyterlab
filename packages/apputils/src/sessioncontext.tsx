@@ -300,7 +300,7 @@ export namespace ISessionContext {
     /**
      * Kernel custom specs defined by kernel name
      */
-    customKernelSpecs?: undefined | PartialJSONObject | {};
+    customKernelSpecs?: undefined | PartialJSONObject;
   }
 
   export type KernelDisplayStatus =
@@ -701,7 +701,7 @@ export class SessionContext implements ISessionContext {
       });
       if (name) {
         if (preference.customKernelSpecs) {
-         options = {
+          options = {
             name,
             custom_kernel_specs: preference.customKernelSpecs
           };
@@ -710,7 +710,6 @@ export class SessionContext implements ISessionContext {
         }
       }
     }
-
 
     if (options) {
       try {
@@ -1390,7 +1389,6 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     const result = await dialog.launch();
 
-
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
@@ -1398,37 +1396,35 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     const dialogResult = result.value as Kernel.IModel;
 
     if (dialogResult) {
-    let model = {
-      'name': dialogResult.name,
-      'custom_kernel_specs': {}
-    }
-
-    if (hasCheckbox && result.isChecked !== null) {
-      if (
-        model &&
-        sessionContext.kernelPreference?.customKernelSpecs
-      ) {
-        sessionContext.kernelPreference.customKernelSpecs = undefined;
-      }
-
-      if(model && dialogResult.custom_kernel_specs){
-        sessionContext.kernelPreference.customKernelSpecs = dialogResult.custom_kernel_specs;
-        model['custom_kernel_specs'] = dialogResult.custom_kernel_specs;
-      }
-
-      sessionContext.kernelPreference = {
-        ...sessionContext.kernelPreference,
-        autoStartDefault: result.isChecked
+      let model = {
+        name: dialogResult.name,
+        custom_kernel_specs: {}
       };
-    }
 
-    if (model === null && !sessionContext.hasNoKernel) {
-      return sessionContext.shutdown();
+      if (hasCheckbox && result.isChecked !== null) {
+        if (model && sessionContext.kernelPreference?.customKernelSpecs) {
+          sessionContext.kernelPreference.customKernelSpecs = undefined;
+        }
+
+        if (model && dialogResult.custom_kernel_specs) {
+          sessionContext.kernelPreference.customKernelSpecs =
+            dialogResult.custom_kernel_specs;
+          model['custom_kernel_specs'] = dialogResult.custom_kernel_specs;
+        }
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          autoStartDefault: result.isChecked
+        };
+      }
+
+      if (model === null && !sessionContext.hasNoKernel) {
+        return sessionContext.shutdown();
+      }
+      if (model) {
+        await sessionContext.changeKernel(model);
+      }
     }
-    if (model) {
-      await sessionContext.changeKernel(model);
-    }
-  }
   }
 
   /**
@@ -1504,8 +1500,8 @@ namespace Private {
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
-     this.sessionContext = sessionContext;
-     this.translator = translator;
+      this.sessionContext = sessionContext;
+      this.translator = translator;
     }
 
     protected onAfterAttach(msg: Message): void {
@@ -1513,16 +1509,26 @@ namespace Private {
       this.setupDefaultKernelSpecs(this.sessionContext, this.translator);
     }
 
-    setupDefaultKernelSpecs(sessionContext: ISessionContext, translator: ITranslator | undefined) {
+    setupDefaultKernelSpecs(
+      sessionContext: ISessionContext,
+      translator: ITranslator | undefined
+    ) {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
       if (this.node) {
-        const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
-        selector.setAttribute(
-          'data-kernel-spec', ''
+        const selector = this.node.querySelector(
+          'select#js-kernel-selector'
+        ) as HTMLSelectElement;
+        selector.setAttribute('data-kernel-spec', '');
+        const kernelSpeccSelectorContainer = this.node.querySelector(
+          'div#js-kernel-specs-selector-container'
+        ) as HTMLDivElement;
+        checkCustomKernelSpecs(
+          sessionContext,
+          selector,
+          trans,
+          kernelSpeccSelectorContainer
         );
-        const kernelSpeccSelectorContainer = this.node.querySelector('div#js-kernel-specs-selector-container') as HTMLDivElement;
-        checkCustomKernelSpecs(sessionContext, selector, trans, kernelSpeccSelectorContainer);
       }
     }
 
@@ -1530,11 +1536,13 @@ namespace Private {
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select#js-kernel-selector') as HTMLSelectElement;
+      const selector = this.node.querySelector(
+        'select#js-kernel-selector'
+      ) as HTMLSelectElement;
       const selectorKernelSpecs = selector.getAttribute('data-kernel-spec');
       let kernelData = JSON.parse(selector.value) as Kernel.IModel;
-      if(selectorKernelSpecs){
-        kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs) ;
+      if (selectorKernelSpecs) {
+        kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs);
       }
       return kernelData;
     }
@@ -1597,22 +1605,21 @@ namespace Private {
     kernelSpeccSelectorContainer?: HTMLDivElement
   ) {
     let kernelConfiguration: PartialJSONObject = {};
-    let selectedKernel =JSON.parse(selector.value) as Kernel.IModel;
+    let selectedKernel = JSON.parse(selector.value) as Kernel.IModel;
 
     let kernelSpecsContainer = document.querySelector(
       '#js-kernel-specs-selector-container'
-     ) as HTMLElement;
+    ) as HTMLElement;
 
     if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
       kernelSpecsContainer = kernelSpeccSelectorContainer;
     }
 
-
     kernelSpecsContainer.innerHTML = '';
-    let kernelName = selectedKernel && selectedKernel.name ? selectedKernel.name  : ''
+    let kernelName =
+      selectedKernel && selectedKernel.name ? selectedKernel.name : '';
     let kernel =
-    kernelName &&
-      sessionContext.specsManager.specs?.kernelspecs[kernelName];
+      kernelName && sessionContext.specsManager.specs?.kernelspecs[kernelName];
     if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
       let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
 
@@ -1621,18 +1628,25 @@ namespace Private {
           let customKernelSpecs = sessionContext.kernelPreference
             ?.customKernelSpecs as PartialJSONObject;
           for (let key in customKernelSpecs) {
-            let selectedValue = customKernelSpecs[key] as PartialJSONValue | undefined;
+            let selectedValue = customKernelSpecs[key] as
+              | PartialJSONValue
+              | undefined;
 
             if (kernelParameters.properties) {
-            let properties = kernelParameters.properties as PartialJSONObject;
+              let properties = kernelParameters.properties as PartialJSONObject;
 
-            let kernelParameter = properties[key] as PartialJSONObject;
+              let kernelParameter = properties[key] as PartialJSONObject;
 
-            if (kernelParameter) {
-              let kernelParametersTmp = (kernelParameters.properties as PartialJSONObject)[key] as PartialJSONObject;
-              (kernelParameters.properties as PartialJSONObject)[key] = {... kernelParametersTmp, default: selectedValue }
+              if (kernelParameter) {
+                let kernelParametersTmp = (
+                  kernelParameters.properties as PartialJSONObject
+                )[key] as PartialJSONObject;
+                (kernelParameters.properties as PartialJSONObject)[key] = {
+                  ...kernelParametersTmp,
+                  default: selectedValue
+                };
+              }
             }
-          }
           }
         }
 
@@ -1664,7 +1678,7 @@ namespace Private {
     options: SessionContext.IKernelSearch
   ): string | null {
     const { specs, preference } = options;
-        const { name, language, canStart, autoStartDefault } = preference;
+    const { name, language, canStart, autoStartDefault } = preference;
 
     if (!specs || canStart === false) {
       return null;

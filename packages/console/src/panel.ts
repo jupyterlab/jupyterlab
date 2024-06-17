@@ -89,10 +89,12 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     this.content.addWidget(this.console);
     void sessionContext.initialize().then(async value => {
       if (value) {
-        let dialog = await (
-          options.sessionDialogs ?? new SessionContextDialogs({ translator })
-        );
-        if (options.kernelPreference && !options.kernelPreference.customKernelSpecs ) {
+        let dialog = await (options.sessionDialogs ??
+          new SessionContextDialogs({ translator }));
+        if (
+          options.kernelPreference &&
+          !options.kernelPreference.customKernelSpecs
+        ) {
           dialog.selectKernel(sessionContext!);
         }
       }

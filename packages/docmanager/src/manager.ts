@@ -651,7 +651,6 @@ export class DocumentManager implements IDocumentManager {
       kernel
     );
 
-
     let context: Private.IContext | null;
     let ready: Promise<void> = Promise.resolve(undefined);
 

@@ -52,7 +52,7 @@ export interface IModel {
   /**
    * Custom kernel specifications for running a kernel
    */
-  custom_kernel_specs?: undefined | PartialJSONObject | {};
+  custom_kernel_specs?: undefined | PartialJSONObject;
 }
 
 /**

@@ -23,7 +23,11 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-import { PartialJSONObject, PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import {
+  PartialJSONObject,
+  PartialJSONValue,
+  PromiseDelegate
+} from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -528,7 +532,9 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private async _populate(customKernelSpecs?:undefined | PartialJSONObject | {}): Promise<void> {
+  private async _populate(
+    customKernelSpecs?: undefined | PartialJSONObject
+  ): Promise<void> {
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
@@ -539,8 +545,12 @@ export class Context<
       return;
     }
 
-    if ((!customKernelSpecs || Object.keys(customKernelSpecs).length === 0) && this.sessionContext.kernelPreference.customKernelSpecs) {
-      customKernelSpecs = this.sessionContext.kernelPreference.customKernelSpecs;
+    if (
+      (!customKernelSpecs || Object.keys(customKernelSpecs).length === 0) &&
+      this.sessionContext.kernelPreference.customKernelSpecs
+    ) {
+      customKernelSpecs =
+        this.sessionContext.kernelPreference.customKernelSpecs;
     }
 
     // Update the kernel preference.
@@ -653,8 +663,13 @@ export class Context<
           return;
         }
         if (contents.content) {
-          if (contents.content.metadata && contents.content.metadata.kernelspec && contents.content.metadata.kernelspec.customKernelSpecs) {
-            customKernelSpecs = contents.content.metadata.kernelspec.customKernelSpecs;
+          if (
+            contents.content.metadata &&
+            contents.content.metadata.kernelspec &&
+            contents.content.metadata.kernelspec.customKernelSpecs
+          ) {
+            customKernelSpecs =
+              contents.content.metadata.kernelspec.customKernelSpecs;
           }
           if (contents.format === 'json') {
             model.fromJSON(contents.content);

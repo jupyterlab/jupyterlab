@@ -11,7 +11,11 @@ import { RJSFSchema, UiSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import { PartialJSONObject } from '@lumino/coreutils';
 
-type FormDataProps = IChangeEvent<any, RJSFSchema, any> | undefined | PartialJSONObject | {};
+type FormDataProps =
+  | IChangeEvent<any, RJSFSchema, any>
+  | undefined
+  | PartialJSONObject
+  | {};
 
 /**
  * Form to select custom properties of kernel
@@ -20,14 +24,10 @@ type FormDataProps = IChangeEvent<any, RJSFSchema, any> | undefined | PartialJSO
  */
 
 const FormComponent = (props: {
-  schema: RJSFSchema,
-  kernelConfigurarion: FormDataProps,
-  updateFormData: (
-    formData: FormDataProps
-  ) => void;
+  schema: RJSFSchema;
+  kernelConfigurarion: FormDataProps;
+  updateFormData: (formData: FormDataProps) => void;
 }): JSX.Element => {
-
-
   const uiSchema: UiSchema = {
     'ui:options': {
       submitButtonOptions: {
@@ -65,9 +65,11 @@ export class DialogWidget extends ReactWidget {
   /**
    * Constructs a new FormWidget.
    */
-  constructor(schema: RJSFSchema, kernelConfigurarion: FormDataProps, updateFormData: (
-    formData: FormDataProps
-  ) => void) {
+  constructor(
+    schema: RJSFSchema,
+    kernelConfigurarion: FormDataProps,
+    updateFormData: (formData: FormDataProps) => void
+  ) {
     super();
     this.schema = schema;
     this.formData = undefined;
@@ -79,10 +81,13 @@ export class DialogWidget extends ReactWidget {
     return this.kernelConfigurarion;
   }
 
-
   render(): JSX.Element {
     return (
-      <FormComponent schema={this.schema} kernelConfigurarion={this.kernelConfigurarion} updateFormData={this.updateFormData} />
+      <FormComponent
+        schema={this.schema}
+        kernelConfigurarion={this.kernelConfigurarion}
+        updateFormData={this.updateFormData}
+      />
     );
   }
 }

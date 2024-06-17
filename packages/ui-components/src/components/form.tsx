@@ -618,7 +618,10 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
 /**
  * Generic rjsf form component for JupyterLab UI.
  */
-export const FormComponent = forwardRef(function FormComponent(props: IFormComponentProps, ref:React.RefObject<Form<ReadonlyJSONObject, RJSFSchema, any>> | null): JSX.Element {
+export const FormComponent = forwardRef(function FormComponent(
+  props: IFormComponentProps,
+  ref: React.RefObject<Form<ReadonlyJSONObject, RJSFSchema, any>> | null
+): JSX.Element {
   const {
     buttonStyle,
     compact,
@@ -678,6 +681,11 @@ export const FormComponent = forwardRef(function FormComponent(props: IFormCompo
   };
 
   return (
-    <Form templates={templates} formContext={formContext as any} {...others} ref={ref}/>
+    <Form
+      templates={templates}
+      formContext={formContext as any}
+      {...others}
+      ref={ref}
+    />
   );
-})
+});

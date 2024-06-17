@@ -319,7 +319,8 @@ async function activateConsole(
     if (result.value) {
       if (kernelConfigurarion) {
         if (args.kernelPreference) {
-          let kernelPreference = args.kernelPreference as ReadonlyPartialJSONObject;
+          let kernelPreference =
+            args.kernelPreference as ReadonlyPartialJSONObject;
           newArgs['kernelPreference'] = {
             ...kernelPreference,
             customKernelSpecs: kernelConfigurarion
