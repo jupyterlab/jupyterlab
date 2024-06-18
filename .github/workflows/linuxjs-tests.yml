@@ -35,6 +35,7 @@ jobs:
             js-documentsearch,
             js-filebrowser,
             js-fileeditor,
+            js-hub-extension,
             js-imageviewer,
             js-inspector,
             js-logconsole,

@@ -75,7 +75,8 @@ export function getHeadings(text: string): IMarkdownHeading[] {
   // Iterate over the lines to get the header level and text for each line:
   const headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
-  let startBackticks = 0;
+  let openingFence = 0;
+  let fenceType;
   let lineIdx = 0;
 
   // Don't check for Markdown headings if in a YAML frontmatter block.
@@ -105,16 +106,18 @@ export function getHeadings(text: string): IMarkdownHeading[] {
     }
 
     // Don't check for Markdown headings if in a code block
-    if (line.startsWith('```')) {
-      const backticks = extractLeadingBackticks(line);
-      if (backticks === 0) continue;
-      else if (startBackticks === 0) {
+    if (line.startsWith('```') || line.startsWith('~~~')) {
+      const closingFence = extractLeadingFences(line);
+      if (closingFence === 0) continue;
+      if (openingFence === 0) {
+        fenceType = line.charAt(0);
         isCodeBlock = !isCodeBlock;
-        startBackticks = backticks;
+        openingFence = closingFence;
         continue;
-      } else if (backticks !== 0 && backticks >= startBackticks) {
+      } else if (fenceType === line.charAt(0) && closingFence >= openingFence) {
         isCodeBlock = !isCodeBlock;
-        startBackticks = 0;
+        openingFence = 0;
+        fenceType = '';
       }
     }
     if (isCodeBlock) {
@@ -133,8 +136,11 @@ export function getHeadings(text: string): IMarkdownHeading[] {
   return headings;
 }
 
-function extractLeadingBackticks(line: string) {
-  const match = line.match(/^(`{3,})/);
+// Returns the length of ``` or ~~~ fences.
+function extractLeadingFences(line: string) {
+  let match;
+  if (line.startsWith('`')) match = line.match(/^(`{3,})/);
+  else match = line.match(/^(~{3,})/);
   return match ? match[0].length : 0;
 }
 

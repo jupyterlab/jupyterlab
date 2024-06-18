@@ -341,7 +341,7 @@ if __name__ == "__main__":
     if answer_file.exists():
         msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
         if tuple(copier.__version__.split(".")) >= ("8", "0", "0"):
-            msg += " --UNSAFE"
+            msg += " --trust"
         print(msg)
     else:
         update_extension(args.path, args.vcs_ref, args.no_input is False)

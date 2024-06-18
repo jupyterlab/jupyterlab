@@ -42,7 +42,7 @@ test.describe('Console', () => {
     await expect.soft(cursor).toBeHidden();
 
     // Try to type something into the editor
-    await cellEditor.type('more text');
+    await cellEditor.pressSequentially('more text');
 
     // Expect the editor content to not change
     expect(await cellEditor.innerText()).toBe('2 + 2');

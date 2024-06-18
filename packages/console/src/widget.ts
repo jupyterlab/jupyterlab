@@ -742,7 +742,7 @@ export class CodeConsole extends Widget {
         if (args.error) {
           for (const cell of this._cells) {
             if ((cell.model as ICodeCellModel).executionCount === null) {
-              cell.setPrompt('');
+              (cell.model as ICodeCellModel).executionState = 'idle';
             }
           }
         }
