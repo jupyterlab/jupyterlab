@@ -244,17 +244,33 @@ export class FileBrowser extends SidePanel {
   }
 
   set showFileFilter(value: boolean) {
-    // TODO: If the old value was true and the new value is false, we need to
-    // clear the filter effect
+    // If the old value was true and the new value is false, clear the filter
     const oldValue = this.showFileFilter;
     if (oldValue && !value) {
       // Return a filter that doesn't exclude anything.
-      this.model.setFilter(value => {
-        return { score: 1, indices: null };
+      console.log('Clearing filter');
+
+      // Clear the search box input
+      (this.folderToolbar.layout as PanelLayout).widgets.forEach(widget => {
+        if (
+          widget.node.getAttribute('data-jp-item-name') === 'fileNameSearcher'
+        ) {
+          console.log('Found fileNameSearcher, clearing its input value');
+          const clearButton = (
+            widget.node.children[0].shadowRoot?.childNodes[3] as HTMLElement
+          ).getElementsByClassName('clear-button')[0] as HTMLButtonElement;
+          clearButton.click();
+        }
       });
+
+      this.model.setFilter(value => {
+        return {};
+      });
+      this.model.refresh();
     }
     this._showFileFilter = value;
-    // TODO: update widget visibility
+
+    // Update widget visibility
     const folderToolbarNode = this.mainPanel.node.getElementsByClassName(
       FOLDER_TOOLBAR_CLASS
     )[0] as HTMLDivElement;
@@ -467,10 +483,6 @@ export class FileBrowser extends SidePanel {
         button.pressed = !oldValue;
       }
     });
-    // TODO: If we're going from filtered to unfiltered, clear the filter.
-    if (oldValue) {
-      console.log('Clear the filter');
-    }
   }
 
   /**
