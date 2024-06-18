@@ -3,6 +3,7 @@
 
 import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
+import { IObservableList } from '@jupyterlab/observables';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -286,12 +287,19 @@ export class OutputArea extends Widget {
         const output = args.newValues[0];
         this._insertOutput(args.newIndex, output);
         if (output.type === 'stream') {
-          const text = (output as any).observableData.get('text');
-          text.changed.connect((sender: any, event: any) => {
+          const text = output.observableData.get(
+            'text'
+          ) as unknown as IObservableList<string>;
+          text.changed.connect(
             (
-              this.widgets[this.widgets.length - 1].layout as PanelLayout
-            ).widgets[1].node.innerHTML += `<pre>${event.newValues[0][0]}</pre>`;
-          });
+              sender: IObservableList<string>,
+              event: IObservableList.IChangedArgs<string>
+            ) => {
+              (
+                this.widgets[this.widgets.length - 1].layout as PanelLayout
+              ).widgets[1].node.innerHTML += `<pre>${event.newValues[0][0]}</pre>`;
+            }
+          );
         }
         break;
       case 'remove':

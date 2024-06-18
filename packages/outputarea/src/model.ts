@@ -322,9 +322,11 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStream += value.text as string;
       this._lastStream = Private.removeOverwrittenChars(this._lastStream);
       const index = this.length - 1;
-      const prev = this.list.get(index) as any;
-      const text = prev.observableData.get('text');
-      text.push(value.text);
+      const prev = this.list.get(index) as IOutputModel;
+      const text = prev.observableData.get(
+        'text'
+      ) as unknown as IObservableList<string>;
+      text.push(value.text as string);
       return this.length;
     }
 

@@ -40,6 +40,11 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
+   * The observable data.
+   */
+  readonly observableData: IObservableJSON;
+
+  /**
    * Whether the output is trusted.
    */
   trusted: boolean;
