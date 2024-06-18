@@ -35,6 +35,14 @@
   flex-direction: column;
 }
 
+.jp-FileBrowser-folderToolbar.jp-Toolbar {
+  border-bottom: none;
+  height: auto;
+  margin: 0 12px 6px;
+  box-shadow: none;
+  padding: 0;
+}
+
 .jp-FileBrowser-Panel {
   flex: 1 1 auto;
   display: flex;
