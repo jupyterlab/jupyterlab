@@ -41,7 +41,7 @@ class LogErrorHandler(logging.StreamHandler):
     """A handler that exits with 1 on a logged error."""
 
     def __init__(self):
-        super().__init__()
+        super().__init__(stream=sys.stderr)
         self.setLevel(logging.ERROR)
         self.errored = False
 
