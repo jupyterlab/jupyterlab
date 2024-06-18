@@ -20,6 +20,11 @@ export interface IObservableList<T> extends IDisposable, Iterable<T> {
   readonly type: 'List';
 
   /**
+   * The value of the list.
+   */
+  array: Array<T>;
+
+  /**
    * The length of the list.
    *
    * #### Notes
@@ -308,6 +313,13 @@ export class ObservableList<T> implements IObservableList<T> {
    */
   get changed(): ISignal<this, IObservableList.IChangedArgs<T>> {
     return this._changed;
+  }
+
+  /**
+   * Get the value of the list.
+   */
+  get array(): Array<T> {
+    return this._array;
   }
 
   /**

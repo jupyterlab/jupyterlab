@@ -283,7 +283,16 @@ export class OutputArea extends Widget {
   ): void {
     switch (args.type) {
       case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
+        const output = args.newValues[0];
+        this._insertOutput(args.newIndex, output);
+        if (output.type === 'stream') {
+          const text = (output as any).observableData.get('text');
+          text.changed.connect((sender: any, event: any) => {
+            (
+              this.widgets[this.widgets.length - 1].layout as PanelLayout
+            ).widgets[1].node.innerHTML += `<pre>${event.newValues[0][0]}</pre>`;
+          });
+        }
         break;
       case 'remove':
         if (this.widgets.length) {

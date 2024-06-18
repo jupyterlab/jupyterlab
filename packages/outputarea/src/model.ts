@@ -321,12 +321,10 @@ export class OutputAreaModel implements IOutputAreaModel {
       // This also replaces the metadata of the last item.
       this._lastStream += value.text as string;
       this._lastStream = Private.removeOverwrittenChars(this._lastStream);
-      value.text = this._lastStream;
-      const item = this._createItem({ value, trusted });
       const index = this.length - 1;
-      const prev = this.list.get(index);
-      this.list.set(index, item);
-      prev.dispose();
+      const prev = this.list.get(index) as any;
+      const text = prev.observableData.get('text');
+      text.push(value.text);
       return this.length;
     }
 

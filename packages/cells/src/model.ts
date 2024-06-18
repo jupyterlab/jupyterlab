@@ -13,7 +13,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { ObservableValue } from '@jupyterlab/observables';
+import { ObservableList, ObservableValue } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -748,6 +748,15 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return super.toJSON() as nbformat.ICodeCell;
   }
 
+  protected onStreamOutputTextChange(
+    sender: any,
+    event: any,
+    outputIndex: number
+  ): void {
+    const codeCell = this.sharedModel as YCodeCell;
+    codeCell.pushStreamOutput(outputIndex, event.newValues[0]);
+  }
+
   /**
    * Handle a change to the cell outputs modelDB and reflect it in the shared model.
    */
@@ -759,6 +768,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
+          for (const output of event.newValues) {
+            if (output.type === 'stream') {
+              (
+                (output as any).observableData.get(
+                  'text'
+                ) as unknown as ObservableList<string>
+              ).changed.connect((sender: any, textEvent: any) => {
+                this.onStreamOutputTextChange(
+                  sender,
+                  textEvent,
+                  event.newIndex
+                );
+              }, this);
+            }
+          }
           const outputs = event.newValues.map(output => output.toJSON());
           codeCell.updateOutputs(event.newIndex, event.newIndex, outputs);
           break;
