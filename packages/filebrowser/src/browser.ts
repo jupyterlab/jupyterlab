@@ -275,9 +275,7 @@ export class FileBrowser extends SidePanel {
     this._showFileFilter = value;
 
     // Update widget visibility
-    const folderToolbarNode = this.mainPanel.node.getElementsByClassName(
-      FOLDER_TOOLBAR_CLASS
-    )[0] as HTMLDivElement;
+    const folderToolbarNode = this.folderToolbar.node;
     folderToolbarNode.style['display'] = this.showFileFilter ? 'block' : 'none';
   }
 
