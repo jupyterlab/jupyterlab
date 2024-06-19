@@ -270,10 +270,8 @@ describe('completer/inline', () => {
           insertText: 'line1\nline2\nline3\nline4\nline5'
         };
         model.setCompletions({ items: [item] });
-        await framePromise();
 
         const ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
-
         expect(ghost.innerText).toBe('line1\nline2\nline3');
       });
 
@@ -298,7 +296,6 @@ describe('completer/inline', () => {
           insertText: 'line1'
         };
         model.setCompletions({ items: [item] });
-        await framePromise();
 
         expect(getGhostTextContent()).toBe('line1\n\n');
       });
@@ -322,7 +319,6 @@ describe('completer/inline', () => {
             }
           ]
         });
-        await framePromise();
 
         expect(getGhostTextContent()).toBe('line1\n\n');
       });
