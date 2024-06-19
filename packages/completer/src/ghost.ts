@@ -141,8 +141,14 @@ class GhostTextWidget extends WidgetType {
 
   private _updateDOM(dom: HTMLElement) {
     const content = this.content;
+
+    if (this.isSpacer) {
+      dom.innerText = content;
+      return;
+    }
+
     let addition = this.options.addedPart;
-    if (addition && !this.isSpacer) {
+    if (addition) {
       if (addition.startsWith('\n')) {
         // Show the new line straight away to ensure proper positioning.
         addition = addition.substring(1);
@@ -157,7 +163,7 @@ class GhostTextWidget extends WidgetType {
       dom.innerText = content;
     }
     // Add "streaming-in-progress" indicator
-    if (!this.isSpacer && this.options.streaming) {
+    if (this.options.streaming) {
       const streamingIndicator = document.createElement('span');
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
       dom.appendChild(streamingIndicator);
