@@ -270,7 +270,7 @@ export class FileBrowser extends SidePanel {
       this.model.setFilter(value => {
         return {};
       });
-      this.model.refresh();
+      this.model.refresh().catch(console.warn);
     }
     this._showFileFilter = value;
 
