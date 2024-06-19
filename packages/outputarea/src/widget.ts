@@ -287,6 +287,7 @@ export class OutputArea extends Widget {
         const output = args.newValues[0];
         this._insertOutput(args.newIndex, output);
         if (output.type === 'stream') {
+          // A stream ouput has been added, follow changes to the text list.
           const text = output.observableData.get(
             'text'
           ) as unknown as IObservableList<string>;
@@ -295,6 +296,7 @@ export class OutputArea extends Widget {
               sender: IObservableList<string>,
               event: IObservableList.IChangedArgs<string>
             ) => {
+              // Append the new text to the previous widget.
               (
                 this.widgets[this.widgets.length - 1].layout as PanelLayout
               ).widgets[1].node.innerHTML += `<pre>${event.newValues[0][0]}</pre>`;

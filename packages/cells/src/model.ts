@@ -752,15 +752,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return super.toJSON() as nbformat.ICodeCell;
   }
 
-  protected onStreamOutputTextChange(
-    sender: IObservableList<string>,
-    event: IObservableList.IChangedArgs<string>,
-    outputIndex: number
-  ): void {
-    const codeCell = this.sharedModel as YCodeCell;
-    codeCell.pushStreamOutput(outputIndex, event.newValues[0]);
-  }
-
   /**
    * Handle a change to the cell outputs modelDB and reflect it in the shared model.
    */
@@ -783,10 +774,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
                   sender: IObservableList<string>,
                   textEvent: IObservableList.IChangedArgs<string>
                 ) => {
-                  this.onStreamOutputTextChange(
-                    sender,
-                    textEvent,
-                    event.newIndex
+                  const codeCell = this.sharedModel as YCodeCell;
+                  codeCell.pushStreamOutput(
+                    event.newIndex,
+                    textEvent.newValues[0]
                   );
                 },
                 this

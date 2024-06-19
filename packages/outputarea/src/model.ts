@@ -261,7 +261,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * @param wait Delay clearing the output until the next message is added.
    */
   clear(wait: boolean = false): void {
-    this._lastStream = '';
+    this._lastStreamName = '';
     if (wait) {
       this.clearNext = true;
       return;
@@ -309,24 +309,21 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Consolidate outputs if they are stream outputs of the same kind.
     if (
       nbformat.isStream(value) &&
-      this._lastStream &&
-      value.name === this._lastName &&
+      value.name === this._lastStreamName &&
       this.shouldCombine({
         value,
         lastModel: this.list.get(this.length - 1)
       })
     ) {
-      // In order to get a list change event, we add the previous
-      // text to the current item and replace the previous item.
-      // This also replaces the metadata of the last item.
-      this._lastStream += value.text as string;
-      this._lastStream = Private.removeOverwrittenChars(this._lastStream);
+      // We append the new text to the current text list.
+      // This creates a text list change event.
       const index = this.length - 1;
       const prev = this.list.get(index) as IOutputModel;
-      const text = prev.observableData.get(
+      const textList = prev.observableData.get(
         'text'
       ) as unknown as IObservableList<string>;
-      text.push(value.text as string);
+      const newText = Private.removeOverwrittenChars(value.text as string);
+      textList.push(newText);
       return this.length;
     }
 
@@ -339,10 +336,9 @@ export class OutputAreaModel implements IOutputAreaModel {
 
     // Update the stream information.
     if (nbformat.isStream(value)) {
-      this._lastStream = value.text as string;
-      this._lastName = value.name;
+      this._lastStreamName = value.name;
     } else {
-      this._lastStream = '';
+      this._lastStreamName = '';
     }
 
     // Add the item to our list and return the new length.
@@ -437,8 +433,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
-  private _lastStream = '';
-  private _lastName: 'stdout' | 'stderr';
+  private _lastStreamName: '' | 'stdout' | 'stderr' = '';
   private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<OutputAreaModel, number>(this);
