@@ -23,6 +23,16 @@ describe('@jupyterlab/vega5-extension', () => {
 
       expect(model).toHaveProperty('data.image/png');
       expect(model).not.toHaveProperty(SCALE_FACTOR_PROP);
+    });
+
+    // requires `canvas`
+    it.skip('should keep size of PNG', async () => {
+      const model = new MimeModel({
+        data: {
+          [VEGALITE4_MIME_TYPE]: VEGALITE4_SPEC
+        }
+      });
+      await VEGALITE4_RENDERER.renderModel(model);
 
       const size = getPNGSize(model.data['image/png'] as string);
 
@@ -49,6 +59,25 @@ describe('@jupyterlab/vega5-extension', () => {
 
       expect(model).toHaveProperty('data.image/png');
       expect(model).toHaveProperty(SCALE_FACTOR_PROP, scaleFactor);
+    });
+
+    // requires `canvas`
+    it.skip('should resize scaled PNG', async () => {
+      const scaleFactor = 2;
+
+      const model = new MimeModel({
+        data: {
+          [VEGALITE4_MIME_TYPE]: VEGALITE4_SPEC
+        },
+        metadata: {
+          [VEGALITE4_MIME_TYPE]: {
+            embed_options: {
+              scaleFactor
+            }
+          }
+        }
+      });
+      await VEGALITE4_RENDERER.renderModel(model);
 
       const size = getPNGSize(model.data['image/png'] as string);
 
