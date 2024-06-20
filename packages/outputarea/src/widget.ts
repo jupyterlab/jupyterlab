@@ -288,37 +288,15 @@ export class OutputArea extends Widget {
         this._insertOutput(args.newIndex, output);
         if (output.type === 'stream') {
           // A stream ouput has been added, follow changes to the text.
-          const text = output.observableData.get(
+          const obsText = output.observableData.get(
             'text'
           ) as unknown as IObservableString;
-          text.changed.connect(
+          obsText.changed.connect(
             (
               sender: IObservableString,
               event: IObservableString.IChangedArgs
             ) => {
-              const node = (
-                this.widgets[this.widgets.length - 1].layout as PanelLayout
-              ).widgets[1].node;
-              if (event.type === 'remove') {
-                // Remove the text.
-                const children = node.children;
-                const text = (children[children.length - 1] as HTMLElement)
-                  .innerText;
-                const newText = text.slice(0, event.start);
-                children[children.length - 1].remove();
-                const pre = document.createElement('pre');
-                pre.innerText = newText;
-                node.appendChild(pre);
-              } else {
-                // Append the text.
-                const pre = document.createElement('pre');
-                let newText = event.value;
-                if (newText.endsWith('\n')) {
-                  newText = newText.slice(0, newText.length - 1);
-                }
-                pre.innerText = newText;
-                node.appendChild(pre);
-              }
+              this._setOutput(args.newIndex, output);
             }
           );
         }
