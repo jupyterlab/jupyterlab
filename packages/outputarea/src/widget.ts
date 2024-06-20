@@ -3,7 +3,7 @@
 
 import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
+import { IObservableString } from '@jupyterlab/observables';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -287,19 +287,38 @@ export class OutputArea extends Widget {
         const output = args.newValues[0];
         this._insertOutput(args.newIndex, output);
         if (output.type === 'stream') {
-          // A stream ouput has been added, follow changes to the text list.
+          // A stream ouput has been added, follow changes to the text.
           const text = output.observableData.get(
             'text'
-          ) as unknown as IObservableList<string>;
+          ) as unknown as IObservableString;
           text.changed.connect(
             (
-              sender: IObservableList<string>,
-              event: IObservableList.IChangedArgs<string>
+              sender: IObservableString,
+              event: IObservableString.IChangedArgs
             ) => {
-              // Append the new text to the previous widget.
-              (
+              const node = (
                 this.widgets[this.widgets.length - 1].layout as PanelLayout
-              ).widgets[1].node.innerHTML += `<pre>${event.newValues[0][0]}</pre>`;
+              ).widgets[1].node;
+              if (event.type === 'remove') {
+                // Remove the text.
+                const children = node.children;
+                const text = (children[children.length - 1] as HTMLElement)
+                  .innerText;
+                const newText = text.slice(0, event.start);
+                children[children.length - 1].remove();
+                const pre = document.createElement('pre');
+                pre.innerText = newText;
+                node.appendChild(pre);
+              } else {
+                // Append the text.
+                const pre = document.createElement('pre');
+                let newText = event.value;
+                if (newText.endsWith('\n')) {
+                  newText = newText.slice(0, newText.length - 1);
+                }
+                pre.innerText = newText;
+                node.appendChild(pre);
+              }
             }
           );
         }

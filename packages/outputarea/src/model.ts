@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
+import {
+  IObservableList,
+  IObservableString,
+  ObservableList
+} from '@jupyterlab/observables';
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
@@ -315,15 +319,26 @@ export class OutputAreaModel implements IOutputAreaModel {
         lastModel: this.list.get(this.length - 1)
       })
     ) {
-      // We append the new text to the current text list.
-      // This creates a text list change event.
-      const index = this.length - 1;
-      const prev = this.list.get(index) as IOutputModel;
-      const textList = prev.observableData.get(
+      // We append the new text to the current text.
+      // This creates a text change event.
+      const prev = this.list.get(this.length - 1) as IOutputModel;
+      const curText = prev.observableData.get(
         'text'
-      ) as unknown as IObservableList<string>;
-      const newText = Private.removeOverwrittenChars(value.text as string);
-      textList.push(newText);
+      ) as unknown as IObservableString;
+      const newText = Private.fixCarriageReturn(value.text as string);
+      let length = curText.text.length;
+      for (let i = 0; i < newText.length; i++) {
+        const character = newText[i];
+        if (character === '\b') {
+          if (length > 0 && curText.text[length - 1] != '\n') {
+            curText.remove(length - 1, length);
+            length--;
+          }
+        } else {
+          curText.insert(length, character);
+          length++;
+        }
+      }
       return this.length;
     }
 
@@ -496,7 +511,7 @@ namespace Private {
    * Remove chunks that should be overridden by the effect of
    * carriage return characters.
    */
-  function fixCarriageReturn(txt: string): string {
+  export function fixCarriageReturn(txt: string): string {
     txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
     while (txt.search(/\r[^$]/g) > -1) {
       const base = txt.match(/^(.*)\r+/m)![1];

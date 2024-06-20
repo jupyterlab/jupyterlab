@@ -6,7 +6,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   IObservableJSON,
   ObservableJSON,
-  ObservableList
+  ObservableString
 } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
@@ -89,15 +89,13 @@ export class OutputModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     const { metadata, trusted } = Private.getBundleOptions(options);
-    const newData: any = {};
+    const newData: { [key: string]: any } = {};
     if (options.value !== undefined) {
       for (const key in options.value) {
         newData[key] = options.value[key];
       }
       if (nbformat.isStream(options.value)) {
-        newData['text'] = new ObservableList({
-          values: [options.value['text'] as string]
-        });
+        newData['text'] = new ObservableString(options.value['text'] as string);
       }
     }
     this._data = new ObservableJSON({ values: newData });
@@ -197,12 +195,10 @@ export class OutputModel implements IOutputModel {
    */
   toJSON(): nbformat.IOutput {
     const output: PartialJSONValue = {};
-    const data: any = {};
+    const data: { [key: string]: any } = {};
     for (const key of this._data.keys()) {
       if (key === 'text') {
-        data[key] = (
-          this._data.get(key) as unknown as ObservableList<string>
-        ).array;
+        data[key] = (this._data.get(key) as unknown as ObservableString).text;
       } else {
         data[key] = this._data.get(key);
       }

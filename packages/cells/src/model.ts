@@ -14,8 +14,8 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 
 import {
-  IObservableList,
-  ObservableList,
+  IObservableString,
+  ObservableString,
   ObservableValue
 } from '@jupyterlab/observables';
 
@@ -766,19 +766,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           for (const output of event.newValues) {
             if (output.type === 'stream') {
               (
-                output.observableData.get(
-                  'text'
-                ) as unknown as ObservableList<string>
+                output.observableData.get('text') as unknown as ObservableString
               ).changed.connect(
                 (
-                  sender: IObservableList<string>,
-                  textEvent: IObservableList.IChangedArgs<string>
+                  sender: IObservableString,
+                  textEvent: IObservableString.IChangedArgs
                 ) => {
                   const codeCell = this.sharedModel as YCodeCell;
-                  codeCell.pushStreamOutput(
-                    event.newIndex,
-                    textEvent.newValues[0]
-                  );
+                  if (textEvent.type === 'remove') {
+                    codeCell.removeStreamOutput(
+                      event.newIndex,
+                      textEvent.start
+                    );
+                  } else {
+                    codeCell.appendStreamOutput(
+                      event.newIndex,
+                      textEvent.value
+                    );
+                  }
                 },
                 this
               );
