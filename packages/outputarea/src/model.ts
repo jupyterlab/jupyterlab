@@ -325,25 +325,15 @@ export class OutputAreaModel implements IOutputAreaModel {
       const curText = prev.observableData.get(
         'text'
       ) as unknown as IObservableString;
-      const newText = Private.fixCarriageReturn(value.text as string);
-      let length = curText.text.length;
-      for (let i = 0; i < newText.length; i++) {
-        const character = newText[i];
-        if (character === '\b') {
-          if (length > 0 && curText.text[length - 1] != '\n') {
-            curText.remove(length - 1, length);
-            length--;
-          }
-        } else {
-          curText.insert(length, character);
-          length++;
-        }
-      }
+      const newText = value.text as string;
+      Private.concatenateText(curText, newText);
       return this.length;
     }
 
+    let newText = '';
     if (nbformat.isStream(value)) {
-      value.text = Private.removeOverwrittenChars(value.text as string);
+      newText = value.text as string;
+      value.text = '';
     }
 
     // Create the new item.
@@ -352,6 +342,10 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Update the stream information.
     if (nbformat.isStream(value)) {
       this._lastStreamName = value.name;
+      const curText = item.observableData.get(
+        'text'
+      ) as unknown as IObservableString;
+      Private.concatenateText(curText, newText);
     } else {
       this._lastStreamName = '';
     }
@@ -494,38 +488,26 @@ namespace Private {
     }
   }
 
-  /**
-   * Remove characters that are overridden by backspace characters.
-   */
-  function fixBackspace(txt: string): string {
-    let tmp = txt;
-    do {
-      txt = tmp;
-      // Cancel out anything-but-newline followed by backspace
-      tmp = txt.replace(/[^\n]\x08/gm, ''); // eslint-disable-line no-control-regex
-    } while (tmp.length < txt.length);
-    return txt;
-  }
-
-  /**
-   * Remove chunks that should be overridden by the effect of
-   * carriage return characters.
-   */
-  export function fixCarriageReturn(txt: string): string {
-    txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
-    while (txt.search(/\r[^$]/g) > -1) {
-      const base = txt.match(/^(.*)\r+/m)![1];
-      let insert = txt.match(/\r+(.*)$/m)![1];
-      insert = insert + base.slice(insert.length, base.length);
-      txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
-    }
-    return txt;
-  }
-
   /*
-   * Remove characters overridden by backspaces and carriage returns
+   * Concatenate a string to an observable string, handling backspaces.
    */
-  export function removeOverwrittenChars(text: string): string {
-    return fixCarriageReturn(fixBackspace(text));
+  export function concatenateText(
+    curText: IObservableString,
+    newText: string
+  ): void {
+    for (let index = 0; index < newText.length; index++) {
+      const character = newText[index];
+      if (character === '\b') {
+        // A backspace cannot delete in a previous line.
+        if (
+          curText.text.length > 0 &&
+          curText.text[curText.text.length - 1] != '\n'
+        ) {
+          curText.remove(curText.text.length - 1, curText.text.length);
+        }
+      } else {
+        curText.insert(curText.text.length, character);
+      }
+    }
   }
 }
