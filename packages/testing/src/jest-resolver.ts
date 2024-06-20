@@ -4,9 +4,9 @@
  */
 
 // ws workaround suggested in https://github.com/websockets/ws/issues/2171#issuecomment-1792147402
-// Mentioned solution has
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Mentioned solution license is:
+//    Copyright (c) Microsoft Corporation. All rights reserved.
+//    Licensed under the MIT License.
 
 module.exports = (path: string, options: any) => {
   // Call the defaultResolver, so we leverage its cache, error handling, etc.
