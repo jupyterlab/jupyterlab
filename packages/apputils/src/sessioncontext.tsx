@@ -332,7 +332,9 @@ export namespace ISessionContext {
      * Application translator object
      */
     translator?: ITranslator;
-
+    /**
+     * Optional setting registry used to access restart dialog preference.
+     */
     settingRegistry?: ISettingRegistry | null;
   }
 }
@@ -1456,7 +1458,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       checkbox: {
         label: trans.__('Do not ask me again.'),
         caption: trans.__(
-          'If checked, no confirmation to restart the kernel will be asked in the future.'
+          'If checked, the kernel will restart without confirmation prompt in the future; you can change this back in the settings.'
         )
       }
     });
