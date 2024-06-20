@@ -140,7 +140,7 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.3.0-alpha.0",
-    "@rspack/cli": "^0.7.3",
+    "@rspack/cli": "^0.7.4",
     "copy-webpack-plugin": "^11.0.0",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",

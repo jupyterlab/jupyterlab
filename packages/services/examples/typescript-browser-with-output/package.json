@@ -22,8 +22,8 @@
     "@jupyterlab/services": "^7.3.0-alpha.0"
   },
   "devDependencies": {
-    "@rspack/cli": "^0.7.3",
-    "@rspack/core": "^0.7.3",
+    "@rspack/cli": "^0.7.4",
+    "@rspack/core": "^0.7.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.1.6"
   },
