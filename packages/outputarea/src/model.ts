@@ -495,18 +495,62 @@ namespace Private {
     curText: IObservableString,
     newText: string
   ): void {
-    for (let index = 0; index < newText.length; index++) {
-      const character = newText[index];
-      if (character === '\b') {
-        // A backspace cannot delete in a previous line.
-        if (
-          curText.text.length > 0 &&
-          curText.text[curText.text.length - 1] != '\n'
-        ) {
-          curText.remove(curText.text.length - 1, curText.text.length);
+    let text = newText;
+    let done = false;
+    while (!done) {
+      const idx1 = text.indexOf('\b');
+      if (idx1 === -1) {
+        // No backspace anymore.
+        if (text.length > 0) {
+          curText.insert(curText.text.length, text);
         }
+        done = true;
       } else {
-        curText.insert(curText.text.length, character);
+        // There is at least one backspace to handle.
+        let deleteNb = 1;
+        // Get the number of contiguous backspaces.
+        for (let idx2 = idx1 + 1; idx2 < text.length; idx2++) {
+          if (text[idx2] === '\b') {
+            deleteNb += 1;
+          } else {
+            break;
+          }
+        }
+        // Delete the characters in the new text.
+        let textToAppend = '';
+        let idx3 = text.slice(0, idx1).lastIndexOf('\n');
+        if (idx3 != -1) {
+          // Only delete up to the new line.
+          textToAppend = text.slice(0, idx3 + 1);
+          text = text.slice(idx1 + deleteNb);
+          deleteNb = 0;
+        } else {
+          if (deleteNb < idx1) {
+            textToAppend = text.slice(0, idx1 - deleteNb);
+            text = text.slice(idx1 + deleteNb);
+          } else {
+            text = text.slice(idx1 + deleteNb);
+          }
+          deleteNb -= idx1;
+        }
+        if (deleteNb > 0) {
+          // There are still characters to delete so nothing to insert from the new text yet.
+          // Delete the characters in the current text.
+          const idx4 = curText.text.lastIndexOf('\n');
+          if (idx4 != -1) {
+            // Only delete up to the new line.
+            curText.remove(idx4 + 1, curText.text.length);
+          } else {
+            let idx5 = curText.text.length - deleteNb;
+            if (idx5 < 0) {
+              idx5 = 0;
+            }
+            curText.remove(idx5, curText.text.length);
+          }
+        } else {
+          // There are characters to insert from the new text.
+          curText.insert(curText.text.length, textToAppend);
+        }
       }
     }
   }
