@@ -8,11 +8,9 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
-  filterIcon,
   IScore,
   SidePanel,
-  Toolbar,
-  ToolbarButton
+  Toolbar
 } from '@jupyterlab/ui-components';
 import { Panel, PanelLayout } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
@@ -83,20 +81,6 @@ export class FileBrowser extends SidePanel {
     this.toolbar.node.setAttribute(
       'aria-label',
       this._trans.__('file browser')
-    );
-
-    // Add a button to toggle the file filter.
-    this.toolbar.addItem(
-      'toggleFilter',
-      new ToolbarButton({
-        // Make icon vary based on state of filter?
-        icon: filterIcon,
-        onClick: () => {
-          this.toggleFileFilter();
-        },
-        tooltip: this._trans.__('Filter files by name'),
-        pressed: this._showFileFilter
-      })
     );
 
     // File browser widgets container
@@ -475,16 +459,9 @@ export class FileBrowser extends SidePanel {
     return this.listing.modelForClick(event);
   }
 
-  toggleFileFilter(): void {
+  public toggleFileFilter(): void {
     const oldValue = this.showFileFilter;
     this.showFileFilter = !oldValue;
-    // Toggle button state for the filter button
-    (this.toolbar.layout as PanelLayout).widgets.forEach(widget => {
-      const button = widget as ToolbarButton;
-      if (button.node.getAttribute('data-jp-item-name') === 'toggleFilter') {
-        button.pressed = !oldValue;
-      }
-    });
   }
 
   /**

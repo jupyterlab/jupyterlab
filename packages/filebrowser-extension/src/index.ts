@@ -49,6 +49,7 @@ import {
   downloadIcon,
   editIcon,
   fileIcon,
+  filterIcon,
   folderIcon,
   IDisposableMenuItem,
   linkIcon,
@@ -125,6 +126,8 @@ namespace CommandIDs {
 
   // For main browser only.
   export const toggleBrowser = 'filebrowser:toggle-main';
+
+  export const toggleFileFilter = 'filebrowser:toggle-file-filter';
 
   export const toggleNavigateToCurrentDirectory =
     'filebrowser:toggle-navigate-to-current-directory';
@@ -1228,6 +1231,14 @@ function addCommands(
     },
     icon: stopIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Shut Down Kernel')
+  });
+
+  commands.addCommand(CommandIDs.toggleFileFilter, {
+    execute: () => {
+      browser.toggleFileFilter();
+    },
+    icon: filterIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Toggle File Filter')
   });
 
   commands.addCommand(CommandIDs.toggleLastModified, {
