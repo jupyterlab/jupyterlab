@@ -658,19 +658,10 @@ export class Context<
         return this._manager.contents.get(path, opts);
       })
       .then(contents => {
-        let customKernelSpecs = {};
         if (this.isDisposed) {
           return;
         }
         if (contents.content) {
-          if (
-            contents.content.metadata &&
-            contents.content.metadata.kernelspec &&
-            contents.content.metadata.kernelspec.customKernelSpecs
-          ) {
-            customKernelSpecs =
-              contents.content.metadata.kernelspec.customKernelSpecs;
-          }
           if (contents.format === 'json') {
             model.fromJSON(contents.content);
           } else {
@@ -693,7 +684,7 @@ export class Context<
         this._updateContentsModel(contents);
         model.dirty = false;
         if (!this._isPopulated) {
-          return this._populate(customKernelSpecs);
+          return this._populate();
         }
       })
       .catch(async err => {
