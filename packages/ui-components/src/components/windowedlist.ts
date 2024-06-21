@@ -1284,7 +1284,7 @@ export class WindowedList<
         const scrollbarItems = this._renderScrollbar();
         const first = scrollbarItems[firstVisibleIndex];
         const last = scrollbarItems[lastVisibleIndex];
-        this._viewportIndicator.style.top = first.offsetTop + 'px';
+        this._viewportIndicator.style.top = (first.offsetTop - 1) + 'px';
         this._viewportIndicator.style.height =
           last.offsetTop - first.offsetTop + last.offsetHeight + 'px';
       }
