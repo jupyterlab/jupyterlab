@@ -1583,6 +1583,8 @@ namespace Private {
     const selector = document.createElement('select');
     selector.setAttribute('id', 'js-kernel-selector');
     selector.onchange = () => {
+      selector.setAttribute(
+        'data-kernel-spec','');
       checkCustomKernelSpecs(sessionContext, selector, trans);
     };
 
