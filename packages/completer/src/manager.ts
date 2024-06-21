@@ -266,15 +266,12 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       },
       configure: (settings: IInlineCompleterSettings) => {
         this._inlineCompleterSettings = settings;
-        this._panelHandlers.forEach((handler, handlerId) => {
-          for (const [
-            providerId,
-            provider
-          ] of this._inlineProviders.entries()) {
-            if (provider.configure) {
-              provider.configure(settings.providers[providerId]);
-            }
+        for (const [providerId, provider] of this._inlineProviders.entries()) {
+          if (provider.configure) {
+            provider.configure(settings.providers[providerId]);
           }
+        }
+        this._panelHandlers.forEach((handler, handlerId) => {
           if (handler.inlineCompleter) {
             handler.inlineCompleter.configure(settings);
           }
