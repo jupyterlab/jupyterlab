@@ -253,7 +253,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
-    
+
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,
