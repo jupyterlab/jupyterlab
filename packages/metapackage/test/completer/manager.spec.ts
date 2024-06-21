@@ -11,6 +11,10 @@ import {
   ContextCompleterProvider,
   ICompletionContext,
   ICompletionProvider,
+  IInlineCompleterActions,
+  IInlineCompleterSettings,
+  IInlineCompletionProvider,
+  InlineCompleter,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
@@ -21,6 +25,7 @@ import {
 } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
@@ -239,6 +244,100 @@ describe('completer/manager', () => {
         // update after providers changed
         await manager.updateCompleter(completerContext);
         expect(handler.completer.model).toBeInstanceOf(CustomCompleterModel);
+      });
+    });
+
+    describe('#selected', () => {
+      let completerContext: ICompletionContext;
+      let widget: NotebookPanel;
+
+      beforeEach(() => {
+        const context = contextFactory();
+        widget = NBTestUtils.createNotebookPanel(context);
+        completerContext = { widget };
+      });
+
+      it('should emit `selected` signal', async () => {
+        const callback = jest.fn();
+        await manager.updateCompleter(completerContext);
+        const handler = manager['_panelHandlers'].get(
+          widget.id
+        ) as CompletionHandler;
+        handler.completer.model!.setCompletionItems([{ label: 'foo' }]);
+        MessageLoop.sendMessage(handler.completer, Widget.Msg.UpdateRequest);
+
+        manager.selected.connect(callback);
+        expect(callback).toHaveBeenCalledTimes(0);
+        manager.select(widget.id);
+        expect(callback).toHaveBeenCalledTimes(1);
+        manager.selected.disconnect(callback);
+      });
+    });
+
+    describe('#inline', () => {
+      let inline: IInlineCompleterActions;
+      beforeEach(() => {
+        manager.setInlineCompleterFactory({
+          factory: options =>
+            new InlineCompleter({
+              ...options,
+              trans: nullTranslator.load('jupyterlab')
+            })
+        });
+        inline = manager.inline!;
+      });
+
+      describe('#configure', () => {
+        it('should call `configure()` method of each provider', () => {
+          const provider1: IInlineCompletionProvider = {
+            fetch: async () => {
+              return { items: [] };
+            },
+            name: 'an inline provider',
+            identifier: 'test-provider-1',
+            configure: jest.fn()
+          };
+          const provider2: IInlineCompletionProvider = {
+            fetch: async () => {
+              return { items: [] };
+            },
+            name: 'a second inline provider',
+            identifier: 'test-provider-2',
+            configure: jest.fn()
+          };
+          manager.registerInlineProvider(provider1);
+          manager.registerInlineProvider(provider2);
+          expect(provider1.configure).toHaveBeenCalledTimes(0);
+
+          const sharedConfig = {
+            debouncerDelay: 0,
+            timeout: 10000
+          };
+          inline.configure({
+            providers: {
+              'test-provider-1': {
+                ...sharedConfig,
+                enabled: true
+              },
+              'test-provider-2': {
+                ...sharedConfig,
+                enabled: false
+              }
+            } as IInlineCompleterSettings['providers']
+          } as IInlineCompleterSettings);
+          expect(provider1.configure).toHaveBeenCalledTimes(1);
+          expect(provider1.configure).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              enabled: true
+            })
+          );
+          expect(provider2.configure).toHaveBeenCalledTimes(1);
+          expect(provider2.configure).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              enabled: false
+            })
+          );
+        });
       });
     });
   });
