@@ -258,11 +258,14 @@ export namespace Commands {
           style.getPropertyValue('--jp-code-font-size'),
           10
         );
+        if (!config.customStyles) {
+          config.customStyles = {};
+        }
         const currentSize =
           (config['customStyles']['fontSize'] ??
             extensions.baseConfiguration['customStyles']['fontSize']) ||
           cssSize;
-        config.fontSize = currentSize + delta;
+        config.customStyles.fontSize = currentSize + delta;
         return settingRegistry
           .set(id, 'editorConfig', config)
           .catch((reason: Error) => {

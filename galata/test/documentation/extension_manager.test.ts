@@ -89,7 +89,7 @@ test.describe('Extension Manager', () => {
     await page
       .locator('.jp-extensionmanager-view')
       .getByRole('searchbox')
-      .type('drawio');
+      .fill('drawio');
 
     await page.evaluate(() => {
       (document.activeElement as HTMLElement).blur();

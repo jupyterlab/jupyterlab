@@ -28,4 +28,5 @@
   white-space: nowrap;
   font-size: var(--jp-ui-font-size0);
   color: var(--jp-ui-font-color1);
+  user-select: text;
 }

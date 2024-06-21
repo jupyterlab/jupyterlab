@@ -39,7 +39,7 @@ To learn more about extensions, see the [user documentation](https://jupyterlab.
 Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
 
 > [!IMPORTANT]
-> JupyterLab 3 will reach its end of maintenance date on May 15, 2024, anywhere on Earth. To help us make this transition, fixes for critical issues will still be backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
+> JupyterLab 3 reached its end of maintenance date on May 15, 2024. Fixes for critical issues will still be backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
 
 ---
 
@@ -176,7 +176,7 @@ We have videoconference meetings every week where we discuss what we have been w
 
 Anyone is welcome to attend, if they would like to discuss a topic or just listen in.
 
-- When: Wednesdays [9:00 AM Pacific Time (USA)](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
+- When: Wednesdays 9:00 AM Pacific Time (USA)
 - Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 

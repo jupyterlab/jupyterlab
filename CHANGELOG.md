@@ -320,6 +320,82 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.0a0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0...52b641e67bb4ed4510efac6b86e089900c95a43b))
+
+### Enhancements made
+
+- Add the command to toggle the virtual scrollbar to the palette [#16322](https://github.com/jupyterlab/jupyterlab/pull/16322) ([@jtpio](https://github.com/jtpio))
+- Add a signal to proxy all `Completer.selected` signals [#16312](https://github.com/jupyterlab/jupyterlab/pull/16312) ([@ajbozarth](https://github.com/ajbozarth))
+- Advertise the color scheme based on the theme [#16301](https://github.com/jupyterlab/jupyterlab/pull/16301) ([@krassowski](https://github.com/krassowski))
+- Allow to select the path in debugger source component [#16246](https://github.com/jupyterlab/jupyterlab/pull/16246) ([@krassowski](https://github.com/krassowski))
+- Add error field and animation in inline completion [#15344](https://github.com/jupyterlab/jupyterlab/pull/15344) ([@Wzixiao](https://github.com/Wzixiao))
+
+### Bugs fixed
+
+- Fix execution in console in terminal interaction mode [#16348](https://github.com/jupyterlab/jupyterlab/pull/16348) ([@krassowski](https://github.com/krassowski))
+- Fix workspace context menu incorrectly showing up in other sidebar sections [#16346](https://github.com/jupyterlab/jupyterlab/pull/16346) ([@krassowski](https://github.com/krassowski))
+- Fix `Shift + Tab` contextual help inspector tooltip regression [#16343](https://github.com/jupyterlab/jupyterlab/pull/16343) ([@krassowski](https://github.com/krassowski))
+- Reactive toolbar: avoid simultaneous calls to \_onResize() [#16335](https://github.com/jupyterlab/jupyterlab/pull/16335) ([@brichet](https://github.com/brichet))
+- Upgrade CodeMirror dependencies [#16306](https://github.com/jupyterlab/jupyterlab/pull/16306) ([@krassowski](https://github.com/krassowski))
+- Resetting a shortcut does not restore and enable the default if it was modified [#16304](https://github.com/jupyterlab/jupyterlab/pull/16304) ([@itsmevichu](https://github.com/itsmevichu))
+- Allow to invoke inline completer anywhere (not only at the end of line) [#16298](https://github.com/jupyterlab/jupyterlab/pull/16298) ([@ajbozarth](https://github.com/ajbozarth))
+- Search and replace with substring in markdown and raw cells [#16293](https://github.com/jupyterlab/jupyterlab/pull/16293) ([@JasonWeill](https://github.com/JasonWeill))
+- Wait for the cell toolbar items to be rendered the first time before looking for overlap [#16291](https://github.com/jupyterlab/jupyterlab/pull/16291) ([@brichet](https://github.com/brichet))
+- Add lowercase proxy vars and make priority consistent with other tools [#16287](https://github.com/jupyterlab/jupyterlab/pull/16287) ([@jgoodson](https://github.com/jgoodson))
+
+### Maintenance and upkeep improvements
+
+- Do not check links to Jupyter blog on Medium [#16351](https://github.com/jupyterlab/jupyterlab/pull/16351) ([@krassowski](https://github.com/krassowski))
+- Update .git-blame-ignore-revs [#16333](https://github.com/jupyterlab/jupyterlab/pull/16333) ([@fcollonval](https://github.com/fcollonval))
+- Run Python tests on MacOS with Python 12, replace `canvas` with `jest-canvas-mock` [#16314](https://github.com/jupyterlab/jupyterlab/pull/16314) ([@krassowski](https://github.com/krassowski))
+- Allow RegExp in galata helper when looking for a tab [#16302](https://github.com/jupyterlab/jupyterlab/pull/16302) ([@brichet](https://github.com/brichet))
+- Update to Playwright 1.44.0 [#16300](https://github.com/jupyterlab/jupyterlab/pull/16300) ([@jtpio](https://github.com/jtpio))
+- Wait for the cell toolbar items to be rendered the first time before looking for overlap [#16291](https://github.com/jupyterlab/jupyterlab/pull/16291) ([@brichet](https://github.com/brichet))
+- Bump the pip group with 7 updates [#16270](https://github.com/jupyterlab/jupyterlab/pull/16270) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Run Python tests on MacOS with Python 12, replace `canvas` with `jest-canvas-mock` [#16314](https://github.com/jupyterlab/jupyterlab/pull/16314) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-05-06&to=2024-05-23&type=c))
+
+[@ajbozarth](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aajbozarth+updated%3A2024-05-06..2024-05-23&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-05-06..2024-05-23&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-05-06..2024-05-23&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-05-06..2024-05-23&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-05-06..2024-05-23&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2024-05-06..2024-05-23&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-05-06..2024-05-23&type=Issues) | [@jgoodson](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajgoodson+updated%3A2024-05-06..2024-05-23&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-05-06..2024-05-23&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-05-06..2024-05-23&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-05-06..2024-05-23&type=Issues) | [@Rob-P-Smith](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARob-P-Smith+updated%3A2024-05-06..2024-05-23&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-05-06..2024-05-23&type=Issues) | [@Wzixiao](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AWzixiao+updated%3A2024-05-06..2024-05-23&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
+## 4.2.0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0rc0...8a17ca61cf0943225ddc4506763228dd21c90dab))
+
+### Bugs fixed
+
+- Check the command is registered before calling `notifyCommandChanged()` [#16273](https://github.com/jupyterlab/jupyterlab/pull/16273) ([@jtpio](https://github.com/jtpio))
+- Set aria-label to title if no label for [#16262](https://github.com/jupyterlab/jupyterlab/pull/16262) ([@fcollonval](https://github.com/fcollonval))
+- Fix changing font size in text editor [#16261](https://github.com/jupyterlab/jupyterlab/pull/16261) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Fix replace when replacement text matches source text multiple times [#16258](https://github.com/jupyterlab/jupyterlab/pull/16258) ([@JasonWeill](https://github.com/JasonWeill))
+- Add reopen closed command to tab context menu [#16250](https://github.com/jupyterlab/jupyterlab/pull/16250) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Bump ejs from 3.1.8 to 3.1.10 [#16275](https://github.com/jupyterlab/jupyterlab/pull/16275) ([@dependabot](https://github.com/dependabot))
+- Bump the actions group with 2 updates [#16271](https://github.com/jupyterlab/jupyterlab/pull/16271) ([@dependabot](https://github.com/dependabot))
+- Make labeller remove outdated labels [#16257](https://github.com/jupyterlab/jupyterlab/pull/16257) ([@krassowski](https://github.com/krassowski))
+- Update to Playwright 1.43.1 [#15621](https://github.com/jupyterlab/jupyterlab/pull/15621) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Add documentation on using jupyverse [#16190](https://github.com/jupyterlab/jupyterlab/pull/16190) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-26&to=2024-05-06&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-04-26..2024-05-06&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-26..2024-05-06&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-26..2024-05-06&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-04-26..2024-05-06&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-26..2024-05-06&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-04-26..2024-05-06&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-26..2024-05-06&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-26..2024-05-06&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-26..2024-05-06&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-26..2024-05-06&type=Issues)
+
 ## 4.2.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b3...d84e8e09bd2577d7113cd36aa7bf67817ad52727))
@@ -359,8 +435,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-19&to=2024-04-26&type=c))
 
 [@Alanhou1222](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAlanhou1222+updated%3A2024-04-19..2024-04-26&type=Issues) | [@divyansshhh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adivyansshhh+updated%3A2024-04-19..2024-04-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-19..2024-04-26&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2024-04-19..2024-04-26&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-04-19..2024-04-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-19..2024-04-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-19..2024-04-26&type=Issues) | [@kolibril13](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akolibril13+updated%3A2024-04-19..2024-04-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-19..2024-04-26&type=Issues) | [@NexVeridian](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ANexVeridian+updated%3A2024-04-19..2024-04-26&type=Issues) | [@Rob-P-Smith](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARob-P-Smith+updated%3A2024-04-19..2024-04-26&type=Issues) | [@sawickid](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asawickid+updated%3A2024-04-19..2024-04-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-19..2024-04-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.2.0b3
 

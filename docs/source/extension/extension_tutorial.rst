@@ -66,7 +66,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=20 git copier=7 jinja2-time
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=20 git copier=9 jinja2-time
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -101,7 +101,7 @@ This will create a new folder for your extension in your current directory.
 
     mkdir my_first_extension
     cd my_first_extension
-    copier copy https://github.com/jupyterlab/extension-template .
+    copier copy --trust https://github.com/jupyterlab/extension-template .
 
 When prompted, enter values like the following for all of the template
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -207,6 +207,7 @@ Important for Windows users
    by activating the 'Developer Mode'. That may not be allowed by your administrators.
    See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
    for instructions.
+.. Note: The same important section is present in the developer/contributing.rst section too. If you modify it here, ensure to update it there as well.
 
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

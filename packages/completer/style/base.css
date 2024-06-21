@@ -218,6 +218,11 @@
   opacity: 0;
   display: inline-block;
   vertical-align: top;
+  /* stylelint-disable-next-line csstree/validator */
+  text-wrap: none;
+}
+
+.jp-GhostText-letterSpacer {
   max-width: 0;
 }
 
@@ -278,6 +283,30 @@
 
   40% {
     opacity: 0.2;
+  }
+}
+
+.jp-GhostText-errorIndicator::after {
+  animation: jp-GhostText-error 500ms 1;
+  animation-delay: 3500ms;
+  color: var(--jp-error-color1);
+  font-size: 150%;
+  line-height: 10px;
+  margin-left: 2px;
+  padding: 0 4px;
+  content: '⚠';
+  cursor: help;
+  position: relative;
+  top: 2px;
+}
+
+@keyframes jp-GhostText-error {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 

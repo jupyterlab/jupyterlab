@@ -25,6 +25,8 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     // We put the object in an iframe, which seems to have a better chance
     // of retaining its scroll position upon tab focusing, moving around etc.
     const iframe = document.createElement('iframe');
+    // Sets iframe loading to lazy
+    iframe.setAttribute('loading', 'lazy');
     this.node.appendChild(iframe);
     // The iframe content window is not available until the onload event.
     iframe.onload = () => {

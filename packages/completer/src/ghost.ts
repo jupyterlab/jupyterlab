@@ -14,6 +14,7 @@ const TRANSIENT_LETTER_SPACER_CLASS = 'jp-GhostText-letterSpacer';
 const GHOST_TEXT_CLASS = 'jp-GhostText';
 const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
+const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
 
 /**
  * Ghost text content and placement.
@@ -39,6 +40,15 @@ export interface IGhostText {
    * Whether streaming is in progress.
    */
   streaming?: boolean;
+  /**
+   * An error occurred in the request.
+   */
+  error?: {
+    /**
+     * A message explaining the error.
+     */
+    message?: string;
+  };
   /**
    * Callback to execute when pointer enters the boundary of the ghost text.
    */
@@ -107,7 +117,8 @@ class GhostTextWidget extends WidgetType {
   eq(other: GhostTextWidget) {
     return (
       other.content == this.content &&
-      other.options.streaming === this.options.streaming
+      other.options.streaming === this.options.streaming &&
+      other.options.error === this.options.error
     );
   }
 
@@ -139,10 +150,63 @@ class GhostTextWidget extends WidgetType {
     return wrap;
   }
 
+  private _removeErrorAnimation(dom: HTMLElement) {
+    const elementsToRemove = dom.querySelectorAll(`.${ERROR_INDICATOR_CLASS}`);
+
+    elementsToRemove.forEach(element => {
+      element.remove();
+    });
+  }
+
+  /**
+   * Mount the error animation DOM and remove the streaming indicator if any.
+   */
+  private _mountErrorAnimation(dom: HTMLElement) {
+    const errorIndicator = document.createElement('span');
+    errorIndicator.className = ERROR_INDICATOR_CLASS;
+    const error = this.options.error;
+    if (error?.message) {
+      errorIndicator.title = error?.message;
+    }
+
+    // Delete stream and previous error animation
+    const elementsToRemove = dom.querySelectorAll(
+      `.${STREAMING_INDICATOR_CLASS}, .${ERROR_INDICATOR_CLASS}`
+    );
+
+    elementsToRemove.forEach(element => {
+      element.remove();
+    });
+
+    dom.appendChild(errorIndicator);
+  }
+
   private _updateDOM(dom: HTMLElement) {
+    if (this.options.error) {
+      this._mountErrorAnimation(dom);
+
+      this._clearErrorTimeout = setTimeout(() => {
+        this._removeErrorAnimation(dom);
+        this._clearErrorTimeout = null;
+      }, 5000);
+      return;
+    }
+    // If not in an error anymore, clear the error indicator
+    if (this._clearErrorTimeout !== null) {
+      clearTimeout(this._clearErrorTimeout);
+      this._removeErrorAnimation(dom);
+      this._clearErrorTimeout = null;
+    }
+
     const content = this.content;
+
+    if (this.isSpacer) {
+      dom.innerText = content;
+      return;
+    }
+
     let addition = this.options.addedPart;
-    if (addition && !this.isSpacer) {
+    if (addition) {
       if (addition.startsWith('\n')) {
         // Show the new line straight away to ensure proper positioning.
         addition = addition.substring(1);
@@ -157,7 +221,7 @@ class GhostTextWidget extends WidgetType {
       dom.innerText = content;
     }
     // Add "streaming-in-progress" indicator
-    if (!this.isSpacer && this.options.streaming) {
+    if (this.options.streaming) {
       const streamingIndicator = document.createElement('span');
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
       dom.appendChild(streamingIndicator);
@@ -172,6 +236,8 @@ class GhostTextWidget extends WidgetType {
     }
     super.destroy(dom);
   }
+
+  private _clearErrorTimeout: ReturnType<typeof setTimeout> | null = null;
 }
 
 export namespace GhostTextManager {

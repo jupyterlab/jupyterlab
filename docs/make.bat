@@ -11,10 +11,16 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=python -msphinx
 )
 set SOURCEDIR=source
+set APIDIR=%SOURCEDIR%\api
 set BUILDDIR=build
 set SPHINXPROJ=JupyterLab
 
 if "%1" == "" goto help
+
+if not exist "%APIDIR%" (
+    echo Creating api directory...
+    mkdir "%APIDIR%"
+)
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
