@@ -4,7 +4,18 @@
 .. _extension_migration:
 
 Extension Migration Guide
-================================================
+=========================
+
+JupyterLab 4.2 to 4.3
+---------------------
+
+CSS styling
+^^^^^^^^^^^
+
+Previously JupyterLab was leaking CSS rules globally. Starting from 4.3, this is not the case
+any more. The side effect for extensions is that DOM element attached outside the application
+shell may have broken styles. To fix this, you should add the class ``jp-ThemedContainer`` to
+the DOM elements added outside the application shell.
 
 
 JupyterLab 4.1 to 4.2
