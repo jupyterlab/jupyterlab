@@ -250,7 +250,7 @@ export class FileBrowser extends SidePanel {
         }
       });
 
-      // Return a filter that doesn't exclude anything.
+      // Set a filter that doesn't exclude anything.
       this.model.setFilter(value => {
         return {};
       });
