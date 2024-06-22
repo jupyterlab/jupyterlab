@@ -20,6 +20,9 @@ async function main(): Promise<void> {
   const dock = new DockPanel();
   dock.id = 'main';
 
+  // Ensure Jupyter styling
+  dock.addClass('jp-ThemedContainer');
+
   // Attach the widget to the dom.
   Widget.attach(dock, document.body);
 

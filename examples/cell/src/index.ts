@@ -218,6 +218,10 @@ function main(): void {
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
 
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  completer.addClass('jp-ThemedContainer');
+
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
   Widget.attach(completer, document.body);

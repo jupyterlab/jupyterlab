@@ -623,6 +623,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     );
 
     notificationStatus.addClass('jp-Notification-Status');
+    notificationStatus.addClass('jp-ThemedContainer');
 
     if (statusBar) {
       statusBar.registerStatusItem(notificationPlugin.id, {

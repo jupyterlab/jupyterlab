@@ -310,6 +310,10 @@ function createApp(
     menu.open(x, y);
   });
 
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  menu.addClass('jp-ThemedContainer');
+
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
 
