@@ -105,11 +105,15 @@ Because iframes steal all cursor events, the following two rules are necessary
 to suppress pointer events while resize drags are occurring. There may be a
 better solution to this problem.
 */
-body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
+body.lm-mod-override-cursor
+  .jp-ThemedContainer
+  .jp-OutputArea-output.jp-mod-isolated {
   position: relative;
 }
 
-body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
+body.lm-mod-override-cursor
+  .jp-ThemedContainer
+  .jp-OutputArea-output.jp-mod-isolated::before {
   content: '';
   position: absolute;
   top: 0;

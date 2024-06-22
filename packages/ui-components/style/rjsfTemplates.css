@@ -130,7 +130,7 @@
   fill: var(--jp-ui-font-color0);
 }
 
-button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
+.jp-ThemedContainer button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }

@@ -784,6 +784,7 @@ namespace Private {
         document.createElement('div')
       );
       container.id = 'react-toastify-container';
+      container.classList.add('jp-ThemedContainer');
       const root = createRoot(container);
 
       root.render(

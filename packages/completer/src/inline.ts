@@ -36,6 +36,7 @@ export class InlineCompleter extends Widget {
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass(INLINE_COMPLETER_CLASS);
+    this.addClass('jp-ThemedContainer');
     this._ghostManager = new GhostTextManager({
       onBlur: this._onEditorBlur.bind(this)
     });

@@ -1114,6 +1114,7 @@ class ToolbarPopup extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
+    this.addClass('jp-ThemedContainer');
     this.layout = new PanelLayout();
     Widget.attach(this, document.body);
     this.hide();
