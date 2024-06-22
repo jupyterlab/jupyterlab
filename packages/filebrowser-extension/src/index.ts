@@ -1235,7 +1235,13 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleFileFilter, {
     execute: () => {
-      browser.toggleFileFilter();
+      // Update toggled state, then let the toolbar button update
+      browser.showFileFilter = !browser.showFileFilter;
+      commands.notifyCommandChanged(CommandIDs.toggleFileFilter);
+    },
+    isToggled: () => {
+      const toggled = browser.showFileFilter;
+      return toggled;
     },
     icon: filterIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Toggle File Filter')
