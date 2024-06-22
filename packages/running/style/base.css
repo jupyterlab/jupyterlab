@@ -214,6 +214,9 @@ span.jp-RunningSessions-icon > svg {
 
 .jp-SearchableSessions-filter {
   overflow: visible;
+
+  /* Required to display correctly the filter box and its focus highlight */
+  padding: 0 2px;
 }
 
 .jp-SearchableSessions-filter > .jp-FilterBox {
