@@ -459,11 +459,6 @@ export class FileBrowser extends SidePanel {
     return this.listing.modelForClick(event);
   }
 
-  public toggleFileFilter(): void {
-    const oldValue = this.showFileFilter;
-    this.showFileFilter = !oldValue;
-  }
-
   /**
    * Create the underlying DirListing instance.
    *
