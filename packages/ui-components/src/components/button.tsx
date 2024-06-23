@@ -3,9 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+/*
+ * @deprecated You should use the `Button` component from `@jupyter/react-components` instead.
+ */
+
 import React from 'react';
 import { classes } from '../utils';
-import { Button as ToolkitButton } from '@jupyter/react-components';
 
 /**
  * Button component property
@@ -20,10 +23,6 @@ export interface IButtonProps
    * Whether this button should use small styles.
    */
   small?: boolean;
-  /**
-   * Specifies the button's value for form submission and server parameter passing.
-   */
-  value?: string;
 }
 
 /**
@@ -33,13 +32,18 @@ export interface IButtonProps
  * @returns Component
  */
 export function Button(props: IButtonProps): JSX.Element {
-  const { small, children, className, ...others } = props;
+  const { minimal, small, children, ...others } = props;
   return (
-    <ToolkitButton
+    <button
       {...others}
-      className={classes(className, small ? 'jp-mod-small' : '', 'jp-Button')}
+      className={classes(
+        props.className,
+        minimal ? 'jp-mod-minimal' : '',
+        small ? 'jp-mod-small' : '',
+        'jp-Button'
+      )}
     >
       {children}
-    </ToolkitButton>
+    </button>
   );
 }
