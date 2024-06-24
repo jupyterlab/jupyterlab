@@ -157,8 +157,7 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyPartialJSONObject {
-    const data = Private.getData(this.toJSON());
-    return data;
+    return Private.getData(this.toJSON());
   }
 
   get observableData(): IObservableJSON {
@@ -195,22 +194,24 @@ export class OutputModel implements IOutputModel {
    */
   toJSON(): nbformat.IOutput {
     const output: PartialJSONValue = {};
+    for (const key in this._raw) {
+      output[key] = Private.extract(this._raw, key);
+    }
     const data: { [key: string]: any } = {};
     for (const key of this._data.keys()) {
       if (key === 'text') {
-        data[key] = (this._data.get(key) as unknown as ObservableString).text;
+        const text = (this._data.get(key) as unknown as ObservableString).text;
+        data[key] = text;
+        output['text'] = text;
       } else {
         data[key] = this._data.get(key);
       }
-    }
-    for (const key in data) {
-      output[key] = Private.extract(data, key);
     }
     switch (this.type) {
       case 'display_data':
       case 'execute_result':
       case 'update_display_data':
-        output['data'] = this.data as PartialJSONObject;
+        output['data'] = data as PartialJSONObject;
         output['metadata'] = this.metadata as PartialJSONObject;
         break;
       default:

@@ -51,7 +51,7 @@
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.26.3",
     "@jupyter/react-components": "^0.16.6",
-    "@jupyter/ydoc": "^2.0.1",
+    "@jupyter/ydoc": "^3.0.0-a2",
     "@jupyterlab/application": "^4.3.0-alpha.2",
     "@jupyterlab/apputils": "^4.4.0-alpha.2",
     "@jupyterlab/cells": "^4.3.0-alpha.2",

@@ -790,7 +790,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             }
           }
           const outputs = event.newValues.map(output => output.toJSON());
-          codeCell.updateOutputs(event.newIndex, event.newIndex, outputs);
+          codeCell.updateOutputs(
+            event.newIndex,
+            event.newIndex,
+            outputs,
+            'modeldb'
+          );
           break;
         }
         case 'set': {
@@ -798,12 +803,18 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,
-            newValues
+            newValues,
+            'modeldb'
           );
           break;
         }
         case 'remove':
-          codeCell.updateOutputs(event.oldIndex, event.oldValues.length);
+          codeCell.updateOutputs(
+            event.oldIndex,
+            event.oldValues.length,
+            [],
+            'modeldb'
+          );
           break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
@@ -820,8 +831,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     if (change.outputsChange) {
       globalModelDBMutex(() => {
-        this.outputs.clear();
-        slot.getOutputs().forEach(output => this._outputs.add(output));
+        let retain = 0;
+        for (const outputsChange of change.outputsChange!) {
+          if ('retain' in outputsChange) {
+            retain += outputsChange.retain!;
+          }
+          if ('delete' in outputsChange) {
+            for (let i = 0; i < outputsChange.delete!; i++) {
+              this._outputs.remove(retain);
+            }
+          }
+          if ('insert' in outputsChange) {
+            // Inserting an output always results in appending it.
+            for (const output of outputsChange.insert!) {
+              this._outputs.add(output.toJSON());
+            }
+          }
+        }
       });
     }
 

@@ -61,6 +61,11 @@ export interface IOutputAreaModel extends IDisposable {
   add(output: nbformat.IOutput): number;
 
   /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void;
+
+  /**
    * Set the value at the specified index.
    */
   set(index: number, output: nbformat.IOutput): void;
@@ -260,6 +265,14 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void {
+    this.list.get(index).dispose();
+    this.list.remove(index);
+  }
+
+  /**
    * Clear all of the output.
    *
    * @param wait Delay clearing the output until the next message is added.
@@ -339,6 +352,9 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Create the new item.
     const item = this._createItem({ value, trusted });
 
+    // Add the item to our list and return the new length.
+    const length = this.list.push(item);
+
     // Update the stream information.
     if (nbformat.isStream(value)) {
       this._lastStreamName = value.name;
@@ -350,8 +366,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStreamName = '';
     }
 
-    // Add the item to our list and return the new length.
-    return this.list.push(item);
+    return length;
   }
 
   /**
