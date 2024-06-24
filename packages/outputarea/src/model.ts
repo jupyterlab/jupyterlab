@@ -57,6 +57,11 @@ export interface IOutputAreaModel extends IDisposable {
   add(output: nbformat.IOutput): number;
 
   /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void;
+
+  /**
    * Set the value at the specified index.
    */
   set(index: number, output: nbformat.IOutput): void;
@@ -253,6 +258,14 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
 
     return this._add(output);
+  }
+
+  /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void {
+    this.list.get(index).dispose();
+    this.list.remove(index);
   }
 
   /**

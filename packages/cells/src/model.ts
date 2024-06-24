@@ -790,8 +790,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     if (change.outputsChange) {
       globalModelDBMutex(() => {
-        this.outputs.clear();
-        slot.getOutputs().forEach(output => this._outputs.add(output));
+        let retain = 0;
+        for (const outputsChange of change.outputsChange!) {
+          if ('retain' in outputsChange) {
+            retain += outputsChange.retain!;
+          }
+          if ('delete' in outputsChange) {
+            for (let i = 0; i < outputsChange.delete!; i++) {
+              this._outputs.remove(retain);
+            }
+          }
+          if ('insert' in outputsChange) {
+            // Inserting an output always results in appending it.
+            for (const output of outputsChange.insert!) {
+              this._outputs.add(output.toJSON());
+            }
+          }
+        }
       });
     }
 
