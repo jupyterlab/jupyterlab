@@ -3,10 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-/*
- * @deprecated You should use the `Button` component from `@jupyter/react-components` instead.
- */
-
 import React from 'react';
 import { classes } from '../utils';
 
@@ -28,6 +24,7 @@ export interface IButtonProps
 /**
  * Button component
  *
+ * @deprecated You should use the `Button` component from `@jupyter/react-components` instead.
  * @param props Component properties
  * @returns Component
  */

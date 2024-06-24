@@ -888,7 +888,7 @@ export namespace Dialog {
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
                 title={trans.__('Cancel')}
-                minimal
+                scale="xsmall"
               >
                 <closeIcon.react tag={null} />
               </Button>
@@ -1026,6 +1026,16 @@ export namespace Dialog {
     createItemClass(data: IButton): string {
       // Setup the initial class name.
       let name = 'jp-Dialog-button';
+
+      // Add the other state classes.
+      if (data.accept) {
+        name += ' jp-mod-accept';
+      } else {
+        name += ' jp-mod-reject';
+      }
+      if (data.displayType === 'warn') {
+        name += ' jp-mod-warn';
+      }
 
       // Add the extra class.
       const extra = data.className;

@@ -680,12 +680,13 @@ namespace Private {
   export function CloseButton(props: ICloseButtonProps) {
     return (
       <Button
-        className={`jp-Button jp-icon-hover ${TOAST_CLOSE_BUTTON_CLASS}${
+          appearance="stealth"
+          className={`jp-Button jp-icon-hover ${TOAST_CLOSE_BUTTON_CLASS}${
           props.closeIconMargin ? ` ${TOAST_CLOSE_BUTTON_MARGIN_CLASS}` : ''
         }`}
         title={props.title ?? ''}
         onClick={props.close}
-        minimal
+        scale="xsmall"
       >
         <props.closeIcon tag={null} />
       </Button>
@@ -859,7 +860,7 @@ namespace Private {
         title={action.caption ?? action.label}
         className={classes}
         onClick={clickHandler}
-        minimal
+        scale="xsmall"
       >
         {action.label}
       </Button>
