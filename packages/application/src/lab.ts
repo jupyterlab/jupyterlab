@@ -296,11 +296,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       .catch(console.warn);
   }
 
-  protected attachShell(id: string): void {
-    super.attachShell(id);
-    this.shell.node.parentElement?.classList.add('jp-ThemedContainer');
-  }
-
   private _info: JupyterLab.IInfo = JupyterLab.defaultInfo;
   private _paths: JupyterFrontEnd.IPaths;
   private _allPluginsActivated = new PromiseDelegate<void>();
