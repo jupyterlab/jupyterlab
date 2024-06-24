@@ -43,7 +43,7 @@ export const ConnectionLost: IConnectionLost = async function (
     checkbox: {
       label: trans.__('Do not show this message again in this session.'),
       caption: trans.__(
-        'If checked, you will not see a dialog informing you about an issue with server connection in the future.'
+        'If checked, you will not see a dialog informing you about an issue with server connection in this session.'
       )
     },
     buttons: buttons
