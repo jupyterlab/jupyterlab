@@ -623,7 +623,6 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     );
 
     notificationStatus.addClass('jp-Notification-Status');
-    notificationStatus.addClass('jp-ThemedContainer');
 
     if (statusBar) {
       statusBar.registerStatusItem(notificationPlugin.id, {
@@ -632,6 +631,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         rank: -1
       });
     } else {
+      notificationStatus.addClass('jp-ThemedContainer');
       // if the status bar is not available, position the notification
       // status in the bottom right corner of the page
       notificationStatus.node.style.position = 'fixed';
