@@ -5,10 +5,14 @@
 
 import { ILabStatus } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IFormRendererRegistry, ReactWidget } from '@jupyterlab/ui-components';
+import {
+  IFormRendererRegistry,
+  ReactWidget,
+  UseSignal
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
@@ -30,39 +34,28 @@ export class SettingsEditor extends SplitPanel {
     });
     this.translator = options.translator || nullTranslator;
     this._status = options.status;
-    const list = (this._list = new PluginList({
+    this._listModel = new PluginList.Model({
       registry: options.registry,
-      toSkip: options.toSkip,
+      // Filters out a couple of plugins that take too long to load in the new settings editor.
+      toSkip: options.toSkip
+    });
+    this._list = new PluginList({
+      registry: options.registry,
       translator: this.translator,
-      query: options.query
-    }));
-    this.addWidget(list);
+      query: options.query,
+      model: this._listModel
+    });
+    this._listModel.changed.connect(() => {
+      this.update();
+    });
+    this.addWidget(this._list);
     this.setDirtyState = this.setDirtyState.bind(this);
 
-    /**
-     * Initializes the settings panel after loading the schema for all plugins.
-     */
-    void Promise.all(
-      PluginList.sortPlugins(options.registry)
-        .filter(plugin => {
-          const { schema } = plugin;
-          const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
-          const editable = Object.keys(schema.properties || {}).length > 0;
-          const extensible = schema.additionalProperties !== false;
-
-          return !deprecated && (editable || extensible);
-        })
-        .map(async plugin => await options.registry.load(plugin.id))
-    )
-      .then(settings => {
-        const settingsPanel = ReactWidget.create(
+    const settingsPanel = ReactWidget.create(
+      <UseSignal signal={this._listModel.changed}>
+        {() => (
           <SettingsPanel
-            settings={
-              settings.filter(
-                pluginSettings =>
-                  !(options.toSkip ?? []).includes(pluginSettings.id)
-              ) as Settings[]
-            }
+            settings={[...Object.values(this._listModel.settings)]}
             editorRegistry={options.editorRegistry}
             handleSelectSignal={this._list.handleSelectSignal}
             onSelect={(id: string) => (this._list.selection = id)}
@@ -72,12 +65,13 @@ export class SettingsEditor extends SplitPanel {
             translator={this.translator}
             initialFilter={this._list.filter}
           />
-        );
-        this.addWidget(settingsPanel);
-      })
-      .catch(reason => {
-        console.error(`Fail to load the setting plugins:\n${reason}`);
-      });
+        )}
+      </UseSignal>
+    );
+    // Initializes the settings panel after loading the schema for all plugins.
+    this._listModel.ready.then(() => {
+      this.addWidget(settingsPanel);
+    });
   }
 
   /**
@@ -152,6 +146,7 @@ export class SettingsEditor extends SplitPanel {
   private _status: ILabStatus;
   private _dirty: boolean = false;
   private _list: PluginList;
+  private _listModel: PluginList.Model;
   private _saveStateChange = new Signal<this, SettingsEditor.SaveState>(this);
 }
 
