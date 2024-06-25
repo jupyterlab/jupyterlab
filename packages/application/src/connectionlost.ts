@@ -6,8 +6,25 @@ import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IConnectionLost } from './tokens';
 
-let displayConnectionLost = true;
-let serverConnectionLost: Promise<void | Dialog.IResult<string>> | undefined;
+export function getDisplayConnection(): boolean {
+  return Private.displayConnectionLost;
+}
+
+export function disableConnectionLostDialog(): void {
+  Private.displayConnectionLost = false;
+}
+
+export function getServerConnectionLost():
+  | Promise<void | Dialog.IResult<string>>
+  | undefined {
+  return Private.serverConnectionLost;
+}
+
+export function setServerConnectionLost(
+  connectionLostDialog: Promise<void | Dialog.IResult<string>> | undefined
+): void {
+  Private.serverConnectionLost = connectionLostDialog;
+}
 
 /**
  * A default connection lost handler, which brings up an error dialog.
@@ -27,17 +44,20 @@ export const ConnectionLost: IConnectionLost = async function (
   );
   const buttons = [Dialog.okButton({ label: trans.__('Dismiss') })];
 
-  if (!displayConnectionLost) {
+  if (!getDisplayConnection()) {
     return;
   }
 
-  if (serverConnectionLost) {
+  let connectionDialog: Promise<void | Dialog.IResult<string>> | undefined =
+    getServerConnectionLost();
+
+  if (connectionDialog) {
     // Wait for the pre-existing promise to complete
-    await serverConnectionLost;
+    await connectionDialog;
     return;
   }
 
-  serverConnectionLost = showDialog({
+  const dialog = showDialog({
     title: title,
     body: networkMsg,
     checkbox: {
@@ -50,7 +70,7 @@ export const ConnectionLost: IConnectionLost = async function (
   })
     .then(result => {
       if (result.isChecked) {
-        displayConnectionLost = false;
+        disableConnectionLostDialog();
       }
       return;
     })
@@ -58,7 +78,26 @@ export const ConnectionLost: IConnectionLost = async function (
       console.error('An error occurred while showing the dialog: ', error);
     })
     .finally(() => {
-      serverConnectionLost = undefined;
+      setServerConnectionLost(undefined);
     });
+
+  setServerConnectionLost(dialog);
+
   return;
 };
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Boolean determining if connection lost dialog is displayed.
+   */
+  export let displayConnectionLost = true;
+  /**
+   * The resulting connection lost dialog promise.
+   */
+  export let serverConnectionLost:
+    | Promise<void | Dialog.IResult<string>>
+    | undefined;
+}
