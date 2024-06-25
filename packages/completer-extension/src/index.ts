@@ -166,7 +166,8 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
 
 const inlineCompleter: JupyterFrontEndPlugin<void> = {
   id: INLINE_COMPLETER_PLUGIN,
-  description: 'Provides a factory for inline completer.',
+  description:
+    'Registers the inline completer factory; adds inline completer commands, shortcuts and settings.',
   requires: [
     ICompletionProviderManager,
     IInlineCompleterFactory,
