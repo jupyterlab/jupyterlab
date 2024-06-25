@@ -37,11 +37,12 @@ test_aliases = dict(aliases)
 test_aliases["app-dir"] = "BrowserApp.app_dir"
 
 
-class LogErrorHandler(logging.Handler):
+class LogErrorHandler(logging.StreamHandler):
     """A handler that exits with 1 on a logged error."""
 
     def __init__(self):
-        super().__init__(level=logging.ERROR)
+        super().__init__(stream=sys.stderr)
+        self.setLevel(logging.ERROR)
         self.errored = False
 
     def filter(self, record):
@@ -54,12 +55,12 @@ class LogErrorHandler(logging.Handler):
             and record.exc_info is not None
             and isinstance(record.exc_info[1], (StreamClosedError, WebSocketClosedError))
         ):
-            return
+            return False
         return super().filter(record)
 
     def emit(self, record):
-        print(record.msg, file=sys.stderr)
         self.errored = True
+        super().emit(record)
 
 
 def run_test(app, func):
@@ -141,25 +142,33 @@ async def run_async_process(cmd, **kwargs):
 
 async def run_browser(url):
     """Run the browser test and return an exit code."""
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["npm", "init", "-y"], cwd=target)
         await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
-    await run_async_process(["npx", "playwright", "install"], cwd=target)
+    await run_async_process(["npx", "playwright", "install", browser], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
 def run_browser_sync(url):
     """Run the browser test and return an exit code."""
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
         subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
         subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
-    subprocess.call(["npx", "playwright", "install"], cwd=target)  # noqa S603 S607
+    subprocess.call(["npx", "playwright", "install", browser], cwd=target)  # noqa S603 S607
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 
@@ -187,9 +196,12 @@ class BrowserApp(LabApp):
         super().initialize_settings()
 
     def initialize_handlers(self):
-        func = run_browser if self.test_browser else lambda url: 0
-        if os.name == "nt" and func == run_browser:
-            func = run_browser_sync
+        def func(*args, **kwargs):
+            return 0
+
+        if self.test_browser:
+            func = run_browser_sync if os.name == "nt" else run_browser
+
         run_test(self.serverapp, func)
         super().initialize_handlers()
 

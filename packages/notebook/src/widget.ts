@@ -1294,6 +1294,107 @@ export namespace StaticNotebook {
 }
 
 /**
+ * A virtual scrollbar item representing a notebook cell.
+ */
+class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
+  /**
+   * Construct a scrollbar item.
+   */
+  constructor(options: { notebook: Notebook; model: ICellModel }) {
+    // Note: there should be no DOM operations in the constructor
+    this._model = options.model;
+    this._notebook = options.notebook;
+  }
+
+  /**
+   * Render the scrollbar item as an HTML element.
+   */
+  render = (props: { index: number }) => {
+    if (!this._element) {
+      this._element = this._createElement();
+      this._notebook.activeCellChanged.connect(this._updateActive);
+      this._notebook.selectionChanged.connect(this._updateSelection);
+    }
+    const text = `${props.index + 1}`;
+    if (text != this._element.innerText) {
+      this._element.innerText = text;
+    }
+    this._updateActive();
+    this._updateSelection();
+    return this._element;
+  };
+
+  /**
+   * Unique item key used for caching.
+   */
+  get key(): string {
+    return this._model.id;
+  }
+
+  /**
+   * Test whether the item has been disposed.
+   */
+  get isDisposed(): boolean {
+    // Ensure the state is up-to-date in case if the model was disposed
+    // (the model can be disposed when cells are moved/recreated).
+    if (!this._isDisposed && this._model.isDisposed) {
+      this.dispose();
+    }
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the item.
+   */
+  dispose = () => {
+    this._isDisposed = true;
+    this._notebook.activeCellChanged.disconnect(this._updateActive);
+    this._notebook.selectionChanged.disconnect(this._updateSelection);
+  };
+
+  private _createElement() {
+    return document.createElement('li');
+  }
+
+  private _updateActive = () => {
+    if (!this._element) {
+      this._element = this._createElement();
+    }
+    const li = this._element;
+    const wasActive = li.classList.contains(ACTIVE_CLASS);
+    if (this._notebook.activeCell?.model === this._model) {
+      if (!wasActive) {
+        li.classList.add(ACTIVE_CLASS);
+      }
+    } else if (wasActive) {
+      li.classList.remove(ACTIVE_CLASS);
+      // Needed due to order in which selection and active changed signals fire
+      li.classList.remove(SELECTED_CLASS);
+    }
+  };
+
+  private _updateSelection = () => {
+    if (!this._element) {
+      this._element = this._createElement();
+    }
+    const li = this._element;
+    const wasSelected = li.classList.contains(SELECTED_CLASS);
+    if (this._notebook.selectedCells.some(cell => this._model === cell.model)) {
+      if (!wasSelected) {
+        li.classList.add(SELECTED_CLASS);
+      }
+    } else if (wasSelected) {
+      li.classList.remove(SELECTED_CLASS);
+    }
+  };
+
+  private _model: ICellModel;
+  private _notebook: Notebook;
+  private _isDisposed: boolean = false;
+  private _element: HTMLElement | null = null;
+}
+
+/**
  * A notebook widget that supports interactivity.
  */
 export class Notebook extends StaticNotebook {
@@ -1318,20 +1419,19 @@ export class Notebook extends StaticNotebook {
           return document.createElement('ol');
         },
 
+        createScrollbarViewportIndicator(): HTMLElement {
+          return document.createElement('div');
+        },
+
         createScrollbarItem(
           notebook: Notebook,
-          index: number,
+          _index: number,
           model: ICellModel
-        ): HTMLLIElement {
-          const li = document.createElement('li');
-          li.appendChild(document.createTextNode(`${index + 1}`));
-          if (notebook.activeCellIndex === index) {
-            li.classList.add('jp-mod-active');
-          }
-          if (notebook.selectedCells.some(cell => model === cell.model)) {
-            li.classList.add('jp-mod-selected');
-          }
-          return li;
+        ): WindowedList.IRenderer.IScrollbarItem {
+          return new ScrollbarItem({
+            notebook,
+            model
+          });
         }
       },
       ...options
