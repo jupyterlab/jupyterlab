@@ -248,10 +248,10 @@ Start from the extension template.
 
 .. code-block:: shell
 
-    pip install "copier~=8.0" jinja2-time
+    pip install "copier~=9" jinja2-time
     mkdir myextension
     cd myextension
-    copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
+    copier copy --trust https://github.com/jupyterlab/extension-template .
 
 Install the dependencies. Note that extensions are built against the
 released npm packages, not the development versions.
