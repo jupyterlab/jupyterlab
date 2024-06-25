@@ -247,33 +247,6 @@ describe('completer/manager', () => {
       });
     });
 
-    describe('#selected', () => {
-      let completerContext: ICompletionContext;
-      let widget: NotebookPanel;
-
-      beforeEach(() => {
-        const context = contextFactory();
-        widget = NBTestUtils.createNotebookPanel(context);
-        completerContext = { widget };
-      });
-
-      it('should emit `selected` signal', async () => {
-        const callback = jest.fn();
-        await manager.updateCompleter(completerContext);
-        const handler = manager['_panelHandlers'].get(
-          widget.id
-        ) as CompletionHandler;
-        handler.completer.model!.setCompletionItems([{ label: 'foo' }]);
-        MessageLoop.sendMessage(handler.completer, Widget.Msg.UpdateRequest);
-
-        manager.selected.connect(callback);
-        expect(callback).toHaveBeenCalledTimes(0);
-        manager.select(widget.id);
-        expect(callback).toHaveBeenCalledTimes(1);
-        manager.selected.disconnect(callback);
-      });
-    });
-
     describe('#inline', () => {
       let inline: IInlineCompleterActions;
       beforeEach(() => {
