@@ -6,26 +6,6 @@ import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IConnectionLost } from './tokens';
 
-export function getDisplayConnection(): boolean {
-  return Private.displayConnectionLost;
-}
-
-export function disableConnectionLostDialog(): void {
-  Private.displayConnectionLost = false;
-}
-
-export function getServerConnectionLost():
-  | Promise<void | Dialog.IResult<string>>
-  | undefined {
-  return Private.serverConnectionLost;
-}
-
-export function setServerConnectionLost(
-  connectionLostDialog: Promise<void | Dialog.IResult<string>> | undefined
-): void {
-  Private.serverConnectionLost = connectionLostDialog;
-}
-
 /**
  * A default connection lost handler, which brings up an error dialog.
  */
