@@ -55,9 +55,13 @@ export class PluginList extends ReactWidget {
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
     this._model = options.model ?? new PluginList.Model(options);
-    this._model.ready.then(() => {
-      this.update();
-    });
+    this._model.ready
+      .then(() => {
+        this.update();
+      })
+      .catch(reason => {
+        console.error(`Failed to load the plugin list model:\n${reason}`);
+      });
     this._model.changed.connect(() => {
       this.update();
     });
@@ -561,9 +565,13 @@ export namespace PluginList {
         }
       }, this);
       this._plugins = this._loadPlugins();
-      this._loadSettings(this._plugins).then(() => {
-        this._ready.resolve(undefined);
-      });
+      this._loadSettings(this._plugins)
+        .then(() => {
+          this._ready.resolve(undefined);
+        })
+        .catch(reason => {
+          console.error(`Failed to load the settings:\n${reason}`);
+        });
     }
 
     /**

@@ -69,9 +69,13 @@ export class SettingsEditor extends SplitPanel {
       </UseSignal>
     );
     // Initializes the settings panel after loading the schema for all plugins.
-    this._listModel.ready.then(() => {
-      this.addWidget(settingsPanel);
-    });
+    this._listModel.ready
+      .then(() => {
+        this.addWidget(settingsPanel);
+      })
+      .catch(reason => {
+        console.error(`Failed to load the setting plugins:\n${reason}`);
+      });
   }
 
   /**
