@@ -539,6 +539,12 @@ div.jp-Cell-Placeholder-content-3 {
   white-space: pre;
 }
 
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-item[data-type='markdown']
+  > .jp-scrollbarItem-source {
+  white-space: pre-line;
+}
+
 /*-----------------------------------------------------------------------------
 | Printing
 |----------------------------------------------------------------------------*/
