@@ -1321,7 +1321,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       this._notebook.selectionChanged.connect(this._updateSelection);
       if (this._model.type === 'code') {
         const model = this._model as ICodeCellModel;
-        model.outputs.changed.connect(this._updateOutput);
+        model.outputs.changed.connect(this._updatePrompt);
         model.stateChanged.connect(this._updateState);
       }
     }
@@ -1338,7 +1338,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
 
     this._updateActive();
     this._updateSelection();
-    this._updateOutput();
+    this._updatePrompt();
     this._updateDirty();
     return this._element;
   };
@@ -1372,7 +1372,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     if (this._model.type === 'code') {
       const model = this._model as ICodeCellModel;
       if (model.outputs) {
-        model.outputs.changed.disconnect(this._updateOutput);
+        model.outputs.changed.disconnect(this._updatePrompt);
         model.stateChanged.disconnect(this._updateState);
       }
     }
@@ -1413,11 +1413,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     }
   }
 
-  private _updateOutput = () => {
-    this._updatePrompt();
-  };
-
-  private _updatePrompt() {
+  private _updatePrompt = () => {
     if (this._model.type !== 'code') {
       return;
     }
@@ -1448,7 +1444,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     if (this._element!.dataset.output !== state) {
       this._element!.dataset.output = state;
     }
-  }
+  };
 
   private _createElement() {
     const li = document.createElement('li');
