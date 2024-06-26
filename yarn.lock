@@ -2169,8 +2169,8 @@ __metadata:
     "@jupyterlab/ui-components-extension": ~4.3.0-alpha.0
     "@jupyterlab/vega5-extension": ~4.3.0-alpha.0
     "@jupyterlab/workspaces-extension": ~4.3.0-alpha.0
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     chokidar: ^3.6.0
     duplicate-package-checker-webpack-plugin: ^3.0.0
     fs-extra: ^10.1.0
@@ -2319,7 +2319,7 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/virtualdom": ^2.0.1
     "@lumino/widgets": ^2.3.2
-    "@rspack/core": ^0.7.4
+    "@rspack/core": ^0.7.5
     "@types/fs-extra": ^9.0.1
     "@types/glob": ^7.1.1
     "@types/node": ^20.11.27
@@ -2993,8 +2993,8 @@ __metadata:
     "@jupyterlab/translation": ^4.3.0-alpha.0
     "@jupyterlab/translation-extension": ^4.3.0-alpha.0
     "@jupyterlab/ui-components-extension": ^4.3.0-alpha.0
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     fs-extra: ^10.1.0
     glob: ~7.1.6
     mini-svg-data-uri: ^1.4.4
@@ -3022,8 +3022,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.3.0-alpha.0
     "@lumino/commands": ^2.3.0
     "@lumino/widgets": ^2.3.2
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.1.6
@@ -3046,8 +3046,8 @@ __metadata:
     "@jupyterlab/translation": ^4.3.0-alpha.0
     "@lumino/commands": ^2.3.0
     "@lumino/widgets": ^2.3.2
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     rimraf: ~5.0.5
     typescript: ~5.1.6
   languageName: unknown
@@ -3099,7 +3099,7 @@ __metadata:
     "@jupyterlab/translation-extension": ^4.3.0-alpha.0
     "@jupyterlab/ui-components-extension": ^4.3.0-alpha.0
     "@jupyterlab/vega5-extension": ^4.3.0-alpha.0
-    "@rspack/cli": ^0.7.4
+    "@rspack/cli": ^0.7.5
     copy-webpack-plugin: ^11.0.0
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3158,8 +3158,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.3.0-alpha.0
     "@lumino/commands": ^2.3.0
     "@lumino/widgets": ^2.3.2
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.1.6
@@ -3190,8 +3190,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.3.0-alpha.0
     "@lumino/commands": ^2.3.0
     "@lumino/widgets": ^2.3.2
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.1.6
@@ -3205,8 +3205,8 @@ __metadata:
     "@jupyterlab/coreutils": ^6.3.0-alpha.0
     "@jupyterlab/services": ^7.3.0-alpha.0
     "@lumino/coreutils": ^2.1.2
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     rimraf: ~5.0.5
     typescript: ~5.1.6
   languageName: unknown
@@ -3220,8 +3220,8 @@ __metadata:
     "@jupyterlab/outputarea": ^4.3.0-alpha.0
     "@jupyterlab/rendermime": ^4.3.0-alpha.0
     "@jupyterlab/services": ^7.3.0-alpha.0
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     rimraf: ~5.0.5
     typescript: ~5.1.6
   languageName: unknown
@@ -3238,7 +3238,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.3.0-alpha.0
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.2
-    "@rspack/cli": ^0.7.4
+    "@rspack/cli": ^0.7.5
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.1.6
@@ -3256,8 +3256,8 @@ __metadata:
     "@jupyterlab/terminal": ^4.3.0-alpha.0
     "@jupyterlab/theme-light-extension": ^4.3.0-alpha.0
     "@lumino/widgets": ^2.3.2
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     typescript: ~5.1.6
@@ -4133,8 +4133,8 @@ __metadata:
     "@jupyterlab/notebook": ^4.3.0-alpha.0
     "@jupyterlab/outputarea": ^4.3.0-alpha.0
     "@jupyterlab/rendermime": ^4.3.0-alpha.0
-    "@rspack/cli": ^0.7.4
-    "@rspack/core": ^0.7.4
+    "@rspack/cli": ^0.7.5
+    "@rspack/core": ^0.7.5
     css-loader: ^7.1.1
     null-loader: ^4.0.0
     rimraf: ~5.0.5
@@ -4499,7 +4499,7 @@ __metadata:
     "@lumino/polling": ^2.1.2
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
-    "@rspack/cli": ^0.7.4
+    "@rspack/cli": ^0.7.5
     "@types/jest": ^29.2.0
     "@types/ws": ^8.5.3
     jest: ^29.2.0
@@ -5918,82 +5918,82 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-arm64@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-darwin-arm64@npm:0.7.4"
+"@rspack/binding-darwin-arm64@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-darwin-arm64@npm:0.7.5"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-darwin-x64@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-darwin-x64@npm:0.7.4"
+"@rspack/binding-darwin-x64@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-darwin-x64@npm:0.7.5"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-gnu@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-linux-arm64-gnu@npm:0.7.4"
+"@rspack/binding-linux-arm64-gnu@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-linux-arm64-gnu@npm:0.7.5"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-arm64-musl@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-linux-arm64-musl@npm:0.7.4"
+"@rspack/binding-linux-arm64-musl@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-linux-arm64-musl@npm:0.7.5"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-gnu@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-linux-x64-gnu@npm:0.7.4"
+"@rspack/binding-linux-x64-gnu@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-linux-x64-gnu@npm:0.7.5"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rspack/binding-linux-x64-musl@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-linux-x64-musl@npm:0.7.4"
+"@rspack/binding-linux-x64-musl@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-linux-x64-musl@npm:0.7.5"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-arm64-msvc@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-win32-arm64-msvc@npm:0.7.4"
+"@rspack/binding-win32-arm64-msvc@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-win32-arm64-msvc@npm:0.7.5"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-ia32-msvc@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-win32-ia32-msvc@npm:0.7.4"
+"@rspack/binding-win32-ia32-msvc@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-win32-ia32-msvc@npm:0.7.5"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@rspack/binding-win32-x64-msvc@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding-win32-x64-msvc@npm:0.7.4"
+"@rspack/binding-win32-x64-msvc@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding-win32-x64-msvc@npm:0.7.5"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@rspack/binding@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/binding@npm:0.7.4"
+"@rspack/binding@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/binding@npm:0.7.5"
   dependencies:
-    "@rspack/binding-darwin-arm64": 0.7.4
-    "@rspack/binding-darwin-x64": 0.7.4
-    "@rspack/binding-linux-arm64-gnu": 0.7.4
-    "@rspack/binding-linux-arm64-musl": 0.7.4
-    "@rspack/binding-linux-x64-gnu": 0.7.4
-    "@rspack/binding-linux-x64-musl": 0.7.4
-    "@rspack/binding-win32-arm64-msvc": 0.7.4
-    "@rspack/binding-win32-ia32-msvc": 0.7.4
-    "@rspack/binding-win32-x64-msvc": 0.7.4
+    "@rspack/binding-darwin-arm64": 0.7.5
+    "@rspack/binding-darwin-x64": 0.7.5
+    "@rspack/binding-linux-arm64-gnu": 0.7.5
+    "@rspack/binding-linux-arm64-musl": 0.7.5
+    "@rspack/binding-linux-x64-gnu": 0.7.5
+    "@rspack/binding-linux-x64-musl": 0.7.5
+    "@rspack/binding-win32-arm64-msvc": 0.7.5
+    "@rspack/binding-win32-ia32-msvc": 0.7.5
+    "@rspack/binding-win32-x64-msvc": 0.7.5
   dependenciesMeta:
     "@rspack/binding-darwin-arm64":
       optional: true
@@ -6013,16 +6013,16 @@ __metadata:
       optional: true
     "@rspack/binding-win32-x64-msvc":
       optional: true
-  checksum: 84d0ff6f15f35fbf91415d08237b99d9eea39b1e7589baa7474b2a8505e2549f80159254c8eb34609ce0bb66a38f3d973237489465d72ff612450522efb75413
+  checksum: de25c44cc9c3a240c6f59a657d19d7170c3af1c99097fe2aa5118e2af7b0d606935ad45640102888ce1806bc67fb207189f562cfbcfe4c1628116f5b06f7c6b6
   languageName: node
   linkType: hard
 
-"@rspack/cli@npm:^0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/cli@npm:0.7.4"
+"@rspack/cli@npm:^0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/cli@npm:0.7.5"
   dependencies:
     "@discoveryjs/json-ext": ^0.5.7
-    "@rspack/dev-server": 0.7.4
+    "@rspack/dev-server": 0.7.5
     colorette: 2.0.19
     exit-hook: ^3.2.0
     interpret: ^3.1.1
@@ -6034,16 +6034,16 @@ __metadata:
     "@rspack/core": ">=0.4.0"
   bin:
     rspack: bin/rspack
-  checksum: da549c83b4d3a29ba5114986b0f5e6e4e69c65905e676132fe82dc2119a1feef0a1d817f9f202c016f2ad24644674024093354e6bfe7c5153b0f04217bef5202
+  checksum: 2410e9beb424d9c7dabe5dc32a68e88915f5789804bb3e6ddc35403d26ce0436bfed7224d9baf04266debde664ecb11a3385429c0f4c97955a522fb190d4767f
   languageName: node
   linkType: hard
 
-"@rspack/core@npm:^0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/core@npm:0.7.4"
+"@rspack/core@npm:^0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/core@npm:0.7.5"
   dependencies:
     "@module-federation/runtime-tools": 0.1.6
-    "@rspack/binding": 0.7.4
+    "@rspack/binding": 0.7.5
     caniuse-lite: ^1.0.30001616
     tapable: 2.2.1
     webpack-sources: 3.2.3
@@ -6052,13 +6052,13 @@ __metadata:
   peerDependenciesMeta:
     "@swc/helpers":
       optional: true
-  checksum: a7fccb5819c1852534185377643e27af0d5fd03aa52c5ad3ef33b9572794b6787163b43c049eb31442e58704fcb859dc515820686caf530274ca6bc849c76bd0
+  checksum: 9e41005231d7a58888cb349ee26737752087f13847f6178308f04e99169187996e40cdaf8987e656a81fe1fb91aeb2e8ca2f1fa32fed46b04fe2709325e5a387
   languageName: node
   linkType: hard
 
-"@rspack/dev-server@npm:0.7.4":
-  version: 0.7.4
-  resolution: "@rspack/dev-server@npm:0.7.4"
+"@rspack/dev-server@npm:0.7.5":
+  version: 0.7.5
+  resolution: "@rspack/dev-server@npm:0.7.5"
   dependencies:
     chokidar: 3.5.3
     connect-history-api-fallback: 2.0.0
@@ -6070,7 +6070,7 @@ __metadata:
     ws: 8.8.1
   peerDependencies:
     "@rspack/core": "*"
-  checksum: f9ff265287250d5a7426dadf99031207a49f8bc38cf0a9c9389a746d5944aeb438d7441b570c7b40408e2122aa03947e58aaa46f4441d73771c1fe8db8525cb7
+  checksum: d5c767726b1083797cdcc852cb0603fc81ae0225341b5cf52d15e847ced0f1672b83a42bd3237fd047ba63ebe5a9032f5de9ca8c47f318e6ac68425c91ff46d7
   languageName: node
   linkType: hard
 

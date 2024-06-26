@@ -199,8 +199,8 @@
   "devDependencies": {
     "@jupyterlab/builder": "^4.3.0-alpha.0",
     "@jupyterlab/buildutils": "^4.3.0-alpha.0",
-    "@rspack/cli": "^0.7.4",
-    "@rspack/core": "^0.7.4",
+    "@rspack/cli": "^0.7.5",
+    "@rspack/core": "^0.7.5",
     "chokidar": "^3.6.0",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "fs-extra": "^10.1.0",
