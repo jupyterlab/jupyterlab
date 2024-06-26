@@ -61,7 +61,7 @@ export const ConnectionLost: IConnectionLost = async function (
       Private.serverConnectionLost = undefined;
     });
 
-  setServerConnectionLost(dialog);
+  Private.serverConnectionLost = dialog;
 
   return;
 };
