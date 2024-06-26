@@ -24,7 +24,7 @@ export const ConnectionLost: IConnectionLost = async function (
   );
   const buttons = [Dialog.okButton({ label: trans.__('Dismiss') })];
 
-  if (!getDisplayConnection()) {
+  if (!Private.displayConnectionLost) {
     return;
   }
 
