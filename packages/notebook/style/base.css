@@ -518,8 +518,6 @@ div.jp-Cell-Placeholder-content-3 {
   font-family: monospace;
   font-size: 80%;
   line-height: 100%;
-  position: relative;
-  top: 1px;
   margin-left: -1px;
   padding-right: 1px;
   text-wrap: nowrap; /* stylelint-disable-line csstree/validator */
