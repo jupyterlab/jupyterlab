@@ -58,7 +58,7 @@ export const ConnectionLost: IConnectionLost = async function (
       console.error('An error occurred while showing the dialog: ', error);
     })
     .finally(() => {
-      setServerConnectionLost(undefined);
+      Private.serverConnectionLost = undefined;
     });
 
   setServerConnectionLost(dialog);
