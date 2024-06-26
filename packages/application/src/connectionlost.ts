@@ -29,7 +29,7 @@ export const ConnectionLost: IConnectionLost = async function (
   }
 
   let connectionDialog: Promise<void | Dialog.IResult<string>> | undefined =
-    getServerConnectionLost();
+    Private.serverConnectionLost;
 
   if (connectionDialog) {
     // Wait for the pre-existing promise to complete
