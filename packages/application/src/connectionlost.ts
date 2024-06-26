@@ -50,7 +50,7 @@ export const ConnectionLost: IConnectionLost = async function (
   })
     .then(result => {
       if (result.isChecked) {
-        disableConnectionLostDialog();
+        Private.displayConnectionLost = false;
       }
       return;
     })
