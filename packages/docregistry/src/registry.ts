@@ -61,6 +61,7 @@ export class DocumentRegistry implements IDisposable {
       };
       this._fileTypes.push(value);
     });
+    console.log(this._fileTypes,"this._fileTypes")
   }
 
   /**
@@ -117,6 +118,7 @@ export class DocumentRegistry implements IDisposable {
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
     const name = factory.name.toLowerCase();
+    console.log("name",name)
     if (!name || name === 'default') {
       throw Error('Invalid factory name');
     }
@@ -148,6 +150,12 @@ export class DocumentRegistry implements IDisposable {
       }
       this._widgetFactoriesForFileType[ft].push(name);
     }
+    // this._changed.emit({
+    //   type: 'widgetFactory',
+    //   name,
+    //   change: 'added'
+    // });
+
     this._changed.emit({
       type: 'widgetFactory',
       name,

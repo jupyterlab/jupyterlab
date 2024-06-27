@@ -47,6 +47,40 @@ namespace CommandIDs {
   export const TSVGoToLine = 'tsv:go-to-line';
 }
 
+
+
+// // Disposable  Class
+// interface IPlaceholder extends IObservableDisposable {}
+
+// interface IWidgetFactoryPlaceholder {
+//   // somethings
+// }
+
+// class WidgetFactoryPlaceholder implements DocumentRegistry.IWidgetFactory, IPlaceholder {
+//   constructor(entrypoint: IWidgetFactoryPlaceholder) {
+//     // ...
+//   }
+
+//   // Will be required to attach this to the factory
+//   widgetCreated(){
+// should be a signal
+// console.log("checking")
+
+//   }
+
+//   createNew() {
+// await import('@jupyterlab/apputils-extension')
+//      for register and activate createNew()
+//      
+//     // This is actually this method that when triggered should load the plugin
+//   }
+// }
+
+
+
+
+
+
 /**
  * The CSV file handler extension.
  */
@@ -63,7 +97,7 @@ const csv: JupyterFrontEndPlugin<void> = {
     ISettingRegistry,
     IToolbarWidgetRegistry
   ],
-  autoStart: true
+  autoStart: false
 };
 
 /**
@@ -82,7 +116,7 @@ const tsv: JupyterFrontEndPlugin<void> = {
     ISettingRegistry,
     IToolbarWidgetRegistry
   ],
-  autoStart: true
+  autoStart: false
 };
 
 /**
@@ -129,6 +163,29 @@ function activateCsv(
 
   const trans = translator.load('jupyterlab');
 
+  // Does this class needs to have 
+  // const factory = new WidgetFactoryPlaceholder({
+  //   entrypoints: {
+  //     "name": "CSVTable",
+  //     "label": "CSV Viewer",
+  //     "fileTypes": ["csv"],
+  //     "defaultFor": ["csv"]
+  // },
+  //   factoryCall: CSVViewerFactory,
+  //   options : {
+  //     name: FACTORY_CSV,
+  //     label: trans.__('CSV Viewer'),
+  //     fileTypes: ['csv'],
+  //     defaultFor: ['csv'],
+  //     readOnly: true,
+  //     toolbarFactory,
+  //     translator
+  //   }
+  // })
+
+
+
+
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
     label: trans.__('CSV Viewer'),
@@ -138,6 +195,8 @@ function activateCsv(
     toolbarFactory,
     translator
   });
+
+
   const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'csvviewer'
   });

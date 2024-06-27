@@ -58,7 +58,25 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "entryPoints": {
+      "fileTypes": [
+        {
+          "name": "csv",
+          "extensions": [
+            ".csv"
+          ]
+        }
+      ],
+      "widgetFactory": [
+        {
+          "name": "CSVTable",
+          "fileTypes": [
+            "csv"
+          ]
+        }
+      ]
+    }
   },
   "styleModule": "style/index.js"
 }
