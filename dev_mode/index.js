@@ -83,7 +83,7 @@ var JupyterLab = require('@jupyterlab/application').JupyterLab;
       queuedFederated.push(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
-    
+
     if (data.style && !PageConfig.Extension.isDisabled(data.name)) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
@@ -164,7 +164,7 @@ var JupyterLab = require('@jupyterlab/application').JupyterLab;
 
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
-  if (!queuedFederated.includes('{{@key}}')) {  
+  if (!queuedFederated.includes('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
       ext.__scope__ = '{{@key}}';

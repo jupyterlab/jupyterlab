@@ -71,7 +71,7 @@ namespace CommandIDs {
 //   createNew() {
 // await import('@jupyterlab/apputils-extension')
 //      for register and activate createNew()
-//      
+//
 //     // This is actually this method that when triggered should load the plugin
 //   }
 // }
@@ -163,7 +163,7 @@ function activateCsv(
 
   const trans = translator.load('jupyterlab');
 
-  // Does this class needs to have 
+  // Does this class needs to have
   // const factory = new WidgetFactoryPlaceholder({
   //   entrypoints: {
   //     "name": "CSVTable",
