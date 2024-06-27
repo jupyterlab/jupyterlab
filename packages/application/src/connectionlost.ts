@@ -22,18 +22,14 @@ export const ConnectionLost: IConnectionLost = async function (
       'JupyterLab will continue trying to reconnect.\n' +
       'Check your network connection or Jupyter server configuration.\n'
   );
-  const buttons = [Dialog.okButton({ label: trans.__('Dismiss') })];
 
   if (!Private.displayConnectionLost) {
     return;
   }
 
-  let connectionDialog: Promise<void | Dialog.IResult<string>> | undefined =
-    Private.serverConnectionLost;
-
-  if (connectionDialog) {
+  if (Private.serverConnectionLost) {
     // Wait for the pre-existing promise to complete
-    await connectionDialog;
+    await Private.serverConnectionLost;
     return;
   }
 
@@ -46,7 +42,7 @@ export const ConnectionLost: IConnectionLost = async function (
         'If checked, you will not see a dialog informing you about an issue with server connection in this session.'
       )
     },
-    buttons: buttons
+    buttons: [Dialog.okButton({ label: trans.__('Dismiss') })]
   })
     .then(result => {
       if (result.isChecked) {
@@ -62,8 +58,6 @@ export const ConnectionLost: IConnectionLost = async function (
     });
 
   Private.serverConnectionLost = dialog;
-
-  return;
 };
 
 /**
