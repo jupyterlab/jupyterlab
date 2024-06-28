@@ -22,6 +22,11 @@
 @import './toolbar.css';
 @import './windowedlist.css';
 
+:root {
+  /* Increase default density for Jupyter toolkit components */
+  --density: -4;
+}
+
 body {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -156,6 +161,11 @@ input::placeholder {
   padding: 6px;
 }
 
+.jp-HTMLSelect.jp-DefaultStyle {
+  /* Leave space for the focus outline */
+  padding: 0 2px;
+}
+
 .jp-HTMLSelect.jp-DefaultStyle select {
   background-color: initial;
   border: none;
@@ -182,6 +192,10 @@ input::placeholder {
 
 .jp-HTMLSelect.jp-DefaultStyle select:disabled ~ span {
   cursor: not-allowed;
+}
+
+.jp-HTMLSelect.jp-DefaultStyle select:focus-visible {
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
 }
 
 /* Use our own theme for hover and option styles */
