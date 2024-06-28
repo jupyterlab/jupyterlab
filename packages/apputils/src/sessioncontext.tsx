@@ -15,12 +15,21 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PartialJSONObject,
+  PartialJSONValue,
+  PromiseDelegate,
+  UUID
+} from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
+import { DialogWidget } from '@jupyterlab/ui-components';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { Message } from '@lumino/messaging';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -287,6 +296,11 @@ export namespace ISessionContext {
      * found (default `false`).
      */
     readonly autoStartDefault?: boolean;
+
+    /**
+     * Kernel custom specs defined by kernel name
+     */
+    customKernelSpecs?: undefined | PartialJSONObject;
   }
 
   export type KernelDisplayStatus =
@@ -670,7 +684,8 @@ export class SessionContext implements ISessionContext {
    */
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
-
+    const specs = this.specsManager.specs;
+    //
     if (!preference.autoStartDefault && preference.shouldStart === false) {
       return true;
     }
@@ -680,12 +695,19 @@ export class SessionContext implements ISessionContext {
       options = { id: preference.id };
     } else {
       const name = Private.getDefaultKernel({
-        specs: this.specsManager.specs,
+        specs,
         sessions: this.sessionManager.running(),
         preference
       });
       if (name) {
-        options = { name };
+        if (preference.customKernelSpecs) {
+          options = {
+            name,
+            custom_kernel_specs: preference.customKernelSpecs
+          };
+        } else {
+          options = { name };
+        }
       }
     }
 
@@ -709,6 +731,7 @@ export class SessionContext implements ISessionContext {
    */
   async restartKernel(): Promise<void> {
     const kernel = this.session?.kernel || null;
+
     if (this._isRestarting) {
       return;
     }
@@ -1370,19 +1393,37 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       return;
     }
 
-    if (hasCheckbox && result.isChecked !== null) {
-      sessionContext.kernelPreference = {
-        ...sessionContext.kernelPreference,
-        autoStartDefault: result.isChecked
-      };
-    }
+    const dialogResult = result.value as Kernel.IModel;
 
-    const model = result.value;
-    if (model === null && !sessionContext.hasNoKernel) {
-      return sessionContext.shutdown();
-    }
-    if (model) {
-      await sessionContext.changeKernel(model);
+    if (dialogResult) {
+      let model = {
+        name: dialogResult.name,
+        custom_kernel_specs: {}
+      };
+
+      if (hasCheckbox && result.isChecked !== null) {
+        if (model && sessionContext.kernelPreference?.customKernelSpecs) {
+          sessionContext.kernelPreference.customKernelSpecs = undefined;
+        }
+
+        if (model && dialogResult.custom_kernel_specs) {
+          sessionContext.kernelPreference.customKernelSpecs =
+            dialogResult.custom_kernel_specs;
+          model['custom_kernel_specs'] = dialogResult.custom_kernel_specs;
+        }
+
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          autoStartDefault: result.isChecked
+        };
+      }
+
+      if (model === null && !sessionContext.hasNoKernel) {
+        return sessionContext.shutdown();
+      }
+      if (model) {
+        await sessionContext.changeKernel(model);
+      }
     }
   }
 
@@ -1452,19 +1493,58 @@ namespace Private {
    * A widget that provides a kernel selection.
    */
   export class KernelSelector extends Widget {
+    sessionContext: ISessionContext;
+    translator: ITranslator | undefined;
     /**
      * Create a new kernel selector widget.
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
+      this.sessionContext = sessionContext;
+      this.translator = translator;
+    }
+
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.setupDefaultKernelSpecs(this.sessionContext, this.translator);
+    }
+
+    setupDefaultKernelSpecs(
+      sessionContext: ISessionContext,
+      translator: ITranslator | undefined
+    ) {
+      translator = translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
+      if (this.node) {
+        const selector = this.node.querySelector(
+          'select#js-kernel-selector'
+        ) as HTMLSelectElement;
+        selector.setAttribute('data-kernel-spec', '');
+        const kernelSpeccSelectorContainer = this.node.querySelector(
+          'div#js-kernel-specs-selector-container'
+        ) as HTMLDivElement;
+        checkCustomKernelSpecs(
+          sessionContext,
+          selector,
+          trans,
+          kernelSpeccSelectorContainer
+        );
+      }
     }
 
     /**
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      const selector = this.node.querySelector('select') as HTMLSelectElement;
-      return JSON.parse(selector.value) as Kernel.IModel;
+      const selector = this.node.querySelector(
+        'select#js-kernel-selector'
+      ) as HTMLSelectElement;
+      const selectorKernelSpecs = selector.getAttribute('data-kernel-spec');
+      let kernelData = JSON.parse(selector.value) as Kernel.IModel;
+      if (selectorKernelSpecs) {
+        kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs);
+      }
+      return kernelData;
     }
   }
 
@@ -1480,22 +1560,117 @@ namespace Private {
     const trans = translator.load('jupyterlab');
 
     const body = document.createElement('div');
+
+    const container = document.createElement('div');
+
+    const kernelSpecsContainer = document.createElement('div');
+
+    container.setAttribute('id', 'js-kernel-selector-container');
+
+    kernelSpecsContainer.setAttribute(
+      'id',
+      'js-kernel-specs-selector-container'
+    );
+
     const text = document.createElement('label');
     text.textContent = `${trans.__('Select kernel for:')} "${
       sessionContext.name
     }"`;
-    body.appendChild(text);
+
+    container.appendChild(text);
 
     const options = getKernelSearch(sessionContext);
     const selector = document.createElement('select');
+    selector.setAttribute('id', 'js-kernel-selector');
+    selector.onchange = () => {
+      selector.setAttribute(
+        'data-kernel-spec','');
+      checkCustomKernelSpecs(sessionContext, selector, trans);
+    };
+
     populateKernelSelect(
       selector,
       options,
       translator,
       !sessionContext.hasNoKernel ? sessionContext.kernelDisplayName : null
     );
-    body.appendChild(selector);
+    container.append(selector);
+    body.append(container);
+    body.append(kernelSpecsContainer);
     return body;
+  }
+
+  function checkCustomKernelSpecs(
+    sessionContext: ISessionContext,
+    selector: HTMLSelectElement,
+    trans: IRenderMime.TranslationBundle,
+    kernelSpeccSelectorContainer?: HTMLDivElement
+  ) {
+    let kernelConfiguration: PartialJSONObject = {};
+    let selectedKernel = JSON.parse(selector.value) as Kernel.IModel;
+
+    let kernelSpecsContainer = document.querySelector(
+      '#js-kernel-specs-selector-container'
+    ) as HTMLElement;
+
+    if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
+      kernelSpecsContainer = kernelSpeccSelectorContainer;
+    }
+
+    kernelSpecsContainer.innerHTML = '';
+    let kernelName =
+      selectedKernel && selectedKernel.name ? selectedKernel.name : '';
+    let kernel =
+      kernelName && sessionContext.specsManager.specs?.kernelspecs[kernelName];
+    if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
+      let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
+
+      if (kernelParameters) {
+        if (sessionContext.kernelPreference?.customKernelSpecs) {
+          let customKernelSpecs = sessionContext.kernelPreference
+            ?.customKernelSpecs as PartialJSONObject;
+          for (let key in customKernelSpecs) {
+            let selectedValue = customKernelSpecs[key] as
+              | PartialJSONValue
+              | undefined;
+
+            if (kernelParameters.properties) {
+              let properties = kernelParameters.properties as PartialJSONObject;
+
+              let kernelParameter = properties[key] as PartialJSONObject;
+
+              if (kernelParameter) {
+                let kernelParametersTmp = (
+                  kernelParameters.properties as PartialJSONObject
+                )[key] as PartialJSONObject;
+                (kernelParameters.properties as PartialJSONObject)[key] = {
+                  ...kernelParametersTmp,
+                  default: selectedValue
+                };
+              }
+            }
+          }
+        }
+
+        let kernelSpecWidget = new DialogWidget(
+          kernelParameters,
+          kernelConfiguration,
+          formData => {
+            kernelConfiguration = formData as PartialJSONObject;
+            selector.setAttribute(
+              'data-kernel-spec',
+              JSON.stringify(kernelConfiguration)
+            );
+          },
+          trans
+        );
+
+        //Update widget
+        if (kernelSpecsContainer) {
+          Widget.attach(kernelSpecWidget, kernelSpecsContainer);
+        }
+      }
+    }
   }
 
   /**

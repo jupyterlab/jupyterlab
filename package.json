@@ -109,6 +109,8 @@
     "yjs": "^13.5.40"
   },
   "dependencies": {
+    "@jupyterlab/application": "workspace:^",
+    "@jupyterlab/apputils": "workspace:^",
     "@typescript-eslint/eslint-plugin": "~6.13.2",
     "@typescript-eslint/parser": "~6.13.2",
     "eslint": "~8.55.0",
