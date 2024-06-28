@@ -81,9 +81,7 @@ const UNUSED: Dict<string[]> = {
     'css-loader',
     'path-browserify',
     'process',
-    'style-loader',
     'terser-webpack-plugin',
-    'webpack-cli',
     'worker-loader',
     'source-map-loader'
   ],

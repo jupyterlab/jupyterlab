@@ -1,14 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import * as webpack from 'webpack';
+import * as rspack from '@rspack/core';
 import miniSVGDataURI from 'mini-svg-data-uri';
 
 const rules = [
   { test: /\.raw\.css$/, type: 'asset/source' },
-  {
-    test: /(?<!\.raw)\.css$/,
-    use: [require.resolve('style-loader'), require.resolve('css-loader')]
-  },
   { test: /\.txt$/, type: 'asset/source' },
   { test: /\.md$/, type: 'asset/source' },
   { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
@@ -32,7 +28,10 @@ const rules = [
     issuer: /\.css$/,
     type: 'asset',
     generator: {
-      dataUrl: (content: any) => miniSVGDataURI(content.toString())
+      dataUrl: {
+        content: (content: any) => miniSVGDataURI(content.content),
+        mimetype: 'image/svg+xml'
+      }
     }
   },
   {
@@ -80,10 +79,10 @@ module.exports = {
     aggregateTimeout: 1000
   },
   output: {
-    hashFunction: 'sha256'
+    hashFunction: 'xxhash64'
   },
   plugins: [
-    new webpack.ProvidePlugin({
+    new rspack.ProvidePlugin({
       process: 'process/browser'
     })
   ]
