@@ -38,9 +38,9 @@ const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
 const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
 
 /**
- * The class name added to the filebrowser folder toolbar node.
+ * The class name added to the filebrowser filter toolbar node.
  */
-const FOLDER_TOOLBAR_CLASS = 'jp-FileBrowser-folderToolbar';
+const FILTER_TOOLBAR_CLASS = 'jp-FileBrowser-filterToolbar';
 
 /**
  * The class name added to the filebrowser listing node.
@@ -91,7 +91,7 @@ export class FileBrowser extends SidePanel {
     this.crumbs = new BreadCrumbs({ model, translator });
     this.crumbs.addClass(CRUMBS_CLASS);
 
-    // The folder toolbar appears immediately below the breadcrumbs and above the directory listing.
+    // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
     const searcher = FilenameSearcher({
       updateFilter: (
         filterFn: (item: string) => Partial<IScore> | null,
@@ -108,10 +108,10 @@ export class FileBrowser extends SidePanel {
     });
     searcher.addClass(FILTERBOX_CLASS);
 
-    this.folderToolbar = new Toolbar();
-    this.folderToolbar.addClass(FOLDER_TOOLBAR_CLASS);
-    this.folderToolbar.addItem('fileNameSearcher', searcher);
-    this.folderToolbar.node.style['display'] = this.showFileFilter
+    this.filterToolbar = new Toolbar();
+    this.filterToolbar.addClass(FILTER_TOOLBAR_CLASS);
+    this.filterToolbar.addItem('fileNameSearcher', searcher);
+    this.filterToolbar.node.style['display'] = this.showFileFilter
       ? 'block'
       : 'none';
 
@@ -123,7 +123,7 @@ export class FileBrowser extends SidePanel {
     this.listing.addClass(LISTING_CLASS);
 
     this.mainPanel.addWidget(this.crumbs);
-    this.mainPanel.addWidget(this.folderToolbar);
+    this.mainPanel.addWidget(this.filterToolbar);
     this.mainPanel.addWidget(this.listing);
 
     this.addWidget(this.mainPanel);
@@ -232,7 +232,7 @@ export class FileBrowser extends SidePanel {
     const oldValue = this.showFileFilter;
     if (oldValue && !value) {
       // Clear the search box input
-      (this.folderToolbar.layout as PanelLayout).widgets.forEach(widget => {
+      (this.filterToolbar.layout as PanelLayout).widgets.forEach(widget => {
         if (
           widget.node.getAttribute('data-jp-item-name') === 'fileNameSearcher'
         ) {
@@ -259,8 +259,8 @@ export class FileBrowser extends SidePanel {
     this._showFileFilter = value;
 
     // Update widget visibility
-    const folderToolbarNode = this.folderToolbar.node;
-    folderToolbarNode.style['display'] = this.showFileFilter ? 'block' : 'none';
+    const filterToolbarNode = this.filterToolbar.node;
+    filterToolbarNode.style['display'] = this.showFileFilter ? 'block' : 'none';
   }
 
   /**
@@ -509,7 +509,7 @@ export class FileBrowser extends SidePanel {
     }
   }
 
-  protected folderToolbar: Toolbar;
+  protected filterToolbar: Toolbar;
   protected listing: DirListing;
   protected crumbs: BreadCrumbs;
   protected mainPanel: Panel;
