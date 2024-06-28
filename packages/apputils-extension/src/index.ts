@@ -48,7 +48,7 @@ import { displayShortcuts } from './shortcuts';
 /**
  * The interval in milliseconds before recover options appear during splash.
  */
-const SPLASH_RECOVER_TIMEOUT = 12000;
+const SPLASH_RECOVER_TIMEOUT = 20000;
 
 /**
  * The command IDs used by the apputils plugin.
