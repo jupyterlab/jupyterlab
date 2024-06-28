@@ -1734,6 +1734,12 @@
     ]
   },
   {
+    "id": "notebook:filter-cells",
+    "label": "Filter Cells",
+    "caption": "Filter cells",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:get-kernel",
     "label": "Get Kernel",
     "caption": "",

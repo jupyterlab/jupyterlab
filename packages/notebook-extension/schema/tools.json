@@ -13,6 +13,10 @@
             "title": "Cell tool",
             "type": "null"
           },
+          "_TAG-FILTERING-TOOL": {
+            "title": "Filter cells",
+            "type": "null"
+          },
           "/editable": {
             "title": "Editable",
             "type": "boolean",
@@ -104,6 +108,9 @@
       "metadataOptions": {
         "_CELL-TOOL": {
           "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.renderer"
+        },
+        "_TAG-FILTERING-TOOL": {
+          "customRenderer": "@jupyterlab/notebook-extension:cell-filters.renderer"
         },
         "/raw_mimetype": {
           "cellTypes": ["raw"]
