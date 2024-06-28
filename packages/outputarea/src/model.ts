@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
+import {
+  IObservableList,
+  IObservableString,
+  ObservableList
+} from '@jupyterlab/observables';
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
@@ -55,6 +59,11 @@ export interface IOutputAreaModel extends IDisposable {
    * Contiguous stream outputs of the same `name` are combined.
    */
   add(output: nbformat.IOutput): number;
+
+  /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void;
 
   /**
    * Set the value at the specified index.
@@ -256,12 +265,20 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void {
+    this.list.get(index).dispose();
+    this.list.remove(index);
+  }
+
+  /**
    * Clear all of the output.
    *
    * @param wait Delay clearing the output until the next message is added.
    */
   clear(wait: boolean = false): void {
-    this._lastStream = '';
+    this._lastStreamName = '';
     if (wait) {
       this.clearNext = true;
       return;
@@ -309,29 +326,27 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Consolidate outputs if they are stream outputs of the same kind.
     if (
       nbformat.isStream(value) &&
-      this._lastStream &&
-      value.name === this._lastName &&
+      value.name === this._lastStreamName &&
       this.shouldCombine({
         value,
         lastModel: this.list.get(this.length - 1)
       })
     ) {
-      // In order to get a list change event, we add the previous
-      // text to the current item and replace the previous item.
-      // This also replaces the metadata of the last item.
-      this._lastStream += value.text as string;
-      this._lastStream = Private.removeOverwrittenChars(this._lastStream);
-      value.text = this._lastStream;
-      const item = this._createItem({ value, trusted });
-      const index = this.length - 1;
-      const prev = this.list.get(index);
-      this.list.set(index, item);
-      prev.dispose();
+      // We append the new text to the current text.
+      // This creates a text change event.
+      const prev = this.list.get(this.length - 1) as IOutputModel;
+      const curText = prev.observableData.get(
+        'text'
+      ) as unknown as IObservableString;
+      const newText = value.text as string;
+      Private.concatenateText(curText, newText);
       return this.length;
     }
 
+    let newText = '';
     if (nbformat.isStream(value)) {
-      value.text = Private.removeOverwrittenChars(value.text as string);
+      newText = value.text as string;
+      value.text = '';
     }
 
     // Create the new item.
@@ -339,10 +354,13 @@ export class OutputAreaModel implements IOutputAreaModel {
 
     // Update the stream information.
     if (nbformat.isStream(value)) {
-      this._lastStream = value.text as string;
-      this._lastName = value.name;
+      this._lastStreamName = value.name;
+      const curText = item.observableData.get(
+        'text'
+      ) as unknown as IObservableString;
+      Private.concatenateText(curText, newText);
     } else {
-      this._lastStream = '';
+      this._lastStreamName = '';
     }
 
     // Add the item to our list and return the new length.
@@ -437,8 +455,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
-  private _lastStream = '';
-  private _lastName: 'stdout' | 'stderr';
+  private _lastStreamName: '' | 'stdout' | 'stderr' = '';
   private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<OutputAreaModel, number>(this);
@@ -484,38 +501,70 @@ namespace Private {
     }
   }
 
-  /**
-   * Remove characters that are overridden by backspace characters.
-   */
-  function fixBackspace(txt: string): string {
-    let tmp = txt;
-    do {
-      txt = tmp;
-      // Cancel out anything-but-newline followed by backspace
-      tmp = txt.replace(/[^\n]\x08/gm, ''); // eslint-disable-line no-control-regex
-    } while (tmp.length < txt.length);
-    return txt;
-  }
-
-  /**
-   * Remove chunks that should be overridden by the effect of
-   * carriage return characters.
-   */
-  function fixCarriageReturn(txt: string): string {
-    txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
-    while (txt.search(/\r[^$]/g) > -1) {
-      const base = txt.match(/^(.*)\r+/m)![1];
-      let insert = txt.match(/\r+(.*)$/m)![1];
-      insert = insert + base.slice(insert.length, base.length);
-      txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
-    }
-    return txt;
-  }
-
   /*
-   * Remove characters overridden by backspaces and carriage returns
+   * Concatenate a string to an observable string, handling backspaces.
    */
-  export function removeOverwrittenChars(text: string): string {
-    return fixCarriageReturn(fixBackspace(text));
+  export function concatenateText(
+    curText: IObservableString,
+    newText: string
+  ): void {
+    let text = newText;
+    let done = false;
+    while (!done) {
+      const idx1 = text.indexOf('\b');
+      if (idx1 === -1) {
+        // No backspace anymore.
+        if (text.length > 0) {
+          curText.insert(curText.text.length, text);
+        }
+        done = true;
+      } else {
+        // There is at least one backspace to handle.
+        let deleteNb = 1;
+        // Get the number of contiguous backspaces.
+        for (let idx2 = idx1 + 1; idx2 < text.length; idx2++) {
+          if (text[idx2] === '\b') {
+            deleteNb += 1;
+          } else {
+            break;
+          }
+        }
+        // Delete the characters in the new text.
+        let textToAppend = '';
+        let idx3 = text.slice(0, idx1).lastIndexOf('\n');
+        if (idx3 != -1) {
+          // Only delete up to the new line.
+          textToAppend = text.slice(0, idx3 + 1);
+          text = text.slice(idx1 + deleteNb);
+          deleteNb = 0;
+        } else {
+          if (deleteNb < idx1) {
+            textToAppend = text.slice(0, idx1 - deleteNb);
+            text = text.slice(idx1 + deleteNb);
+          } else {
+            text = text.slice(idx1 + deleteNb);
+          }
+          deleteNb -= idx1;
+        }
+        if (deleteNb > 0) {
+          // There are still characters to delete so nothing to insert from the new text yet.
+          // Delete the characters in the current text.
+          const idx4 = curText.text.lastIndexOf('\n');
+          if (idx4 != -1) {
+            // Only delete up to the new line.
+            curText.remove(idx4 + 1, curText.text.length);
+          } else {
+            let idx5 = curText.text.length - deleteNb;
+            if (idx5 < 0) {
+              idx5 = 0;
+            }
+            curText.remove(idx5, curText.text.length);
+          }
+        } else {
+          // There are characters to insert from the new text.
+          curText.insert(curText.text.length, textToAppend);
+        }
+      }
+    }
   }
 }
