@@ -2,13 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  Button,
-  closeIcon,
-  LabIcon,
-  ReactWidget,
-  Styling
-} from '@jupyterlab/ui-components';
+import { closeIcon, ReactWidget, Styling } from '@jupyterlab/ui-components';
+import { Button } from '@jupyter/react-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
@@ -887,13 +882,14 @@ export namespace Dialog {
             {title}
             {options.hasClose && (
               <Button
+                appearance="stealth"
                 className="jp-Dialog-close-button"
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
                 title={trans.__('Cancel')}
-                minimal
+                scale="xsmall"
               >
-                <LabIcon.resolveReact icon={closeIcon} tag="span" />
+                <closeIcon.react tag={null} />
               </Button>
             )}
           </>
@@ -988,10 +984,12 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('button');
+      const e = document.createElement('jp-button') as HTMLButtonElement;
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
       e.appendChild(this.renderLabel(button));
+      const appearance = this.createItemAppearance(button);
+      e.setAttribute('appearance', appearance);
       return e;
     }
 
@@ -1046,6 +1044,18 @@ export namespace Dialog {
 
       // Return the complete class name.
       return name;
+    }
+
+    createItemAppearance(
+      data: IButton
+    ): 'accent' | 'error' | 'lightweight' | 'neutral' | 'outline' | 'stealth' {
+      if(data.displayType === 'warn') {
+        return 'error';
+      } else if(data.accept) {
+        return 'accent';
+      } else {
+        return 'neutral';
+      }
     }
 
     /**
