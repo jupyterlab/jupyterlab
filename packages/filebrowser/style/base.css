@@ -29,13 +29,13 @@
   row-gap: 12px;
 }
 
-.jp-FileBrowser-folderToolbar {
+.jp-FileBrowser-filterToolbar {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
 }
 
-.jp-FileBrowser-folderToolbar.jp-Toolbar {
+.jp-FileBrowser-filterToolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
   margin: 0 12px 6px;
@@ -79,7 +79,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-FileBrowser-toolbar > .jp-Toolbar-item,
-.jp-FileBrowser-folderToolbar > .jp-Toolbar-item {
+.jp-FileBrowser-filterToolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
   align-items: center;
@@ -114,7 +114,7 @@
   display: none;
 }
 
-.jp-FileBrowser-folderToolbar > .jp-FileBrowser-filterBox {
+.jp-FileBrowser-filterToolbar > .jp-FileBrowser-filterBox {
   width: 100%;
 }
 
