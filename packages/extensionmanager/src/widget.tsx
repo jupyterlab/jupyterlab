@@ -62,6 +62,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
         {githubUser ? (
           <img
             src={`https://github.com/${githubUser}.png?size=${BADGE_QUERY_SIZE}`}
+            crossOrigin="anonymous"
             style={{ width: '32px', height: '32px' }}
           />
         ) : (
