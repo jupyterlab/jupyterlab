@@ -21,11 +21,11 @@ When drag events occur, `lm-mod-override-cursor` is added to the body.
 This reuses the same CSS selector logic as jp-IFrame to prevent embedded
 PDFs from swallowing cursor events.
 */
-body.lm-mod-override-cursor .jp-ThemedContainer .jp-PDFContainer {
+body.lm-mod-override-cursor .jp-PDFContainer {
   position: relative;
 }
 
-body.lm-mod-override-cursor .jp-ThemedContainer .jp-PDFContainer::before {
+body.lm-mod-override-cursor .jp-PDFContainer::before {
   content: '';
   position: absolute;
   z-index: 10;
