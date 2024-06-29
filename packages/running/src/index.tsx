@@ -4,8 +4,8 @@
  * @packageDocumentation
  * @module running
  */
-
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITranslator,
   nullTranslator,
@@ -16,6 +16,7 @@ import {
   caretRightIcon,
   closeIcon,
   collapseAllIcon,
+  CommandToolbarButton,
   expandAllIcon,
   FilterBox,
   IScore,
@@ -31,7 +32,6 @@ import {
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
@@ -540,6 +540,12 @@ class Section extends PanelWithToolbar {
         ...options
       })
     );
+
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(button.id, button)
+      );
+    }
   }
 
   /**
@@ -1149,6 +1155,11 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Used to add arbitrary buttons to this section
+     */
+    toolbarButtons?: (ToolbarButton | CommandToolbarButton)[];
   }
 
   /**
