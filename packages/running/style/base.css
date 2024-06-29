@@ -110,23 +110,23 @@
   min-width: max-content;
 }
 
-.jp-ThemedContainer img.jp-RunningSessions-icon,
-.jp-ThemedContainer span.jp-RunningSessions-icon > svg {
+img.jp-RunningSessions-icon,
+span.jp-RunningSessions-icon > svg {
   width: 16px;
   height: 16px;
 }
 
-.jp-ThemedContainer img.jp-RunningSessions-icon {
+img.jp-RunningSessions-icon {
   margin-top: 4px;
   object-fit: contain;
 }
 
-.jp-ThemedContainer span.jp-RunningSessions-icon {
+span.jp-RunningSessions-icon {
   align-items: center;
   display: flex;
 }
 
-.jp-ThemedContainer span.jp-RunningSessions-icon > svg {
+span.jp-RunningSessions-icon > svg {
   display: block;
   margin: 0 auto;
 }

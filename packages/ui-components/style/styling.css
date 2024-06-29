@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-ThemedContainer button.jp-mod-styled {
+button.jp-mod-styled {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color0);
   border: none;
@@ -19,7 +19,7 @@
   -moz-appearance: none;
 }
 
-.jp-ThemedContainer input.jp-mod-styled {
+input.jp-mod-styled {
   background: var(--jp-input-background);
   height: 28px;
   box-sizing: border-box;
@@ -34,19 +34,19 @@
   -moz-appearance: none;
 }
 
-.jp-ThemedContainer input[type='checkbox'].jp-mod-styled {
+input[type='checkbox'].jp-mod-styled {
   appearance: checkbox;
   -webkit-appearance: checkbox;
   -moz-appearance: checkbox;
   height: auto;
 }
 
-.jp-ThemedContainer input.jp-mod-styled:focus {
+input.jp-mod-styled:focus {
   border: var(--jp-border-width) solid var(--md-blue-500, #2196f3);
   box-shadow: inset 0 0 4px var(--md-blue-300, #64b5f6);
 }
 
-.jp-ThemedContainer input[type='checkbox'].jp-mod-styled:focus-visible {
+input[type='checkbox'].jp-mod-styled:focus-visible {
   outline: var(--jp-border-width) solid var(--jp-input-active-border-color);
   outline-offset: 1px;
 }
@@ -71,14 +71,14 @@
   background-color: var(--jp-input-active-background);
 }
 
-.jp-ThemedContainer select.jp-mod-styled:hover {
+select.jp-mod-styled:hover {
   cursor: pointer;
   color: var(--jp-ui-font-color0);
   background-color: var(--jp-input-hover-background);
   box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
-.jp-ThemedContainer select.jp-mod-styled {
+select.jp-mod-styled {
   flex: 1 1 auto;
   width: 100%;
   font-size: var(--jp-ui-font-size2);
@@ -93,11 +93,11 @@
   -moz-appearance: none;
 }
 
-.jp-ThemedContainer select.jp-mod-styled:not([multiple]) {
+select.jp-mod-styled:not([multiple]) {
   height: 32px;
 }
 
-.jp-ThemedContainer select.jp-mod-styled[multiple] {
+select.jp-mod-styled[multiple] {
   max-height: 200px;
   overflow-y: auto;
 }

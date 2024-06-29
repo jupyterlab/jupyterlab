@@ -436,37 +436,37 @@
   top: 15px;
 }
 
-.jp-ThemedContainer div.jp-Cell-Placeholder-h1 {
+div.jp-Cell-Placeholder-h1 {
   top: 20px;
   height: 20px;
   left: 15px;
   width: 150px;
 }
 
-.jp-ThemedContainer div.jp-Cell-Placeholder-h2 {
+div.jp-Cell-Placeholder-h2 {
   left: 15px;
   top: 50px;
   height: 10px;
   width: 100px;
 }
 
-.jp-ThemedContainer div.jp-Cell-Placeholder-content-1,
-.jp-ThemedContainer div.jp-Cell-Placeholder-content-2,
-.jp-ThemedContainer div.jp-Cell-Placeholder-content-3 {
+div.jp-Cell-Placeholder-content-1,
+div.jp-Cell-Placeholder-content-2,
+div.jp-Cell-Placeholder-content-3 {
   left: 15px;
   right: 15px;
   height: 10px;
 }
 
-.jp-ThemedContainer div.jp-Cell-Placeholder-content-1 {
+div.jp-Cell-Placeholder-content-1 {
   top: 100px;
 }
 
-.jp-ThemedContainer div.jp-Cell-Placeholder-content-2 {
+div.jp-Cell-Placeholder-content-2 {
   top: 120px;
 }
 
-.jp-ThemedContainer div.jp-Cell-Placeholder-content-3 {
+div.jp-Cell-Placeholder-content-3 {
   top: 140px;
 }
 

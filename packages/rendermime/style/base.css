@@ -584,18 +584,18 @@
   border-left: 5px solid var(--jp-border-color2);
 }
 
-.jp-ThemedContainer a.jp-InternalAnchorLink {
+a.jp-InternalAnchorLink {
   visibility: hidden;
   margin-left: 8px;
   color: var(--md-blue-800, #1565c0);
 }
 
-.jp-ThemedContainer h1:hover .jp-InternalAnchorLink,
-.jp-ThemedContainer h2:hover .jp-InternalAnchorLink,
-.jp-ThemedContainer h3:hover .jp-InternalAnchorLink,
-.jp-ThemedContainer h4:hover .jp-InternalAnchorLink,
-.jp-ThemedContainer h5:hover .jp-InternalAnchorLink,
-.jp-ThemedContainer h6:hover .jp-InternalAnchorLink {
+h1:hover .jp-InternalAnchorLink,
+h2:hover .jp-InternalAnchorLink,
+h3:hover .jp-InternalAnchorLink,
+h4:hover .jp-InternalAnchorLink,
+h5:hover .jp-InternalAnchorLink,
+h6:hover .jp-InternalAnchorLink {
   visibility: visible;
 }
 
