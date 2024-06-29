@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { Base64ModelFactory } from '@jupyterlab/docregistry';
+// import { Base64ModelFactory } from '@jupyterlab/docregistry';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
@@ -31,6 +31,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         })
     });
 
+    console.log("Init")
     // Create an IInfo dictionary from the options to override the defaults.
     const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
       if (val in options) {
@@ -45,9 +46,11 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     this.restored = this.shell.restored
       .then(async () => {
         const activated: Promise<void | void[]>[] = [];
+        console.log("Activate differed plugins")
         const deferred = this.activateDeferredPlugins().catch(error => {
           console.error('Error when activating deferred plugins\n:', error);
         });
+        console.log(deferred,'deferred')
         activated.push(deferred);
         if (this._info.deferred) {
           const customizedDeferred = Promise.all(
@@ -63,7 +66,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
           activated.push(customizedDeferred);
         }
         Promise.all(activated)
-          .then(() => {
+          .then((e) => {
             this._allPluginsActivated.resolve();
           })
           .catch(() => undefined);
@@ -105,7 +108,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     }
 
     // Add initial model factory.
-    this.docRegistry.addModelFactory(new Base64ModelFactory());
+    // this.docRegistry.addModelFactory(new Base64ModelFactory());
 
     if (options.mimeExtensions) {
       for (const plugin of createRendermimePlugins(options.mimeExtensions)) {
@@ -182,6 +185,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     data.forEach(item => {
       try {
         this.registerPlugin(item);
+        console.log(this,"this._plugins", item.id)
       } catch (error) {
         this.registerPluginErrors.push(error);
       }

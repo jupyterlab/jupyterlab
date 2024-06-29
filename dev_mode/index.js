@@ -55,11 +55,12 @@ export async function main() {
      };
   }
 
-  var JupyterLab = require('@jupyterlab/application').JupyterLab;
+var JupyterLab = require('@jupyterlab/application').JupyterLab;
   var disabled = [];
   var deferred = [];
   var ignorePlugins = [];
   var register = [];
+  var registerAddress = []
 
 
   const federatedExtensionPromises = [];
@@ -90,6 +91,8 @@ export async function main() {
 
   const allPlugins = [];
 
+
+  // This needs to be somehow delay the activation and reading the assests
   /**
    * Iterate over active plugins in an extension.
    *
@@ -203,9 +206,12 @@ export async function main() {
       patterns: PageConfig.Extension.deferred
         .map(function (val) { return val.raw; })
     },
-    availablePlugins: allPlugins
+    availablePlugins: allPlugins,
+    entrypoints: {
+      // all the plugisn
+    }
   });
-  register.forEach(function(item) { lab.registerPluginModule(item); });
+  register.forEach(function(item) {lab.registerPluginModule(item); });
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
