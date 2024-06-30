@@ -58,7 +58,41 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "plugins": [
+      {
+        "id": "@jupyterlab/csvviewer-extension:csv",
+        "description": "Adds viewer for CSV file types",
+        "requires": [
+          "@jupyterlab/translation:ITranslator"
+        ],
+        "optional": [
+          "@jupyterlab/application:ILayoutRestorer",
+          "@jupyterlab/apputils:IThemeManager",
+          "@jupyterlab/mainmenu:IMainMenu",
+          "@jupyterlab/documentsearch:ISearchProviderRegistry",
+          "@jupyterlab/coreutils:ISettingRegistry",
+          "@jupyterlab/apputils:IToolbarWidgetRegistry"
+        ],
+        "autoStart": false
+      },
+      {
+        "id": "@jupyterlab/csvviewer-extension:tsv",
+        "description": "Adds viewer for TSV file types.",
+        "requires": [
+          "@jupyterlab/translation:ITranslator"
+        ],
+        "optional": [
+          "@jupyterlab/application:ILayoutRestorer",
+          "@jupyterlab/apputils:IThemeManager",
+          "@jupyterlab/mainmenu:IMainMenu",
+          "@jupyterlab/documentsearch:ISearchProviderRegistry",
+          "@jupyterlab/coreutils:ISettingRegistry",
+          "@jupyterlab/apputils:IToolbarWidgetRegistry"
+        ],
+        "autoStart": false
+      }
+    ]
   },
   "styleModule": "style/index.js"
 }

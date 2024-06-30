@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { PromiseDelegate } from '@lumino/coreutils';
 import { PageConfig, PluginRegistry2 } from '@jupyterlab/coreutils';
 
 import './style.js';
@@ -170,27 +171,31 @@ export async function main() {
   {{#each jupyterlab_extensions}}
   if (!queuedFederated.includes('{{@key}}')) {
     try {
-      const pkgJson = await import(`{{@key}}/package.json`);
+      const pkgJson = await import('{{@key}}/package.json');
 
       const pkgPlugins = pkgJson['jupyterlab']['plugins'];
       if (pkgPlugins) {
-        for( let plugin in processPlugins(pkgPlugins, key)) {
+        for(let plugin of processPlugins(pkgPlugins, '{{@key}}')) {
           register.push({...plugin, loader: async () => {
-            const candidate = modulesCache.get('{{@key}}{{#if this}}/{{this}}{{/if}}')?.deref();
+            const candidate = modulesCache.get('{{@key}}{{#if this}}/{{this}}{{/if}}');
             if(candidate) {
-              return candidate;
+              return (await candidate);
             }
-            console.debug(`Loading {{@key}}{{#if this}}/{{this}}{{/if}}…`)
+            const delegate = new PromiseDelegate();
+            modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', delegate.promise);
+            console.debug('Loading {{@key}}{{#if this}}/{{this}}{{/if}}…');
             let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
             ext.__scope__ = '{{@key}}';
-            modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', new WeakRef(ext))
+            delegate.resolve(ext);
             return ext;
           }})
         }
       } else {
+        const delegate = new PromiseDelegate();
+        modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', delegate.promise);
         let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
         ext.__scope__ = '{{@key}}';
-        modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', new WeakRef(ext));
+        delegate.resolve(ext);
         for (let plugin of activePlugins(ext)) {
           register.push(plugin);
         }
@@ -234,9 +239,14 @@ export async function main() {
     // FIXME allPlugins may contain strings instead of tokens
     availablePlugins: allPlugins
   });
-  register.forEach(function(item) { lab.registerPluginModule(item); });
+  register.forEach(function(item) { pluginRegistry.registerPlugin(item); });
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
+
+  // FIXME to delete - for testing set csv plugin loaded at arbitrary later time
+  // setTimeout(() => {
+  //   pluginRegistry.activatePlugin("@jupyterlab/csvviewer-extension:csv")
+  // }, 8000)
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
