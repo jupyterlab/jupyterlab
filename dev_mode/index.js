@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, PluginRegistry2 } from '@jupyterlab/coreutils';
 
 import './style.js';
 
@@ -19,43 +19,46 @@ async function createModule(scope, module) {
   }
 }
 
+const modulesCache = new Map();
+
 /**
  * The main entry point for the application.
  */
 export async function main() {
 
-   // Handle a browser test.
-   // Set up error handling prior to loading extensions.
-   var browserTest = PageConfig.getOption('browserTest');
-   if (browserTest.toLowerCase() === 'true') {
-     var el = document.createElement('div');
-     el.id = 'browserTest';
-     document.body.appendChild(el);
-     el.textContent = '[]';
-     el.style.display = 'none';
-     var errors = [];
-     var reported = false;
-     var timeout = 25000;
+  // Handle a browser test.
+  // Set up error handling prior to loading extensions.
+  var browserTest = PageConfig.getOption('browserTest');
+  if (browserTest.toLowerCase() === 'true') {
+    var el = document.createElement('div');
+    el.id = 'browserTest';
+    document.body.appendChild(el);
+    el.textContent = '[]';
+    el.style.display = 'none';
+    var errors = [];
+    var reported = false;
+    var timeout = 25000;
 
-     var report = function() {
-       if (reported) {
-         return;
-       }
-       reported = true;
-       el.className = 'completed';
-     }
+    var report = function() {
+      if (reported) {
+        return;
+      }
+      reported = true;
+      el.className = 'completed';
+    }
 
-     window.onerror = function(msg, url, line, col, error) {
-       errors.push(String(error));
-       el.textContent = JSON.stringify(errors)
-     };
-     console.error = function(message) {
-       errors.push(String(message));
-       el.textContent = JSON.stringify(errors)
-     };
+    window.onerror = function(msg, url, line, col, error) {
+      errors.push(String(error));
+      el.textContent = JSON.stringify(errors)
+    };
+    console.error = function(message) {
+      errors.push(String(message));
+      el.textContent = JSON.stringify(errors)
+    };
   }
 
-  var JupyterLab = require('@jupyterlab/application').JupyterLab;
+  const pluginRegistry = new PluginRegistry2();
+  var JupyterLab = (await import('@jupyterlab/application')).JupyterLab;
   var disabled = [];
   var deferred = [];
   var ignorePlugins = [];
@@ -90,6 +93,31 @@ export async function main() {
 
   const allPlugins = [];
 
+  function* processPlugins(plugins, scope) {
+    for (let plugin of plugins) {
+      const isDisabled = PageConfig.Extension.isDisabled(plugin.id);
+      allPlugins.push({
+        id: plugin.id,
+        description: plugin.description,
+        requires: plugin.requires ?? [],
+        optional: plugin.optional ?? [],
+        provides: plugin.provides ?? null,
+        autoStart: plugin.autoStart,
+        enabled: !isDisabled,
+        extension: scope
+      });
+      if (isDisabled) {
+        disabled.push(plugin.id);
+        continue;
+      }
+      if (PageConfig.Extension.isDeferred(plugin.id)) {
+        deferred.push(plugin.id);
+        ignorePlugins.push(plugin.id);
+      }
+      yield plugin;
+    }
+  }
+
   /**
    * Iterate over active plugins in an extension.
    *
@@ -107,28 +135,7 @@ export async function main() {
     }
 
     let plugins = Array.isArray(exports) ? exports : [exports];
-    for (let plugin of plugins) {
-      const isDisabled = PageConfig.Extension.isDisabled(plugin.id);
-      allPlugins.push({
-        id: plugin.id,
-        description: plugin.description,
-        requires: plugin.requires ?? [],
-        optional: plugin.optional ?? [],
-        provides: plugin.provides ?? null,
-        autoStart: plugin.autoStart,
-        enabled: !isDisabled,
-        extension: extension.__scope__
-      });
-      if (isDisabled) {
-        disabled.push(plugin.id);
-        continue;
-      }
-      if (PageConfig.Extension.isDeferred(plugin.id)) {
-        deferred.push(plugin.id);
-        ignorePlugins.push(plugin.id);
-      }
-      yield plugin;
-    }
+    yield* processPlugins(plugins, extension.__scope__);
   }
 
   // Handle the registered mime extensions.
@@ -163,10 +170,30 @@ export async function main() {
   {{#each jupyterlab_extensions}}
   if (!queuedFederated.includes('{{@key}}')) {
     try {
-      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
-      ext.__scope__ = '{{@key}}';
-      for (let plugin of activePlugins(ext)) {
-        register.push(plugin);
+      const pkgJson = await import(`{{@key}}/package.json`);
+
+      const pkgPlugins = pkgJson['jupyterlab']['plugins'];
+      if (pkgPlugins) {
+        for( let plugin in processPlugins(pkgPlugins, key)) {
+          register.push({...plugin, loader: async () => {
+            const candidate = modulesCache.get('{{@key}}{{#if this}}/{{this}}{{/if}}')?.deref();
+            if(candidate) {
+              return candidate;
+            }
+            console.debug(`Loading {{@key}}{{#if this}}/{{this}}{{/if}}…`)
+            let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
+            ext.__scope__ = '{{@key}}';
+            modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', new WeakRef(ext))
+            return ext;
+          }})
+        }
+      } else {
+        let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
+        ext.__scope__ = '{{@key}}';
+        modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', new WeakRef(ext));
+        for (let plugin of activePlugins(ext)) {
+          register.push(plugin);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -192,6 +219,7 @@ export async function main() {
   });
 
   const lab = new JupyterLab({
+    pluginRegistry,
     mimeExtensions,
     disabled: {
       matches: disabled,
@@ -203,6 +231,7 @@ export async function main() {
       patterns: PageConfig.Extension.deferred
         .map(function (val) { return val.raw; })
     },
+    // FIXME allPlugins may contain strings instead of tokens
     availablePlugins: allPlugins
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
@@ -226,5 +255,4 @@ export async function main() {
     // Handle failures to restore after the timeout has elapsed.
     window.setTimeout(function() { report(errors); }, timeout);
   }
-
 }

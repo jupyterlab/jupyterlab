@@ -11,6 +11,7 @@ export * from './lru';
 export * from './markdowncodeblocks';
 export * from './pageconfig';
 export * from './path';
+export * from './plugins';
 export * from './signal';
 export * from './text';
 export * from './time';
