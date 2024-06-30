@@ -2,9 +2,9 @@ name: Windows Tests
 
 on:
   push:
-    branches: [main]
+    branches: [poc/plugin-data-based]
   pull_request:
-    branches: [main]
+    branches: [poc/plugin-data-based]
   release:
     types: [published]
 
