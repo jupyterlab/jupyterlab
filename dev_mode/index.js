@@ -100,9 +100,9 @@ export async function main() {
       allPlugins.push({
         id: plugin.id,
         description: plugin.description,
-        requires: plugin.requires ?? [],
-        optional: plugin.optional ?? [],
-        provides: plugin.provides ?? null,
+        requires: plugin.requires ? plugin.requires.map(token => typeof token === 'string' ? { name: token } : token) : [],
+        optional: plugin.optional ? plugin.optional.map(token => typeof token === 'string' ? { name: token } : token) : [],
+        provides: plugin.provides ? typeof plugin.provides === 'string' ? {name: plugin.provides} : plugin.provides : null,
         autoStart: plugin.autoStart,
         enabled: !isDisabled,
         extension: scope
@@ -236,7 +236,6 @@ export async function main() {
       patterns: PageConfig.Extension.deferred
         .map(function (val) { return val.raw; })
     },
-    // FIXME allPlugins may contain strings instead of tokens
     availablePlugins: allPlugins
   });
   register.forEach(function(item) { pluginRegistry.registerPlugin(item); });
