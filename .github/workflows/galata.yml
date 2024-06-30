@@ -5,7 +5,7 @@ on:
     types: [created]
   push:
     branches:
-      - main
+      - poc/plugin-data-based
   pull_request:
 
 env:
