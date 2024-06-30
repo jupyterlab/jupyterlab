@@ -7,6 +7,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import Form, { FormProps, IChangeEvent } from '@rjsf/core';
+import { WidgetProps } from '@rjsf/utils';
 
 import {
   ADDITIONAL_PROPERTY_FLAG,
@@ -627,7 +628,10 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     ...others
   } = props;
 
-  const uiSchema = { ...(others.uiSchema || JSONExt.emptyObject) } as UiSchema;
+  const uiSchema = {
+    ...(others.uiSchema || JSONExt.emptyObject),
+    'ui:widget': 'CheckboxWidget'
+  } as UiSchema;
 
   uiSchema['ui:options'] = { ...DEFAULT_UI_OPTIONS, ...uiSchema['ui:options'] };
 
@@ -677,6 +681,45 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
   };
 
   return (
-    <Form templates={templates} formContext={formContext as any} {...others} />
+    // @ts-expect-error I know
+    <Form
+      templates={templates as any}
+      formContext={formContext as any}
+      {...others}
+      widgets={customWidgets}
+      uiSchema={uiSchema}
+    />
   );
 }
+
+// Define the CustomCheckbox component
+const CustomCheckbox: React.FC<WidgetProps> = ({
+  id,
+  value,
+  required,
+  onChange,
+  label
+}) => {
+  return (
+    <div className="customCheckboxContainer">
+      <button
+        id={id}
+        className={`jp-CheckboxButton ${value ? 'checked' : 'unchecked'}`}
+        onClick={() => onChange(!value)}
+        aria-required={required}
+      >
+        {value ? 'Checked' : 'Unchecked'}
+      </button>
+      {label && (
+        <label htmlFor={id} className="jp-CheckboxLabel">
+          {label}
+        </label>
+      )}
+    </div>
+  );
+};
+
+// Assuming you have a setup for integrating custom widgets
+export const customWidgets = {
+  CheckboxWidget: CustomCheckbox
+};
