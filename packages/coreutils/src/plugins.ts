@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { topologicSort } from '@lumino/algorithm';
 import { IPlugin, type PluginRegistry, type Token } from '@lumino/coreutils';
 
