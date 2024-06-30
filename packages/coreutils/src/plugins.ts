@@ -469,7 +469,6 @@ export class PluginRegistry2<T = any> {
    * the required services for the user's plugins will be resolved
    * automatically when the plugin is activated.
    */
-  // FIXME
   async resolveRequiredService<U>(token: Token<U> | string): Promise<U> {
     // Reject the promise if there is no provider for the type.
     const serviceName = (token as Token<U>).name ?? token;
@@ -506,7 +505,6 @@ export class PluginRegistry2<T = any> {
    * the optional services for the user's plugins will be resolved
    * automatically when the plugin is activated.
    */
-  // FIXME
   async resolveOptionalService<U>(token: Token<U> | string): Promise<U | null> {
     // Resolve with `null` if there is no provider for the type.
     const id = this._services.get((token as Token<U>).name ?? token);
