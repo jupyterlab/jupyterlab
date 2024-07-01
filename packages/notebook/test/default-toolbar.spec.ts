@@ -48,7 +48,7 @@ describe('@jupyterlab/notebook', () => {
           const promise = signalToPromise(context.fileChanged);
           await framePromise();
           await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           await expect(promise).resolves.not.toThrow();
           button.dispose();
         });
@@ -69,7 +69,7 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           expect(panel.content.activeCellIndex).toBe(1);
           expect(panel.content.activeCell).toBeInstanceOf(CodeCell);
           button.dispose();
@@ -91,7 +91,7 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           expect(panel.content.widgets.length).toBe(count - 1);
           expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
           button.dispose();
@@ -113,7 +113,7 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           expect(panel.content.widgets.length).toBe(count);
           expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
           button.dispose();
@@ -138,7 +138,7 @@ describe('@jupyterlab/notebook', () => {
           await framePromise();
           await button.renderPromise;
           NotebookActions.copy(panel.content);
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           await sleep();
           expect(panel.content.widgets.length).toBe(count + 1);
           button.dispose();
@@ -270,7 +270,7 @@ describe('@jupyterlab/notebook', () => {
               delegate.resolve(void 0);
             }
           });
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           await expect(delegate.promise).resolves.not.toThrow();
           button.dispose();
         });
@@ -303,7 +303,7 @@ describe('@jupyterlab/notebook', () => {
               delegate.resolve(void 0);
             }
           });
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           await acceptDialog();
           await expect(delegate.promise).resolves.not.toThrow();
           button.dispose();

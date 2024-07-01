@@ -50,7 +50,7 @@ describe('@jupyterlab/ui-components', () => {
       await framePromise();
 
       expect(button.hasClass('jp-CommandToolbarButton')).toBe(true);
-      simulate(button.node.firstElementChild!, 'mousedown');
+      simulate(button.node.firstElementChild!, 'click');
       expect(options.execute).toHaveBeenCalledTimes(1);
     });
 
@@ -515,7 +515,7 @@ describe('@jupyterlab/ui-components', () => {
           Widget.attach(button, document.body);
           await framePromise();
           await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          simulate(button.node.firstChild as HTMLElement, 'click');
           expect(called).toBe(true);
           button.dispose();
         });
@@ -676,7 +676,7 @@ describe('@jupyterlab/ui-components', () => {
         });
         Widget.attach(widget, document.body);
         await framePromise();
-        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        simulate(widget.node.firstChild as HTMLElement, 'click');
         expect(mockCalled).toBe(true);
 
         mockCalled = false;
@@ -687,7 +687,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.onClick = mockOnClickUpdated;
         await framePromise();
         await widget.renderPromise;
-        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        simulate(widget.node.firstChild as HTMLElement, 'click');
         expect(mockCalled).toBe(false);
         expect(mockUpdatedCalled).toBe(true);
         widget.dispose();
