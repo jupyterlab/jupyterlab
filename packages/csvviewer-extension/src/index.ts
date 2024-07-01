@@ -146,14 +146,15 @@ function activateCsv(
   let style: DataGrid.Style = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
-  if (restorer) {
-    // Handle state restoration.
-    void restorer.restore(tracker, {
-      command: 'docmanager:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
-      name: widget => widget.context.path
-    });
-  }
+  // FIXME restorer is not possible for plugin not activated at start-up
+  // if (restorer) {
+  //   // Handle state restoration.
+  //   void restorer.restore(tracker, {
+  //     command: 'docmanager:open',
+  //     args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
+  //     name: widget => widget.context.path
+  //   });
+  // }
 
   app.docRegistry.addWidgetFactory(factory);
   const ft = app.docRegistry.getFileType('csv');
@@ -306,14 +307,15 @@ function activateTsv(
   let style: DataGrid.Style = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
-  if (restorer) {
-    // Handle state restoration.
-    void restorer.restore(tracker, {
-      command: 'docmanager:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
-      name: widget => widget.context.path
-    });
-  }
+  // FIXME restorer is not possible for plugin not activated at start-up
+  // if (restorer) {
+  //   // Handle state restoration.
+  //   void restorer.restore(tracker, {
+  //     command: 'docmanager:open',
+  //     args: widget => ({ path: widget.context.path, factory: FACTORY_TSV }),
+  //     name: widget => widget.context.path
+  //   });
+  // }
 
   app.docRegistry.addWidgetFactory(factory);
   const ft = app.docRegistry.getFileType('tsv');

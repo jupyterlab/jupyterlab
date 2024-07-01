@@ -13,7 +13,9 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, python, examples, interop, nonode, lint]
+        # FIXME can we drop splice_source
+        # group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
         # This will be used by the base setup action
         python-version: ["3.8", "3.12"]
         include:

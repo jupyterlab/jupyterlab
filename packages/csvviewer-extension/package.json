@@ -46,8 +46,8 @@
     "@jupyterlab/observables": "^5.3.0-alpha.1",
     "@jupyterlab/settingregistry": "^4.3.0-alpha.1",
     "@jupyterlab/translation": "^4.3.0-alpha.1",
-    "@lumino/datagrid": "^2.3.1",
-    "@lumino/widgets": "^2.3.2"
+    "@lumino/datagrid": "^2.4.0",
+    "@lumino/widgets": "^2.4.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
@@ -58,7 +58,41 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "plugins": [
+      {
+        "id": "@jupyterlab/csvviewer-extension:csv",
+        "description": "Adds viewer for CSV file types",
+        "requires": [
+          "@jupyterlab/translation:ITranslator"
+        ],
+        "optional": [
+          "@jupyterlab/application:ILayoutRestorer",
+          "@jupyterlab/apputils:IThemeManager",
+          "@jupyterlab/mainmenu:IMainMenu",
+          "@jupyterlab/documentsearch:ISearchProviderRegistry",
+          "@jupyterlab/coreutils:ISettingRegistry",
+          "@jupyterlab/apputils:IToolbarWidgetRegistry"
+        ],
+        "autoStart": false
+      },
+      {
+        "id": "@jupyterlab/csvviewer-extension:tsv",
+        "description": "Adds viewer for TSV file types.",
+        "requires": [
+          "@jupyterlab/translation:ITranslator"
+        ],
+        "optional": [
+          "@jupyterlab/application:ILayoutRestorer",
+          "@jupyterlab/apputils:IThemeManager",
+          "@jupyterlab/mainmenu:IMainMenu",
+          "@jupyterlab/documentsearch:ISearchProviderRegistry",
+          "@jupyterlab/coreutils:ISettingRegistry",
+          "@jupyterlab/apputils:IToolbarWidgetRegistry"
+        ],
+        "autoStart": false
+      }
+    ]
   },
   "styleModule": "style/index.js"
 }

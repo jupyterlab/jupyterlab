@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { test } from '@jupyterlab/galata';
-import { Token } from '@lumino/coreutils';
 import { expect } from '@playwright/test';
 import * as fs from 'fs-extra';
 
@@ -27,10 +26,11 @@ test('All plugins and tokens must have a description', async ({
 
       plugins[id] = window.jupyterapp.getPluginDescription(id);
       const plugin = (
-        (window.jupyterapp as any)._plugins as Map<
+        (window.jupyterapp as any).pluginRegistry?._plugins ??
+        ((window.jupyterapp as any)._plugins as Map<
           string,
-          { provides: Token<any> | null }
-        >
+          { provides: { name: string; description: string } | null }
+        >)
       ).get(id);
       if (plugin?.provides) {
         const token = plugin.provides;
