@@ -41,28 +41,26 @@ export class GalataInpage implements IGalataInpage {
   async getPlugin<K extends keyof IPluginNameToInterfaceMap>(
     pluginId: K
   ): Promise<IPluginNameToInterfaceMap[K] | undefined> {
-    return new Promise((resolve, reject) => {
-      const app = this._app;
-      const hasPlugin = app.hasPlugin(pluginId);
+    const app = this._app;
+    const hasPlugin = app.hasPlugin(pluginId);
 
-      if (hasPlugin) {
-        try {
-          const appAny = app as any;
-          const plugin: any = appAny._plugins
-            ? appAny._plugins.get(pluginId)
-            : undefined;
-          if (plugin.activated) {
-            resolve(plugin.service);
-          } else {
-            void app.activatePlugin(pluginId).then(response => {
-              resolve(plugin.service);
-            });
-          }
-        } catch (error) {
-          console.error('Failed to get plugin', error);
+    if (hasPlugin) {
+      try {
+        const appAny = app as any;
+        const plugins = appAny.pluginRegistr?._plugins ?? appAny._plugins;
+        const plugin: any = plugins?.get(pluginId);
+        if (!plugin) {
+          return undefined;
         }
+
+        if (!plugin.activated) {
+          await app.activatePlugin(pluginId);
+        }
+        return plugin.service;
+      } catch (error) {
+        console.error('Failed to get plugin', error);
       }
-    });
+    }
   }
 
   /**
