@@ -1470,6 +1470,222 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
   private _translator: ITranslator;
 }
 
+export namespace SessionContextDialogs {
+  /**
+   * Populate a kernel select node for the session.
+   *
+   * #### Notes
+   * If `options.preference.language` is set, the dropdown is populated with the
+   * following option groups and options:
+   *
+   *  - (Start %1 Kernel, language)
+   *    - { all kernelspecs whose language matches in alphabetical order }
+   *  - (Use No Kernel)
+   *    - `No Kernel`
+   *  - (Start Kernel)
+   *    - { all other kernelspecs in alphabetical order }
+   *  - (Connect to Existing %1 Kernel, language)
+   *    - { all running kernels whose language matches in alphabetical order }
+   *  - (Connect to Kernel)
+   *    - { all other running kernels in alphabetical order }
+   *
+   * If there no language preference is set the dropdown is populated with:
+   *
+   *  - (Start Kernel)
+   *    - { all kernelspecs in alphabetical order }
+   *  - (Use No Kernel)
+   *    - `No Kernel`
+   *  - (Connect to Existing Kernel)
+   *    - { all running kernels in alphabetical order  }
+   *
+   * If `options.preference.id` is set and a kernel exists with that id, its
+   * corresponding `<option>` is selected. Otherwise if
+   * `options.preference.language` is set, the first kernelspec that matches it
+   * is selected.
+   */
+  export function populateKernelSelect(
+    node: HTMLSelectElement,
+    sessionContext: ISessionContext,
+    translator?: ITranslator
+  ) {
+    const options = {
+      kernels:
+        sessionContext.kernelManager?.running() ??
+        // If kernel manager is unavailable use kernels from running sessions.
+        // TODO: Remove this (next version) when kernel manager is guaranteed.
+        Array.from(sessionContext.sessionManager.running())
+          .filter(session => !!session.kernel)
+          .map(session => session.kernel!),
+      specs: sessionContext.specsManager.specs,
+      sessions: sessionContext.sessionManager.running(),
+      preference: {
+        ...sessionContext.kernelPreference,
+        // Use current kernel id to set `selected` in dropdown.
+        id: sessionContext.session?.kernel?.id
+      }
+    };
+    const currentKernelDisplayName = !sessionContext.hasNoKernel
+      ? sessionContext.kernelDisplayName
+      : null;
+
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+
+    const { preference } = options;
+    const specs = {
+      default: '',
+      kernelspecs: Object.create(null) as {
+        [key: string]: KernelSpec.ISpecModel;
+      },
+      ...options.specs
+    };
+
+    // Create mapping of languages and kernel names.
+    const sorted: KernelSpec.ISpecModel[] = [];
+    const languages: { [key: string]: string } = Object.create(null);
+    for (const name in specs.kernelspecs) {
+      sorted.push(specs.kernelspecs[name]!);
+      languages[name] = specs.kernelspecs[name]!.language;
+    }
+    sorted.sort((a, b) => a.display_name.localeCompare(b.display_name));
+
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
+    if (preference.canStart === false) {
+      node.appendChild(Private.optionForNone(translator));
+      node.value = 'null';
+      node.disabled = true;
+      return;
+    }
+    node.disabled = false;
+    // Create mapping of sessions and kernel ids.
+    const kernels = Array.from(options.kernels ?? []);
+    const sessions = Array.from(options.sessions ?? []).reduce(
+      (sessions, session) => {
+        if (session.kernel?.id) sessions[session.kernel.id] = session;
+        return sessions;
+      },
+      {} as { [kernel: string]: Session.IModel }
+    );
+    const language =
+      preference.language ||
+      languages[preference.name!] ||
+      (preference.id ? languages[sessions[preference.id]?.name] : '');
+    const labels = {
+      startPreferred: trans.__('Start %1 Kernel', language),
+      startOther: trans.__('Start Kernel'),
+      connectToPreferred: trans.__('Connect to Existing %1 Kernel', language),
+      connectToOther: trans.__('Connect to Other Kernel'),
+      startKernel: trans.__('Start Kernel'),
+      connectKernel: trans.__('Connect to Existing Kernel')
+    };
+
+    node.selectedIndex = -1;
+    // If there is a language preference create a different set of groups.
+    if (language) {
+      // Render kernelspecs.
+      const preferred = document.createElement('optgroup');
+      const other = document.createElement('optgroup');
+      preferred.label = labels.startPreferred;
+      other.label = labels.startOther;
+      for (const spec of sorted) {
+        const option = Private.optionForSpec(spec);
+        (spec.language === language ? preferred : other).appendChild(option);
+      }
+      // Add preferred language group.
+      node.appendChild(preferred);
+      // Render the no kernel option.
+      node.appendChild(Private.optionForNone(translator));
+      // Add other kernelspecs.
+      node.appendChild(other);
+      // Render running kernels, separate into preferred language kernels et al.
+      const preferredRunning = document.createElement('optgroup');
+      const otherRunning = document.createElement('optgroup');
+      preferredRunning.label = labels.connectToPreferred;
+      otherRunning.label = labels.connectToOther;
+      kernels
+        .map(kernel => ({
+          option: Private.optionForKernel(
+            kernel,
+            specs.kernelspecs[kernel.name]?.display_name ?? '',
+            sessions[kernel.id],
+            translator
+          ),
+          language: languages[kernel.name]
+        }))
+        .sort((a, b) => a.option.text.localeCompare(b.option.text))
+        .forEach(node =>
+          (language === node.language
+            ? preferredRunning
+            : otherRunning
+          ).appendChild(node.option)
+        );
+      if (preferredRunning.firstChild) node.appendChild(preferredRunning);
+      if (otherRunning.firstChild) node.appendChild(otherRunning);
+    } else {
+      // Render kernelspecs first.
+      const kernelspecs = document.createElement('optgroup');
+      kernelspecs.label = labels.startKernel;
+      sorted.forEach(spec =>
+        kernelspecs.appendChild(Private.optionForSpec(spec))
+      );
+      node.appendChild(kernelspecs);
+
+      // Next render the no kernel option.
+      node.appendChild(Private.optionForNone(translator));
+
+      // Render running kernels.
+      const running = document.createElement('optgroup');
+      running.label = labels.connectKernel;
+      kernels
+        .map(kernel =>
+          Private.optionForKernel(
+            kernel,
+            specs.kernelspecs[kernel.name]?.display_name ?? '',
+            sessions[kernel.id],
+            translator
+          )
+        )
+        .sort((a, b) => a.text.localeCompare(b.text))
+        .forEach(option => running.appendChild(option));
+      node.appendChild(running);
+    }
+    // Set the selected option.
+    if (preference.id || currentKernelDisplayName || preference.name) {
+      for (const option of node.options) {
+        const choice = JSON.parse(option.value) as null | Kernel.IModel;
+        if (!choice) continue;
+        if (preference.id) {
+          if (preference.id === choice.id) {
+            option.selected = true;
+            break;
+          }
+          continue;
+        }
+        if (currentKernelDisplayName) {
+          if (
+            currentKernelDisplayName ===
+            specs.kernelspecs[choice.name]?.display_name
+          ) {
+            option.selected = true;
+            break;
+          }
+          continue;
+        }
+        if (preference.name) {
+          if (preference.name === choice.name) {
+            option.selected = true;
+            break;
+          }
+          continue;
+        }
+      }
+    }
+  }
+}
+
 /**
  * The namespace for module private data.
  */
@@ -1499,7 +1715,7 @@ namespace Private {
   }
 
   /**
-   * Create a node for a kernel selector widget.
+   * Create an HTML node for a kernel selector widget.
    */
   function createSelectorNode(
     sessionContext: ISessionContext,
@@ -1517,27 +1733,7 @@ namespace Private {
     body.appendChild(text);
 
     const selector = document.createElement('select');
-    populateKernelSelect(
-      selector,
-      {
-        kernels:
-          sessionContext.kernelManager?.running() ??
-          // If kernel manager is unavailable use kernels from running sessions.
-          // TODO: Remove this (next version) when kernel manager is guaranteed.
-          Array.from(sessionContext.sessionManager.running())
-            .filter(session => !!session.kernel)
-            .map(session => session.kernel!),
-        specs: sessionContext.specsManager.specs,
-        sessions: sessionContext.sessionManager.running(),
-        preference: {
-          ...sessionContext.kernelPreference,
-          // Use current kernel id to set `selected` in dropdown.
-          id: sessionContext.session?.kernel?.id
-        }
-      },
-      translator,
-      !sessionContext.hasNoKernel ? sessionContext.kernelDisplayName : null
-    );
+    SessionContextDialogs.populateKernelSelect(selector, sessionContext);
     body.appendChild(selector);
     return body;
   }
@@ -1601,202 +1797,9 @@ namespace Private {
   }
 
   /**
-   * Populate a kernel select node for the session.
-   *
-   * #### Notes
-   * If `options.preference.language` is set, the dropdown is populated with the
-   * following option groups and options:
-   *
-   *  - (Start %1 Kernel, language)
-   *    - { all kernelspecs whose language matches in alphabetical order }
-   *  - (Use No Kernel)
-   *    - `No Kernel`
-   *  - (Start Kernel)
-   *    - { all other kernelspecs in alphabetical order }
-   *  - (Connect to Existing %1 Kernel, language)
-   *    - { all running kernels whose language matches in alphabetical order }
-   *  - (Connect to Kernel)
-   *    - { all other running kernels in alphabetical order }
-   *
-   * If there no language preference is set the dropdown is populated with:
-   *
-   *  - (Start Kernel)
-   *    - { all kernelspecs in alphabetical order }
-   *  - (Use No Kernel)
-   *    - `No Kernel`
-   *  - (Connect to Existing Kernel)
-   *    - { all running kernels in alphabetical order  }
-   *
-   * If `options.preference.id` is set and a kernel exists with that id, its
-   * corresponding `<option>` is selected. Otherwise if
-   * `options.preference.language` is set, the first kernelspec that matches it
-   * is selected.
-   */
-  function populateKernelSelect(
-    node: HTMLSelectElement,
-    options: SessionContext.IKernelSearch,
-    translator?: ITranslator,
-    currentKernelDisplayName: string | null = null
-  ) {
-    while (node.firstChild) {
-      node.removeChild(node.firstChild);
-    }
-
-    const { preference } = options;
-    const specs = {
-      default: '',
-      kernelspecs: Object.create(null) as {
-        [key: string]: KernelSpec.ISpecModel;
-      },
-      ...options.specs
-    };
-
-    // Create mapping of languages and kernel names.
-    const sorted: KernelSpec.ISpecModel[] = [];
-    const languages: { [key: string]: string } = Object.create(null);
-    for (const name in specs.kernelspecs) {
-      sorted.push(specs.kernelspecs[name]!);
-      languages[name] = specs.kernelspecs[name]!.language;
-    }
-    sorted.sort((a, b) => a.display_name.localeCompare(b.display_name));
-
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-
-    if (preference.canStart === false) {
-      node.appendChild(optionForNone(translator));
-      node.value = 'null';
-      node.disabled = true;
-      return;
-    }
-    node.disabled = false;
-    // Create mapping of sessions and kernel ids.
-    const kernels = Array.from(options.kernels ?? []);
-    const sessions = Array.from(options.sessions ?? []).reduce(
-      (sessions, session) => {
-        if (session.kernel?.id) sessions[session.kernel.id] = session;
-        return sessions;
-      },
-      {} as { [kernel: string]: Session.IModel }
-    );
-    const language =
-      preference.language ||
-      languages[preference.name!] ||
-      (preference.id ? languages[sessions[preference.id]?.name] : '');
-    const labels = {
-      startPreferred: trans.__('Start %1 Kernel', language),
-      startOther: trans.__('Start Kernel'),
-      connectToPreferred: trans.__('Connect to Existing %1 Kernel', language),
-      connectToOther: trans.__('Connect to Other Kernel'),
-      startKernel: trans.__('Start Kernel'),
-      connectKernel: trans.__('Connect to Existing Kernel')
-    };
-
-    node.selectedIndex = -1;
-    // If there is a language preference create a different set of groups.
-    if (language) {
-      // Render kernelspecs.
-      const preferred = document.createElement('optgroup');
-      const other = document.createElement('optgroup');
-      preferred.label = labels.startPreferred;
-      other.label = labels.startOther;
-      for (const spec of sorted) {
-        const option = optionForSpec(spec);
-        (spec.language === language ? preferred : other).appendChild(option);
-      }
-      // Add preferred language group.
-      node.appendChild(preferred);
-      // Render the no kernel option.
-      node.appendChild(optionForNone(translator));
-      // Add other kernelspecs.
-      node.appendChild(other);
-      // Render running kernels, separate into preferred language kernels et al.
-      const preferredRunning = document.createElement('optgroup');
-      const otherRunning = document.createElement('optgroup');
-      preferredRunning.label = labels.connectToPreferred;
-      otherRunning.label = labels.connectToOther;
-      kernels
-        .map(kernel => ({
-          option: optionForKernel(
-            kernel,
-            specs.kernelspecs[kernel.name]?.display_name ?? '',
-            sessions[kernel.id],
-            translator
-          ),
-          language: languages[kernel.name]
-        }))
-        .sort((a, b) => a.option.text.localeCompare(b.option.text))
-        .forEach(node =>
-          (language === node.language
-            ? preferredRunning
-            : otherRunning
-          ).appendChild(node.option)
-        );
-      if (preferredRunning.firstChild) node.appendChild(preferredRunning);
-      if (otherRunning.firstChild) node.appendChild(otherRunning);
-    } else {
-      // Render kernelspecs first.
-      const kernelspecs = document.createElement('optgroup');
-      kernelspecs.label = labels.startKernel;
-      sorted.forEach(spec => kernelspecs.appendChild(optionForSpec(spec)));
-      node.appendChild(kernelspecs);
-
-      // Next render the no kernel option.
-      node.appendChild(optionForNone(translator));
-
-      // Render running kernels.
-      const running = document.createElement('optgroup');
-      running.label = labels.connectKernel;
-      kernels
-        .map(kernel =>
-          optionForKernel(
-            kernel,
-            specs.kernelspecs[kernel.name]?.display_name ?? '',
-            sessions[kernel.id],
-            translator
-          )
-        )
-        .sort((a, b) => a.text.localeCompare(b.text))
-        .forEach(option => running.appendChild(option));
-      node.appendChild(running);
-    }
-    // Set the selected option.
-    if (preference.id || currentKernelDisplayName || preference.name) {
-      for (const option of node.options) {
-        const choice = JSON.parse(option.value) as null | Kernel.IModel;
-        if (!choice) continue;
-        if (preference.id) {
-          if (preference.id === choice.id) {
-            option.selected = true;
-            break;
-          }
-          continue;
-        }
-        if (currentKernelDisplayName) {
-          if (
-            currentKernelDisplayName ===
-            specs.kernelspecs[choice.name]?.display_name
-          ) {
-            option.selected = true;
-            break;
-          }
-          continue;
-        }
-        if (preference.name) {
-          if (preference.name === choice.name) {
-            option.selected = true;
-            break;
-          }
-          continue;
-        }
-      }
-    }
-  }
-
-  /**
    * Create an option for no kernel.
    */
-  function optionForNone(
+  export function optionForNone(
     translator: ITranslator = nullTranslator
   ): HTMLOptGroupElement {
     const trans = translator.load('jupyterlab');
@@ -1812,7 +1815,7 @@ namespace Private {
   /**
    * Create an option element for a running kernel.
    */
-  function optionForKernel(
+  export function optionForKernel(
     kernel: Kernel.IModel,
     displayName?: string,
     session?: Session.IModel,
@@ -1837,7 +1840,9 @@ namespace Private {
   /**
    * Create an option element for a kernel spec.
    */
-  function optionForSpec(spec: KernelSpec.ISpecModel): HTMLOptionElement {
+  export function optionForSpec(
+    spec: KernelSpec.ISpecModel
+  ): HTMLOptionElement {
     const option = document.createElement('option');
     option.text = spec.display_name;
     option.value = JSON.stringify({ name: spec.name });
