@@ -188,10 +188,11 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
     [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]
   );
 
+  // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
   return (
     <Search
       className="jp-FilterBox"
-      ref={props.inputRef as any}
+      ref={props.inputRef as React.Ref<any>}
       value={filter}
       onChange={handleChange}
       onInput={handleChange}
