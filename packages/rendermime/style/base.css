@@ -407,7 +407,7 @@
   white-space: pre-wrap;
 }
 
-.jp-RenderedHTMLCommon :not(pre) > code {
+.jp-ThemedContainer .jp-RenderedHTMLCommon :not(pre) > code {
   background-color: var(--jp-layout-color2);
   padding: 1px 5px;
 }
