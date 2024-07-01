@@ -1529,7 +1529,7 @@ export namespace SessionContextDialogs {
    *  - (Connect to Kernel)
    *    - { all other running kernels in alphabetical order }
    *
-   * If there no language preference is set the dropdown is populated with:
+   * If no language preference is set the dropdown is populated with:
    *
    *  - (Start Kernel)
    *    - { all kernelspecs in alphabetical order }
