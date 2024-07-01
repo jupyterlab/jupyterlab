@@ -31,7 +31,12 @@
 }
 
 .lm-MenuBar-item {
-  padding: 0 8px;
+  /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
+  /* stylelint-disable-next-line csstree/validator */
+  padding: 0 min(calc(4vw - 11.2px), 8px); /* The use of min(), calc() and vw units
+    has the effect that as the screen drops below 480px, horizontal padding will
+    steadily decrease so that the standard menu items fit in a 320px wide screen
+    (equivalent to zooming to 400% from 1280px) */
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   border-top: var(--jp-border-width) solid transparent;
