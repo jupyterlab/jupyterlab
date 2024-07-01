@@ -67,6 +67,11 @@ import { topbar } from './topbar';
 export const DEFAULT_CONTEXT_ITEM_RANK = 100;
 
 /**
+ * An ID for the aria-live region
+ */
+const ARIA_LIVE_ID = 'commands-aria-live';
+
+/**
  * The command IDs used by the application plugin.
  */
 namespace CommandIDs {
@@ -242,9 +247,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return !!widget && widget.title.closable;
       },
       execute: () => {
+        let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
         const widget = contextMenuWidget();
         if (widget) {
           widget.close();
+          ariaLiveRegion!.append(trans.__('Tab Closed'));
         }
       }
     });
@@ -256,6 +263,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return some(shell.widgets('main'), (_, i) => i === 1);
       },
       execute: () => {
+        let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
         const widget = contextMenuWidget();
         if (!widget) {
           return;
@@ -266,6 +274,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             widget.close();
           }
         }
+        ariaLiveRegion!.append(trans.__('Closed All Other Tabs'));
       }
     });
 
@@ -275,11 +284,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         !!contextMenuWidget() &&
         widgetsRightOf(contextMenuWidget()!).length > 0,
       execute: () => {
+        let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
         const widget = contextMenuWidget();
         if (!widget) {
           return;
         }
         closeWidgets(widgetsRightOf(widget));
+        ariaLiveRegion!.append(trans.__('Closed Tabs to Right'));
       }
     });
 
@@ -295,43 +306,55 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           labShell.activateNextTab();
+          ariaLiveRegion!.append(trans.__('Activated Next Tab'));
         }
       });
 
       commands.addCommand(CommandIDs.activatePreviousTab, {
         label: trans.__('Activate Previous Tab'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           labShell.activatePreviousTab();
+          ariaLiveRegion!.append(trans.__('Activated Previous Tab'));
         }
       });
 
       commands.addCommand(CommandIDs.activateNextTabBar, {
         label: trans.__('Activate Next Tab Bar'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           labShell.activateNextTabBar();
+          ariaLiveRegion!.append(trans.__('Activated Next Tab Bar'));
         }
       });
 
       commands.addCommand(CommandIDs.activatePreviousTabBar, {
         label: trans.__('Activate Previous Tab Bar'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           labShell.activatePreviousTabBar();
+          ariaLiveRegion!.append(trans.__('Activated Previous Tab Bar'));
         }
       });
 
       commands.addCommand(CommandIDs.closeAll, {
         label: trans.__('Close All Tabs'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           labShell.closeAll();
+          ariaLiveRegion!.append(trans.__('Closed All Tabs'));
         }
       });
 
       commands.addCommand(CommandIDs.toggleHeader, {
         label: trans.__('Show Header'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           if (labShell.mode === 'single-document') {
             labShell.toggleTopInSimpleModeVisibility();
+            ariaLiveRegion!.append(trans.__('Showing Header'));
           }
         },
         isToggled: () => labShell.isTopInSimpleModeVisible(),
@@ -341,10 +364,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleLeftArea, {
         label: trans.__('Show Left Sidebar'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
+            ariaLiveRegion!.append(trans.__('Opened Left Sidebar'));
           } else {
             labShell.collapseLeft();
+            ariaLiveRegion!.append(trans.__('Closed Left Sidebar'));
             if (labShell.currentWidget) {
               labShell.activateById(labShell.currentWidget.id);
             }
@@ -357,10 +383,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleRightArea, {
         label: trans.__('Show Right Sidebar'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           if (labShell.rightCollapsed) {
             labShell.expandRight();
+            ariaLiveRegion!.append(trans.__('Opened Right Sidebar'));
           } else {
             labShell.collapseRight();
+            ariaLiveRegion!.append(trans.__('Closed Right Sidebar'));
             if (labShell.currentWidget) {
               labShell.activateById(labShell.currentWidget.id);
             }
@@ -420,10 +449,13 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             ? trans.__('Show Right Activity Bar')
             : trans.__('Show Left Activity Bar'),
         execute: args => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           if (args.side === 'right') {
             labShell.toggleSideTabBarVisibility('right');
+            ariaLiveRegion!.append(trans.__('Showing Right Activity Bar'));
           } else {
             labShell.toggleSideTabBarVisibility('left');
+            ariaLiveRegion!.append(trans.__('Showing Left Activity Bar'));
           }
         },
         isToggled: args =>
@@ -439,7 +471,9 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.togglePresentationMode, {
         label: () => trans.__('Presentation Mode'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           labShell.presentationMode = !labShell.presentationMode;
+          ariaLiveRegion!.append(trans.__('Entered Presentation Mode'));
         },
         isToggled: () => labShell.presentationMode,
         isVisible: () => true
@@ -458,9 +492,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return mode === 'single-document' || mode === 'multiple-document';
         },
         execute: args => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           const mode = args['mode'] as string;
           if (mode === 'single-document' || mode === 'multiple-document') {
             labShell.mode = mode;
+            ariaLiveRegion!.append(trans.__('Entered %1 mode', mode));
             return;
           }
           throw new Error(`Unsupported application shell mode: ${mode}`);
@@ -471,10 +507,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         label: trans.__('Simple Interface'),
         isToggled: () => labShell.mode === 'single-document',
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           const args =
             labShell.mode === 'multiple-document'
               ? { mode: 'single-document' }
               : { mode: 'multiple-document' };
+          ariaLiveRegion!.append(trans.__('Simple Interface'));
           return commands.execute(CommandIDs.setMode, args);
         }
       });
@@ -482,12 +520,22 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.resetLayout, {
         label: trans.__('Reset Default Layout'),
         execute: () => {
+          let ariaLiveRegion = document.getElementById(ARIA_LIVE_ID);
           // Turn off presentation mode
           if (labShell.presentationMode) {
             commands
               .execute(CommandIDs.togglePresentationMode)
+              .then(() =>
+                ariaLiveRegion!.append(trans.__('Presentation mode turned off'))
+              )
               .catch(reason => {
                 console.error('Failed to undo presentation mode.', reason);
+                ariaLiveRegion!.append(
+                  trans.__(
+                    'Failed to undo presentation mode. Caused by %1',
+                    reason
+                  )
+                );
               });
           }
           // Display top header
@@ -495,9 +543,20 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             labShell.mode === 'single-document' &&
             !labShell.isTopInSimpleModeVisible()
           ) {
-            commands.execute(CommandIDs.toggleHeader).catch(reason => {
-              console.error('Failed to display title header.', reason);
-            });
+            commands
+              .execute(CommandIDs.toggleHeader)
+              .then(() =>
+                ariaLiveRegion!.append(trans.__('Displaying title header'))
+              )
+              .catch(reason => {
+                console.error('Failed to display title header.', reason);
+                ariaLiveRegion!.append(
+                  trans.__(
+                    'Failed to display title header. Caused by %1',
+                    reason
+                  )
+                );
+              });
           }
           // Display side tabbar
           (['left', 'right'] as ('left' | 'right')[]).forEach(side => {
@@ -507,8 +566,20 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             ) {
               commands
                 .execute(CommandIDs.toggleSideTabBar, { side })
+                .then(() =>
+                  ariaLiveRegion!.append(
+                    trans.__('Displaying %1 side tab bar', side)
+                  )
+                )
                 .catch(reason => {
                   console.error(`Failed to show ${side} activity bar.`, reason);
+                  ariaLiveRegion!.append(
+                    trans.__(
+                      'Failed to show %1 activity bar. Caused by %2',
+                      side,
+                      reason
+                    )
+                  );
                 });
             }
           });
