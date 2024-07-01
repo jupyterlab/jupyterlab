@@ -441,7 +441,7 @@ def _get_labextension_metadata(module):  # noqa
         try:
             package = (
                 subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"],  # noqa S603
+                    [sys.executable, "setup.py", "--name"],  # S603
                     cwd=mod_path,
                 )
                 .decode("utf8")
