@@ -313,6 +313,8 @@ function createApp(
   // Ensure Jupyter styling
   panel.addClass('jp-ThemedContainer');
   menu.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

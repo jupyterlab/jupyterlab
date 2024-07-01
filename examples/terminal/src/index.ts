@@ -22,6 +22,8 @@ async function main(): Promise<void> {
 
   // Ensure Jupyter styling
   dock.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the widget to the dom.
   Widget.attach(dock, document.body);
