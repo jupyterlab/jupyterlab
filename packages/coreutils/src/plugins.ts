@@ -6,6 +6,20 @@
 import { topologicSort } from '@lumino/algorithm';
 import { IPlugin, type PluginRegistry, type Token } from '@lumino/coreutils';
 
+export interface IToken {
+  /**
+   * Token purpose description.
+   */
+  readonly description?: string;
+  /**
+   * The human readable name for the token.
+   *
+   * #### Notes
+   * This can be useful for debugging and logging.
+   */
+  readonly name: string;
+}
+
 /**
  * The interface for a module that exports a plugin or plugins as
  * the default value.
@@ -15,73 +29,6 @@ export interface IPluginModule {
    * The default export.
    */
   default: IPlugin<any, any> | IPlugin<any, any>[];
-}
-
-export interface IPluginOptions {
-  /**
-   * The human readable ID of the plugin.
-   *
-   * #### Notes
-   * This must be unique within an application.
-   */
-  id: string;
-  /**
-   * Plugin description.
-   *
-   * #### Notes
-   * This can be used to provide user documentation on the feature
-   * brought by a plugin.
-   */
-  description?: string;
-  /**
-   * Whether the plugin should be activated on application start or waiting for being
-   * required. If the value is 'defer' then the plugin should be activated only after
-   * the application is started.
-   *
-   * #### Notes
-   * The default is `false`.
-   */
-  autoStart?: boolean | 'defer';
-  /**
-   * The types of required services for the plugin, if any.
-   *
-   * #### Notes
-   * These tokens correspond to the services that are required by
-   * the plugin for correct operation.
-   *
-   * When the plugin is activated, a concrete instance of each type
-   * will be passed to the `activate()` function, in the order they
-   * are specified in the `requires` array.
-   */
-  requires?: string[];
-  /**
-   * The types of optional services for the plugin, if any.
-   *
-   * #### Notes
-   * These tokens correspond to the services that can be used by the
-   * plugin if available, but are not necessarily required.
-   *
-   * The optional services will be passed to the `activate()` function
-   * following all required services. If an optional service cannot be
-   * resolved, `null` will be passed in its place.
-   */
-  optional?: string[];
-  /**
-   * The type of service provided by the plugin, if any.
-   *
-   * #### Notes
-   * This token corresponds to the service exported by the plugin.
-   *
-   * When the plugin is activated, the return value of `activate()`
-   * is used as the concrete instance of the type.
-   */
-  provides?: string | null;
-  /**
-   * Callback to load the plugin module.
-   *
-   * @returns The module containing the plugin
-   */
-  loader: () => Promise<IPluginModule>;
 }
 
 export interface IPlugin2<T = any, U = any>
@@ -122,7 +69,7 @@ export interface IPlugin2<T = any, U = any>
    * When the plugin is activated, the return value of `activate()`
    * is used as the concrete instance of the type.
    */
-  provides?: Token<U> | string | null;
+  provides?: IToken | null;
   /**
    * A function invoked to activate the plugin.
    *
@@ -267,7 +214,7 @@ export class PluginRegistry2<T = any> {
 
     // Add the service token to the service map.
     if (data.provides) {
-      this._services.set(data.provides, data.id);
+      this._services.set(data.provides.name, data.id);
     }
 
     // Add the plugin to the plugin map.
@@ -594,7 +541,7 @@ namespace Private {
     /**
      * The type of service provided by the plugin, or `null`.
      */
-    readonly provides: string | null;
+    readonly provides: IToken | null;
 
     /**
      * The function which activates the plugin.
@@ -642,10 +589,7 @@ namespace Private {
 
       this.id = plugin.id;
       this.description = plugin.description ?? '';
-      this.provides =
-        (plugin.provides ?? null) !== null
-          ? (plugin.provides as Token<any>).name ?? plugin.provides
-          : null;
+      this.provides = plugin.provides ?? null;
       this.autoStart = plugin.autoStart ?? false;
       this.requires = plugin.requires
         ? plugin.requires.map(p => (p as Token<any>).name ?? p)
@@ -720,7 +664,7 @@ namespace Private {
     /**
      * The type of service provided by the plugin, or `null`.
      */
-    readonly provides: string | null;
+    readonly provides: IToken | null;
 
     /**
      * The function which activates the plugin.
@@ -797,7 +741,7 @@ namespace Private {
   ): void {
     const dependencies = [...plugin.requires, ...plugin.optional];
     const visit = (token: string): boolean => {
-      if (token === plugin.provides) {
+      if (token === plugin.provides?.name) {
         return true;
       }
       const id = services.get(token);

@@ -102,7 +102,7 @@ export async function main() {
         description: plugin.description,
         requires: plugin.requires ? plugin.requires.map(token => typeof token === 'string' ? { name: token } : token) : [],
         optional: plugin.optional ? plugin.optional.map(token => typeof token === 'string' ? { name: token } : token) : [],
-        provides: plugin.provides ? typeof plugin.provides === 'string' ? {name: plugin.provides} : plugin.provides : null,
+        provides: plugin.provides ? plugin.provides : null,
         autoStart: plugin.autoStart,
         enabled: !isDisabled,
         extension: scope
