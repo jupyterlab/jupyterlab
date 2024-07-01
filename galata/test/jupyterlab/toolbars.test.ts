@@ -17,6 +17,9 @@ toolbars.forEach(([plugin, parameter]) => {
   test(`Toolbar commands for ${plugin} must exists`, async ({ page }) => {
     const [toolbarItems, commands] = await page.evaluate(
       async ([plugin, parameter]) => {
+        // Ensure to activate the plugin
+        await window.jupyterapp.activatePlugin(plugin);
+
         const settings = await window.galata.getPlugin(
           '@jupyterlab/apputils-extension:settings'
         );
