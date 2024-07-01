@@ -2105,7 +2105,7 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"],  # noqa S603
+            [node, YARN_PATH, "config", "--json"],  # S603
             stderr=subprocess.PIPE,
             cwd=HERE,
         )

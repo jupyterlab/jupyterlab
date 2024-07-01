@@ -14,7 +14,7 @@ if os.name == "nt":
             subprocess.check_call(
                 ["rmdir", "/s", "/q", "node_modules"],  # noqa S602 S607
                 cwd=root,
-                shell=True,  # noqa S602 S607
+                shell=True,  # S602 S607
             )
             dnames.remove("node_modules")
 
