@@ -47,7 +47,7 @@ export class GalataInpage implements IGalataInpage {
     if (hasPlugin) {
       try {
         const appAny = app as any;
-        const plugins = appAny.pluginRegistr?._plugins ?? appAny._plugins;
+        const plugins = appAny.pluginRegistry?._plugins ?? appAny._plugins;
         const plugin: any = plugins?.get(pluginId);
         if (!plugin) {
           return undefined;
