@@ -113,9 +113,7 @@ export class FileBrowser extends SidePanel {
     this.filterToolbar = new Toolbar();
     this.filterToolbar.addClass(FILTER_TOOLBAR_CLASS);
     this.filterToolbar.addItem('fileNameSearcher', searcher);
-    this.filterToolbar.node.style['display'] = this.showFileFilter
-      ? 'block'
-      : 'none';
+    this.filterToolbar.setHidden(!this.showFileFilter);
 
     this.listing = this.createDirListing({
       model,
