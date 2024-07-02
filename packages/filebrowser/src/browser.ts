@@ -105,7 +105,8 @@ export class FileBrowser extends SidePanel {
       useFuzzyFilter: true,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: false,
-      showIcon: false
+      showIcon: false,
+      inputRef: this._fileFilterRef
     });
     searcher.addClass(FILTERBOX_CLASS);
 
