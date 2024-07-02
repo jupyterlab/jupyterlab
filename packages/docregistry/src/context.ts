@@ -78,6 +78,7 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
       path: localPath,
