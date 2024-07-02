@@ -58,13 +58,13 @@ export class PluginList extends ReactWidget {
     this._model.ready
       .then(() => {
         this.update();
+        this._model.changed.connect(() => {
+          this.update();
+        });
       })
       .catch(reason => {
         console.error(`Failed to load the plugin list model:\n${reason}`);
       });
-    this._model.changed.connect(() => {
-      this.update();
-    });
     this.mapPlugins = this.mapPlugins.bind(this);
     this.setFilter = this.setFilter.bind(this);
     this.setFilter(
