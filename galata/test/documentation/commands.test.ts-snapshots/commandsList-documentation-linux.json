@@ -294,7 +294,7 @@
     "label": "Display the completion helper.",
     "caption": "",
     "shortcuts": [
-      "Tab"
+      "Ctrl ArrowDown"
     ]
   },
   {
@@ -302,7 +302,7 @@
     "label": "Display the completion helper.",
     "caption": "",
     "shortcuts": [
-      "Tab"
+      "Ctrl ArrowDown"
     ]
   },
   {
@@ -310,7 +310,7 @@
     "label": "Display the completion helper.",
     "caption": "",
     "shortcuts": [
-      "Tab"
+      "Ctrl ArrowDown"
     ]
   },
   {
@@ -1295,7 +1295,7 @@
     "label": "Accept Inline Completion",
     "caption": "",
     "shortcuts": [
-      "Alt End"
+      "Tab"
     ]
   },
   {
@@ -1348,12 +1348,6 @@
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "English",
-    "shortcuts": []
-  },
-  {
-    "id": "jupyterlab-translation:zh_CN",
-    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
     "shortcuts": []
   },
   {
