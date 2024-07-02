@@ -12,7 +12,8 @@ import {
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
-import { Panel, PanelLayout } from '@lumino/widgets';
+import { Panel } from '@lumino/widgets';
+import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
