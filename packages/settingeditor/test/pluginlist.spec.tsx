@@ -77,7 +77,7 @@ describe('@jupyterlab/settingeditor', () => {
 
         await registry.load(id);
 
-        await signalToPromise(model.changed);
+        await expect(signalToPromise(model.changed)).resolves.not.toThrow();
       });
 
       it('should emit when the transform of a plugin resolves', async () => {
@@ -96,7 +96,23 @@ describe('@jupyterlab/settingeditor', () => {
         // Load with transformer
         await registry.load(id);
 
-        await signalToPromise(model.changed);
+        await expect(signalToPromise(model.changed)).resolves.not.toThrow();
+      });
+
+      it('should emit when settings change', async () => {
+        connector.schemas[id] = schema;
+
+        const settings = await registry.load(id);
+        const model = new PluginList.Model({ registry });
+        await model.ready;
+
+        // Change to a non-default value
+        settings.set('testSetting', 'test');
+        await expect(signalToPromise(model.changed)).resolves.not.toThrow();
+
+        // Change back to the default
+        settings.set('testSetting', 'example');
+        await expect(signalToPromise(model.changed)).resolves.not.toThrow();
       });
     });
 

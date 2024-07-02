@@ -595,14 +595,18 @@ export namespace PluginList {
      * Settings keyed by plugin name.
      *
      * Note: settings for plugins can be loaded later than the plugin
-     * itelf, which is the case for plugins using a `transform` step.
+     * itself, which is the case for plugins using a `transform` step.
      */
     get settings(): Record<string, Settings> {
       return this._settings;
     }
 
     /**
-     * Signal emitted when list of plugins, or the associated settings, change.
+     * Signal emitted when list of plugins change.
+     *
+     * This signal will be emitted when new plugins are added to the registry,
+     * when settings schema of an already present plugin changes, and when the
+     * settings state changes from default to modified or vice versa.
      */
     get changed(): ISignal<PluginList.Model, void> {
       return this._changed;
@@ -631,7 +635,14 @@ export namespace PluginList {
         const pluginSettings = (await this._registry.load(
           plugin.id
         )) as Settings;
+        pluginSettings.changed.connect(() => {
+          if (pluginSettings.isModified !== this._settingsModified[plugin.id]) {
+            this._changed.emit();
+            this._settingsModified[plugin.id] = pluginSettings.isModified;
+          }
+        });
         this._settings[plugin.id] = pluginSettings;
+        this._settingsModified[plugin.id] = pluginSettings.isModified;
       }
     }
 
@@ -650,6 +661,7 @@ export namespace PluginList {
     private _ready = new PromiseDelegate<void>();
     private _registry: ISettingRegistry;
     private _settings: Record<string, Settings> = {};
+    private _settingsModified: Record<string, boolean> = {};
     private _toSkip: string[];
   }
 
