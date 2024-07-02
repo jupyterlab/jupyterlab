@@ -29,19 +29,20 @@ The current state of JupyterLab
 
 Jupyter accessibility statements are living documents. This statement was first created on 16 May 2022 using the `W3C Accessibility Statement Generator Tool <https://www.w3.org/WAI/planning/statements/>`_ with additions and edits from the Jupyter accessibility contributors community.
 
-.. note::
+note
+""""
 
     This statement was last updated on the 09 of August 2022.
 
 Conformance status
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 The `Web Content Accessibility Guidelines (WCAG) <https://www.w3.org/WAI/standards-guidelines/wcag>`_ defines requirements for designers and developers to improve accessibility for people with disabilities. It defines three levels of conformance: Level A, Level AA, and Level AAA. JupyterLab is nonconforming with WCAG 2.1 level AA. Nonconforming means that the content does not meet the accessibility standard.
 
 JupyterLab's accessibility does not exist in isolation. JupyterLab inherits much from the many projects it is built upon and its accessibility conformance may impact projects built off of JupyterLab or its components. The accessibility of this ecosystem is interlinked, so conformance may need to be resolved at different levels in order to impact JupyterLab positively.
 
 Compatibility with browsers and assistive technology
-""""""""""""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 JupyterLab is designed to be compatible with the following
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -93,7 +94,7 @@ Accessibility of JupyterLab relies on the following technologies to work with th
 These technologies are relied upon for conformance with the accessibility standards used.
 
 Limitations and alternatives
-""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Despite our best efforts to ensure accessibility of JupyterLab, there may be some limitations. Below is a description of known limitations, and potential solutions. Please contact us if you observe an issue not listed below.
 
@@ -139,7 +140,8 @@ Jupyter accessibility contributors take the following measures to ensure accessi
 * Employ formal accessibility quality assurance methods.
 * Document changes, approaches, and improvements to the above methods and to JupyterLab itself.
 
-.. note::
+note
+""""
 
     For more information on current efforts to improve JupyterLab's accessibility, visit the `CZI - JupyterLab accessibility grant roadmap <https://jupyter-a11y.netlify.app/roadmap/intro.html>`_.
 
