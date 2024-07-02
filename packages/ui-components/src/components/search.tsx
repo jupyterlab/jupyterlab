@@ -191,7 +191,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   };
 
   // Show the icon by default, or if the caller specifically requests it
-  const showSearchIcon = props.showIcon === undefined || props.showIcon;
+  const showSearchIcon = props.showIcon ?? true;
 
   return (
     <Search
