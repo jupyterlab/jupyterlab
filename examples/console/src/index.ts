@@ -154,6 +154,9 @@ function startApp(
   panel.addWidget(palette);
   panel.addWidget(consolePanel);
 
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
 

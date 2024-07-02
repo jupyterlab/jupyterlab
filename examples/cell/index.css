@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-body {
+body.jp-ThemedContainer {
   background: white;
   margin: 0;
   padding: 0;
@@ -16,6 +16,7 @@ body {
   right: 4px;
   bottom: 4px;
   border-bottom: 1px solid #e0e0e0;
+  background-color: white;
 }
 
 .jp-Toolbar {

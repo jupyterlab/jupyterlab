@@ -29,6 +29,7 @@ export class Popup extends Widget {
    */
   constructor(options: Omit<Popup.IOptions, 'startHidden'>) {
     super();
+    this.addClass('jp-ThemedContainer');
     this._body = options.body;
     this._body.addClass('jp-StatusBar-HoverItem');
     this._anchor = options.anchor;

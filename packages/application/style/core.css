@@ -11,7 +11,7 @@
   display: none !important;
 }
 
-body {
+.jp-ThemedContainer {
   font-family: var(--jp-ui-font-family);
   background: var(--jp-layout-color3);
   margin: 0;

@@ -88,6 +88,7 @@ export class Dialog<T> extends Widget {
     dialogNode.ariaModal = 'true';
     super({ node: dialogNode });
     this.addClass('jp-Dialog');
+    this.addClass('jp-ThemedContainer');
     const normalized = Private.handleOptions(options);
     const renderer = normalized.renderer;
 

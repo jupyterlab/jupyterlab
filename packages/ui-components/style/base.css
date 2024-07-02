@@ -22,18 +22,18 @@
 @import './toolbar.css';
 @import './windowedlist.css';
 
-body {
+.jp-ThemedContainer {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
 /* Disable native link decoration styles everywhere outside of dialog boxes */
-a {
+.jp-ThemedContainer a {
   text-decoration: unset;
   color: unset;
 }
 
-a:hover {
+.jp-ThemedContainer a:hover {
   text-decoration: unset;
   color: unset;
 }
@@ -145,7 +145,7 @@ a:hover {
 }
 
 .jp-InputGroup input::placeholder,
-input::placeholder {
+.jp-ThemedContainer input::placeholder {
   color: var(--jp-ui-font-color2);
 }
 
@@ -192,6 +192,6 @@ input::placeholder {
   color: var(--jp-ui-font-color0);
 }
 
-select {
+.jp-ThemedContainer select {
   box-sizing: border-box;
 }

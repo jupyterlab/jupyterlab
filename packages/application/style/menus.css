@@ -26,7 +26,7 @@
   overflow-x: auto;
 }
 
-.lm-MenuBar-menu {
+.lm-MenuBar-menu.jp-ThemedContainer {
   top: calc(-2 * var(--jp-border-width));
 }
 
