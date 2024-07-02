@@ -77,7 +77,8 @@ __metadata:
 
 "@jupyter/web-components@npm:^0.15.2, @jupyter/web-components@npm:^0.15.3":
   version: 0.15.3
-  resolution: "@jupyter/web-components@npm:0.15.3"
+  resolution: "
+  @npm:0.15.3"
   dependencies:
     "@microsoft/fast-colors": ^5.3.1
     "@microsoft/fast-element": ^1.12.0
