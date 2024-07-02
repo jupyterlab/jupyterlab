@@ -504,6 +504,7 @@ export class FileBrowser extends SidePanel {
 
   private _directoryPending: Promise<Contents.IModel> | null = null;
   private _filePending: Promise<Contents.IModel> | null = null;
+  private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
   private _showFileCheckboxes: boolean = false;
