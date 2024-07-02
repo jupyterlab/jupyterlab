@@ -232,23 +232,9 @@ export class FileBrowser extends SidePanel {
     const oldValue = this.showFileFilter;
     if (oldValue && !value) {
       // Clear the search box input
-      (this.filterToolbar.layout as PanelLayout).widgets.forEach(widget => {
-        if (
-          widget.node.getAttribute('data-jp-item-name') === 'fileNameSearcher'
-        ) {
-          // Find the search element's "clear" button and click it
-          widget.node.children[0].shadowRoot?.childNodes.forEach(childNode => {
-            if (childNode.nodeType === Node.ELEMENT_NODE) {
-              const clearButtonElements = (
-                childNode as HTMLElement
-              ).getElementsByClassName('clear-button');
-              if (clearButtonElements.length > 0) {
-                (clearButtonElements[0] as HTMLButtonElement).click();
-              }
-            }
-          });
-        }
-      });
+      if (this._fileFilterRef.current) {
+        this._fileFilterRef.current.value = '';
+      }
 
       // Set a filter that doesn't exclude anything.
       this.model.setFilter(value => {
