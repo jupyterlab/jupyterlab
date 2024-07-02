@@ -245,8 +245,10 @@ export class FileBrowser extends SidePanel {
     this._showFileFilter = value;
 
     // Update widget visibility
-    const filterToolbarNode = this.filterToolbar.node;
-    filterToolbarNode.style['display'] = this.showFileFilter ? 'block' : 'none';
+    this.filterToolbar.setHidden(!this.showFileFilter);
+    if (this.showFileFilter) {
+      this._fileFilterRef.current?.focus();
+    }
   }
 
   /**
