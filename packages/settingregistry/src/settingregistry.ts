@@ -560,6 +560,13 @@ export class SettingRegistry implements ISettingRegistry {
   }
 
   /**
+   * A promise which resolves when the pre-fetched plugins passed to the registry finished pre-loading.
+   */
+  protected get ready() {
+    return this._ready;
+  }
+
+  /**
    * Load a plugin into the registry.
    */
   private async _load(data: ISettingRegistry.IPlugin): Promise<void> {
