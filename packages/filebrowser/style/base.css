@@ -29,6 +29,20 @@
   row-gap: 12px;
 }
 
+.jp-FileBrowser-filterToolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
+.jp-FileBrowser-filterToolbar.jp-Toolbar {
+  border-bottom: none;
+  height: auto;
+  margin: 0 12px 6px;
+  box-shadow: none;
+  padding: 0;
+}
+
 .jp-FileBrowser-Panel {
   flex: 1 1 auto;
   display: flex;
@@ -64,7 +78,8 @@
 | Buttons
 |----------------------------------------------------------------------------*/
 
-.jp-FileBrowser-toolbar > .jp-Toolbar-item {
+.jp-FileBrowser-toolbar > .jp-Toolbar-item,
+.jp-FileBrowser-filterToolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
   align-items: center;
@@ -72,7 +87,7 @@
 }
 
 .jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
-  width: 40px;
+  width: 28px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -99,7 +114,11 @@
   display: none;
 }
 
-.jp-FileBrowser-toolbar > .jp-FileBrowser-filterBox {
+.jp-FileBrowser-filterToolbar > .jp-FileBrowser-filterBox {
+  width: 100%;
+}
+
+.jp-FileBrowser-filterBox > .jp-FilterBox {
   width: 100%;
 }
 
