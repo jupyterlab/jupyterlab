@@ -41,6 +41,11 @@ export interface IFilterBoxProps {
   placeholder?: string;
 
   /**
+   * Whether to show a search icon in the box.
+   */
+  showIcon?: boolean;
+
+  /**
    * A function to callback when filter is updated.
    */
   updateFilter: (
@@ -185,6 +190,9 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
     );
   };
 
+  // Show the icon by default, or if the caller specifically requests it
+  const showSearchIcon = props.showIcon ?? true;
+
   return (
     <Search
       className="jp-FilterBox"
@@ -195,7 +203,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       placeholder={props.placeholder}
       disabled={props.disabled}
     >
-      <searchIcon.react slot="end" tag={null} />
+      {showSearchIcon && <searchIcon.react slot="end" tag={null} />}
     </Search>
   );
 };
@@ -204,13 +212,5 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
  * A widget which hosts a input textbox to filter on file names.
  */
 export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(
-    <FilterBox
-      updateFilter={props.updateFilter}
-      useFuzzyFilter={props.useFuzzyFilter}
-      placeholder={props.placeholder}
-      forceRefresh={props.forceRefresh}
-      caseSensitive={props.caseSensitive}
-    />
-  );
+  return ReactWidget.create(<FilterBox {...props} />);
 };

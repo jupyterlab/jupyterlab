@@ -1808,8 +1808,8 @@ class _AppHandler:
 
         data = config.setdefault(source, {})
         dead = []
-        for name, source in data.items():
-            if not osp.exists(source):
+        for name, source_ in data.items():
+            if not osp.exists(source_):
                 dead.append(name)
 
         for name in dead:
@@ -2104,8 +2104,8 @@ def _yarn_config(logger):
         return configuration
 
     try:
-        output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"],  # S603
+        output_binary = subprocess.check_output(  # noqa S603
+            [node, YARN_PATH, "config", "--json"],
             stderr=subprocess.PIPE,
             cwd=HERE,
         )
