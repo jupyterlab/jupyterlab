@@ -403,21 +403,23 @@ class PyPIExtensionManager(ExtensionManager):
                         if response.status_code < 400:  # noqa PLR2004
                             if download_url.endswith(".whl"):
                                 with ZipFile(io.BytesIO(response.content)) as wheel:
-                                    for name in filter(
+                                    for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         wheel.namelist(),
                                     ):
-                                        data = json.loads(wheel.read(name))
+                                        data = json.loads(wheel.read(filename))
                                         jlab_metadata = data.get("jupyterlab")
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
                                 with TarFile(io.BytesIO(response.content)) as sdist:
-                                    for name in filter(
+                                    for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
                                     ):
-                                        data = json.load(sdist.extractfile(sdist.getmember(name)))
+                                        data = json.load(
+                                            sdist.extractfile(sdist.getmember(filename))
+                                        )
                                         jlab_metadata = data.get("jupyterlab")
                                         if jlab_metadata is not None:
                                             break
@@ -438,7 +440,7 @@ class PyPIExtensionManager(ExtensionManager):
 
                 return ActionResult(status="ok", needs_restart=follow_ups)
             else:
-                self.log.error(f"Failed to installed {name}: code {result.returncode}\n{error}")
+                self.log.error(f"Failed to installed {filename}: code {result.returncode}\n{error}")
                 return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:
