@@ -218,7 +218,7 @@
   background-color: transparent;
 }
 
-.jp-Licenses-Grid tr.jp-mod-selected {
+.jp-Licenses-Grid.jp-RenderedHTMLCommon tr.jp-mod-selected {
   background-color: var(--jp-brand-color1);
   color: #fff;
 }
