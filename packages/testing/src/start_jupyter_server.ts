@@ -55,8 +55,8 @@ export class JupyterServer {
     const env = {
       JUPYTER_CONFIG_DIR: Private.handleConfig(options),
       JUPYTER_DATA_DIR: Private.handleData(options),
-      JUPYTER_RUNTIME_DIR: JupyterServer.mktempDir('jupyter_runtime'),
-      IPYTHONDIR: JupyterServer.mktempDir('ipython'),
+      JUPYTER_RUNTIME_DIR: Private.mktempDir('jupyter_runtime'),
+      IPYTHONDIR: Private.mktempDir('ipython'),
       PATH: process.env.PATH
     };
 
@@ -142,6 +142,13 @@ export namespace JupyterServer {
      */
     additionalKernelSpecs: JSONObject;
   }
+}
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  export let child: ChildProcess | null = null;
 
   /**
    * Make a temporary directory.
@@ -153,16 +160,8 @@ export namespace JupyterServer {
     if (!fs.existsSync(pathPrefix)) {
       fs.mkdirSync(pathPrefix);
     }
-
     return fs.mkdtempSync(`${pathPrefix}/${suffix}`);
   }
-}
-
-/**
- * A namespace for module private data.
- */
-namespace Private {
-  export let child: ChildProcess | null = null;
 
   /**
    * Install a spec in the data directory.
@@ -179,7 +178,7 @@ namespace Private {
    * Create and populate a notebook directory.
    */
   function createNotebookDir(): string {
-    const nbDir = JupyterServer.mktempDir('notebook');
+    const nbDir = mktempDir('notebook');
     fs.mkdirSync(path.join(nbDir, 'src'));
     fs.writeFileSync(path.join(nbDir, 'src', 'temp.txt'), 'hello');
 
@@ -194,7 +193,7 @@ namespace Private {
    * Create a temporary directory for schemas.
    */
   function createAppDir(): string {
-    const appDir = JupyterServer.mktempDir('app');
+    const appDir = mktempDir('app');
 
     // Add a fake static/index.html for `ensure_app_check()`
     fs.mkdirSync(path.join(appDir, 'static'));
@@ -247,13 +246,13 @@ namespace Private {
       });
     }
 
-    const configDir = JupyterServer.mktempDir('config');
+    const configDir = mktempDir('config');
     const configPath = path.join(configDir, 'jupyter_server_config.json');
     const root_dir = createNotebookDir();
 
     const app_dir = createAppDir();
-    const user_settings_dir = JupyterServer.mktempDir('settings');
-    const workspaces_dir = JupyterServer.mktempDir('workspaces');
+    const user_settings_dir = mktempDir('settings');
+    const workspaces_dir = mktempDir('workspaces');
 
     const configData = merge(
       {
@@ -290,7 +289,7 @@ namespace Private {
    * Handle data.
    */
   export function handleData(options: Partial<JupyterServer.IOptions>): string {
-    const dataDir = JupyterServer.mktempDir('data');
+    const dataDir = mktempDir('data');
 
     // Install custom specs.
     installSpec(dataDir, 'echo', {

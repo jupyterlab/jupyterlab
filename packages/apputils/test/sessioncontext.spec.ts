@@ -44,13 +44,21 @@ const MOCK_KERNEL = {
   kernel_name: 'mock-kernel'
 };
 
+function mktempDir(suffix: string): string {
+  const pathPrefix = '/tmp/jupyterlab-apputils-sessioncontext-test';
+  if (!fs.existsSync(pathPrefix)) {
+    fs.mkdirSync(pathPrefix);
+  }
+  return fs.mkdtempSync(`${pathPrefix}/${suffix}`);
+}
+
 describe('@jupyterlab/apputils', () => {
   let server: JupyterServer;
   let external: string;
 
   beforeAll(async () => {
     server = new JupyterServer();
-    external = JupyterServer.mktempDir('external_kernels');
+    external = mktempDir('external_kernels');
 
     if (!(await fs.pathExists(`${external}/kernel.json`))) {
       const data = JSON.stringify(MOCK_KERNEL);
