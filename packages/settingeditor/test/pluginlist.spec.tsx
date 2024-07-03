@@ -107,12 +107,16 @@ describe('@jupyterlab/settingeditor', () => {
         await model.ready;
 
         // Change to a non-default value
-        settings.set('testSetting', 'test');
-        await expect(signalToPromise(model.changed)).resolves.not.toThrow();
+        await Promise.all([
+          settings.set('testSetting', 'test'),
+          expect(signalToPromise(model.changed)).resolves.not.toThrow()
+        ]);
 
         // Change back to the default
-        settings.set('testSetting', 'example');
-        await expect(signalToPromise(model.changed)).resolves.not.toThrow();
+        await Promise.all([
+          settings.set('testSetting', 'example'),
+          expect(signalToPromise(model.changed)).resolves.not.toThrow()
+        ]);
       });
     });
 
