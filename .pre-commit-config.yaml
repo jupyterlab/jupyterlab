@@ -27,7 +27,7 @@ repos:
         exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.28.4
+    rev: 0.28.6
     hooks:
       - id: check-github-workflows
 
