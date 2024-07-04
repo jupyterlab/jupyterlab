@@ -2038,16 +2038,21 @@ function activateNotebookHandler(
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       const metadata = args['metadata'] as ReadonlyJSONObject;
-      console.log('PageConfig');
-      console.dir(PageConfig);
-      const allow_insecure_kernel_specs = PageConfig.getOption('allow_insecure_kernel_specs');
-      console.log('allow_insecure_kernel_specs');
-      console.log(allow_insecure_kernel_specs);
-      if (metadata?.parameters && allow_insecure_kernel_specs) {
-        let schema = metadata.parameters as RJSFSchema;
-        showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+      const allow_insecure_kernelspec_params = PageConfig.getOption('allow_insecure_kernelspec_params') === 'true' ? true: false;
+      if(metadata?.is_secure) {
+        if (!metadata?.parameters) {
+          return createNew(cwd, kernelId, kernelName);
+        } else {
+          let schema = metadata.parameters as RJSFSchema;
+          showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+        }
       } else {
-        return createNew(cwd, kernelId, kernelName);
+        if (allow_insecure_kernelspec_params) {
+            let schema = metadata.parameters as RJSFSchema;
+            showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+        } else {
+            return createNew(cwd, kernelId, kernelName);      
+        }
       }
     }
   });

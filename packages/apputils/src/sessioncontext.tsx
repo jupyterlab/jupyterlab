@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
   KernelMessage,
@@ -1583,8 +1583,7 @@ namespace Private {
     const selector = document.createElement('select');
     selector.setAttribute('id', 'js-kernel-selector');
     selector.onchange = () => {
-      selector.setAttribute(
-        'data-kernel-spec','');
+      selector.setAttribute('data-kernel-spec', '');
       checkCustomKernelSpecs(sessionContext, selector, trans);
     };
 
@@ -1622,52 +1621,66 @@ namespace Private {
       selectedKernel && selectedKernel.name ? selectedKernel.name : '';
     let kernel =
       kernelName && sessionContext.specsManager.specs?.kernelspecs[kernelName];
-    if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
-      let kernelParameters = kernel?.metadata?.parameters as PartialJSONObject;
+    const allow_insecure_kernelspec_params =
+      PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
+        ? true
+        : false;
+    if (
+      (kernel &&
+        kernel?.metadata &&
+        kernel?.metadata?.is_secure &&
+        kernel?.metadata?.parameters) ||
+      allow_insecure_kernelspec_params
+    ) {
+      if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
+        let kernelParameters = kernel?.metadata
+          ?.parameters as PartialJSONObject;
 
-      if (kernelParameters) {
-        if (sessionContext.kernelPreference?.customKernelSpecs) {
-          let customKernelSpecs = sessionContext.kernelPreference
-            ?.customKernelSpecs as PartialJSONObject;
-          for (let key in customKernelSpecs) {
-            let selectedValue = customKernelSpecs[key] as
-              | PartialJSONValue
-              | undefined;
+        if (kernelParameters) {
+          if (sessionContext.kernelPreference?.customKernelSpecs) {
+            let customKernelSpecs = sessionContext.kernelPreference
+              ?.customKernelSpecs as PartialJSONObject;
+            for (let key in customKernelSpecs) {
+              let selectedValue = customKernelSpecs[key] as
+                | PartialJSONValue
+                | undefined;
 
-            if (kernelParameters.properties) {
-              let properties = kernelParameters.properties as PartialJSONObject;
+              if (kernelParameters.properties) {
+                let properties =
+                  kernelParameters.properties as PartialJSONObject;
 
-              let kernelParameter = properties[key] as PartialJSONObject;
+                let kernelParameter = properties[key] as PartialJSONObject;
 
-              if (kernelParameter) {
-                let kernelParametersTmp = (
-                  kernelParameters.properties as PartialJSONObject
-                )[key] as PartialJSONObject;
-                (kernelParameters.properties as PartialJSONObject)[key] = {
-                  ...kernelParametersTmp,
-                  default: selectedValue
-                };
+                if (kernelParameter) {
+                  let kernelParametersTmp = (
+                    kernelParameters.properties as PartialJSONObject
+                  )[key] as PartialJSONObject;
+                  (kernelParameters.properties as PartialJSONObject)[key] = {
+                    ...kernelParametersTmp,
+                    default: selectedValue
+                  };
+                }
               }
             }
           }
-        }
 
-        let kernelSpecWidget = new DialogWidget(
-          kernelParameters,
-          kernelConfiguration,
-          formData => {
-            kernelConfiguration = formData as PartialJSONObject;
-            selector.setAttribute(
-              'data-kernel-spec',
-              JSON.stringify(kernelConfiguration)
-            );
-          },
-          trans
-        );
+          let kernelSpecWidget = new DialogWidget(
+            kernelParameters,
+            kernelConfiguration,
+            formData => {
+              kernelConfiguration = formData as PartialJSONObject;
+              selector.setAttribute(
+                'data-kernel-spec',
+                JSON.stringify(kernelConfiguration)
+              );
+            },
+            trans
+          );
 
-        //Update widget
-        if (kernelSpecsContainer) {
-          Widget.attach(kernelSpecWidget, kernelSpecsContainer);
+          //Update widget
+          if (kernelSpecsContainer) {
+            Widget.attach(kernelSpecWidget, kernelSpecsContainer);
+          }
         }
       }
     }
