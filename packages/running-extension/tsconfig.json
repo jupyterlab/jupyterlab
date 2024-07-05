@@ -2,7 +2,8 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "lib": ["es2023", "dom"]
   },
   "include": ["src/*"],
   "references": [
