@@ -78,7 +78,7 @@ export async function addKernelRunningSessionManager(
   }
 
   commands.addCommand(SHUTDOWN_UNUSED_BUTTON_CLASS, {
-    label: args => (args.toolbar ? '' : shutdownUnusedLabel),
+    caption: args => (args.toolbar ? '' : shutdownUnusedLabel),
     icon: args => (args.toolbar ? cleaningIcon : undefined),
     execute: async () => {
       const unusedKernels = getUnusedKernels();
@@ -155,7 +155,7 @@ export async function addKernelRunningSessionManager(
       new CommandToolbarButton({
         commands,
         id: SHUTDOWN_UNUSED_BUTTON_CLASS,
-        label: shutdownUnusedLabel,
+        caption: shutdownUnusedLabel,
         args: { toolbar: true }
       })
     ]
