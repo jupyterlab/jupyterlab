@@ -211,7 +211,7 @@ export class OutputModel implements IOutputModel {
       case 'display_data':
       case 'execute_result':
       case 'update_display_data':
-        output['data'] = data as PartialJSONObject;
+        output['data'] = data.data as PartialJSONObject;
         output['metadata'] = this.metadata as PartialJSONObject;
         break;
       default:
