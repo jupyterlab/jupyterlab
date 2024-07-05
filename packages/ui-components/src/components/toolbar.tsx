@@ -863,7 +863,7 @@ export function ToolbarButtonComponent(
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={title}
-      minimal
+      scale="xsmall"
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact

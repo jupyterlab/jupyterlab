@@ -94,10 +94,6 @@
   color: var(--jp-ui-font-color3);
 }
 
-.jp-RunningSessions-collapseButton {
-  margin: 4px 2px;
-}
-
 .jp-RunningSessions-collapseButton[aria-pressed='true'] {
   box-shadow: none;
 }
@@ -181,29 +177,10 @@ span.jp-RunningSessions-icon > svg {
 
 .jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent {
   color: var(--jp-warn-color1);
-  background-color: transparent;
-  border-radius: 2px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent:hover {
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent:focus {
-  border: none;
-  box-shadow: none;
-  background-color: var(--jp-layout-color2);
 }
 
 .jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled] {
   color: var(--jp-ui-font-color2);
-}
-
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled]:hover {
-  background: none;
 }
 
 /*-----------------------------------------------------------------------------
@@ -241,6 +218,9 @@ span.jp-RunningSessions-icon > svg {
 
 .jp-SearchableSessions-filter {
   overflow: visible;
+
+  /* Required to display correctly the filter box and its focus highlight */
+  padding: 0 2px;
 }
 
 .jp-SearchableSessions-filter > .jp-FilterBox {

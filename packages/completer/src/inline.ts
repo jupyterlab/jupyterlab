@@ -200,6 +200,17 @@ export class InlineCompleter extends Widget {
       this._updateShortcutsVisibility();
     }
     GhostTextManager.streamingAnimation = settings.streamingAnimation;
+    GhostTextManager.spacerRemovalDelay = Math.max(
+      0,
+      settings.editorResizeDelay - 300
+    );
+    GhostTextManager.spacerRemovalDuration = Math.max(
+      0,
+      Math.min(300, settings.editorResizeDelay - 300)
+    );
+    this._minLines = settings.minLines;
+    this._maxLines = settings.maxLines;
+    this._reserveSpaceForLongest = settings.reserveSpaceForLongest;
   }
 
   /**
@@ -409,12 +420,26 @@ export class InlineCompleter extends Widget {
     }
 
     const view = (editor as CodeMirrorEditor).editor;
+
+    let minLines: number;
+    if (this._reserveSpaceForLongest) {
+      const items = this.model?.completions?.items ?? [];
+      const longest = Math.max(
+        ...items.map(i => i.insertText.split('\n').length)
+      );
+      minLines = Math.max(this._minLines, longest);
+    } else {
+      minLines = this._minLines;
+    }
+
     this._ghostManager.placeGhost(view, {
       from: editor.getOffsetAt(model.cursor),
       content: text,
       providerId: item.provider.identifier,
       addedPart: item.lastStreamed,
       streaming: item.streaming,
+      minLines: minLines,
+      maxLines: this._maxLines,
       onPointerOver: this._onPointerOverGhost.bind(this),
       onPointerLeave: this._onPointerLeaveGhost.bind(this),
       error: item.error
@@ -493,6 +518,8 @@ export class InlineCompleter extends Widget {
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _ghostManager: GhostTextManager;
   private _lastItem: CompletionHandler.IInlineItem | null = null;
+  private _maxLines: number;
+  private _minLines: number;
   private _model: InlineCompleter.IModel | null = null;
   private _providerWidget = new Widget();
   private _showShortcuts = InlineCompleter.defaultSettings.showShortcuts;
@@ -501,6 +528,7 @@ export class InlineCompleter extends Widget {
   private _trans: TranslationBundle;
   private _toolbar = new Toolbar<Widget>();
   private _progressBar: HTMLElement;
+  private _reserveSpaceForLongest: boolean;
 }
 
 /**
@@ -540,7 +568,11 @@ export namespace InlineCompleter {
     showWidget: 'onHover',
     showShortcuts: true,
     streamingAnimation: 'uncover',
-    providers: {}
+    providers: {},
+    minLines: 2,
+    maxLines: 4,
+    editorResizeDelay: 1000,
+    reserveSpaceForLongest: false
   };
 
   /**
