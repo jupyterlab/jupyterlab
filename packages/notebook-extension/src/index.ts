@@ -2038,7 +2038,7 @@ function activateNotebookHandler(
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       const metadata = args['metadata'] as ReadonlyJSONObject;
-      const allow_insecure_kernelspec_params = PageConfig.getOption('allow_insecure_kernelspec_params') === 'true' ? true: false;
+      const allowInsecureKernelspecParams = PageConfig.getOption('allow_insecure_kernelspec_params') === 'true' ? true: false;
       if(metadata?.is_secure) {
         if (!metadata?.parameters) {
           return createNew(cwd, kernelId, kernelName);
@@ -2047,7 +2047,7 @@ function activateNotebookHandler(
           showKernelSpecDialog(schema, cwd, kernelId, kernelName);
         }
       } else {
-        if (allow_insecure_kernelspec_params) {
+        if (allowInsecureKernelspecParams) {
             let schema = metadata.parameters as RJSFSchema;
             showKernelSpecDialog(schema, cwd, kernelId, kernelName);
         } else {
@@ -2075,6 +2075,8 @@ function activateNotebookHandler(
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
+          console.log('spec');
+          console.dir(spec);
           const kernelIconUrl =
             spec.resources['logo-svg'] || spec.resources['logo-64x64'];
           //if has enum then add one icon

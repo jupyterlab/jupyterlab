@@ -1621,7 +1621,7 @@ namespace Private {
       selectedKernel && selectedKernel.name ? selectedKernel.name : '';
     let kernel =
       kernelName && sessionContext.specsManager.specs?.kernelspecs[kernelName];
-    const allow_insecure_kernelspec_params =
+    const allowInsecureKernelspecParams =
       PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
         ? true
         : false;
@@ -1630,7 +1630,7 @@ namespace Private {
         kernel?.metadata &&
         kernel?.metadata?.is_secure &&
         kernel?.metadata?.parameters) ||
-      allow_insecure_kernelspec_params
+        allowInsecureKernelspecParams
     ) {
       if (kernel && kernel?.metadata && kernel?.metadata?.parameters) {
         let kernelParameters = kernel?.metadata

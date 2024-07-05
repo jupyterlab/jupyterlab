@@ -62,6 +62,7 @@ import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 import type { RJSFSchema } from '@rjsf/utils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * The command IDs used by the console plugin.
@@ -612,11 +613,22 @@ async function activateConsole(
         '';
       //
       const metadata = args['metadata'] as ReadonlyJSONObject;
-      if (metadata?.parameters) {
-        let schema = metadata.parameters as RJSFSchema;
-        return showKernelSpecDialog(schema, basePath, args);
+      const allowInsecureKernelspecParams = PageConfig.getOption('allow_insecure_kernelspec_params') === 'true' ? true: false;
+
+      if(metadata?.is_secure) {
+        if (!metadata?.parameters) {
+          return createConsole({ basePath, ...args });
+        } else {
+          let schema = metadata.parameters as RJSFSchema;
+          return showKernelSpecDialog(schema, basePath, args);
+        }
       } else {
-        return createConsole({ basePath, ...args });
+        if (allowInsecureKernelspecParams) {
+          let schema = metadata.parameters as RJSFSchema;
+          return showKernelSpecDialog(schema, basePath, args);
+        } else {
+          return createConsole({ basePath, ...args });      
+        }
       }
     }
   });
