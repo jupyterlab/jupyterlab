@@ -49,7 +49,7 @@ export async function addKernelRunningSessionManager(
   let shutdownUnusedEnabled = false;
   const shutdownUnusedThrottler = new Throttler(
     checkShutdownUnusedEnabled,
-    5000
+    10000
   );
 
   // Throttle signal emissions from the kernel and session managers.
@@ -62,11 +62,10 @@ export async function addKernelRunningSessionManager(
   // Wait until the relevant services are ready.
   await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
 
-  async function getUnusedKernels() {
+  function getUnusedKernels() {
     // Identifies unused kernels
-    const runningKernels = await KernelAPI.listRunning();
-    return runningKernels.filter(
-      kernel => kernel.connections !== undefined && kernel.connections < 1
+    return Array.from(kernels.running()).filter(
+      kernel => (kernel.connections ?? 1) < 1
     );
   }
 
@@ -79,26 +78,21 @@ export async function addKernelRunningSessionManager(
   }
 
   commands.addCommand(SHUTDOWN_UNUSED_BUTTON_CLASS, {
-    label: shutdownUnusedLabel,
+    label: args => (args.toolbar ? '' : shutdownUnusedLabel),
+    icon: args => (args.toolbar ? cleaningIcon : undefined),
     execute: async () => {
-      const unusedKernels = await getUnusedKernels();
+      const unusedKernels = getUnusedKernels();
 
       if (unusedKernels.length === 0) {
-        void showDialog({
-          title: trans.__('No Unused Kernels'),
-          body: trans.__('There are no unused kernels to shut down.'),
-          buttons: [Dialog.okButton()]
-        });
         return;
       }
 
       const confirmed = await showDialog({
         title: shutdownUnusedLabel,
-        body: trans.__(
-          `Are you sure you want to shut down the following unused kernels?\n\n${unusedKernels
-            .map(kernel => kernel.name)
-            .join('\n')}`
-        ),
+        body:
+          trans.__(
+            'Are you sure you want to shut down the following unused kernels?'
+          ) + `\n\n${unusedKernels.map(kernel => kernel.name).join('\n')}`,
         buttons: [
           Dialog.cancelButton(),
           Dialog.warnButton({ label: shutdownUnusedLabel })
@@ -106,18 +100,16 @@ export async function addKernelRunningSessionManager(
       });
 
       if (confirmed.button.accept) {
-        for (const kernel of unusedKernels) {
-          await KernelAPI.shutdownKernel(kernel.id);
-        }
+        await Promise.allSettled(
+          unusedKernels.map(kernel => KernelAPI.shutdownKernel(kernel.id))
+        );
         await Promise.all([
           kernels.refreshRunning(),
           sessions.refreshRunning()
         ]);
       }
     },
-    isEnabled: () => {
-      return shutdownUnusedEnabled;
-    }
+    isEnabled: () => shutdownUnusedEnabled
   });
 
   // Add the kernels pane to the running sidebar.
@@ -162,9 +154,9 @@ export async function addKernelRunningSessionManager(
     toolbarButtons: [
       new CommandToolbarButton({
         commands,
-        icon: cleaningIcon,
         id: SHUTDOWN_UNUSED_BUTTON_CLASS,
-        label: shutdownUnusedLabel
+        label: shutdownUnusedLabel,
+        args: { toolbar: true }
       })
     ]
   });
