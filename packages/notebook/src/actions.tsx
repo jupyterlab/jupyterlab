@@ -2434,7 +2434,7 @@ namespace Private {
               cell.model.type === 'code' &&
               (cell as CodeCell).model.executionCount == null
             ) {
-              cell.setPrompt('');
+              (cell.model as ICodeCellModel).executionState = 'idle';
             }
           });
         } else {

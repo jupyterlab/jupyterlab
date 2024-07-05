@@ -684,10 +684,10 @@ class Section extends PanelWithToolbar {
     const inTreeView = hasNesting && !this._buttons['switch-view'].pressed;
 
     this._buttons['switch-view'].node.style.display = hasNesting
-      ? 'block'
+      ? 'flex'
       : 'none';
     this._buttons['collapse-expand'].node.style.display = inTreeView
-      ? 'block'
+      ? 'flex'
       : 'none';
 
     this._buttons['collapse-expand'].enabled = enabled;
