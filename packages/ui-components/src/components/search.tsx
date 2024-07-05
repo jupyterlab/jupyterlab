@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
 
@@ -177,26 +177,30 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   /**
    * Handler for search input changes.
    */
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.updateFilter(
-      updateFilterFunction(
-        target.value,
-        props.useFuzzyFilter,
-        props.caseSensitive
-      ),
-      target.value
-    );
-  };
+  const handleChange = useCallback(
+    (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      setFilter(target.value);
+      props.updateFilter(
+        updateFilterFunction(
+          target.value,
+          props.useFuzzyFilter,
+          props.caseSensitive
+        ),
+        target.value
+      );
+    },
+    [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]
+  );
 
   // Show the icon by default, or if the caller specifically requests it
   const showSearchIcon = props.showIcon ?? true;
 
+  // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
   return (
     <Search
       className="jp-FilterBox"
-      ref={props.inputRef}
+      ref={props.inputRef as React.Ref<any>}
       value={filter}
       onChange={handleChange}
       onInput={handleChange}
