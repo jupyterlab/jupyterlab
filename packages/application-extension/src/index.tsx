@@ -50,16 +50,21 @@ import {
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
 import {
+  type IPlugin,
   JSONExt,
   PromiseDelegate,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { services } from './services';
 import { topbar } from './topbar';
+import { connectionStatus } from './connectionstatus';
+import { serverSettings } from './serversettings';
+import { defaultDrive } from './defaultdrive';
 
 /**
  * Default context menu item rank
@@ -1305,7 +1310,8 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: IPlugin<any, any>[] = [
+  connectionStatus,
   contextMenuPlugin,
   dirty,
   main,
@@ -1315,6 +1321,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tree,
   notfound,
   busy,
+  serverSettings,
+  defaultDrive,
+  services,
   shell,
   status,
   info,

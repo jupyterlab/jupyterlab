@@ -35,6 +35,35 @@ export type IConnectionLost = (
 ) => Promise<void>;
 
 /**
+ * Application connection status interface
+ */
+export interface IConnectionStatus {
+  /**
+   * Whether the application is connected to the server or not.
+   *
+   * #### Notes
+   *
+   * Every periodic network polling should be paused while this is set
+   * to `false`. Extensions should use this value to decide whether to proceed
+   * with the polling.
+   * The extensions may also set this value to `false` if there is no need to
+   * fetch anything from the server backend basing on some conditions
+   * (e.g. when an error message dialog is displayed).
+   * At the same time, the extensions are responsible for setting this value
+   * back to `true`.
+   */
+  isConnected: boolean;
+}
+
+/**
+ * Token providing the application connection status.
+ */
+export const IConnectionStatus = new Token<IConnectionStatus>(
+  '@jupyterlab/application:IConnectionStatus',
+  'A service providing the application connection status.'
+);
+
+/**
  * The application status token.
  */
 export const ILabStatus = new Token<ILabStatus>(

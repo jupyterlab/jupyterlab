@@ -4,6 +4,7 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
+import { PluginRegistry } from '@lumino/coreutils';
 
 import './style.js';
 
@@ -24,42 +25,42 @@ async function createModule(scope, module) {
  */
 export async function main() {
 
-   // Handle a browser test.
-   // Set up error handling prior to loading extensions.
-   var browserTest = PageConfig.getOption('browserTest');
-   if (browserTest.toLowerCase() === 'true') {
-     var el = document.createElement('div');
-     el.id = 'browserTest';
-     document.body.appendChild(el);
-     el.textContent = '[]';
-     el.style.display = 'none';
-     var errors = [];
-     var reported = false;
-     var timeout = 25000;
+  // Handle a browser test.
+  // Set up error handling prior to loading extensions.
+  const browserTest = PageConfig.getOption('browserTest');
+  const browserTestTimeout = 25000;
+  let reported = false;
+  const testReportElement = document.createElement('div');
+  const reportBrowserTest = () => {
+    if (reported) {
+      return;
+    }
+    reported = true;
+    testReportElement.className = 'completed';
+  }
+  if (browserTest.toLowerCase() === 'true') {
+    testReportElement.id = 'browserTest';
+    document.body.appendChild(testReportElement);
+    testReportElement.textContent = '[]';
+    testReportElement.style.display = 'none';
+    const errors = [];
 
-     var report = function() {
-       if (reported) {
-         return;
-       }
-       reported = true;
-       el.className = 'completed';
-     }
-
-     window.onerror = function(msg, url, line, col, error) {
-       errors.push(String(error));
-       el.textContent = JSON.stringify(errors)
-     };
-     console.error = function(message) {
-       errors.push(String(message));
-       el.textContent = JSON.stringify(errors)
-     };
+    window.onerror = function(msg, url, line, col, error) {
+      errors.push(String(error));
+      testReportElement.textContent = JSON.stringify(errors)
+    };
+    console.error = function(message) {
+      errors.push(String(message));
+      testReportElement.textContent = JSON.stringify(errors)
+    };
   }
 
-  var JupyterLab = require('@jupyterlab/application').JupyterLab;
-  var disabled = [];
-  var deferred = [];
-  var ignorePlugins = [];
-  var register = [];
+  const pluginRegistry = new PluginRegistry();
+  const JupyterLab = (await import('@jupyterlab/application')).JupyterLab;
+  const disabled = [];
+  const deferred = [];
+  const ignorePlugins = [];
+  const register = [];
 
 
   const federatedExtensionPromises = [];
@@ -136,7 +137,7 @@ export async function main() {
   {{#each jupyterlab_mime_extensions}}
   if (!queuedFederated.includes('{{@key}}')) {
     try {
-      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
       ext.__scope__ = '{{@key}}';
       for (let plugin of activePlugins(ext)) {
         mimeExtensions.push(plugin);
@@ -163,7 +164,7 @@ export async function main() {
   {{#each jupyterlab_extensions}}
   if (!queuedFederated.includes('{{@key}}')) {
     try {
-      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
       ext.__scope__ = '{{@key}}';
       for (let plugin of activePlugins(ext)) {
         register.push(plugin);
@@ -191,8 +192,20 @@ export async function main() {
     console.error(reason);
   });
 
+  pluginRegistry.registerPlugins(register.flat());
+
+  const IConnectionStatus = (await import('@jupyterlab/application/lib/tokens.js')).IConnectionStatus;
+  const IServiceManager = (await import('@jupyterlab/services/lib/tokens.js')).IServiceManager;
+  // Use resolve optional to fallback to the default serviceManager if no plugin are providing it.
+  const connectionStatus = await pluginRegistry.resolveOptionalService(IConnectionStatus);
+  const serviceManager = await pluginRegistry.resolveOptionalService(IServiceManager);
+
   const lab = new JupyterLab({
+    pluginRegistry,
+    serviceManager,
     mimeExtensions,
+    // Application info,
+    connectionStatus,
     disabled: {
       matches: disabled,
       patterns: PageConfig.Extension.disabled
@@ -205,13 +218,12 @@ export async function main() {
     },
     availablePlugins: allPlugins
   });
-  register.forEach(function(item) { lab.registerPluginModule(item); });
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
-  var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
-  var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
+  const exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
+  const devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
 
   if (exposeAppInBrowser || devMode) {
     window.jupyterapp = lab;
@@ -220,11 +232,10 @@ export async function main() {
   // Handle a browser test.
   if (browserTest.toLowerCase() === 'true') {
     lab.restored
-      .then(function() { report(errors); })
-      .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
+      .then(() => { reportBrowserTest(errors); })
+      .catch(reason => { reportBrowserTest([`RestoreError: ${reason.message}`]); });
 
     // Handle failures to restore after the timeout has elapsed.
-    window.setTimeout(function() { report(errors); }, timeout);
+    window.setTimeout(() => { reportBrowserTest(errors); }, browserTestTimeout);
   }
-
 }

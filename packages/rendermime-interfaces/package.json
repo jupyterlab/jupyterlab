@@ -30,8 +30,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.11.0 || ^2.1.2",
-    "@lumino/widgets": "^1.37.2 || ^2.3.2"
+    "@lumino/coreutils": "^1.11.0 || ^2.2.0",
+    "@lumino/widgets": "^1.37.2 || ^2.5.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
