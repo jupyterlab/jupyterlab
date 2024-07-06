@@ -391,7 +391,7 @@
   margin-bottom: 1em;
 }
 
-.jp-RenderedHTMLCommon > pre {
+.jp-ThemedContainer .jp-RenderedHTMLCommon > pre {
   margin: 1.5em 2em;
 }
 
