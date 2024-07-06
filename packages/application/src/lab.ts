@@ -169,6 +169,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * Register plugins from a plugin module.
    *
    * @param mod - The plugin module to register.
+   *
+   * @deprecated This is unused and may be remove in a future version.
    */
   registerPluginModule(mod: JupyterLab.IPluginModule): void {
     let data = mod.default;
@@ -192,6 +194,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * Register the plugins from multiple plugin modules.
    *
    * @param mods - The plugin modules to register.
+   *
+   * @deprecated This is unused and may be remove in a future version.
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
     mods.forEach(mod => {
