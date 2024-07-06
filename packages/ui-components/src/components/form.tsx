@@ -692,25 +692,40 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
   );
 }
 
-// Define the CustomCheckbox component
 const CustomCheckbox: React.FC<WidgetProps> = ({
   id,
   value,
   required,
   onChange,
-  label
+  disabled,
+  readonly,
+  label = '',
+  autofocus,
+  uiSchema
 }) => {
+  const handleCheckboxChange = () => {
+    if (!disabled && !readonly) {
+      onChange(!value);
+    }
+  };
+
   return (
     <div className="customCheckboxContainer">
       <button
         id={id}
-        className={`jp-CheckboxButton ${value ? 'checked' : 'unchecked'}`}
-        onClick={() => onChange(!value)}
+        className={`jp-CheckboxButton ${value ? 'checked' : 'unchecked'} ${
+          disabled ? 'disabled' : ''
+        }`}
+        onClick={handleCheckboxChange}
+        disabled={disabled}
+        autoFocus={autofocus}
         aria-required={required}
+        aria-checked={value ? 'true' : 'false'}
+        aria-label={label} // Ensure label is a string or handle conditionally
       >
         {value ? 'Checked' : 'Unchecked'}
       </button>
-      {label && (
+      {!uiSchema?.['ui:options']?.hideLabel && label && (
         <label htmlFor={id} className="jp-CheckboxLabel">
           {label}
         </label>
