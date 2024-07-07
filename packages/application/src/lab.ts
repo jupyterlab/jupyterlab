@@ -315,7 +315,14 @@ export namespace JupyterLab {
   export interface IOptions
     extends Partial<JupyterFrontEnd.IOptions<ILabShell>>,
       Partial<IInfo> {
+    /**
+     * URL and directory paths used by a Jupyter front-end.
+     */
     paths?: Partial<JupyterFrontEnd.IPaths>;
+    /**
+     * Application connection status.
+     */
+    // connectionStatus?: ...;
   }
 
   /**

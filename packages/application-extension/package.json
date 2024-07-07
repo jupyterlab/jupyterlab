@@ -41,6 +41,7 @@
     "@jupyterlab/apputils": "^4.4.0-alpha.1",
     "@jupyterlab/coreutils": "^6.3.0-alpha.1",
     "@jupyterlab/property-inspector": "^4.3.0-alpha.1",
+    "@jupyterlab/services": "^7.3.0-alpha.1",
     "@jupyterlab/settingregistry": "^4.3.0-alpha.1",
     "@jupyterlab/statedb": "^4.3.0-alpha.1",
     "@jupyterlab/statusbar": "^4.3.0-alpha.1",

@@ -50,15 +50,16 @@ import {
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   PromiseDelegate,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { services } from './services';
 import { topbar } from './topbar';
 
 /**
@@ -1283,6 +1284,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tree,
   notfound,
   busy,
+  services,
   shell,
   status,
   info,

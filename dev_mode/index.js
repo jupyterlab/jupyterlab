@@ -192,9 +192,17 @@ export async function main() {
     console.error(reason);
   });
 
+  pluginRegistry.registerPlugins(register.flat());
+
+  const IServiceManager = (await import('@jupyterlab/services/lib/tokens.js')).IServiceManager;
+  // Use resolve optional to fallback to the default serviceManager if no plugin are providing it.
+  const serviceManager = await pluginRegistry.resolveOptionalService(IServiceManager);
+
   const lab = new JupyterLab({
     pluginRegistry,
+    serviceManager,
     mimeExtensions,
+    // Application info
     disabled: {
       matches: disabled,
       patterns: PageConfig.Extension.disabled
@@ -207,7 +215,6 @@ export async function main() {
     },
     availablePlugins: allPlugins
   });
-  register.forEach(item => { pluginRegistry.registerPlugin(item); });
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
