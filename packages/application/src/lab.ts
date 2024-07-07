@@ -120,6 +120,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 
   /**
    * A list of all errors encountered when registering plugins.
+   *
+   * @deprecated This is unused and may be remove in a future version.
    */
   readonly registerPluginErrors: Array<Error> = [];
 

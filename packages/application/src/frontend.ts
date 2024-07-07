@@ -62,12 +62,12 @@ export abstract class JupyterFrontEnd<
     });
 
     this.commandLinker =
-      options.commandLinker || new CommandLinker({ commands: this.commands });
-    this.docRegistry = options.docRegistry || new DocumentRegistry();
+      options.commandLinker ?? new CommandLinker({ commands: this.commands });
+    this.docRegistry = options.docRegistry ?? new DocumentRegistry();
     this.restored =
-      options.restored ||
+      options.restored ??
       this.started.then(() => restored).catch(() => restored);
-    this.serviceManager = options.serviceManager || new ServiceManager();
+    this._serviceManager = options.serviceManager ?? new ServiceManager();
   }
 
   /**
@@ -108,7 +108,9 @@ export abstract class JupyterFrontEnd<
   /**
    * The service manager used by the application.
    */
-  readonly serviceManager: ServiceManager.IManager;
+  get serviceManager(): ServiceManager.IManager {
+    return this._serviceManager;
+  }
 
   /**
    * The application form factor, e.g., `desktop` or `mobile`.
@@ -206,6 +208,7 @@ export abstract class JupyterFrontEnd<
   private _contextMenuEvent: MouseEvent;
   private _format: U;
   private _formatChanged = new Signal<this, U>(this);
+  private _serviceManager: ServiceManager.IManager;
 }
 
 /**
