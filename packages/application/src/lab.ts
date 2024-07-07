@@ -6,10 +6,12 @@ import { Base64ModelFactory } from '@jupyterlab/docregistry';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
+import { ConnectionStatus } from './connectionstatus';
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
 import { ILabShell, LabShell } from './shell';
 import { LabStatus } from './status';
+import { IConnectionStatus } from './tokens';
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
@@ -31,16 +33,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         })
     });
 
-    // Create an IInfo dictionary from the options to override the defaults.
-    const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
-      if (val in options) {
-        (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
-      }
-      return acc;
-    }, {} as Partial<JupyterLab.IInfo>);
-
     // Populate application info.
-    this._info = { ...JupyterLab.defaultInfo, ...info };
+    this._info = new JupyterLab.Info(options);
 
     this.restored = this.shell.restored
       .then(async () => {
@@ -300,7 +294,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       .catch(console.warn);
   }
 
-  private _info: JupyterLab.IInfo = JupyterLab.defaultInfo;
+  private _info: JupyterLab.IInfo;
   private _paths: JupyterFrontEnd.IPaths;
   private _allPluginsActivated = new PromiseDelegate<void>();
 }
@@ -322,7 +316,7 @@ export namespace JupyterLab {
     /**
      * Application connection status.
      */
-    // connectionStatus?: ...;
+    connectionStatus?: IConnectionStatus;
   }
 
   /**
@@ -378,6 +372,104 @@ export namespace JupyterLab {
      * back to `true`.
      */
     isConnected: boolean;
+  }
+
+  /**
+   * The information about a JupyterLab application.
+   */
+  export class Info implements IInfo {
+    constructor({
+      connectionStatus,
+      ...options
+    }: Partial<IInfo> & { connectionStatus?: IConnectionStatus } = {}) {
+      this._connectionStatus = connectionStatus ?? new ConnectionStatus();
+
+      this._availablePlugins =
+        options.availablePlugins ?? JupyterLab.defaultInfo.availablePlugins;
+      this._devMode = options.devMode ?? JupyterLab.defaultInfo.devMode;
+      this._deferred = JSON.parse(
+        JSON.stringify(options.deferred ?? JupyterLab.defaultInfo.deferred)
+      );
+      this._disabled = JSON.parse(
+        JSON.stringify(options.disabled ?? JupyterLab.defaultInfo.disabled)
+      );
+      this._filesCached =
+        options.filesCached ?? JupyterLab.defaultInfo.filesCached;
+      this._mimeExtensions = JSON.parse(
+        JSON.stringify(
+          options.mimeExtensions ?? JupyterLab.defaultInfo.mimeExtensions
+        )
+      );
+      this.isConnected =
+        options.isConnected ?? JupyterLab.defaultInfo.isConnected;
+    }
+
+    /**
+     * The information about available plugins.
+     */
+    get availablePlugins(): IPluginInfo[] {
+      return this._availablePlugins;
+    }
+
+    /**
+     * Whether the application is in dev mode.
+     */
+    get devMode(): boolean {
+      return this._devMode;
+    }
+
+    /**
+     * The collection of deferred extension patterns and matched extensions.
+     */
+    get deferred(): { patterns: string[]; matches: string[] } {
+      return this._deferred;
+    }
+
+    /**
+     * The collection of disabled extension patterns and matched extensions.
+     */
+    get disabled(): { patterns: string[]; matches: string[] } {
+      return this._disabled;
+    }
+
+    /**
+     * Whether files are cached on the server.
+     */
+    get filesCached(): boolean {
+      return this._filesCached;
+    }
+
+    /**
+     * Every periodic network polling should be paused while this is set
+     * to `false`. Extensions should use this value to decide whether to proceed
+     * with the polling.
+     * The extensions may also set this value to `false` if there is no need to
+     * fetch anything from the server backend basing on some conditions
+     * (e.g. when an error message dialog is displayed).
+     * At the same time, the extensions are responsible for setting this value
+     * back to `true`.
+     */
+    get isConnected(): boolean {
+      return this._connectionStatus.isConnected;
+    }
+    set isConnected(v: boolean) {
+      this._connectionStatus.isConnected = v;
+    }
+
+    /**
+     * The mime renderer extensions.
+     */
+    get mimeExtensions(): IRenderMime.IExtensionModule[] {
+      return this._mimeExtensions;
+    }
+
+    private _devMode: boolean;
+    private _deferred: { patterns: string[]; matches: string[] };
+    private _disabled: { patterns: string[]; matches: string[] };
+    private _mimeExtensions: IRenderMime.IExtensionModule[];
+    private _availablePlugins: IPluginInfo[];
+    private _filesCached: boolean;
+    private _connectionStatus: IConnectionStatus;
   }
 
   /*

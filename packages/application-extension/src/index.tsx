@@ -61,6 +61,7 @@ import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { services } from './services';
 import { topbar } from './topbar';
+import { connectionStatus } from './connectionstatus';
 
 /**
  * Default context menu item rank
@@ -1275,6 +1276,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  connectionStatus,
   contextMenuPlugin,
   dirty,
   main,

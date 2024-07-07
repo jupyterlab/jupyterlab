@@ -194,15 +194,18 @@ export async function main() {
 
   pluginRegistry.registerPlugins(register.flat());
 
+  const IConnectionStatus = (await import('@jupyterlab/application/lib/tokens.js')).IConnectionStatus;
   const IServiceManager = (await import('@jupyterlab/services/lib/tokens.js')).IServiceManager;
   // Use resolve optional to fallback to the default serviceManager if no plugin are providing it.
+  const connectionStatus = await pluginRegistry.resolveOptionalService(IConnectionStatus);
   const serviceManager = await pluginRegistry.resolveOptionalService(IServiceManager);
 
   const lab = new JupyterLab({
     pluginRegistry,
     serviceManager,
     mimeExtensions,
-    // Application info
+    // Application info,
+    connectionStatus,
     disabled: {
       matches: disabled,
       patterns: PageConfig.Extension.disabled
