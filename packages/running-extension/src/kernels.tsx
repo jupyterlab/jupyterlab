@@ -92,7 +92,10 @@ export async function addKernelRunningSessionManager(
         body:
           trans.__(
             'Are you sure you want to shut down the following unused kernels?'
-          ) + `\n\n${unusedKernels.map(kernel => kernel.name).join('\n')}`,
+          ) +
+          `\n${unusedKernels
+            .map(kernel => `${kernel.name} (${kernel.id.slice(0, 8)})`)
+            .join(',\n')}`,
         buttons: [
           Dialog.cancelButton(),
           Dialog.warnButton({ label: shutdownUnusedLabel })
