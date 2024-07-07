@@ -62,6 +62,8 @@ import * as React from 'react';
 import { services } from './services';
 import { topbar } from './topbar';
 import { connectionStatus } from './connectionstatus';
+import { serverSettings } from './serversettings';
+import { defaultDrive } from './defaultdrive';
 
 /**
  * Default context menu item rank
@@ -1286,6 +1288,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tree,
   notfound,
   busy,
+  serverSettings,
+  defaultDrive,
   services,
   shell,
   status,
