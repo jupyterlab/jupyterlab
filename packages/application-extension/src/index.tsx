@@ -52,6 +52,7 @@ import {
 import { find, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
+  type IPlugin,
   JSONExt,
   PromiseDelegate,
   ReadonlyPartialJSONValue
@@ -1277,7 +1278,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: IPlugin<any, any>[] = [
   connectionStatus,
   contextMenuPlugin,
   dirty,
