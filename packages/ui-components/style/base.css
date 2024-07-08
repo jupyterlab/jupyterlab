@@ -22,18 +22,23 @@
 @import './toolbar.css';
 @import './windowedlist.css';
 
-body {
+:root {
+  /* Increase default density for Jupyter toolkit components */
+  --density: -4;
+}
+
+.jp-ThemedContainer {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
 /* Disable native link decoration styles everywhere outside of dialog boxes */
-a {
+.jp-ThemedContainer a {
   text-decoration: unset;
   color: unset;
 }
 
-a:hover {
+.jp-ThemedContainer a:hover {
   text-decoration: unset;
   color: unset;
 }
@@ -145,7 +150,7 @@ a:hover {
 }
 
 .jp-InputGroup input::placeholder,
-input::placeholder {
+.jp-ThemedContainer input::placeholder {
   color: var(--jp-ui-font-color2);
 }
 
@@ -154,6 +159,11 @@ input::placeholder {
   bottom: 1px;
   right: 0;
   padding: 6px;
+}
+
+.jp-HTMLSelect.jp-DefaultStyle {
+  /* Leave space for the focus outline */
+  padding: 0 2px;
 }
 
 .jp-HTMLSelect.jp-DefaultStyle select {
@@ -184,6 +194,10 @@ input::placeholder {
   cursor: not-allowed;
 }
 
+.jp-HTMLSelect.jp-DefaultStyle select:focus-visible {
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+}
+
 /* Use our own theme for hover and option styles */
 /* stylelint-disable-next-line selector-max-type */
 .jp-HTMLSelect.jp-DefaultStyle select:hover,
@@ -192,6 +206,6 @@ input::placeholder {
   color: var(--jp-ui-font-color0);
 }
 
-select {
+.jp-ThemedContainer select {
   box-sizing: border-box;
 }

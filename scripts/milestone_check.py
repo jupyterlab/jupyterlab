@@ -50,9 +50,9 @@ if MILESTONE not in ranges:
     sys.exit(1)
 
 
-out = subprocess.run(
+out = subprocess.run(  # noqa S602
     f"git log {ranges[MILESTONE]} --format='%H,%cE,%s'",
-    shell=True,  # noqa S602
+    shell=True,
     encoding="utf8",
     stdout=subprocess.PIPE,
     check=True,
