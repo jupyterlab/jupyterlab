@@ -52,6 +52,7 @@
 .jp-tocItem-heading {
   display: flex;
   cursor: pointer;
+  width: 100%;
 }
 
 .jp-tocItem-content {

@@ -58,9 +58,7 @@
 
 .jp-mod-running-list-view
   .jp-RunningSessions-item.jp-mod-kernel-widget::part(content-region) {
-  margin-inline-start: calc(
-    -1 * var(--expand-collapse-button-size) + var(--design-unit) * 2px + 8px
-  );
+  margin-inline-start: -1.8em;
 }
 
 .jp-RunningSessions-item.jp-mod-kernelspec,
