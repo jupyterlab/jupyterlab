@@ -8,7 +8,7 @@ import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import Form, { FormProps, IChangeEvent } from '@rjsf/core';
 import { WidgetProps } from '@rjsf/utils';
-
+import { Checkbox } from '@jupyter/react-components';
 import {
   ADDITIONAL_PROPERTY_FLAG,
   ArrayFieldTemplateProps,
@@ -698,33 +698,19 @@ const CustomCheckbox: React.FC<WidgetProps> = ({
   required,
   onChange,
   disabled,
-  readonly,
   label = '',
-  autofocus,
   uiSchema
 }) => {
-  const handleCheckboxChange = () => {
-    if (!disabled && !readonly) {
-      onChange(!value);
-    }
-  };
-
   return (
     <div className="customCheckboxContainer">
-      <button
+      <Checkbox
         id={id}
-        className={`jp-CheckboxButton ${value ? 'checked' : 'unchecked'} ${
-          disabled ? 'disabled' : ''
-        }`}
-        onClick={handleCheckboxChange}
+        checked={value}
+        required={required}
         disabled={disabled}
-        autoFocus={autofocus}
-        aria-required={required}
-        aria-checked={value ? 'true' : 'false'}
-        aria-label={label} // Ensure label is a string or handle conditionally
-      >
-        {value ? 'Checked' : 'Unchecked'}
-      </button>
+        onChange={() => onChange(!value)}
+        aria-label={label}
+      />
       {!uiSchema?.['ui:options']?.hideLabel && label && (
         <label htmlFor={id} className="jp-CheckboxLabel">
           {label}
@@ -734,7 +720,6 @@ const CustomCheckbox: React.FC<WidgetProps> = ({
   );
 };
 
-// Assuming you have a setup for integrating custom widgets
 export const customWidgets = {
   CheckboxWidget: CustomCheckbox
 };
