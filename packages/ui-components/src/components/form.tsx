@@ -739,7 +739,7 @@ function CustomCheckbox<
       aria-describedby={ariaDescribedByIds<T>(id)}
     >
       {label}
-    </Checkbox>
+      </Checkbox>
   );
 }
 
