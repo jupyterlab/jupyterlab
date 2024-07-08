@@ -11,7 +11,15 @@ permissions:
 jobs:
   update-galata-snapshots:
     name: Update Galata References
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
+    if: >
+      (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'COLLABORATOR' ||
+        github.event.issue.author_association == 'MEMBER'
+      ) && github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update galata snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
 
@@ -30,10 +38,29 @@ jobs:
       - name: Configure git to use https
         run: git config --global hub.protocol https
 
-      - name: Checkout the branch from the PR that triggered the job
-        run: gh pr checkout ${{ github.event.issue.number }}
+      - name: Get PR Info
+        id: pr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          COMMENT_AT: ${{ github.event.comment.created_at }}
+        run: |
+          pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
+          head_sha="$(echo "$pr" | jq -r .head.sha)"
+          updated_at="$(echo "$pr" | jq -r .updated_at)"
+
+          if [[ $(date -d "$updated_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              exit 1
+          fi
+
+          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -61,7 +88,15 @@ jobs:
 
   update-documentation-snapshots:
     name: Update Documentation Snapshots
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
+    if: >
+      (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'COLLABORATOR' ||
+        github.event.issue.author_association == 'MEMBER'
+      ) && github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update documentation snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
 
@@ -98,11 +133,29 @@ jobs:
           echo "JUPYTERLAB_GALATA_ROOT_DIR=$PWD" >> $GITHUB_ENV
         working-directory: demo
 
-      - name: Checkout the branch from the PR that triggered the job
-        working-directory: core
-        run: gh pr checkout ${{ github.event.issue.number }}
+      - name: Get PR Info
+        id: pr
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          COMMENT_AT: ${{ github.event.comment.created_at }}
+        run: |
+          pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
+          head_sha="$(echo "$pr" | jq -r .head.sha)"
+          updated_at="$(echo "$pr" | jq -r .updated_at)"
+
+          if [[ $(date -d "$updated_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              exit 1
+          fi
+
+          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
