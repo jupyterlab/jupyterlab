@@ -146,6 +146,7 @@ jobs:
           updated_at="$(echo "$pr" | jq -r .updated_at)"
 
           if [[ $(date -d "$updated_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              echo "Updating is not allowed because the PR changed (at $COMMENT_AT) since the triggering comment was issued (at $updated_at)"
               exit 1
           fi
 
