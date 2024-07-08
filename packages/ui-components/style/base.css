@@ -20,12 +20,8 @@
 @import './switch.css';
 @import './table.css';
 @import './toolbar.css';
+@import './toolkit.css';
 @import './windowedlist.css';
-
-:root {
-  /* Increase default density for Jupyter toolkit components */
-  --density: -4;
-}
 
 .jp-ThemedContainer {
   color: var(--jp-ui-font-color1);

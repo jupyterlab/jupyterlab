@@ -3,14 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-/*-----------------------------------------------------------------------------
-| Variables
-|----------------------------------------------------------------------------*/
-
-:root {
-  --jp-private-running-item-height: 24px;
-}
-
 .jp-RunningSessions {
   display: flex;
   flex-direction: column;
@@ -45,29 +37,6 @@
   padding-left: 14px;
 }
 
-.jp-RunningSessions-item {
-  display: flex;
-  flex-direction: row;
-  color: var(--jp-ui-font-color1);
-  height: var(--jp-private-running-item-height);
-  line-height: var(--jp-private-running-item-height);
-  padding: 0 8px;
-}
-
-.jp-RunningSessions-item:hover {
-  background-color: var(--jp-layout-color2);
-  cursor: pointer;
-}
-
-.jp-mod-running-leaf {
-  /** Account for lack of collapser */
-  margin-left: 16px;
-}
-
-.jp-RunningSessions-sectionContainer > .jp-RunningSessions-sectionList {
-  padding-left: 0;
-}
-
 .jp-RunningSessions-viewButton[aria-pressed='true'] {
   box-shadow: none;
 }
@@ -80,9 +49,18 @@
   margin-left: 0;
 }
 
-.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernel,
-.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernelspec {
+.jp-mod-running-list-view
+  .jp-RunningSessions-item.jp-mod-kernelspec::part(positioning-region),
+.jp-mod-running-list-view
+  .jp-RunningSessions-item.jp-mod-kernel::part(positioning-region) {
   display: none;
+}
+
+.jp-mod-running-list-view
+  .jp-RunningSessions-item.jp-mod-kernel-widget::part(content-region) {
+  margin-inline-start: calc(
+    -1 * var(--expand-collapse-button-size) + var(--design-unit) * 2px + 8px
+  );
 }
 
 .jp-RunningSessions-item.jp-mod-kernelspec,
@@ -160,19 +138,8 @@ span.jp-RunningSessions-icon > svg {
   width: 16px;
 }
 
-.jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
-  border-radius: 0;
-  margin: 0;
-}
-
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
   visibility: hidden;
-}
-
-.jp-RunningSessions-sectionList
-  .jp-RunningSessions-item
-  .jp-Button.jp-RunningSessions-itemShutdown:hover {
-  background: var(--jp-layout-color3);
 }
 
 .jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent {

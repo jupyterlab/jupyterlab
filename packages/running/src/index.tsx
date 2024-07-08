@@ -5,19 +5,20 @@
  * @module running
  */
 
+import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
-  caretDownIcon,
-  caretRightIcon,
   closeIcon,
   collapseAllIcon,
   expandAllIcon,
   FilterBox,
+  getTreeItemElement,
   IScore,
   LabIcon,
   PanelWithToolbar,
@@ -27,18 +28,16 @@ import {
   tableRowsIcon,
   Toolbar,
   ToolbarButton,
-  ToolbarButtonComponent,
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode } from 'react';
+import React, { isValidElement, ReactNode, useCallback } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -59,11 +58,6 @@ const SECTION_CLASS = 'jp-RunningSessions-section';
  * The class name added to a section container.
  */
 const CONTAINER_CLASS = 'jp-RunningSessions-sectionContainer';
-
-/**
- * The class name added to the running kernel sessions section list.
- */
-const LIST_CLASS = 'jp-RunningSessions-sectionList';
 
 /**
  * The class name added to the running sessions items.
@@ -89,11 +83,6 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
-
-/**
- * The class name added to a collapse/expand carets.
- */
-const CARET_CLASS = 'jp-RunningSessions-caret';
 
 /**
  * The class name added to icons.
@@ -213,15 +202,16 @@ function Item(props: {
   const trans = translator.load('jupyterlab');
 
   // Handle shutdown requests.
-  let stopPropagation = false;
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
   const shutdownLabel =
     (typeof props.shutdownLabel === 'function'
       ? props.shutdownLabel(runningItem)
       : props.shutdownLabel) ?? trans.__('Shut Down');
-  const shutdown = () => {
-    stopPropagation = true;
-    runningItem.shutdown?.();
+  const shutdown = (event: React.MouseEvent) => {
+    if (!event.defaultPrevented) {
+      event.preventDefault();
+      runningItem.shutdown?.();
+    }
   };
 
   // Materialise getter to avoid triggering it repeatedly
@@ -230,9 +220,18 @@ function Item(props: {
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
   const [collapsed, collapse] = React.useState(false);
   const collapsible = !!children?.length;
-  const onClick = collapsible
-    ? () => !stopPropagation && collapse(!collapsed)
-    : undefined;
+  const onClick = useCallback(
+    (event: React.MouseEvent) => {
+      const item = getTreeItemElement(event.target as HTMLElement);
+      if (event.currentTarget !== item) {
+        return;
+      }
+      if (collapsible) {
+        collapse(!collapsed);
+      }
+    },
+    [collapsible, collapsed]
+  );
 
   // Listen to signal to collapse from outside
   props.collapseToggled.connect((_emitter, newCollapseState) =>
@@ -242,61 +241,50 @@ function Item(props: {
   if (runningItem.className) {
     classList.push(runningItem.className);
   }
-  if (props.child) {
-    classList.push('jp-mod-running-child');
-  }
-  if (props.child && !children) {
-    classList.push('jp-mod-running-leaf');
-  }
 
   return (
     <>
-      <li>
-        <div
-          className={classList.join(' ')}
-          onClick={onClick}
-          data-context={runningItem.context || ''}
+      <TreeItem
+        className={`${classList.join(' ')} jp-TreeItem`}
+        onClick={onClick}
+        data-context={runningItem.context || ''}
+        expanded={!collapsed}
+      >
+        {icon ? (
+          typeof icon === 'string' ? (
+            <img src={icon} className={ITEM_ICON_CLASS} slot="start" />
+          ) : (
+            <icon.react slot="start" tag="span" className={ITEM_ICON_CLASS} />
+          )
+        ) : undefined}
+        <span
+          className={ITEM_LABEL_CLASS}
+          title={title}
+          onClick={runningItem.open && (() => runningItem.open!())}
         >
-          {collapsible &&
-            (collapsed ? (
-              <caretRightIcon.react tag="span" className={CARET_CLASS} />
-            ) : (
-              <caretDownIcon.react tag="span" className={CARET_CLASS} />
-            ))}
-          {icon ? (
-            typeof icon === 'string' ? (
-              <img src={icon} className={ITEM_ICON_CLASS} />
-            ) : (
-              <icon.react tag="span" className={ITEM_ICON_CLASS} />
-            )
-          ) : undefined}
-          <span
-            className={ITEM_LABEL_CLASS}
-            title={title}
-            onClick={runningItem.open && (() => runningItem.open!())}
+          {runningItem.label()}
+        </span>
+        {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
+        {runningItem.shutdown && (
+          <Button
+            appearance="stealth"
+            className={SHUTDOWN_BUTTON_CLASS}
+            onClick={shutdown}
+            title={shutdownLabel}
+            slot="end"
           >
-            {runningItem.label()}
-          </span>
-          {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
-          {runningItem.shutdown && (
-            <ToolbarButtonComponent
-              className={SHUTDOWN_BUTTON_CLASS}
-              icon={shutdownItemIcon}
-              onClick={shutdown}
-              tooltip={shutdownLabel}
-            />
-          )}
-        </div>
-        {collapsible && !collapsed && (
+            <shutdownItemIcon.react tag={null} />
+          </Button>
+        )}
+        {children && (
           <List
-            child={true}
             runningItems={children!}
             shutdownItemIcon={shutdownItemIcon}
             translator={translator}
             collapseToggled={props.collapseToggled}
           />
         )}
-      </li>
+      </TreeItem>
     </>
   );
 }
@@ -326,7 +314,7 @@ function List(props: {
         .map(({ item }) => item)
     : props.runningItems;
   return (
-    <ul className={LIST_CLASS}>
+    <>
       {items.map((item, i) => (
         <Item
           child={props.child}
@@ -338,7 +326,7 @@ function List(props: {
           collapseToggled={props.collapseToggled}
         />
       ))}
-    </ul>
+    </>
   );
 }
 
@@ -456,14 +444,16 @@ class ListWidget extends ReactWidget {
           }
           return (
             <div className={CONTAINER_CLASS}>
-              <List
-                runningItems={options.runningItems}
-                shutdownLabel={options.manager.shutdownLabel}
-                shutdownItemIcon={options.manager.shutdownItemIcon}
-                filter={options.filterProvider?.filter}
-                translator={options.translator}
-                collapseToggled={options.collapseToggled}
-              />
+              <TreeView className="jp-TreeView">
+                <List
+                  runningItems={options.runningItems}
+                  shutdownLabel={options.manager.shutdownLabel}
+                  shutdownItemIcon={options.manager.shutdownItemIcon}
+                  filter={options.filterProvider?.filter}
+                  translator={options.translator}
+                  collapseToggled={options.collapseToggled}
+                />
+              </TreeView>
             </div>
           );
         }}
