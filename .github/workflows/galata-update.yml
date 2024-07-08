@@ -156,6 +156,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          path: core
           ref: ${{ steps.pr.outputs.head_sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
