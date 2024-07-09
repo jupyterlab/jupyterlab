@@ -55,7 +55,7 @@
   "@jupyterlab/completer-extension:base-service": "Adds context and kernel completion providers.",
   "@jupyterlab/completer-extension:inline-history": "Adds inline completion provider suggesting code from execution history.",
   "@jupyterlab/completer-extension:inline-completer-factory": "Provides a factory for inline completer.",
-  "@jupyterlab/completer-extension:inline-completer": "Provides a factory for inline completer.",
+  "@jupyterlab/completer-extension:inline-completer": "Registers the inline completer factory; adds inline completer commands, shortcuts and settings.",
   "@jupyterlab/console-extension:factory": "Provides the console widget content factory.",
   "@jupyterlab/console-extension:tracker": "Provides the console widget tracker.",
   "@jupyterlab/console-extension:foreign": "Add foreign handler of IOPub messages to the console.",
