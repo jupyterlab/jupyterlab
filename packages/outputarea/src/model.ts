@@ -268,8 +268,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Remove an output at a given index.
    */
   remove(index: number): void {
-    this.list.get(index).dispose();
-    this.list.remove(index);
+    this.list.remove(index)?.dispose();
   }
 
   /**
@@ -339,7 +338,7 @@ export class OutputAreaModel implements IOutputAreaModel {
         'text'
       ) as unknown as IObservableString;
       const newText = value.text as string;
-      Private.concatenateText(curText, newText);
+      Private.addText(curText, newText);
       return this.length;
     }
 
@@ -361,7 +360,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       const curText = item.observableData.get(
         'text'
       ) as unknown as IObservableString;
-      Private.concatenateText(curText, newText);
+      Private.addText(curText, newText);
     } else {
       this._lastStreamName = '';
     }
@@ -506,66 +505,59 @@ namespace Private {
   /*
    * Concatenate a string to an observable string, handling backspaces.
    */
-  export function concatenateText(
-    curText: IObservableString,
-    newText: string
-  ): void {
-    let text = newText;
-    let done = false;
-    while (!done) {
-      const idx1 = text.indexOf('\b');
-      if (idx1 === -1) {
-        // No backspace anymore.
-        if (text.length > 0) {
-          curText.insert(curText.text.length, text);
+  export function addText(curText: IObservableString, newText: string): void {
+    let text = curText.text;
+    let idx0 = text.length;
+    for (let idx1 = 0; idx1 < newText.length; idx1++) {
+      const newChar = newText[idx1];
+      if (newChar === '\b') {
+        // Backspace: delete previous character if there is one and if it's not a line feed.
+        if (idx0 > 0 && text[idx0 - 1] !== '\n') {
+          text = text.slice(0, idx0 - 1) + text.slice(idx0 + 1);
+          idx0--;
         }
+      } else if (newChar === '\r') {
+        // Carriage return: go back to beginning of line.
+        let done = false;
+        while (!done) {
+          if (idx0 === 0) {
+            done = true;
+          } else if (text[idx0 - 1] === '\n') {
+            done = true;
+          } else {
+            idx0--;
+          }
+        }
+      } else if (newChar === '\n') {
+        // Insert new line at end of text.
+        text = text + '\n';
+        idx0 = text.length;
+      } else {
+        // Insert character at current position.
+        text = text.slice(0, idx0) + newChar + text.slice(idx0 + 1);
+        idx0++;
+      }
+    }
+    // Compute the difference between current text and new text.
+    let done = false;
+    let idx = 0;
+    while (!done) {
+      if (idx === text.length) {
+        if (idx !== curText.text.length) {
+          curText.remove(idx, curText.text.length);
+          done = true;
+        }
+      } else if (idx === curText.text.length) {
+        if (idx !== text.length) {
+          curText.insert(curText.text.length, text.slice(idx));
+          done = true;
+        }
+      } else if (text[idx] !== curText.text[idx]) {
+        curText.remove(idx, curText.text.length);
+        curText.insert(idx, text.slice(idx));
         done = true;
       } else {
-        // There is at least one backspace to handle.
-        let deleteNb = 1;
-        // Get the number of contiguous backspaces.
-        for (let idx2 = idx1 + 1; idx2 < text.length; idx2++) {
-          if (text[idx2] === '\b') {
-            deleteNb += 1;
-          } else {
-            break;
-          }
-        }
-        // Delete the characters in the new text.
-        let textToAppend = '';
-        let idx3 = text.slice(0, idx1).lastIndexOf('\n');
-        if (idx3 != -1) {
-          // Only delete up to the new line.
-          textToAppend = text.slice(0, idx3 + 1);
-          text = text.slice(idx1 + deleteNb);
-          deleteNb = 0;
-        } else {
-          if (deleteNb < idx1) {
-            textToAppend = text.slice(0, idx1 - deleteNb);
-            text = text.slice(idx1 + deleteNb);
-          } else {
-            text = text.slice(idx1 + deleteNb);
-          }
-          deleteNb -= idx1;
-        }
-        if (deleteNb > 0) {
-          // There are still characters to delete so nothing to insert from the new text yet.
-          // Delete the characters in the current text.
-          const idx4 = curText.text.lastIndexOf('\n');
-          if (idx4 != -1) {
-            // Only delete up to the new line.
-            curText.remove(idx4 + 1, curText.text.length);
-          } else {
-            let idx5 = curText.text.length - deleteNb;
-            if (idx5 < 0) {
-              idx5 = 0;
-            }
-            curText.remove(idx5, curText.text.length);
-          }
-        } else {
-          // There are characters to insert from the new text.
-          curText.insert(curText.text.length, textToAppend);
-        }
+        idx++;
       }
     }
   }
