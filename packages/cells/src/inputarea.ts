@@ -10,6 +10,7 @@ import { Widget } from '@lumino/widgets';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ICellModel } from './model';
+import { runIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
 /**
  * The class name added to input area widgets.
@@ -20,6 +21,16 @@ const INPUT_AREA_CLASS = 'jp-InputArea';
  * The class name added to the prompt area of cell.
  */
 const INPUT_AREA_PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to the prompt area's text indicator
+ */
+const INPUT_AREA_PROMPT_INDICATOR_CLASS = 'jp-InputArea-prompt-indicator';
+
+/**
+ * The class name added to the prompt area's run button
+ */
+const INPUT_AREA_PROMPT_RUN_CLASS = 'jp-InputArea-prompt-run';
 
 /**
  * The class name added to OutputPrompt.
@@ -261,16 +272,65 @@ export interface IInputPrompt extends Widget {
   executionCount: string | null;
 }
 
-/**
- * The default input prompt implementation.
- */
 export class InputPrompt extends Widget implements IInputPrompt {
   /*
-   * Create an output prompt widget.
+   * Create an input prompt widget.
    */
   constructor() {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
+    // Two sub-classes: prompt text and run button
+    const layout = (this.layout = new PanelLayout());
+    const promptIndicator = (this._promptIndicator =
+      new InputPromptIndicator());
+    layout.addWidget(promptIndicator);
+    const runButton = (this._runButton = new ToolbarButton({
+      icon: runIcon,
+      onClick: () => {
+        console.log('Run this cell');
+      },
+      tooltip: 'Run this cell'
+    }));
+    runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
+    layout.addWidget(runButton);
+    this.updateRunButtonVisibility();
+  }
+
+  /**
+   * The execution count for the prompt.
+   */
+  get executionCount(): string | null {
+    return this._executionCount;
+  }
+  set executionCount(value: string | null) {
+    this._executionCount = value;
+    this._promptIndicator.executionCount = value;
+    this.updateRunButtonVisibility();
+  }
+
+  private updateRunButtonVisibility() {
+    // Show the run button if the execution count is null
+    if (this.executionCount) {
+      this._promptIndicator.show();
+      this._runButton.hide();
+    } else {
+      this._promptIndicator.hide();
+      this._runButton.show();
+    }
+  }
+
+  private _executionCount: string | null = null;
+  private _promptIndicator: InputPromptIndicator;
+  private _runButton: ToolbarButton;
+}
+
+export class InputPromptIndicator extends Widget implements IInputPrompt {
+  /*
+   * Create an input prompt widget.
+   */
+  constructor() {
+    super();
+    this.addClass(INPUT_AREA_PROMPT_INDICATOR_CLASS);
   }
 
   /**
