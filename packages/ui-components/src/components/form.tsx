@@ -7,7 +7,14 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import Form, { FormProps, IChangeEvent } from '@rjsf/core';
-import { WidgetProps } from '@rjsf/utils';
+import {
+  ariaDescribedByIds,
+  FormContextType,
+  RJSFSchema,
+  schemaRequiresTrueValue,
+  StrictRJSFSchema,
+  WidgetProps
+} from '@rjsf/utils';
 import { Checkbox } from '@jupyter/react-components';
 import {
   ADDITIONAL_PROPERTY_FLAG,
@@ -625,13 +632,11 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     showModifiedFromDefault,
     translator,
     formContext,
+    widgets,
     ...others
   } = props;
 
-  const uiSchema = {
-    ...(others.uiSchema || JSONExt.emptyObject),
-    'ui:widget': 'CheckboxWidget'
-  } as UiSchema;
+  const uiSchema = { ...(others.uiSchema || JSONExt.emptyObject) } as UiSchema;
 
   uiSchema['ui:options'] = { ...DEFAULT_UI_OPTIONS, ...uiSchema['ui:options'] };
 
@@ -681,44 +686,62 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
   };
 
   return (
-    // @ts-expect-error I know
     <Form
       templates={templates as any}
       formContext={formContext as any}
+      widgets={{ ...customWidgets, ...widgets }}
       {...others}
-      widgets={customWidgets}
-      uiSchema={uiSchema}
     />
   );
 }
 
-const CustomCheckbox: React.FC<WidgetProps> = ({
+function CustomCheckbox<
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = any
+>({
+  schema,
   id,
   value,
-  required,
-  onChange,
   disabled,
+  readonly,
   label = '',
-  uiSchema
-}) => {
+  onChange,
+  onBlur,
+  onFocus
+}: WidgetProps<T, S, F>) {
+  // Because an unchecked checkbox will cause html5 validation to fail, only add
+  // the "required" attribute if the field value must be "true", due to the
+  // "const" or "enum" keywords
+  const required = schemaRequiresTrueValue<S>(schema);
+  const _onChange = ({
+    target: { checked }
+  }: React.ChangeEvent<HTMLElement & { checked: boolean }>) =>
+    onChange(checked);
+  const _onBlur = ({
+    target
+  }: React.FocusEvent<HTMLElement & { value: string }>) =>
+    onBlur(id, target && target.value);
+  const _onFocus = ({
+    target
+  }: React.FocusEvent<HTMLElement & { value: string }>) =>
+    onFocus(id, target && target.value);
   return (
-    <div className="customCheckboxContainer">
-      <Checkbox
-        id={id}
-        checked={value}
-        required={required}
-        disabled={disabled}
-        onChange={() => onChange(!value)}
-        aria-label={label}
-      />
-      {!uiSchema?.['ui:options']?.hideLabel && label && (
-        <label htmlFor={id} className="jp-CheckboxLabel">
-          {label}
-        </label>
-      )}
-    </div>
+    <Checkbox
+      id={id}
+      name={id}
+      checked={typeof value === 'undefined' ? false : Boolean(value)}
+      required={required}
+      disabled={disabled || readonly}
+      onChange={_onChange}
+      onBlur={_onBlur}
+      onFocus={_onFocus}
+      aria-describedby={ariaDescribedByIds<T>(id)}
+    >
+      {label}
+    </Checkbox>
   );
-};
+}
 
 export const customWidgets = {
   CheckboxWidget: CustomCheckbox
