@@ -67,7 +67,7 @@
 }
 
 /* The run button should only be visible on the active cell. */
-.jp-mod-active .jp-InputArea-prompt-run {
+.jp-CodeCell.jp-mod-active .jp-InputArea-prompt-run {
   display: block;
 }
 
