@@ -28,6 +28,12 @@ const INPUT_AREA_PROMPT_CLASS = 'jp-InputArea-prompt';
 const INPUT_AREA_PROMPT_INDICATOR_CLASS = 'jp-InputArea-prompt-indicator';
 
 /**
+ * Class for an empty prompt indicator, indicating no execution count
+ */
+const INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS =
+  'jp-InputArea-prompt-indicator-empty';
+
+/**
  * The class name added to the prompt area's run button
  */
 const INPUT_AREA_PROMPT_RUN_CLASS = 'jp-InputArea-prompt-run';
@@ -311,10 +317,8 @@ export class InputPrompt extends Widget implements IInputPrompt {
   private updateRunButtonVisibility() {
     // Show the run button if the execution count is null
     if (this.executionCount) {
-      this._promptIndicator.show();
       this._runButton.hide();
     } else {
-      this._promptIndicator.hide();
       this._runButton.show();
     }
   }
@@ -341,10 +345,12 @@ export class InputPromptIndicator extends Widget implements IInputPrompt {
   }
   set executionCount(value: string | null) {
     this._executionCount = value;
-    if (value === null) {
-      this.node.textContent = ' ';
+    if (value) {
+      this.node.textContent = `[${value}]:`;
+      this.removeClass(INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS);
     } else {
-      this.node.textContent = `[${value || ' '}]:`;
+      this.node.textContent = '[ ]:';
+      this.addClass(INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS);
     }
   }
 
