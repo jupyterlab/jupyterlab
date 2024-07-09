@@ -1357,6 +1357,12 @@
     "shortcuts": []
   },
   {
+    "id": "jupyterlab-translation:zh_CN",
+    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "shortcuts": []
+  },
+  {
     "id": "kernelmenu:change",
     "label": "Change Kernel…",
     "caption": "",
