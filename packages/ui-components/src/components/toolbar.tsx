@@ -863,7 +863,7 @@ export function ToolbarButtonComponent(
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={title}
-      minimal
+      scale="xsmall"
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
@@ -1114,6 +1114,7 @@ class ToolbarPopup extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
+    this.addClass('jp-ThemedContainer');
     this.layout = new PanelLayout();
     Widget.attach(this, document.body);
     this.hide();
