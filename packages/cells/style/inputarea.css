@@ -54,12 +54,31 @@
   position: absolute;
   top: var(--jp-code-padding);
   right: var(--jp-code-padding);
+  z-index: 10;
+}
+
+/**
+ * The prompt indicator on the active cell, with no executions,
+ * should not be visible.
+ */
+.jp-mod-active
+  .jp-InputArea-prompt-indicator.jp-InputArea-prompt-indicator-empty {
+  display: none;
+}
+
+/* The run button should only be visible on the active cell. */
+.jp-mod-active .jp-InputArea-prompt-run {
+  display: block;
 }
 
 .jp-InputArea-prompt-run {
   position: absolute;
   top: calc(-1 * var(--jp-code-padding));
   right: 0;
+  z-index: 20;
+
+  /* Only display this when the cell is active. */
+  display: none;
 }
 
 /*-----------------------------------------------------------------------------
