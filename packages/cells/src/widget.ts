@@ -2594,7 +2594,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 }
 
 /**
- * The namespace for the `CodeCell` class statics.
+ * The namespace for the `MarkdownCell` class statics.
  */
 export namespace MarkdownCell {
   /**
