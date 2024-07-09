@@ -48,19 +48,30 @@ jobs:
         run: |
           pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
           head_sha="$(echo "$pr" | jq -r .head.sha)"
-          updated_at="$(echo "$pr" | jq -r .updated_at)"
+          pushed_at="$(echo "$pr" | jq -r .pushed_at)"
 
-          if [[ $(date -d "$updated_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+          if [[ $(date -d "$pushed_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              echo "Updating is not allowed because the PR was pushed to (at $pushed_at) after the triggering comment was issued (at $COMMENT_AT)"
               exit 1
           fi
 
           echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.pr.outputs.head_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout the branch from the PR that triggered the job
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr checkout ${{ github.event.issue.number }}
+
+      - name: Validate the fetched branch HEAD revision
+        env:
+          EXPECTED_SHA: ${{ steps.pr.outputs.head_sha }}
+        run: |
+          actual_sha="$(git rev-parse HEAD)"
+
+          if [[ "$actual_sha" != "$EXPECTED_SHA" ]]; then
+              echo "The HEAD of the checked out branch ($actual_sha) differs from the HEAD commit available at the time when trigger comment was submitted ($EXPECTED_SHA)"
+              exit 1
+          fi
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -143,19 +154,32 @@ jobs:
         run: |
           pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
           head_sha="$(echo "$pr" | jq -r .head.sha)"
-          updated_at="$(echo "$pr" | jq -r .updated_at)"
+          pushed_at="$(echo "$pr" | jq -r .pushed_at)"
 
-          if [[ $(date -d "$updated_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+          if [[ $(date -d "$pushed_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
+              echo "Updating is not allowed because the PR was pushed to (at $pushed_at) after the triggering comment was issued (at $COMMENT_AT)"
               exit 1
           fi
 
           echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.pr.outputs.head_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout the branch from the PR that triggered the job
+        working-directory: core
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr checkout ${{ github.event.issue.number }}
+
+      - name: Validate the fetched branch HEAD revision
+        working-directory: core
+        env:
+          EXPECTED_SHA: ${{ steps.pr.outputs.head_sha }}
+        run: |
+          actual_sha="$(git rev-parse HEAD)"
+
+          if [[ "$actual_sha" != "$EXPECTED_SHA" ]]; then
+              echo "The HEAD of the checked out branch ($actual_sha) differs from the HEAD commit available at the time when trigger comment was submitted ($EXPECTED_SHA)"
+              exit 1
+          fi
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
