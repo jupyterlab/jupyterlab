@@ -14,11 +14,10 @@
 }
 
 .jp-PropertyInspector-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
 }
 
 .jp-PropertyInspector-placeholderContent {
+  color: var(--jp-content-font-color2);
   padding: 8px;
 }
