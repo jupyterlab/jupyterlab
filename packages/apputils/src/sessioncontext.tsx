@@ -1833,9 +1833,9 @@ namespace Private {
       optgroup.label = label;
       for (const { selected, text, title, value } of options) {
         const option = document.createElement('option');
-        option.selected = !!selected;
+        if (selected) option.selected = true;
+        if (title) option.title = title;
         option.text = text;
-        option.title = title || '';
         option.value = value;
         optgroup.appendChild(option);
       }
