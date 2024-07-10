@@ -24,7 +24,5 @@
 
 /* Styles for tree view */
 .jp-TreeView {
-  --density: -4;
-
   min-width: auto;
 }
