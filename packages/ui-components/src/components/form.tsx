@@ -12,7 +12,7 @@ import {
   enumOptionsIndexForValue,
   enumOptionsValueForIndex,
   schemaRequiresTrueValue,
-  labelValue, 
+  labelValue,
   FormContextType,
   RJSFSchema,
   StrictRJSFSchema,
@@ -752,8 +752,8 @@ export const customWidgets = {
 };
 
 function CustomSelect<
-  T = any, 
-  S extends StrictRJSFSchema = RJSFSchema, 
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
   >({
   id,
