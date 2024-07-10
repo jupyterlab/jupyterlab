@@ -24,6 +24,7 @@ input.jp-mod-styled {
   height: 28px;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
   padding-left: 7px;
   padding-right: 7px;
   font-size: var(--jp-ui-font-size2);
@@ -86,7 +87,7 @@ select.jp-mod-styled {
   color: var(--jp-ui-font-color0);
   padding: 0 25px 0 8px;
   border: var(--jp-border-width) solid var(--jp-input-border-color);
-  border-radius: 0;
+  border-radius: var(--jp-border-radius);
   outline: none;
   appearance: none;
   -webkit-appearance: none;
