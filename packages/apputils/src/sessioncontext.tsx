@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
   KernelMessage,
@@ -16,12 +16,13 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
+import { JSONExt, PartialJSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
+import { CustomEnvWidget } from './custom_env';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -1535,8 +1536,36 @@ namespace Private {
       !sessionContext.hasNoKernel ? sessionContext.kernelDisplayName : null
     );
     body.appendChild(selector);
+    const allow_custom_env_variables = PageConfig.getOption('allow_custom_env_variables') === 'true' ? true: false; 
+    console.log('allow_custom_env_variables');
+    console.log(allow_custom_env_variables);
+    
+    if (allow_custom_env_variables){
+      addEnvBlock(body);
+    }
     return body;
   }
+
+  function addEnvBlock(body: HTMLDivElement){
+   
+  let envConfiguration:PartialJSONObject = {};
+
+  function updateFormData(formData: PartialJSONObject){
+    envConfiguration = formData;
+  };
+
+  let customEnvBlock = new CustomEnvWidget(
+    updateFormData,
+    envConfiguration
+  );
+
+  //Update widget
+  if (customEnvBlock) {
+    Widget.attach(customEnvBlock, body);
+  }
+    
+  }
+  
 
   /**
    * Get the default kernel name given select options.
