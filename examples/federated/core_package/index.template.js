@@ -101,7 +101,7 @@ export async function main() {
   {{#each mimeExtensions}}
   if (!federatedExtensionNames.has('{{@key}}')) {
     try {
-      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
       for (let plugin of activePlugins(ext)) {
         mimeExtensions.push(plugin);
       }
@@ -127,7 +127,7 @@ export async function main() {
   {{#each extensions}}
   if (!federatedExtensionNames.has('{{@key}}')) {
     try {
-      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
       for (let plugin of activePlugins(ext)) {
         pluginsToRegister.push(plugin);
       }
@@ -168,8 +168,7 @@ export async function main() {
         .map(function (val) { return val.raw; })
     },
   });
-
-  lab.registerPluginModules(pluginsToRegister);
+  lab.registerPlugins(pluginsToRegister);
   lab.start({ ignorePlugins });
   lab.restored.then(() => {
     console.debug('Example started!');
