@@ -640,6 +640,21 @@ describe('@jupyterlab/apputils', () => {
       sessionContext.dispose();
     });
 
+    describe('#reifyKernelOptions', () => {
+      it('should return externally connected kernels', async () => {
+        await sessionContext.initialize();
+        const { groups } =
+          SessionContextDialogs.reifyKernelOptions(sessionContext);
+        const options = groups.reduce(
+          (acc, group) => acc.concat(group.options),
+          [] as { text: string }[]
+        );
+        expect(options[options.length - 1].text).toContain(
+          MOCK_KERNEL['kernel_name']
+        );
+      });
+    });
+
     describe('#selectKernel()', () => {
       it('should select the currently running kernel by default', async () => {
         await sessionContext.initialize();
@@ -653,15 +668,6 @@ describe('@jupyterlab/apputils', () => {
         const session = sessionContext?.session;
         expect(session!.kernel!.id).toBe(id);
         expect(session!.kernel!.name).toBe(name);
-      });
-
-      it('should display externally connected kernels', async () => {
-        await sessionContext.initialize();
-        const select = document.createElement('select');
-        SessionContextDialogs.populateKernelSelect(select, sessionContext);
-        expect(select.options[select.options.length - 1].text).toContain(
-          MOCK_KERNEL['kernel_name']
-        );
       });
 
       it('should keep the existing kernel if dismissed', async () => {
