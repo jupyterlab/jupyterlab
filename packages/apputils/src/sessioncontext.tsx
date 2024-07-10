@@ -1604,30 +1604,15 @@ export namespace SessionContextDialogs {
     // Create mapping of languages and kernel names.
     const sorted: KernelSpec.ISpecModel[] = [];
     const languages: { [key: string]: string } = Object.create(null);
+
     for (const name in specs.kernelspecs) {
       sorted.push(specs.kernelspecs[name]!);
       languages[name] = specs.kernelspecs[name]!.language;
     }
     sorted.sort((a, b) => a.display_name.localeCompare(b.display_name));
-
     translator = translator || nullTranslator;
+
     const trans = translator.load('jupyterlab');
-
-    if (preference.canStart === false) {
-      options.disabled = true;
-      options.groups.push({
-        label: trans.__('Use No Kernel'),
-        options: [
-          {
-            text: trans.__('No Kernel'),
-            title: trans.__('No Kernel'),
-            value: 'null'
-          }
-        ]
-      });
-      return options;
-    }
-
     const language =
       preference.language ||
       languages[preference.name!] ||
@@ -1674,6 +1659,13 @@ export namespace SessionContextDialogs {
       text: spec.display_name,
       value: JSON.stringify({ name: spec.name })
     });
+
+    // If a kernel cannot be started, bail.
+    if (preference.canStart === false) {
+      options.disabled = true;
+      options.groups.push(noKernel);
+      return options;
+    }
 
     // Create kernel option groups based on whether language preference exists.
     if (language) {
