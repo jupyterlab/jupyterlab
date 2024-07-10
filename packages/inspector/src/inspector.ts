@@ -23,7 +23,7 @@ const CONTENT_CLASS = 'jp-Inspector-content';
 /**
  * The class name added to default inspector content.
  */
-const DEFAULT_CONTENT_CLASS = 'jp-Inspector-default-content';
+const DEFAULT_CONTENT_CLASS = 'jp-Inspector-placeholderContent';
 
 /**
  * A panel which contains a set of inspectors.
