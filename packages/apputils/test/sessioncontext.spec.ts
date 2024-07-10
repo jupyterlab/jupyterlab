@@ -640,11 +640,10 @@ describe('@jupyterlab/apputils', () => {
       sessionContext.dispose();
     });
 
-    describe('#reifyKernelOptions', () => {
+    describe('#kernelOptions', () => {
       it('should return externally connected kernels', async () => {
         await sessionContext.initialize();
-        const { groups } =
-          SessionContextDialogs.reifyKernelOptions(sessionContext);
+        const { groups } = SessionContextDialogs.kernelOptions(sessionContext);
         const options = groups.reduce(
           (acc, group) => acc.concat(group.options),
           [] as { text: string }[]

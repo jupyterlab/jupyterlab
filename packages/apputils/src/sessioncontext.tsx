@@ -1529,7 +1529,7 @@ export namespace SessionContextDialogs {
   };
 
   /**
-   * Returns available kernel options based on session context.
+   * Returns available kernel options grouped based on session context.
    *
    * #### Notes
    * If a language preference is set in the given session context, the options
@@ -1560,7 +1560,7 @@ export namespace SessionContextDialogs {
    * context language preference is set, the first kernelspec that matches it is
    * selected.
    */
-  export function reifyKernelOptions(
+  export function kernelOptions(
     sessionContext: ISessionContext,
     translator: ITranslator | null = null
   ): KernelOptions {
@@ -1830,7 +1830,7 @@ namespace Private {
     body.appendChild(text);
 
     const select = document.createElement('select');
-    const options = SessionContextDialogs.reifyKernelOptions(
+    const options = SessionContextDialogs.kernelOptions(
       sessionContext,
       translator
     );
