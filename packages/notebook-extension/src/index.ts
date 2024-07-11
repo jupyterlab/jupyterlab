@@ -121,6 +121,7 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
+  PartialJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -1938,7 +1939,8 @@ function activateNotebookHandler(
   const createNew = async (
     cwd: string,
     kernelId: string,
-    kernelName: string
+    kernelName: string,
+    customEnvVars?: undefined | PartialJSONObject
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -1948,7 +1950,11 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName }
+        kernel: {
+          id: kernelId,
+          name: kernelName,
+          custom_env_vars: customEnvVars
+        }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;

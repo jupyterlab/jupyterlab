@@ -294,6 +294,11 @@ export namespace ISessionContext {
      * Skip showing the kernel restart dialog if checked (default `false`).
      */
     readonly skipKernelRestartDialog?: boolean;
+
+     /**
+     * Custom kernel variables
+     */
+     customEnvVars?: undefined | PartialJSONObject;
   }
 
   export type KernelDisplayStatus =
@@ -696,7 +701,14 @@ export class SessionContext implements ISessionContext {
         preference
       });
       if (name) {
-        options = { name };
+        if (preference.customEnvVars) {
+          options = {
+            name,
+            custom_env_vars: preference.customEnvVars
+          };
+        } else {
+          options = { name };
+        }
       }
     }
 
@@ -1377,19 +1389,33 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     });
 
     const result = await dialog.launch();
+   
 
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
 
+    const model = result.value as Kernel.IModel;
+    //const dialogResult = result.value as Kernel.IModel;
+ 
+
     if (hasCheckbox && result.isChecked !== null) {
+      if (model && sessionContext.kernelPreference?.customEnvVars) {
+        sessionContext.kernelPreference.customEnvVars = undefined;
+      }
+
+      if (model && model.custom_env_vars) {
+        sessionContext.kernelPreference.customEnvVars =
+          model.custom_env_vars;
+      }
+
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
         autoStartDefault: result.isChecked
       };
     }
 
-    const model = result.value;
+ 
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
@@ -1505,7 +1531,14 @@ namespace Private {
      */
     getValue(): Kernel.IModel {
       const selector = this.node.querySelector('select') as HTMLSelectElement;
-      return JSON.parse(selector.value) as Kernel.IModel;
+      let kernelData = JSON.parse(selector.value) as Kernel.IModel;
+
+      const custmEnvParameters = this.node.getAttribute('data-custom-env-vars');
+      
+      if (custmEnvParameters) {
+        kernelData['custom_env_vars'] = JSON.parse(custmEnvParameters);
+      }
+      return kernelData;
     }
   }
 
@@ -1536,11 +1569,16 @@ namespace Private {
       !sessionContext.hasNoKernel ? sessionContext.kernelDisplayName : null
     );
     body.appendChild(selector);
+
+
+
     const allow_custom_env_variables = PageConfig.getOption('allow_custom_env_variables') === 'true' ? true: false; 
     console.log('allow_custom_env_variables');
     console.log(allow_custom_env_variables);
+    body.setAttribute('data-custom-env-vars', '')
     
     if (allow_custom_env_variables){
+      
       addEnvBlock(body);
     }
     return body;
@@ -1550,13 +1588,19 @@ namespace Private {
    
   let envConfiguration:PartialJSONObject = {};
 
-  function updateFormData(formData: PartialJSONObject){
-    envConfiguration = formData;
-  };
 
   let customEnvBlock = new CustomEnvWidget(
-    updateFormData,
-    envConfiguration
+    envConfiguration,
+    formData => {
+      envConfiguration = formData as PartialJSONObject;
+
+      console.log('envConfiguration');
+      console.dir(envConfiguration)
+      body.setAttribute(
+        'data-custom-env-vars',
+        JSON.stringify(envConfiguration)
+      );
+    },
   );
 
   //Update widget

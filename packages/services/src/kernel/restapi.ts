@@ -4,6 +4,7 @@
 import { ServerConnection } from '../serverconnection';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel, validateModels } from './validate';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The kernel model provided by the server.
@@ -47,6 +48,8 @@ export interface IModel {
    * The traceback for a dead kernel, if applicable.
    */
   readonly traceback?: string;
+
+  custom_env_vars?: undefined | PartialJSONObject;
 }
 
 /**
