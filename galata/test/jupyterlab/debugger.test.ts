@@ -178,9 +178,23 @@ test.describe('Debugger Tests', () => {
 test.describe('Debugger Variables', () => {
   test.use({ autoGoto: false });
 
-  const copyToGlobalsRequest = new PromiseDelegate<void>();
+  async function init({ page, tmpPath }) {
+    // Initialize the debugger.
+    await page.goto(`tree/${tmpPath}`);
+    await createNotebook(page);
 
-  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.debugger.switchOn();
+    await page.waitForCondition(() => page.debugger.isOpen());
+
+    await setBreakpoint(page);
+  }
+
+  test('Copy to globals should work only for local variables', async ({
+    page,
+    tmpPath
+  }) => {
+    const copyToGlobalsRequest = new PromiseDelegate<void>();
+
     // Listener to the websocket, to catch the 'copyToGlobals' request.
     page.on('websocket', ws => {
       ws.on('framesent', event => {
@@ -194,19 +208,8 @@ test.describe('Debugger Variables', () => {
       });
     });
 
-    // Initialize the debugger.
-    await page.goto(`tree/${tmpPath}`);
-    await createNotebook(page);
+    await init({ page, tmpPath });
 
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
-
-    await setBreakpoint(page);
-  });
-
-  test('Copy to globals should work only for local variables', async ({
-    page
-  }) => {
     // Kernel supports copyToGlobals.
     await page.evaluate(async () => {
       const debuggerService = await window.galata.getPlugin(
@@ -226,16 +229,11 @@ test.describe('Debugger Variables', () => {
     await page.getByRole('treeitem', { name: 'local_var:' }).click({
       button: 'right'
     });
-    await expect(
-      page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
-    ).toHaveCount(1);
-
-    await expect(
-      page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
-    ).toBeVisible();
 
     // Request the copy of the local variable to globals scope.
-    await page.getByRole('menuitem', { name: 'Copy to Clipboard' }).click();
+    await page
+      .getByRole('menuitem', { name: 'Copy Variable to Globals' })
+      .click();
 
     // Wait for the request to be sent.
     await copyToGlobalsRequest.promise;
@@ -245,13 +243,18 @@ test.describe('Debugger Variables', () => {
     await page.getByRole('treeitem', { name: 'global_var:' }).click({
       button: 'right'
     });
-    await expect(page.getByRole('menu')).toBeVisible();
+    await expect.soft(page.getByRole('menu')).toBeVisible();
     await expect(
       page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
     ).toHaveCount(0);
   });
 
-  test('Copy to globals not available from kernel', async ({ page }) => {
+  test('Copy to globals not available from kernel', async ({
+    page,
+    tmpPath
+  }) => {
+    await init({ page, tmpPath });
+
     // Kernel doesn't support copyToGlobals.
     await page.evaluate(async () => {
       const debuggerService = await window.galata.getPlugin(
@@ -272,9 +275,9 @@ test.describe('Debugger Variables', () => {
     await page.getByRole('treeitem', { name: 'local_var:' }).click({
       button: 'right'
     });
-    await expect(
-      page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
-    ).not.toBeVisible();
+    await expect
+      .soft(page.getByRole('menuitem', { name: 'Copy Variable to Globals' }))
+      .not.toBeVisible();
 
     // Close the contextual menu
     await page.keyboard.press('Escape');
@@ -283,7 +286,9 @@ test.describe('Debugger Variables', () => {
     ).toHaveCount(0);
   });
 
-  test('Copy to clipboard', async ({ page }) => {
+  test('Copy to clipboard', async ({ page, tmpPath }) => {
+    await init({ page, tmpPath });
+
     // Don't wait as it will be blocked.
     void page.notebook.runCell(1);
 
