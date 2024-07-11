@@ -42,3 +42,7 @@
   text-align: center;
   color: var(--jp-content-font-color2);
 }
+
+.jp-Inspector-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
+}
