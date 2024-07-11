@@ -802,7 +802,7 @@ function CustomSelect<
     <label>
       {labelValue(label, hideLabel)}
       <Select
-        aria-invalid={rawErrors.length > 0}      
+        aria-invalid={rawErrors.length > 0}
         id={id}
         className='form-control'
         value={dropdownValue}
