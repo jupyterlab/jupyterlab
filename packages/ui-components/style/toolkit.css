@@ -8,6 +8,15 @@
   --density: -4;
 }
 
+/* Styles for tree view */
+.jp-TreeView {
+  min-width: auto;
+}
+
+.jp-TreeView.jp-mod-flat > .jp-TreeItem::part(content-region) {
+  margin-inline-start: calc(var(--design-unit) * 1px);
+}
+
 /* Styles for tree item */
 .jp-TreeItem::part(expand-collapse-button) {
   color: var(--jp-inverse-layout-color3);
@@ -20,9 +29,4 @@
 
 .jp-TreeItem[selected] jp-button[appearance='stealth']:hover {
   background: var(--tree-item-expand-collapse-selected-hover);
-}
-
-/* Styles for tree view */
-.jp-TreeView {
-  min-width: auto;
 }

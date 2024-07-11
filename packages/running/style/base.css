@@ -58,7 +58,7 @@
 
 .jp-mod-running-list-view
   .jp-RunningSessions-item.jp-mod-kernel-widget::part(content-region) {
-  margin-inline-start: -1.8em;
+  margin-inline-start: -2.6em;
 }
 
 .jp-RunningSessions-item.jp-mod-kernelspec,
@@ -156,6 +156,10 @@ span.jp-RunningSessions-icon > svg {
   background-color: var(--jp-layout-color2);
   outline: 1px solid var(--jp-brand-color1);
   outline-offset: -2px;
+}
+
+.jp-RunningSessions-item.jp-mod-active.jp-TreeItem::part(positioning-region) {
+  background-color: transparent;
 }
 
 .jp-SearchableSessions-list > .jp-RunningSessions-section {

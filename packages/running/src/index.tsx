@@ -442,9 +442,18 @@ class ListWidget extends ReactWidget {
           } else {
             options.runningItems = options.manager.running();
           }
+          const classes = ['jp-TreeView'];
+          if (
+            options.manager.name !==
+            (options.translator ?? nullTranslator)
+              .load('jupyterlab')
+              .__('Kernels')
+          ) {
+            classes.push('jp-mod-flat');
+          }
           return (
             <div className={CONTAINER_CLASS}>
-              <TreeView className="jp-TreeView">
+              <TreeView className={classes.join(' ')}>
                 <List
                   runningItems={options.runningItems}
                   shutdownLabel={options.manager.shutdownLabel}
