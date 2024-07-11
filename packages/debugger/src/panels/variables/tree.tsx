@@ -309,7 +309,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
         onSelection(variable);
       }
     },
-    [expandable, expanded]
+    [variable]
   );
 
   const renderVariable = useCallback(() => {
@@ -323,6 +323,18 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       });
   }, [commands, variable.name, service.model.callstack.frame?.id]);
 
+  const onContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+      const item = getTreeItemElement(event.target as HTMLElement);
+      if (event.currentTarget !== item) {
+        return;
+      }
+
+      onSelection(variable);
+    },
+    [variable]
+  );
+
   return (
     <TreeItem
       className="jp-TreeItem"
@@ -330,6 +342,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       onSelect={onSelectChange}
       onExpand={fetchChildren}
       onClick={(e): Promise<void> => onVariableClicked(e)}
+      onContextMenu={onContextMenu}
       onKeyDown={event => {
         if (event.key == 'Enter') {
           if (hasMimeRenderer && showDetailsButton) {

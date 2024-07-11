@@ -95,22 +95,22 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
-    expect(await variablesPanel.screenshot()).toMatchSnapshot(
-      'image-debug-session-global-variables.png'
-    );
+    expect
+      .soft(await variablesPanel.screenshot())
+      .toMatchSnapshot('image-debug-session-global-variables.png');
 
     await page.debugger.renderVariable(globalVar);
     let richVariableTab = await page.activity.getPanelLocator(
       `${globalVar} - ${notebookName}`
     );
-    expect(await richVariableTab?.screenshot()).toMatchSnapshot(
-      'image-debug-session-global-rich-variable.png'
-    );
+    expect
+      .soft(await richVariableTab?.screenshot())
+      .toMatchSnapshot('image-debug-session-global-rich-variable.png');
 
     await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
     await page.getByRole('button', { name: 'Continue (F9)' }).click();
-    await expect(variablesPanel.getByRole('tree')).toHaveCount(1);
+    await expect.soft(variablesPanel.getByRole('tree')).toHaveCount(1);
     await page.debugger.waitForVariables();
 
     await page.debugger.renderVariable(localVar);
