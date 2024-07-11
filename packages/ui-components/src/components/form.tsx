@@ -18,9 +18,7 @@ import {
   StrictRJSFSchema,
   WidgetProps
 } from '@rjsf/utils';
-import { Field, Option, OptionOnSelectData } from '@jupyter/react-components';
-import { Checkbox } from '@jupyter/react-components';
-import { Select } from '@jupyter/react-components';
+import { Checkbox, Option, Select } from '@jupyter/react-components';
 import {
   ADDITIONAL_PROPERTY_FLAG,
   ArrayFieldTemplateProps,
@@ -792,22 +790,20 @@ function CustomSelect<
 
   const _onBlur = () => onBlur(id, selectedIndexes);
   const _onFocus = () => onFocus(id, selectedIndexes);
-  const _onChange = (_: any, data: OptionOnSelectData) => {
-    const newValue = getValue(data, multiple);
-    return onChange(enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal));
+  const _onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = multiple
+      ? Array.from(event.target.selectedOptions, option => option.value)
+      : event.target.value;
+    onChange(enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal));
   };
   const showPlaceholderOption = !multiple && schema.default === undefined;
 
   return (
-    <Field
-      label={labelValue(label, hideLabel)}
-      validationState={rawErrors.length ? 'error' : undefined}
-      required={required}
-    >
+    <label>
+      {labelValue(label, hideLabel)}
       <Select
+        aria-invalid={rawErrors.length > 0}      
         id={id}
-        name={id}
-        multiselect={multiple}
         className='form-control'
         value={dropdownValue}
         disabled={disabled || readonly}
@@ -816,6 +812,7 @@ function CustomSelect<
         onFocus={_onFocus}
         onOptionSelect={_onChange}
         selectedOptions={selectedIndexesAsArray}
+        aria-required={required}
         aria-describedby={ariaDescribedByIds<T>(id)}
       >
         {showPlaceholderOption && <Option value=''>{placeholder || ''}</Option>}
@@ -829,6 +826,6 @@ function CustomSelect<
             );
           })}
       </Select>
-    </Field>
+      </label>
   );
 }
