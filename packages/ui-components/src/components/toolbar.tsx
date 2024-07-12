@@ -177,6 +177,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass(TOOLBAR_CLASS);
     this.layout = options.layout ?? new ToolbarLayout();
+    this._noFocusOnClick = options.noFocusOnClick ?? false;
   }
 
   /**
@@ -238,6 +239,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
     Private.nameProperty.set(widget, name);
     widget.node.dataset['jpItemName'] = name;
+    if (this._noFocusOnClick) {
+      widget.node.dataset['noFocusOnClick'] = 'true';
+    }
     return true;
   }
 
@@ -360,6 +364,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
   }
+
+  private _noFocusOnClick: boolean;
 }
 
 /**
@@ -369,8 +375,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   /**
    * Construct a new toolbar widget.
    */
-  constructor() {
-    super();
+  constructor(options: Toolbar.IOptions = {}) {
+    super(options);
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
     this._resizer = new Throttler(async (callTwice = false) => {
@@ -452,7 +458,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (widget instanceof ToolbarPopupOpener) {
       status = super.insertItem(index, name, widget);
     } else {
-      // Insert the widget in the toolbar at axpected index if possible, otherwise
+      // Insert the widget in the toolbar at expected index if possible, otherwise
       // before the popup opener. This position may change when invoking the resizer
       // at the end of this function.
       const j = Math.max(
@@ -730,6 +736,10 @@ export namespace Toolbar {
      * Toolbar widget layout.
      */
     layout?: Layout;
+    /**
+     * Do not give the focus to the button on click.
+     */
+    noFocusOnClick?: boolean;
   }
 
   /**
@@ -802,29 +812,47 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(
   props: ToolbarButtonComponent.IProps
 ): JSX.Element {
-  const actualOnClick = props.actualOnClick ?? true;
+  const refButton = React.useRef<HTMLElement>(null);
+  const [handleMouseDown, setHandleMouseDown] = React.useState<
+    undefined | ((event: React.MouseEvent) => void)
+  >();
+  const [handleClick, setHandleClick] = React.useState<
+    undefined | ((event: React.MouseEvent) => void)
+  >();
 
-  // In some browsers, a button click event moves the focus from the main
-  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
-  // We avoid a click event by calling preventDefault in mousedown, and
-  // we bind the button action to `mousedown`.
-  const handleMouseDown = actualOnClick
-    ? undefined
-    : (event: React.MouseEvent) => {
-        // Fire action only when left button is pressed.
-        if (event.button === 0) {
-          event.preventDefault();
-          props.onClick?.();
-        }
-      };
+  React.useEffect(() => {
+    const actualOnClick =
+      props.actualOnClick ??
+      refButton.current?.parentElement?.dataset['noFocusOnClick']
+        ? false
+        : true;
 
-  const handleClick = actualOnClick
-    ? (event: React.MouseEvent) => {
-        if (event.button === 0) {
-          props.onClick?.();
-        }
-      }
-    : undefined;
+    // In some browsers, a button click event moves the focus from the main
+    // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+    // We avoid a click event by calling preventDefault in mousedown, and
+    // we bind the button action to `mousedown`.
+    setHandleMouseDown(
+      actualOnClick
+        ? undefined
+        : () => (event: React.MouseEvent) => {
+            // Fire action only when left button is pressed.
+            if (event.button === 0) {
+              event.preventDefault();
+              props.onClick?.();
+            }
+          }
+    );
+
+    setHandleClick(
+      actualOnClick
+        ? () => (event: React.MouseEvent) => {
+            if (event.button === 0) {
+              props.onClick?.();
+            }
+          }
+        : undefined
+    );
+  }, []);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
@@ -848,6 +876,7 @@ export function ToolbarButtonComponent(
 
   return (
     <Button
+      ref={refButton}
       appearance="stealth"
       className={
         props.className
