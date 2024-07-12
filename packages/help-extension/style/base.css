@@ -223,10 +223,6 @@
   color: #fff;
 }
 
-.jp-Licenses-Grid.jp-RenderedHTMLCommon .jp-mod-selected code {
-  color: #fff;
-}
-
 /* license text */
 .jp-Licenses-Text {
   min-width: calc(10 * var(--jp-ui-font-size1));
