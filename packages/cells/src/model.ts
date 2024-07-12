@@ -794,7 +794,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             event.newIndex,
             event.newIndex,
             outputs,
-            'modeldb'
+            'silent-change'
           );
           break;
         }
@@ -804,7 +804,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             event.oldIndex,
             event.oldIndex + newValues.length,
             newValues,
-            'modeldb'
+            'silent-change'
           );
           break;
         }
@@ -813,7 +813,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             event.oldIndex,
             event.oldValues.length,
             [],
-            'modeldb'
+            'silent-change'
           );
           break;
         default:

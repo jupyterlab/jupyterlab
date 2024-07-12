@@ -1412,7 +1412,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
         }
       },
       false,
-      'modeldb'
+      'silent-change'
     );
   }
 
@@ -1731,7 +1731,7 @@ export namespace CodeCell {
           model.clearExecution();
         },
         false,
-        'modeldb'
+        'silent-change'
       );
       return;
     }
@@ -1748,7 +1748,7 @@ export namespace CodeCell {
         cell.outputHidden = false;
       },
       false,
-      'modeldb'
+      'silent-change'
     );
     // note: in future we would like to distinguish running from scheduled
     model.executionState = 'running';
