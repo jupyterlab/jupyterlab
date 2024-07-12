@@ -11,7 +11,8 @@ import { IStateDB } from './tokens';
  */
 export class StateDB<
   T extends ReadonlyPartialJSONValue = ReadonlyPartialJSONValue
-> implements IStateDB<T> {
+> implements IStateDB<T>
+{
   /**
    * Create a new state database.
    *
@@ -84,7 +85,7 @@ export class StateDB<
   /**
    * Retrieve all the saved bundles for a namespace.
    *
-   * @param filter - The namespace prefix to retrieve.
+   * @param namespace The namespace prefix to retrieve.
    *
    * @returns A promise that bears a collection of payloads for a namespace.
    *
@@ -147,10 +148,13 @@ export class StateDB<
 
     const { ids, values } = await this._list();
 
-    return values.reduce((acc, val, idx) => {
-      acc[ids[idx]] = val;
-      return acc;
-    }, {} as { [id: string]: T });
+    return values.reduce(
+      (acc, val, idx) => {
+        acc[ids[idx]] = val;
+        return acc;
+      },
+      {} as { [id: string]: T }
+    );
   }
 
   /**

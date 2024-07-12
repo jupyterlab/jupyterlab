@@ -1,0 +1,46 @@
+header:
+  license:
+    spdx-id: BSD-3-Clause
+    copyright-owner: Jupyter Development Team
+    software-name: JupyterLab
+    content: |
+      Copyright (c) Jupyter Development Team.
+      Distributed under the terms of the Modified BSD License.
+
+  paths-ignore:
+    - '**/*.ipynb'
+    - '**/*.json'
+    - '**/*.md'
+    - '**/*.svg'
+    - '**/*.yml'
+    - '**/*.yaml'
+    - '**/*.jupyterlab-workspace'
+    - '**/build'
+    - '**/lib'
+    - '**/node_modules'
+    - '**/MANIFEST.in'
+    - '**/static'
+    - '**/typings'
+    - '**/schemas'
+    - '**/themes'
+    - '*.map.js'
+    - '*.bundle.js'
+    - '**/.*'
+    - '.gitpod.yml'
+    - 'binder/postBuild'
+    - 'binder/start'
+    - 'coverage'
+    - 'dev_mode/style.js'
+    - 'examples/federated/example.cert'
+    - 'galata/test/jupyterlab/notebooks/'
+    - 'galata/test/*/*/*.txt'
+    - 'jupyterlab.desktop'
+    - 'jupyterlab/staging'
+    - 'packages/codemirror/test/foo.grammar'
+    - 'packages/extensionmanager-extension/examples/listings/settings/@jupyterlab/extensionmanager-extension/plugin.jupyterlab-settings'
+    - 'scripts/release_template.txt'
+    - 'typedoc-theme'
+    - 'LICENSE'
+    - 'yarn.lock'
+
+  comment: on-failure

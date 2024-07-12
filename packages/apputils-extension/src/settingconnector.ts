@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { PageConfig } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
@@ -33,19 +38,29 @@ export class SettingConnector extends DataConnector<
     return throttlers[id].invoke();
   }
 
+  async list(query: 'ids'): Promise<{ ids: string[] }>;
   async list(
-    query: 'active' | 'all' = 'all'
-  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
-    const { isDeferred, isDisabled } = PageConfig.Extension;
-    const { ids, values } = await this._connector.list();
+    query: 'active' | 'all'
+  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }>;
+  async list(
+    query: 'active' | 'all' | 'ids' = 'all'
+  ): Promise<{ ids: string[]; values?: ISettingRegistry.IPlugin[] }> {
+    const { isDisabled } = PageConfig.Extension;
+    const { ids, values } = await this._connector.list(
+      query === 'ids' ? 'ids' : undefined
+    );
 
     if (query === 'all') {
       return { ids, values };
     }
 
+    if (query === 'ids') {
+      return { ids };
+    }
+
     return {
-      ids: ids.filter(id => !isDeferred(id) && !isDisabled(id)),
-      values: values.filter(({ id }) => !isDeferred(id) && !isDisabled(id))
+      ids: ids.filter(id => !isDisabled(id)),
+      values: values.filter(({ id }) => !isDisabled(id))
     };
   }
 

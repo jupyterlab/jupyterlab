@@ -6,6 +6,22 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
+    "jupyter.lab.internationalization": {
+      "type": "object",
+      "properties": {
+        "selectors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "jupyter.lab.menus": {
       "type": "object",
       "properties": {
@@ -40,6 +56,13 @@
       },
       "additionalProperties": false
     },
+    "jupyter.lab.metadataforms": {
+      "items": {
+        "$ref": "#/definitions/metadataForm"
+      },
+      "type": "array",
+      "default": []
+    },
     "jupyter.lab.setting-deprecated": {
       "type": "boolean",
       "default": false
@@ -63,6 +86,19 @@
       "type": "array",
       "default": []
     },
+    "jupyter.lab.toolbars": {
+      "properties": {
+        "^\\w[\\w-\\.]*$": {
+          "items": {
+            "$ref": "#/definitions/toolbarItem"
+          },
+          "type": "array",
+          "default": []
+        }
+      },
+      "type": "object",
+      "default": {}
+    },
     "jupyter.lab.transform": {
       "type": "boolean",
       "default": false
@@ -75,6 +111,10 @@
           "description": "Whether the menu is disabled or not",
           "type": "boolean",
           "default": false
+        },
+        "icon": {
+          "description": "Menu icon id",
+          "type": "string"
         },
         "id": {
           "description": "Menu unique id",
@@ -106,6 +146,12 @@
         "label": {
           "description": "Menu label",
           "type": "string"
+        },
+        "mnemonic": {
+          "description": "Mnemonic index for the label",
+          "type": "number",
+          "minimum": -1,
+          "default": -1
         },
         "rank": {
           "description": "Menu rank",
@@ -158,27 +204,189 @@
     "shortcut": {
       "properties": {
         "args": {
+          "title": "The arguments for the command",
           "type": "object"
         },
         "command": {
+          "title": "The command id",
+          "description": "The command executed when the binding is matched.",
           "type": "string"
         },
         "disabled": {
+          "description": "Whether this shortcut is disabled or not.",
           "type": "boolean",
           "default": false
         },
         "keys": {
+          "title": "The key sequence for the binding",
+          "description": "The key shortcut like `Accel A` or the sequence of shortcuts to press like [`Accel A`, `B`]",
           "items": {
             "type": "string"
           },
-          "minItems": 1,
+          "type": "array"
+        },
+        "macKeys": {
+          "title": "The key sequence for the binding on macOS",
+          "description": "The key shortcut like `Cmd A` or the sequence of shortcuts to press like [`Cmd A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "winKeys": {
+          "title": "The key sequence for the binding on Windows",
+          "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "linuxKeys": {
+          "title": "The key sequence for the binding on Linux",
+          "description": "The key shortcut like `Ctrl A` or the sequence of shortcuts to press like [`Ctrl A`, `B`]",
+          "items": {
+            "type": "string"
+          },
           "type": "array"
         },
         "selector": {
+          "title": "CSS selector",
           "type": "string"
         }
       },
       "required": ["command", "keys", "selector"],
+      "type": "object"
+    },
+    "toolbarItem": {
+      "properties": {
+        "name": {
+          "title": "Unique name",
+          "type": "string"
+        },
+        "args": {
+          "title": "Command arguments",
+          "type": "object"
+        },
+        "command": {
+          "title": "Command id",
+          "type": "string",
+          "default": ""
+        },
+        "disabled": {
+          "title": "Whether the item is ignored or not",
+          "type": "boolean",
+          "default": false
+        },
+        "icon": {
+          "title": "Item icon id",
+          "description": "If defined, it will override the command icon",
+          "type": "string"
+        },
+        "label": {
+          "title": "Item label",
+          "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
+          "type": "string"
+        },
+        "type": {
+          "title": "Item type",
+          "type": "string",
+          "enum": ["command", "spacer"]
+        },
+        "rank": {
+          "title": "Item rank",
+          "type": "number",
+          "minimum": 0,
+          "default": 50
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "metadataForm": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The section ID"
+        },
+        "metadataSchema": {
+          "type": "object",
+          "items": {
+            "$ref": "#/definitions/metadataSchema"
+          }
+        },
+        "uiSchema": {
+          "type": "object"
+        },
+        "metadataOptions": {
+          "type": "object",
+          "items": {
+            "$ref": "#/definitions/metadataOptions"
+          }
+        },
+        "label": {
+          "type": "string",
+          "description": "The section label"
+        },
+        "rank": {
+          "type": "integer",
+          "description": "The rank of the section in the right panel"
+        },
+        "showModified": {
+          "type": "boolean",
+          "description": "Whether to show modified values from defaults"
+        }
+      },
+      "required": ["id", "metadataSchema"]
+    },
+    "metadataSchema": {
+      "properties": {
+        "properties": {
+          "type": "object",
+          "description": "The property set up by extension",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "type": "object",
+      "required": ["properties"]
+    },
+    "metadataOptions": {
+      "properties": {
+        "customRenderer": {
+          "type": "string"
+        },
+        "metadataLevel": {
+          "type": "string",
+          "enum": ["cell", "notebook"],
+          "default": "cell"
+        },
+        "cellTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["code", "markdown", "raw"]
+          }
+        },
+        "writeDefault": {
+          "type": "boolean"
+        }
+      },
       "type": "object"
     }
   }

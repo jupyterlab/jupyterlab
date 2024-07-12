@@ -1,18 +1,17 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2017, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-Dialog {
+.jp-Dialog.jp-ThemedContainer {
   position: absolute;
   z-index: 10000;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -26,8 +25,7 @@
   margin-left: auto;
   margin-right: auto;
   background: var(--jp-layout-color1);
-  padding: 24px;
-  padding-bottom: 12px;
+  padding: 24px 24px 12px;
   min-width: 300px;
   min-height: 150px;
   max-width: 1000px;
@@ -36,6 +34,7 @@
   box-shadow: var(--jp-elevation-z20);
   word-wrap: break-word;
   border-radius: var(--jp-border-radius);
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
@@ -43,18 +42,45 @@
   resize: both;
 }
 
+.jp-Dialog-content.jp-Dialog-content-small {
+  max-width: 500px;
+}
+
 .jp-Dialog-button {
   overflow: visible;
+}
+
+button.jp-Dialog-button:disabled {
+  opacity: 0.6;
 }
 
 button.jp-Dialog-button:focus {
   outline: 1px solid var(--jp-brand-color1);
   outline-offset: 4px;
-  -moz-outline-radius: 0px;
+  -moz-outline-radius: 0;
 }
 
 button.jp-Dialog-button:focus::-moz-focus-inner {
   border: 0;
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus,
+button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus,
+button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
+  outline-offset: 4px;
+  -moz-outline-radius: 0;
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-accept:focus {
+  outline: 1px solid var(--jp-accept-color-normal, var(--jp-brand-color1));
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus {
+  outline: 1px solid var(--jp-warn-color-normal, var(--jp-error-color1));
+}
+
+button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
+  outline: 1px solid var(--jp-reject-color-normal, var(--md-grey-600, #757575));
 }
 
 button.jp-Dialog-close-button {
@@ -71,7 +97,7 @@ button.jp-Dialog-close-button {
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size3);
   font-weight: 400;
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-Dialog-body {
@@ -80,6 +106,7 @@ button.jp-Dialog-close-button {
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size1);
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   overflow: auto;
 }
 
@@ -87,10 +114,19 @@ button.jp-Dialog-close-button {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  align-items: center;
   flex: 0 0 auto;
   margin-left: -12px;
   margin-right: -12px;
   padding: 12px;
+}
+
+.jp-Dialog-checkbox {
+  padding-right: 5px;
+}
+
+.jp-Dialog-spacer {
+  flex: 1 1 auto;
 }
 
 .jp-Dialog-title {
@@ -104,7 +140,7 @@ button.jp-Dialog-close-button {
 }
 
 .jp-Dialog-body > button {
-  padding: 0px 16px;
+  padding: 0 16px;
 }
 
 .jp-Dialog-body > label {

@@ -4,25 +4,32 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Private CSS variables
-|----------------------------------------------------------------------------*/
-
-:root {
-  --jp-private-notebook-dragImage-width: 304px;
-  --jp-private-notebook-dragImage-height: 36px;
-  --jp-private-notebook-selected-color: var(--md-blue-400);
-  --jp-private-notebook-active-color: var(--md-green-400);
-}
-
-/*-----------------------------------------------------------------------------
 | Imports
 |----------------------------------------------------------------------------*/
 
 @import './toolbar.css';
+@import './executionindicator.css';
+@import './toc.css';
+@import './notebookfooter.css';
+
+/*-----------------------------------------------------------------------------
+| CSS variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-side-by-side-output-size: 1fr;
+  --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
+  --jp-private-notebook-dragImage-width: 304px;
+  --jp-private-notebook-dragImage-height: 36px;
+  --jp-private-notebook-selected-color: var(--md-blue-400, #42a5f5);
+  --jp-private-notebook-active-color: var(--md-green-400, #66bb6a);
+}
 
 /*-----------------------------------------------------------------------------
 | Notebook
 |----------------------------------------------------------------------------*/
+
+/* stylelint-disable selector-max-class */
 
 .jp-NotebookPanel {
   display: block;
@@ -35,13 +42,15 @@
 }
 
 .jp-Notebook {
-  padding: var(--jp-notebook-padding);
   outline: none;
-  overflow: auto;
   background: var(--jp-layout-color0);
 }
 
-.jp-Notebook.jp-mod-scrollPastEnd::after {
+.jp-Notebook .jp-WindowedPanel-viewport {
+  padding: var(--jp-notebook-padding);
+}
+
+.jp-Notebook.jp-mod-scrollPastEnd > .jp-WindowedPanel-outer::after {
   display: block;
   content: '';
   min-height: var(--jp-notebook-scroll-padding);
@@ -49,10 +58,6 @@
 
 .jp-MainAreaWidget-ContainStrict .jp-Notebook * {
   contain: strict;
-}
-
-.jp-Notebook-render * {
-  contain: none !important;
 }
 
 .jp-Notebook .jp-Cell {
@@ -101,7 +106,8 @@
 .jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt {
   color: var(--jp-warn-color1);
 }
-.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt:before {
+
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt::before {
   color: var(--jp-warn-color1);
   content: '•';
 }
@@ -134,11 +140,19 @@
   background: transparent;
 }
 
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active:focus-visible {
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--jp-brand-color1);
+  z-index: 1;
+}
+
 /* Edit mode */
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
-  box-shadow: var(--jp-input-box-shadow);
+  box-shadow: var(--jp-cell-editor-box-shadow);
   background-color: var(--jp-cell-editor-active-background);
 }
 
@@ -169,7 +183,7 @@
 }
 
 .jp-dragImage-singlePrompt {
-  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
+  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
 .jp-dragImage .jp-dragImage-content {
@@ -183,7 +197,7 @@
   background: var(--jp-cell-editor-background-color);
   color: var(--jp-content-font-color3);
   text-align: left;
-  margin: 4px 4px 4px 0px;
+  margin: 4px 4px 4px 0;
 }
 
 .jp-dragImage .jp-dragImage-prompt {
@@ -208,7 +222,7 @@
   left: 8px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-input-border-color);
-  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.12);
+  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
 /*-----------------------------------------------------------------------------
@@ -220,40 +234,42 @@
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+
   /* This is needed so that all font sizing of children done in ems is
     * relative to this base size */
   font-size: var(--jp-ui-font-size1);
   overflow: auto;
 }
 
-.jp-NotebookTools-tool {
-  padding: 0px 12px 0 12px;
-}
-
 .jp-ActiveCellTool {
-  padding: 12px;
-  background-color: var(--jp-layout-color1);
-  border-top: none !important;
+  padding: 12px 0;
+  display: flex;
 }
 
-.jp-ActiveCellTool .jp-InputArea-prompt {
-  flex: 0 0 auto;
-  padding-left: 0px;
-}
-
-.jp-ActiveCellTool .jp-InputArea-editor {
+.jp-ActiveCellTool-Content {
   flex: 1 1 auto;
-  background: var(--jp-cell-editor-background);
-  border-color: var(--jp-cell-editor-border-color);
 }
 
-.jp-ActiveCellTool .jp-InputArea-editor .CodeMirror {
-  background: transparent;
+.jp-ActiveCellTool .jp-ActiveCellTool-CellContent {
+  background: var(--jp-cell-editor-background);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  min-height: 29px;
+}
+
+.jp-ActiveCellTool .jp-InputPrompt {
+  min-width: calc(var(--jp-cell-prompt-width) * 0.75);
+}
+
+.jp-ActiveCellTool-CellContent > pre {
+  padding: 5px 4px;
+  margin: 0;
+  white-space: normal;
 }
 
 .jp-MetadataEditorTool {
   flex-direction: column;
-  padding: 12px 0px 12px 0px;
+  padding: 12px 0;
 }
 
 .jp-RankedPanel > :not(:first-child) {
@@ -267,13 +283,14 @@
 }
 
 .jp-KeySelector label,
-.jp-MetadataEditorTool label {
+.jp-MetadataEditorTool label,
+.jp-NumberSetter label {
   line-height: 1.4;
 }
 
-.jp-NotebookTools .jp-select-wrapper {
+.jp-NumberSetter input {
+  width: 100%;
   margin-top: 4px;
-  margin-bottom: 0px;
 }
 
 .jp-NotebookTools .jp-Collapse {
@@ -292,6 +309,81 @@
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-InputPrompt,
 .jp-mod-presentationMode .jp-Notebook .jp-Cell .jp-OutputPrompt {
   flex: 0 0 110px;
+}
+
+/*-----------------------------------------------------------------------------
+| Side-by-side Mode (.jp-mod-sideBySide)
+|----------------------------------------------------------------------------*/
+.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
+  display: grid;
+  grid-template-columns: minmax(70px, 1fr) min-content minmax(
+      70px,
+      var(--jp-side-by-side-output-size)
+    );
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'header header header'
+    'input handle output'
+    'footer footer footer';
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell.jp-mod-resizedCell {
+  grid-template-columns: minmax(70px, 1fr) min-content minmax(
+      70px,
+      var(--jp-side-by-side-resized-cell)
+    );
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellHeader {
+  grid-area: header;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-Cell-inputWrapper {
+  grid-area: input;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-Cell-outputWrapper {
+  /* overwrite the default margin (no vertical separation needed in side by side move */
+  margin-top: 0;
+  grid-area: output;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellFooter {
+  grid-area: footer;
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellResizeHandle {
+  grid-area: handle;
+  user-select: none;
+  display: block;
+  height: 100%;
+  cursor: ew-resize;
+  padding: 0 var(--jp-cell-padding);
+}
+
+.jp-mod-sideBySide.jp-Notebook .jp-CodeCell .jp-CellResizeHandle::after {
+  content: '';
+  display: block;
+  background: var(--jp-border-color2);
+  height: 100%;
+  width: 5px;
+}
+
+.jp-mod-sideBySide.jp-Notebook
+  .jp-CodeCell.jp-mod-resizedCell
+  .jp-CellResizeHandle::after {
+  background: var(--jp-border-color0);
+}
+
+.jp-CellResizeHandle {
+  display: none;
 }
 
 /*-----------------------------------------------------------------------------
@@ -333,10 +425,6 @@
   background-repeat: no-repeat;
   background-size: 800px 104px;
   height: 104px;
-  position: relative;
-}
-
-.jp-Cell-Placeholder-wrapper-body div {
   position: absolute;
   right: 15px;
   left: 15px;
@@ -375,4 +463,86 @@ div.jp-Cell-Placeholder-content-2 {
 
 div.jp-Cell-Placeholder-content-3 {
   top: 140px;
+}
+
+/*-----------------------------------------------------------------------------
+| Virtual scrollbar
+|----------------------------------------------------------------------------*/
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-item[data-output='error'] {
+  background: var(--jp-error-color3);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-item[data-output='error']:hover {
+  background: var(--jp-error-color2);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-dirty {
+  background: var(--jp-warn-color3);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-dirty:hover {
+  background: var(--jp-warn-color2);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-selected {
+  background: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-selected:hover {
+  background: var(--jp-brand-color1);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-active {
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content > .jp-mod-active:hover {
+  background: var(--jp-brand-color0);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-item {
+  max-width: 60px;
+  display: flex;
+}
+
+.jp-Notebook .jp-scrollbarItem-executionIndicator {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 80%;
+  line-height: 100%;
+  margin-left: -1px;
+  padding-right: 1px;
+  text-wrap: nowrap; /* stylelint-disable-line csstree/validator */
+}
+
+.jp-Notebook .jp-scrollbarItem-source {
+  display: inline-block;
+  font-size: 3px;
+  vertical-align: middle;
+  max-height: 10em;
+  overflow: hidden;
+}
+
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-item[data-type='code']
+  > .jp-scrollbarItem-source {
+  white-space: pre;
+}
+
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-item[data-type='markdown']
+  > .jp-scrollbarItem-source {
+  white-space: pre-line;
+}
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+@media print {
+  .jp-Notebook .jp-Cell .jp-InputPrompt {
+    float: none;
+  }
 }

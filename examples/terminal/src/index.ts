@@ -7,10 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/terminal/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import { DockPanel, Widget } from '@lumino/widgets';
 
@@ -21,6 +19,11 @@ import { Terminal } from '@jupyterlab/terminal';
 async function main(): Promise<void> {
   const dock = new DockPanel();
   dock.id = 'main';
+
+  // Ensure Jupyter styling
+  dock.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the widget to the dom.
   Widget.attach(dock, document.body);

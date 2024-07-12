@@ -10,14 +10,42 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  IFormRenderer,
+  IFormRendererRegistry
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
+  PartialJSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { Platform } from '@lumino/domutils';
+import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
+import { renderShortCut } from './renderer';
+import { ISignal, Signal } from '@lumino/signaling';
+
+const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+
+function getExternalForJupyterLab(
+  settingRegistry: ISettingRegistry,
+  app: JupyterFrontEnd,
+  translator: ITranslator,
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
+): IShortcutUI.IExternalBundle {
+  return {
+    translator,
+    getSettings: () =>
+      settingRegistry.load(SHORTCUT_PLUGIN_ID, true) as Promise<
+        ISettingRegistry.ISettings<IShortcutsSettingsLayout>
+      >,
+    commandRegistry: app.commands,
+    actionRequested
+  };
+}
 
 /**
  * The default shortcuts extension.
@@ -49,24 +77,130 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
  * required, using the `'body'` selector is more appropriate.
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/shortcuts-extension:shortcuts',
-  requires: [ISettingRegistry, ITranslator],
+  id: SHORTCUT_PLUGIN_ID,
+  description: 'Adds the keyboard shortcuts editor.',
+  requires: [ISettingRegistry],
+  optional: [ITranslator, IFormRendererRegistry],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator | null,
+    editorRegistry: IFormRendererRegistry | null
   ) => {
-    const trans = translator.load('jupyterlab');
+    const translator_ = translator ?? nullTranslator;
+    const trans = translator_.load('jupyterlab');
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema | null;
+    // Stores initial value of the shortcuts `default` value,
+    // which reflects the `overrides.json` contents.
+    let cannonicalOverrides: PartialJSONValue | undefined;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
+
+    if (editorRegistry) {
+      const actionRequested = new Signal<unknown, IShortcutUI.ActionRequest>(
+        {}
+      );
+      const isKeybindingNode = (node: HTMLElement) =>
+        node.dataset['shortcut'] !== undefined;
+
+      app.commands.addCommand(CommandIDs.editBinding, {
+        label: trans.__('Edit Keybinding'),
+        caption: trans.__('Edit existing keybinding'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const keybinding = node?.dataset['keybinding'];
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId || !keybinding) {
+            return console.log('Missing shortcut id/keybinding information');
+          }
+          actionRequested.emit({
+            request: 'edit-keybinding',
+            keybinding: parseInt(keybinding, 10),
+            shortcutId
+          });
+        }
+      });
+
+      app.commands.addCommand(CommandIDs.deleteBinding, {
+        label: trans.__('Delete Keybinding'),
+        caption: trans.__('Delete chosen keybinding'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const keybinding = node?.dataset['keybinding'];
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId || !keybinding) {
+            return console.log('Missing shortcut id/keybinding information');
+          }
+          actionRequested.emit({
+            request: 'delete-keybinding',
+            keybinding: parseInt(keybinding, 10),
+            shortcutId
+          });
+        }
+      });
+
+      app.commands.addCommand(CommandIDs.addBinding, {
+        label: trans.__('Add Keybinding'),
+        caption: trans.__('Add new keybinding for existing shortcut target'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId) {
+            return console.log('Missing shortcut id to add keybinding to');
+          }
+          actionRequested.emit({
+            request: 'add-keybinding',
+            shortcutId
+          });
+        }
+      });
+
+      commands.addCommand(CommandIDs.toggleSelectors, {
+        label: trans.__('Toggle Selectors'),
+        caption: trans.__('Toggle command selectors'),
+        execute: () => {
+          actionRequested.emit({
+            request: 'toggle-selectors'
+          });
+        }
+      });
+
+      commands.addCommand(CommandIDs.resetAll, {
+        label: trans.__('Reset All'),
+        caption: trans.__('Reset all shortcuts'),
+        execute: () => {
+          actionRequested.emit({
+            request: 'reset-all'
+          });
+        }
+      });
+
+      const component: IFormRenderer = {
+        fieldRenderer: (props: any) => {
+          return renderShortCut({
+            external: getExternalForJupyterLab(
+              registry,
+              app,
+              translator_,
+              actionRequested
+            ),
+            ...props
+          });
+        }
+      };
+      editorRegistry.addRenderer(`${shortcuts.id}.shortcuts`, component);
+    }
 
     /**
      * Populate the plugin's schema defaults.
      */
     function populate(schema: ISettingRegistry.ISchema) {
       const commands = app.commands.listCommands().join('\n');
-
+      if (!cannonicalOverrides) {
+        cannonicalOverrides = JSONExt.deepCopy(
+          schema.properties!.shortcuts.default!
+        );
+      }
       loaded = {};
       schema.properties!.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
@@ -75,8 +209,24 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .concat([schema.properties!.shortcuts.default as any[]])
-        .reduce((acc, val) => acc.concat(val), []) // flatten one level
+        .concat([cannonicalOverrides as any[]])
+        .reduce((acc, val) => {
+          if (Platform.IS_MAC) {
+            return acc.concat(val);
+          } else {
+            // If platform is not MacOS, remove all shortcuts containing Cmd
+            // as they will be modified; e.g. `Cmd A` becomes `A`
+            return acc.concat(
+              val.filter(
+                shortcut =>
+                  !shortcut.keys.some(key => {
+                    const { cmd } = CommandRegistry.parseKeystroke(key);
+                    return cmd;
+                  })
+              )
+            );
+          }
+        }, []) // flatten one level
         .sort((a, b) => a.command.localeCompare(b.command));
 
       schema.properties!.shortcuts.description = trans.__(
@@ -100,7 +250,7 @@ List of keyboard shortcuts:`,
       );
     }
 
-    registry.pluginChanged.connect(async (sender, plugin) => {
+    registry.pluginChanged.connect(async (_, plugin) => {
       if (plugin !== shortcuts.id) {
         // If the plugin changed its shortcuts, reload everything.
         const oldShortcuts = loaded[plugin];
@@ -110,8 +260,13 @@ List of keyboard shortcuts:`,
           oldShortcuts === undefined ||
           !JSONExt.deepEqual(oldShortcuts, newShortcuts)
         ) {
+          // Empty the default values to avoid shortcut collisions.
           canonical = null;
-          await registry.reload(shortcuts.id);
+          const schema = registry.plugins[shortcuts.id]!.schema;
+          schema.properties!.shortcuts.default = cannonicalOverrides;
+
+          // Reload the settings.
+          await registry.load(shortcuts.id, true);
         }
       }
     });

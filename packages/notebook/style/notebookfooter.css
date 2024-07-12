@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-Notebook-footer {
+  height: 27px;
+  margin-left: calc(
+    var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
+      var(--jp-cell-padding) + var(--jp-notebook-padding)
+  );
+  width: calc(
+    100% -
+      (
+        var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) + 2 *
+          var(--jp-cell-padding) + 2 * var(--jp-notebook-padding)
+      )
+  );
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  color: var(--jp-ui-font-color3);
+  background: none;
+  cursor: pointer;
+}
+
+.jp-Notebook-footer:focus {
+  border-color: var(--jp-cell-editor-active-border-color);
+}
+
+/* For devices that support hovering, hide footer until hover */
+@media (hover: hover) {
+  .jp-Notebook-footer {
+    opacity: 0;
+  }
+
+  .jp-Notebook-footer:focus,
+  .jp-Notebook-footer:hover {
+    opacity: 1;
+  }
+}

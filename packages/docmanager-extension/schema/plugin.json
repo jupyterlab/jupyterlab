@@ -44,6 +44,10 @@
           {
             "command": "docmanager:rename",
             "rank": 5
+          },
+          {
+            "command": "docmanager:duplicate",
+            "rank": 5
           }
         ]
       },
@@ -59,10 +63,6 @@
             "rank": 4
           },
           {
-            "command": "docmanager:toggle-name-file-on-save",
-            "rank": 4
-          },
-          {
             "type": "separator",
             "rank": 4
           }
@@ -73,22 +73,27 @@
       {
         "command": "docmanager:rename",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 1
+        "rank": 20
+      },
+      {
+        "command": "docmanager:duplicate",
+        "selector": "[data-type=\"document-title\"]",
+        "rank": 21
       },
       {
         "command": "docmanager:delete",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 2
+        "rank": 22
       },
       {
         "command": "docmanager:clone",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 3
+        "rank": 23
       },
       {
         "command": "docmanager:show-in-file-browser",
         "selector": "[data-type=\"document-title\"]",
-        "rank": 4
+        "rank": 24
       }
     ]
   },
@@ -117,6 +122,18 @@
       "description": "Length of save interval in seconds",
       "default": 120
     },
+    "confirmClosingDocument": {
+      "type": "boolean",
+      "title": "Ask for confirmation to close a document",
+      "description": "Whether to ask for confirmation to close a document or not.",
+      "default": false
+    },
+    "lastModifiedCheckMargin": {
+      "type": "number",
+      "title": "Margin for last modified timestamp check",
+      "description": "Max acceptable difference, in milliseconds, between last modified timestamps on disk and client",
+      "default": 500
+    },
     "defaultViewers": {
       "type": "object",
       "title": "Default Viewers",
@@ -127,11 +144,18 @@
         "type": "string"
       }
     },
-    "nameFileOnSave": {
+    "renameUntitledFileOnSave": {
       "type": "boolean",
-      "title": "Name File On First Save",
-      "description": "Whether to prompt to name file on first save",
+      "title": "Rename Untitled File On First Save",
+      "description": "Whether to prompt to rename untitled file on first manual save.",
       "default": true
+    },
+    "maxNumberRecents": {
+      "type": "number",
+      "title": "Recent Items Number",
+      "description": "Number of recently opened/closed files and directories to remember.",
+      "default": 10,
+      "minimum": 0
     }
   },
   "additionalProperties": false,

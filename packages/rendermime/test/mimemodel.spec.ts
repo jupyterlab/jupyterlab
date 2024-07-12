@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MimeModel } from '../src';
+import { MimeModel } from '@jupyterlab/rendermime';
 
 describe('rendermime/mimemodel', () => {
   describe('MimeModel', () => {

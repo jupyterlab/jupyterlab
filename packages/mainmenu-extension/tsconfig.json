@@ -16,6 +16,12 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../filebrowser"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -26,6 +32,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

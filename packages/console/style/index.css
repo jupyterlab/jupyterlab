@@ -7,9 +7,8 @@
 @import url('~@lumino/widgets/style/index.css');
 @import url('~@jupyterlab/ui-components/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
+@import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@lumino/dragdrop/style/index.css');
 @import url('~@jupyterlab/codeeditor/style/index.css');
-@import url('~@jupyterlab/rendermime/style/index.css');
 @import url('~@jupyterlab/cells/style/index.css');
-
 @import url('./base.css');

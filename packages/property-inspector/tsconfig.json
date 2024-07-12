@@ -10,10 +10,10 @@
       "path": "../application"
     },
     {
-      "path": "../apputils"
+      "path": "../translation"
     },
     {
-      "path": "../translation"
+      "path": "../ui-components"
     }
   ]
 }

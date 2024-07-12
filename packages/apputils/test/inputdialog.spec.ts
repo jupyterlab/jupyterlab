@@ -6,7 +6,7 @@ import {
   acceptDialog,
   dismissDialog,
   waitForDialog
-} from '@jupyterlab/testutils';
+} from '@jupyterlab/testing';
 
 describe('@jupyterlab/apputils', () => {
   describe('InputDialog', () => {
@@ -144,6 +144,48 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('getMultipleItems()', () => {
+      it('should accept at least two arguments', async () => {
+        const dialog = InputDialog.getMultipleItems({
+          title: 'list',
+          items: ['item1']
+        });
+
+        await dismissDialog();
+        expect((await dialog).button.accept).toBe(false);
+      });
+
+      it('should return empty list if none is selected', async () => {
+        const dialog = InputDialog.getMultipleItems({
+          items: ['item1', 'item2'],
+          title: 'Pick a choice'
+        });
+
+        await acceptDialog();
+
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toStrictEqual([]);
+      });
+
+      it('should accept option "defaults"', async () => {
+        const dialog = InputDialog.getMultipleItems({
+          label: 'list',
+          items: ['item1', 'item2', 'item3'],
+          defaults: ['item1', 'item3'],
+          title: 'Pick a choice'
+        });
+
+        await acceptDialog();
+
+        const result = await dialog;
+
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toStrictEqual(['item1', 'item3']);
+      });
+    });
+
     describe('getText()', () => {
       it('should accept at least one argument', async () => {
         const dialog = InputDialog.getText({
@@ -205,6 +247,71 @@ describe('@jupyterlab/apputils', () => {
         expect(result.button.accept).toBe(true);
         expect(result.value).toBe('my answer');
         document.body.removeChild(node);
+      });
+
+      it('should prevent accepting when pattern does not match', async () => {
+        const node = document.createElement('div');
+        document.body.appendChild(node);
+
+        const dialog = InputDialog.getText({
+          title: 'Give me letters',
+          pattern: '[a-z]+',
+          host: node
+        });
+
+        await waitForDialog(node);
+        const input = node.querySelector(
+          'input[type="text"]'
+        ) as HTMLInputElement;
+
+        input.value = '123';
+        input.dispatchEvent(new Event('input'));
+
+        const acceptButton = node.querySelector(
+          'button.jp-mod-accept'
+        ) as HTMLButtonElement;
+        const dismissButton = node.querySelector(
+          'button.jp-mod-reject'
+        ) as HTMLButtonElement;
+        expect(acceptButton.disabled).toBe(true);
+        expect(dismissButton.disabled).toBe(false);
+
+        await dismissDialog();
+        const result = await dialog;
+        expect(result.button.accept).toBe(false);
+      });
+
+      it('should allow accepting when pattern matches', async () => {
+        const node = document.createElement('div');
+        document.body.appendChild(node);
+
+        const dialog = InputDialog.getText({
+          title: 'Give me letters',
+          pattern: '[a-z]+',
+          host: node
+        });
+
+        await waitForDialog(node);
+        const input = node.querySelector(
+          'input[type="text"]'
+        ) as HTMLInputElement;
+
+        input.value = 'abc';
+        input.dispatchEvent(new Event('input'));
+
+        const acceptButton = node.querySelector(
+          'button.jp-mod-accept'
+        ) as HTMLButtonElement;
+        const dismissButton = node.querySelector(
+          'button.jp-mod-reject'
+        ) as HTMLButtonElement;
+        expect(acceptButton.disabled).toBe(false);
+        expect(dismissButton.disabled).toBe(false);
+
+        await acceptDialog();
+        const result = await dialog;
+        expect(result.button.accept).toBe(true);
+        expect(result.value).toBe('abc');
       });
     });
 

@@ -102,6 +102,7 @@ export class MenuSvg extends Menu {
   constructor(options: Menu.IOptions) {
     options.renderer = options.renderer || MenuSvg.defaultRenderer;
     super(options);
+    this.addClass('jp-ThemedContainer');
   }
 
   /**
@@ -171,15 +172,6 @@ export namespace MenuSvg {
         return h.div({ className }, checkIcon, data.item.iconLabel);
       }
 
-      /* <DEPRECATED> */
-      if (typeof data.item.icon === 'string') {
-        return h.div(
-          { className: classes(className, 'jp-Icon') },
-          data.item.iconLabel
-        );
-      }
-      /* </DEPRECATED> */
-
       // if data.item.icon is undefined, it will be ignored
       return h.div({ className }, data.item.icon!, data.item.iconLabel);
     }
@@ -193,9 +185,6 @@ export namespace MenuSvg {
      */
     createIconClass(data: Menu.IRenderData): string {
       let name = 'lm-Menu-itemIcon';
-      /* <DEPRECATED> */
-      name += ' p-Menu-itemIcon';
-      /* </DEPRECATED> */
 
       if (data.item.type === 'separator') {
         return classes(data.item.iconClass, name);
@@ -216,11 +205,7 @@ export namespace MenuSvg {
      * @returns A virtual element representing the submenu icon.
      */
     renderSubmenu(data: Menu.IRenderData): VirtualElement {
-      const className =
-        'lm-Menu-itemSubmenuIcon' +
-        /* <DEPRECATED> */
-        ' p-Menu-itemSubmenuIcon';
-      /* </DEPRECATED> */
+      const className = 'lm-Menu-itemSubmenuIcon';
 
       if (data.item.type === 'submenu') {
         return h.div({ className }, submenuIcon);

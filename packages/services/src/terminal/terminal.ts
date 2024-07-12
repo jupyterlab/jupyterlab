@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator } from '@lumino/algorithm';
-
 import { JSONPrimitive } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
@@ -15,6 +13,19 @@ import { IManager as IBaseManager } from '../basemanager';
 
 import { IModel, isAvailable } from './restapi';
 export { IModel, isAvailable };
+
+export namespace ITerminal {
+  export interface IOptions {
+    /**
+     * The terminal name.
+     */
+    name?: string;
+    /**
+     *  The terminal current directory.
+     */
+    cwd?: string;
+  }
+}
 
 /**
  * An interface for a terminal session.
@@ -140,28 +151,26 @@ export interface IManager extends IBaseManager {
    *
    * @returns A new iterator over the running terminals.
    */
-  running(): IIterator<IModel>;
+  running(): IterableIterator<IModel>;
 
   /**
    * Create a new terminal session.
    *
-   * @param options - The options used to create the session.
+   * @param options - The options used to create the terminal.
    *
-   * @returns A promise that resolves with the terminal instance.
+   * @returns A promise that resolves with the terminal connection instance.
    *
    * #### Notes
    * The manager `serverSettings` will be always be used.
    */
-  startNew(
-    options?: ITerminalConnection.IOptions
-  ): Promise<ITerminalConnection>;
+  startNew(options?: ITerminal.IOptions): Promise<ITerminalConnection>;
 
   /*
    * Connect to a running session.
    *
-   * @param name - The name of the target session.
+   * @param options - The options used to connect to the terminal.
    *
-   * @returns A promise that resolves with the new session instance.
+   * @returns The new terminal connection instance.
    */
   connectTo(
     options: Omit<ITerminalConnection.IOptions, 'serverSettings'>

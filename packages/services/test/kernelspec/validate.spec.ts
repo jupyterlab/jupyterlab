@@ -11,19 +11,21 @@ import { PYTHON_SPEC } from '../utils';
 describe('kernelspec/validate', () => {
   describe('#validateSpecModel', () => {
     it('should pass with valid data', () => {
-      validateSpecModel(PYTHON_SPEC);
+      expect(() => {
+        validateSpecModel(PYTHON_SPEC);
+      }).not.toThrow();
     });
 
     it('should fail on missing data', () => {
       const spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
       delete spec['name'];
-      expect(() => validateSpecModel(spec)).toThrowError();
+      expect(() => validateSpecModel(spec)).toThrow();
     });
 
     it('should fail on incorrect data', () => {
       const spec = JSON.parse(JSON.stringify(PYTHON_SPEC));
       spec.spec.language = 1;
-      expect(() => validateSpecModel(spec)).toThrowError();
+      expect(() => validateSpecModel(spec)).toThrow();
     });
   });
 
@@ -35,14 +37,16 @@ describe('kernelspec/validate', () => {
           python: PYTHON_SPEC
         }
       };
-      validateSpecModels(model);
+      expect(() => {
+        validateSpecModels(model);
+      }).not.toThrow();
     });
 
     it('should fail on missing data', () => {
       const model: any = {
         default: 'python'
       };
-      expect(() => validateSpecModels(model)).toThrowError();
+      expect(() => validateSpecModels(model)).toThrow();
     });
   });
 });

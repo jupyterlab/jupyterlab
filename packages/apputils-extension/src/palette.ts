@@ -100,8 +100,7 @@ export namespace Palette {
       'aria-label',
       trans.__('Command Palette Section')
     );
-    shell.add(palette, 'left', { rank: 300 });
-
+    shell.add(palette, 'left', { rank: 300, type: 'Command Palette' });
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
@@ -109,7 +108,7 @@ export namespace Palette {
         if (modal && !newModal) {
           palette.parent = null;
           modalPalette.detach();
-          shell.add(palette, 'left', { rank: 300 });
+          shell.add(palette, 'left', { rank: 300, type: 'Command Palette' });
         } else if (!modal && newModal) {
           palette.parent = null;
           modalPalette.palette = palette;
@@ -138,7 +137,7 @@ export namespace Palette {
         b => b.command === CommandIDs.activate
       );
       if (binding) {
-        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
         palette.title.caption = trans.__('Commands (%1)', ks);
       } else {
         palette.title.caption = trans.__('Commands');

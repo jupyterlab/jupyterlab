@@ -23,7 +23,8 @@ import { ILabShell } from './shell';
  * The layout restorer token.
  */
 export const ILayoutRestorer = new Token<ILayoutRestorer>(
-  '@jupyterlab/application:ILayoutRestorer'
+  '@jupyterlab/application:ILayoutRestorer',
+  'A service providing application layout restoration functionality. Use this to have your activities restored across page loads.'
 );
 
 /**
@@ -115,6 +116,9 @@ export class LayoutRestorer implements ILayoutRestorer {
     this._connector = options.connector;
     this._first = options.first;
     this._registry = options.registry;
+    if (options.mode) {
+      this._mode = options.mode;
+    }
 
     void this._first
       .then(() => {
@@ -130,6 +134,17 @@ export class LayoutRestorer implements ILayoutRestorer {
       .then(() => {
         this._restored.resolve(void 0);
       });
+  }
+
+  /**
+   * Whether full layout restoration is deferred and is currently incomplete.
+   *
+   * #### Notes
+   * This flag is useful for tracking when the application has started in
+   * 'single-document' mode and the main area has not yet been restored.
+   */
+  get isDeferred(): boolean {
+    return this._deferred.length > 0;
   }
 
   /**
@@ -162,6 +177,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       downArea: null,
       leftArea: null,
       rightArea: null,
+      topArea: null,
       relativeSizes: null
     };
     const layout = this._connector.fetch(KEY);
@@ -173,19 +189,19 @@ export class LayoutRestorer implements ILayoutRestorer {
         return blank;
       }
 
-      const {
-        main,
-        down,
-        left,
-        right,
-        relativeSizes
-      } = data as Private.ILayout;
+      const { main, down, left, right, relativeSizes, top } =
+        data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
       const fresh = false;
 
       // Rehydrate main area.
-      const mainArea = this._rehydrateMainArea(main);
+      let mainArea: ILabShell.IMainArea | null = null;
+      if (this._mode === 'multiple-document') {
+        mainArea = this._rehydrateMainArea(main);
+      } else {
+        this._deferredMainArea = main;
+      }
 
       // Rehydrate down area.
       const downArea = this._rehydrateDownArea(down);
@@ -202,7 +218,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         downArea,
         leftArea,
         rightArea,
-        relativeSizes: relativeSizes || null
+        relativeSizes: relativeSizes || null,
+        topArea: (top as any) ?? null
       };
     } catch (error) {
       return blank;
@@ -216,22 +233,17 @@ export class LayoutRestorer implements ILayoutRestorer {
    *
    * @param options - The restoration options.
    */
-  restore(
+  async restore(
     tracker: WidgetTracker,
     options: IRestorer.IOptions<Widget>
   ): Promise<any> {
-    const warning = 'restore() can only be called before `first` has resolved.';
-
     if (this._firstDone) {
-      console.warn(warning);
-      return Promise.reject(warning);
+      throw new Error('restore() must be called before `first` has resolved.');
     }
 
     const { namespace } = tracker;
     if (this._trackers.has(namespace)) {
-      const warning = `A tracker namespaced ${namespace} was already restored.`;
-      console.warn(warning);
-      return Promise.reject(warning);
+      throw new Error(`The tracker "${namespace}" is already restored.`);
     }
 
     const { args, command, name, when } = options;
@@ -258,27 +270,60 @@ export class LayoutRestorer implements ILayoutRestorer {
     });
 
     const first = this._first;
-    const promise = tracker
-      .restore({
-        args: args || (() => JSONExt.emptyObject),
-        command,
-        connector: this._connector,
-        name,
-        registry: this._registry,
-        when: when ? [first].concat(when) : first
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    if (this._mode == 'multiple-document') {
+      const promise = tracker
+        .restore({
+          args: args || (() => JSONExt.emptyObject),
+          command,
+          connector: this._connector,
+          name,
+          registry: this._registry,
+          when: when ? [first].concat(when) : first
+        })
+        .catch(error => {
+          console.error(error);
+        });
 
-    this._promises.push(promise);
-    return promise;
+      this._promises.push(promise);
+
+      return promise;
+    }
+
+    tracker.defer({
+      args: args || (() => JSONExt.emptyObject),
+      command,
+      connector: this._connector,
+      name,
+      registry: this._registry,
+      when: when ? [first].concat(when) : first
+    });
+    this._deferred.push(tracker);
+  }
+
+  /**
+   * Restore the application layout if its restoration has been deferred.
+   *
+   * @returns - the rehydrated main area.
+   */
+  async restoreDeferred(): Promise<ILabShell.IMainArea | null> {
+    if (!this.isDeferred) {
+      return null;
+    }
+
+    // Empty the deferred list and wait for all trackers to restore.
+    const wait = Promise.resolve();
+    const promises = this._deferred.map(t => wait.then(() => t.restore()));
+    this._deferred.length = 0;
+    await Promise.all(promises);
+
+    // Rehydrate the main area layout.
+    return this._rehydrateMainArea(this._deferredMainArea);
   }
 
   /**
    * Save the layout state for the application.
    */
-  save(data: ILabShell.ILayout): Promise<void> {
+  save(layout: ILabShell.ILayout): Promise<void> {
     // If there are promises that are unresolved, bail.
     if (!this._promisesDone) {
       const warning = 'save() was called prematurely.';
@@ -287,11 +332,16 @@ export class LayoutRestorer implements ILayoutRestorer {
     }
 
     const dehydrated: Private.ILayout = {};
-    dehydrated.main = this._dehydrateMainArea(data.mainArea);
-    dehydrated.down = this._dehydrateDownArea(data.downArea);
-    dehydrated.left = this._dehydrateSideArea(data.leftArea);
-    dehydrated.right = this._dehydrateSideArea(data.rightArea);
-    dehydrated.relativeSizes = data.relativeSizes;
+
+    // Save the cached main area layout if restoration is deferred.
+    dehydrated.main = this.isDeferred
+      ? this._deferredMainArea
+      : this._dehydrateMainArea(layout.mainArea);
+    dehydrated.down = this._dehydrateDownArea(layout.downArea);
+    dehydrated.left = this._dehydrateSideArea(layout.leftArea);
+    dehydrated.right = this._dehydrateSideArea(layout.rightArea);
+    dehydrated.relativeSizes = layout.relativeSizes;
+    dehydrated.top = { ...layout.topArea };
 
     return this._connector.save(KEY, dehydrated);
   }
@@ -309,7 +359,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized main area description object.
+   * Rehydrate a serialized main area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -355,7 +405,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   /**
-   * Reydrate a serialized side area description object.
+   * Rehydrate a serialized side area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -396,7 +446,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     if (!area) {
       return null;
     }
-    const dehydrated: Private.ISideArea = { collapsed: area.collapsed };
+    const dehydrated: Private.ISideArea = {
+      collapsed: area.collapsed,
+      visible: area.visible
+    };
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
       if (current) {
@@ -408,11 +461,19 @@ export class LayoutRestorer implements ILayoutRestorer {
         .map(widget => Private.nameProperty.get(widget))
         .filter(name => !!name);
     }
+    if (area.widgetStates) {
+      dehydrated.widgetStates = area.widgetStates as {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      };
+    }
     return dehydrated;
   }
 
   /**
-   * Reydrate a serialized side area description object.
+   * Rehydrate a serialized side area description object.
    *
    * #### Notes
    * This function consumes data that can become corrupted, so it uses type
@@ -422,7 +483,18 @@ export class LayoutRestorer implements ILayoutRestorer {
     area?: Private.ISideArea | null
   ): ILabShell.ISideArea {
     if (!area) {
-      return { collapsed: true, currentWidget: null, widgets: null };
+      return {
+        collapsed: true,
+        currentWidget: null,
+        visible: true,
+        widgets: null,
+        widgetStates: {
+          ['null']: {
+            sizes: null,
+            expansionStates: null
+          }
+        }
+      };
     }
     const internal = this._widgets;
     const collapsed = area.collapsed ?? false;
@@ -437,10 +509,18 @@ export class LayoutRestorer implements ILayoutRestorer {
             internal.has(`${name}`) ? internal.get(`${name}`) : null
           )
           .filter(widget => !!widget);
+    const widgetStates = area.widgetStates as {
+      [id: string]: {
+        sizes: number[] | null;
+        expansionStates: boolean[] | null;
+      };
+    };
     return {
       collapsed,
       currentWidget: currentWidget!,
-      widgets: widgets as Widget[] | null
+      widgets: widgets as Widget[] | null,
+      visible: area.visible ?? true,
+      widgetStates: widgetStates
     };
   }
 
@@ -453,6 +533,8 @@ export class LayoutRestorer implements ILayoutRestorer {
   }
 
   private _connector: IDataConnector<ReadonlyPartialJSONValue>;
+  private _deferred = new Array<WidgetTracker>();
+  private _deferredMainArea?: Private.IMainArea | null = null;
   private _first: Promise<any>;
   private _firstDone = false;
   private _promisesDone = false;
@@ -461,6 +543,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   private _registry: CommandRegistry;
   private _trackers = new Set<string>();
   private _widgets = new Map<string, Widget>();
+  private _mode: DockPanel.Mode = 'multiple-document';
 }
 
 /**
@@ -488,6 +571,11 @@ export namespace LayoutRestorer {
      * The application command registry.
      */
     registry: CommandRegistry;
+
+    /**
+     * The DockPanel mode.
+     */
+    mode?: DockPanel.Mode;
   }
 }
 
@@ -528,6 +616,11 @@ namespace Private {
      * The relatives sizes of the areas of the user interface.
      */
     relativeSizes?: number[] | null;
+
+    /**
+     * The restorable description of the top area in the user interface.
+     */
+    top?: ITopArea | null;
   }
 
   /**
@@ -565,6 +658,11 @@ namespace Private {
     current?: string | null;
 
     /**
+     * A flag denoting whether the side tab bar is visible.
+     */
+    visible?: boolean | null;
+
+    /**
      * The collection of widgets held by the sidebar.
      */
     widgets?: Array<string> | null;
@@ -588,6 +686,16 @@ namespace Private {
      * The index of the selected tab.
      */
     currentIndex: number;
+  }
+
+  /**
+   * The restorable description of the top area in the user interface.
+   */
+  export interface ITopArea extends PartialJSONObject {
+    /**
+     * Top area visibility in simple mode.
+     */
+    readonly simpleVisibility?: boolean;
   }
 
   /**

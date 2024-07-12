@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../application"
@@ -19,10 +19,25 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../completer"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../docmanager"
+    },
+    {
+      "path": "../docmanager-extension"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
     },
     {
       "path": "../filebrowser"
@@ -34,7 +49,13 @@
       "path": "../logconsole"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../metadataform"
     },
     {
       "path": "../nbformat"
@@ -62,6 +83,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"

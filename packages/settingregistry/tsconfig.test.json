@@ -3,16 +3,16 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../statedb"
     },
     {
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../statedb"
+      "path": "../testing"
     }
   ]
 }

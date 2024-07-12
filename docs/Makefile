@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 # Minimal makefile for Sphinx documentation
 #
 
@@ -21,5 +24,5 @@ help:
 
 clean:
 	# clean api build as well
-	-rm -rf "$(SOURCEDIR)/../api"
+	-rm -rf "$(SOURCEDIR)/api"
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

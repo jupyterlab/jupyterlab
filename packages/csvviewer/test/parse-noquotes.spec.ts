@@ -19,18 +19,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(4);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        9,
-        11,
-        13,
-        15,
-        18,
-        20,
-        22,
-        24
+        0, 2, 4, 6, 9, 11, 13, 15, 18, 20, 22, 24
       ]);
     });
 
@@ -49,18 +38,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(4);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        8,
-        10,
-        12,
-        14,
-        16,
-        18,
-        20,
-        22
+        0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
       ]);
     });
 
@@ -92,18 +70,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(4);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        8,
-        10,
-        12,
-        14,
-        16,
-        18,
-        20,
-        22
+        0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
       ]);
     });
 
@@ -165,18 +132,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(4);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        8,
-        10,
-        10,
-        10,
-        11,
-        13,
-        15,
-        17
+        0, 2, 4, 6, 8, 10, 10, 10, 11, 13, 15, 17
       ]);
     });
 
@@ -193,18 +149,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(4);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        9,
-        11,
-        11,
-        11,
-        13,
-        15,
-        17,
-        19
+        0, 2, 4, 6, 9, 11, 11, 11, 13, 15, 17, 19
       ]);
     });
 
@@ -221,21 +166,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(5);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        7,
-        8,
-        10,
-        10,
-        10,
-        10,
-        11,
-        13,
-        15,
-        17,
-        19
+        0, 2, 4, 6, 7, 8, 10, 10, 10, 10, 11, 13, 15, 17, 19
       ]);
     });
 
@@ -252,21 +183,7 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.nrows).toEqual(3);
       expect(results.ncols).toEqual(5);
       expect(results.offsets).toEqual([
-        0,
-        2,
-        4,
-        6,
-        7,
-        9,
-        11,
-        11,
-        11,
-        11,
-        13,
-        15,
-        17,
-        19,
-        21
+        0, 2, 4, 6, 7, 9, 11, 11, 11, 11, 13, 15, 17, 19, 21
       ]);
     });
 

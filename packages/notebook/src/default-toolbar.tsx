@@ -2,17 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  addToolbarButtonClass,
+  Toolbar as AppToolbar,
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
-  ReactWidget,
-  sessionContextDialogs,
-  showDialog,
-  Toolbar,
-  ToolbarButton,
-  ToolbarButtonComponent,
-  UseSignal
+  SessionContextDialogs,
+  showDialog
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
@@ -23,15 +18,20 @@ import {
 } from '@jupyterlab/translation';
 import {
   addIcon,
+  addToolbarButtonClass,
   copyIcon,
   cutIcon,
   fastForwardIcon,
   HTMLSelect,
   pasteIcon,
+  ReactWidget,
   runIcon,
-  saveIcon
+  saveIcon,
+  Toolbar,
+  ToolbarButton,
+  ToolbarButtonComponent,
+  UseSignal
 } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
@@ -53,27 +53,31 @@ const TOOLBAR_CELLTYPE_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createSaveButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     function onClick() {
       if (panel.context.model.readOnly) {
         return showDialog({
           title: trans.__('Cannot Save'),
           body: trans.__('Document is read-only'),
-          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+          buttons: [Dialog.okButton()]
         });
       }
-      void panel.context.save(true).then(() => {
+      void panel.context.save().then(() => {
         if (!panel.isDisposed) {
           return panel.context.createCheckpoint();
         }
       });
     }
-    return addToolbarButtonClass(
+
+    return addToolbarButtonClass<ReactWidget>(
       ReactWidget.create(
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
@@ -100,11 +104,14 @@ export namespace ToolbarItems {
 
   /**
    * Create an insert toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createInsertButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: addIcon,
@@ -117,11 +124,14 @@ export namespace ToolbarItems {
 
   /**
    * Create a cut toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createCutButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: cutIcon,
@@ -134,11 +144,14 @@ export namespace ToolbarItems {
 
   /**
    * Create a copy toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createCopyButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: copyIcon,
@@ -151,11 +164,14 @@ export namespace ToolbarItems {
 
   /**
    * Create a paste toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createPasteButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: pasteIcon,
@@ -168,40 +184,56 @@ export namespace ToolbarItems {
 
   /**
    * Create a run toolbar item.
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createRunButton(
     panel: NotebookPanel,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
-  ): Widget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
+  ): ReactWidget {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: runIcon,
       onClick: () => {
-        void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
+        void NotebookActions.runAndAdvance(
+          panel.content,
+          panel.sessionContext,
+          sessionDialogs,
+          translator
+        );
       },
       tooltip: trans.__('Run the selected cells and advance')
     });
   }
   /**
    * Create a restart run all toolbar item
+   *
+   * @deprecated since v3.2
+   * This is dead code now.
    */
   export function createRestartRunAllButton(
     panel: NotebookPanel,
     dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
-  ): Widget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
+  ): ReactWidget {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
-        void (dialogs ?? sessionContextDialogs)
-          .restart(panel.sessionContext, translator)
-          .then(restarted => {
-            if (restarted) {
-              void NotebookActions.runAll(panel.content, panel.sessionContext);
-            }
-            return restarted;
-          });
+        const dialogs_ = dialogs ?? new SessionContextDialogs({ translator });
+        void dialogs_.restart(panel.sessionContext).then(restarted => {
+          if (restarted) {
+            void NotebookActions.runAll(
+              panel.content,
+              panel.sessionContext,
+              dialogs_,
+              translator
+            );
+          }
+          return restarted;
+        });
       },
       tooltip: trans.__('Restart the kernel, then re-run the whole notebook')
     });
@@ -221,12 +253,14 @@ export namespace ToolbarItems {
   export function createCellTypeItem(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     return new CellTypeSwitcher(panel.content, translator);
   }
 
   /**
    * Get the default toolbar items for panel
+   *
+   * @deprecated since v4
    */
   export function getDefaultItems(
     panel: NotebookPanel,
@@ -239,14 +273,20 @@ export namespace ToolbarItems {
       { name: 'cut', widget: createCutButton(panel, translator) },
       { name: 'copy', widget: createCopyButton(panel, translator) },
       { name: 'paste', widget: createPasteButton(panel, translator) },
-      { name: 'run', widget: createRunButton(panel, translator) },
+      {
+        name: 'run',
+        widget: createRunButton(panel, sessionDialogs, translator)
+      },
       {
         name: 'interrupt',
-        widget: Toolbar.createInterruptButton(panel.sessionContext, translator)
+        widget: AppToolbar.createInterruptButton(
+          panel.sessionContext,
+          translator
+        )
       },
       {
         name: 'restart',
-        widget: Toolbar.createRestartButton(
+        widget: AppToolbar.createRestartButton(
           panel.sessionContext,
           sessionDialogs,
           translator
@@ -260,15 +300,11 @@ export namespace ToolbarItems {
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
-        widget: Toolbar.createKernelNameItem(
+        widget: AppToolbar.createKernelNameItem(
           panel.sessionContext,
           sessionDialogs,
           translator
         )
-      },
-      {
-        name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.sessionContext, translator)
       }
     ];
   }
@@ -316,7 +352,7 @@ export class CellTypeSwitcher extends ReactWidget {
     }
   };
 
-  render() {
+  render(): JSX.Element {
     let value = '-';
     if (this._notebook.activeCell) {
       value = this._notebook.activeCell.model.type;

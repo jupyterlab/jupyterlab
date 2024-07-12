@@ -1,5 +1,7 @@
 # project files
 coverage/
+.eslintcache
+.stylelintcache
 
 dev_mode/listings
 dev_mode/schemas
@@ -9,7 +11,10 @@ dev_mode/workspaces
 dev_mode/stats.json
 
 docs/_build
-docs/api
+docs/source/user/commands_list.md
+docs/source/extension/plugins_list.rst
+docs/source/extension/tokens_list.rst
+docs/source/api
 **/docs/source/_build
 
 examples/app/build
@@ -20,6 +25,7 @@ examples/federated/labextensions
 
 junit.xml
 
+jupyterlab/galata/@jupyterlab
 jupyterlab/geckodriver
 jupyterlab/static
 jupyterlab/schemas
@@ -28,9 +34,12 @@ jupyterlab/style.js
 jupyterlab/tests/**/static
 jupyterlab/tests/**/labextension
 
+ui-tests/test-output
+
 # Remove after next release
 jupyterlab/imports.css
 
+packages/codemirror/test/foo*.js
 packages/nbconvert-css/style/
 packages/services/examples/node/config.json
 packages/services/examples/browser/tmp
@@ -39,6 +48,14 @@ packages/theme-*/static
 tests/**/coverage
 tests/**/.cache-loader
 
+# galata
+galata/benchmark-results
+galata/playwright-report
+galata/test-results
+galata/*benchmark-expected.json
+
+package_json.tar.gz
+
 # javascript/typescript
 lib
 node_modules
@@ -46,7 +63,6 @@ node_modules
 *.tsbuildinfo
 lerna-debug.log
 yarn-error.log
-storybook-static
 
 # python
 .cache
@@ -58,6 +74,7 @@ __pycache__
 pip-wheel-metadata
 Pipfile
 Pipfile.lock
+venv/
 
 # xeus-python debug logs
 xpython_debug_logs
@@ -96,6 +113,16 @@ iframe_figures/
 lerna-debug.log
 yarn-error.log
 
+# yarn >=2.x local files
+.yarn/*
+.pnp.*
+jupyterlab/staging/.yarn/*
+jupyterlab/staging/.pnp.*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.yarn/*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.pnp/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.yarn/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.pnp/*
+
 # copied changelog file
 docs/source/getting_started/changelog.md
 
@@ -110,10 +137,14 @@ junit.xml
 # ms IDE stuff
 *.code-workspace
 .history
-.vscode
+.vscode/*
+!.vscode/extension.json
 
-ui-tests/test-output
-ui-tests/jlab_root
-
-package_json.tar.gz
 .jupyter_releaser_checkout
+
+# generated LSP interfaces
+packages/lsp/src/_*
+
+# generated reports
+webpack-bundle-analyzer.html
+examples/**/test-results/

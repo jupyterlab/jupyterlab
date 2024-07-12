@@ -1,12 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Styling } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { each } from '@lumino/algorithm';
+import { Styling } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import type { CSVViewer } from './widget';
 
 /**
  * The class name added to a csv toolbar widget.
@@ -28,15 +27,11 @@ export class CSVDelimiter extends Widget {
    * Construct a new csv table widget.
    */
   constructor(options: CSVToolbar.IOptions) {
-    super({ node: Private.createNode(options.selected, options.translator) });
+    super({
+      node: Private.createNode(options.widget.delimiter, options.translator)
+    });
+    this._widget = options.widget;
     this.addClass(CSV_DELIMITER_CLASS);
-  }
-
-  /**
-   * A signal emitted when the delimiter selection has changed.
-   */
-  get delimiterChanged(): ISignal<this, string> {
-    return this._delimiterChanged;
   }
 
   /**
@@ -59,7 +54,7 @@ export class CSVDelimiter extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'change':
-        this._delimiterChanged.emit(this.selectNode.value);
+        this._widget.delimiter = this.selectNode.value;
         break;
       default:
         break;
@@ -80,7 +75,7 @@ export class CSVDelimiter extends Widget {
     this.selectNode.removeEventListener('change', this);
   }
 
-  private _delimiterChanged = new Signal<this, string>(this);
+  protected _widget: CSVViewer;
 }
 
 /**
@@ -92,9 +87,9 @@ export namespace CSVToolbar {
    */
   export interface IOptions {
     /**
-     * The initially selected delimiter.
+     * Document widget for this toolbar
      */
-    selected: string;
+    widget: CSVViewer;
 
     /**
      * The application language translator.
@@ -131,7 +126,7 @@ namespace Private {
     const select = document.createElement('select');
     label.textContent = trans.__('Delimiter: ');
     label.className = CSV_DELIMITER_LABEL_CLASS;
-    each(delimiters, ([delimiter, label]) => {
+    for (const [delimiter, label] of delimiters) {
       const option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
@@ -139,7 +134,7 @@ namespace Private {
         option.selected = true;
       }
       select.appendChild(option);
-    });
+    }
     div.appendChild(label);
     const node = Styling.wrapSelect(select);
     node.classList.add(CSV_DELIMITER_DROPDOWN_CLASS);

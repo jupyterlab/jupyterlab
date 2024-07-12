@@ -5,7 +5,7 @@ import { ContentsManager } from '@jupyterlab/services';
 
 import { log } from './log';
 
-export async function main() {
+export async function main(): Promise<void> {
   const contents = new ContentsManager();
 
   log('Create a new directory');

@@ -11,5 +11,7 @@ export {
   IDebugger,
   IDebuggerConfig,
   IDebuggerSources,
-  IDebuggerSidebar
+  IDebuggerSidebar,
+  IDebuggerHandler,
+  IDebuggerSourceViewer
 } from './tokens';

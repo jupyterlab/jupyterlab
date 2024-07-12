@@ -33,34 +33,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

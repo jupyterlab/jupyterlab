@@ -1,16 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Context } from '@jupyterlab/docregistry';
-import { Mock, NBTestUtils } from '@jupyterlab/testutils';
-import { UUID } from '@lumino/coreutils';
+import { ISessionContext } from '@jupyterlab/apputils';
+import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
+import { INotebookContent } from '@jupyterlab/nbformat';
 import {
   INotebookModel,
   Notebook,
-  NotebookModel,
-  NotebookModelFactory,
-  NotebookPanel
-} from '../src';
+  NotebookPanel,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import * as defaultContent45 from './default-45.json';
+import * as emptyContent from './empty.json';
+
+export { DEFAULT_CONTENT } from '@jupyterlab/notebook/lib/testutils';
+export const DEFAULT_CONTENT_45: INotebookContent = defaultContent45;
+export const EMPTY_CONTENT: INotebookContent = emptyContent;
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.
@@ -20,29 +26,21 @@ import {
  * Create a default notebook content factory.
  */
 export function createNotebookFactory(): Notebook.IContentFactory {
-  return new Notebook.ContentFactory({
-    editorFactory: NBTestUtils.editorFactory
-  });
+  return NBTestUtils.createNotebookFactory();
 }
 
 /**
  * Create a default notebook panel content factory.
  */
 export function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
-  return new NotebookPanel.ContentFactory({
-    editorFactory: NBTestUtils.editorFactory
-  });
+  return NBTestUtils.createNotebookPanelFactory();
 }
 
 /**
  * Create a notebook widget.
  */
-export function createNotebook(): Notebook {
-  return new Notebook({
-    rendermime: NBTestUtils.defaultRenderMime(),
-    contentFactory: createNotebookFactory(),
-    mimeTypeService: NBTestUtils.mimeTypeService
-  });
+export function createNotebook(sessionContext?: ISessionContext): Notebook {
+  return NBTestUtils.createNotebook(sessionContext);
 }
 
 /**
@@ -51,30 +49,29 @@ export function createNotebook(): Notebook {
 export function createNotebookPanel(
   context: Context<INotebookModel>
 ): NotebookPanel {
-  return new NotebookPanel({
-    content: createNotebook(),
-    context
-  });
+  return NBTestUtils.createNotebookPanel(context);
 }
 
 /**
  * Populate a notebook with default content.
  */
 export function populateNotebook(notebook: Notebook): void {
-  const model = new NotebookModel();
-  model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-  notebook.model = model;
+  NBTestUtils.populateNotebook(notebook);
 }
 
-export const DEFAULT_CONTENT = NBTestUtils.DEFAULT_CONTENT;
-export const DEFAULT_CONTENT_45 = NBTestUtils.DEFAULT_CONTENT_45;
 export const editorFactory = NBTestUtils.editorFactory;
 export const mimeTypeService = NBTestUtils.mimeTypeService;
 export const defaultEditorConfig = NBTestUtils.defaultEditorConfig;
 export const clipboard = NBTestUtils.clipboard;
 
-export function defaultRenderMime() {
+export function defaultRenderMime(): any {
   return NBTestUtils.defaultRenderMime();
+}
+
+export function createNotebookWidgetFactory(
+  toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
+): NotebookWidgetFactory {
+  return NBTestUtils.createNotebookWidgetFactory(toolbarFactory);
 }
 
 /**
@@ -83,21 +80,5 @@ export function defaultRenderMime() {
 export async function createMockContext(
   startKernel = false
 ): Promise<Context<INotebookModel>> {
-  const path = UUID.uuid4() + '.txt';
-  const manager = new Mock.ServiceManagerMock();
-  const factory = new NotebookModelFactory({});
-
-  const context = new Context({
-    manager,
-    factory,
-    path,
-    kernelPreference: {
-      shouldStart: startKernel,
-      canStart: startKernel,
-      autoStartDefault: startKernel
-    }
-  });
-  await context.initialize(true);
-  await context.sessionContext.initialize();
-  return context;
+  return NBTestUtils.createMockContext(startKernel);
 }

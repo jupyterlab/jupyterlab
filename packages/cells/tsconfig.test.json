@@ -18,6 +18,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../filebrowser"
     },
     {
@@ -36,7 +39,10 @@
       "path": "../services"
     },
     {
-      "path": "../shared-models"
+      "path": "../toc"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"
@@ -45,46 +51,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../attachments"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../codemirror"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../filebrowser"
-    },
-    {
-      "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
-    },
-    {
-      "path": "../outputarea"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../shared-models"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

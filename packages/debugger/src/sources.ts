@@ -2,25 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
-
-import {
-  CodeEditor,
-  CodeEditorWrapper,
-  IEditorServices
-} from '@jupyterlab/codeeditor';
-
+import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
-
 import { IEditorTracker } from '@jupyterlab/fileeditor';
-
 import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { textEditorIcon } from '@jupyterlab/ui-components';
-
-import { each } from '@lumino/algorithm';
-
 import { IDebugger } from './tokens';
 
 /**
@@ -50,7 +37,7 @@ export class DebuggerSources implements IDebugger.ISources {
    *
    * @param params - The editor search parameters.
    */
-  find(params: IDebugger.ISources.FindParams): CodeEditor.IEditor[] {
+  find(params: IDebugger.ISources.FindParams): IDebugger.ISources.IEditor[] {
     return [
       ...this._findInConsoles(params),
       ...this._findInEditors(params),
@@ -74,7 +61,7 @@ export class DebuggerSources implements IDebugger.ISources {
     widget.title.closable = true;
     widget.title.caption = caption;
     widget.title.icon = textEditorIcon;
-    this._shell.add(widget, 'main');
+    this._shell.add(widget, 'main', { type: 'Debugger Sources' });
     void this._readOnlyEditorTracker.add(widget);
   }
 
@@ -85,13 +72,13 @@ export class DebuggerSources implements IDebugger.ISources {
    */
   private _findInNotebooks(
     params: IDebugger.ISources.FindParams
-  ): CodeEditor.IEditor[] {
+  ): IDebugger.ISources.IEditor[] {
     if (!this._notebookTracker) {
       return [];
     }
     const { focus, kernel, path, source } = params;
 
-    const editors: CodeEditor.IEditor[] = [];
+    const editors: IDebugger.ISources.IEditor[] = [];
     this._notebookTracker.forEach(notebookPanel => {
       const sessionContext = notebookPanel.sessionContext;
 
@@ -107,7 +94,7 @@ export class DebuggerSources implements IDebugger.ISources {
       const cells = notebookPanel.content.widgets;
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
-        const code = cell.model.value.text;
+        const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
           return;
@@ -118,13 +105,22 @@ export class DebuggerSources implements IDebugger.ISources {
         if (focus) {
           notebook.activeCellIndex = i;
           if (notebook.activeCell) {
-            const node = notebook.activeCell.inputArea.node;
-            const rect = node.getBoundingClientRect();
-            notebook.scrollToPosition(rect.bottom, 45);
+            notebook
+              .scrollToItem(notebook.activeCellIndex, 'smart')
+              .catch(reason => {
+                // no-op
+              });
           }
           this._shell.activateById(notebookPanel.id);
         }
-        editors.push(cell.editor);
+
+        editors.push(
+          Object.freeze({
+            get: () => cell.editor,
+            reveal: () => notebook.scrollToItem(i, 'smart'),
+            src: cell.model.sharedModel
+          })
+        );
       });
     });
     return editors;
@@ -137,13 +133,13 @@ export class DebuggerSources implements IDebugger.ISources {
    */
   private _findInConsoles(
     params: IDebugger.ISources.FindParams
-  ): CodeEditor.IEditor[] {
+  ): IDebugger.ISources.IEditor[] {
     if (!this._consoleTracker) {
       return [];
     }
     const { focus, kernel, path, source } = params;
 
-    const editors: CodeEditor.IEditor[] = [];
+    const editors: IDebugger.ISources.IEditor[] = [];
     this._consoleTracker.forEach(consoleWidget => {
       const sessionContext = consoleWidget.sessionContext;
 
@@ -152,20 +148,29 @@ export class DebuggerSources implements IDebugger.ISources {
       }
 
       const cells = consoleWidget.console.cells;
-      each(cells, cell => {
-        const code = cell.model.value.text;
+      for (const cell of cells) {
+        const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
-          return;
+          break;
         }
         if (source !== codeId) {
-          return;
+          break;
         }
-        editors.push(cell.editor);
+
+        editors.push(
+          Object.freeze({
+            get: () => cell.editor,
+            reveal: () =>
+              Promise.resolve(this._shell.activateById(consoleWidget.id)),
+            src: cell.model.sharedModel
+          })
+        );
+
         if (focus) {
           this._shell.activateById(consoleWidget.id);
         }
-      });
+      }
     });
     return editors;
   }
@@ -177,13 +182,13 @@ export class DebuggerSources implements IDebugger.ISources {
    */
   private _findInEditors(
     params: IDebugger.ISources.FindParams
-  ): CodeEditor.IEditor[] {
+  ): IDebugger.ISources.IEditor[] {
     if (!this._editorTracker) {
       return [];
     }
     const { focus, kernel, path, source } = params;
 
-    const editors: CodeEditor.IEditor[] = [];
+    const editors: IDebugger.ISources.IEditor[] = [];
     this._editorTracker.forEach(doc => {
       const fileEditor = doc.content;
       if (path !== fileEditor.context.path) {
@@ -195,7 +200,7 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const code = editor.model.value.text;
+      const code = editor.model.sharedModel.getSource();
       const codeId = this._getCodeId(code, kernel);
       if (!codeId) {
         return;
@@ -203,7 +208,14 @@ export class DebuggerSources implements IDebugger.ISources {
       if (source !== codeId) {
         return;
       }
-      editors.push(editor);
+      editors.push(
+        Object.freeze({
+          get: () => editor,
+          reveal: () => Promise.resolve(this._shell.activateById(doc.id)),
+          src: fileEditor.model.sharedModel
+        })
+      );
+
       if (focus) {
         this._shell.activateById(doc.id);
       }
@@ -218,17 +230,17 @@ export class DebuggerSources implements IDebugger.ISources {
    */
   private _findInReadOnlyEditors(
     params: IDebugger.ISources.FindParams
-  ): CodeEditor.IEditor[] {
+  ): IDebugger.ISources.IEditor[] {
     const { focus, kernel, source } = params;
 
-    const editors: CodeEditor.IEditor[] = [];
+    const editors: IDebugger.ISources.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
       const editor = widget.content?.editor;
       if (!editor) {
         return;
       }
 
-      const code = editor.model.value.text;
+      const code = editor.model.sharedModel.getSource();
       const codeId = this._getCodeId(code, kernel);
       if (!codeId) {
         return;
@@ -237,7 +249,13 @@ export class DebuggerSources implements IDebugger.ISources {
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
-      editors.push(editor);
+      editors.push(
+        Object.freeze({
+          get: () => editor,
+          reveal: () => Promise.resolve(this._shell.activateById(widget.id)),
+          src: editor.model.sharedModel
+        })
+      );
       if (focus) {
         this._shell.activateById(widget.id);
       }

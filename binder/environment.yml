@@ -1,13 +1,59 @@
-name: example-environment
+name: jupyterlab-dev
+
 channels:
   - conda-forge
+  - nodefaults
+
 dependencies:
-  - jupyterlab-link-share=0.2
+  # runtimes
+  - nodejs >=20,<21
+  - python =3.11
+  # package managers
+  - pip
+  - yarn >=3,<4
+  # build
+  - hatch-jupyter-builder >=0.3.2
+  - hatchling >=1.5.0
+  # run
+  - async-lru >=1.0.0
+  - httpx >=0.25.0
+  - ipykernel
+  - jinja2 >=3.0.3
+  - jupyter_core
+  - jupyter_server >=2.4.0,<3
+  - jupyter-lsp >=2.0.0
+  - jupyterlab_server >=2.19.0,<3
+  - notebook-shim >=0.2
+  - packaging
+  - tornado >=6.2.0
+  - traitlets >=5.10.1
+  # test
+  - coverage
+  - pytest >=7.0
+  - pytest-check-links >=0.7
+  - pytest-console-scripts
+  - pytest-cov
+  - pytest-jupyter-server >=0.5.3
+  - pytest-timeout
+  - pytest-tornasync
+  - requests
+  - requests-cache
+  - virtualenv
+  # dev
+  - bump2version
+  - hatch
+  - pre-commit
+  - pytest-cov
+  - python-build
+  - ruff
+  # demo
   - jupyter-server-proxy
   - matplotlib-base
-  - nodejs=14
+  - notebook >=7.0.4
   - numpy
-  - pip
-  - python=3.8
   - vega_datasets
   - xeus-python
+  # extra conda stuff
+  - jsonschema-with-format-nongpl
+  - jupyter-collaboration >= 2.0.1
+  - jupyter_events >=0.7.0

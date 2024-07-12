@@ -6,7 +6,7 @@
       {
         "command": "inspector:open",
         "selector": ".jp-Notebook",
-        "rank": 10
+        "rank": 50
       }
     ]
   },

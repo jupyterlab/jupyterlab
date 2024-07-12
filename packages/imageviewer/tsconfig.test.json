@@ -15,16 +15,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docregistry"
+      "path": "../testing"
     }
   ]
 }

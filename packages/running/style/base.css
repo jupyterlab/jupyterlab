@@ -1,18 +1,15 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 /*-----------------------------------------------------------------------------
 | Variables
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-running-button-height: 28px;
-  --jp-private-running-button-width: 48px;
   --jp-private-running-item-height: 24px;
-  --jp-private-running-shutdown-button-height: 24px;
 }
-
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
 
 .jp-RunningSessions {
   display: flex;
@@ -20,60 +17,32 @@
   min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-RunningSessions-header {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
+.jp-RunningSessions > .jp-SidePanel-toolbar::part(positioning-region) {
   justify-content: flex-end;
 }
 
 .jp-RunningSessions-section {
-  display: flex;
-  flex: 0 1 auto;
-  flex-direction: column;
+  min-height: 50px;
   overflow: auto;
-}
-
-.jp-RunningSessions-sectionHeader {
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-between;
-  height: 28px;
-  display: flex;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  margin-top: 8px;
-}
-
-.jp-RunningSessions-sectionHeader h2 {
-  flex: 0 0 auto;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: var(--jp-ui-font-size0);
-  padding: 8px 8px 8px 12px;
-  margin: 0px;
-}
-
-.jp-RunningSessions-sectionHeader .jp-ToolbarButtonComponent {
-  flex: 0 0 auto;
 }
 
 .jp-RunningSessions-sectionContainer {
-  flex: 1 1 auto;
   margin: 0;
   padding: 0;
-  overflow: auto;
 }
 
 .jp-RunningSessions-sectionList {
+  display: block;
   margin: 0;
   padding: 0;
   list-style-type: none;
+  padding-left: 14px;
 }
 
 .jp-RunningSessions-item {
@@ -82,17 +51,86 @@
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
-  padding: 0 8px 0 8px;
+  padding: 0 8px;
 }
 
 .jp-RunningSessions-item:hover {
   background-color: var(--jp-layout-color2);
+  cursor: pointer;
+}
+
+.jp-mod-running-leaf {
+  /** Account for lack of collapser */
+  margin-left: 16px;
+}
+
+.jp-RunningSessions-sectionContainer > .jp-RunningSessions-sectionList {
+  padding-left: 0;
+}
+
+.jp-RunningSessions-viewButton[aria-pressed='true'] {
+  box-shadow: none;
+}
+
+.jp-mod-running-list-view .jp-RunningSessions-sectionList {
+  padding-left: 0;
+}
+
+.jp-mod-running-list-view .jp-mod-running-leaf {
+  margin-left: 0;
+}
+
+.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernel,
+.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernelspec {
+  display: none;
+}
+
+.jp-RunningSessions-item.jp-mod-kernelspec,
+.jp-RunningSessions-item.jp-mod-kernel {
+  user-select: none;
+}
+
+.jp-RunningSessions-item-label-kernel-id {
+  color: var(--jp-ui-font-color3);
+}
+
+.jp-RunningSessions-collapseButton[aria-pressed='true'] {
+  box-shadow: none;
+}
+
+.jp-RunningSessions-icon {
+  margin: 0 4px;
+}
+
+.jp-RunningSessions-toolbar {
+  min-width: max-content;
+}
+
+img.jp-RunningSessions-icon,
+span.jp-RunningSessions-icon > svg {
+  width: 16px;
+  height: 16px;
+}
+
+img.jp-RunningSessions-icon {
+  margin-top: 4px;
+  object-fit: contain;
+}
+
+span.jp-RunningSessions-icon {
+  align-items: center;
+  display: flex;
+}
+
+span.jp-RunningSessions-icon > svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .jp-RunningSessions-itemLabel {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 55%;
-  padding: 0 4px 0 4px;
+  padding: 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -105,19 +143,30 @@
 .jp-RunningSessions-itemDetail {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 45%;
-  padding: 0 4px 0 4px;
+  padding: 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
+.jp-RunningSessions-caret {
+  align-items: center;
+  display: flex;
+  padding-right: 4px;
+}
+
+.jp-RunningSessions-caret > svg {
+  height: 16px;
+  width: 16px;
+}
+
 .jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
-  border-radius: 0px;
+  border-radius: 0;
+  margin: 0;
 }
 
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
   visibility: hidden;
-  /* display: none; */
 }
 
 .jp-RunningSessions-sectionList
@@ -126,32 +175,97 @@
   background: var(--jp-layout-color3);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled {
-  margin: 0px 8px;
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent {
   color: var(--jp-warn-color1);
-  background-color: transparent;
-  height: var(--jp-private-running-shutdown-button-height);
-  line-height: var(--jp-private-running-shutdown-button-height);
-  border-radius: 2px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled:hover {
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-RunningSessions-shutdownAll.jp-mod-styled:focus {
-  border: none;
-  box-shadow: none;
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled] {
   color: var(--jp-ui-font-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled:hover {
-  background: none;
+/*-----------------------------------------------------------------------------
+| SearchableSessions
+|----------------------------------------------------------------------------*/
+
+.jp-RunningSessions-item.jp-mod-active {
+  background-color: var(--jp-layout-color2);
+  outline: 1px solid var(--jp-brand-color1);
+  outline-offset: -2px;
+}
+
+.jp-SearchableSessions-list > .jp-RunningSessions-section {
+  min-height: auto;
+}
+
+.jp-SearchableSessions-title {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size0);
+  margin: 0;
+  padding: 4px 0;
+}
+
+.jp-SearchableSessions-titleLabel {
+  text-transform: uppercase;
+}
+
+.jp-SearchableSessions-acceptButton {
+  display: none;
+}
+
+.jp-SearchableSessions-list > .jp-RunningSessions-section.jp-mod-empty {
+  display: none;
+}
+
+.jp-SearchableSessions-filter {
+  overflow: visible;
+
+  /* Required to display correctly the filter box and its focus highlight */
+  padding: 0 2px;
+}
+
+.jp-SearchableSessions-filter > .jp-FilterBox {
+  width: 100%;
+}
+
+.jp-SearchableSessions-list {
+  overflow: auto;
+}
+
+.jp-SearchableSessions.jp-Dialog-body {
+  display: flex;
+}
+
+.jp-SearchableSessions-modal .jp-Dialog-content {
+  padding: 16px;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  min-height: 100px;
+  max-height: 95%;
+}
+
+.jp-SearchableSessions-modal .jp-Dialog-footer {
+  display: none;
+}
+
+.jp-SearchableSessions-modal .jp-Dialog-header {
+  font-size: var(--jp-ui-font-size2);
+}
+
+.jp-SearchableSessions-modal.jp-Dialog {
+  background: transparent;
+  justify-content: start;
+  padding-top: 38px;
+  border: 0;
+}
+
+.jp-SearchableSessions-emptyIndicator {
+  color: var(--jp-ui-font-color2);
+  padding: 16px;
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+.jp-RunningSessions-section:not(.jp-mod-empty)
+  ~ .jp-SearchableSessions-emptyIndicator {
+  display: none;
 }

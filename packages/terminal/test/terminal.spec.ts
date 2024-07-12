@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { TerminalManager, Terminal as TerminalNS } from '@jupyterlab/services';
-import {
-  framePromise,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
+import { framePromise, JupyterServer, testEmission } from '@jupyterlab/testing';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Terminal } from '../src';
@@ -15,7 +11,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -70,7 +66,7 @@ describe('terminal/index', () => {
       widget = new LogTerminal(session, { autoFit: false });
       Widget.attach(widget, document.body);
       return framePromise();
-    });
+    }, 30000);
 
     afterEach(() => {
       widget.dispose();
@@ -138,8 +134,8 @@ describe('terminal/index', () => {
     });
 
     describe('#refresh()', () => {
-      it('should refresh the widget', () => {
-        return widget.refresh();
+      it('should refresh the widget', async () => {
+        await expect(widget.refresh()).resolves.not.toThrow();
       });
     });
 

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "latest",
+    "version": "latest",
+    "url": "https://jupyterlab.readthedocs.io/en/latest/"
+  },
+  {
+    "name": "stable",
+    "version": "stable",
+    "url": "https://jupyterlab.readthedocs.io/en/stable/"
+  },
+  {
+    "name": "4.1.x",
+    "version": "4.1.x",
+    "url": "https://jupyterlab.readthedocs.io/en/4.1.x/"
+  },
+  {
+    "name": "4.0.x",
+    "version": "4.0.x",
+    "url": "https://jupyterlab.readthedocs.io/en/4.0.x/"
+  },
+  {
+    "name": "3.6.x",
+    "version": "3.6.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.6.x/"
+  },
+  {
+    "name": "2.2.x",
+    "version": "2.2.x",
+    "url": "https://jupyterlab.readthedocs.io/en/2.2.x/"
+  }
+]

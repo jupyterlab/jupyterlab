@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+:root {
+  --jp-add-tag-extra-width: 8px;
+}
+
+.jp-CellTags-Tag {
+  height: 20px;
+  border-radius: 10px;
+  margin-right: 5px;
+  margin-bottom: 10px;
+  padding: 0 8px;
+  font-size: var(--jp-ui-font-size1);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  max-width: calc(100% - 25px);
+  border: 1px solid var(--jp-border-color1);
+  color: var(--jp-ui-font-color1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jp-CellTags-Unapplied {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-CellTags-Applied {
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-CellTags-Add {
+  white-space: nowrap;
+  overflow: hidden;
+  border: none;
+  outline: none;
+  resize: horizontal;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color2);
+}
+
+.jp-CellTags-Holder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jp-CellTags-Empty {
+  width: 4em;
+}

@@ -3,11 +3,9 @@
 
 import * as nbformat from '@jupyterlab/nbformat';
 import {
-  IModelDB,
   IObservableMap,
   IObservableValue,
-  ObservableMap,
-  ObservableValue
+  ObservableMap
 } from '@jupyterlab/observables';
 import {
   AttachmentModel,
@@ -106,11 +104,6 @@ export namespace IAttachmentsModel {
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
-
-    /**
-     * An optional IModelDB to store the attachments model.
-     */
-    modelDB?: IModelDB;
   }
 
   /**
@@ -136,9 +129,9 @@ export class AttachmentsModel implements IAttachmentsModel {
   /**
    * Construct a new observable outputs instance.
    */
-  constructor(options: IAttachmentsModel.IOptions = {}) {
+  constructor(options: IAttachmentsModel.IOptions) {
     this.contentFactory =
-      options.contentFactory || AttachmentsModel.defaultContentFactory;
+      options.contentFactory ?? AttachmentsModel.defaultContentFactory;
     if (options.values) {
       for (const key of Object.keys(options.values)) {
         if (options.values[key] !== undefined) {
@@ -147,19 +140,6 @@ export class AttachmentsModel implements IAttachmentsModel {
       }
     }
     this._map.changed.connect(this._onMapChanged, this);
-
-    // If we are given a IModelDB, keep an up-to-date
-    // serialized copy of the AttachmentsModel in it.
-    if (options.modelDB) {
-      this._modelDB = options.modelDB;
-      this._serialized = this._modelDB.createValue('attachments');
-      if (this._serialized.get()) {
-        this.fromJSON(this._serialized.get() as nbformat.IAttachments);
-      } else {
-        this._serialized.set(this.toJSON());
-      }
-      this._serialized.changed.connect(this._onSerializedChanged, this);
-    }
   }
 
   /**
@@ -260,7 +240,7 @@ export class AttachmentsModel implements IAttachmentsModel {
    * #### Notes
    * This will clear any existing data.
    */
-  fromJSON(values: nbformat.IAttachments) {
+  fromJSON(values: nbformat.IAttachments): void {
     this.clear();
     Object.keys(values).forEach(key => {
       if (values[key] !== undefined) {
@@ -307,21 +287,6 @@ export class AttachmentsModel implements IAttachmentsModel {
   }
 
   /**
-   * If the serialized version of the outputs have changed due to a remote
-   * action, then update the model accordingly.
-   */
-  private _onSerializedChanged(
-    sender: IObservableValue,
-    args: ObservableValue.IChangedArgs
-  ) {
-    if (!this._changeGuard) {
-      this._changeGuard = true;
-      this.fromJSON(args.newValue as nbformat.IAttachments);
-      this._changeGuard = false;
-    }
-  }
-
-  /**
    * Handle a change to an item.
    */
   private _onGenericChange(): void {
@@ -332,7 +297,6 @@ export class AttachmentsModel implements IAttachmentsModel {
   private _isDisposed = false;
   private _stateChanged = new Signal<IAttachmentsModel, void>(this);
   private _changed = new Signal<this, IAttachmentsModel.ChangedArgs>(this);
-  private _modelDB: IModelDB | null = null;
   private _serialized: IObservableValue | null = null;
   private _changeGuard = false;
 }

@@ -43,7 +43,7 @@ export interface IHTMLSelectProps
 }
 
 export class HTMLSelect extends React.Component<IHTMLSelectProps> {
-  public render() {
+  public render(): JSX.Element {
     const {
       className,
       defaultStyle = true,
@@ -63,6 +63,12 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
       className
     );
 
+    // If the HTMLSelect is integrated to a toolbar, we avoid propagating the focus
+    // to the element with tabindex=0.
+    const handleFocus = (event: React.FocusEvent) => {
+      event.stopPropagation();
+    };
+
     const optionChildren = options.map(option => {
       const props: IOptionProps =
         typeof option === 'object' ? option : { value: option };
@@ -76,6 +82,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
     return (
       <div className={cls}>
         <select
+          onFocus={handleFocus}
           disabled={disabled}
           ref={elementRef}
           {...htmlProps}
@@ -88,8 +95,8 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
           {...{
             tag: 'span',
             stylesheet: 'select',
-            right: '7px',
-            top: '5px',
+            right: '4px',
+            top: '8px',
             ...iconProps
           }}
         />

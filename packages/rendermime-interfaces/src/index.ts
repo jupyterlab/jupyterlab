@@ -7,9 +7,8 @@
  * @module rendermime-interfaces
  */
 
-import { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * A namespace for rendermime associated interfaces.
@@ -72,7 +71,13 @@ export namespace IRenderMime {
    * A toolbar item.
    */
   export interface IToolbarItem {
+    /**
+     * Unique item name
+     */
     name: string;
+    /**
+     * Toolbar widget
+     */
     widget: Widget;
   }
 
@@ -87,6 +92,12 @@ export namespace IRenderMime {
      * The name of the widget to display in dialogs.
      */
     readonly name: string;
+
+    /**
+     * The label of the widget to display in dialogs.
+     * If not given, name is used instead.
+     */
+    readonly label?: string;
 
     /**
      * The name of the document model type.
@@ -116,9 +127,14 @@ export namespace IRenderMime {
     readonly defaultRendered?: ReadonlyArray<string>;
 
     /**
+     * The application language translator.
+     */
+    readonly translator?: ITranslator;
+
+    /**
      * A function returning a list of toolbar items to add to the toolbar.
      */
-    readonly toolbarFactory?: (widget?: IRenderer) => IToolbarItem[];
+    readonly toolbarFactory?: (widget?: Widget) => IToolbarItem[];
   }
 
   export namespace LabIcon {
@@ -145,8 +161,7 @@ export namespace IRenderMime {
      */
     export interface IRenderer {
       readonly render: (container: HTMLElement, options?: any) => void;
-      // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
-      readonly unrender: (container: HTMLElement) => void;
+      readonly unrender?: (container: HTMLElement, options?: any) => void;
     }
 
     /**
@@ -187,7 +202,7 @@ export namespace IRenderMime {
 
     /**
      * The icon for the file type. Can either be a string containing the name
-     * of an existing icon, or an object with {name, svgstr} fields, where
+     * of an existing icon, or an object with \{name, svgstr\} fields, where
      * svgstr is a string containing the raw contents of an svg file.
      */
     readonly icon?: LabIcon.IResolvable;
@@ -205,7 +220,7 @@ export namespace IRenderMime {
     /**
      * The file format for the file type ('text', 'base64', or 'json').
      */
-    readonly fileFormat?: string;
+    readonly fileFormat?: string | null;
   }
 
   /**
@@ -221,6 +236,15 @@ export namespace IRenderMime {
      * `'@jupyterlab/apputils-extension:settings'` or `'foo-extension:bar'`.
      */
     readonly id: string;
+
+    /**
+     * Extension description.
+     *
+     * #### Notes
+     * This can be used to provide user documentation on the feature
+     * brought by the extension.
+     */
+    readonly description?: string;
 
     /**
      * A renderer factory to be registered to render the MIME type.
@@ -271,11 +295,6 @@ export namespace IRenderMime {
    * A widget which displays the contents of a mime model.
    */
   export interface IRenderer extends Widget {
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
-
     /**
      * Render a mime model.
      *
@@ -354,9 +373,34 @@ export namespace IRenderMime {
     latexTypesetter: ILatexTypesetter | null;
 
     /**
+     * The Markdown parser.
+     */
+    markdownParser?: IMarkdownParser | null;
+
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+
+  /**
+   * The options used to sanitize.
+   */
+  export interface ISanitizerOptions {
+    /**
+     * The allowed tags.
+     */
+    allowedTags?: string[];
+
+    /**
+     * The allowed attributes for a given tag.
+     */
+    allowedAttributes?: { [key: string]: string[] };
+
+    /**
+     * The allowed style values for a given tag.
+     */
+    allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
   }
 
   /**
@@ -364,9 +408,19 @@ export namespace IRenderMime {
    */
   export interface ISanitizer {
     /**
-     * Sanitize an HTML string.
+     * @returns Whether to replace URLs by HTML anchors.
      */
-    sanitize(dirty: string): string;
+    getAutolink?(): boolean;
+
+    /**
+     * Sanitize an HTML string.
+     *
+     * @param dirty - The dirty text.
+     * @param options - The optional sanitization options.
+     *
+     * @returns The sanitized string.
+     */
+    sanitize(dirty: string, options?: ISanitizerOptions): string;
   }
 
   /**
@@ -376,13 +430,41 @@ export namespace IRenderMime {
     /**
      * Add the link handler to the node.
      *
-     * @param node: the anchor node for which to handle the link.
+     * @param node the anchor node for which to handle the link.
      *
-     * @param path: the path to open when the link is clicked.
+     * @param path the path to open when the link is clicked.
      *
-     * @param id: an optional element id to scroll to when the path is opened.
+     * @param id an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
+    /**
+     * Add the path handler to the node.
+     *
+     * @param node the anchor node for which to handle the link.
+     *
+     * @param path the path to open when the link is clicked.
+     *
+     * @param scope the scope to which the path is bound.
+     *
+     * @param id an optional element id to scroll to when the path is opened.
+     */
+    handlePath?(
+      node: HTMLElement,
+      path: string,
+      scope: 'kernel' | 'server',
+      id?: string
+    ): void;
+  }
+
+  export interface IResolvedLocation {
+    /**
+     * Location scope.
+     */
+    scope: 'kernel' | 'server';
+    /**
+     * Resolved path.
+     */
+    path: string;
   }
 
   /**
@@ -406,12 +488,23 @@ export namespace IRenderMime {
      * Whether the URL should be handled by the resolver
      * or not.
      *
+     * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+     *
      * #### Notes
      * This is similar to the `isLocal` check in `URLExt`,
      * but can also perform additional checks on whether the
      * resolver should handle a given URL.
      */
-    isLocal?: (url: string) => boolean;
+    isLocal?: (url: string, allowRoot?: boolean) => boolean;
+
+    /**
+     * Resolve a path from Jupyter kernel to a path:
+     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - path understood and known by kernel (if such a path exists).
+     * Returns `null` if there is no file matching provided path in neither
+     * kernel nor jupyter-server contents manager.
+     */
+    resolvePath?: (path: string) => Promise<IResolvedLocation | null>;
   }
 
   /**
@@ -423,13 +516,178 @@ export namespace IRenderMime {
      *
      * @param element - the DOM element to typeset. The typesetting may
      *   happen synchronously or asynchronously.
-     *
-     * #### Notes
-     * The application-wide rendermime object has a settable
-     * `latexTypesetter` property which is used wherever LaTeX
-     * typesetting is required. Extensions wishing to provide their
-     * own typesetter may replace that on the global `lab.rendermime`.
      */
     typeset(element: HTMLElement): void;
+  }
+
+  /**
+   * The interface for a Markdown parser.
+   */
+  export interface IMarkdownParser {
+    /**
+     * Render a markdown source into unsanitized HTML.
+     *
+     * @param source - The string to render.
+     * @returns - A promise of the string containing HTML which may require sanitization.
+     */
+    render(source: string): Promise<string>;
+  }
+
+  // ********************** //
+  // Translation interfaces //
+  // ********************** //
+
+  /**
+   * Bundle of gettext-based translation functions for a specific domain.
+   */
+  export type TranslationBundle = {
+    /**
+     * Alias for `gettext` (translate strings without number inflection)
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    __(msgid: string, ...args: any[]): string;
+    /**
+     * Alias for `ngettext` (translate accounting for plural forms)
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n determines which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string;
+    /**
+     * Alias for `pgettext` (translate in given context)
+     * @param msgctxt context
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    _p(msgctxt: string, msgid: string, ...args: any[]): string;
+    /**
+     * Alias for `npgettext` (translate accounting for plural forms in given context)
+     * @param msgctxt context
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n number used to determine which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    _np(
+      msgctxt: string,
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+    /**
+     * Look up the message id in the catalog and return the corresponding message string.
+     * Otherwise, the message id is returned.
+     *
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    gettext(msgid: string, ...args: any[]): string;
+    /**
+     * Do a plural-forms lookup of a message id. msgid is used as the message id for
+     * purposes of lookup in the catalog, while n is used to determine which plural form
+     * to use. Otherwise, when n is 1 msgid is returned, and msgid_plural is returned in
+     * all other cases.
+     *
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n determines which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    ngettext(
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+    /**
+     * Look up the context and message id in the catalog and return the corresponding
+     * message string. Otherwise, the message id is returned.
+     *
+     * @param msgctxt context
+     * @param msgid message (text to translate)
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    pgettext(msgctxt: string, msgid: string, ...args: any[]): string;
+    /**
+     * Do a plural-forms lookup of a message id. msgid is used as the message id for
+     * purposes of lookup in the catalog, while n is used to determine which plural
+     * form to use. Otherwise, when n is 1 msgid is returned, and msgid_plural is
+     * returned in all other cases.
+     *
+     * @param msgctxt context
+     * @param msgid message for singular
+     * @param msgid_plural message for plural
+     * @param n number used to determine which plural form to use
+     * @param args
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    npgettext(
+      msgctxt: string,
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+
+    /**
+     * Do a plural-forms lookup of a message id. msgid is used as the message id for
+     * purposes of lookup in the catalog, while n is used to determine which plural
+     * form to use. Otherwise, when n is 1 msgid is returned, and msgid_plural is
+     * returned in all other cases.
+     *
+     * @param domain - The translations domain.
+     * @param msgctxt - The message context.
+     * @param msgid - The singular string to translate.
+     * @param msgid_plural - The plural string to translate.
+     * @param n - The number for pluralization.
+     * @param args - Any additional values to use with interpolation
+     *
+     * @returns A translated string if found, or the original string.
+     */
+    dcnpgettext(
+      domain: string,
+      msgctxt: string,
+      msgid: string,
+      msgid_plural: string,
+      n: number,
+      ...args: any[]
+    ): string;
+  };
+
+  /**
+   * Translation provider interface
+   */
+  export interface ITranslator {
+    /**
+     * The code of the language in use.
+     */
+    readonly languageCode: string;
+
+    /**
+     * Load translation bundles for a given domain.
+     *
+     * @param domain The translation domain to use for translations.
+     *
+     * @returns The translation bundle if found, or the English bundle.
+     */
+    load(domain: string): TranslationBundle;
   }
 }

@@ -3,22 +3,22 @@
   "version": "3.0.2",
   "private": true,
   "main": "index.js",
-  "scripts": {
-    "build:labextension": "jupyter labextension build .",
-    "clean": "rimraf ./test-hyphens/labextension"
-  },
-  "dependencies": {
-    "@jupyterlab/launcher": "^3.1.0-alpha.5"
-  },
-  "devDependencies": {
-    "@jupyterlab/builder": "^3.1.0-alpha.5",
-    "rimraf": "^3.0.2"
-  },
   "files": [
     "index.js"
   ],
+  "scripts": {
+    "build:labextension": "jupyter labextension build .",
+    "clean": "rimraf ./test_hyphens/labextension"
+  },
+  "dependencies": {
+    "@jupyterlab/launcher": "^4.0.0-alpha.21"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^4.0.0-alpha.21",
+    "rimraf": "~3.0.0"
+  },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "./test-hyphens/labextension"
+    "outputDir": "./test_hyphens/labextension"
   }
 }

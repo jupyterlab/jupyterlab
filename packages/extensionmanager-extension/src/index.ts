@@ -6,15 +6,18 @@
  */
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
-import { ExtensionView } from '@jupyterlab/extensionmanager';
+import { ExtensionsPanel, ListModel } from '@jupyterlab/extensionmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { extensionIcon } from '@jupyterlab/ui-components';
 
 const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';
@@ -23,6 +26,7 @@ const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';
  * IDs of the commands added by this extension.
  */
 namespace CommandIDs {
+  export const showPanel = 'extensionmanager:show-panel';
   export const toggle = 'extensionmanager:toggle';
 }
 
@@ -31,69 +35,89 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
+  description: 'Adds the extension manager plugin.',
   autoStart: true,
-  requires: [ISettingRegistry, ITranslator],
-  optional: [ILabShell, ILayoutRestorer, ICommandPalette],
+  requires: [ISettingRegistry],
+  optional: [ITranslator, ILayoutRestorer, ICommandPalette],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
-    translator: ITranslator,
-    labShell: ILabShell | null,
+    translator: ITranslator | null,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null
   ) => {
+    const { commands, shell, serviceManager } = app;
+    translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
-    const settings = await registry.load(plugin.id);
-    let enabled = settings.composite['enabled'] === true;
 
-    const { commands, serviceManager } = app;
-    let view: ExtensionView | undefined;
+    const model = new ListModel(serviceManager, translator);
 
     const createView = () => {
-      const v = new ExtensionView(app, serviceManager, settings, translator);
+      const v = new ExtensionsPanel({ model, translator: translator! });
       v.id = 'extensionmanager.main-view';
       v.title.icon = extensionIcon;
       v.title.caption = trans.__('Extension Manager');
+      v.node.setAttribute('role', 'region');
+      v.node.setAttribute('aria-label', trans.__('Extension Manager section'));
       if (restorer) {
         restorer.add(v, v.id);
       }
+      shell.add(v, 'left', { rank: 1000 });
+
       return v;
     };
 
-    if (enabled && labShell) {
-      view = createView();
-      view.node.setAttribute('role', 'region');
-      view.node.setAttribute(
-        'aria-label',
-        trans.__('Extension Manager section')
-      );
-      labShell.add(view, 'left', { rank: 1000 });
-    }
+    // Create a view by default, so it can be restored when loading the workspace.
+    let view: ExtensionsPanel | null = createView();
 
     // If the extension is enabled or disabled,
     // add or remove it from the left area.
     Promise.all([app.restored, registry.load(PLUGIN_ID)])
       .then(([, settings]) => {
+        model.isDisclaimed = settings.get('disclaimed').composite as boolean;
+        model.isEnabled = settings.get('enabled').composite as boolean;
+        model.stateChanged.connect(() => {
+          if (
+            model.isDisclaimed !==
+            (settings.get('disclaimed').composite as boolean)
+          ) {
+            settings.set('disclaimed', model.isDisclaimed).catch(reason => {
+              console.error(`Failed to set setting 'disclaimed'.\n${reason}`);
+            });
+          }
+          if (
+            model.isEnabled !== (settings.get('enabled').composite as boolean)
+          ) {
+            settings.set('enabled', model.isEnabled).catch(reason => {
+              console.error(`Failed to set setting 'enabled'.\n${reason}`);
+            });
+          }
+        });
+
+        if (model.isEnabled) {
+          view = view ?? createView();
+        } else {
+          view?.dispose();
+          view = null;
+        }
+
         settings.changed.connect(async () => {
-          enabled = settings.composite['enabled'] === true;
-          if (enabled && !view?.isAttached) {
-            const accepted = await Private.showWarning(trans);
-            if (!accepted) {
-              void settings.set('enabled', false);
-              return;
+          model.isDisclaimed = settings.get('disclaimed').composite as boolean;
+          model.isEnabled = settings.get('enabled').composite as boolean;
+          app.commands.notifyCommandChanged(CommandIDs.toggle);
+
+          if (model.isEnabled) {
+            if (view === null || !view.isAttached) {
+              const accepted = await Private.showWarning(trans);
+              if (!accepted) {
+                void settings.set('enabled', false);
+                return;
+              }
             }
-            view = view || createView();
-            view.node.setAttribute('role', 'region');
-            view.node.setAttribute(
-              'aria-label',
-              trans.__('Extension Manager section')
-            );
-            if (labShell) {
-              labShell.add(view, 'left', { rank: 1000 });
-            }
-          } else if (!enabled && view?.isAttached) {
-            app.commands.notifyCommandChanged(CommandIDs.toggle);
-            view.close();
+            view = view ?? createView();
+          } else {
+            view?.dispose();
+            view = null;
           }
         });
       })
@@ -103,21 +127,31 @@ const plugin: JupyterFrontEndPlugin<void> = {
         );
       });
 
+    commands.addCommand(CommandIDs.showPanel, {
+      label: trans.__('Extension Manager'),
+      execute: () => {
+        if (view) {
+          shell.activateById(view.id);
+        }
+      },
+      isVisible: () => model.isEnabled
+    });
+
     commands.addCommand(CommandIDs.toggle, {
       label: trans.__('Enable Extension Manager'),
       execute: () => {
         if (registry) {
-          void registry.set(plugin.id, 'enabled', !enabled);
+          void registry.set(plugin.id, 'enabled', !model.isEnabled);
         }
       },
-      isToggled: () => enabled,
-      isEnabled: () => serviceManager.builder.isAvailable
+      isToggled: () => model.isEnabled
     });
 
-    const category = trans.__('Extension Manager');
-    const command = CommandIDs.toggle;
     if (palette) {
-      palette.addItem({ command, category });
+      palette.addItem({
+        command: CommandIDs.toggle,
+        category: trans.__('Extension Manager')
+      });
     }
   }
 };
@@ -139,7 +173,7 @@ namespace Private {
   export async function showWarning(
     trans: TranslationBundle
   ): Promise<boolean> {
-    return showDialog({
+    const result = await showDialog({
       title: trans.__('Enable Extension Manager?'),
       body: trans.__(`Thanks for trying out JupyterLab's extension manager.
 The JupyterLab development team is excited to have a robust
@@ -151,8 +185,8 @@ Do you want to continue?`),
         Dialog.cancelButton({ label: trans.__('Disable') }),
         Dialog.warnButton({ label: trans.__('Enable') })
       ]
-    }).then(result => {
-      return result.button.accept;
     });
+
+    return result.button.accept;
   }
 }

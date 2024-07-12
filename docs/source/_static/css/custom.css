@@ -1,22 +1,31 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/* stylelint-disable selector-max-type */
+
+/* Navbar at the top */
+.jupyter-nav-logo {
+  padding: 0;
+}
+
+.jupyter-nav-logo img {
+  width: 30px;
+}
+
+.navbar-brand {
+  padding: 0.6em;
+}
+
+/* Save some space by making this just long enough for the text */
+nav.navbar form.bd-search {
+  width: 14em;
+}
+
+/* Text on page */
 h4 {
   font-size: 100%;
-}
-
-.wy-nav-side p.caption {
-  color: #f5f5f5;
-}
-
-div.wy-side-nav-search {
-  background: #f37626;
-}
-
-.wy-nav-content iframe {
-  margin: auto;
-  display: block;
-}
-
-.wy-breadcrumbs-aside img {
-  height: 1em !important;
 }
 
 /* Elevation
@@ -27,38 +36,45 @@ div.wy-side-nav-search {
   * https://material-components-web.appspot.com/elevation.html
   */
 
-.rst-content img.jp-screenshot {
+main img.jp-screenshot {
   border: none;
+
   /* MD Elevation 8 */
-  box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
-    0px 8px 10px 1px rgba(145, 145, 145, 0.14),
-    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(145, 145, 145, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
   margin-bottom: 24px;
 }
 
-/* 
+/*
  * The div.jp-youtube-video styling is done to get the YouTube video to size dynamically
  * to 100% of the content width.
  */
 
-.rst-content div.jp-youtube-video {
+main div.jp-youtube-video {
   position: relative;
   width: 100%;
-  height: 0px;
+  height: 0;
+
   /* This must be equal to the inverse of the aspect ratio of the video */
+
   /* The current value is: 56.25% = 315/560 */
   padding-bottom: 56.25%;
   border: none;
+
   /* MD Elevation 8 */
-  box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
-    0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
   margin-bottom: 24px;
 }
 
-.rst-content div.jp-youtube-video iframe {
+main div.jp-youtube-video iframe {
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
 }

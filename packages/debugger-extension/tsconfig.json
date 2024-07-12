@@ -13,10 +13,10 @@
       "path": "../apputils"
     },
     {
-      "path": "../codeeditor"
+      "path": "../cells"
     },
     {
-      "path": "../codemirror"
+      "path": "../codeeditor"
     },
     {
       "path": "../console"

@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _language:
 
 Localization and language
@@ -9,7 +12,7 @@ the display language of the user interface.
 Language packs
 --------------
 
-To be able to provide a new display language, you will need to 
+To be able to provide a new display language, you will need to
 install a language pack.
 
 Visit the `language packs repository <https://github.com/jupyterlab/language-packs/>`__
@@ -43,19 +46,19 @@ select the desired language in the Language submenu.
 The Language submenu will only list any previously installed language
 packs.
 
-.. image:: images/language_settings.png
+.. image:: ../images/language-settings.png
    :align: center
    :class: jp-screenshot
 
 Selecting the new language will prompt for confirmation.
 
-.. image:: images/language_change.png
+.. image:: ../images/language-change.png
    :align: center
    :class: jp-screenshot
 
 Once you accept, the browser will refresh and the interface will
 now be shown, for this example in Simplified Chinese.
 
-.. image:: images/language_chinese.png
+.. image:: ../images/language-chinese.png
    :align: center
    :class: jp-screenshot

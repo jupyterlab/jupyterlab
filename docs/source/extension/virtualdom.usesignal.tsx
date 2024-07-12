@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import * as React from 'react';
 
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
 import { ISignal, Signal } from '@lumino/signaling';
 

@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
@@ -25,7 +26,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @returns the cleaned container
    */
-  static remove(container: HTMLElement) {
+  static remove(container: HTMLElement): HTMLElement {
     // clean up all children
     while (container.firstChild) {
       container.firstChild.remove();
@@ -38,11 +39,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Resolve an icon name or a {name, svgstr} pair into an
+   * Resolve an icon name or a \{name, svgstr\} pair into an
    * actual LabIcon.
    *
-   * @param icon - either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields.
+   * @param options - icon: either a string with the name of an existing icon
+   * or an object with \{name: string, svgstr: string\} fields.
    *
    * @returns a LabIcon instance
    */
@@ -72,25 +73,25 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       return new LabIcon({ name: icon, svgstr: refreshSvgstr, _loading: true });
     }
 
-    // icon was provided as a non-LabIcon {name, svgstr} pair, communicating
+    // icon was provided as a non-LabIcon \{name, svgstr\} pair, communicating
     // an intention to create a new icon
     return new LabIcon(icon);
   }
 
   /**
-   * Resolve an icon name or a {name, svgstr} pair into a DOM element.
+   * Resolve an icon name or a \{name, svgstr\} pair into a DOM element.
    * If icon arg is undefined, the function will fall back to trying to render
    * the icon as a CSS background image, via the iconClass arg.
    * If both icon and iconClass are undefined, this function will return
    * an empty div.
    *
    * @param icon - optional, either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields
+   * or an object with \{name: string, svgstr: string\} fields
    *
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
    *
-   * @deprecated fallback - don't use, optional, a LabIcon instance that will
+   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
    * be used if neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the element method
@@ -103,7 +104,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     iconClass,
     fallback,
     ...props
-  }: Partial<LabIcon.IResolverProps> & LabIcon.IProps) {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IProps): HTMLElement {
     if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined/resolvable, use fallback
@@ -120,19 +121,19 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Resolve an icon name or a {name, svgstr} pair into a React component.
+   * Resolve an icon name or a \{name, svgstr\} pair into a React component.
    * If icon arg is undefined, the function will fall back to trying to render
    * the icon as a CSS background image, via the iconClass arg.
    * If both icon and iconClass are undefined, the returned component
    * will simply render an empty div.
    *
    * @param icon - optional, either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields
+   * or an object with \{name: string, svgstr: string\} fields
    *
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
    *
-   * @deprecated fallback - don't use, optional, a LabIcon instance that will
+   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
    * be used if neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the React component
@@ -145,7 +146,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     iconClass,
     fallback,
     ...props
-  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps) {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps): JSX.Element {
     if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined/resolvable, use fallback
@@ -163,7 +164,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Resolve a {name, svgstr} pair into an actual svg node.
+   * Resolve a \{name, svgstr\} pair into an actual svg node.
    */
   static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(
@@ -197,7 +198,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @param debug - optional boolean to force debug on or off
    */
-  static toggleDebug(debug?: boolean) {
+  static toggleDebug(debug?: boolean): void {
     LabIcon._debug = debug ?? !LabIcon._debug;
   }
 
@@ -237,10 +238,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         return icon;
       } else {
         // already loaded icon svg exists; replace it and warn
-        // TODO: need to see if this warning is useful or just noisy
-        console.warn(
-          `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
-        );
+        if (LabIcon._debug) {
+          console.warn(
+            `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
+          );
+        }
         icon.svgstr = svgstr;
         return icon;
       }
@@ -264,7 +266,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @returns a view of this LabIcon instance
    */
-  bindprops(props?: LabIcon.IProps) {
+  bindprops(props?: LabIcon.IProps): LabIcon {
     const view = Object.create(this);
     view._props = props;
     view.react = view._initReact(view.name + '_bind');
@@ -330,28 +332,39 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       return document.createElement('div');
     }
 
-    let returnSvgElement = true;
     if (container) {
       // take ownership by removing any existing children
       while (container.firstChild) {
         container.firstChild.remove();
       }
-    } else {
+    } else if (tag) {
       // create a container if needed
       container = document.createElement(tag);
-
-      returnSvgElement = false;
     }
+
+    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
+    if (!container) {
+      if (label) {
+        console.warn();
+      }
+      return svgElement;
+    }
+
     if (label != null) {
       container.textContent = label;
     }
-    Private.initContainer({ container, className, styleProps, title });
+
+    Private.initContainer({
+      container: container!,
+      className,
+      styleProps,
+      title
+    });
 
     // add the svg node to the container
-    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
     container.appendChild(svgElement);
 
-    return returnSvgElement ? svgElement : container;
+    return container;
   }
 
   render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
@@ -404,7 +417,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgReactAttrs;
   }
 
-  get svgstr() {
+  get svgstr(): string {
     return this._svgstr;
   }
 
@@ -444,6 +457,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           container,
           label,
           title,
+          slot,
           tag = 'div',
           ...styleProps
         }: LabIcon.IProps = { ...this._props, ...props };
@@ -466,7 +480,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         });
 
         // make it so that tag can be used as a jsx component
-        const Tag = tag;
+        const Tag = tag ?? React.Fragment;
 
         // ensure that svg html is valid
         if (!(this.svgInnerHTML && this.svgReactAttrs)) {
@@ -474,8 +488,21 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           return <></>;
         }
 
+        const svgProps = { ...this.svgReactAttrs };
+        if (!tag) {
+          Object.assign(svgProps, {
+            className:
+              className || styleProps
+                ? classes(className, LabIconStyle.styleClass(styleProps))
+                : undefined,
+            title: title,
+            slot: slot
+          });
+        }
+
         const svgComponent = (
           <svg
+            {...svgProps}
             {...this.svgReactAttrs}
             dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
             ref={ref}
@@ -492,13 +519,19 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             </React.Fragment>
           );
         } else {
+          let attributes = {};
+          if (Tag !== React.Fragment) {
+            attributes = {
+              className:
+                className || styleProps
+                  ? classes(className, LabIconStyle.styleClass(styleProps))
+                  : undefined,
+              title: title,
+              slot: slot
+            };
+          }
           return (
-            <Tag
-              className={classes(
-                className,
-                LabIconStyle.styleClass(styleProps)
-              )}
-            >
+            <Tag {...attributes}>
               {svgComponent}
               {label}
             </Tag>
@@ -514,7 +547,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   protected _initRender({
     render,
     unrender
-  }: Partial<VirtualElement.IRenderer>) {
+  }: Partial<VirtualElement.IRenderer>): void {
     if (render) {
       this.render = render;
       if (unrender) {
@@ -621,20 +654,7 @@ export namespace LabIcon {
   /**
    * The simplest possible interface for defining a generic icon.
    */
-  export interface IIcon {
-    /**
-     * The name of the icon. By convention, the icon name will be namespaced
-     * as so:
-     *
-     *     "pkg-name:icon-name"
-     */
-    readonly name: string;
-
-    /**
-     * A string containing the raw contents of an svg file.
-     */
-    svgstr: string;
-  }
+  export interface IIcon extends IRenderMime.LabIcon.IIcon {}
 
   export interface IRendererOptions {
     attrs?: ElementAttrs;
@@ -679,13 +699,22 @@ export namespace LabIcon {
     /**
      * HTML element tag used to create the icon's outermost container node,
      * if no container is passed in
+     *
+     * #### Notes
+     * If `null` is provided and no container is defined, the icon SVG will return directly
+     * ignoring all other attributes (label, title,...)
      */
-    tag?: 'div' | 'span';
+    tag?: 'div' | 'span' | null;
 
     /**
      * Optional title that will be set on the icon's outermost container node
      */
     title?: string;
+
+    /**
+     * Optional slot property to specify the position of the icon in the template
+     */
+    slot?: string | null;
   }
 
   export interface IResolverProps {
@@ -701,9 +730,7 @@ export namespace LabIcon {
   /**
    * A type that can be resolved to a LabIcon instance.
    */
-  export type IResolvable =
-    | string
-    | (IIcon & Partial<VirtualElement.IRenderer>);
+  export type IResolvable = IRenderMime.LabIcon.IResolvable;
 
   /**
    * A type that maybe can be resolved to a LabIcon instance.
@@ -738,6 +765,7 @@ namespace Private {
     label,
     title,
     tag = 'div',
+    slot,
     ...styleProps
   }: LabIcon.IProps): HTMLElement {
     if (container?.className === className) {
@@ -752,7 +780,7 @@ namespace Private {
       }
     } else {
       // create a container if needed
-      container = document.createElement(tag);
+      container = document.createElement(tag ?? 'div');
     }
     if (label != null) {
       container.textContent = label;
@@ -775,7 +803,7 @@ namespace Private {
       ref: LabIcon.IReactRef
     ) => {
       // make it so that tag can be used as a jsx component
-      const Tag = tag;
+      const Tag = tag ?? 'div';
 
       if (container) {
         initContainer({ container, className, styleProps, title });
@@ -929,19 +957,29 @@ namespace Private {
         label = undefined;
       }
 
-      ReactDOM.render(
-        <this._icon.react
+      const icon = this._icon;
+
+      if (this._rootDOM !== null) {
+        this._rootDOM.unmount();
+      }
+      this._rootDOM = createRoot(container);
+      this._rootDOM.render(
+        <icon.react
           container={container}
           label={label}
           {...{ ...this._rendererOptions?.props, ...options?.props }}
-        />,
-        container
+        />
       );
     }
 
     unrender(container: HTMLElement): void {
-      ReactDOM.unmountComponentAtNode(container);
+      if (this._rootDOM !== null) {
+        this._rootDOM.unmount();
+        this._rootDOM = null;
+      }
     }
+
+    private _rootDOM: Root | null = null;
   }
 }
 

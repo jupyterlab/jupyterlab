@@ -1,0 +1,239 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-FormGroup-content fieldset {
+  border: none;
+  padding: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+/* stylelint-disable selector-max-type */
+
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper > input,
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper > select,
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper > textarea {
+  font-size: var(--jp-content-font-size2);
+  border-color: var(--jp-input-border-color);
+  border-style: solid;
+  border-radius: var(--jp-border-radius);
+  border-width: 1px;
+  padding: 6px 8px;
+  background: none;
+  color: var(--jp-ui-font-color0);
+  height: inherit;
+}
+
+.jp-FormGroup-content .jp-inputFieldWrapper > select > option {
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-FormGroup-content fieldset input[type='checkbox'] {
+  position: relative;
+  top: 2px;
+  margin-left: 0;
+}
+
+.jp-FormGroup-content button.jp-mod-styled {
+  cursor: pointer;
+}
+
+.jp-FormGroup-content .checkbox label {
+  cursor: pointer;
+  font-size: var(--jp-content-font-size1);
+}
+
+.jp-FormGroup-content .jp-root > fieldset > legend {
+  display: none;
+}
+
+.jp-FormGroup-content .jp-root > fieldset > p {
+  display: none;
+}
+
+/** copy of `input.jp-mod-styled:focus` style */
+.jp-FormGroup-content fieldset input:focus,
+.jp-FormGroup-content fieldset select:focus {
+  -moz-outline-radius: unset;
+  outline: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  outline-offset: -1px;
+  box-shadow: var(--jp-input-box-shadow);
+}
+
+.jp-FormGroup-content fieldset input:hover:not(:focus),
+.jp-FormGroup-content fieldset select:hover:not(:focus) {
+  background-color: var(--jp-border-color2);
+}
+
+/* stylelint-enable selector-max-type */
+
+.jp-FormGroup-content .checkbox .field-description {
+  /* Disable default description field for checkbox:
+   because other widgets do not have description fields,
+   we add descriptions to each widget on the field level.
+  */
+  display: none;
+}
+
+.jp-FormGroup-content #root__description {
+  display: none;
+}
+
+.jp-FormGroup-content .jp-modifiedIndicator {
+  width: 5px;
+  background-color: var(--jp-brand-color2);
+  margin-top: 0;
+  margin-left: calc(var(--jp-private-settingeditor-modifier-indent) * -1);
+  flex-shrink: 0;
+}
+
+.jp-FormGroup-content .jp-modifiedIndicator.jp-errorIndicator {
+  background-color: var(--jp-error-color0);
+  margin-right: 0.5em;
+}
+
+/* RJSF ARRAY style */
+
+.jp-arrayFieldWrapper legend {
+  font-size: var(--jp-content-font-size2);
+  color: var(--jp-ui-font-color0);
+  flex-basis: 100%;
+  padding: 4px 0;
+  font-weight: var(--jp-content-heading-font-weight);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-arrayFieldWrapper .field-description {
+  padding: 4px 0;
+  white-space: pre-wrap;
+}
+
+.jp-arrayFieldWrapper .array-item {
+  width: 100%;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  margin: 4px;
+}
+
+.jp-ArrayOperations {
+  display: flex;
+  margin-left: 8px;
+}
+
+.jp-ArrayOperationsButton {
+  margin: 2px;
+}
+
+.jp-ArrayOperationsButton .jp-icon3[fill] {
+  fill: var(--jp-ui-font-color0);
+}
+
+button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* RJSF form validation error */
+
+.jp-FormGroup-content .validationErrors {
+  color: var(--jp-error-color0);
+}
+
+/* Hide panel level error as duplicated the field level error */
+.jp-FormGroup-content .panel.errors {
+  display: none;
+}
+
+/* RJSF normal content (settings-editor) */
+
+.jp-FormGroup-contentNormal {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.jp-FormGroup-contentNormal .jp-FormGroup-contentItem {
+  margin-left: 7px;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-FormGroup-contentNormal .jp-FormGroup-description {
+  flex-basis: 100%;
+  padding: 4px 7px;
+}
+
+.jp-FormGroup-contentNormal .jp-FormGroup-default {
+  flex-basis: 100%;
+  padding: 4px 7px;
+}
+
+.jp-FormGroup-contentNormal .jp-FormGroup-fieldLabel {
+  font-size: var(--jp-content-font-size1);
+  font-weight: normal;
+  min-width: 120px;
+}
+
+.jp-FormGroup-contentNormal fieldset:not(:first-child) {
+  margin-left: 7px;
+}
+
+.jp-FormGroup-contentNormal .field-array-of-string .array-item {
+  /* Display `jp-ArrayOperations` buttons side-by-side with content except
+    for small screens where flex-wrap will place them one below the other.
+  */
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.jp-FormGroup-contentNormal .jp-objectFieldWrapper .form-group {
+  padding: 2px 8px 2px var(--jp-private-settingeditor-modifier-indent);
+  margin-top: 2px;
+}
+
+/* RJSF compact content (metadata-form) */
+
+.jp-FormGroup-content.jp-FormGroup-contentCompact {
+  width: 100%;
+}
+
+.jp-FormGroup-contentCompact .form-group {
+  display: flex;
+  padding: 0.5em 0.2em 0.5em 0;
+}
+
+.jp-FormGroup-contentCompact
+  .jp-FormGroup-compactTitle
+  .jp-FormGroup-description {
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-FormGroup-contentCompact .jp-FormGroup-fieldLabel {
+  padding-bottom: 0.3em;
+}
+
+.jp-FormGroup-contentCompact .jp-inputFieldWrapper .form-control {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jp-FormGroup-contentCompact .jp-arrayFieldWrapper .jp-FormGroup-compactTitle {
+  padding-bottom: 7px;
+}
+
+.jp-FormGroup-contentCompact
+  .jp-objectFieldWrapper
+  .jp-objectFieldWrapper
+  .form-group {
+  padding: 2px 8px 2px var(--jp-private-settingeditor-modifier-indent);
+  margin-top: 2px;
+}
+
+.jp-FormGroup-contentCompact ul.error-detail {
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  padding-inline-start: 1em;
+}

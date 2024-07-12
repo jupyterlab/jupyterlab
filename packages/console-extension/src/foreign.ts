@@ -18,10 +18,11 @@ import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
 
 /**
- * The console widget tracker provider.
+ * The console foreign handler.
  */
 export const foreign: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
+  description: 'Add foreign handler of IOPub messages to the console.',
   requires: [IConsoleTracker, ISettingRegistry, ITranslator],
   optional: [ICommandPalette],
   activate: activateForeign,
@@ -95,6 +96,12 @@ function activateForeign(
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget
   });
+
+  const notify = () => {
+    commands.notifyCommandChanged(toggleShowAllActivity);
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     palette.addItem({

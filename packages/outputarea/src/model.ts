@@ -4,7 +4,7 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
-import { each, map, toArray } from '@lumino/algorithm';
+import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -14,12 +14,14 @@ import { ISignal, Signal } from '@lumino/signaling';
  */
 export interface IOutputAreaModel extends IDisposable {
   /**
-   * A signal emitted when the model state changes.
+   * A signal emitted when the output item changes.
+   *
+   * The number is the index of the output that changed.
    */
-  readonly stateChanged: ISignal<IOutputAreaModel, void>;
+  readonly stateChanged: ISignal<IOutputAreaModel, number>;
 
   /**
-   * A signal emitted when the model changes.
+   * A signal emitted when the list of items changes.
    */
   readonly changed: ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs>;
 
@@ -78,11 +80,6 @@ export interface IOutputAreaModel extends IDisposable {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[];
-
-  /**
-   * The maximum number of output items to display on top and bottom of cell output.
-   */
-  maxNumberOutputs?: number;
 }
 
 /**
@@ -140,24 +137,26 @@ export class OutputAreaModel implements IOutputAreaModel {
       options.contentFactory || OutputAreaModel.defaultContentFactory;
     this.list = new ObservableList<IOutputModel>();
     if (options.values) {
-      each(options.values, value => {
-        this._add(value);
-      });
+      for (const value of options.values) {
+        const index = this._add(value) - 1;
+        const item = this.list.get(index);
+        item.changed.connect(this._onGenericChange, this);
+      }
     }
     this.list.changed.connect(this._onListChanged, this);
   }
 
   /**
-   * A signal emitted when the model state changes.
+   * A signal emitted when an item changes.
    */
-  get stateChanged(): ISignal<IOutputAreaModel, void> {
+  get stateChanged(): ISignal<IOutputAreaModel, number> {
     return this._stateChanged;
   }
 
   /**
-   * A signal emitted when the model changes.
+   * A signal emitted when the list of items changes.
    */
-  get changed(): ISignal<this, IOutputAreaModel.ChangedArgs> {
+  get changed(): ISignal<IOutputAreaModel, IOutputAreaModel.ChangedArgs> {
     return this._changed;
   }
 
@@ -187,11 +186,11 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
     const trusted = (this._trusted = value);
     for (let i = 0; i < this.list.length; i++) {
-      let item = this.list.get(i);
-      const value = item.toJSON();
-      item.dispose();
-      item = this._createItem({ value, trusted });
+      const oldItem = this.list.get(i);
+      const value = oldItem.toJSON();
+      const item = this._createItem({ value, trusted });
       this.list.set(i, item);
+      oldItem.dispose();
     }
   }
 
@@ -267,9 +266,9 @@ export class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list, (item: IOutputModel) => {
+    for (const item of this.list) {
       item.dispose();
-    });
+    }
     this.list.clear();
   }
 
@@ -279,22 +278,26 @@ export class OutputAreaModel implements IOutputAreaModel {
    * #### Notes
    * This will clear any existing data.
    */
-  fromJSON(values: nbformat.IOutput[]) {
+  fromJSON(values: nbformat.IOutput[]): void {
     this.clear();
-    each(values, value => {
+    for (const value of values) {
       this._add(value);
-    });
+    }
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, (output: IOutputModel) => output.toJSON()));
+    return Array.from(
+      map(this.list, (output: IOutputModel) => output.toJSON())
+    );
   }
 
   /**
    * Add a copy of the item to the list.
+   *
+   * @returns The list length
    */
   private _add(value: nbformat.IOutput): number {
     const trusted = this._trusted;
@@ -322,9 +325,9 @@ export class OutputAreaModel implements IOutputAreaModel {
       const item = this._createItem({ value, trusted });
       const index = this.length - 1;
       const prev = this.list.get(index);
-      prev.dispose();
       this.list.set(index, item);
-      return index;
+      prev.dispose();
+      return this.length;
     }
 
     if (nbformat.isStream(value)) {
@@ -355,7 +358,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   protected shouldCombine(options: {
     value: nbformat.IOutput;
     lastModel: IOutputModel;
-  }) {
+  }): boolean {
     return true;
   }
 
@@ -377,7 +380,6 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
     const factory = this.contentFactory;
     const item = factory.createOutputModel(options);
-    item.changed.connect(this._onGenericChange, this);
     return item;
   }
 
@@ -388,22 +390,61 @@ export class OutputAreaModel implements IOutputAreaModel {
     sender: IObservableList<IOutputModel>,
     args: IObservableList.IChangedArgs<IOutputModel>
   ) {
+    switch (args.type) {
+      case 'add':
+        args.newValues.forEach(item => {
+          item.changed.connect(this._onGenericChange, this);
+        });
+        break;
+      case 'remove':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
+      case 'set':
+        args.newValues.forEach(item => {
+          item.changed.connect(this._onGenericChange, this);
+        });
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
+    }
     this._changed.emit(args);
   }
 
   /**
    * Handle a change to an item.
    */
-  private _onGenericChange(): void {
-    this._stateChanged.emit(void 0);
+  private _onGenericChange(itemModel: IOutputModel): void {
+    let idx: number;
+    let item: IOutputModel | null = null;
+    for (idx = 0; idx < this.list.length; idx++) {
+      item = this.list.get(idx);
+      if (item === itemModel) {
+        break;
+      }
+    }
+    if (item != null) {
+      this._stateChanged.emit(idx);
+      this._changed.emit({
+        type: 'set',
+        newIndex: idx,
+        oldIndex: idx,
+        oldValues: [item],
+        newValues: [item]
+      });
+    }
   }
 
-  private _lastStream: string;
+  private _lastStream = '';
   private _lastName: 'stdout' | 'stderr';
   private _trusted = false;
   private _isDisposed = false;
-  private _stateChanged = new Signal<IOutputAreaModel, void>(this);
-  private _changed = new Signal<this, IOutputAreaModel.ChangedArgs>(this);
+  private _stateChanged = new Signal<OutputAreaModel, number>(this);
+  private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
+    this
+  );
 }
 
 /**

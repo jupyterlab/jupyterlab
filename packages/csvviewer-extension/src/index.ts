@@ -11,22 +11,26 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   InputDialog,
   IThemeManager,
+  IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
-  CSVViewer,
   CSVViewerFactory,
-  TextRenderConfig,
   TSVViewerFactory
-} from '@jupyterlab/csvviewer';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+} from '@jupyterlab/csvviewer/lib/widget';
+import { CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
+import type { CSVViewer } from '@jupyterlab/csvviewer';
+import type { TextRenderConfig } from '@jupyterlab/csvviewer';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
+import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IObservableList } from '@jupyterlab/observables';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { DataGrid } from '@lumino/datagrid';
-import { CSVSearchProvider } from './searchprovider';
+import type { DataGrid } from '@lumino/datagrid';
 
 /**
  * The name of the factories that creates widgets.
@@ -35,17 +39,29 @@ const FACTORY_CSV = 'CSVTable';
 const FACTORY_TSV = 'TSVTable';
 
 /**
+ * The command IDs used by the csvviewer plugins.
+ */
+namespace CommandIDs {
+  export const CSVGoToLine = 'csv:go-to-line';
+
+  export const TSVGoToLine = 'tsv:go-to-line';
+}
+
+/**
  * The CSV file handler extension.
  */
 const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
+  description: 'Adds viewer for CSV file types',
   requires: [ITranslator],
   optional: [
     ILayoutRestorer,
     IThemeManager,
     IMainMenu,
-    ISearchProviderRegistry
+    ISearchProviderRegistry,
+    ISettingRegistry,
+    IToolbarWidgetRegistry
   ],
   autoStart: true
 };
@@ -56,40 +72,18 @@ const csv: JupyterFrontEndPlugin<void> = {
 const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
+  description: 'Adds viewer for TSV file types.',
   requires: [ITranslator],
   optional: [
     ILayoutRestorer,
     IThemeManager,
     IMainMenu,
-    ISearchProviderRegistry
+    ISearchProviderRegistry,
+    ISettingRegistry,
+    IToolbarWidgetRegistry
   ],
   autoStart: true
 };
-
-/**
- * Connect menu entries for find and go to line.
- */
-function addMenuEntries(
-  mainMenu: IMainMenu,
-  tracker: WidgetTracker<IDocumentWidget<CSVViewer>>,
-  translator: ITranslator
-) {
-  const trans = translator.load('jupyterlab');
-  // Add go to line capability to the edit menu.
-  mainMenu.editMenu.goToLiners.add({
-    tracker,
-    goToLine: (widget: IDocumentWidget<CSVViewer>) => {
-      return InputDialog.getNumber({
-        title: trans.__('Go to Line'),
-        value: 0
-      }).then(value => {
-        if (value.button.accept && value.value !== null) {
-          widget.content.goToLine(value.value);
-        }
-      });
-    }
-  } as IEditMenu.IGoToLiner<IDocumentWidget<CSVViewer>>);
-}
 
 /**
  * Activate cssviewer extension for CSV files
@@ -100,13 +94,48 @@ function activateCsv(
   restorer: ILayoutRestorer | null,
   themeManager: IThemeManager | null,
   mainMenu: IMainMenu | null,
-  searchregistry: ISearchProviderRegistry | null
+  searchRegistry: ISearchProviderRegistry | null,
+  settingRegistry: ISettingRegistry | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): void {
+  const { commands, shell } = app;
+  let toolbarFactory:
+    | ((
+        widget: IDocumentWidget<CSVViewer>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
+      FACTORY_CSV,
+      'delimiter',
+      widget =>
+        new CSVDelimiter({
+          widget: widget.content,
+          translator
+        })
+    );
+
+    if (settingRegistry) {
+      toolbarFactory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FACTORY_CSV,
+        csv.id,
+        translator
+      );
+    }
+  }
+
+  const trans = translator.load('jupyterlab');
+
   const factory = new CSVViewerFactory({
     name: FACTORY_CSV,
+    label: trans.__('CSV Viewer'),
     fileTypes: ['csv'],
     defaultFor: ['csv'],
     readOnly: true,
+    toolbarFactory,
     translator
   });
   const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
@@ -128,7 +157,10 @@ function activateCsv(
 
   app.docRegistry.addWidgetFactory(factory);
   const ft = app.docRegistry.getFileType('csv');
-  factory.widgetCreated.connect((sender, widget) => {
+
+  let searchProviderInitialized = false;
+
+  factory.widgetCreated.connect(async (sender, widget) => {
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -141,7 +173,16 @@ function activateCsv(
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
-    // Set the theme for the new widget.
+
+    // Delay await to execute `widget.title` setters (above) synchronously
+    if (searchRegistry && !searchProviderInitialized) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('csv', CSVSearchProvider);
+      searchProviderInitialized = true;
+    }
+
+    // Set the theme for the new widget; requires `.content` to be loaded.
+    await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
   });
@@ -156,7 +197,8 @@ function activateCsv(
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
       : Private.DARK_TEXT_CONFIG;
-    tracker.forEach(grid => {
+    tracker.forEach(async grid => {
+      await grid.content.ready;
       grid.content.style = style;
       grid.content.rendererConfig = rendererConfig;
     });
@@ -165,12 +207,42 @@ function activateCsv(
     themeManager.themeChanged.connect(updateThemes);
   }
 
+  // Add commands
+  const isEnabled = () =>
+    tracker.currentWidget !== null &&
+    tracker.currentWidget === shell.currentWidget;
+
+  commands.addCommand(CommandIDs.CSVGoToLine, {
+    label: trans.__('Go to Line'),
+    execute: async () => {
+      const widget = tracker.currentWidget;
+      if (widget === null) {
+        return;
+      }
+      const result = await InputDialog.getNumber({
+        title: trans.__('Go to Line'),
+        value: 0
+      });
+      if (result.button.accept && result.value !== null) {
+        widget.content.goToLine(result.value);
+      }
+    },
+    isEnabled
+  });
+
   if (mainMenu) {
-    addMenuEntries(mainMenu, tracker, translator);
+    // Add go to line capability to the edit menu.
+    mainMenu.editMenu.goToLiners.add({
+      id: CommandIDs.CSVGoToLine,
+      isEnabled
+    });
   }
-  if (searchregistry) {
-    searchregistry.register('csv', CSVSearchProvider);
-  }
+
+  const notify = () => {
+    commands.notifyCommandChanged(CommandIDs.CSVGoToLine);
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**
@@ -182,13 +254,48 @@ function activateTsv(
   restorer: ILayoutRestorer | null,
   themeManager: IThemeManager | null,
   mainMenu: IMainMenu | null,
-  searchregistry: ISearchProviderRegistry | null
+  searchRegistry: ISearchProviderRegistry | null,
+  settingRegistry: ISettingRegistry | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): void {
+  const { commands, shell } = app;
+  let toolbarFactory:
+    | ((
+        widget: IDocumentWidget<CSVViewer>
+      ) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
+
+  if (toolbarRegistry) {
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
+      FACTORY_TSV,
+      'delimiter',
+      widget =>
+        new CSVDelimiter({
+          widget: widget.content,
+          translator
+        })
+    );
+
+    if (settingRegistry) {
+      toolbarFactory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FACTORY_TSV,
+        tsv.id,
+        translator
+      );
+    }
+  }
+
+  const trans = translator.load('jupyterlab');
+
   const factory = new TSVViewerFactory({
     name: FACTORY_TSV,
+    label: trans.__('TSV Viewer'),
     fileTypes: ['tsv'],
     defaultFor: ['tsv'],
     readOnly: true,
+    toolbarFactory,
     translator
   });
   const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
@@ -210,7 +317,10 @@ function activateTsv(
 
   app.docRegistry.addWidgetFactory(factory);
   const ft = app.docRegistry.getFileType('tsv');
-  factory.widgetCreated.connect((sender, widget) => {
+
+  let searchProviderInitialized = false;
+
+  factory.widgetCreated.connect(async (sender, widget) => {
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -223,7 +333,16 @@ function activateTsv(
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
-    // Set the theme for the new widget.
+
+    // Delay await to execute `widget.title` setters (above) synchronously
+    if (searchRegistry && !searchProviderInitialized) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('tsv', CSVSearchProvider);
+      searchProviderInitialized = true;
+    }
+
+    // Set the theme for the new widget; requires `.content` to be loaded.
+    await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
   });
@@ -238,7 +357,8 @@ function activateTsv(
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
       : Private.DARK_TEXT_CONFIG;
-    tracker.forEach(grid => {
+    tracker.forEach(async grid => {
+      await grid.content.ready;
       grid.content.style = style;
       grid.content.rendererConfig = rendererConfig;
     });
@@ -247,12 +367,40 @@ function activateTsv(
     themeManager.themeChanged.connect(updateThemes);
   }
 
+  // Add commands
+  const isEnabled = () =>
+    tracker.currentWidget !== null &&
+    tracker.currentWidget === shell.currentWidget;
+
+  commands.addCommand(CommandIDs.TSVGoToLine, {
+    label: trans.__('Go to Line'),
+    execute: async () => {
+      const widget = tracker.currentWidget;
+      if (widget === null) {
+        return;
+      }
+      const result = await InputDialog.getNumber({
+        title: trans.__('Go to Line'),
+        value: 0
+      });
+      if (result.button.accept && result.value !== null) {
+        widget.content.goToLine(result.value);
+      }
+    },
+    isEnabled
+  });
+
   if (mainMenu) {
-    addMenuEntries(mainMenu, tracker, translator);
+    // Add go to line capability to the edit menu.
+    mainMenu.editMenu.goToLiners.add({
+      id: CommandIDs.TSVGoToLine,
+      isEnabled
+    });
   }
-  if (searchregistry) {
-    searchregistry.register('tsv', CSVSearchProvider);
-  }
+
+  tracker.currentChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.TSVGoToLine);
+  });
 }
 
 /**
@@ -269,7 +417,6 @@ namespace Private {
    * The light theme for the data grid.
    */
   export const LIGHT_STYLE: DataGrid.Style = {
-    ...DataGrid.defaultStyle,
     voidColor: '#F3F3F3',
     backgroundColor: 'white',
     headerBackgroundColor: '#EEEEEE',
@@ -282,7 +429,6 @@ namespace Private {
    * The dark theme for the data grid.
    */
   export const DARK_STYLE: DataGrid.Style = {
-    ...DataGrid.defaultStyle,
     voidColor: 'black',
     backgroundColor: '#111111',
     headerBackgroundColor: '#424242',

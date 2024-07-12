@@ -1,5 +1,11 @@
 # https://github.com/marketplace/actions/labeler
 name: "Pull Request Labeler"
+
+#####
+# This workflow is triggered by pull_request_target event.
+# Never checkout the PR and run ANY local code on it.
+#####
+
 on:
 - pull_request_target
 
@@ -11,6 +17,7 @@ jobs:
     name: Update PR Labels
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/labeler@main
+    - uses: actions/labeler@v5
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        sync-labels: true

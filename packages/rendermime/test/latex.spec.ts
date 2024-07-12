@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { removeMath, replaceMath } from '../src';
+import { removeMath, replaceMath } from '@jupyterlab/rendermime';
 
 describe('jupyter-ui', () => {
   describe('removeMath()', () => {
@@ -14,6 +14,34 @@ describe('jupyter-ui', () => {
 
     it('should handle code spans', () => {
       const input = '`$foo` and `$bar` are variables';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle fenced code blocks', () => {
+      const input = '```\n$foo\n$bar\n```';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle tilde fenced code blocks', () => {
+      const input = '~~~\n$foo\n$bar\n~~~';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle long fenced code blocks', () => {
+      const input = '````\n$foo\n$bar\n```\n``````';
+      const { text, math } = removeMath(input);
+      expect(text).toBe(input);
+      expect(math).toEqual([]);
+    });
+
+    it('should handle fenced code blocks with info string', () => {
+      const input = '```R\ndata[data$foo > 1 & data$bar < 2,]\n```';
       const { text, math } = removeMath(input);
       expect(text).toBe(input);
       expect(math).toEqual([]);

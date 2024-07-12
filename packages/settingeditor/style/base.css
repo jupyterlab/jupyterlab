@@ -10,20 +10,26 @@
   --jp-private-settingeditor-row-height: 16px;
   --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
+  --jp-private-settingeditor-modifier-indent: 5px;
+  --jp-private-settingeditor-header-spacing: 8px;
 }
 
-#setting-editor {
+.jp-SettingsPanel,
+#json-setting-editor {
   min-width: 360px;
   min-height: 240px;
   background-color: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
   margin-top: -1px;
   outline: none;
+
   /* This is needed so that all font sizing of children done in ems is
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
 }
 
-#setting-editor > .lm-Widget {
+#setting-editor > .lm-Widget,
+#json-setting-editor > .lm-Widget {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -31,213 +37,251 @@
   right: 0;
 }
 
-#setting-editor .lm-SplitPanel-handle {
+#setting-editor .lm-SplitPanel-handle,
+#json-setting-editor .lm-SplitPanel-handle {
   background-color: var(--jp-border-color2);
 }
 
-#setting-editor .jp-SettingEditorInstructions {
-  text-align: center;
-}
+/** Plugin list **/
 
-#setting-editor .jp-SettingEditorInstructions-icon {
-  display: inline-block;
-  height: 78px;
-  margin: 2px 5px 2px 8px;
-  width: 60px;
-}
-
-#setting-editor .jp-SettingEditorInstructions-title {
-  color: var(--jp-ui-font-color0);
-  font-size: 32px;
-  font-weight: 200;
-  line-height: 78px;
-  vertical-align: top;
-}
-
-#setting-editor .jp-SettingEditorInstructions-text {
-  color: var(--jp-ui-font-color0);
-  font-size: var(--jp-ui-font-size2);
-}
-
-#setting-editor .jp-PluginList {
+.jp-PluginList {
   min-width: 175px;
   max-width: 275px;
+  background-color: var(--jp-layout-color2);
 }
 
-#setting-editor .jp-PluginList ul {
-  background-color: var(--jp-layout-color1);
+.jp-PluginList-wrapper {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.jp-PluginList ul {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   list-style-type: none;
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  position: absolute;
+  position: relative;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
-#setting-editor .jp-PluginList li {
-  display: flex;
-  flex-direction: row;
-  border: 1px solid transparent;
-  overflow: hidden;
-  padding: 4px 0 4px 4px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.jp-PluginList .jp-PluginList-header {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
 }
 
-#setting-editor .jp-PluginList li:hover {
-  background-color: var(--jp-layout-color2);
-  border: 1px solid var(--jp-border-color2);
+.jp-PluginList .jp-PluginList-noResults,
+.jp-PluginList .jp-PluginList-header {
+  flex: 0 0 auto;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size0);
+  padding: 8px 8px 8px 12px;
+  margin: 10px;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
 }
 
-#setting-editor .jp-PluginList li.jp-mod-selected {
+.jp-PluginList .jp-SelectedIndicator {
+  width: 3px;
   background-color: var(--jp-brand-color1);
-  color: white;
-  border: 1px solid var(--jp-brand-color1);
+  height: var(--jp-cell-collapser-min-height);
+  visibility: hidden;
 }
 
-#setting-editor
-  ul.jp-PluginList
-  li.jp-mod-selected
-  span.jp-PluginList-icon.jp-FileIcon {
-  background-image: var(--jp-icon-file-selected);
+.jp-PluginList .jp-mod-selected .jp-SelectedIndicator {
+  visibility: inherit;
 }
 
-#setting-editor .jp-PluginList-icon {
-  display: inline-block;
+.jp-PluginList .jp-ErrorPlugin .jp-SelectedIndicator {
+  background-color: var(--jp-error-color0);
+}
+
+.jp-PluginList-icon {
+  display: flex;
   height: 20px;
   width: 20px;
   margin-right: 3px;
   position: relative;
 }
 
-#setting-editor .jp-SettingsRawEditor .jp-Toolbar {
+.jp-PluginList-wrapper > .jp-FilterBox {
+  margin: 8px 12px 0;
+}
+
+.jp-PluginList mark {
+  background-color: transparent;
+  font-weight: bold;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-PluginList-entry {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  background: transparent;
+  overflow: hidden;
+  padding: 4px 0 4px 4px;
+  white-space: nowrap;
+}
+
+.jp-PluginList-entry:hover {
+  background: var(--jp-layout-color1);
+}
+
+.jp-PluginList-entry li {
+  margin-left: 27px;
+  margin-top: 5px;
+  color: var(--jp-ui-font-color1);
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+.jp-PluginList-entry-label {
+  display: flex;
+}
+
+.jp-PluginList-entry-label-text {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
+  color: var(--jp-ui-font-color1);
+  line-height: var(--jp-cell-collapser-min-height);
+}
+
+/** Raw editor **/
+
+.jp-SettingsRawEditor .jp-Toolbar {
   color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size1);
   height: var(--jp-private-settingeditor-toolbar-height);
   max-height: var(--jp-private-settingeditor-toolbar-height);
 }
 
-#setting-editor
-  .jp-SettingsRawEditor
-  .jp-Toolbar
-  .jp-ToolbarButtonComponent-label {
+.jp-SettingsRawEditor .jp-Toolbar .jp-ToolbarButtonComponent-label {
   display: none;
 }
 
-#setting-editor .jp-SettingsRawEditor .jp-Toolbar-item {
+.jp-SettingsRawEditor .jp-Toolbar-item {
   margin-top: 1px;
   align-items: center;
 }
 
-.jp-ToolbarButtonComponent-label
-  #setting-editor
-  .jp-SettingsRawEditor.jp-mod-error
-  .jp-Toolbar-item.jp-BugIcon::after {
-  color: red;
-  content: '\25CF'; /* Unicode circle character (error dot) */
-  font-size: 7px;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 4px;
-  left: 6px;
-}
-
-#setting-editor .jp-SettingsRawEditor .jp-Inspector {
+.jp-SettingsRawEditor .jp-Inspector {
   border-top: 2px solid var(--jp-layout-color2);
   min-height: var(--jp-private-settingeditor-debug-height);
   max-height: var(--jp-private-settingeditor-debug-height);
 }
 
-#setting-editor
-  .jp-SettingsRawEditor
-  .jp-Inspector.jp-SettingsDebug
-  .jp-RenderedHTMLCommon {
+.jp-SettingsRawEditor .jp-Inspector.jp-SettingsDebug .jp-RenderedHTMLCommon {
   padding: 2px 5px 2px 0;
   width: 100%;
 }
 
-#setting-editor
-  .jp-SettingsRawEditor
-  .jp-Inspector.jp-SettingsDebug
-  .jp-RenderedHTMLCommon
-  p {
+.jp-SettingsRawEditor .jp-Inspector.jp-SettingsDebug .jp-RenderedHTMLCommon p {
   text-align: right;
 }
 
-#setting-editor .jp-SettingsTableEditor {
-  border: 1px solid var(--jp-brand-color1);
-  margin: 0;
-  padding: 0;
+.jp-SettingsRawEditor .cm-editor {
+  height: 100%;
 }
 
-#setting-editor .jp-SettingsTableEditor legend {
-  color: var(--jp-brand-color1);
-  font-size: 70%;
-  font-weight: bold;
-  margin-left: 15px;
-  height: var(--jp-private-settingeditor-legend-height);
+/** Panel **/
+
+.jp-SettingsPanel .checkbox p {
+  font-size: var(--jp-content-font-size1);
 }
 
-#setting-editor .jp-SettingsTableEditor-wrapper {
-  position: absolute;
-  top: var(--jp-private-settingeditor-legend-height);
-  bottom: 0;
+.jp-SettingsPanel .checkbox {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.jp-SettingsPanel .form-group {
+  display: flex;
+  padding: 4px 8px 4px var(--jp-private-settingeditor-modifier-indent);
+  margin-top: 5px;
+}
+
+.jp-SettingsPanel .jp-SettingsEditor {
+  padding: 20px;
+}
+
+.jp-SettingsPanel {
   overflow-y: auto;
+  height: 100%;
 }
 
-#setting-editor .jp-SettingsTableEditor table {
-  table-layout: fixed;
+.jp-SettingsForm {
+  position: relative;
+}
+
+.jp-SettingsForm > .rjsf > .form-group {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/** Settings header **/
+
+.jp-SettingsHeader {
+  display: grid;
+  grid-template:
+    'title buttonbar'
+    'description buttonbar';
+  grid-template-columns: 1fr max-content;
+  padding: 0 var(--jp-private-settingeditor-header-spacing);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-SettingsHeader-title {
+  font-size: var(--jp-content-font-size3);
+  color: var(--jp-ui-font-color0);
+  font-weight: 400;
+  grid-area: title;
+  padding: 0;
+  margin-top: calc(var(--jp-private-settingeditor-header-spacing) * 2);
+  margin-bottom: calc(var(--jp-private-settingeditor-header-spacing) / 2);
+}
+
+.jp-SettingsHeader-description {
+  grid-area: description;
+  padding-bottom: var(--jp-private-settingeditor-header-spacing);
   color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
-  padding: 2px;
-  width: calc(100% - 4px);
-  overflow: hidden;
 }
 
-#setting-editor .jp-SettingsTableEditor tr {
-  color: var(--jp-ui-font-color2);
-  height: var(--jp-private-settingeditor-row-height);
-  overflow: hidden;
+.jp-SettingsHeader-buttonbar {
+  margin: auto var(--jp-private-settingeditor-header-spacing);
+  grid-row: span 2;
 }
 
-#setting-editor .jp-SettingsTableEditor th {
-  background-color: var(--jp-layout-color3);
-  border: 1px solid transparent;
-  font-weight: bold;
-  height: var(--jp-private-settingeditor-row-height);
+.jp-SettingsHeader-buttonbar > .jp-RestoreButton {
+  background-color: var(--jp-warn-color-normal);
+  border: 0;
+  color: var(--jp-ui-inverse-font-color0);
 }
 
-#setting-editor .jp-SettingsTableEditor td {
-  border: 1px solid transparent;
-  height: var(--jp-private-settingeditor-row-height);
+.jp-PluginEditor {
+  overflow: auto;
 }
 
-#setting-editor .jp-SettingsTableEditor th.jp-SettingsTableEditor-key {
-  width: var(--jp-private-settingeditor-key-width);
+/** Placeholder **/
+
+.jp-SettingsEditor-placeholder {
+  text-align: center;
 }
 
-#setting-editor .jp-SettingsTableEditor th.jp-SettingsTableEditor-type {
-  width: var(--jp-private-settingeditor-type-width);
+.jp-SettingsEditor-placeholderContent {
+  color: var(--jp-content-font-color2);
+  padding: 8px;
 }
 
-#setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-key {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-#setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-value {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-#setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-type {
-  text-align: right;
+.jp-SettingsEditor-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
 }

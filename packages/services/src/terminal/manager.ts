@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator, iter } from '@lumino/algorithm';
-
 import { Poll } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -113,11 +111,9 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   /*
    * Connect to a running terminal.
    *
-   * @param name - The name of the target terminal.
-   *
    * @param options - The options used to connect to the terminal.
    *
-   * @returns A promise that resolves to the new terminal connection instance.
+   * @returns The new terminal connection instance.
    *
    * #### Notes
    * The manager `serverSettings` will be used.
@@ -145,8 +141,8 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    *
    * @returns A new iterator over the running terminals.
    */
-  running(): IIterator<Terminal.IModel> {
-    return iter(this._models);
+  running(): IterableIterator<Terminal.IModel> {
+    return this._models[Symbol.iterator]();
   }
 
   /**
@@ -166,14 +162,22 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   /**
    * Create a new terminal session.
    *
-   * @returns A promise that resolves with the terminal instance.
+   * @param options - The options used to create the terminal.
+   *
+   * @returns A promise that resolves with the terminal connection instance.
    *
    * #### Notes
    * The manager `serverSettings` will be used unless overridden in the
    * options.
    */
-  async startNew(): Promise<Terminal.ITerminalConnection> {
-    const model = await startNew(this.serverSettings);
+  async startNew(
+    options?: Terminal.ITerminal.IOptions
+  ): Promise<Terminal.ITerminalConnection> {
+    const model = await startNew(
+      this.serverSettings,
+      options?.name,
+      options?.cwd
+    );
     await this.refreshRunning();
     return this.connectTo({ model });
   }
@@ -212,11 +216,13 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     try {
       models = await listRunning(this.serverSettings);
     } catch (err) {
-      // Check for a network error, or a 503 error, which is returned
-      // by a JupyterHub when a server is shut down.
+      // Handle network errors, as well as cases where we are on a
+      // JupyterHub and the server is not running. JupyterHub returns a
+      // 503 (<2.0) or 424 (>2.0) in that case.
       if (
         err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503
+        err.response?.status === 503 ||
+        err.response?.status === 424
       ) {
         this._connectionFailure.emit(err);
       }
@@ -289,6 +295,73 @@ export namespace TerminalManager {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
-    standby?: Poll.Standby;
+    standby?: Poll.Standby | (() => boolean | Poll.Standby);
+  }
+
+  /**
+   * A no-op terminal manager to be used when starting terminals is not supported.
+   */
+  export class NoopManager extends TerminalManager {
+    /**
+     * Whether the manager is active.
+     */
+    get isActive(): boolean {
+      return false;
+    }
+
+    /**
+     * Used for testing.
+     */
+    get parentReady(): Promise<void> {
+      return super.ready;
+    }
+
+    /**
+     * A promise that fulfills when the manager is ready (never).
+     */
+    get ready(): Promise<void> {
+      return this.parentReady.then(() => this._readyPromise);
+    }
+
+    /**
+     * Create a new terminal session - throw an error since it is not supported.
+     *
+     */
+    async startNew(
+      options?: Terminal.ITerminal.IOptions
+    ): Promise<Terminal.ITerminalConnection> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Terminal Manager')
+      );
+    }
+
+    /*
+     * Connect to a running terminal - throw an error since it is not supported.
+     */
+    connectTo(
+      options: Omit<Terminal.ITerminalConnection.IOptions, 'serverSettings'>
+    ): Terminal.ITerminalConnection {
+      throw Error('Not implemented in no-op Terminal Manager');
+    }
+
+    /**
+     * Shut down a session by id - throw an error since it is not supported.
+     */
+    async shutdown(id: string): Promise<void> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Terminal Manager')
+      );
+    }
+
+    /**
+     * Execute a request to the server to poll running sessions and update state.
+     */
+    protected async requestRunning(): Promise<void> {
+      return Promise.resolve();
+    }
+
+    private _readyPromise = new Promise<void>(() => {
+      /* no-op */
+    });
   }
 }

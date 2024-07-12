@@ -1,0 +1,157 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+@font-face /* 0 */ {
+  font-display: swap;
+  font-family: MJXZERO;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff')
+    format('woff');
+}
+
+@font-face /* 1 */ {
+  font-display: swap;
+  font-family: MJXTEX;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 2 */ {
+  font-display: swap;
+  font-family: MJXTEX-B;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff')
+    format('woff');
+}
+
+@font-face /* 3 */ {
+  font-display: swap;
+  font-family: MJXTEX-I;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff')
+    format('woff');
+}
+
+@font-face /* 4 */ {
+  font-display: swap;
+  font-family: MJXTEX-MI;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff')
+    format('woff');
+}
+
+@font-face /* 5 */ {
+  font-display: swap;
+  font-family: MJXTEX-BI;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff')
+    format('woff');
+}
+
+@font-face /* 6 */ {
+  font-display: swap;
+  font-family: 'MJXTEX-S1';
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 7 */ {
+  font-display: swap;
+  font-family: 'MJXTEX-S2';
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 8 */ {
+  font-display: swap;
+  font-family: 'MJXTEX-S3';
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 9 */ {
+  font-display: swap;
+  font-family: 'MJXTEX-S4';
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 10 */ {
+  font-display: swap;
+  font-family: MJXTEX-A;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 11 */ {
+  font-display: swap;
+  font-family: MJXTEX-C;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 12 */ {
+  font-display: swap;
+  font-family: MJXTEX-CB;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff')
+    format('woff');
+}
+
+@font-face /* 13 */ {
+  font-display: swap;
+  font-family: MJXTEX-FR;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 14 */ {
+  font-display: swap;
+  font-family: MJXTEX-FRB;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff')
+    format('woff');
+}
+
+@font-face /* 15 */ {
+  font-display: swap;
+  font-family: MJXTEX-SS;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 16 */ {
+  font-display: swap;
+  font-family: MJXTEX-SSB;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff')
+    format('woff');
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff')
+    format('woff');
+}
+
+@font-face /* 18 */ {
+  font-display: swap;
+  font-family: MJXTEX-SC;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 19 */ {
+  font-display: swap;
+  font-family: MJXTEX-T;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 20 */ {
+  font-display: swap;
+  font-family: MJXTEX-V;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff')
+    format('woff');
+}
+
+@font-face /* 21 */ {
+  font-display: swap;
+  font-family: MJXTEX-VB;
+  src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff')
+    format('woff');
+}

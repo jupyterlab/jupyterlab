@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _documents:
 
 Documents
@@ -19,10 +22,10 @@ Overview of document architecture
 ---------------------------------
 
 A 'document' in JupyterLab is represented by a model instance implementing the
-`IModel <../api/interfaces/docregistry.documentregistry.imodel.html>`__ interface.
+`IModel <../api/interfaces/docregistry.DocumentRegistry.IModel.html>`__ interface.
 The model interface is intentionally fairly small, and concentrates on representing
 the data in the document and signaling changes to that data. Each model has an
-associated `context <../api/interfaces/docregistry.documentregistry.icontext.html>`__
+associated `context <../api/interfaces/docregistry.DocumentRegistry.IContext.html>`__
 instance as well. The context for a model is the bridge between the internal data
 of the document, stored in the model, and the file metadata and operations possible
 on the file, such as save and revert. Since many objects will need both the context
@@ -33,38 +36,26 @@ representing the file. For example, a notebook can be opened with a notebook mod
 and with a text model. Different models for the same file path do not directly
 communicate with each other.
 
-Models contain an instance of `ModelDB <../api/classes/observables.modeldb-1.html>`__
-that acts as data storage for the model's content. In JupyterLab 3.1, we introduced
-the package ``@jupyterlab/shared-models`` to swap ``ModelDB`` as a data storage
-to make 'documents' collaborative. We implemented these shared models using
-`Yjs <https://yjs.dev>`_, a high-performance CRDT for building collaborative applications
-that automatically sync. You can find all the documentation of Yjs `here <https://docs.yjs.dev>`_.
-At the moment, models contain both a ``ModelDB`` and a ``Shared Model`` instance, so it is
-possible to access ``ModelDB`` yet.
+Models contain an instance of `ISharedDocument <https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedDocument.html>`_
+that acts as data storage for the model's content. As of JupyterLab 4, the default data
+storage implementation is a `YDocument <https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument-1.html>`_
+based on `Yjs <https://docs.yjs.dev>`_, a high-performance CRDT for building collaborative
+applications. Both the interface and the implementation are provided by the package
+`@jupyter/ydoc <https://github.com/jupyter-server/jupyter_ydoc>`_.
 
-`Document widgets <../api/classes/docregistry.documentregistry-1.html>`__ represent
+`Document widgets <../api/classes/docregistry.DocumentWidget-1.html>`__ represent
 a view of a document model. There can be multiple document widgets associated with
 a single document model, and they naturally stay in sync with each other since they
 are views on the same underlying data model.
 
-`Shared Models <../api/interfaces/shared_models.ishareddocument.html>`__ are models
-using Yjs’ shared types as a data structures instead of ``ModelDB``.
-
-The `Document Registry <../api/classes/docregistry.documentregistry-1.html>`__
+The `Document Registry <../api/classes/docregistry.DocumentRegistry-1.html>`__
 is where document types and factories are registered. Plugins can
 require a document registry instance and register their content types
 and providers.
 
-The `Document Manager <../api/classes/docmanager.documentmanager-1.html>`__
+The `Document Manager <../api/classes/docmanager.DocumentManager-1.html>`__
 uses the Document Registry to create models and widgets for documents.
 The Document Manager handles the lifecycle of documents for the application.
-
-The `Document Provider <../api/classes/docprovider.websocketproviderwithlocks-1.html>`__
-is a WebSocket provider that syncs documents through a new end-point (``api/yjs``)
-in the JupyterLab server. `Providers <https://docs.yjs.dev/ecosystem/connection-provider>`_
-abstract Yjs from the network technology your application uses. They sync Yjs
-documents through a communication protocol or a database. Most providers have
-in common that they use the concept of room names to connect Yjs documents.
 
 
 Document Registry
@@ -77,8 +68,13 @@ Document Registry
 -  widget factories for specific model factories
 -  widget extension factories
 
-`Widget Factories <../api/classes/docregistry.documentregistry-1.html#addwidgetfactory>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. note::
+
+   We recommend you to look at the `document example <https://github.com/jupyterlab/extension-examples/tree/main/documents>`__
+   to help understanding a pratical case.
+
+`Widget Factories <../api/classes/docregistry.DocumentRegistry-1.html#addWidgetFactory>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a widget for a given file.
 
@@ -86,16 +82,16 @@ Create a widget for a given file.
 
 -  The notebook widget factory that creates NotebookPanel widgets.
 
-`Model Factories <../api/classes/docregistry.documentregistry-1.html#addmodelfactory>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Model Factories <../api/classes/docregistry.DocumentRegistry-1.html#addModelFactory>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a model for a given file.
 
 Models are generally differentiated by the contents options used to
 fetch the model (e.g. text, base64, notebook).
 
-`Widget Extension Factories <../api/classes/docregistry.documentregistry-1.html#addwidgetextension>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Widget Extension Factories <../api/classes/docregistry.DocumentRegistry-1.html#addWidgetExtension>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Adds additional functionality to a widget type. An extension instance is
 created for each widget instance, enabling the extension to add
@@ -106,11 +102,13 @@ functionality to each widget or observe the widget and/or its context.
 -  The ipywidgets extension that is created for NotebookPanel widgets.
 -  Adding a button to the toolbar of each NotebookPanel widget.
 
-`File Types <../api/classes/docregistry.documentregistry-1.html#addfiletype>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`File Types <../api/classes/docregistry.DocumentRegistry-1.html#addFileType>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`Document Models <../api/interfaces/docregistry.documentregistry.imodel.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Adds a new file type to be understood through a mimetype and file extensions within JupyterLab.
+
+`Document Models <../api/interfaces/docregistry.DocumentRegistry.IModel.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Created by the model factories and passed to widget factories and widget
 extension factories. Models are the way in which we interact with the
@@ -118,8 +116,8 @@ data of a document. For a simple text file, we typically only use the
 ``to/fromString()`` methods. A more complex document like a Notebook
 contains more points of interaction like the Notebook metadata.
 
-`Document Contexts <../api/interfaces/docregistry.documentregistry.icontext.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Document Contexts <../api/interfaces/docregistry.DocumentRegistry.IContext.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Created by the Document Manager and passed to widget factories and
 widget extensions. The context contains the model as one of its
@@ -138,10 +136,10 @@ between the document model and the wider application.
 Shared Models
 -------------
 
-The shared-models package contains an `ISharedNotebook
-<../api/interfaces/shared_models.isharednotebook.html>`_ and an `ISharedFile
-<../api/interfaces/shared_models.isharedfile.html>`_ which are the abstract
-interfaces to work against if you want to manipulate a notebook or a file.
+The `@jupyter/ydoc` package contains an `ISharedNotebook
+<https://jupyter-ydoc.readthedocs.io/en/latest/api/modules/ISharedNotebook.html>`_
+and an `ISharedFile <https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedFile.html>`_
+which are the abstract interfaces to work against if you want to manipulate a notebook or a text file.
 
 These models wrap a `Yjs document (Y.Doc) <https://docs.yjs.dev/api/y.doc>`_ which represents
 a shared document between clients and hold multiple shared objects. They enable you
@@ -151,7 +149,11 @@ types of collaborative applications.
 
 In addition, a shared model has an `Awareness <https://docs.yjs.dev/getting-started/adding-awareness>`_
 attribute. This attribute is linked to the *Y.Doc* which means there is one *Awareness* object per document and is
-used for sharing cursor locations and presence information.
+used for sharing cursor locations and presence information. The `Awareness` is an implementation detail of Yjs
+and is not part of the `ISharedDocument` interface.
+
+Please, check out the `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_
+to know more about this package.
 
 Document Manager
 ----------------

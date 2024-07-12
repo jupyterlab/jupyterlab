@@ -1,0 +1,72 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-WindowedPanel-outer {
+  height: 100%;
+  position: relative;
+  overflow: auto;
+}
+
+.jp-WindowedPanel-inner {
+  position: relative;
+}
+
+.jp-WindowedPanel-viewport {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: visible;
+}
+
+.jp-WindowedPanel-scrollbar {
+  display: none;
+  position: relative;
+}
+
+.jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-scrollbar {
+  background-color: inherit;
+  border-left: 1px solid var(--jp-layout-color3);
+  display: block;
+  position: fixed;
+  overflow-y: auto;
+  overflow-x: hidden;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  min-width: 35px;
+  z-index: 1;
+}
+
+.jp-WindowedPanel-scrollbar-content {
+  background-color: transparent;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.jp-WindowedPanel-scrollbar-content > .jp-WindowedPanel-scrollbar-item {
+  border-bottom: 1px solid var(--jp-layout-color3);
+  background-color: rgb(from var(--jp-layout-color1) r g b / 50%);
+  padding: 2px;
+  text-align: left;
+  margin: 0 2px;
+}
+
+.jp-WindowedPanel-scrollbar-content > .jp-WindowedPanel-scrollbar-item:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-WindowedPanel-scrollbar-viewportIndicator {
+  position: absolute;
+  background: var(--jp-layout-color2);
+  border: 1px solid var(--jp-layout-color4);
+  width: 100%;
+  z-index: 2;
+  border-radius: 2px;
+  box-sizing: border-box;
+}

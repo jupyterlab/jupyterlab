@@ -1,0 +1,64 @@
+ci:
+  # Same schedule interval as dependabot see .github/dependabot.yml
+  autoupdate_schedule: monthly
+  # skip any check that needs internet access
+  skip: [prettier, eslint, stylelint]
+
+default_language_version:
+  node: system
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: forbid-new-submodules
+      - id: end-of-file-fixer
+        exclude: galata/.*-snapshots
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: requirements-txt-fixer
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: check-builtin-literals
+      - id: trailing-whitespace
+        exclude: (.bumpversion.cfg|yarn.js)
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.28.6
+    hooks:
+      - id: check-github-workflows
+
+  # Check ruff version is aligned with the one in pyproject.toml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: 'npm run prettier:files'
+        language: node
+        types_or: [json, ts, tsx, javascript, jsx, css]
+        exclude: \.ipynb$
+      - id: eslint
+        name: eslint
+        entry: 'npm run eslint:files'
+        language: node
+        types_or: [ts, tsx, javascript, jsx]
+      - id: stylelint
+        name: stylelint
+        entry: 'npm run stylelint:files'
+        language: node
+        types: [css]
+      - id: integrity
+        name: integrity
+        entry: 'npm run integrity --force'
+        language: node
+        stages: [push]

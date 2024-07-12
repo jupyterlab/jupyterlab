@@ -1,6 +1,8 @@
 {
   "title": "Command Palette",
   "description": "Command palette settings.",
+  "jupyter.lab.setting-icon": "ui-components:palette",
+  "jupyter.lab.setting-icon-label": "Command Palette",
   "jupyter.lab.menus": {
     "main": [
       {
@@ -8,6 +10,10 @@
         "items": [
           {
             "command": "apputils:activate-command-palette",
+            "rank": 0
+          },
+          {
+            "type": "separator",
             "rank": 0
           }
         ]

@@ -6,7 +6,6 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ITranslator } from '@jupyterlab/translation';
 import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
@@ -63,22 +62,22 @@ export function addOpenTabsSessionManager(
   managers: IRunningSessionManagers,
   translator: ITranslator,
   labShell: ILabShell
-) {
+): void {
   const signaler = new OpenTabsSignaler(labShell);
   const trans = translator.load('jupyterlab');
 
   managers.add({
     name: trans.__('Open Tabs'),
     running: () => {
-      return toArray(labShell.widgets('main')).map((widget: Widget) => {
+      return Array.from(labShell.widgets('main')).map((widget: Widget) => {
         signaler.addWidget(widget);
         return new OpenTab(widget);
       });
     },
     shutdownAll: () => {
-      toArray(labShell.widgets('main')).forEach((widget: Widget) => {
+      for (const widget of labShell.widgets('main')) {
         widget.close();
-      });
+      }
     },
     refreshRunning: () => {
       return void 0;

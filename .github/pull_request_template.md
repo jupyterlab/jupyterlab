@@ -2,7 +2,7 @@
 Thanks for contributing to JupyterLab!
 Please fill out the following items to submit a pull request.
 See the contributing guidelines for more information:
-https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md
+https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md
 -->
 
 ## References
@@ -19,7 +19,7 @@ https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md
 
 <!-- Describe any visual or user interaction changes and how they address the issue. -->
 
-<!-- For visual changes, include before and after screenshots here. -->
+<!-- For visual changes, include before and after screenshots or GIF/mp4/other video demo here. -->
 
 ## Backwards-incompatible changes
 

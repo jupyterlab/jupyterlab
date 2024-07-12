@@ -19,9 +19,6 @@
       "path": "../docmanager"
     },
     {
-      "path": "../docprovider"
-    },
-    {
       "path": "../docregistry"
     },
     {
@@ -31,10 +28,16 @@
       "path": "../settingregistry"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../statusbar"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

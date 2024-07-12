@@ -1,11 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
+import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   JSONObject,
   PromiseDelegate,
@@ -15,9 +20,8 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import ResizeObserver from 'resize-observer-polyfill';
 import { IOutputAreaModel } from './model';
 
 /**
@@ -39,6 +43,8 @@ const OUTPUT_AREA_OUTPUT_CLASS = 'jp-OutputArea-output';
  * The class name added to prompt children of OutputArea.
  */
 const OUTPUT_AREA_PROMPT_CLASS = 'jp-OutputArea-prompt';
+
+const OUTPUT_AREA_STDIN_HIDING_CLASS = 'jp-OutputArea-stdin-hiding';
 
 /**
  * The class name added to OutputPrompt.
@@ -70,6 +76,11 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
+/**
+ * The overlay that can be clicked to switch between output scrolling modes.
+ */
+const OUTPUT_PROMPT_OVERLAY = 'jp-OutputArea-promptOverlay';
+
 /** ****************************************************************************
  * OutputArea
  ******************************************************************************/
@@ -89,28 +100,30 @@ export class OutputArea extends Widget {
    */
   constructor(options: OutputArea.IOptions) {
     super();
-    const model = (this.model = options.model);
+    super.layout = new PanelLayout();
     this.addClass(OUTPUT_AREA_CLASS);
-    this.rendermime = options.rendermime;
     this.contentFactory =
-      options.contentFactory || OutputArea.defaultContentFactory;
-    this.layout = new PanelLayout();
-    this.trimmedOutputModels = new Array<IOutputModel>();
-    this.maxNumberOutputs = options.maxNumberOutputs || 0;
-    this.headTailNumberOutputs = Math.round(this.maxNumberOutputs / 2);
-    this.headEndIndex = this.headTailNumberOutputs;
-    for (let i = 0; i < model.length; i++) {
+      options.contentFactory ?? OutputArea.defaultContentFactory;
+    this.rendermime = options.rendermime;
+    this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
+    this._translator = options.translator ?? nullTranslator;
+    this._inputHistoryScope = options.inputHistoryScope ?? 'global';
+
+    const model = (this.model = options.model);
+    for (
+      let i = 0;
+      i < Math.min(model.length, this._maxNumberOutputs + 1);
+      i++
+    ) {
       const output = model.get(i);
       this._insertOutput(i, output);
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
+    if (options.promptOverlay) {
+      this._addPromptOverlay();
+    }
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly model: IOutputAreaModel;
 
   /**
    * The content factory used by the widget.
@@ -118,41 +131,31 @@ export class OutputArea extends Widget {
   readonly contentFactory: OutputArea.IContentFactory;
 
   /**
+   * The model used by the widget.
+   */
+  readonly model: IOutputAreaModel;
+
+  /**
    * The rendermime instance used by the widget.
    */
   readonly rendermime: IRenderMimeRegistry;
 
   /**
-   * The hidden output models.
+   * Narrow the type of OutputArea's layout prop
    */
-  private trimmedOutputModels: IOutputModel[];
-
-  /*
-   * The maximum outputs to show in the trimmed
-   * output area.
-   */
-  private maxNumberOutputs: number;
-
-  /*
-   * The maximum outputs to show in the trimmed
-   * output head and tail areas.
-   */
-  private headTailNumberOutputs: number;
-
-  /*
-   * The index for the end of the head in case of trim mode.
-   */
-  private headEndIndex: number;
+  get layout(): PanelLayout {
+    return super.layout as PanelLayout;
+  }
 
   /**
    * A read-only sequence of the children widgets in the output area.
    */
   get widgets(): ReadonlyArray<Widget> {
-    return (this.layout as PanelLayout).widgets;
+    return this.layout.widgets;
   }
 
   /**
-   * A public signal used to indicate the number of outputs has changed.
+   * A public signal used to indicate the number of displayed outputs has changed.
    *
    * #### Notes
    * This is useful for parents who want to apply styling based on the number
@@ -188,12 +191,23 @@ export class OutputArea extends Widget {
     }
     this._future = value;
 
+    value.done
+      .finally(() => {
+        this._pendingInput = false;
+      })
+      .catch(() => {
+        // No-op, required because `finally` re-raises any rejections,
+        // even if caught on the `done` promise level before.
+      });
+
     this.model.clear();
 
     // Make sure there were no input widgets.
     if (this.widgets.length) {
       this._clear();
-      this.outputLengthChanged.emit(this.model.length);
+      this.outputLengthChanged.emit(
+        Math.min(this.model.length, this._maxNumberOutputs)
+      );
     }
 
     // Handle published messages.
@@ -208,6 +222,43 @@ export class OutputArea extends Widget {
         this.onInputRequest(msg, value);
       }
     };
+  }
+
+  /**
+   * Signal emitted when an output area is requesting an input. The signal
+   * carries the input widget that this class creates in response to the input
+   * request.
+   */
+  get inputRequested(): ISignal<OutputArea, IStdin> {
+    return this._inputRequested;
+  }
+
+  /**
+   * A flag indicating if the output area has pending input.
+   */
+  get pendingInput(): boolean {
+    return this._pendingInput;
+  }
+
+  /**
+   * The maximum number of output items to display on top and bottom of cell output.
+   *
+   * ### Notes
+   * It is set to Infinity if no trim is applied.
+   */
+  get maxNumberOutputs(): number {
+    return this._maxNumberOutputs;
+  }
+  set maxNumberOutputs(limit: number) {
+    if (limit <= 0) {
+      console.warn(`OutputArea.maxNumberOutputs must be strictly positive.`);
+      return;
+    }
+    const lastShown = this._maxNumberOutputs;
+    this._maxNumberOutputs = limit;
+    if (lastShown < limit) {
+      this._showTrimmedOutputs(lastShown);
+    }
   }
 
   /**
@@ -233,7 +284,6 @@ export class OutputArea extends Widget {
     switch (args.type) {
       case 'add':
         this._insertOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
         break;
       case 'remove':
         if (this.widgets.length) {
@@ -260,21 +310,48 @@ export class OutputArea extends Widget {
             // prevent jitter caused by immediate height change
             this._preventHeightChangeJitter();
           }
-          this.outputLengthChanged.emit(this.model.length);
         }
         break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
-        this.outputLengthChanged.emit(this.model.length);
         break;
       default:
         break;
     }
+    this.outputLengthChanged.emit(
+      Math.min(this.model.length, this._maxNumberOutputs)
+    );
+  }
+
+  /**
+   * Emitted when user requests toggling of the output scrolling mode.
+   */
+  get toggleScrolling(): ISignal<OutputArea, void> {
+    return this._toggleScrolling;
+  }
+
+  get initialize(): ISignal<OutputArea, void> {
+    return this._initialize;
+  }
+
+  /**
+   * Add overlay allowing to toggle scrolling.
+   */
+  private _addPromptOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = OUTPUT_PROMPT_OVERLAY;
+    overlay.addEventListener('click', () => {
+      this._toggleScrolling.emit();
+    });
+    this.node.appendChild(overlay);
+    requestAnimationFrame(() => {
+      this._initialize.emit();
+    });
   }
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
-   * *
+   *
    * @param startIndex - The index of first element removed
    *
    * @param count - The number of elements removed from model items
@@ -301,16 +378,27 @@ export class OutputArea extends Widget {
   /**
    * Follow changes on the output model state.
    */
-  protected onStateChanged(sender: IOutputAreaModel): void {
-    this.trimmedOutputModels = new Array<IOutputModel>();
-    for (let i = 0; i < this.model.length; i++) {
-      this._setOutput(i, this.model.get(i));
+  protected onStateChanged(
+    sender: IOutputAreaModel,
+    change: number | void
+  ): void {
+    const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
+    if (change) {
+      if (change >= this._maxNumberOutputs) {
+        // Bail early
+        return;
+      }
+      this._setOutput(change, this.model.get(change));
+    } else {
+      for (let i = 0; i < outputLength; i++) {
+        this._setOutput(i, this.model.get(i));
+      }
     }
-    this.outputLengthChanged.emit(this.model.length);
+    this.outputLengthChanged.emit(outputLength);
   }
 
   /**
-   * Clear the widget inputs and outputs.
+   * Clear the widget outputs.
    */
   private _clear(): void {
     // Bail if there is no work to do.
@@ -372,75 +460,87 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
+    // Indicate that input is pending
+    this._pendingInput = true;
+
     const input = factory.createStdin({
+      parent_header: msg.header,
       prompt: stdinPrompt,
       password,
-      future
+      future,
+      translator: this._translator,
+      inputHistoryScope: this._inputHistoryScope
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
-    const layout = this.layout as PanelLayout;
-    layout.addWidget(panel);
+    // Increase number of outputs to display the result up to the input request.
+    if (this.model.length >= this.maxNumberOutputs) {
+      this.maxNumberOutputs = this.model.length;
+    }
+    this._inputRequested.emit(input);
 
-    const buttons = [
-      Dialog.cancelButton({ label: 'Cancel' }),
-      Dialog.okButton({ label: 'Select' })
-    ];
-
-    const modalInput = factory.createStdin({
-      prompt: stdinPrompt,
-      password,
-      future
-    });
-
-    const dialog = new Dialog<Promise<string>>({
-      title: 'Your input is requested',
-      body: modalInput,
-      buttons
-    });
-
-    void dialog.launch().then(result => {
-      if (result.button.accept) {
-        const value = result.value;
-        if (value) {
-          void value.then(v => {
-            // Use stdin as the stream so it does not get combined with stdout.
-            this.model.add({
-              output_type: 'stream',
-              name: 'stdin',
-              text: v + '\n'
-            });
-            panel.dispose();
-          });
-        }
-      }
-    });
+    // Get the input node to ensure focus after updating the model upon user reply.
+    const inputNode = input.node.getElementsByTagName('input')[0];
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
      * and remove the stdin widget.
      */
     void input.value.then(value => {
+      // Increase number of outputs to display the result of stdin if needed.
+      if (this.model.length >= this.maxNumberOutputs) {
+        this.maxNumberOutputs = this.model.length + 1;
+      }
+      panel.addClass(OUTPUT_AREA_STDIN_HIDING_CLASS);
       // Use stdin as the stream so it does not get combined with stdout.
+      // Note: because it modifies DOM it may (will) shift focus away from the input node.
       this.model.add({
         output_type: 'stream',
         name: 'stdin',
         text: value + '\n'
       });
-      panel.dispose();
+      // Refocus the input node after it lost focus due to update of the model.
+      inputNode.focus();
+
+      // Indicate that input is no longer pending
+      this._pendingInput = false;
+
+      // Keep the input in view for a little while; this (along refocusing)
+      // ensures that we can avoid the cell editor stealing the focus, and
+      // leading to user inadvertently modifying editor content when executing
+      // consecutive commands in short succession.
+      window.setTimeout(() => {
+        // Tack currently focused element to ensure that it remains on it
+        // after disposal of the panel with the old input
+        // (which modifies DOM and can lead to focus jump).
+        const focusedElement = document.activeElement;
+        // Dispose the old panel with no longer needed input box.
+        panel.dispose();
+        // Refocus the element that was focused before.
+        if (focusedElement && focusedElement instanceof HTMLElement) {
+          focusedElement.focus();
+        }
+      }, 500);
     });
+
+    // Note: the `input.value` promise must be listened to before we attach the panel
+    this.layout.addWidget(panel);
   }
 
   /**
    * Update an output in the layout in place.
    */
   private _setOutput(index: number, model: IOutputModel): void {
-    const layout = this.layout as PanelLayout;
-    const panel = layout.widgets[index] as Panel;
-    const renderer = (panel.widgets
-      ? panel.widgets[1]
-      : panel) as IRenderMime.IRenderer;
+    if (index >= this._maxNumberOutputs) {
+      return;
+    }
+    const panel = this.layout.widgets[index] as Panel;
+    const renderer = (
+      panel.widgets
+        ? panel.widgets.filter(it => 'renderModel' in it).pop()
+        : panel
+    ) as IRenderMime.IRenderer;
     // Check whether it is safe to reuse renderer:
     // - Preferred mime type has not changed
     // - Isolation has not changed
@@ -449,14 +549,13 @@ export class OutputArea extends Widget {
       model.trusted ? 'any' : 'ensure'
     );
     if (
-      renderer.renderModel &&
       Private.currentPreferredMimetype.get(renderer) === mimeType &&
       OutputArea.isIsolated(mimeType, model.metadata) ===
         renderer instanceof Private.IsolatedRenderer
     ) {
       void renderer.renderModel(model);
     } else {
-      layout.widgets[index].dispose();
+      this.layout.widgets[index].dispose();
       this._insertOutput(index, model);
     }
   }
@@ -468,56 +567,32 @@ export class OutputArea extends Widget {
    * @param model - The model of the output to be inserted.
    */
   private _insertOutput(index: number, model: IOutputModel): void {
-    if (index === 0) {
-      this.trimmedOutputModels = new Array<IOutputModel>();
+    if (index > this._maxNumberOutputs) {
+      return;
     }
-    if (index === this.maxNumberOutputs && this.maxNumberOutputs !== 0) {
-      // TODO Improve style of the display message.
-      const separatorModel = this.model.contentFactory.createOutputModel({
-        value: {
-          output_type: 'display_data',
-          data: {
-            'text/html': `
-              <a style="margin: 10px; text-decoration: none;">
-                <pre>Output of this cell has been trimmed on the initial display.</pre>
-                <pre>Displaying the first ${this.maxNumberOutputs} top and last bottom outputs.</pre>
-                <pre>Click on this message to get the complete output.</pre>
-              </a>
-              `
-          }
-        }
-      });
-      const onClick = () =>
-        this._showTrimmedOutputs(this.headTailNumberOutputs);
-      const separator = this.createOutputItem(separatorModel);
-      separator!.node.addEventListener('click', onClick);
-      const layout = this.layout as PanelLayout;
-      layout.insertWidget(this.headEndIndex, separator!);
-    }
-    const output = this._createOutput(model);
-    const layout = this.layout as PanelLayout;
-    if (index < this.maxNumberOutputs || this.maxNumberOutputs === 0) {
-      layout.insertWidget(index, output);
-    } else if (index >= this.maxNumberOutputs) {
-      layout.removeWidgetAt(this.headTailNumberOutputs + 1);
-      layout.insertWidget(index, output);
-    }
-    if (index >= this.headTailNumberOutputs && this.maxNumberOutputs !== 0) {
-      this.trimmedOutputModels.push(model);
-    }
-    if (!this._outputTracker.has(output)) {
-      void this._outputTracker.add(output);
-    }
-  }
 
-  private _createOutput(model: IOutputModel): Widget {
-    let output = this.createOutputItem(model);
-    if (output) {
-      output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+    const layout = this.layout as PanelLayout;
+
+    if (index === this._maxNumberOutputs) {
+      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
+        const lastShown = this._maxNumberOutputs;
+        this._maxNumberOutputs = Infinity;
+        this._showTrimmedOutputs(lastShown);
+      });
+      layout.insertWidget(index, this._wrappedOutput(warning));
     } else {
-      output = new Widget();
+      let output = this.createOutputItem(model);
+      if (output) {
+        output.toggleClass(EXECUTE_CLASS, model.executionCount !== null);
+      } else {
+        output = new Widget();
+      }
+
+      if (!this._outputTracker.has(output)) {
+        void this._outputTracker.add(output);
+      }
+      layout.insertWidget(index, output);
     }
-    return output;
   }
 
   /**
@@ -528,20 +603,22 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Remove the information message related to the trimmed output
-   * and show all previously trimmed outputs.
+   * Dispose information message and show output models from the given
+   * index to maxNumberOutputs
+   *
+   * @param lastShown Starting model index to insert.
    */
-  private _showTrimmedOutputs(headTailNumberOutputs: number) {
-    const layout = this.layout as PanelLayout;
-    layout.removeWidgetAt(headTailNumberOutputs);
-    for (
-      let i = 0;
-      i < this.trimmedOutputModels.length - this.headTailNumberOutputs;
-      i++
-    ) {
-      const output = this._createOutput(this.trimmedOutputModels[i]);
-      layout.insertWidget(headTailNumberOutputs + i, output);
+  private _showTrimmedOutputs(lastShown: number) {
+    // Dispose information widget
+    this.widgets[lastShown].dispose();
+
+    for (let idx = lastShown; idx < this.model.length; idx++) {
+      this._insertOutput(idx, this.model.get(idx));
     }
+
+    this.outputLengthChanged.emit(
+      Math.min(this.model.length, this._maxNumberOutputs)
+    );
   }
 
   /**
@@ -557,18 +634,7 @@ export class OutputArea extends Widget {
       return null;
     }
 
-    const panel = new Private.OutputPanel();
-
-    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
-
-    const prompt = this.contentFactory.createOutputPrompt();
-    prompt.executionCount = model.executionCount;
-    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
-    panel.addWidget(prompt);
-
-    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
-    panel.addWidget(output);
-    return panel;
+    return this._wrappedOutput(output, model.executionCount);
   }
 
   /**
@@ -592,7 +658,8 @@ export class OutputArea extends Widget {
     output.renderModel(model).catch(error => {
       // Manually append error message to output
       const pre = document.createElement('pre');
-      pre.textContent = `Javascript Error: ${error.message}`;
+      const trans = this._translator.load('jupyterlab');
+      pre.textContent = trans.__('Javascript Error: %1', error.message);
       output.node.appendChild(pre);
 
       // Remove mime-type-specific CSS classes
@@ -615,7 +682,6 @@ export class OutputArea extends Widget {
     const transient = ((msg.content as any).transient || {}) as JSONObject;
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
-
     switch (msgType) {
       case 'execute_result':
       case 'display_data':
@@ -638,6 +704,15 @@ export class OutputArea extends Widget {
           }
         }
         break;
+      case 'status': {
+        const executionState = (msg as KernelMessage.IStatusMsg).content
+          .execution_state;
+        if (executionState === 'idle') {
+          // If status is idle, the kernel is no longer blocked by the input
+          this._pendingInput = false;
+        }
+        break;
+      }
       default:
         break;
     }
@@ -677,15 +752,50 @@ export class OutputArea extends Widget {
     model.add(output);
   };
 
-  private _minHeightTimeout: number | null = null;
+  /**
+   * Wrap a output widget within a output panel
+   *
+   * @param output Output widget to wrap
+   * @param executionCount Execution count
+   * @returns The output panel
+   */
+  private _wrappedOutput(
+    output: Widget,
+    executionCount: number | null = null
+  ): Panel {
+    const panel = new Private.OutputPanel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    const prompt = this.contentFactory.createOutputPrompt();
+    prompt.executionCount = executionCount;
+    prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
+    panel.addWidget(prompt);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
+  }
+
+  private _displayIdMap = new Map<string, number[]>();
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   >;
-  private _displayIdMap = new Map<string, number[]>();
+  /**
+   * The maximum outputs to show in the trimmed
+   * output area.
+   */
+  private _maxNumberOutputs: number;
+  private _minHeightTimeout: number | null = null;
+  private _inputRequested = new Signal<OutputArea, IStdin>(this);
+  private _toggleScrolling = new Signal<OutputArea, void>(this);
+  private _initialize = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
+  private _translator: ITranslator;
+  private _inputHistoryScope: 'global' | 'session' = 'global';
+  private _pendingInput: boolean = false;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -704,10 +814,17 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected createOutputItem(model: IOutputModel): Widget | null {
     const output = this.createRenderedMimetype(model);
-    if (output) {
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+
+    if (!output) {
+      return null;
     }
-    return output;
+
+    const panel = new Private.OutputPanel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
   }
 }
 
@@ -738,6 +855,21 @@ export namespace OutputArea {
      * The maximum number of output items to display on top and bottom of cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Whether to show prompt overlay emitting `toggleScrolling` signal.
+     */
+    promptOverlay?: boolean;
+
+    /**
+     * Translator
+     */
+    readonly translator?: ITranslator;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
   }
 
   /**
@@ -891,6 +1023,85 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
+  private static _history: Map<string, string[]> = new Map();
+
+  private static _historyIx(key: string, ix: number): number | undefined {
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
+    // wrap nonpositive ix to nonnegative ix
+    if (ix <= 0) {
+      return len + ix;
+    }
+  }
+
+  private static _historyAt(key: string, ix: number): string | undefined {
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
+    const ixpos = Stdin._historyIx(key, ix);
+
+    if (ixpos !== undefined && ixpos < len) {
+      return history[ixpos];
+    }
+    // return undefined if ix is out of bounds
+  }
+
+  private static _historyPush(key: string, line: string): void {
+    const history = Stdin._history.get(key)!;
+    history.push(line);
+    if (history.length > 1000) {
+      // truncate line history if it's too long
+      history.shift();
+    }
+  }
+
+  private static _historySearch(
+    key: string,
+    pat: string,
+    ix: number,
+    reverse = true
+  ): number | undefined {
+    const history = Stdin._history.get(key)!;
+    const len = history.length;
+    const ixpos = Stdin._historyIx(key, ix);
+    const substrFound = (x: string) => x.search(pat) !== -1;
+
+    if (ixpos === undefined) {
+      return;
+    }
+
+    if (reverse) {
+      if (ixpos === 0) {
+        // reverse search fails if already at start of history
+        return;
+      }
+
+      const ixFound = (history.slice(0, ixpos) as any).findLastIndex(
+        substrFound
+      );
+      if (ixFound !== -1) {
+        // wrap ix to negative
+        return ixFound - len;
+      }
+    } else {
+      if (ixpos >= len - 1) {
+        // forward search fails if already at end of history
+        return;
+      }
+
+      const ixFound = history.slice(ixpos + 1).findIndex(substrFound);
+      if (ixFound !== -1) {
+        // wrap ix to negative and adjust for slice
+        return ixFound - len + ixpos + 1;
+      }
+    }
+  }
+
   /**
    * Construct a new input widget.
    */
@@ -899,10 +1110,32 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
-    this._input = this.node.getElementsByTagName('input')[0];
-    this._input.focus();
     this._future = options.future;
+    this._historyIndex = 0;
+    this._historyKey =
+      options.inputHistoryScope === 'session'
+        ? options.parent_header.session
+        : '';
+    this._historyPat = '';
+    this._parentHeader = options.parent_header;
+    this._password = options.password;
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this._value = options.prompt + ' ';
+
+    this._input = this.node.getElementsByTagName('input')[0];
+    // make users aware of the line history feature
+    if (!this._password) {
+      this._input.placeholder = this._trans.__(
+        '↑↓ for history. Search history with c-↑/c-↓'
+      );
+    } else {
+      this._input.placeholder = '';
+    }
+
+    // initialize line history
+    if (!Stdin._history.has(this._historyKey)) {
+      Stdin._history.set(this._historyKey, []);
+    }
   }
 
   /**
@@ -910,15 +1143,6 @@ export class Stdin extends Widget implements IStdin {
    */
   get value(): Promise<string> {
     return this._promise.promise.then(() => this._value);
-  }
-
-  /**
-   * Submit and get the value of the Stdin widget.
-   */
-  getValue(): Promise<string> {
-    console.log('WHAT THE FUCK!');
-    this.submit();
-    return this.value;
   }
 
   /**
@@ -931,30 +1155,112 @@ export class Stdin extends Widget implements IStdin {
    * called in response to events on the dock panel's node. It should
    * not be called directly by user code.
    */
-  handleEvent(event: Event): void {
+  handleEvent(event: KeyboardEvent): void {
+    if (this._resolved) {
+      // Do not handle any more key events if the promise was resolved.
+      event.preventDefault();
+      return;
+    }
+    const input = this._input;
+
     if (event.type === 'keydown') {
-      if ((event as KeyboardEvent).keyCode === 13) {
-        // Enter
-        this.submit();
+      if (event.key === 'Enter') {
+        this.resetSearch();
+
+        this._future.sendInputReply(
+          {
+            status: 'ok',
+            value: input.value
+          },
+          this._parentHeader
+        );
+        if (this._password) {
+          this._value += '········';
+        } else {
+          this._value += input.value;
+          Stdin._historyPush(this._historyKey, input.value);
+        }
+        this._resolved = true;
+        this._promise.resolve(void 0);
+      } else if (event.key === 'Escape') {
+        // currently this gets clobbered by the documentsearch:end command at the notebook level
+        this.resetSearch();
+        input.blur();
+      } else if (
+        event.ctrlKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
+        if (this._historyPat === '') {
+          this._historyPat = input.value;
+        }
+
+        const reverse = event.key === 'ArrowUp';
+        const searchHistoryIx = Stdin._historySearch(
+          this._historyKey,
+          this._historyPat,
+          this._historyIndex,
+          reverse
+        );
+
+        if (searchHistoryIx !== undefined) {
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            searchHistoryIx
+          );
+          if (historyLine !== undefined) {
+            if (this._historyIndex === 0) {
+              this._valueCache = input.value;
+            }
+
+            this._setInputValue(historyLine);
+            this._historyIndex = searchHistoryIx;
+            // The default action for ArrowUp is moving to first character
+            // but we want to keep the cursor at the end.
+            event.preventDefault();
+          }
+        }
+      } else if (event.key === 'ArrowUp') {
+        this.resetSearch();
+
+        const historyLine = Stdin._historyAt(
+          this._historyKey,
+          this._historyIndex - 1
+        );
+        if (historyLine) {
+          if (this._historyIndex === 0) {
+            this._valueCache = input.value;
+          }
+          this._setInputValue(historyLine);
+          --this._historyIndex;
+          // The default action for ArrowUp is moving to first character
+          // but we want to keep the cursor at the end.
+          event.preventDefault();
+        }
+      } else if (event.key === 'ArrowDown') {
+        this.resetSearch();
+
+        if (this._historyIndex === 0) {
+          // do nothing
+        } else if (this._historyIndex === -1) {
+          this._setInputValue(this._valueCache);
+          ++this._historyIndex;
+        } else {
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            this._historyIndex + 1
+          );
+          if (historyLine) {
+            this._setInputValue(historyLine);
+            ++this._historyIndex;
+          }
+        }
       }
     }
   }
 
-  /*
-   * Submit input value.
-   */
-  submit() {
-    const input = this._input;
-    this._future.sendInputReply({
-      status: 'ok',
-      value: input.value
-    });
-    if (input.type === 'password') {
-      this._value += Array(input.value.length + 1).join('·');
-    } else {
-      this._value += input.value;
-    }
-    this._promise.resolve(void 0);
+  protected resetSearch(): void {
+    this._historyPat = '';
   }
 
   /**
@@ -962,13 +1268,6 @@ export class Stdin extends Widget implements IStdin {
    */
   protected onAfterAttach(msg: Message): void {
     this._input.addEventListener('keydown', this);
-    this.update();
-  }
-
-  /**
-   * Handle `update-request` messages sent to the widget.
-   */
-  protected onUpdateRequest(msg: Message): void {
     this._input.focus();
   }
 
@@ -979,10 +1278,25 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
+  private _setInputValue(value: string) {
+    this._input.value = value;
+    // Set cursor at the end; this is usually not necessary when input is
+    // focused but having the explicit placement ensures consistency.
+    this._input.setSelectionRange(value.length, value.length);
+  }
+
   private _future: Kernel.IShellFuture;
+  private _historyIndex: number;
+  private _historyKey: string;
+  private _historyPat: string;
   private _input: HTMLInputElement;
-  private _value: string;
+  private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
+  private _password: boolean;
   private _promise = new PromiseDelegate<void>();
+  private _trans: TranslationBundle;
+  private _value: string;
+  private _valueCache: string;
+  private _resolved: boolean = false;
 }
 
 export namespace Stdin {
@@ -1004,6 +1318,21 @@ export namespace Stdin {
      * The kernel future associated with the request.
      */
     future: Kernel.IShellFuture;
+
+    /**
+     * The header of the input_request message.
+     */
+    parent_header: KernelMessage.IInputReplyMsg['parent_header'];
+
+    /**
+     * Translator
+     */
+    readonly translator?: ITranslator;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
   }
 }
 
@@ -1041,7 +1370,8 @@ namespace Private {
    */
   export class IsolatedRenderer
     extends Widget
-    implements IRenderMime.IRenderer {
+    implements IRenderMime.IRenderer
+  {
     /**
      * Create an isolated renderer.
      */
@@ -1142,5 +1472,75 @@ namespace Private {
       super.onAfterDetach(msg);
       this.node.removeEventListener('contextmenu', this._onContext.bind(this));
     }
+  }
+
+  /**
+   * Trimmed outputs information widget.
+   */
+  export class TrimmedOutputs extends Widget {
+    /**
+     * Widget constructor
+     *
+     * ### Notes
+     * The widget will be disposed on click after calling the callback.
+     *
+     * @param maxNumberOutputs Maximal number of outputs to display
+     * @param _onClick Callback on click event on the widget
+     */
+    constructor(
+      maxNumberOutputs: number,
+      onClick: (event: MouseEvent) => void
+    ) {
+      const node = document.createElement('div');
+      const title = `The first ${maxNumberOutputs} are displayed`;
+      const msg = 'Show more outputs';
+      node.insertAdjacentHTML(
+        'afterbegin',
+        `<a title=${title}>
+          <pre>${msg}</pre>
+        </a>`
+      );
+      super({
+        node
+      });
+      this._onClick = onClick;
+      this.addClass('jp-TrimmedOutputs');
+      this.addClass('jp-RenderedHTMLCommon');
+    }
+
+    /**
+     * Handle the DOM events for widget.
+     *
+     * @param event - The DOM event sent to the widget.
+     *
+     * #### Notes
+     * This method implements the DOM `EventListener` interface and is
+     * called in response to events on the widget's DOM node. It should
+     * not be called directly by user code.
+     */
+    handleEvent(event: Event): void {
+      if (event.type === 'click') {
+        this._onClick(event as MouseEvent);
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
+    }
+
+    /**
+     * A message handler invoked on a `'before-detach'`
+     * message
+     */
+    protected onBeforeDetach(msg: Message): void {
+      super.onBeforeDetach(msg);
+      this.node.removeEventListener('click', this);
+    }
+
+    private _onClick: (event: MouseEvent) => void;
   }
 }

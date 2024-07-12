@@ -1,9 +1,19 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _installation:
 
 Installation
 ============
 
-JupyterLab can be installed using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker``.
+JupyterLab can be installed as a terminal-launched application accessible via a web browser (default), or as a desktop application which is running in its own window and can be opened by clicking on a desktop shortcut (`JupyterLab Desktop <https://github.com/jupyterlab/jupyterlab-desktop>`__). This page describes installation of the default (terminal-launched) JupyterLab application using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker`` and assumes basic knowledge of the terminal. For JupyterLab Desktop instructions see the `Installation section <https://github.com/jupyterlab/jupyterlab-desktop#installation>`__ in the JupyterLab Desktop repository.
+
+.. warning::
+    New versions of JupyterLab may break backwards compatibility with extensions and other
+    Jupyter customizations. As noted in :ref:`versioning_notes`, JupyterLab development and
+    release cycles follow semantic versioning, so we recommend planning your installation and
+    upgrade procedures to account for possible breaking changes that may disrupt your usage
+    of JupyterLab and any related tools that are critical to your workflows.
 
 conda
 -----
@@ -32,11 +42,13 @@ If you use ``pip``, you can install it with:
 
     pip install jupyterlab
 
+If you are using a macOS version that comes with Python 2, run ``pip3``
+instead of ``pip``.
 
 If installing using ``pip install --user``, you must add the user-level
 ``bin`` directory to your ``PATH`` environment variable in order to launch
-``jupyter lab``. If you are using a Unix derivative (FreeBSD, GNU / Linux, 
-macOS), you can achieve this by using ``export PATH="$HOME/.local/bin:$PATH"`` command.
+``jupyter lab``. If you are using a Unix derivative (FreeBSD, GNU/Linux,
+macOS), you can do this by running ``export PATH="$HOME/.local/bin:$PATH"``.
 
 pipenv
 ------
@@ -62,8 +74,8 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
     jupyter lab
-    
-Alternatively, you can run ``jupyter lab`` inside the virtualenv with 
+
+Alternatively, you can run ``jupyter lab`` inside the virtualenv with
 
 .. code:: bash
 
@@ -86,6 +98,38 @@ Usage with JupyterHub
 Read the details on our :ref:`JupyterLab on JupyterHub documentation page <jupyterhub>`.
 
 
+Usage with Jupyverse
+--------------------
+
+`Jupyverse <https://github.com/jupyter-server/jupyverse/>`__ is a next-generation Jupyter server based on
+`FastAPI <https://fastapi.tiangolo.com/>`__. It can be used instead of
+`jupyter-server <https://github.com/jupyter-server/jupyter_server/>`__, the Jupyter server installed by default with JupyterLab.
+Note that ``jupyter-server`` extensions won't work with ``jupyverse`` (for which there might be equivalent plugins).
+
+You can install ``jupyverse`` with ``pip``:
+
+.. code:: bash
+
+    pip install jupyverse[auth, jupyterlab]
+
+or with ``conda``:
+
+.. code:: bash
+
+    conda install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
+or with ``mamba``:
+
+.. code:: bash
+
+    mamba install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
+And run it with:
+
+.. code:: bash
+
+    jupyverse
+
 Supported browsers
 ------------------
 
@@ -94,30 +138,9 @@ The latest versions of the following browsers are currently known to work:
 -  Firefox
 -  Chrome
 -  Safari
+-  Edge
 
 Earlier browser versions may also work, but come with no guarantees.
-
-JupyterLab uses CSS Variables for styling, which is one reason for the
-minimum versions listed above.  IE 11+ or Edge 14 do not support
-CSS Variables, and are not directly supported at this time.
-A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS files in the
-``jupyterlab/build`` directory manually if desired.
-
-Usage with private NPM registry
--------------------------------
-
-To install some extensions, you will need access to an NPM packages registry. Some companies do not allow
-reaching directly public registry and have a private registry. To use it, you need to configure ``npm``
-**and** ``yarn`` to point to that registry (ask your corporate IT department for the correct URL):
-
-.. code::
-
-    npm config set registry https://registry.company.com/
-    yarn config set registry https://registry.company.com/
-    
-JupyterLab will pick up that registry automatically. You can check which registry URL is used by JupyterLab by running::
-
-    python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
 
 Installation problems
 ---------------------
@@ -175,7 +198,7 @@ which means SSL communication will not be required for downloading Python librar
     pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pandas
 
 
-Using the tips from above, you can handle many network problems 
+Using the tips from above, you can handle many network problems
 related to installing Python libraries.
 
 Many Jupyter extensions require having working ``npm`` and ``jlpm`` (alias for ``yarn``) commands,
@@ -193,7 +216,7 @@ You can set the proxy or registry used for npm with the following commands.
 
     # Set default registry for NPM (optional, useful in case if common JavaScript libs cannot be found)
     npm config set registry http://registry.npmjs.org/
-    jlpm config set registry https://registry.yarnpkg.com/
+    jlpm config set npmRegistryServer https://registry.yarnpkg.com/
 
 
 In case you can communicate via HTTP, but installation with ``npm`` fails

@@ -1,8 +1,13 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 const playwright = require('playwright');
-const inspect = require('util').inspect;
 const path = require('path');
 const fs = require('fs');
 
+// eslint-disable-next-line no-redeclare
 const URL = process.argv[2];
 const BROWSER_VAR = 'JLAB_BROWSER_TYPE';
 const BROWSER = process.env[BROWSER_VAR] || 'chromium';
@@ -23,6 +28,7 @@ if (OUTPUT) {
 async function main() {
   /* eslint-disable no-console */
   console.info(`Starting headless ${BROWSER}...`);
+  let testError = null;
 
   const pwBrowser = playwright[BROWSER];
   const browser = await pwBrowser.launch({
@@ -58,10 +64,14 @@ async function main() {
   await page.waitForNavigation();
 
   console.log('Waiting for page content..');
-  const html = await page.content();
-  if (inspect(html).indexOf('jupyter-config-data') === -1) {
-    console.error('Error loading JupyterLab page:');
-    console.error(html);
+
+  try {
+    await page.locator('#jupyter-config-data').waitFor({ state: 'attached' });
+  } catch (reason) {
+    console.error('Error loading JupyterLab page:', reason);
+    // Limit to 1000 characters
+    console.error((await page.content()).substring(0, 1000));
+    testError = reason;
   }
 
   console.log('Waiting for #main selector...');
@@ -73,7 +83,6 @@ async function main() {
     state: 'attached'
   });
   console.log('Waiting for application to start...');
-  let testError = null;
 
   try {
     await page.waitForSelector('.completed', { state: 'attached' });

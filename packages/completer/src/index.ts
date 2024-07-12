@@ -6,10 +6,13 @@
  */
 
 export * from './handler';
-export * from './kernelconnector';
-export * from './contextconnector';
-export * from './connector';
 export * from './model';
 export * from './widget';
-
 export * from './tokens';
+export * from './manager';
+export * from './reconciliator';
+export * from './icons';
+export * from './inline';
+export * from './default/contextprovider';
+export * from './default/kernelprovider';
+export * from './default/inlinehistoryprovider';

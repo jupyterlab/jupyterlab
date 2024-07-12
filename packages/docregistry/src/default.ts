@@ -1,34 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
+import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IModelDB } from '@jupyterlab/observables';
+import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
-import * as models from '@jupyterlab/shared-models';
+import { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
+import { createReadonlyLabel } from './components';
 
 /**
  * The default implementation of a document model.
  */
 export class DocumentModel
   extends CodeEditor.Model
-  implements DocumentRegistry.ICodeModel {
+  implements DocumentRegistry.ICodeModel
+{
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, modelDB?: IModelDB) {
-    super({ modelDB });
-    this._defaultLang = languagePreference || '';
-    const filemodel = new models.YFile() as models.ISharedFile;
-    this.switchSharedModel(filemodel, true);
-    this.value.changed.connect(this.triggerContentChange, this);
+  constructor(options: DocumentRegistry.IModelOptions<ISharedFile> = {}) {
+    super({ sharedModel: options.sharedModel });
+    this._defaultLang = options.languagePreference ?? '';
+    this._collaborationEnabled = !!options.collaborationEnabled;
+
+    this.sharedModel.changed.connect(this._onStateChanged, this);
   }
 
   /**
@@ -52,12 +53,16 @@ export class DocumentModel
     return this._dirty;
   }
   set dirty(newValue: boolean) {
-    if (newValue === this._dirty) {
+    const oldValue = this._dirty;
+    if (newValue === oldValue) {
       return;
     }
-    const oldValue = this._dirty;
     this._dirty = newValue;
-    this.triggerStateChange({ name: 'dirty', oldValue, newValue });
+    this.triggerStateChange({
+      name: 'dirty',
+      oldValue,
+      newValue
+    });
   }
 
   /**
@@ -96,10 +101,17 @@ export class DocumentModel
   }
 
   /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborationEnabled;
+  }
+
+  /**
    * Serialize the model to a string.
    */
   toString(): string {
-    return this.value.text;
+    return this.sharedModel.getSource();
   }
 
   /**
@@ -109,14 +121,14 @@ export class DocumentModel
    * Should emit a [contentChanged] signal.
    */
   fromString(value: string): void {
-    this.value.text = value;
+    this.sharedModel.setSource(value);
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): PartialJSONValue {
-    return JSON.parse(this.value.text || 'null');
+    return JSON.parse(this.sharedModel.getSource() || 'null');
   }
 
   /**
@@ -151,21 +163,51 @@ export class DocumentModel
     this.dirty = true;
   }
 
+  private _onStateChanged(sender: ISharedFile, changes: DocumentChange): void {
+    if ((changes as FileChange).sourceChange) {
+      this.triggerContentChange();
+    }
+    if (changes.stateChange) {
+      changes.stateChange.forEach(value => {
+        if (value.name === 'dirty') {
+          // Setting `dirty` will trigger the state change.
+          // We always set `dirty` because the shared model state
+          // and the local attribute are synchronized one way shared model -> _dirty
+          this.dirty = value.newValue;
+        } else if (value.oldValue !== value.newValue) {
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
+        }
+      });
+    }
+  }
+
   /**
    * The shared notebook model.
    */
-  readonly sharedModel: models.ISharedFile;
+  readonly sharedModel: ISharedFile;
   private _defaultLang = '';
   private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _collaborationEnabled: boolean;
 }
 
 /**
  * An implementation of a model factory for text files.
  */
 export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
+  /**
+   * Instantiates a TextModelFactory.
+   */
+  constructor(collaborative?: boolean) {
+    this._collaborative = collaborative ?? true;
+  }
+
   /**
    * The name of the model type.
    *
@@ -196,6 +238,13 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   }
 
   /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborative;
+  }
+
+  /**
    * Get whether the model factory has been disposed.
    */
   get isDisposed(): boolean {
@@ -212,29 +261,29 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   /**
    * Create a new model.
    *
-   * @param languagePreference - An optional kernel language preference.
-   * @param modelDB - An optional modelDB.
-   * @param isInitialized - An optional flag to check if the model is initialized.
+   * @param options - Model options.
    *
    * @returns A new document model.
    */
   createNew(
-    languagePreference?: string,
-    modelDB?: IModelDB,
-    isInitialized?: boolean
+    options: DocumentRegistry.IModelOptions<ISharedFile> = {}
   ): DocumentRegistry.ICodeModel {
-    return new DocumentModel(languagePreference, modelDB);
+    const collaborative = options.collaborationEnabled && this.collaborative;
+    return new DocumentModel({
+      ...options,
+      collaborationEnabled: collaborative
+    });
   }
 
   /**
    * Get the preferred kernel language given a file path.
    */
   preferredLanguage(path: string): string {
-    const mode = Mode.findByFileName(path);
-    return mode && mode.mode;
+    return '';
   }
 
   private _isDisposed = false;
+  private _collaborative: boolean;
 }
 
 /**
@@ -277,13 +326,15 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U> {
+> implements DocumentRegistry.IWidgetFactory<T, U>
+{
   /**
    * Construct a new `ABCWidgetFactory`.
    */
   constructor(options: DocumentRegistry.IWidgetFactoryOptions<T>) {
     this._translator = options.translator || nullTranslator;
     this._name = options.name;
+    this._label = options.label || options.name;
     this._readOnly = options.readOnly === undefined ? false : options.readOnly;
     this._defaultFor = options.defaultFor ? options.defaultFor.slice() : [];
     this._defaultRendered = (options.defaultRendered || []).slice();
@@ -292,6 +343,7 @@ export abstract class ABCWidgetFactory<
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
     this._shutdownOnClose = !!options.shutdownOnClose;
+    this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
   }
 
@@ -329,10 +381,18 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * The name of the widget to display in dialogs.
+   * A unique name identifying of the widget.
    */
   get name(): string {
     return this._name;
+  }
+
+  /**
+   * The label of the widget to display in dialogs.
+   * If not given, name is used instead.
+   */
+  get label(): string {
+    return this._label;
   }
 
   /**
@@ -396,6 +456,16 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Whether to automatically select the preferred kernel during a kernel start
+   */
+  get autoStartDefault(): boolean {
+    return this._autoStartDefault;
+  }
+  set autoStartDefault(value: boolean) {
+    this._autoStartDefault = value;
+  }
+
+  /**
    * Create a new widget given a document model and a context.
    *
    * #### Notes
@@ -405,16 +475,11 @@ export abstract class ABCWidgetFactory<
     // Create the new widget
     const widget = this.createNewWidget(context, source);
 
-    // Add toolbar items
-    let items: DocumentRegistry.IToolbarItem[];
-    if (this._toolbarFactory) {
-      items = this._toolbarFactory(widget);
-    } else {
-      items = this.defaultToolbarFactory(widget);
-    }
-    items.forEach(({ name, widget: item }) => {
-      widget.toolbar.addItem(name, item);
-    });
+    // Add toolbar
+    setToolbar(
+      widget,
+      this._toolbarFactory ?? this.defaultToolbarFactory.bind(this)
+    );
 
     // Emit widget created signal
     this._widgetCreated.emit(widget);
@@ -438,11 +503,17 @@ export abstract class ABCWidgetFactory<
   }
 
   private _toolbarFactory:
-    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | ((
+        widget: T
+      ) =>
+        | DocumentRegistry.IToolbarItem[]
+        | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
   private _isDisposed = false;
   private _translator: ITranslator;
   private _name: string;
+  private _label: string;
+  private _autoStartDefault: boolean;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
@@ -469,12 +540,13 @@ export class DocumentWidget<
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   >
   extends MainAreaWidget<T>
-  implements IDocumentWidget<T, U> {
+  implements IDocumentWidget<T, U>
+{
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
-
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes
@@ -486,6 +558,9 @@ export class DocumentWidget<
     void this.context.ready.then(() => {
       this._handleDirtyState();
     });
+
+    // listen for changes to the title object
+    this.title.changed.connect(this._onTitleChanged, this);
   }
 
   /**
@@ -496,6 +571,31 @@ export class DocumentWidget<
   }
 
   /**
+   * Handle a title change.
+   */
+  private async _onTitleChanged(_sender: Title<this>) {
+    const validNameExp = /[\/\\:]/;
+    const name = this.title.label;
+    // Use localPath to avoid the drive name
+    const filename =
+      this.context.localPath.split('/').pop() || this.context.localPath;
+
+    if (name === filename) {
+      return;
+    }
+    if (name.length > 0 && !validNameExp.test(name)) {
+      const oldPath = this.context.path;
+      await this.context.rename(name);
+      if (this.context.path !== oldPath) {
+        // Rename succeeded
+        return;
+      }
+    }
+    // Reset title if name is invalid or rename fails
+    this.title.label = filename;
+  }
+
+  /**
    * Handle a path change.
    */
   private _onPathChanged(
@@ -503,6 +603,8 @@ export class DocumentWidget<
     path: string
   ): void {
     this.title.label = PathExt.basename(sender.localPath);
+    // The document is not untitled any more.
+    this.isUntitled = false;
   }
 
   /**
@@ -515,13 +617,31 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
+    if (!this.context.model.dirty) {
+      if (!this.context.model.collaborative) {
+        if (!this.context.contentsModel?.writable) {
+          const readOnlyIndicator = createReadonlyLabel(this);
+          let roi = this.toolbar.insertBefore(
+            'kernelName',
+            'read-only-indicator',
+            readOnlyIndicator
+          );
+          if (!roi) {
+            this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+          }
+        }
+      }
+    }
   }
 
   /**
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (this.context.model.dirty) {
+    if (
+      this.context.model.dirty &&
+      !this.title.className.includes(DIRTY_CLASS)
+    ) {
       this.title.className += ` ${DIRTY_CLASS}`;
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
@@ -529,6 +649,16 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+  protected readonly _trans;
+
+  /**
+   * Whether the document has an auto-generated name or not.
+   *
+   * #### Notes
+   * A document has auto-generated name if its name is untitled and up
+   * to the instant the user saves it manually for the first time.
+   */
+  isUntitled?: boolean;
 }
 
 export namespace DocumentWidget {
@@ -544,6 +674,10 @@ export namespace DocumentWidget {
     U extends DocumentRegistry.IModel = DocumentRegistry.IModel
   > extends MainAreaWidget.IOptionsOptionalContent<T> {
     context: DocumentRegistry.IContext<U>;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

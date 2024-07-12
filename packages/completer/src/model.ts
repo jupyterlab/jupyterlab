@@ -1,18 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IIterator,
-  iter,
-  IterableOrArrayLike,
-  map,
-  StringExt,
-  toArray
-} from '@lumino/algorithm';
+import { StringExt } from '@lumino/algorithm';
 import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
+
+/**
+ * Escape HTML by native means of the browser.
+ */
+function escapeHTML(text: string) {
+  const node = document.createElement('span');
+  node.textContent = text;
+  return node.innerHTML;
+}
 
 /**
  * An implementation of a completer model.
@@ -23,6 +25,13 @@ export class CompleterModel implements Completer.IModel {
    */
   get stateChanged(): ISignal<this, void> {
     return this._stateChanged;
+  }
+
+  /**
+   * A signal emitted when query string changes (at invocation, or as user types).
+   */
+  get queryChanged(): ISignal<this, Completer.IQueryChange> {
+    return this._queryChanged;
   }
 
   /**
@@ -105,6 +114,9 @@ export class CompleterModel implements Completer.IModel {
     const ending = original.text.substring(end);
     query = query.substring(0, query.lastIndexOf(ending));
     this._query = query;
+    this.processedItemsCache = null;
+    this._processedToOriginalItem = null;
+    this._queryChanged.emit({ newValue: this._query, origin: 'editorUpdate' });
     this._stateChanged.emit(undefined);
   }
 
@@ -131,6 +143,9 @@ export class CompleterModel implements Completer.IModel {
   }
   set query(newValue: string) {
     this._query = newValue;
+    this.processedItemsCache = null;
+    this._processedToOriginalItem = null;
+    this._queryChanged.emit({ newValue: this._query, origin: 'setter' });
   }
 
   /**
@@ -167,24 +182,37 @@ export class CompleterModel implements Completer.IModel {
    *
    * #### Notes
    * This is a read-only property.
+   * When overriding it is recommended to cache results in `processedItemsCache`
+   * property which will be automatically nullified when needed.
    */
-  completionItems?(): CompletionHandler.ICompletionItems {
-    let query = this._query;
-    if (query) {
-      return this._markup(query);
+  completionItems(): CompletionHandler.ICompletionItems {
+    if (!this.processedItemsCache) {
+      let query = this._query;
+      if (query) {
+        const markedItems = this._markup(query);
+        this.processedItemsCache = markedItems.map(it => it.processedItem);
+        this._processedToOriginalItem = new WeakMap(
+          markedItems.map(it => [it.processedItem, it.originalItem])
+        );
+      } else {
+        this.processedItemsCache = this._completionItems.map(item => {
+          return this._escapeItemLabel(item);
+        });
+        this._processedToOriginalItem = null;
+      }
     }
-    return this._completionItems;
+    return this.processedItemsCache;
   }
 
   /**
    * Set the list of visible items in the completer menu, and append any
    * new types to KNOWN_TYPES.
    */
-  setCompletionItems?(newValue: CompletionHandler.ICompletionItems): void {
+  setCompletionItems(newValue: CompletionHandler.ICompletionItems): void {
     if (
       JSONExt.deepEqual(
-        (newValue as unknown) as ReadonlyPartialJSONArray,
-        (this._completionItems as unknown) as ReadonlyPartialJSONArray
+        newValue as unknown as ReadonlyPartialJSONArray,
+        this._completionItems as unknown as ReadonlyPartialJSONArray
       )
     ) {
       return;
@@ -193,25 +221,9 @@ export class CompleterModel implements Completer.IModel {
     this._orderedTypes = Private.findOrderedCompletionItemTypes(
       this._completionItems
     );
+    this.processedItemsCache = null;
+    this._processedToOriginalItem = null;
     this._stateChanged.emit(undefined);
-  }
-
-  /**
-   * The list of visible items in the completer menu.
-   * @deprecated use `completionItems` instead
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  items(): IIterator<Completer.IItem> {
-    return this._filter();
-  }
-
-  /**
-   * The unfiltered list of all available options in a completer menu.
-   */
-  options(): IIterator<string> {
-    return iter(this._options);
   }
 
   /**
@@ -243,34 +255,6 @@ export class CompleterModel implements Completer.IModel {
    */
   orderedTypes(): string[] {
     return this._orderedTypes;
-  }
-
-  /**
-   * Set the available options in the completer menu.
-   */
-  setOptions(
-    newValue: IterableOrArrayLike<string>,
-    typeMap?: Completer.TypeMap
-  ) {
-    const values = toArray(newValue || []);
-    const types = typeMap || {};
-
-    if (
-      JSONExt.deepEqual(values, this._options) &&
-      JSONExt.deepEqual(types, this._typeMap)
-    ) {
-      return;
-    }
-    if (values.length) {
-      this._options = values;
-      this._typeMap = types;
-      this._orderedTypes = Private.findOrderedTypes(types);
-    } else {
-      this._options = [];
-      this._typeMap = {};
-      this._orderedTypes = [];
-    }
-    this._stateChanged.emit(undefined);
   }
 
   /**
@@ -327,7 +311,6 @@ export class CompleterModel implements Completer.IModel {
    */
   handleTextChange(change: Completer.ITextState): void {
     const original = this._original;
-
     // If there is no active completion, return.
     if (!original) {
       return;
@@ -358,7 +341,6 @@ export class CompleterModel implements Completer.IModel {
     const original = this._original;
     const cursor = this._cursor;
     const current = this._current;
-
     if (!original || !cursor || !current) {
       return undefined;
     }
@@ -376,7 +358,7 @@ export class CompleterModel implements Completer.IModel {
    *
    * @param hard - Reset even if a subset match is in progress.
    */
-  reset(hard = false) {
+  reset(hard = false): void {
     // When the completer detects a common subset prefix for all options,
     // it updates the model and sets the model source to that value, triggering
     // a reset. Unless explicitly a hard reset, this should be ignored.
@@ -391,101 +373,208 @@ export class CompleterModel implements Completer.IModel {
    * Check if CompletionItem matches against query.
    * Highlight matching prefix by adding <mark> tags.
    */
-  private _markup(query: string): CompletionHandler.ICompletionItems {
+  private _markup(query: string): {
+    processedItem: CompletionHandler.ICompletionItem;
+    originalItem: CompletionHandler.ICompletionItem;
+  }[] {
     const items = this._completionItems;
     let results: Private.ICompletionMatch[] = [];
-    for (let item of items) {
+    for (const originalItem of items) {
       // See if label matches query string
-      // With ICompletionItems, the label may include parameters, so we exclude them from the matcher.
+      // With ICompletionItems, the label may include parameters,
+      // so we exclude them from the matcher.
       // e.g. Given label `foo(b, a, r)` and query `bar`,
       // don't count parameters, `b`, `a`, and `r` as matches.
-      const index = item.label.indexOf('(');
-      const prefix = index > -1 ? item.label.substring(0, index) : item.label;
-      let match = StringExt.matchSumOfSquares(prefix, query);
+      const index = originalItem.label.indexOf('(');
+      const text =
+        index > -1
+          ? originalItem.label.substring(0, index)
+          : originalItem.label;
+      const match = StringExt.matchSumOfSquares(escapeHTML(text), query);
       // Filter non-matching items.
       if (match) {
         // Highlight label text if there's a match
         let marked = StringExt.highlight(
-          item.label,
+          escapeHTML(originalItem.label),
           match.indices,
           Private.mark
         );
+        // Use `Object.assign` to evaluate getters.
+        const highlightedItem = Object.assign({}, originalItem);
+        highlightedItem.label = marked.join('');
+        highlightedItem.insertText =
+          originalItem.insertText ?? originalItem.label;
         results.push({
-          ...item,
-          // Allow for lazily retrieved documentation (with a getter)
-          documentation: item.documentation,
-          label: marked.join(''),
-          // If no insertText is present, preserve original label value
-          // by setting it as the insertText.
-          insertText: item.insertText ? item.insertText : item.label,
-          score: match.score
+          item: highlightedItem,
+          score: match.score,
+          originalItem
         });
       }
     }
-    results.sort(Private.scoreCmp2);
+    results.sort(Private.scoreCmp);
 
-    // Delete the extra score attribute to not leak implementation details
-    // to JavaScript callers.
-    results.forEach(x => {
-      delete (x as any).score;
-    });
-
-    return results;
+    // Extract only the item (dropping the extra score attribute to not leak
+    // implementation details to JavaScript callers.
+    return results.map(match => ({
+      processedItem: match.item,
+      originalItem: match.originalItem
+    }));
   }
 
   /**
-   * Apply the query to the complete options list to return the matching subset.
+   * Lazy load missing data of an item.
+   * @param indexOrValue - the item or its index
+   * @remarks
+   * Resolving item by index will be deprecated in
+   * the JupyterLab 5.0 and removed in JupyterLab 6.0.
+   *
+   * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
+   *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
+   * promise of resolved completion item.
    */
-  private _filter(): IIterator<Completer.IItem> {
-    const options = this._options || [];
-    const query = this._query;
-    if (!query) {
-      return map(options, option => ({ raw: option, text: option }));
-    }
-    const results: Private.IMatch[] = [];
-    for (const option of options) {
-      const match = StringExt.matchSumOfSquares(option, query);
-      if (match) {
-        const marked = StringExt.highlight(option, match.indices, Private.mark);
-        results.push({
-          raw: option,
-          score: match.score,
-          text: marked.join('')
-        });
+  resolveItem(
+    indexOrValue: number | CompletionHandler.ICompletionItem
+  ): Promise<CompletionHandler.ICompletionItem | null> | undefined {
+    let processedItem: CompletionHandler.ICompletionItem | undefined;
+
+    if (typeof indexOrValue === 'number') {
+      const completionItems = this.completionItems();
+      if (!completionItems || !completionItems[indexOrValue]) {
+        return undefined;
       }
+      processedItem = completionItems[indexOrValue];
+    } else {
+      processedItem = indexOrValue;
     }
-    return map(results.sort(Private.scoreCmp), result => ({
-      text: result.text,
-      raw: result.raw
-    }));
+    if (!processedItem) {
+      return undefined;
+    }
+
+    let originalItem: CompletionHandler.ICompletionItem | undefined;
+    if (this._processedToOriginalItem) {
+      originalItem = this._processedToOriginalItem.get(processedItem);
+    } else {
+      originalItem = processedItem;
+    }
+    if (!originalItem) {
+      return undefined;
+    }
+    return this._resolveItemByValue(originalItem);
+  }
+
+  /**
+   * Lazy load missing data of a completion item.
+   *
+   * @param  completionItem - the item to be resolved
+   * @return See `resolveItem` method
+   */
+  private _resolveItemByValue(
+    completionItem: CompletionHandler.ICompletionItem
+  ): Promise<CompletionHandler.ICompletionItem | null> {
+    const current = ++this._resolvingItem;
+    let resolvedItem: Promise<CompletionHandler.ICompletionItem>;
+    if (completionItem.resolve) {
+      let patch: Completer.IPatch | undefined;
+      if (completionItem.insertText) {
+        patch = this.createPatch(completionItem.insertText);
+      }
+      resolvedItem = completionItem.resolve(patch);
+    } else {
+      resolvedItem = Promise.resolve(completionItem);
+    }
+    return resolvedItem
+      .then(activeItem => {
+        // Escape the label it in place
+        this._escapeItemLabel(activeItem, true);
+        (
+          Object.keys(activeItem) as Array<
+            keyof CompletionHandler.ICompletionItem
+          >
+        ).forEach(
+          <Key extends keyof CompletionHandler.ICompletionItem>(key: Key) => {
+            completionItem[key] = activeItem[key];
+          }
+        );
+        completionItem.resolve = undefined;
+        if (current !== this._resolvingItem) {
+          return Promise.resolve(null);
+        }
+        return activeItem;
+      })
+      .catch(e => {
+        console.error(e);
+        // Failed to resolve missing data, return the original item.
+        return Promise.resolve(completionItem);
+      });
+  }
+
+  /**
+   * Escape item label, storing the original label and adding `insertText` if needed.
+   * If escaping changes label creates a new item unless `inplace` is true.
+   */
+  private _escapeItemLabel(
+    item: CompletionHandler.ICompletionItem,
+    inplace: boolean = false
+  ): CompletionHandler.ICompletionItem {
+    const escapedLabel = escapeHTML(item.label);
+    // If there was no insert text, use the original (unescaped) label.
+    if (escapedLabel !== item.label) {
+      const newItem = inplace ? item : Object.assign({}, item);
+      newItem.insertText = item.insertText ?? item.label;
+      newItem.label = escapedLabel;
+      return newItem;
+    }
+    return item;
   }
 
   /**
    * Reset the state of the model.
    */
   private _reset(): void {
+    const hadQuery = this._query;
     this._current = null;
     this._cursor = null;
     this._completionItems = [];
-    this._options = [];
     this._original = null;
     this._query = '';
+    this.processedItemsCache = null;
+    this._processedToOriginalItem = null;
     this._subsetMatch = false;
     this._typeMap = {};
     this._orderedTypes = [];
+    if (hadQuery) {
+      this._queryChanged.emit({ newValue: this._query, origin: 'reset' });
+    }
   }
 
+  protected processedItemsCache: CompletionHandler.ICompletionItems | null =
+    null;
   private _current: Completer.ITextState | null = null;
   private _cursor: Completer.ICursorSpan | null = null;
   private _isDisposed = false;
   private _completionItems: CompletionHandler.ICompletionItems = [];
-  private _options: string[] = [];
   private _original: Completer.ITextState | null = null;
   private _query = '';
   private _subsetMatch = false;
   private _typeMap: Completer.TypeMap = {};
   private _orderedTypes: string[] = [];
   private _stateChanged = new Signal<this, void>(this);
+  private _queryChanged = new Signal<this, Completer.IQueryChange>(this);
+
+  /**
+   * The weak map between a processed completion item with the original item.
+   * It's used to keep track of original completion item in case of displaying
+   * the completer with query.
+   */
+  private _processedToOriginalItem: WeakMap<
+    CompletionHandler.ICompletionItem,
+    CompletionHandler.ICompletionItem
+  > | null = null;
+
+  /**
+   * A counter to cancel ongoing `resolveItem` call.
+   */
+  private _resolvingItem = 0;
 }
 
 /**
@@ -535,30 +624,24 @@ namespace Private {
   }
 
   /**
-   * A sort comparison function for item match scores.
-   *
-   * #### Notes
-   * This orders the items first based on score (lower is better), then
-   * by locale order of the item text.
+   * A filtered completion matching result.
    */
-  export function scoreCmp(a: IMatch, b: IMatch): number {
-    const delta = a.score - b.score;
-    if (delta !== 0) {
-      return delta;
-    }
-    return a.raw.localeCompare(b.raw);
-  }
-
-  /**
-   * A filtered completion menu matching result.
-   */
-  export interface ICompletionMatch extends CompletionHandler.ICompletionItem {
+  export interface ICompletionMatch {
+    /**
+     * The completion item data.
+     */
+    item: CompletionHandler.ICompletionItem;
     /**
      * A score which indicates the strength of the match.
      *
      * A lower score is better. Zero is the best possible score.
      */
     score: number;
+
+    /**
+     * The original completion item data.
+     */
+    originalItem: CompletionHandler.ICompletionItem;
   }
 
   /**
@@ -568,12 +651,12 @@ namespace Private {
    * This orders the items first based on score (lower is better), then
    * by locale order of the item text.
    */
-  export function scoreCmp2(a: ICompletionMatch, b: ICompletionMatch): number {
+  export function scoreCmp(a: ICompletionMatch, b: ICompletionMatch): number {
     const delta = a.score - b.score;
     if (delta !== 0) {
       return delta;
     }
-    return a.insertText?.localeCompare(b.insertText ?? '') ?? 0;
+    return a.item.insertText?.localeCompare(b.item.insertText ?? '') ?? 0;
   }
 
   /**

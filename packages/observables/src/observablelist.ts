@@ -1,21 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  IIterator,
-  IterableOrArrayLike,
-  toArray
-} from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A list which can be observed for changes.
  */
-export interface IObservableList<T> extends IDisposable {
+export interface IObservableList<T> extends IDisposable, Iterable<T> {
   /**
    * A signal emitted when the list has changed.
    */
@@ -33,19 +26,6 @@ export interface IObservableList<T> extends IDisposable {
    * This is a read-only property.
    */
   length: number;
-
-  /**
-   * Create an iterator over the values in the list.
-   *
-   * @returns A new iterator starting at the front of the list.
-   *
-   * #### Complexity
-   * Constant.
-   *
-   * #### Iterator Validity
-   * No changes.
-   */
-  iter(): IIterator<T>;
 
   /**
    * Remove all values from the list.
@@ -110,12 +90,12 @@ export interface IObservableList<T> extends IDisposable {
    * #### Undefined Behavior.
    * An `index` which is non-integral.
    */
-  insertAll(index: number, values: IterableOrArrayLike<T>): void;
+  insertAll(index: number, values: Iterable<T>): void;
 
   /**
    * Move a value from one index to another.
    *
-   * @parm fromIndex - The index of the element to move.
+   * @param fromIndex - The index of the element to move.
    *
    * @param toIndex - The index to move the element to.
    *
@@ -149,7 +129,7 @@ export interface IObservableList<T> extends IDisposable {
   /**
    * Push a set of values to the back of the list.
    *
-   * @param values - An iterable or array-like set of values to add.
+   * @param values - An iterable set of values to add.
    *
    * @returns The new length of the list.
    *
@@ -159,7 +139,7 @@ export interface IObservableList<T> extends IDisposable {
    * #### Iterator Validity
    * No changes.
    */
-  pushAll(values: IterableOrArrayLike<T>): number;
+  pushAll(values: Iterable<T>): number;
 
   /**
    * Remove and return the value at a specific index.
@@ -308,10 +288,10 @@ export class ObservableList<T> implements IObservableList<T> {
    * Construct a new observable map.
    */
   constructor(options: ObservableList.IOptions<T> = {}) {
-    if (options.values !== void 0) {
-      each(options.values, value => {
+    if (options.values) {
+      for (const value of options.values) {
         this._array.push(value);
-      });
+      }
     }
     this._itemCmp = options.itemCmp || Private.itemCmp;
   }
@@ -367,8 +347,8 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Iterator Validity
    * No changes.
    */
-  iter(): IIterator<T> {
-    return new ArrayIterator(this._array);
+  [Symbol.iterator](): IterableIterator<T> {
+    return this._array[Symbol.iterator]();
   }
 
   /**
@@ -569,7 +549,7 @@ export class ObservableList<T> implements IObservableList<T> {
   /**
    * Move a value from one index to another.
    *
-   * @parm fromIndex - The index of the element to move.
+   * @param fromIndex - The index of the element to move.
    *
    * @param toIndex - The index to move the element to.
    *
@@ -601,7 +581,7 @@ export class ObservableList<T> implements IObservableList<T> {
   /**
    * Push a set of values to the back of the list.
    *
-   * @param values - An iterable or array-like set of values to add.
+   * @param values - An iterable set of values to add.
    *
    * @returns The new length of the list.
    *
@@ -615,17 +595,17 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Iterator Validity
    * No changes.
    */
-  pushAll(values: IterableOrArrayLike<T>): number {
+  pushAll(values: Iterable<T>): number {
     const newIndex = this.length;
-    each(values, value => {
+    for (const value of values) {
       this._array.push(value);
-    });
+    }
     this._changed.emit({
       type: 'add',
       oldIndex: -1,
       newIndex,
       oldValues: [],
-      newValues: toArray(values)
+      newValues: Array.from(values)
     });
     return this.length;
   }
@@ -651,17 +631,17 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Undefined Behavior.
    * An `index` which is non-integral.
    */
-  insertAll(index: number, values: IterableOrArrayLike<T>): void {
+  insertAll(index: number, values: Iterable<T>): void {
     const newIndex = index;
-    each(values, value => {
+    for (const value of values) {
       ArrayExt.insert(this._array, index++, value);
-    });
+    }
     this._changed.emit({
       type: 'add',
       oldIndex: -2,
       newIndex,
       oldValues: [],
-      newValues: toArray(values)
+      newValues: Array.from(values)
     });
   }
 
@@ -715,7 +695,7 @@ export namespace ObservableList {
     /**
      * An optional initial set of values.
      */
-    values?: IterableOrArrayLike<T>;
+    values?: Iterable<T>;
 
     /**
      * The item comparison function for change detection on `set`.
@@ -733,7 +713,7 @@ namespace Private {
   /**
    * The default strict equality item cmp.
    */
-  export function itemCmp(first: any, second: any): boolean {
+  export function itemCmp<T>(first: T, second: T): boolean {
     return first === second;
   }
 }

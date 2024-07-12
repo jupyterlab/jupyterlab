@@ -1,0 +1,39 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../inspector"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../testing"
+    }
+  ]
+}

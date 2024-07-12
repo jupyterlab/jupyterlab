@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
+import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { JSONObject, UUID } from '@lumino/coreutils';
 import { ConfigSection, ConfigWithDefaults } from '../../src';
 import { getRequestHandler, handleRequest, makeSettings } from '../utils';
@@ -22,7 +22,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -50,7 +50,7 @@ describe('config', () => {
         name: randomName(),
         serverSettings
       });
-      await expectFailure(configPromise, 'Invalid response: 201 Created');
+      await expect(configPromise).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -81,7 +81,7 @@ describe('config', () => {
       const config = await ConfigSection.create({ name: randomName() });
       handleRequest(config, 201, {});
       const update = config.update({ foo: 'baz' });
-      await expectFailure(update, 'Invalid response: 201 Created');
+      await expect(update).rejects.toThrow(/Invalid response: 201/);
     });
   });
 });
@@ -196,7 +196,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       const config = new ConfigWithDefaults({ section });
       const set = config.set('foo', 'bar');
       expect(section.data['foo']).toBe('bar');
-      await expectFailure(set, 'Invalid response: 201 Created');
+      await expectFailure(set, 'Invalid response: 201');
     });
   });
 });

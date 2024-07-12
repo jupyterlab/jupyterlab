@@ -7,15 +7,17 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { bugIcon } from '@jupyterlab/ui-components';
+import { bugIcon, SidePanel } from '@jupyterlab/ui-components';
 
-import { Panel, SplitPanel, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
 import { Callstack as CallstackPanel } from './panels/callstack';
 
 import { Sources as SourcesPanel } from './panels/sources';
+
+import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
 
@@ -24,25 +26,26 @@ import { IDebugger } from './tokens';
 /**
  * A debugger sidebar.
  */
-export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
+export class DebuggerSidebar extends SidePanel {
   /**
    * Instantiate a new Debugger.Sidebar
    *
    * @param options The instantiation options for a Debugger.Sidebar
    */
   constructor(options: DebuggerSidebar.IOptions) {
-    super();
+    const translator = options.translator || nullTranslator;
+    super({ translator });
     this.id = 'jp-debugger-sidebar';
     this.title.icon = bugIcon;
     this.addClass('jp-DebuggerSidebar');
 
     const {
       callstackCommands,
+      breakpointsCommands,
       editorServices,
       service,
       themeManager
     } = options;
-    const translator = options.translator || nullTranslator;
     const model = service.model;
 
     this.variables = new VariablesPanel({
@@ -61,6 +64,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
 
     this.breakpoints = new BreakpointsPanel({
       service,
+      commands: breakpointsCommands,
       model: model.breakpoints,
       translator
     });
@@ -72,72 +76,26 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
       translator
     });
 
+    this.kernelSources = new KernelSourcesPanel({
+      model: model.kernelSources,
+      service,
+      translator
+    });
+
     const header = new DebuggerSidebar.Header();
 
-    this.addWidget(header);
+    this.header.addWidget(header);
     model.titleChanged.connect((_, title) => {
       header.title.label = title;
     });
 
-    this._body = new SplitPanel();
-    this._body.orientation = 'vertical';
-    this._body.addClass('jp-DebuggerSidebar-body');
-    this.addWidget(this._body);
+    this.content.addClass('jp-DebuggerSidebar-body');
 
-    this.addItem(this.variables);
-    this.addItem(this.callstack);
-    this.addItem(this.breakpoints);
-    this.addItem(this.sources);
-  }
-
-  /**
-   * Add an item at the end of the sidebar.
-   *
-   * @param widget - The widget to add to the sidebar.
-   *
-   * #### Notes
-   * If the widget is already contained in the sidebar, it will be moved.
-   * The item can be removed from the sidebar by setting its parent to `null`.
-   */
-  addItem(widget: Widget): void {
-    this._body.addWidget(widget);
-  }
-
-  /**
-   * Insert an item at the specified index.
-   *
-   * @param index - The index at which to insert the widget.
-   *
-   * @param widget - The widget to insert into to the sidebar.
-   *
-   * #### Notes
-   * If the widget is already contained in the sidebar, it will be moved.
-   * The item can be removed from the sidebar by setting its parent to `null`.
-   */
-  insertItem(index: number, widget: Widget): void {
-    this._body.insertWidget(index, widget);
-  }
-
-  /**
-   * A read-only array of the sidebar items.
-   */
-  get items(): readonly Widget[] {
-    return this._body.widgets;
-  }
-
-  /**
-   * Whether the sidebar is disposed.
-   */
-  isDisposed: boolean;
-
-  /**
-   * Dispose the sidebar.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    super.dispose();
+    this.addWidget(this.variables);
+    this.addWidget(this.callstack);
+    this.addWidget(this.breakpoints);
+    this.addWidget(this.sources);
+    this.addWidget(this.kernelSources);
   }
 
   /**
@@ -160,10 +118,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
    */
   readonly sources: SourcesPanel;
 
-  /**
-   * Container for debugger panels.
-   */
-  private _body: SplitPanel;
+  readonly kernelSources: KernelSourcesPanel;
 }
 
 /**
@@ -183,6 +138,12 @@ export namespace DebuggerSidebar {
      * The callstack toolbar commands.
      */
     callstackCommands: CallstackPanel.ICommands;
+
+    /**
+     * The callstack toolbar commands.
+     */
+    breakpointsCommands: BreakpointsPanel.ICommands;
+
     /**
      * The editor services.
      */
@@ -209,7 +170,7 @@ export namespace DebuggerSidebar {
     constructor() {
       super({ node: Private.createHeader() });
       this.title.changed.connect(_ => {
-        this.node!.querySelector('h2')!.textContent = this.title.label;
+        this.node.textContent = this.title.label;
       });
     }
   }
@@ -223,15 +184,11 @@ namespace Private {
    * Create a sidebar header node.
    */
   export function createHeader(): HTMLElement {
-    const header = document.createElement('div');
-    header.classList.add('jp-stack-panel-header');
-
     const title = document.createElement('h2');
 
     title.textContent = '-';
-    title.classList.add('jp-left-truncated');
-    header.appendChild(title);
+    title.classList.add('jp-text-truncated');
 
-    return header;
+    return title;
   }
 }

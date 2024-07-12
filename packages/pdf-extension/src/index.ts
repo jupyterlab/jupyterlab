@@ -25,6 +25,8 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
     // We put the object in an iframe, which seems to have a better chance
     // of retaining its scroll position upon tab focusing, moving around etc.
     const iframe = document.createElement('iframe');
+    // Sets iframe loading to lazy
+    iframe.setAttribute('loading', 'lazy');
     this.node.appendChild(iframe);
     // The iframe content window is not available until the onload event.
     iframe.onload = () => {
@@ -108,7 +110,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
   /**
    * Dispose of the resources held by the pdf widget.
    */
-  dispose() {
+  dispose(): void {
     if (this._disposable) {
       this._disposable.dispose();
     }
@@ -134,10 +136,12 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     id: '@jupyterlab/pdf-extension:factory',
+    description: 'Adds renderer for PDF content.',
     rendererFactory,
     dataType: 'string',
     documentWidgetFactoryOptions: {
       name: 'PDF',
+      // TODO: translate label
       modelName: 'base64',
       primaryFileType: 'PDF',
       fileTypes: ['PDF'],

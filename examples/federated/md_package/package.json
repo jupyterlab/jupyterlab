@@ -1,22 +1,21 @@
 {
   "name": "@jupyterlab/example-federated-md",
-  "version": "2.2.0-beta.1",
+  "version": "3.3.0-alpha.2",
   "private": true,
   "main": "./index.js",
-  "style": "./style/index.css",
   "scripts": {
     "build": "npm run clean && build-labextension --development --core-path ../core_package .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.1.0-beta.1",
-    "@jupyterlab/example-federated-middle": "^2.2.0-beta.1",
-    "@jupyterlab/markdownviewer-extension": "^3.1.0-beta.1",
-    "@lumino/widgets": "^1.19.0"
+    "@jupyterlab/application": "^4.3.0-alpha.2",
+    "@jupyterlab/example-federated-middle": "^3.2.0-alpha.2",
+    "@jupyterlab/markdownviewer-extension": "^4.3.0-alpha.2",
+    "@lumino/widgets": "^2.3.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.1.0-beta.1",
-    "rimraf": "~3.0.0"
+    "@jupyterlab/builder": "^4.3.0-alpha.2",
+    "rimraf": "~5.0.5"
   },
   "jupyterlab": {
     "extension": true,

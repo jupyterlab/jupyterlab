@@ -99,7 +99,7 @@ export class ForeignHandler implements IDisposable {
         cell = this._newCell(parentMsgId);
         const model = cell.model;
         model.executionCount = inputMsg.content.execution_count;
-        model.value.text = inputMsg.content.code;
+        model.sharedModel.setSource(inputMsg.content.code);
         model.trusted = true;
         parent.update();
         return true;

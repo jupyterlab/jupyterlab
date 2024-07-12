@@ -7,6 +7,9 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
     },
     {
@@ -16,7 +19,7 @@
       "path": "../observables"
     },
     {
-      "path": "../shared-models"
+      "path": "../statusbar"
     },
     {
       "path": "../translation"

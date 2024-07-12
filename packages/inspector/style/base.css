@@ -25,16 +25,13 @@
 .jp-Inspector-content {
   background: var(--jp-layout-color1);
   border: none;
-}
-
-.jp-Inspector-content {
   padding: 8px;
   width: 100%;
   height: 100%;
   overflow: auto;
 }
 
-.jp-Inspector-content pre {
+.jp-ThemedContainer .jp-Inspector-content pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   margin: 0;

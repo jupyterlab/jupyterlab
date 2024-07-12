@@ -5,6 +5,7 @@
 import * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 import * as KernelAPI from './restapi';
+import { KernelConnection } from './default';
 
 export * from './manager';
-export { Kernel, KernelMessage, KernelAPI };
+export { Kernel, KernelMessage, KernelAPI, KernelConnection };

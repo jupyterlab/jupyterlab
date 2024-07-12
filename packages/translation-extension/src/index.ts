@@ -8,10 +8,11 @@
  */
 
 import {
+  ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -21,27 +22,22 @@ import {
 } from '@jupyterlab/translation';
 
 /**
- * A namespace for command IDs.
- */
-export namespace CommandIDs {
-  export const installAdditionalLanguages =
-    'jupyterlab-translation:install-additional-languages';
-}
-
-/**
  * Translation plugins
  */
 const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
 
 const translator: JupyterFrontEndPlugin<ITranslator> = {
   id: '@jupyterlab/translation:translator',
+  description: 'Provides the application translation object.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
+  optional: [ILabShell],
   provides: ITranslator,
   activate: async (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
-    settings: ISettingRegistry
+    settings: ISettingRegistry,
+    labShell: ILabShell | null
   ) => {
     const setting = await settings.load(PLUGIN_ID);
     const currentLocale: string = setting.get('locale').composite as string;
@@ -50,11 +46,21 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     const displayStringsPrefix: boolean = setting.get('displayStringsPrefix')
       .composite as boolean;
     stringsPrefix = displayStringsPrefix ? stringsPrefix : '';
+    const serverSettings = app.serviceManager.serverSettings;
     const translationManager = new TranslationManager(
       paths.urls.translations,
-      stringsPrefix
+      stringsPrefix,
+      serverSettings
     );
     await translationManager.fetch(currentLocale);
+
+    // Set translator to UI
+    if (labShell) {
+      labShell.translator = translationManager;
+    }
+
+    Dialog.translator = translationManager;
+
     return translationManager;
   }
 };
@@ -64,13 +70,16 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
  */
 const langMenu: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
-  requires: [IMainMenu, ISettingRegistry, ITranslator],
+  description: 'Adds translation commands and settings.',
+  requires: [ISettingRegistry, ITranslator],
+  optional: [IMainMenu, ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    mainMenu: IMainMenu,
     settings: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator,
+    mainMenu: IMainMenu | null,
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
@@ -90,22 +99,34 @@ const langMenu: JupyterFrontEndPlugin<void> = {
       .then(setting => {
         // Read the settings
         loadSetting(setting);
-        document.documentElement.lang = currentLocale;
+
+        // Ensure currentLocale is not 'default' which is not a valid language code
+        if (currentLocale !== 'default') {
+          document.documentElement.lang = (currentLocale ?? '').replace(
+            '_',
+            '-'
+          );
+        } else {
+          document.documentElement.lang = 'en-US';
+        }
 
         // Listen for your plugin setting changes using Signal
         setting.changed.connect(loadSetting);
 
         // Create a languages menu
-        const languagesMenu = mainMenu.settingsMenu.items.find(
-          item =>
-            item.type === 'submenu' &&
-            item.submenu?.id === 'jp-mainmenu-settings-language'
-        )?.submenu;
+        const languagesMenu = mainMenu
+          ? mainMenu.settingsMenu.items.find(
+              item =>
+                item.type === 'submenu' &&
+                item.submenu?.id === 'jp-mainmenu-settings-language'
+            )?.submenu
+          : null;
 
         let command: string;
 
+        const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<any>('')
+        requestTranslationsAPI<any>('', '', {}, serverSettings)
           .then(data => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
@@ -114,7 +135,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const toggled = displayName === nativeName;
               const label = toggled
                 ? `${displayName}`
-                : `${displayName} (${nativeName})`;
+                : `${displayName} - ${nativeName}`;
 
               // Add a command per language
               command = `jupyterlab-translation:${locale}`;
@@ -127,10 +148,13 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                 execute: () => {
                   return showDialog({
                     title: trans.__('Change interface language?'),
-                    body: trans.__('Are you sure you want to refresh?'),
+                    body: trans.__(
+                      'After changing the interface language to %1, you will need to reload JupyterLab to see the changes.',
+                      label
+                    ),
                     buttons: [
                       Dialog.cancelButton({ label: trans.__('Cancel') }),
-                      Dialog.okButton({ label: trans.__('Ok') })
+                      Dialog.okButton({ label: trans.__('Change and reload') })
                     ]
                   }).then(result => {
                     if (result.button.accept) {
@@ -152,6 +176,13 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                 languagesMenu.addItem({
                   command,
                   args: {}
+                });
+              }
+
+              if (palette) {
+                palette.addItem({
+                  category: trans.__('Display Languages'),
+                  command
                 });
               }
             }

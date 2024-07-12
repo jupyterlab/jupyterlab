@@ -1,19 +1,33 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { IStateDB } from '@jupyterlab/statedb';
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
-import { FileBrowser } from './browser';
+import type { FileBrowser } from './browser';
 
-/* tslint:disable */
 /**
- * The path tracker token.
+ * The file browser factory token.
  */
 export const IFileBrowserFactory = new Token<IFileBrowserFactory>(
-  '@jupyterlab/filebrowser:IFileBrowserFactory'
+  '@jupyterlab/filebrowser:IFileBrowserFactory',
+  `A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.`
 );
-/* tslint:enable */
+
+/**
+ * The default file browser token.
+ */
+export const IDefaultFileBrowser = new Token<IDefaultFileBrowser>(
+  '@jupyterlab/filebrowser:IDefaultFileBrowser',
+  'A service for the default file browser.'
+);
+
+/**
+ * Default file browser type.
+ */
+export type IDefaultFileBrowser = FileBrowser;
 
 /**
  * The file browser factory interface.
@@ -46,11 +60,6 @@ export interface IFileBrowserFactory {
    * The widget tracker used by the factory to track file browsers.
    */
   readonly tracker: WidgetTracker<FileBrowser>;
-
-  /**
-   * The default file browser for the application.
-   */
-  defaultBrowser: FileBrowser;
 }
 
 /**
@@ -107,4 +116,22 @@ export namespace IFileBrowserFactory {
      */
     state?: IStateDB | null;
   }
+}
+
+/**
+ * The token that indicates the default file browser commands are loaded.
+ */
+export const IFileBrowserCommands = new Token<IFileBrowserCommands>(
+  '@jupyterlab/filebrowser:IFileBrowserCommands',
+  'A token to ensure file browser commands are loaded.'
+);
+
+/**
+ * The identifiers of loaded commands exposed for reuse.
+ */
+export interface IFileBrowserCommands {
+  /**
+   * Command for opening a file or a directory by path.
+   */
+  openPath: string;
 }

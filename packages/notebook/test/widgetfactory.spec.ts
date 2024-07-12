@@ -2,40 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ToolbarButton } from '@jupyterlab/apputils';
-import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
-import { initNotebookContext } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { toArray } from '@lumino/algorithm';
-import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '../src';
+import { Context } from '@jupyterlab/docregistry';
+import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
+import {
+  INotebookModel,
+  NotebookPanel,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
-const contentFactory = utils.createNotebookPanelFactory();
 const rendermime = utils.defaultRenderMime();
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
 });
-
-function createFactory(
-  toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
-): NotebookWidgetFactory {
-  return new NotebookWidgetFactory({
-    name: 'notebook',
-    fileTypes: ['notebook'],
-    rendermime,
-    toolbarFactory,
-    contentFactory,
-    mimeTypeService: utils.mimeTypeService,
-    editorConfig: utils.defaultEditorConfig
-  });
-}
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookWidgetFactory', () => {
@@ -51,14 +38,14 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#constructor()', () => {
       it('should create a notebook widget factory', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         expect(factory).toBeInstanceOf(NotebookWidgetFactory);
       });
     });
 
     describe('#isDisposed', () => {
       it('should get whether the factory has been disposed', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         expect(factory.isDisposed).toBe(false);
         factory.dispose();
         expect(factory.isDisposed).toBe(true);
@@ -67,13 +54,13 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the factory', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         factory.dispose();
         expect(factory.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         factory.dispose();
         factory.dispose();
         expect(factory.isDisposed).toBe(true);
@@ -82,12 +69,12 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#editorConfig', () => {
       it('should be the editor config passed into the constructor', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         expect(factory.editorConfig).toBe(utils.defaultEditorConfig);
       });
 
       it('should be settable', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         const newConfig = { ...utils.defaultEditorConfig };
         factory.editorConfig = newConfig;
         expect(factory.editorConfig).toBe(newConfig);
@@ -96,30 +83,28 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#createNew()', () => {
       it('should create a new `NotebookPanel` widget', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
         expect(panel).toBeInstanceOf(NotebookPanel);
       });
 
       it('should create a clone of the rendermime', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
         expect(panel.content.rendermime).not.toBe(rendermime);
       });
 
       it('should pass the editor config to the notebook', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
         expect(panel.content.editorConfig).toBe(utils.defaultEditorConfig);
       });
 
       it('should populate the default toolbar items', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
-        const items = toArray(panel.toolbar.names());
-        expect(items).toEqual(expect.arrayContaining(['save']));
-        expect(items).toEqual(expect.arrayContaining(['restart']));
-        expect(items).toEqual(expect.arrayContaining(['kernelStatus']));
+        // It will only contain the popup opener
+        expect(Array.from(panel.toolbar.names())).toHaveLength(1);
       });
 
       it('should populate the customized toolbar items', () => {
@@ -127,17 +112,25 @@ describe('@jupyterlab/notebook', () => {
           { name: 'foo', widget: new ToolbarButton() },
           { name: 'bar', widget: new ToolbarButton() }
         ];
-        const factory = createFactory(toolbarFactory);
+        const factory = utils.createNotebookWidgetFactory(toolbarFactory);
         const panel = factory.createNew(context);
         const panel2 = factory.createNew(context);
-        expect(toArray(panel.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(panel2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(panel.toolbar.children()).length).toBe(2);
-        expect(toArray(panel2.toolbar.children()).length).toBe(2);
+        expect(Array.from(panel.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(Array.from(panel2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(Array.from(panel.toolbar.children()).length).toBe(3);
+        expect(Array.from(panel2.toolbar.children()).length).toBe(3);
       });
 
       it('should clone from the optional source widget', () => {
-        const factory = createFactory();
+        const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
         const clone = factory.createNew(panel.context, panel);
         expect(clone).toBeInstanceOf(NotebookPanel);

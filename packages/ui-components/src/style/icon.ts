@@ -139,16 +139,6 @@ export namespace LabIconStyle {
      * the array, giving precedence to the rightmost values.
      */
     stylesheet?: ISheetResolvable | ISheetResolvable[];
-
-    /**
-     * @deprecated use stylesheet instead
-     */
-    kind?: IBuiltin;
-
-    /**
-     * @deprecated use elementPosition instead
-     */
-    justify?: 'center' | 'right' | 'left';
   }
 
   /**
@@ -274,10 +264,6 @@ export namespace LabIconStyle {
         $nest: {
           '.lm-DockPanel-tabBar &': {
             marginRight: '4px'
-          },
-          '#tab-manager &': {
-            marginRight: '2px',
-            position: 'relative'
           }
         }
       },
@@ -286,10 +272,6 @@ export namespace LabIconStyle {
           '.lm-DockPanel-tabBar &': {
             height: '14px',
             width: '14px'
-          },
-          '#tab-manager &': {
-            height: '16px',
-            width: '16px'
           }
         }
       },
@@ -338,7 +320,7 @@ export namespace LabIconStyle {
 
     settingsEditor: {
       container: {
-        display: 'inline-block',
+        display: 'flex',
         flex: '0 0 20px',
         margin: '0 3px 0 0',
         position: 'relative',
@@ -355,38 +337,6 @@ export namespace LabIconStyle {
     },
 
     sideBar: {
-      container: {
-        // `&` will be substituted for the generated classname (interpolation)
-        $nest: {
-          // left sidebar tab divs
-          '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
-            transform: 'rotate(90deg)'
-          },
-          // left sidebar currently selected tab div
-          '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
-            transform:
-              'rotate(90deg)\n' +
-              '    translate(\n' +
-              '      calc(-0.5 * var(--jp-border-width)),\n' +
-              '      calc(-0.5 * var(--jp-border-width))\n' +
-              '    )'
-          },
-
-          // right sidebar tab divs
-          '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
-            transform: 'rotate(-90deg)'
-          },
-          // right sidebar currently selected tab div
-          '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
-            transform:
-              'rotate(-90deg)\n' +
-              '    translate(\n' +
-              '      calc(0.5 * var(--jp-border-width)),\n' +
-              '      calc(-0.5 * var(--jp-border-width))\n' +
-              '    )'
-          }
-        }
-      },
       element: {
         height: 'auto',
         width: '20px'
@@ -425,7 +375,6 @@ export namespace LabIconStyle {
     toolbarButton: {
       container: {
         display: 'inline-block',
-        margin: 'auto',
         verticalAlign: 'middle'
       },
       element: {
@@ -562,24 +511,7 @@ export namespace LabIconStyle {
       return '';
     }
 
-    let {
-      elementPosition,
-      elementSize,
-      stylesheet,
-      kind,
-      justify,
-      ...elementCSS
-    } = props;
-
-    // DEPRECATED: alias kind => stylesheet
-    if (!stylesheet) {
-      stylesheet = kind;
-    }
-
-    // DEPRECATED: alias justify => elementPosition
-    if (!elementPosition) {
-      elementPosition = justify;
-    }
+    let { elementPosition, elementSize, stylesheet, ...elementCSS } = props;
 
     // add option args with defined values to overrides
     const options = {

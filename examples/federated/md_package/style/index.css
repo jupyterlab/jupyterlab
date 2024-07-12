@@ -5,8 +5,8 @@
 
 .mimerenderer-certificate > .certificate {
   background-color: #07618b;
-  border-radius: 20px 20px 20px 20px;
-  box-shadow: 0px 5px 10px 0px;
+  border-radius: 20px;
+  box-shadow: 0 5px 10px 0;
   height: 250px;
   margin-left: 35%;
   margin-top: 10%;
@@ -16,7 +16,7 @@
 
 .mimerenderer-certificate > .certificate > .paper {
   background: #e0e0e0;
-  border-radius: 5px 5px 5px 5px;
+  border-radius: 5px;
   height: 200px;
   left: 25px;
   position: absolute;
@@ -35,7 +35,7 @@
 
 .mimerenderer-certificate > .certificate > .paper > .text {
   margin-top: 20px;
-  padding: 0px;
+  padding: 0;
   text-align: center;
   z-index: 200;
 }
@@ -46,7 +46,7 @@
   font-size: 2em;
   height: 20px;
   left: 30px;
-  padding: 10px 10px 10px 10px;
+  padding: 10px;
   position: absolute;
   top: 30px;
   width: 20px;

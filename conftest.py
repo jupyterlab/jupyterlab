@@ -1,29 +1,24 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
 import pytest
 
-
 pytest_plugins = [
-    "jupyter_server.pytest_plugin",
+    "pytest_jupyter.jupyter_server",
     "jupyterlab_server.pytest_plugin",
-    "jupyterlab.pytest_plugin"
+    "jupyterlab.pytest_plugin",
 ]
 
 
 def pytest_addoption(parser):
     """
-    Adds flags for py.test.
+    Adds flags for pytest.
 
     This is called by the pytest API
     """
     group = parser.getgroup("general")
-    group.addoption('--quick', action='store_true',
-                    help="Skip slow tests")
-    group.addoption('--slow', action='store_true',
-                    help="Run only slow tests")
+    group.addoption("--quick", action="store_true", help="Skip slow tests")
+    group.addoption("--slow", action="store_true", help="Run only slow tests")
 
 
 def pytest_configure(config):

@@ -19,10 +19,10 @@
       "path": "../docregistry"
     },
     {
-      "path": "../filebrowser"
+      "path": "../mainmenu"
     },
     {
-      "path": "../mainmenu"
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../services"
@@ -34,10 +34,16 @@
       "path": "../statedb"
     },
     {
+      "path": "../statusbar"
+    },
+    {
       "path": "../translation"
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../workspaces"
     }
   ]
 }

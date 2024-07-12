@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. raw:: html
 
    <!--
@@ -111,8 +114,7 @@ removed from the DOM, you’ll first need to clean it up:
 This cleanup step is not a special property of ``LabIcon``, but is
 instead needed for any React component that is rendered directly at the
 top level by ``ReactDOM``: failure to call ``unmountComponentAtNode``
-can result in a `memory
-leak <https://stackoverflow.com/a/48198011/425458>`__.
+can result in a memory leak.
 
 How to create your own custom ``LabIcon``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -136,7 +138,7 @@ How to create a new ``LabIcon`` from an external svg file
 Although you can copy-and-paste an svg directly into the ``LabIcon``
 constructor, the best practice is to keep the svg for each of your icons
 in its own separate svg file. You will need to have an ``svg.d.ts`` file
-at the root of your project’s ``src`` directory:
+at the root of your project’s ``src`` folder:
 
 .. code:: typescript
 
@@ -165,9 +167,9 @@ Sync icon color to JupyterLab theme
 
    <em>Example svgs with class annotation can be found in <a href="https://github.com/jupyterlab/jupyterlab/tree/f0153e0258b32674c9aec106383ddf7b618cebab/packages/ui-components/style/icons">ui-components/style/icons</a></em>
 
-| 
+|
 | You can ensure that the colors of your custom ``LabIcon`` sync up to the colors of the current JupyterLab theme by adding appropriate ``class`` annotations to each colored element of your icon's svg.
-| 
+|
 | In other words, each element of your svg that a ``fill="..."`` or a ``stroke="..."`` property should also have a ``class="jp-icon<whatever>"`` property.
 
 Available icon classes
@@ -177,7 +179,7 @@ Available icon classes
 
    <em>Icon-related CSS classes are defined in <a href="https://github.com/jupyterlab/jupyterlab/blob/f0153e0258b32674c9aec106383ddf7b618cebab/packages/ui-components/style/icons.css">ui-components/style/icons.css</a></em>
 
-| 
+|
 | All colors shown are for the standard light/dark theme, mouse over for hex values.
 
 ``jp-iconX``: contrast to theme background

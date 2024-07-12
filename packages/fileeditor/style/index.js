@@ -8,6 +8,10 @@ import '@lumino/widgets/style/index.js';
 import '@jupyterlab/ui-components/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/codeeditor/style/index.js';
+import '@jupyterlab/documentsearch/style/index.js';
+import '@jupyterlab/codemirror/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
+import '@jupyterlab/lsp/style/index.js';
+import '@jupyterlab/toc/style/index.js';
 
 import './base.css';

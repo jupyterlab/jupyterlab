@@ -1,0 +1,30 @@
+name: Docker Tests
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docker:
+    name: Docker Dev Container
+    if: ${{ github.event_name == 'schedule' }} || contains( github.event.pull_request.title, '[docker]')
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build the image
+        run: |
+          bash ./docker/start.sh build
+          docker image ls 2>&1 | grep -ie "jupyterlab_dev" -
+
+      - name: Start the dev container
+        run: |
+          bash ./docker/start.sh dev-detach
+
+      - name: Wait for JupyterLab
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000

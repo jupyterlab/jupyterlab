@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-import { signalToPromise, testEmission } from '@jupyterlab/testutils';
+import { signalToPromise, testEmission } from '@jupyterlab/testing';
 import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -50,28 +50,33 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#currentChanged', () => {
-      it('should emit for the first added widget', async () => {
-        const widget = createWidget();
-        const promise = signalToPromise(tracker.currentChanged);
-        void tracker.add(widget);
-        await promise;
-        widget.dispose();
+      let widget: Widget;
+      let widget2: Widget;
+
+      beforeEach(() => {
+        widget = createWidget();
+        widget2 = createWidget();
       });
 
-      it('should emit when a widget is added and there is another widget that does not have focus', async () => {
-        const widget = createWidget();
-        const widget2 = createWidget();
-        await tracker.add(widget);
-        const promise = signalToPromise(tracker.currentChanged);
-        await tracker.add(widget2);
-        await promise;
+      afterEach(() => {
         widget.dispose();
         widget2.dispose();
       });
 
+      it('should emit for the first added widget', async () => {
+        const promise = signalToPromise(tracker.currentChanged);
+        void tracker.add(widget);
+        await expect(promise).resolves.not.toThrow();
+      });
+
+      it('should emit when a widget is added and there is another widget that does not have focus', async () => {
+        await tracker.add(widget);
+        const promise = signalToPromise(tracker.currentChanged);
+        await tracker.add(widget2);
+        await expect(promise).resolves.not.toThrow();
+      });
+
       it('should not emit when a widget is added and there is another widget that has focus', async () => {
-        const widget = createWidget();
-        const widget2 = createWidget();
         Widget.attach(widget, document.body);
         focus(widget);
         await tracker.add(widget);
@@ -81,13 +86,9 @@ describe('@jupyterlab/apputils', () => {
         });
         await tracker.add(widget2);
         expect(called).toBe(false);
-        widget.dispose();
-        widget2.dispose();
       });
 
       it('should emit when the focus changes', async () => {
-        const widget = createWidget();
-        const widget2 = createWidget();
         Widget.attach(widget, document.body);
         Widget.attach(widget2, document.body);
         focus(widget);
@@ -95,15 +96,25 @@ describe('@jupyterlab/apputils', () => {
         await tracker.add(widget2);
         const promise = signalToPromise(tracker.currentChanged);
         focus(widget2);
-        await promise;
-        widget.dispose();
-        widget2.dispose();
+        await expect(promise).resolves.not.toThrow();
       });
     });
 
     describe('#widgetAdded', () => {
+      let widget: Widget;
+      let widget2: Widget;
+
+      beforeEach(() => {
+        widget = createWidget();
+        widget2 = createWidget();
+      });
+
+      afterEach(() => {
+        widget.dispose();
+        widget2.dispose();
+      });
+
       it('should emit when a widget has been added', async () => {
-        const widget = createWidget();
         const promise = signalToPromise(tracker.widgetAdded);
 
         await tracker.add(widget);
@@ -112,12 +123,9 @@ describe('@jupyterlab/apputils', () => {
 
         expect(sender).toBe(tracker);
         expect(args).toBe(widget);
-        widget.dispose();
       });
 
       it('should not emit when a widget has been injected', async () => {
-        const one = createWidget();
-        const two = createWidget();
         let total = 0;
         const promise = testEmission(tracker.currentChanged, {
           find: () => {
@@ -128,14 +136,12 @@ describe('@jupyterlab/apputils', () => {
         tracker.widgetAdded.connect(() => {
           total++;
         });
-        void tracker.add(one);
-        void tracker.inject(two);
-        Widget.attach(two, document.body);
-        focus(two);
-        Widget.detach(two);
-        await promise;
-        one.dispose();
-        two.dispose();
+        void tracker.add(widget);
+        void tracker.inject(widget2);
+        Widget.attach(widget2, document.body);
+        focus(widget2);
+        Widget.detach(widget2);
+        await expect(promise).resolves.not.toThrow();
       });
     });
 

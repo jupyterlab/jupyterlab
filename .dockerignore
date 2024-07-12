@@ -1,4 +1,6 @@
-.git
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 .dockerignore
 Dockerfile
 
@@ -13,11 +15,8 @@ dev_mode/workspaces
 dev_mode/stats.json
 
 # Skip docs
-docs/
 **/docs/source/_build
 
-# Skip examples
-examples/
 
 junit.xml
 
@@ -41,4 +40,4 @@ tests/**/coverage
 tests/**/.cache-loader
 
 **/node_modules
-ui-tests/
+.yarn

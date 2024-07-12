@@ -1,0 +1,65 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
+.jp-Notebook-ExecutionIndicator {
+  position: relative;
+  display: inline-block;
+  z-index: 9997;
+  padding-top: 1px;
+}
+
+.jp-Notebook-ExecutionIndicator-tooltip {
+  visibility: hidden;
+  height: auto;
+  width: max-content;
+  width: -moz-max-content;
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+  text-align: justify;
+  border-radius: 6px;
+  padding: 0 5px;
+  position: fixed;
+  display: table;
+}
+
+.jp-Notebook-ExecutionIndicator-tooltip.up {
+  transform: translateX(-50%) translateY(-100%) translateY(-32px);
+}
+
+.jp-Notebook-ExecutionIndicator-tooltip.down {
+  transform: translateX(calc(-100% + 16px)) translateY(5px);
+}
+
+.jp-Notebook-ExecutionIndicator-tooltip.hidden {
+  display: none;
+}
+
+.jp-Notebook-ExecutionIndicator:hover .jp-Notebook-ExecutionIndicator-tooltip {
+  visibility: visible;
+}
+
+.jp-Notebook-ExecutionIndicator span {
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  color: var(--jp-ui-font-color1);
+  line-height: 24px;
+  display: block;
+}
+
+.jp-Notebook-ExecutionIndicator-progress-bar {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+}

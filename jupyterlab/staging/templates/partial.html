@@ -1,3 +1,8 @@
+<!--
+  ~ Copyright (c) Jupyter Development Team.
+  ~ Distributed under the terms of the Modified BSD License.
+-->
+
 {# Copy so we do not modify the page_config with updates. #}
 {% set page_config_full = page_config.copy() %}
 
@@ -12,3 +17,7 @@
   <link rel="icon" type="image/x-icon" href="{{ base_url | escape }}static/favicons/favicon.ico" class="idle favicon">
   <link rel="" type="image/x-icon" href="{{ base_url | escape }}static/favicons/favicon-busy-1.ico" class="busy favicon">
   {% endblock %}
+
+  {% if custom_css %}
+  <link rel="stylesheet" type="text/css" href="{{ base_url | escape }}custom/custom.css">
+  {% endif %}

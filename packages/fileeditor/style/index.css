@@ -8,6 +8,9 @@
 @import url('~@jupyterlab/ui-components/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
 @import url('~@jupyterlab/codeeditor/style/index.css');
+@import url('~@jupyterlab/documentsearch/style/index.css');
+@import url('~@jupyterlab/codemirror/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
-
+@import url('~@jupyterlab/lsp/style/index.css');
+@import url('~@jupyterlab/toc/style/index.css');
 @import url('./base.css');

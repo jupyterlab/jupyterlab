@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Collapse {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.jp-Collapse-header {
+  padding: 1px 12px;
+  background-color: var(--jp-layout-color1);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.jp-Collapser-icon {
+  height: 16px;
+}
+
+.jp-Collapse-header-collapsed .jp-Collapser-icon {
+  transform: rotate(-90deg);
+  margin: auto 0;
+}
+
+.jp-Collapser-title {
+  line-height: 25px;
+}
+
+.jp-Collapse-contents {
+  padding: 0 12px;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  overflow: auto;
+}

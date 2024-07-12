@@ -1,0 +1,140 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
+.jp-StatusBar-Widget {
+  display: flex;
+  align-items: center;
+  background: var(--jp-layout-color2);
+  min-height: var(--jp-statusbar-height);
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.jp-StatusBar-Left {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.jp-StatusBar-Middle {
+  display: flex;
+  align-items: center;
+}
+
+.jp-StatusBar-Right {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.jp-StatusBar-Item {
+  max-height: var(--jp-statusbar-height);
+  margin: 0 2px;
+  height: var(--jp-statusbar-height);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--jp-ui-font-color1);
+  padding: 0 6px;
+}
+
+.jp-mod-highlighted:hover {
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-mod-clicked {
+  background-color: var(--jp-brand-color1);
+}
+
+.jp-mod-clicked:hover {
+  background-color: var(--jp-brand-color0);
+}
+
+.jp-mod-clicked .jp-StatusBar-TextItem {
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-StatusBar-HoverItem {
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.jp-StatusBar-TextItem {
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  line-height: 24px;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-StatusBar-GroupItem {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.jp-Statusbar-ProgressCircle > svg {
+  display: block;
+  margin: 0 auto;
+  width: 16px;
+  align-self: normal;
+}
+
+.jp-Statusbar-ProgressCircle .jp-Statusbar-ProgressCirclePath {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.jp-Statusbar-ProgressBar-progress-bar {
+  height: 10px;
+  width: 100px;
+  border: solid 0.25px var(--jp-brand-color2);
+  border-radius: 3px;
+  overflow: hidden;
+  align-self: center;
+}
+
+.jp-Statusbar-ProgressBar-progress-bar > div {
+  background-color: var(--jp-brand-color2);
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 40px 40px;
+  float: left;
+  width: 0%;
+  height: 100%;
+  font-size: 12px;
+  line-height: 14px;
+  color: #fff;
+  text-align: center;
+  animation: jp-Statusbar-ExecutionTime-progress-bar 2s linear infinite;
+}
+
+.jp-Statusbar-ProgressBar-progress-bar p {
+  color: var(--jp-ui-font-color1);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  line-height: 10px;
+  width: 100px;
+}
+
+@keyframes jp-Statusbar-ExecutionTime-progress-bar {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 40px 40px;
+  }
+}

@@ -17,6 +17,7 @@ import { ITranslator } from '@jupyterlab/translation';
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/theme-light-extension:plugin',
+  description: 'Adds a light theme.',
   requires: [IThemeManager, ITranslator],
   activate: (
     app: JupyterFrontEnd,

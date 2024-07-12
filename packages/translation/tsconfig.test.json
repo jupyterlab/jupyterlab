@@ -6,6 +6,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../services"
     },
     {
@@ -15,16 +18,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
+      "path": "../testing"
     }
   ]
 }

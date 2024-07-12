@@ -1,50 +1,43 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  sleep,
-  testEmission
-} from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
 import { Kernel, KernelAPI, KernelManager } from '../../src';
 import { makeSettings } from '../utils';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('kernel/manager', () => {
-  let manager: KernelManager;
   let kernel: Kernel.IModel;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
+    server = new JupyterServer();
+    await server.start();
     kernel = await KernelAPI.startNew();
-  });
-
-  beforeEach(() => {
-    manager = new KernelManager({ standby: 'never' });
-    return manager.ready;
-  });
-
-  afterEach(() => {
-    manager.dispose();
-  });
+  }, 30000);
 
   afterAll(async () => {
-    const models = await KernelAPI.listRunning();
-    await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+    await server.shutdown();
   });
 
   describe('KernelManager', () => {
+    let manager: KernelManager;
+
+    beforeEach(() => {
+      manager = new KernelManager({ standby: 'never' });
+      return manager.ready;
+    });
+
+    afterEach(() => {
+      manager.dispose();
+    });
+
+    afterAll(async () => {
+      const models = await KernelAPI.listRunning();
+      await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+    });
+
     describe('#constructor()', () => {
       it('should take the options as an argument', async () => {
         manager.dispose();
@@ -72,7 +65,7 @@ describe('kernel/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toBeGreaterThan(0);
+        expect(Array.from(manager.running()).length).toBeGreaterThan(0);
       });
     });
     describe('#runningChanged', () => {
@@ -80,7 +73,7 @@ describe('kernel/manager', () => {
         let called = false;
         manager.runningChanged.connect((sender, args) => {
           expect(sender).toBe(manager);
-          expect(toArray(args).length).toBeGreaterThan(0);
+          expect(Array.from(args).length).toBeGreaterThan(0);
           called = true;
         });
         await KernelAPI.startNew();
@@ -112,28 +105,28 @@ describe('kernel/manager', () => {
     });
 
     describe('#ready', () => {
-      it('should resolve when the manager is ready', () => {
-        return manager.ready;
+      it('should resolve when the manager is ready', async () => {
+        await expect(manager.ready).resolves.not.toThrow();
       });
     });
 
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toBeGreaterThan(0);
+        expect(Array.from(manager.running()).length).toBeGreaterThan(0);
       });
 
       it('should update the running kernels when one is shut down', async () => {
-        const old = toArray(manager.running()).length;
+        const old = Array.from(manager.running()).length;
         await KernelAPI.startNew();
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toBeGreaterThan(old);
+        expect(Array.from(manager.running()).length).toBeGreaterThan(old);
       });
     });
 
     describe('#startNew()', () => {
-      it('should start a new kernel', () => {
-        return manager.startNew();
+      it('should start a new kernel', async () => {
+        await expect(manager.startNew()).resolves.not.toThrow();
       });
 
       it('should emit a runningChanged signal', async () => {
@@ -197,6 +190,77 @@ describe('kernel/manager', () => {
         await sleep(100);
         expect(kernel1.status).toBe('dead');
         expect(kernel1.isDisposed).toBe(true);
+      });
+    });
+  });
+
+  describe('NoopManager', () => {
+    let manager: KernelManager.NoopManager;
+
+    beforeEach(async () => {
+      manager = new KernelManager.NoopManager({ standby: 'never' });
+      await manager.parentReady;
+    });
+
+    afterEach(() => {
+      manager.dispose();
+    });
+
+    describe('#constructor()', () => {
+      it('should take the options as an argument', async () => {
+        manager.dispose();
+        manager = new KernelManager.NoopManager({
+          serverSettings: makeSettings(),
+          standby: 'never'
+        });
+        await manager.parentReady;
+        expect(manager instanceof KernelManager.NoopManager).toBe(true);
+      });
+    });
+
+    describe('#serverSettings', () => {
+      it('should get the server settings', async () => {
+        manager.dispose();
+        const serverSettings = makeSettings();
+        const standby = 'never';
+        const token = serverSettings.token;
+        manager = new KernelManager.NoopManager({ serverSettings, standby });
+        await manager.parentReady;
+        expect(manager.serverSettings.token).toBe(token);
+      });
+    });
+
+    describe('#running()', () => {
+      it('should get the running sessions', async () => {
+        await manager.refreshRunning();
+        expect(Array.from(manager.running()).length).toEqual(0);
+      });
+    });
+
+    describe('#refreshRunning()', () => {
+      it('should update the running kernels', async () => {
+        await manager.refreshRunning();
+        expect(Array.from(manager.running()).length).toEqual(0);
+      });
+    });
+
+    describe('#startNew()', () => {
+      it('should throw an error', () => {
+        return expect(manager.startNew()).rejects.toThrow();
+      });
+    });
+
+    describe('#connectTo()', () => {
+      it('should throw an error', () => {
+        return expect(() => {
+          manager.connectTo({ model: kernel });
+        }).toThrow();
+      });
+    });
+
+    describe('shutdown()', () => {
+      it('should throw an error', () => {
+        return expect(manager.shutdown(kernel.id)).rejects.toThrow();
       });
     });
   });

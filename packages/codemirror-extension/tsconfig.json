@@ -16,15 +16,6 @@
       "path": "../codemirror"
     },
     {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../mainmenu"
-    },
-    {
       "path": "../settingregistry"
     },
     {
@@ -32,6 +23,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

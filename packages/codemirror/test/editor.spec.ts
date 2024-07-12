@@ -1,15 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { YFile } from '@jupyter/ydoc';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditor,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+import { sleep } from '@jupyterlab/testutils';
 import { generate, simulate } from 'simulate-event';
 
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
-
-const ENTER = 13;
 
 class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
@@ -26,12 +33,45 @@ describe('CodeMirrorEditor', () => {
   let host: HTMLElement;
   let model: CodeEditor.IModel;
   const TEXT = new Array(100).join('foo bar baz\n');
+  let languages: IEditorLanguageRegistry;
+  let extensionsRegistry: IEditorExtensionRegistry;
+
+  beforeAll(async () => {
+    languages = new EditorLanguageRegistry();
+    extensionsRegistry = new EditorExtensionRegistry();
+    EditorExtensionRegistry.getDefaultExtensions()
+      .filter(ext =>
+        [
+          'lineNumbers',
+          'lineWrap',
+          'readOnly',
+          'allowMultipleSelections'
+        ].includes(ext.name)
+      )
+      .forEach(ext => {
+        extensionsRegistry.addExtension(ext);
+      });
+    for (const language of EditorLanguageRegistry.getDefaultLanguages().filter(
+      spec => spec.name === 'Python'
+    )) {
+      languages.addLanguage(language);
+      await languages.getLanguage(language.name);
+    }
+  });
 
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
-    model = new CodeEditor.Model();
-    editor = new LogFileEditor({ host, model });
+    const sharedModel = new YFile();
+    model = new CodeEditor.Model({ sharedModel });
+    editor = new LogFileEditor({
+      extensionsRegistry,
+      host,
+      model,
+      languages,
+      // Binding between the editor and the Yjs model
+      extensions: [ybinding({ ytext: sharedModel.ysource })]
+    });
   });
 
   afterEach(() => {
@@ -54,7 +94,7 @@ describe('CodeMirrorEditor', () => {
       };
       editor.edgeRequested.connect(listener);
       expect(edge).toBeNull();
-      editor.editor.triggerOnKeyDown(event);
+      editor.editor.contentDOM.dispatchEvent(event);
       expect(edge).toBe('top');
     });
 
@@ -66,7 +106,7 @@ describe('CodeMirrorEditor', () => {
       };
       editor.edgeRequested.connect(listener);
       expect(edge).toBeNull();
-      editor.editor.triggerOnKeyDown(event);
+      editor.editor.contentDOM.dispatchEvent(event);
       expect(edge).toBe('bottom');
     });
   });
@@ -75,56 +115,39 @@ describe('CodeMirrorEditor', () => {
     it('should be the unique id of the editor', () => {
       expect(editor.uuid).toBeTruthy();
       const uuid = 'foo';
-      editor = new LogFileEditor({ model, host, uuid });
+      editor = new LogFileEditor({
+        extensionsRegistry,
+        model,
+        host,
+        uuid,
+        languages
+      });
       expect(editor.uuid).toBe('foo');
-    });
-  });
-
-  describe('#selectionStyle', () => {
-    it('should be the selection style of the editor', () => {
-      expect(editor.selectionStyle).toEqual(CodeEditor.defaultSelectionStyle);
-    });
-
-    it('should be settable', () => {
-      const style = {
-        className: 'foo',
-        displayName: 'bar',
-        color: 'black'
-      };
-      editor.selectionStyle = style;
-      expect(editor.selectionStyle).toEqual(style);
     });
   });
 
   describe('#editor', () => {
     it('should be the codemirror editor wrapped by the editor', () => {
       const cm = editor.editor;
-      expect(cm.getDoc()).toBe(editor.doc);
-    });
-  });
-
-  describe('#doc', () => {
-    it('should be the codemirror doc wrapped by the editor', () => {
-      const doc = editor.doc;
-      expect(doc.getEditor()).toBe(editor.editor);
+      expect(cm.state.doc).toBe(editor.doc);
     });
   });
 
   describe('#lineCount', () => {
     it('should get the number of lines in the editor', () => {
       expect(editor.lineCount).toBe(1);
-      editor.model.value.text = 'foo\nbar\nbaz';
+      editor.model.sharedModel.setSource('foo\nbar\nbaz');
       expect(editor.lineCount).toBe(3);
     });
   });
 
   describe('#getOption()', () => {
     it('should get whether line numbers should be shown', () => {
-      expect(editor.getOption('lineNumbers')).toBe(false);
+      expect(editor.getOption('lineNumbers')).toBe(true);
     });
 
     it('should get whether horizontally scrolling should be used', () => {
-      expect(editor.getOption('lineWrap')).toBe('on');
+      expect(editor.getOption('lineWrap')).toBe(true);
     });
 
     it('should get whether the editor is readonly', () => {
@@ -134,13 +157,13 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setOption()', () => {
     it('should set whether line numbers should be shown', () => {
-      editor.setOption('lineNumbers', true);
-      expect(editor.getOption('lineNumbers')).toBe(true);
+      editor.setOption('lineNumbers', false);
+      expect(editor.getOption('lineNumbers')).toBe(false);
     });
 
     it('should set whether horizontally scrolling should be used', () => {
-      editor.setOption('lineWrap', 'off');
-      expect(editor.getOption('lineWrap')).toBe('off');
+      editor.setOption('lineWrap', false);
+      expect(editor.getOption('lineWrap')).toBe(false);
     });
 
     it('should set whether the editor is readonly', () => {
@@ -187,7 +210,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getLine()', () => {
     it('should get a line of text', () => {
-      model.value.text = 'foo\nbar';
+      model.sharedModel.setSource('foo\nbar');
       expect(editor.getLine(0)).toBe('foo');
       expect(editor.getLine(1)).toBe('bar');
       expect(editor.getLine(2)).toBeUndefined();
@@ -196,7 +219,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getOffsetAt()', () => {
     it('should get the offset for a given position', () => {
-      model.value.text = 'foo\nbar';
+      model.sharedModel.setSource('foo\nbar');
       let pos = {
         column: 2,
         line: 1
@@ -206,45 +229,47 @@ describe('CodeMirrorEditor', () => {
         column: 2,
         line: 5
       };
-      expect(editor.getOffsetAt(pos)).toBe(7);
+      expect(() => {
+        editor.getOffsetAt(pos);
+      }).toThrow(RangeError);
     });
   });
 
   describe('#getPositionAt()', () => {
     it('should get the position for a given offset', () => {
-      model.value.text = 'foo\nbar';
+      model.sharedModel.setSource('foo\nbar');
       let pos = editor.getPositionAt(6);
       expect(pos.column).toBe(2);
       expect(pos.line).toBe(1);
-      pos = editor.getPositionAt(101);
-      expect(pos.column).toBe(3);
-      expect(pos.line).toBe(1);
+      expect(() => {
+        pos = editor.getPositionAt(101);
+      }).toThrow(RangeError);
     });
   });
 
   describe('#undo()', () => {
     it('should undo one edit', () => {
-      model.value.text = 'foo';
+      model.sharedModel.setSource('foo');
       editor.undo();
-      expect(model.value.text).toBe('');
+      expect(model.sharedModel.getSource()).toBe('');
     });
   });
 
   describe('#redo()', () => {
     it('should redo one undone edit', () => {
-      model.value.text = 'foo';
+      model.sharedModel.setSource('foo');
       editor.undo();
       editor.redo();
-      expect(model.value.text).toBe('foo');
+      expect(model.sharedModel.getSource()).toBe('foo');
     });
   });
 
   describe('#clearHistory()', () => {
     it('should clear the undo history', () => {
-      model.value.text = 'foo';
+      model.sharedModel.setSource('foo');
       editor.clearHistory();
       editor.undo();
-      expect(model.value.text).toBe('foo');
+      expect(model.sharedModel.getSource()).toBe('foo');
     });
   });
 
@@ -276,59 +301,24 @@ describe('CodeMirrorEditor', () => {
   describe('#handleEvent', () => {
     describe('focus', () => {
       it('should add the focus class to the host', () => {
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.contentDOM, 'focus');
         expect(host.classList.contains('jp-mod-focused')).toBe(true);
       });
     });
 
     describe('blur', () => {
       it('should remove the focus class from the host', () => {
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.contentDOM, 'focus');
         expect(host.classList.contains('jp-mod-focused')).toBe(true);
-        simulate(editor.editor.getInputField(), 'blur');
+        simulate(editor.editor.contentDOM, 'blur');
         expect(host.classList.contains('jp-mod-focused')).toBe(false);
       });
     });
   });
 
-  describe('#refresh()', () => {
-    it('should repaint the editor', () => {
-      editor.refresh();
-      expect(editor).toBeTruthy();
-    });
-  });
-
-  describe('#addKeydownHandler()', () => {
-    it('should add a keydown handler to the editor', () => {
-      let called = 0;
-      const handler = () => {
-        called++;
-        return true;
-      };
-      const disposable = editor.addKeydownHandler(handler);
-      let evt = generate('keydown', { keyCode: ENTER });
-      editor.editor.triggerOnKeyDown(evt);
-      expect(called).toBe(1);
-      disposable.dispose();
-      expect(disposable.isDisposed).toBe(true);
-
-      evt = generate('keydown', { keyCode: ENTER });
-      editor.editor.triggerOnKeyDown(evt);
-      expect(called).toBe(1);
-    });
-  });
-
-  describe('#setSize()', () => {
-    it('should set the size of the editor in pixels', () => {
-      editor.setSize({ width: 100, height: 100 });
-      editor.setSize(null);
-      expect(editor).toBeTruthy();
-    });
-  });
-
   describe('#revealPosition()', () => {
     it('should reveal the given position in the editor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       editor.revealPosition({ line: 50, column: 0 });
       expect(editor).toBeTruthy();
     });
@@ -336,7 +326,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#revealSelection()', () => {
     it('should reveal the given selection in the editor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const start = { line: 50, column: 0 };
       const end = { line: 52, column: 0 };
       editor.setSelection({ start, end });
@@ -345,31 +335,9 @@ describe('CodeMirrorEditor', () => {
     });
   });
 
-  describe('#getCoordinateForPosition()', () => {
-    it('should get the window coordinates given a cursor position', () => {
-      model.value.text = TEXT;
-      const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
-      if (typeof process !== 'undefined') {
-        expect(coord.left).toBe(0);
-      } else {
-        expect(coord.left).toBeGreaterThan(0);
-      }
-    });
-  });
-
-  describe('#getPositionForCoordinate()', () => {
-    it('should get the window coordinates given a cursor position', () => {
-      model.value.text = TEXT;
-      const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
-      const newPos = editor.getPositionForCoordinate(coord)!;
-      expect(newPos.line).toBeTruthy();
-      expect(newPos.column).toBeTruthy();
-    });
-  });
-
   describe('#getCursorPosition()', () => {
     it('should get the primary position of the cursor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       let pos = editor.getCursorPosition();
       expect(pos.line).toBe(0);
       expect(pos.column).toBe(0);
@@ -383,7 +351,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setCursorPosition()', () => {
     it('should set the primary position of the cursor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       editor.setCursorPosition({ line: 12, column: 3 });
       const pos = editor.getCursorPosition();
       expect(pos.line).toBe(12);
@@ -401,7 +369,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setSelection()', () => {
     it('should set the primary selection of the editor', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const start = { line: 50, column: 0 };
       const end = { line: 52, column: 0 };
       editor.setSelection({ start, end });
@@ -410,7 +378,7 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should remove any secondary cursors', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
         end: { line: 52, column: 0 }
@@ -427,7 +395,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getSelections()', () => {
     it('should get the selections for all the cursors', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
         end: { line: 52, column: 0 }
@@ -444,8 +412,8 @@ describe('CodeMirrorEditor', () => {
   });
 
   describe('#setSelections()', () => {
-    it('should set the selections for all the cursors', () => {
-      model.value.text = TEXT;
+    it('should set the selections for all the cursors', async () => {
+      model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
         end: { line: 52, column: 0 }
@@ -461,7 +429,7 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should set a default selection for an empty array', () => {
-      model.value.text = TEXT;
+      model.sharedModel.setSource(TEXT);
       editor.setSelections([]);
       const selection = editor.getSelection();
       expect(selection.start.line).toBe(0);
@@ -473,8 +441,98 @@ describe('CodeMirrorEditor', () => {
     it('should run when there is a keydown event on the editor', () => {
       const event = generate('keydown', { keyCode: UP_ARROW });
       expect(editor.methods).toEqual(expect.not.arrayContaining(['onKeydown']));
-      editor.editor.triggerOnKeyDown(event);
+      editor.editor.contentDOM.dispatchEvent(event);
       expect(editor.methods).toEqual(expect.arrayContaining(['onKeydown']));
+    });
+  });
+
+  describe('#getTokenAt()', () => {
+    it('should return innermost token', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('foo = "a"\nbar = 1');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokenAt(1)).toStrictEqual({
+        offset: 0,
+        type: 'VariableName',
+        value: 'foo'
+      });
+
+      expect(editor.getTokenAt(11)).toStrictEqual({
+        offset: 10,
+        type: 'VariableName',
+        value: 'bar'
+      });
+    });
+    it('should return preceeding token when it is the last token', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('import');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokenAt(6)).toStrictEqual({
+        type: 'import',
+        offset: 0,
+        value: 'import'
+      });
+    });
+  });
+
+  describe('#getTokens()', () => {
+    it('should get a list of tokens', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('foo = "a"\nbar = 1');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokens()).toStrictEqual([
+        {
+          offset: 0,
+          type: 'VariableName',
+          value: 'foo'
+        },
+        {
+          offset: 4,
+          type: 'AssignOp',
+          value: '='
+        },
+        {
+          offset: 6,
+          type: 'String',
+          value: '"a"'
+        },
+        {
+          offset: 10,
+          type: 'VariableName',
+          value: 'bar'
+        },
+        {
+          offset: 14,
+          type: 'AssignOp',
+          value: '='
+        },
+        {
+          offset: 16,
+          type: 'Number',
+          value: '1'
+        }
+      ]);
+    });
+  });
+
+  describe('#replaceSelection()', () => {
+    it('should set text in empty editor', () => {
+      model.sharedModel.setSource('');
+      editor.replaceSelection('text');
+      expect(model.sharedModel.source).toBe('text');
+      expect(editor.getSelection().end.column).toBe(4);
+    });
+
+    it('should replace from start to end of selection', () => {
+      model.sharedModel.setSource('axxc');
+      const start = { line: 0, column: 1 };
+      const end = { line: 0, column: 3 };
+      editor.setSelection({ start, end });
+      editor.replaceSelection('b');
+      expect(model.sharedModel.source).toBe('abc');
     });
   });
 });

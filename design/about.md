@@ -68,11 +68,11 @@ Users should be able to:
 
 ### Layout
 
-The new About plugin will feature a cleaner layout, with different "slides" that guide the user through the different features and actions of JupyterLab. These slides can be scrolled through like any website, but each section is automatically formatted to fit the viewport (we will be creating a framework similar to—if not using parts of—[fullpage.js](http://alvarotrigo.com/fullPage/)). We will be implementing the use of images and animations per slide to help users understand each new “feature” of JupyterLab better, and to understand how to use it.
+The new About plugin will feature a cleaner layout, with different "slides" that guide the user through the different features and actions of JupyterLab. These slides can be scrolled through like any website, but each section is automatically formatted to fit the viewport (we will be creating a framework similar to—if not using parts of—[fullpage.js](https://alvarotrigo.com/fullPage/)). We will be implementing the use of images and animations per slide to help users understand each new “feature” of JupyterLab better, and to understand how to use it.
 
 The title slide will contain the JupyterLab logo near the top, and welcome text underneath to make the user feel at home, and to explain the current release of their JupyterLab version. After this, we’re hoping to include an overview of the "features" (i.e. Main Area, Command Palette, File Browser, etc.), by giving each feature an icon and description. This can be clicked and will ultimately be linked to that feature’s slide.
 
-After the title slide, there will be a few more slides for each feature. Each slide will have a mini icon and title for the feature, an animated image (_.gif or _.gifv file) showing the user process of the feature, and a more in-depth description of the "feature".
+After the title slide, there will be a few more slides for each feature. Each slide will have a mini icon and title for the feature, an animated image (\_.gif or \_.gifv file) showing the user process of the feature, and a more in-depth description of the "feature".
 
 The final slide will give the user the ability to start working with a Notebook, Console, and/or Terminal—very similar to the Launcher plugin—acting as a Call-to-Action for the user to start using JupyterLab.
 
@@ -94,7 +94,7 @@ We will continue brainstorming and developing design renditions to determine if 
 
 The About Plugin will feature an interactive guide for the user to scroll through. Motion will be reflected with the scrolling, slide transitions, which helps the user understand where the About content is going, and where to get more About content.
 
-Motion will also be implemented in our animations for each feature, using a moving image format (_.gif or _.gifv file) of a UX demonstration of a real screen, to show users not only where and what each feature looks like, but also how to actually use each feature in real time.
+Motion will also be implemented in our animations for each feature, using a moving image format (\_.gif or \_.gifv file) of a UX demonstration of a real screen, to show users not only where and what each feature looks like, but also how to actually use each feature in real time.
 
 ---
 

@@ -8,20 +8,12 @@ import {
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { ITranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
-import {
-  BasicKeyHandler,
-  BasicMouseHandler,
-  BasicSelectionModel,
-  CellRenderer,
-  DataGrid,
-  TextRenderer
-} from '@lumino/datagrid';
+import type * as DataGridModule from '@lumino/datagrid';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { DSVModel } from './model';
+import type * as DSVModelModule from './model';
 import { CSVDelimiter } from './toolbar';
 
 /**
@@ -58,7 +50,7 @@ export class TextRenderConfig {
   /**
    * horizontalAlignment of the text
    */
-  horizontalAlignment: TextRenderer.HorizontalAlignment;
+  horizontalAlignment: DataGridModule.TextRenderer.HorizontalAlignment;
 }
 
 /**
@@ -68,7 +60,7 @@ export class TextRenderConfig {
  * to set the background color of cells matching the search text.
  */
 export class GridSearchService {
-  constructor(grid: DataGrid) {
+  constructor(grid: DataGridModule.DataGrid) {
     this._grid = grid;
     this._query = null;
     this._row = 0;
@@ -89,7 +81,7 @@ export class GridSearchService {
    */
   cellBackgroundColorRendererFunc(
     config: TextRenderConfig
-  ): CellRenderer.ConfigFunc<string> {
+  ): DataGridModule.CellRenderer.ConfigFunc<string> {
     return ({ value, row, column }) => {
       if (this._query) {
         if ((value as string).match(this._query)) {
@@ -106,7 +98,7 @@ export class GridSearchService {
   /**
    * Clear the search.
    */
-  clear() {
+  clear(): void {
     this._query = null;
     this._row = 0;
     this._column = -1;
@@ -217,7 +209,7 @@ export class GridSearchService {
     return this._query;
   }
 
-  private _grid: DataGrid;
+  private _grid: DataGridModule.DataGrid;
   private _query: RegExp | null;
   private _row: number;
   private _column: number;
@@ -235,11 +227,29 @@ export class CSVViewer extends Widget {
   constructor(options: CSVViewer.IOptions) {
     super();
 
-    const context = (this._context = options.context);
-    const layout = (this.layout = new PanelLayout());
+    this._context = options.context;
+    this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
 
+    this._ready = this.initialize();
+  }
+
+  /**
+   * Promise which resolves when the content is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready;
+  }
+
+  protected async initialize(): Promise<void> {
+    const layout = this.layout as PanelLayout;
+    if (this.isDisposed || !layout) {
+      return;
+    }
+    const { BasicKeyHandler, BasicMouseHandler, DataGrid } =
+      await Private.ensureDataGrid();
+    this._defaultStyle = DataGrid.defaultStyle;
     this._grid = new DataGrid({
       defaultSizes: {
         rowHeight: 24,
@@ -264,16 +274,15 @@ export class CSVViewer extends Widget {
     this._searchService = new GridSearchService(this._grid);
     this._searchService.changed.connect(this._updateRenderer, this);
 
-    void this._context.ready.then(() => {
-      this._updateGrid();
-      this._revealed.resolve(undefined);
-      // Throttle the rendering rate of the widget.
-      this._monitor = new ActivityMonitor({
-        signal: context.model.contentChanged,
-        timeout: RENDER_TIMEOUT
-      });
-      this._monitor.activityStopped.connect(this._updateGrid, this);
+    await this._context.ready;
+    await this._updateGrid();
+    this._revealed.resolve(undefined);
+    // Throttle the rendering rate of the widget.
+    this._monitor = new ActivityMonitor({
+      signal: this._context.model.contentChanged,
+      timeout: RENDER_TIMEOUT
     });
+    this._monitor.activityStopped.connect(this._updateGrid, this);
   }
 
   /**
@@ -286,7 +295,7 @@ export class CSVViewer extends Widget {
   /**
    * A promise that resolves when the csv viewer is ready to be revealed.
    */
-  get revealed() {
+  get revealed(): Promise<void> {
     return this._revealed.promise;
   }
 
@@ -301,17 +310,17 @@ export class CSVViewer extends Widget {
       return;
     }
     this._delimiter = value;
-    this._updateGrid();
+    void this._updateGrid();
   }
 
   /**
    * The style used by the data grid.
    */
-  get style(): DataGrid.Style {
+  get style(): DataGridModule.DataGrid.Style {
     return this._grid.style;
   }
-  set style(value: DataGrid.Style) {
-    this._grid.style = value;
+  set style(value: DataGridModule.DataGrid.Style) {
+    this._grid.style = { ...this._defaultStyle, ...value };
   }
 
   /**
@@ -319,7 +328,7 @@ export class CSVViewer extends Widget {
    */
   set rendererConfig(rendererConfig: TextRenderConfig) {
     this._baseRenderer = rendererConfig;
-    this._updateRenderer();
+    void this._updateRenderer();
   }
 
   /**
@@ -342,7 +351,7 @@ export class CSVViewer extends Widget {
   /**
    * Go to line
    */
-  goToLine(lineNumber: number) {
+  goToLine(lineNumber: number): void {
     this._grid.scrollToRow(lineNumber);
   }
 
@@ -357,10 +366,12 @@ export class CSVViewer extends Widget {
   /**
    * Create the model for the grid.
    */
-  private _updateGrid(): void {
+  private async _updateGrid(): Promise<void> {
+    const { BasicSelectionModel } = await Private.ensureDataGrid();
+    const { DSVModel } = await Private.ensureDSVModel();
     const data: string = this._context.model.toString();
     const delimiter = this._delimiter;
-    const oldModel = this._grid.dataModel as DSVModel;
+    const oldModel = this._grid.dataModel as DSVModelModule.DSVModel;
     const dataModel = (this._grid.dataModel = new DSVModel({
       data,
       delimiter
@@ -374,17 +385,17 @@ export class CSVViewer extends Widget {
   /**
    * Update the renderer for the grid.
    */
-  private _updateRenderer(): void {
+  private async _updateRenderer(): Promise<void> {
     if (this._baseRenderer === null) {
       return;
     }
+    const { TextRenderer } = await Private.ensureDataGrid();
     const rendererConfig = this._baseRenderer;
     const renderer = new TextRenderer({
       textColor: rendererConfig.textColor,
       horizontalAlignment: rendererConfig.horizontalAlignment,
-      backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
-        rendererConfig
-      )
+      backgroundColor:
+        this._searchService.cellBackgroundColorRendererFunc(rendererConfig)
     });
     this._grid.cellRenderers.update({
       body: renderer,
@@ -395,15 +406,15 @@ export class CSVViewer extends Widget {
   }
 
   private _context: DocumentRegistry.Context;
-  private _grid: DataGrid;
+  private _grid: DataGridModule.DataGrid;
+  private _defaultStyle: typeof DataGridModule.DataGrid.defaultStyle;
   private _searchService: GridSearchService;
-  private _monitor: ActivityMonitor<
-    DocumentRegistry.IModel,
-    void
-  > | null = null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
+    null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
+  private _ready: Promise<void>;
 }
 
 /**
@@ -434,13 +445,6 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     if (delimiter) {
       content.delimiter = delimiter;
     }
-    const csvDelimiter = new CSVDelimiter({ selected: content.delimiter });
-    this.toolbar.addItem('delimiter', csvDelimiter);
-    csvDelimiter.delimiterChanged.connect(
-      (sender: CSVDelimiter, delimiter: string) => {
-        content!.delimiter = delimiter;
-      }
-    );
   }
 
   /**
@@ -476,20 +480,10 @@ export namespace CSVDocumentWidget {
 
   export interface IOptions
     extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
-    delimiter?: string;
-
     /**
-     * The application language translator.
+     * Data delimiter character
      */
-    translator?: ITranslator;
-  }
-}
-
-namespace Private {
-  export function createContent(
-    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
-  ) {
-    return new CSVViewer({ context });
+    delimiter?: string;
   }
 }
 
@@ -508,14 +502,29 @@ export class CSVViewerFactory extends ABCWidgetFactory<
     const translator = this.translator;
     return new CSVDocumentWidget({ context, translator });
   }
+
+  /**
+   * Default factory for toolbar items to be added after the widget is created.
+   */
+  protected defaultToolbarFactory(
+    widget: IDocumentWidget<CSVViewer>
+  ): DocumentRegistry.IToolbarItem[] {
+    return [
+      {
+        name: 'delimiter',
+        widget: new CSVDelimiter({
+          widget: widget.content,
+          translator: this.translator
+        })
+      }
+    ];
+  }
 }
 
 /**
  * A widget factory for TSV widgets.
  */
-export class TSVViewerFactory extends ABCWidgetFactory<
-  IDocumentWidget<CSVViewer>
-> {
+export class TSVViewerFactory extends CSVViewerFactory {
   /**
    * Create a new widget given a context.
    */
@@ -528,5 +537,35 @@ export class TSVViewerFactory extends ABCWidgetFactory<
       delimiter,
       translator: this.translator
     });
+  }
+}
+
+namespace Private {
+  let gridLoaded: PromiseDelegate<typeof DataGridModule> | null = null;
+  let modelLoaded: PromiseDelegate<typeof DSVModelModule> | null = null;
+
+  /**
+   * Lazily load the datagrid module when the first grid is requested.
+   */
+  export async function ensureDataGrid(): Promise<typeof DataGridModule> {
+    if (gridLoaded == null) {
+      gridLoaded = new PromiseDelegate();
+      gridLoaded.resolve(await import('@lumino/datagrid'));
+    }
+    return gridLoaded.promise;
+  }
+
+  export async function ensureDSVModel(): Promise<typeof DSVModelModule> {
+    if (modelLoaded == null) {
+      modelLoaded = new PromiseDelegate();
+      modelLoaded.resolve(await import('./model'));
+    }
+    return modelLoaded.promise;
+  }
+
+  export function createContent(
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
+  ): CSVViewer {
+    return new CSVViewer({ context });
   }
 }

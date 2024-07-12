@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+.jp-RenderedMermaid {
+  overflow: auto;
+  display: flex;
+}
+
+.jp-RenderedMermaid.jp-mod-warning {
+  width: auto;
+  padding: 0.5em;
+  margin-top: 0.5em;
+  border: var(--jp-border-width) solid var(--jp-warn-color2);
+  border-radius: var(--jp-border-radius);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.jp-RenderedMermaid figure {
+  margin: 0;
+  overflow: auto;
+  max-width: 100%;
+}
+
+.jp-RenderedMermaid img {
+  max-width: 100%;
+}
+
+.jp-RenderedMermaid-Details > pre {
+  margin-top: 1em;
+}
+
+.jp-RenderedMermaid-Summary {
+  color: var(--jp-warn-color2);
+}
+
+.jp-RenderedMermaid:not(.jp-mod-warning) pre {
+  display: none;
+}
+
+.jp-RenderedMermaid-Summary > pre {
+  display: inline-block;
+  white-space: normal;
+}

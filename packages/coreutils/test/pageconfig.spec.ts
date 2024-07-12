@@ -7,6 +7,7 @@ describe('@jupyterlab/coreutils', () => {
   describe('PageConfig', () => {
     beforeEach(() => {
       PageConfig.setOption('foo', 'bar');
+      PageConfig.setOption('workspace', PageConfig.defaultWorkspace);
     });
 
     describe('#getOption()', () => {
@@ -59,6 +60,43 @@ describe('@jupyterlab/coreutils', () => {
       it('should be an empty string for a bad base url', () => {
         const url = 'blargh://foo.com';
         expect(PageConfig.getWsUrl(url)).toBe('');
+      });
+    });
+
+    describe('#getUrl()', () => {
+      const path = '/path/to/file.ext';
+
+      it('should return shortest url by default', () => {
+        const url = PageConfig.getUrl({});
+        expect(url).toEqual('http://localhost/lab');
+      });
+
+      it('should return a local shareable url if shareUrl is undefined', () => {
+        const url = PageConfig.getUrl({
+          workspace: PageConfig.defaultWorkspace,
+          treePath: path,
+          toShare: true
+        });
+
+        expect(url).toEqual(`http://localhost/lab/tree${path}`);
+      });
+
+      describe('hub environment', () => {
+        const shareUrl = 'http://hub.host.lab/hub/user-redirect';
+
+        beforeEach(() => {
+          PageConfig.setOption('shareUrl', shareUrl);
+        });
+
+        it('should return a non-local shareable url if shareUrl is defined', () => {
+          const url = PageConfig.getUrl({
+            workspace: PageConfig.defaultWorkspace,
+            treePath: path,
+            toShare: true
+          });
+
+          expect(url).toEqual(`${shareUrl}/lab/tree${path}`);
+        });
       });
     });
   });

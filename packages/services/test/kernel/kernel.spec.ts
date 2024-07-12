@@ -1,13 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expectFailure,
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { KernelAPI } from '../../src';
 import {
@@ -21,18 +15,20 @@ const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('kernel', () => {
   let tester: KernelTester;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
 
   afterEach(async () => {
     if (tester) {
@@ -45,7 +41,9 @@ describe('kernel', () => {
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
       const kernel = await KernelAPI.startNew();
-      expect(toArray(await KernelAPI.listRunning()).length).toBeGreaterThan(0);
+      expect(Array.from(await KernelAPI.listRunning()).length).toBeGreaterThan(
+        0
+      );
       await KernelAPI.shutdownKernel(kernel.id);
     });
 
@@ -53,7 +51,7 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const k = await KernelAPI.startNew({}, serverSettings);
       const response = await KernelAPI.listRunning(serverSettings);
-      expect(toArray(response).length).toBeGreaterThan(0);
+      expect(Array.from(response).length).toBeGreaterThan(0);
       await KernelAPI.shutdownKernel(k.id);
     });
 
@@ -61,19 +59,19 @@ describe('kernel', () => {
       const data = { id: UUID.uuid4(), name: 'test' };
       const settings = getRequestHandler(200, data);
       const promise = KernelAPI.listRunning(settings);
-      await expectFailure(promise, 'Invalid kernel list');
+      await expect(promise).rejects.toThrow(/Invalid kernel list/);
     });
 
     it('should throw an error for an invalid response', async () => {
       const settings = getRequestHandler(201, {});
       const promise = KernelAPI.listRunning(settings);
-      await expectFailure(promise, 'Invalid response: 201 Created');
+      await expect(promise).rejects.toThrow(/Invalid response: 201/);
     });
 
     it('should throw an error for an error response', async () => {
       const settings = getRequestHandler(500, {});
       const promise = KernelAPI.listRunning(settings);
-      await expectFailure(promise, '');
+      await expect(promise).rejects.toThrow();
     });
   });
 
@@ -81,7 +79,7 @@ describe('kernel', () => {
     it('should accept ajax options', async () => {
       const serverSettings = makeSettings();
       const k = await KernelAPI.startNew({}, serverSettings);
-      await KernelAPI.shutdownKernel(k.id);
+      await expect(KernelAPI.shutdownKernel(k.id)).resolves.not.toThrow();
     });
 
     it('should still construct connection if the kernel dies', async () => {
@@ -102,7 +100,7 @@ describe('kernel', () => {
     it('should throw an error for an invalid kernel id', async () => {
       const serverSettings = getRequestHandler(201, { id: UUID.uuid4() });
       const kernelPromise = KernelAPI.startNew({}, serverSettings);
-      await expectFailure(kernelPromise);
+      await expect(kernelPromise).rejects.toThrow();
     });
 
     it('should throw an error for another invalid kernel id', async () => {
@@ -111,20 +109,20 @@ describe('kernel', () => {
         name: 1
       });
       const kernelPromise = KernelAPI.startNew({}, serverSettings);
-      await expectFailure(kernelPromise);
+      await expect(kernelPromise).rejects.toThrow();
     });
 
     it('should throw an error for an invalid response', async () => {
       const data = { id: UUID.uuid4(), name: 'foo' };
       const serverSettings = getRequestHandler(200, data);
       const kernelPromise = KernelAPI.startNew({}, serverSettings);
-      await expectFailure(kernelPromise, 'Invalid response: 200 OK');
+      await expect(kernelPromise).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw an error for an error response', async () => {
       const serverSettings = getRequestHandler(500, {});
       const kernelPromise = KernelAPI.startNew({}, serverSettings);
-      await expectFailure(kernelPromise, '');
+      await expect(kernelPromise).rejects.toThrow();
     });
 
     it('should auto-reconnect on websocket error', async () => {
@@ -136,7 +134,7 @@ describe('kernel', () => {
         find: (k, status) => status === 'connecting'
       });
       await tester.close();
-      await emission;
+      await expect(emission).resolves.not.toThrow();
     });
   });
 
@@ -148,8 +146,10 @@ describe('kernel', () => {
       expect(kernels.find(k => k.id === kernel.id)).toBeUndefined();
     });
 
-    it('should handle a 404 error', () => {
-      return KernelAPI.shutdownKernel(UUID.uuid4());
+    it('should handle a 404 error', async () => {
+      await expect(
+        KernelAPI.shutdownKernel(UUID.uuid4())
+      ).resolves.not.toThrow();
     });
   });
 });

@@ -6,9 +6,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../services"
-    },
-    {
       "path": "../translation"
     },
     {
@@ -18,19 +15,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

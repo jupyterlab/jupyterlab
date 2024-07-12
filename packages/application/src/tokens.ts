@@ -7,13 +7,17 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
+import { JupyterFrontEnd } from './frontend';
 
 /**
  * A token for which a plugin can provide to respond to connection failures
  * to the application server.
  */
 export const IConnectionLost = new Token<IConnectionLost>(
-  '@jupyterlab/apputils:IConnectionLost'
+  '@jupyterlab/application:IConnectionLost',
+  `A service for invoking the dialog shown
+  when JupyterLab has lost its connection to the server. Use this if, for some reason,
+  you want to bring up the "connection lost" dialog under new circumstances.`
 );
 
 /**
@@ -31,9 +35,61 @@ export type IConnectionLost = (
 ) => Promise<void>;
 
 /**
+ * The application status token.
+ */
+export const ILabStatus = new Token<ILabStatus>(
+  '@jupyterlab/application:ILabStatus',
+  `A service for interacting with the application busy/dirty
+  status. Use this if you want to set the application "busy" favicon, or to set
+  the application "dirty" status, which asks the user for confirmation before leaving the application page.`
+);
+
+/**
+ * An interface for JupyterLab-like application status functionality.
+ */
+export interface ILabStatus {
+  /**
+   * A signal for when application changes its busy status.
+   */
+  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+
+  /**
+   * A signal for when application changes its dirty status.
+   */
+  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+
+  /**
+   * Whether the application is busy.
+   */
+  readonly isBusy: boolean;
+
+  /**
+   * Whether the application is dirty.
+   */
+  readonly isDirty: boolean;
+
+  /**
+   * Set the application state to busy.
+   *
+   * @returns A disposable used to clear the busy state for the caller.
+   */
+  setBusy(): IDisposable;
+
+  /**
+   * Set the application state to dirty.
+   *
+   * @returns A disposable used to clear the dirty state for the caller.
+   */
+  setDirty(): IDisposable;
+}
+
+/**
  * The URL Router token.
  */
-export const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
+export const IRouter = new Token<IRouter>(
+  '@jupyterlab/application:IRouter',
+  'The URL router used by the application. Use this to add custom URL-routing for your extension (e.g., to invoke a command if the user navigates to a sub-path).'
+);
 
 /**
  * A static class that routes URLs within the application.

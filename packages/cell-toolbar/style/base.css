@@ -1,0 +1,72 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-cell-button .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-cell-button:hover .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+
+.jp-toolbar-overlap .jp-cell-toolbar {
+  display: none;
+}
+
+.jp-cell-toolbar {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  min-height: 25px;
+  z-index: 6;
+  position: absolute;
+  right: 3px;
+
+  /* Override .jp-Toolbar */
+  background-color: transparent;
+  border-bottom: inherit;
+  box-shadow: none;
+}
+
+/* Overrides for mobile view hiding cell toolbar */
+@media only screen and (width <= 760px) {
+  .jp-cell-toolbar {
+    display: none;
+  }
+}
+
+.jp-cell-toolbar button.jp-ToolbarButtonComponent {
+  cursor: pointer;
+}
+
+.jp-cell-toolbar .jp-ToolbarButton button {
+  display: none;
+}
+
+.jp-cell-toolbar .jp-ToolbarButton .jp-cell-all,
+.jp-CodeCell .jp-ToolbarButton .jp-cell-code,
+.jp-MarkdownCell .jp-ToolbarButton .jp-cell-markdown,
+.jp-RawCell .jp-ToolbarButton .jp-cell-raw {
+  display: block;
+}
+
+.jp-cell-toolbar .jp-Toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.jp-cell-mod-click {
+  cursor: pointer;
+}
+
+/* Custom styling for rendered markdown cells so that cell toolbar is visible */
+.jp-MarkdownOutput {
+  border-width: var(--jp-border-width);
+  border-color: transparent;
+  border-style: solid;
+}
+
+.jp-mod-active .jp-MarkdownOutput {
+  border-color: var(--jp-cell-editor-border-color);
+}

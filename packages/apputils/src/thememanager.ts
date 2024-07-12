@@ -8,13 +8,11 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { each } from '@lumino/algorithm';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from './dialog';
-import { ISplashScreen } from './splash';
-import { IThemeManager } from './tokens';
+import { ISplashScreen, IThemeManager } from './tokens';
 
 /**
  * The number of milliseconds between theme loading attempts.
@@ -63,10 +61,57 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Get the name of the preferred light theme.
+   */
+  get preferredLightTheme(): string {
+    return this._settings.composite['preferred-light-theme'] as string;
+  }
+
+  /**
+   * Get the name of the preferred dark theme.
+   */
+  get preferredDarkTheme(): string {
+    return this._settings.composite['preferred-dark-theme'] as string;
+  }
+
+  /**
+   * Get the name of the preferred theme
+   * When `adaptive-theme` is disabled, get current theme;
+   * Else, depending on the system settings, get preferred light or dark theme.
+   */
+  get preferredTheme(): string | null {
+    if (!this.isToggledAdaptiveTheme()) {
+      return this.theme;
+    }
+    if (this.isSystemColorSchemeDark()) {
+      return this.preferredDarkTheme;
+    }
+    return this.preferredLightTheme;
+  }
+
+  /**
    * The names of the registered themes.
    */
   get themes(): ReadonlyArray<string> {
     return Object.keys(this._themes);
+  }
+
+  /**
+   * Get the names of the light themes.
+   */
+  get lightThemes(): ReadonlyArray<string> {
+    return Object.entries(this._themes)
+      .filter(([_, theme]) => theme.isLight)
+      .map(([name, _]) => name);
+  }
+
+  /**
+   * Get the names of the dark themes.
+   */
+  get darkThemes(): ReadonlyArray<string> {
+    return Object.entries(this._themes)
+      .filter(([_, theme]) => !theme.isLight)
+      .map(([name, _]) => name);
   }
 
   /**
@@ -77,11 +122,21 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Test if the system's preferred color scheme is dark
+   */
+  isSystemColorSchemeDark(): boolean {
+    return (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+  }
+
+  /**
    * Get the value of a CSS variable from its key.
    *
    * @param key - A Jupyterlab CSS variable, without the leading '--jp-'.
    *
-   * @return value - The current value of the Jupyterlab CSS variable
+   * @returns value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
     return (
@@ -218,6 +273,20 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Set the preferred light theme.
+   */
+  setPreferredLightTheme(name: string): Promise<void> {
+    return this._settings.set('preferred-light-theme', name);
+  }
+
+  /**
+   * Set the preferred dark theme.
+   */
+  setPreferredDarkTheme(name: string): Promise<void> {
+    return this._settings.set('preferred-dark-theme', name);
+  }
+
+  /**
    * Test whether a given theme is light.
    */
   isLight(name: string): boolean {
@@ -273,6 +342,23 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Test if the user enables adaptive theme.
+   */
+  isToggledAdaptiveTheme(): boolean {
+    return !!this._settings.composite['adaptive-theme'];
+  }
+
+  /**
+   * Toggle the `adaptive-theme` setting.
+   */
+  toggleAdaptiveTheme(): Promise<void> {
+    return this._settings.set(
+      'adaptive-theme',
+      !this._settings.composite['adaptive-theme']
+    );
+  }
+
+  /**
    * Get the display name of the theme.
    */
   getDisplayName(name: string): string {
@@ -303,7 +389,18 @@ export class ThemeManager implements IThemeManager {
     Object.keys(overidesSchema).forEach(key => {
       // override validation is against the CSS property in the description
       // field. Example: for key ui-font-family, .description is font-family
-      this._overrideProps[key] = overidesSchema[key].description;
+      let description;
+      switch (key) {
+        case 'code-font-size':
+        case 'content-font-size1':
+        case 'ui-font-size1':
+          description = 'font-size';
+          break;
+        default:
+          description = overidesSchema[key].description;
+          break;
+      }
+      this._overrideProps[key] = description;
     });
   }
 
@@ -323,7 +420,15 @@ export class ThemeManager implements IThemeManager {
 
     const settings = this._settings;
     const themes = this._themes;
-    const theme = settings.composite['theme'] as string;
+
+    let theme = settings.composite['theme'] as string;
+    if (this.isToggledAdaptiveTheme()) {
+      if (this.isSystemColorSchemeDark()) {
+        theme = this.preferredDarkTheme;
+      } else {
+        theme = this.preferredLightTheme;
+      }
+    }
 
     // If another promise is outstanding, wait until it finishes before
     // attempting to load the settings. Because outstanding promises cannot
@@ -400,6 +505,13 @@ export class ThemeManager implements IThemeManager {
       }
     });
     links.length = 0;
+
+    const themeProps = this._settings.schema.properties?.theme;
+    if (themeProps) {
+      themeProps.enum = Object.keys(themes).map(
+        value => themes[value].displayName ?? value
+      );
+    }
 
     // Unload the previously loaded theme.
     const old = current ? themes[current].unload() : Promise.resolve();
@@ -506,7 +618,9 @@ namespace Private {
    * Fit a widget and all of its children, recursively.
    */
   export function fitAll(widget: Widget): void {
-    each(widget.children(), fitAll);
+    for (const child of widget.children()) {
+      fitAll(child);
+    }
     widget.fit();
   }
 }

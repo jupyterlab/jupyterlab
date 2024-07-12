@@ -41,7 +41,13 @@
   overflow-y: auto;
 }
 
+.jp-RenderedJSON mark.jp-mod-selected {
+  background-color: var(--jp-search-unselected-match-background-color);
+  color: var(--jp-search-unselected-match-color);
+}
+
 /* Output styles */
+
 /* .jp-OutputArea .jp-RenderedJSON {
 
 } */

@@ -1,28 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { init } from './utils';
-
-init();
-
 import { act } from 'react-dom/test-utils';
+
+import { Button } from '@jupyter/web-components';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
 } from '@jupyterlab/codemirror';
 
 import { KernelSpecManager, Session } from '@jupyterlab/services';
 
-import {
-  createSession,
-  JupyterServer,
-  signalToPromise
-} from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -40,21 +37,16 @@ import { DebuggerModel } from '../src/model';
 
 import { SourcesBody } from '../src/panels/sources/body';
 
-import { SourcesHeader } from '../src/panels/sources/header';
-
+import { IYText } from '@jupyter/ydoc';
 import { IDebugger } from '../src/tokens';
-
-/**
- * A test sidebar.
- */
-class TestSidebar extends Debugger.Sidebar {}
 
 const server = new JupyterServer();
 
+const emptyFn = () => undefined;
+
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -65,8 +57,35 @@ describe('Debugger', () => {
   const config = new Debugger.Config();
   const service = new DebuggerService({ specsManager, config });
   const registry = new CommandRegistry();
-  const factoryService = new CodeMirrorEditorFactory();
-  const mimeTypeService = new CodeMirrorMimeTypeService();
+  const languages = new EditorLanguageRegistry();
+  const callstackToolbarCommands = {
+    continue: 'continue',
+    terminate: 'terminate',
+    next: 'next',
+    stepIn: 'stepIn',
+    stepOut: 'stepOut',
+    evaluate: 'evaluate'
+  };
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(lang => ['Python'].includes(lang.name))
+    .forEach(lang => {
+      languages.addLanguage(lang);
+    });
+  const extensions = new EditorExtensionRegistry();
+  EditorExtensionRegistry.getDefaultExtensions()
+    .filter(ext => ['lineNumbers'].includes(ext.name))
+    .forEach(ext => extensions.addExtension(ext));
+  extensions.addExtension({
+    name: 'binding',
+    factory: ({ model }) => {
+      const m = model.sharedModel as IYText;
+      return EditorExtensionRegistry.createImmutableExtension(
+        ybinding({ ytext: m.ysource })
+      );
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const lines = [3, 5];
   const code = [
     'i = 0',
@@ -81,7 +100,7 @@ describe('Debugger', () => {
   let session: Debugger.Session;
   let path: string;
   let connection: Session.ISessionConnection;
-  let sidebar: TestSidebar;
+  let sidebar: Debugger.Sidebar;
 
   beforeAll(async () => {
     connection = await createSession({
@@ -89,21 +108,25 @@ describe('Debugger', () => {
       type: 'test',
       path: UUID.uuid4()
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
 
-    session = new Debugger.Session({ connection });
+    session = new Debugger.Session({ connection, config });
     service.session = session;
 
-    sidebar = new TestSidebar({
+    // Populate the command registry with fake command to render the button.
+    Object.keys(callstackToolbarCommands).forEach(command => {
+      registry.addCommand(command, { execute: emptyFn });
+    });
+
+    sidebar = new Debugger.Sidebar({
       service,
       callstackCommands: {
         registry,
-        continue: '',
-        terminate: '',
-        next: '',
-        stepIn: '',
-        stepOut: '',
-        evaluate: ''
+        ...callstackToolbarCommands
+      },
+      breakpointsCommands: {
+        registry,
+        pauseOnExceptions: ''
       },
       editorServices: {
         factoryService,
@@ -155,25 +178,124 @@ describe('Debugger', () => {
     });
   });
 
+  describe('Panel', () => {
+    let toolbarList: any;
+    beforeEach(() => {
+      toolbarList = sidebar.content.node.querySelectorAll(
+        '.jp-AccordionPanel-title'
+      );
+    });
+    it('should have 5 child widgets', () => {
+      expect(sidebar.widgets.length).toBe(5);
+    });
+
+    it('should have 5 toolbars', () => {
+      expect(toolbarList.length).toBe(5);
+    });
+    describe('Variable toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(0);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Variables');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(2);
+        expect((buttons[0] as Button).title).toBe('Tree View');
+        expect((buttons[1] as Button).title).toBe('Table View');
+      });
+    });
+    describe('Callstack toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(1);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Callstack');
+      });
+      it('should have six buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(6);
+      });
+    });
+    describe('Breakpoints toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(2);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Breakpoints');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(3);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Source');
+      });
+
+      it('should have one button', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(1);
+      });
+    });
+  });
+
   describe('#callstack', () => {
-    it('should have a header and a body', () => {
-      expect(sidebar.callstack.widgets.length).toEqual(2);
+    it('should have a body', () => {
+      expect(sidebar.callstack.widgets.length).toEqual(1);
     });
 
     it('should have the jp-DebuggerCallstack class', () => {
       expect(sidebar.callstack.hasClass('jp-DebuggerCallstack')).toBe(true);
-    });
-
-    it('should have the debug buttons', () => {
-      const node = sidebar.callstack.node;
-      const items = node.querySelectorAll('button');
-
-      expect(items.length).toEqual(6);
-      items.forEach(item => {
-        expect(Array.from(items[0].classList)).toEqual(
-          expect.arrayContaining(['jp-ToolbarButtonComponent'])
-        );
-      });
     });
 
     it('should display the stack frames', () => {
@@ -256,22 +378,21 @@ describe('Debugger', () => {
   });
 
   describe('#sources', () => {
-    it('should have a header and a body', () => {
-      expect(sidebar.sources.widgets.length).toEqual(2);
+    it('should have a body', () => {
+      expect(sidebar.sources.widgets.length).toEqual(1);
     });
 
     it('should display the source path in the header', () => {
-      const body = sidebar.sources.widgets[0] as SourcesHeader;
-      const children = toArray(body.children());
-      const sourcePath = children[2].node.querySelector('span');
-      expect(sourcePath!.innerHTML).toEqual(path);
+      const header = sidebar.sources.toolbar;
+      const pathWidget = header.node.innerHTML;
+      expect(pathWidget).toContain(path);
     });
 
     it('should display the source code in the body', () => {
-      const body = sidebar.sources.widgets[1] as SourcesBody;
-      const children = toArray(body.children());
+      const body = sidebar.sources.widgets[0] as SourcesBody;
+      const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
-      expect(editor.model.value.text).toEqual(code);
+      expect(editor.model.sharedModel.getSource()).toEqual(code);
     });
   });
 });

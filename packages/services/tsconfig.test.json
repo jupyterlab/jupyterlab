@@ -9,9 +9,6 @@
       "path": "../nbformat"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../settingregistry"
     },
     {
@@ -21,22 +18,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
-    },
-    {
-      "path": "../settingregistry"
-    },
-    {
-      "path": "../statedb"
+      "path": "../testing"
     }
   ]
 }

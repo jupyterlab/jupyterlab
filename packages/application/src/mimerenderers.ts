@@ -25,7 +25,8 @@ export interface IMimeDocumentTracker extends IWidgetTracker<MimeDocument> {}
  * The mime document tracker token.
  */
 export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
-  '@jupyterlab/application:IMimeDocumentTracker'
+  '@jupyterlab/application:IMimeDocumentTracker',
+  'A widget tracker for documents rendered using a mime renderer extension. Use this if you want to list and interact with documents rendered by such extensions.'
 );
 
 /**
@@ -58,6 +59,7 @@ export function createRendermimePlugins(
   // and exposing the mime document widget tracker.
   plugins.push({
     id: '@jupyterlab/application:mimedocument',
+    description: 'Provides a mime document widget tracker.',
     optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,
     autoStart: true,
@@ -89,6 +91,7 @@ export function createRendermimePlugin(
 ): JupyterFrontEndPlugin<void> {
   return {
     id: item.id,
+    description: item.description,
     requires: [IRenderMimeRegistry, ITranslator],
     autoStart: true,
     activate: (

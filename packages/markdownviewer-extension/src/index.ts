@@ -10,19 +10,22 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
   IMarkdownViewerTracker,
   MarkdownDocument,
   MarkdownViewer,
-  MarkdownViewerFactory
+  MarkdownViewerFactory,
+  MarkdownViewerTableOfContentsFactory
 } from '@jupyterlab/markdownviewer';
 import {
+  IRenderMime,
   IRenderMimeRegistry,
   markdownRendererFactory
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -44,9 +47,15 @@ const FACTORY = 'Markdown Preview';
 const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   activate,
   id: '@jupyterlab/markdownviewer-extension:plugin',
+  description: 'Adds markdown file viewer and provides its tracker.',
   provides: IMarkdownViewerTracker,
   requires: [IRenderMimeRegistry, ITranslator],
-  optional: [ILayoutRestorer, ISettingRegistry],
+  optional: [
+    ILayoutRestorer,
+    ISettingRegistry,
+    ITableOfContentsRegistry,
+    ISanitizer
+  ],
   autoStart: true
 };
 
@@ -58,7 +67,9 @@ function activate(
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  tocRegistry: ITableOfContentsRegistry | null,
+  sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
   const { commands, docRegistry } = app;
@@ -110,6 +121,7 @@ function activate(
   const factory = new MarkdownViewerFactory({
     rendermime,
     name: FACTORY,
+    label: trans.__('Markdown Preview'),
     primaryFileType: docRegistry.getFileType('markdown'),
     fileTypes: ['markdown'],
     defaultRendered: ['markdown']
@@ -172,6 +184,16 @@ function activate(
     },
     label: trans.__('Show Markdown Editor')
   });
+
+  if (tocRegistry) {
+    tocRegistry.add(
+      new MarkdownViewerTableOfContentsFactory(
+        tracker,
+        rendermime.markdownParser,
+        sanitizer ?? rendermime.sanitizer
+      )
+    );
+  }
 
   return tracker;
 }

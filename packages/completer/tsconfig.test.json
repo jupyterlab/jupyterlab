@@ -9,13 +9,25 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../rendermime"
     },
     {
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../statedb"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"
@@ -24,25 +36,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

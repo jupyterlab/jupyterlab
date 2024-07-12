@@ -31,6 +31,11 @@ export interface IManager extends IObservableDisposable {
    * A promise that resolves when the manager is initially ready.
    */
   readonly ready: Promise<void>;
+
+  /**
+   * Whether the manager is active.
+   */
+  readonly isActive: boolean;
 }
 
 export abstract class BaseManager implements IManager {
@@ -68,12 +73,20 @@ export abstract class BaseManager implements IManager {
   abstract ready: Promise<void>;
 
   /**
+   * Whether the manager is active.
+   */
+  get isActive(): boolean {
+    return true;
+  }
+
+  /**
    * Dispose of the delegate and invoke the callback function.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     this._disposed.emit(undefined);
     Signal.clearData(this);
   }

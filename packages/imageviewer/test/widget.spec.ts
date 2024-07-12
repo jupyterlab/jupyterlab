@@ -1,26 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UUID } from '@lumino/coreutils';
-
-import { Contents, ServiceManager } from '@jupyterlab/services';
-
-import { Message, MessageLoop } from '@lumino/messaging';
-
-import { Widget } from '@lumino/widgets';
-
 import {
   Base64ModelFactory,
   Context,
   DocumentRegistry,
   DocumentWidget
 } from '@jupyterlab/docregistry';
-
+import { createFileContext } from '@jupyterlab/docregistry/lib/testutils';
 import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
-
-import { createFileContext } from '@jupyterlab/testutils';
-
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { Contents, ServiceManager } from '@jupyterlab/services';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { UUID } from '@lumino/coreutils';
+import { Message, MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 
 class LogImage extends ImageViewer {
   methods: string[] = [];
@@ -70,7 +63,7 @@ describe('ImageViewer', () => {
   let widget: LogImage;
 
   beforeAll(async () => {
-    manager = new Mock.ServiceManagerMock();
+    manager = new ServiceManagerMock();
     await manager.ready;
     return manager.contents.save(IMAGE.path!, IMAGE);
   });
@@ -167,17 +160,14 @@ describe('ImageViewer', () => {
 
 describe('ImageViewerFactory', () => {
   describe('#createNewWidget', () => {
-    it('should create an image document widget', async () => {
+    it('should create an image document widget', () => {
       const factory = new ImageViewerFactory({
         name: 'Image',
         modelName: 'base64',
         fileTypes: ['png'],
         defaultFor: ['png']
       });
-      const context = await createFileContext(
-        IMAGE.path,
-        new Mock.ServiceManagerMock()
-      );
+      const context = createFileContext(IMAGE.path, new ServiceManagerMock());
       const d = factory.createNew(context);
       expect(d).toBeInstanceOf(DocumentWidget);
       expect(d.content).toBeInstanceOf(ImageViewer);

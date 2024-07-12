@@ -6,29 +6,30 @@
  */
 
 import {
+  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  CommandToolbarButton,
   Dialog,
   ICommandPalette,
-  IFrame,
   MainAreaWidget,
   showDialog,
-  Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import {
+  CommandToolbarButton,
   copyrightIcon,
+  IFrame,
   jupyterIcon,
   jupyterlabWordmarkIcon,
-  refreshIcon
+  refreshIcon,
+  Toolbar
 } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Menu } from '@lumino/widgets';
@@ -50,8 +51,6 @@ namespace CommandIDs {
   export const show = 'help:show';
 
   export const hide = 'help:hide';
-
-  export const launchClassic = 'help:launch-classic-notebook';
 
   export const jupyterForum = 'help:jupyter-forum';
 
@@ -77,6 +76,7 @@ const HELP_CLASS = 'jp-Help';
  */
 const about: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:about',
+  description: 'Adds a "About" dialog feature.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -135,7 +135,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2021 Project Jupyter Contributors')}
+            {trans.__('© 2015-2023 Project Jupyter Contributors')}
           </span>
         );
         const body = (
@@ -165,40 +165,11 @@ const about: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to add a command to open the Classic Notebook interface.
- */
-const launchClassic: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:launch-classic',
-  autoStart: true,
-  requires: [ITranslator],
-  optional: [ICommandPalette],
-  activate: (
-    app: JupyterFrontEnd,
-    translator: ITranslator,
-    palette: ICommandPalette | null
-  ): void => {
-    const { commands } = app;
-    const trans = translator.load('jupyterlab');
-    const category = trans.__('Help');
-
-    commands.addCommand(CommandIDs.launchClassic, {
-      label: trans.__('Launch Classic Notebook'),
-      execute: () => {
-        window.open(PageConfig.getBaseUrl() + 'tree');
-      }
-    });
-
-    if (palette) {
-      palette.addItem({ command: CommandIDs.launchClassic, category });
-    }
-  }
-};
-
-/**
  * A plugin to add a command to open the Jupyter Forum.
  */
 const jupyterForum: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:jupyter-forum',
+  description: 'Adds command to open the Jupyter Forum website.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -225,62 +196,25 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to add a list of resources to the help menu.
+ * A plugin to open resources in IFrames or new browser tabs.
  */
-const resources: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:resources',
+const open: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:open',
+  description: 'Add command to open websites as panel or browser tab.',
   autoStart: true,
-  requires: [IMainMenu, ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer],
+  requires: [ITranslator],
+  optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
-    mainMenu: IMainMenu,
     translator: ITranslator,
-    palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
   ): void => {
+    const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
-    let counter = 0;
-    const category = trans.__('Help');
     const namespace = 'help-doc';
-    const baseUrl = PageConfig.getBaseUrl();
-    const { commands, shell, serviceManager } = app;
+
     const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
-    const resources = [
-      {
-        text: trans.__('JupyterLab Reference'),
-        url: 'https://jupyterlab.readthedocs.io/en/stable/'
-      },
-      {
-        text: trans.__('JupyterLab FAQ'),
-        url:
-          'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
-      },
-      {
-        text: trans.__('Jupyter Reference'),
-        url: 'https://jupyter.org/documentation'
-      },
-      {
-        text: trans.__('Markdown Reference'),
-        url: 'https://commonmark.org/help/'
-      }
-    ];
-
-    resources.sort((a: any, b: any) => {
-      return a.text.localeCompare(b.text);
-    });
-
-    // Handle state restoration.
-    if (restorer) {
-      void restorer.restore(tracker, {
-        command: CommandIDs.open,
-        args: widget => ({
-          url: widget.content.url,
-          text: widget.content.title.label
-        }),
-        name: widget => widget.content.url
-      });
-    }
+    let counter = 0;
 
     /**
      * Create a new HelpWidget widget.
@@ -292,7 +226,8 @@ const resources: JupyterFrontEndPlugin<void> = {
       // can prevent some content from being loaded onto the
       // help pages.
       const content = new IFrame({
-        sandbox: ['allow-scripts', 'allow-forms']
+        sandbox: ['allow-scripts', 'allow-forms'],
+        loading: 'lazy'
       });
       content.url = url;
       content.addClass(HELP_CLASS);
@@ -303,131 +238,10 @@ const resources: JupyterFrontEndPlugin<void> = {
       return widget;
     }
 
-    // Populate the Help menu.
-    const helpMenu = mainMenu.helpMenu;
-
-    const resourcesGroup = resources.map(args => ({
-      args,
-      command: CommandIDs.open
-    }));
-    helpMenu.addGroup(resourcesGroup, 10);
-
-    // Generate a cache of the kernel help links.
-    const kernelInfoCache = new Map<
-      string,
-      KernelMessage.IInfoReplyMsg['content']
-    >();
-    serviceManager.sessions.runningChanged.connect((m, sessions) => {
-      // If a new session has been added, it is at the back
-      // of the session list. If one has changed or stopped,
-      // it does not hurt to check it.
-      if (!sessions.length) {
-        return;
-      }
-      const sessionModel = sessions[sessions.length - 1];
-      if (
-        !sessionModel.kernel ||
-        kernelInfoCache.has(sessionModel.kernel.name)
-      ) {
-        return;
-      }
-      const session = serviceManager.sessions.connectTo({
-        model: sessionModel,
-        kernelConnectionOptions: { handleComms: false }
-      });
-
-      void session.kernel?.info.then(kernelInfo => {
-        const name = session.kernel!.name;
-
-        // Check the cache second time so that, if two callbacks get scheduled,
-        // they don't try to add the same commands.
-        if (kernelInfoCache.has(name)) {
-          return;
-        }
-        // Set the Kernel Info cache.
-        kernelInfoCache.set(name, kernelInfo);
-
-        // Utility function to check if the current widget
-        // has registered itself with the help menu.
-        const usesKernel = () => {
-          let result = false;
-          const widget = app.shell.currentWidget;
-          if (!widget) {
-            return result;
-          }
-          helpMenu.kernelUsers.forEach(u => {
-            if (u.tracker.has(widget) && u.getKernel(widget)?.name === name) {
-              result = true;
-            }
-          });
-          return result;
-        };
-
-        // Add the kernel banner to the Help Menu.
-        const bannerCommand = `help-menu-${name}:banner`;
-        const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
-        if (!spec) {
-          return;
-        }
-        const kernelName = spec.display_name;
-        let kernelIconUrl = spec.resources['logo-64x64'];
-        if (kernelIconUrl) {
-          const index = kernelIconUrl.indexOf('kernelspecs');
-          kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
-        }
-        commands.addCommand(bannerCommand, {
-          label: trans.__('About the %1 Kernel', kernelName),
-          isVisible: usesKernel,
-          isEnabled: usesKernel,
-          execute: () => {
-            // Create the header of the about dialog
-            const headerLogo = <img src={kernelIconUrl} />;
-            const title = (
-              <span className="jp-About-header">
-                {headerLogo}
-                <div className="jp-About-header-info">{kernelName}</div>
-              </span>
-            );
-            const banner = <pre>{kernelInfo.banner}</pre>;
-            const body = <div className="jp-About-body">{banner}</div>;
-
-            return showDialog({
-              title,
-              body,
-              buttons: [
-                Dialog.createButton({
-                  label: trans.__('Dismiss'),
-                  className: 'jp-About-button jp-mod-reject jp-mod-styled'
-                })
-              ]
-            });
-          }
-        });
-        helpMenu.addGroup([{ command: bannerCommand }], 20);
-
-        // Add the kernel info help_links to the Help menu.
-        const kernelGroup: Menu.IItemOptions[] = [];
-        (kernelInfo.help_links || []).forEach(link => {
-          const commandId = `help-menu-${name}:${link.text}`;
-          commands.addCommand(commandId, {
-            label: link.text,
-            isVisible: usesKernel,
-            isEnabled: usesKernel,
-            execute: () => {
-              return commands.execute(CommandIDs.open, link);
-            }
-          });
-          kernelGroup.push({ command: commandId });
-        });
-        helpMenu.addGroup(kernelGroup, 21);
-
-        // Dispose of the session object since we no longer need it.
-        session.dispose();
-      });
-    });
-
     commands.addCommand(CommandIDs.open, {
-      label: args => args['text'] as string,
+      label: args =>
+        (args['text'] as string) ??
+        trans.__('Open the provided `url` in a tab.'),
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;
@@ -449,6 +263,203 @@ const resources: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    // Handle state restoration.
+    if (restorer) {
+      void restorer.restore(tracker, {
+        command: CommandIDs.open,
+        args: widget => ({
+          url: widget.content.url,
+          text: widget.content.title.label
+        }),
+        name: widget => widget.content.url
+      });
+    }
+  }
+};
+
+/**
+ * A plugin to add a list of resources to the help menu.
+ */
+const resources: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:resources',
+  description: 'Adds menu entries to Jupyter reference documentation websites.',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ILabShell, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    mainMenu: IMainMenu,
+    translator: ITranslator,
+    labShell: ILabShell | null,
+    palette: ICommandPalette | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+    const { commands, serviceManager } = app;
+    const resources = [
+      {
+        text: trans.__('JupyterLab Reference'),
+        url: 'https://jupyterlab.readthedocs.io/en/latest/'
+      },
+      {
+        text: trans.__('JupyterLab FAQ'),
+        url: 'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
+      },
+      {
+        text: trans.__('Jupyter Reference'),
+        url: 'https://jupyter.org/documentation'
+      },
+      {
+        text: trans.__('Markdown Reference'),
+        url: 'https://commonmark.org/help/'
+      }
+    ];
+
+    resources.sort((a: any, b: any) => {
+      return a.text.localeCompare(b.text);
+    });
+
+    // Populate the Help menu.
+    const helpMenu = mainMenu.helpMenu;
+
+    const resourcesGroup = resources.map(args => ({
+      args,
+      command: CommandIDs.open
+    }));
+    helpMenu.addGroup(resourcesGroup, 10);
+
+    // Generate a cache of the kernel help links.
+    const kernelInfoCache = new Map<
+      string,
+      KernelMessage.IInfoReplyMsg['content']
+    >();
+
+    const onSessionRunningChanged = (
+      m: Session.IManager,
+      sessions: Session.IModel[]
+    ) => {
+      // If a new session has been added, it is at the back
+      // of the session list. If one has changed or stopped,
+      // it does not hurt to check it.
+      if (!sessions.length) {
+        return;
+      }
+      const sessionModel = sessions[sessions.length - 1];
+      if (
+        !sessionModel.kernel ||
+        kernelInfoCache.has(sessionModel.kernel.name)
+      ) {
+        return;
+      }
+      const session = serviceManager.sessions.connectTo({
+        model: sessionModel,
+        kernelConnectionOptions: { handleComms: false }
+      });
+
+      void session.kernel?.info
+        .then(kernelInfo => {
+          const name = session.kernel!.name;
+
+          // Check the cache second time so that, if two callbacks get scheduled,
+          // they don't try to add the same commands.
+          if (kernelInfoCache.has(name)) {
+            return;
+          }
+
+          const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
+          if (!spec) {
+            return;
+          }
+
+          // Set the Kernel Info cache.
+          kernelInfoCache.set(name, kernelInfo);
+
+          // Utility function to check if the current widget
+          // has registered itself with the help menu.
+          let usesKernel = false;
+          const onCurrentChanged = async () => {
+            const kernel: Kernel.IKernelConnection | null =
+              await commands.execute('helpmenu:get-kernel');
+            usesKernel = kernel?.name === name;
+          };
+          // Set the status for the current widget
+          onCurrentChanged().catch(error => {
+            console.error(
+              'Failed to get the kernel for the current widget.',
+              error
+            );
+          });
+          if (labShell) {
+            // Update status when current widget changes
+            labShell.currentChanged.connect(onCurrentChanged);
+          }
+          const isEnabled = () => usesKernel;
+
+          // Add the kernel banner to the Help Menu.
+          const bannerCommand = `help-menu-${name}:banner`;
+          const kernelName = spec.display_name;
+          const kernelIconUrl =
+            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
+          commands.addCommand(bannerCommand, {
+            label: trans.__('About the %1 Kernel', kernelName),
+            isVisible: isEnabled,
+            isEnabled,
+            execute: () => {
+              // Create the header of the about dialog
+              const headerLogo = (
+                <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
+              );
+              const title = (
+                <span className="jp-About-header">
+                  {headerLogo}
+                  <div className="jp-About-header-info">{kernelName}</div>
+                </span>
+              );
+              const banner = <pre>{kernelInfo.banner}</pre>;
+              const body = <div className="jp-About-body">{banner}</div>;
+
+              return showDialog({
+                title,
+                body,
+                buttons: [
+                  Dialog.createButton({
+                    label: trans.__('Dismiss'),
+                    className: 'jp-About-button jp-mod-reject jp-mod-styled'
+                  })
+                ]
+              });
+            }
+          });
+          helpMenu.addGroup([{ command: bannerCommand }], 20);
+
+          // Add the kernel info help_links to the Help menu.
+          const kernelGroup: Menu.IItemOptions[] = [];
+          (kernelInfo.help_links || []).forEach(link => {
+            const commandId = `help-menu-${name}:${link.text}`;
+            commands.addCommand(commandId, {
+              label: commands.label(CommandIDs.open, link),
+              isVisible: isEnabled,
+              isEnabled,
+              execute: () => {
+                return commands.execute(CommandIDs.open, link);
+              }
+            });
+            kernelGroup.push({ command: commandId });
+          });
+          helpMenu.addGroup(kernelGroup, 21);
+        })
+        .then(() => {
+          // Dispose of the session object since we no longer need it.
+          session.dispose();
+        });
+    };
+
+    // Create menu items for currently running sessions
+    for (const model of serviceManager.sessions.running()) {
+      onSessionRunningChanged(serviceManager.sessions, [model]);
+    }
+    serviceManager.sessions.runningChanged.connect(onSessionRunningChanged);
+
     if (palette) {
       resources.forEach(args => {
         palette.addItem({ args, command: CommandIDs.open, category });
@@ -467,6 +478,7 @@ const resources: JupyterFrontEndPlugin<void> = {
  */
 const licenses: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:licenses',
+  description: 'Adds licenses used report tools.',
   autoStart: true,
   requires: [ITranslator],
   optional: [IMainMenu, ICommandPalette, ILayoutRestorer],
@@ -562,7 +574,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
       label: licensesText,
       execute: (args: any) => {
         const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
-        shell.add(licenseMain, 'main');
+        shell.add(licenseMain, 'main', { type: 'Licenses' });
 
         // add to tracker so it can be restored, and update when choices change
         void licensesTracker.add(licenseMain);
@@ -621,11 +633,8 @@ const licenses: JupyterFrontEndPlugin<void> = {
         command: CommandIDs.licenses,
         name: widget => 'licenses',
         args: widget => {
-          const {
-            currentBundleName,
-            currentPackageIndex,
-            packageFilter
-          } = widget.content.model;
+          const { currentBundleName, currentPackageIndex, packageFilter } =
+            widget.content.model;
 
           const args: Licenses.ICreateArgs = {
             currentBundleName,
@@ -641,8 +650,8 @@ const licenses: JupyterFrontEndPlugin<void> = {
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
-  launchClassic,
   jupyterForum,
+  open,
   resources,
   licenses
 ];

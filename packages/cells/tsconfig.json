@@ -22,6 +22,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../filebrowser"
     },
     {
@@ -40,7 +43,10 @@
       "path": "../services"
     },
     {
-      "path": "../shared-models"
+      "path": "../toc"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

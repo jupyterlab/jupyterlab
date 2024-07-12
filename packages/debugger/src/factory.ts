@@ -6,8 +6,7 @@ import {
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
-
-import { IDebugger } from '.';
+import { IDebugger } from './tokens';
 
 /**
  * A widget factory for read only editors.
@@ -31,18 +30,26 @@ export class ReadOnlyEditorFactory {
     const { content, mimeType, path } = source;
     const factory = this._services.factoryService.newInlineEditor;
     const mimeTypeService = this._services.mimeTypeService;
+    const model = new CodeEditor.Model({
+      mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
+    });
+    model.sharedModel.source = content;
     const editor = new CodeEditorWrapper({
-      model: new CodeEditor.Model({
-        value: content,
-        mimeType: mimeType || mimeTypeService.getMimeTypeByFilePath(path)
-      }),
-      factory,
-      config: {
-        readOnly: true,
-        lineNumbers: true
-      }
+      editorOptions: {
+        config: {
+          readOnly: true,
+          lineNumbers: true
+        }
+      },
+      model,
+      factory
     });
     editor.node.setAttribute('data-jp-debugger', 'true');
+
+    editor.disposed.connect(() => {
+      model.dispose();
+    });
+
     return editor;
   }
 

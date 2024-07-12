@@ -24,7 +24,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Construct the main menu bar.
    */
   constructor(commands: CommandRegistry) {
-    super();
+    let options = { forceItemsPosition: { forceX: false, forceY: true } };
+    super(options);
     this._commands = commands;
   }
 
@@ -143,7 +144,11 @@ export class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
+  addMenu(
+    menu: Menu,
+    update: boolean = true,
+    options: IMainMenu.IAddOptions = {}
+  ): void {
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }
@@ -234,12 +239,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
    *
    * @param commands The command registry
    * @param options The main menu options.
-   * @param translator - The application language translator.
+   * @param trans - The application language translator.
    */
   static generateMenu(
     commands: CommandRegistry,
     options: IMainMenu.IMenuOptions,
-    translator: TranslationBundle
+    trans: TranslationBundle
   ): RankedMenu {
     let menu: RankedMenu;
     const { id, label, rank } = options;
@@ -309,8 +314,9 @@ export class MainMenu extends MenuBar implements IMainMenu {
     }
 
     if (label) {
-      menu.title.label = translator.__(label);
+      menu.title.label = trans._p('menu', label);
     }
+
     return menu;
   }
 

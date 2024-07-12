@@ -13,19 +13,22 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docprovider"
-    },
-    {
       "path": "../docregistry"
     },
     {
       "path": "../services"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../statusbar"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

@@ -2,8 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { classes } from 'typestyle/lib';
-import { textItem } from '../style/text';
 
 /**
  * A namespace for TextItem statics.
@@ -33,7 +31,11 @@ export function TextItem(
 ): React.ReactElement<TextItem.IProps> {
   const { title, source, className, ...rest } = props;
   return (
-    <span className={classes(textItem, className)} title={title} {...rest}>
+    <span
+      className={`jp-StatusBar-TextItem ${className}`}
+      title={title}
+      {...rest}
+    >
       {source}
     </span>
   );

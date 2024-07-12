@@ -74,15 +74,17 @@ export function classesDedupe(
 export function getReactAttrs(
   elem: Element,
   { ignore = [] }: { ignore?: string[] } = {}
-) {
-  return elem.getAttributeNames().reduce((d, name) => {
-    if (name === 'style' || ignore.includes(name)) {
-      void 0;
-    } else if (name.startsWith('data')) {
-      d[name] = elem.getAttribute(name);
-    } else {
-      d[Text.camelCase(name)] = elem.getAttribute(name);
-    }
-    return d;
-  }, {} as any);
+): { [key: string]: string | null } {
+  return elem
+    .getAttributeNames()
+    .reduce<{ [key: string]: string | null }>((d, name) => {
+      if (name === 'style' || ignore.includes(name)) {
+        void 0;
+      } else if (name.startsWith('data')) {
+        d[name] = elem.getAttribute(name);
+      } else {
+        d[Text.camelCase(name)] = elem.getAttribute(name);
+      }
+      return d;
+    }, {});
 }

@@ -1,18 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { ServerConnection, WorkspaceManager } from '../../src';
-import { init } from '../utils';
-
-// Initialize the fetch overrides.
-init();
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -59,6 +55,15 @@ describe('workspace', () => {
         expect((await manager.fetch(id)).metadata.id).toBe(id);
         await manager.remove(id);
       });
+
+      it('should reject on invalid id', async () => {
+        const id = '../';
+
+        const callback = async () => {
+          await manager.fetch(id);
+        };
+        await expect(callback).rejects.toThrow();
+      });
     });
 
     describe('#list()', () => {
@@ -90,6 +95,15 @@ describe('workspace', () => {
         await manager.save(id, { data: {}, metadata: { id } });
         expect((await manager.fetch(id)).metadata.id).toBe(id);
         await manager.remove(id);
+      });
+
+      it('should reject on invalid id', async () => {
+        const id = '../';
+
+        const callback = async () => {
+          await manager.save(id, { data: {}, metadata: { id } });
+        };
+        await expect(callback).rejects.toThrow();
       });
     });
   });

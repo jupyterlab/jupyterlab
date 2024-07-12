@@ -7,23 +7,38 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/cells/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '@jupyterlab/completer/style/index.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
-import { SessionContext, Toolbar } from '@jupyterlab/apputils';
+import {
+  Toolbar as AppToolbar,
+  SessionContext,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
+import {
+  refreshIcon,
+  stopIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 
-import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
-import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  EditorThemeRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
 
 import {
   Completer,
   CompleterModel,
   CompletionHandler,
-  KernelConnector
+  KernelCompleterProvider,
+  ProviderReconciliator
 } from '@jupyterlab/completer';
 
 import {
@@ -36,6 +51,8 @@ import {
   KernelSpecManager,
   SessionManager
 } from '@jupyterlab/services';
+
+import { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -50,7 +67,46 @@ function main(): void {
     specsManager,
     name: 'Example'
   });
-  const mimeService = new CodeMirrorMimeTypeService();
+  const editorExtensions = () => {
+    const themes = new EditorThemeRegistry();
+    EditorThemeRegistry.getDefaultThemes().forEach(theme => {
+      themes.addTheme(theme);
+    });
+    const registry = new EditorExtensionRegistry();
+
+    EditorExtensionRegistry.getDefaultExtensions({ themes }).forEach(
+      extensionFactory => {
+        registry.addExtension(extensionFactory);
+      }
+    );
+    registry.addExtension({
+      name: 'shared-model-binding',
+      factory: options => {
+        const sharedModel = options.model.sharedModel as IYText;
+        return EditorExtensionRegistry.createImmutableExtension(
+          ybinding({
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
+          })
+        );
+      }
+    });
+    return registry;
+  };
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+
+  const factoryService = new CodeMirrorEditorFactory({
+    extensions: editorExtensions(),
+    languages
+  });
+  const mimeService = new CodeMirrorMimeTypeService(languages);
 
   // Initialize the command registry with the bindings.
   const commands = new CommandRegistry();
@@ -69,15 +125,22 @@ function main(): void {
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const cellWidget = new CodeCell({
+    contentFactory: new Cell.ContentFactory({
+      editorFactory: factoryService.newInlineEditor.bind(factoryService)
+    }),
     rendermime,
-    model: new CodeCellModel({})
+    model: new CodeCellModel()
   }).initializeState();
 
   // Handle the mimeType for the current kernel asynchronously.
   sessionContext.kernelChanged.connect(() => {
     void sessionContext.session?.kernel?.info.then(info => {
       const lang = info.language_info;
-      const mimeType = mimeService.getMimeTypeByLanguage(lang);
+      const mimeTypes = mimeService.getMimeTypeByLanguage(lang);
+      const mimeType =
+        Array.isArray(mimeTypes) && mimeTypes.length !== 0
+          ? mimeTypes[0]
+          : mimeTypes;
       cellWidget.model.mimeType = mimeType;
     });
   });
@@ -89,13 +152,22 @@ function main(): void {
   const editor = cellWidget.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const connector = new KernelConnector({ session: sessionContext.session });
-  const handler = new CompletionHandler({ completer, connector });
+  const timeout = 1000;
+  const provider = new KernelCompleterProvider();
+  const reconciliator = new ProviderReconciliator({
+    context: { widget: cellWidget, editor, session: sessionContext.session },
+    providers: [provider],
+    timeout: timeout
+  });
+  const handler = new CompletionHandler({ completer, reconciliator });
 
   //sessionContext.session?.kernel.
   void sessionContext.ready.then(() => {
-    handler.connector = new KernelConnector({
-      session: sessionContext.session
+    const provider = new KernelCompleterProvider();
+    handler.reconciliator = new ProviderReconciliator({
+      context: { widget: cellWidget, editor, session: sessionContext.session },
+      providers: [provider],
+      timeout: timeout
     });
   });
 
@@ -109,10 +181,32 @@ function main(): void {
   // Create a toolbar for the cell.
   const toolbar = new Toolbar();
   toolbar.addItem('spacer', Toolbar.createSpacerItem());
-  toolbar.addItem('interrupt', Toolbar.createInterruptButton(sessionContext));
-  toolbar.addItem('restart', Toolbar.createRestartButton(sessionContext));
-  toolbar.addItem('name', Toolbar.createKernelNameItem(sessionContext));
-  toolbar.addItem('status', Toolbar.createKernelStatusItem(sessionContext));
+  toolbar.addItem(
+    'interrupt',
+    new ToolbarButton({
+      icon: stopIcon,
+      onClick: () => {
+        void sessionContext.session?.kernel?.interrupt();
+      },
+      tooltip: 'Interrupt the kernel'
+    })
+  );
+  const dialogs = new SessionContextDialogs();
+  toolbar.addItem(
+    'restart',
+    new ToolbarButton({
+      icon: refreshIcon,
+      onClick: () => {
+        void dialogs.restart(sessionContext);
+      },
+      tooltip: 'Restart the kernel'
+    })
+  );
+  toolbar.addItem(
+    'name',
+    AppToolbar.createKernelNameItem(sessionContext, dialogs)
+  );
+  toolbar.addItem('status', AppToolbar.createKernelStatusItem(sessionContext));
 
   // Lay out the widgets.
   const panel = new BoxPanel();
@@ -123,6 +217,12 @@ function main(): void {
   panel.addWidget(cellWidget);
   BoxPanel.setStretch(toolbar, 0);
   BoxPanel.setStretch(cellWidget, 1);
+
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+  completer.addClass('jp-ThemedContainer');
+  // [optional] Enforce Jupyter styling on the full page
+  document.body.classList.add('jp-ThemedContainer');
 
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);

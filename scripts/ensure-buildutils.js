@@ -54,6 +54,10 @@ function ensurePackage(p) {
   if (!current) {
     // This must be "npm" because it is run during `pip install -e .` before
     // jlpm is installed.
+    childProcess.execSync('npm run clean', {
+      stdio: [0, 1, 2],
+      cwd: path.resolve('./' + p)
+    });
     childProcess.execSync('npm run build', {
       stdio: [0, 1, 2],
       cwd: path.resolve('./' + p)

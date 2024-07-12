@@ -1,0 +1,195 @@
+name: UI Tests
+
+on:
+  issue_comment:
+    types: [created]
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
+jobs:
+  test:
+    name: Visual Regression Tests
+    if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
+    timeout-minutes: 80
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm run build
+
+      - name: Launch JupyterLab
+        run: |
+          cd galata
+          jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+
+      - name: Install browser
+        run: |
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+
+      - name: Wait for JupyterLab
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test --project galata jupyterlab
+          mv galata/test-results galata/test-jupyterlab-results || true
+          # Run once benchmark tests to ensure they have no regression
+          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-galata-test-assets
+          path: |
+            galata/test-jupyterlab-results
+            galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-galata-report
+          path: |
+            galata/playwright-report
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log
+
+  test-documentation:
+    name: Visual Regression Documentation
+    if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Documentation snapshots updated.'))) }}
+    # Python version is frozen through strategy.matrix.python-version
+    # Python dependencies are frozen in the installation step
+    # Note: IPython is among the frozen package
+    timeout-minutes: 80
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        # Freeze Python version because it appears in console header
+        python-version: ['3.10.6']
+    steps:
+      - name: Checkout JupyterLab
+        uses: actions/checkout@v4
+        with:
+          path: core
+
+      - name: Checkout demo project
+        uses: actions/checkout@v4
+        with:
+          repository: jupyterlab/jupyterlab-demo
+          ref: master
+          path: demo
+
+      - name: Get demo folder
+        run: |
+          echo "DEMO_DIR=$PWD" >> $GITHUB_ENV
+        working-directory: demo
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+
+      - name: Install dependencies
+        run: |
+          set -ex
+          # Install chinese font
+          sudo apt-get update
+          sudo apt-get install fonts-dejavu fonts-noto
+
+          # Freeze the packages to ensure consistent look and feel
+          # IPython is frozen because its version is displayed in
+          # the console header
+          pip install .[docs-screenshots]
+          bash ./scripts/ci_install.sh
+
+          # Build dev-mode
+          jlpm run build
+        working-directory: core
+
+      - name: Launch JupyterLab
+        env:
+          JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.DEMO_DIR }}
+          # Ignore Python warning for cleaner documentation snapshots
+          PYTHONWARNINGS: ignore
+        run: |
+          set -ex
+          cd galata
+          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1) &
+        working-directory: core
+
+      - name: Install browser
+        run: |
+          set -ex
+          cd galata
+          # Install only Chromium browser
+          jlpm playwright install chromium
+          jlpm run build
+        working-directory: core
+
+      - name: Wait for JupyterLab
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
+
+      - name: Test
+        run: |
+          cd galata
+          jlpm run test:doc
+        working-directory: core
+
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-documentation-test-assets
+          path: |
+            core/galata/test-results
+
+      - name: Upload Galata Test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-documentation-report
+          path: |
+            core/galata/playwright-report
+
+      - name: Stop JupyterLab
+        if: always()
+        run: |
+          kill -s SIGTERM $(pgrep jupyter-lab)
+
+      - name: Print JupyterLab logs
+        if: always()
+        run: |
+          cat /tmp/jupyterlab_server.log

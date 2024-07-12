@@ -1,4 +1,8 @@
-#!/usr/bin/env node
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 const pkg = require('./staging/package.json');
 
 function parser(part) {

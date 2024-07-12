@@ -1,0 +1,35 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-pluginmanager {
+  display: grid;
+  grid-template-rows: min-content min-content 1fr;
+}
+
+.jp-pluginmanager-Header,
+.jp-pluginmanager-Disclaimer {
+  padding: 8px;
+}
+
+.jp-pluginmanager-Disclaimer-checkbox {
+  position: relative;
+  top: 2px;
+}
+
+.jp-pluginmanager-AvailableList {
+  overflow: auto;
+}
+
+.jp-pluginmanager-AvailableList > .jp-sortable-table > thead {
+  position: sticky;
+}
+
+.jp-pluginmanager-PluginInUseMessage {
+  max-width: 550px;
+}
+
+.jp-pluginmanager-Header > .jp-FilterBox {
+  width: 100%;
+}

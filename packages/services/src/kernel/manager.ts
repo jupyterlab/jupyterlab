@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { every, IIterator, iter } from '@lumino/algorithm';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
@@ -140,8 +138,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * @returns A new iterator over the running kernels.
    */
-  running(): IIterator<Kernel.IModel> {
-    return iter([...this._models.values()]);
+  running(): IterableIterator<Kernel.IModel> {
+    return this._models.values();
   }
 
   /**
@@ -239,11 +237,13 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     try {
       models = await listRunning(this.serverSettings);
     } catch (err) {
-      // Check for a network error, or a 503 error, which is returned
-      // by a JupyterHub when a server is shut down.
+      // Handle network errors, as well as cases where we are on a
+      // JupyterHub and the server is not running. JupyterHub returns a
+      // 503 (<2.0) or 424 (>2.0) in that case.
       if (
         err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503
+        err.response?.status === 503 ||
+        err.response?.status === 424
       ) {
         this._connectionFailure.emit(err);
       }
@@ -256,12 +256,19 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     if (
       this._models.size === models.length &&
-      every(models, x => {
-        const existing = this._models.get(x.id);
+      models.every(model => {
+        const existing = this._models.get(model.id);
         if (!existing) {
           return false;
         }
-        return existing.name === x.name;
+        return (
+          existing.connections === model.connections &&
+          existing.execution_state === model.execution_state &&
+          existing.last_activity === model.last_activity &&
+          existing.name === model.name &&
+          existing.reason === model.reason &&
+          existing.traceback === model.traceback
+        );
       })
     ) {
       // Identical models list (presuming models does not contain duplicate
@@ -337,6 +344,76 @@ export namespace KernelManager {
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
-    standby?: Poll.Standby;
+    standby?: Poll.Standby | (() => boolean | Poll.Standby);
+  }
+
+  /**
+   * A no-op kernel manager to be used when starting kernels.
+   */
+  export class NoopManager extends KernelManager {
+    /**
+     * Whether the manager is active.
+     */
+    get isActive(): boolean {
+      return false;
+    }
+
+    /**
+     * Used for testing.
+     */
+    get parentReady(): Promise<void> {
+      return super.ready;
+    }
+
+    /**
+     * Start a new kernel - throws an error since it is not supported.
+     */
+    async startNew(
+      createOptions: IKernelOptions = {},
+      connectOptions: Omit<
+        Kernel.IKernelConnection.IOptions,
+        'model' | 'serverSettings'
+      > = {}
+    ): Promise<Kernel.IKernelConnection> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Kernel Manager')
+      );
+    }
+
+    /**
+     * Connect to an existing kernel - throws an error since it is not supported.
+     */
+    connectTo(
+      options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
+    ): Kernel.IKernelConnection {
+      throw new Error('Not implemented in no-op Kernel Manager');
+    }
+
+    /**
+     * Shut down a kernel by id - throws an error since it is not supported.
+     */
+    async shutdown(id: string): Promise<void> {
+      return Promise.reject(
+        new Error('Not implemented in no-op Kernel Manager')
+      );
+    }
+
+    /**
+     * A promise that fulfills when the manager is ready (never).
+     */
+    get ready(): Promise<void> {
+      return this.parentReady.then(() => this._readyPromise);
+    }
+
+    /**
+     * Execute a request to the server to poll running kernels and update state.
+     */
+    protected async requestRunning(): Promise<void> {
+      return Promise.resolve();
+    }
+
+    private _readyPromise = new Promise<void>(() => {
+      /* no-op */
+    });
   }
 }

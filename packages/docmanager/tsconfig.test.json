@@ -9,46 +9,28 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docprovider"
-    },
-    {
       "path": "../docregistry"
     },
     {
       "path": "../services"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../statusbar"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docprovider"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
+      "path": "../testing"
     }
   ]
 }

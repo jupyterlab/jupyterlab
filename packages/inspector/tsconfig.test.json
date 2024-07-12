@@ -27,28 +27,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../statedb"
-    },
-    {
-      "path": "../translation"
+      "path": "../testing"
     }
   ]
 }

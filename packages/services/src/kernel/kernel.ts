@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator } from '@lumino/algorithm';
-
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
@@ -116,8 +114,6 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * This is a guard to avoid deadlock is the user asks input
    * as second time before submitting his first input
-   *
-   * See https://github.com/jupyterlab/jupyterlab/issues/8632
    */
   hasPendingInput: boolean;
 
@@ -179,7 +175,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * @returns A promise that resolves when the kernel has interrupted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -196,7 +192,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * @returns A promise that resolves when the kernel has restarted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) and validates the response model.
    *
    * Any existing Future or Comm objects are cleared.
    *
@@ -369,7 +365,10 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#messages-on-the-stdin-router-dealer-sockets).
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 
   /**
    * Create a new comm.
@@ -468,6 +467,11 @@ export interface IKernelConnection extends IObservableDisposable {
   ): void;
 
   /**
+   * Remove the input guard, if any.
+   */
+  removeInputGuard(): void;
+
+  /**
    * A signal emitted when the kernel status changes.
    */
   statusChanged: ISignal<this, KernelMessage.Status>;
@@ -514,7 +518,7 @@ export interface IKernelConnection extends IObservableDisposable {
    *
    * #### Notes
    * Uses the [Jupyter Notebook
-   * API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+   * API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * On a valid response, closes the websocket, disposes of the kernel
    * object, and fulfills the promise.
@@ -611,7 +615,7 @@ export interface IManager extends IBaseManager {
    *
    * @returns A new iterator over the running kernels.
    */
-  running(): IIterator<IModel>;
+  running(): IterableIterator<IModel>;
 
   /**
    * Force a refresh of the running kernels.
@@ -772,7 +776,10 @@ export interface IFuture<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void;
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void;
 }
 
 export interface IShellFuture<

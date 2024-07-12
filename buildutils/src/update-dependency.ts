@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as utils from './utils';
 import packageJson from 'package-json';
 
-import commander from 'commander';
+import { program as commander } from 'commander';
 import semver from 'semver';
 
 const versionCache = new Map();

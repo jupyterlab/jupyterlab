@@ -2,14 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  defaultSanitizer,
-  ISanitizer,
-  ISessionContext
-} from '@jupyterlab/apputils';
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { Sanitizer } from '@jupyterlab/apputils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Contents, Session } from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
@@ -33,11 +29,12 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    */
   constructor(options: RenderMimeRegistry.IOptions = {}) {
     // Parse the options.
-    this.translator = options.translator || nullTranslator;
-    this.resolver = options.resolver || null;
-    this.linkHandler = options.linkHandler || null;
-    this.latexTypesetter = options.latexTypesetter || null;
-    this.sanitizer = options.sanitizer || defaultSanitizer;
+    this.translator = options.translator ?? nullTranslator;
+    this.resolver = options.resolver ?? null;
+    this.linkHandler = options.linkHandler ?? null;
+    this.latexTypesetter = options.latexTypesetter ?? null;
+    this.markdownParser = options.markdownParser ?? null;
+    this.sanitizer = options.sanitizer ?? new Sanitizer();
 
     // Add the initial factories.
     if (options.initialFactories) {
@@ -50,7 +47,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   /**
    * The sanitizer used by the rendermime instance.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The object used to resolve relative urls for the rendermime instance.
@@ -66,6 +63,11 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    * The LaTeX typesetter for the rendermime.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * The Markdown parser for the rendermime.
+   */
+  readonly markdownParser: IRenderMime.IMarkdownParser | null;
 
   /**
    * The application language translator.
@@ -140,6 +142,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
       latexTypesetter: this.latexTypesetter,
+      markdownParser: this.markdownParser,
       translator: this.translator
     });
   }
@@ -165,11 +168,13 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   clone(options: IRenderMimeRegistry.ICloneOptions = {}): RenderMimeRegistry {
     // Create the clone.
     const clone = new RenderMimeRegistry({
-      resolver: options.resolver || this.resolver || undefined,
-      sanitizer: options.sanitizer || this.sanitizer || undefined,
-      linkHandler: options.linkHandler || this.linkHandler || undefined,
+      resolver: options.resolver ?? this.resolver ?? undefined,
+      sanitizer: options.sanitizer ?? this.sanitizer ?? undefined,
+      linkHandler: options.linkHandler ?? this.linkHandler ?? undefined,
       latexTypesetter:
-        options.latexTypesetter || this.latexTypesetter || undefined,
+        options.latexTypesetter ?? this.latexTypesetter ?? undefined,
+      markdownParser:
+        options.markdownParser ?? this.markdownParser ?? undefined,
       translator: this.translator
     });
 
@@ -307,6 +312,11 @@ export namespace RenderMimeRegistry {
     latexTypesetter?: IRenderMime.ILatexTypesetter;
 
     /**
+     * An optional Markdown parser.
+     */
+    markdownParser?: IRenderMime.IMarkdownParser;
+
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -320,15 +330,7 @@ export namespace RenderMimeRegistry {
      * Create a new url resolver.
      */
     constructor(options: IUrlResolverOptions) {
-      if (options.path) {
-        this._path = options.path;
-      } else if (options.session) {
-        this._session = options.session;
-      } else {
-        throw new Error(
-          "Either 'path' or 'session' must be given as a constructor option"
-        );
-      }
+      this._path = options.path;
       this._contents = options.contents;
     }
 
@@ -336,7 +338,7 @@ export namespace RenderMimeRegistry {
      * The path of the object, from which local urls can be derived.
      */
     get path(): string {
-      return this._path ?? this._session.path;
+      return this._path;
     }
     set path(value: string) {
       this._path = value;
@@ -371,19 +373,87 @@ export namespace RenderMimeRegistry {
      * Whether the URL should be handled by the resolver
      * or not.
      *
+     * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+     *
      * #### Notes
      * This is similar to the `isLocal` check in `URLExt`,
      * but it also checks whether the path points to any
      * of the `IDrive`s that may be registered with the contents
      * manager.
      */
-    isLocal(url: string): boolean {
-      const path = decodeURI(url);
-      return URLExt.isLocal(url) || !!this._contents.driveName(path);
+    isLocal(url: string, allowRoot: boolean = false): boolean {
+      if (this.isMalformed(url)) {
+        return false;
+      }
+      return (
+        URLExt.isLocal(url, allowRoot) ||
+        !!this._contents.driveName(decodeURI(url))
+      );
+    }
+
+    /**
+     * Resolve a path from Jupyter kernel to a path:
+     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - path understood and known by kernel (if such a path exists).
+     * Returns `null` if there is no file matching provided path in neither
+     * kernel nor jupyter-server contents manager.
+     */
+    async resolvePath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      // TODO: a clean implementation would be server-side and depends on:
+      // https://github.com/jupyter-server/jupyter_server/issues/1280
+
+      const rootDir = PageConfig.getOption('rootUri').replace('file://', '');
+      // Workaround: expand `~` path using root dir (if it matches).
+      if (path.startsWith('~/') && rootDir.startsWith('/home/')) {
+        // For now we assume that kernel is in root dir.
+        path = rootDir.split('/').slice(0, 3).join('/') + path.substring(1);
+      }
+      if (path.startsWith(rootDir) || path.startsWith('./')) {
+        try {
+          const relativePath = path.replace(rootDir, '');
+          // If file exists on the server we have guessed right
+          const response = await this._contents.get(relativePath, {
+            content: false
+          });
+          return {
+            path: response.path,
+            scope: 'server'
+          };
+        } catch (error) {
+          // The file seems like should be on the server but is not.
+          console.warn(`Could not resolve location of ${path} on server`);
+          return null;
+        }
+      }
+      // The file is not accessible from jupyter-server but maybe it is
+      // available from DAP `source`; we assume the path is available
+      // from kernel because currently we have no way of checking this
+      // without introducing a cycle (unless we were to set the debugger
+      // service instance on the resolver later).
+      return {
+        path: path,
+        scope: 'kernel'
+      };
+    }
+
+    /**
+     * Whether the URL can be decoded using `decodeURI`.
+     */
+    isMalformed(url: string): boolean {
+      try {
+        decodeURI(url);
+        return false;
+      } catch (error: unknown) {
+        if (error instanceof URIError) {
+          return true;
+        }
+        throw error;
+      }
     }
 
     private _path: string;
-    private _session: ISessionContext | Session.ISessionConnection;
     private _contents: Contents.IManager;
   }
 
@@ -397,20 +467,7 @@ export namespace RenderMimeRegistry {
      * #### Notes
      * Either session or path must be given, and path takes precedence.
      */
-    path?: string;
-
-    /**
-     * The session used by the resolver.
-     *
-     * @deprecated use the `path` option instead and update it as needed.
-     *
-     * #### Notes
-     * For convenience, this can be a session context as well. Either session
-     * or path must be given, and path takes precedence.
-     *
-     * TODO: remove this option and make `path` required.
-     */
-    session?: ISessionContext | Session.ISessionConnection;
+    path: string;
 
     /**
      * The contents manager used by the resolver.
@@ -450,13 +507,5 @@ namespace Private {
       }
       return p1.id - p2.id;
     });
-  }
-
-  export function sessionConnection(
-    s: Session.ISessionConnection | ISessionContext
-  ): Session.ISessionConnection | null {
-    return (s as any).sessionChanged
-      ? (s as ISessionContext).session
-      : (s as Session.ISessionConnection);
   }
 }

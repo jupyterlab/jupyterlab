@@ -1,0 +1,47 @@
+$schema: https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/stylelintrc.json
+
+extends:
+  - stylelint-config-recommended
+  - stylelint-config-standard
+  - stylelint-prettier/recommended
+
+plugins:
+  - stylelint-csstree-validator
+
+rules:
+  import-notation: null
+  # TODO: fix all of these rules violated in stylelint-config-recommended
+  no-descending-specificity: null
+  # this fixer is incompatible with the copyright headers
+  comment-whitespace-inside: null
+  # these fixers assume use of `autoprefixer`: we _don't_ use any CSS preprocessors
+  property-no-vendor-prefix: null
+  selector-no-vendor-prefix: null
+  value-no-vendor-prefix: null
+  # these fixers doesn't work well with variables
+  alpha-value-notation: null
+  color-function-notation: null
+  # TODO: evaluate these unfixable rules violated in stylelint-config-standard
+  custom-property-pattern: null
+  declaration-block-no-redundant-longhand-properties: null
+  function-linear-gradient-no-nonstandard-direction: null
+  function-url-quotes: null
+  keyframes-name-pattern: null
+  number-max-precision: null
+  selector-class-pattern: null
+  selector-id-pattern: null
+  selector-pseudo-class-no-unknown: null
+  selector-pseudo-element-no-unknown: null
+  selector-not-notation: null
+  # disallow use of more than one bare HTML tag like `div span` to avoid performance regression,
+  # while allowing compounded HTML tags like `button.jp-Button`
+  selector-max-type:
+    - 1
+    - ignore: "compounded"
+  # matching complex selectors is expensive
+  selector-max-class: 4
+  # TODO: decrease max-compound to 3
+  selector-max-compound-selectors: 4
+  # TODO: decrease to 0
+  selector-max-universal: 1
+  csstree/validator: true

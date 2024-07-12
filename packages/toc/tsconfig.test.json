@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": ["src/**/*", "test/*"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable"]
   },
@@ -9,31 +9,19 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
       "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
     },
     {
       "path": "../docregistry"
     },
     {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../markdownviewer"
-    },
-    {
-      "path": "../notebook"
+      "path": "../observables"
     },
     {
       "path": "../rendermime"
     },
     {
-      "path": "../settingregistry"
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../translation"
@@ -45,43 +33,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../cells"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docmanager"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../markdownviewer"
-    },
-    {
-      "path": "../notebook"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../settingregistry"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

@@ -27,12 +27,15 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the inspector plugin.
  */
 namespace CommandIDs {
   export const open = 'inspector:open';
+  export const close = 'inspector:close';
+  export const toggle = 'inspector:toggle';
 }
 
 /**
@@ -40,6 +43,7 @@ namespace CommandIDs {
  */
 const inspector: JupyterFrontEndPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
+  description: 'Provides the code introspection widget.',
   requires: [ITranslator],
   optional: [ICommandPalette, ILauncher, ILayoutRestorer],
   provides: IInspector,
@@ -53,9 +57,12 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
   ): IInspector => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
-    const command = CommandIDs.open;
-    const label = trans.__('Show Contextual Help');
+    const caption = trans.__(
+      'Live updating code documentation from the active kernel'
+    );
+    const openedLabel = trans.__('Contextual Help');
     const namespace = 'inspector';
+    const datasetKey = 'jpInspector';
     const tracker = new WidgetTracker<MainAreaWidget<InspectorPanel>>({
       namespace
     });
@@ -72,7 +79,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
           content: new InspectorPanel({ translator })
         });
         inspector.id = 'jp-inspector';
-        inspector.title.label = label;
+        inspector.title.label = openedLabel;
         inspector.title.icon = inspectorIcon;
         void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
@@ -80,23 +87,31 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         inspector.content.source?.onEditorChange(args);
       }
       if (!inspector.isAttached) {
-        shell.add(inspector, 'main', { activate: false, mode: 'split-right' });
+        shell.add(inspector, 'main', {
+          activate: false,
+          mode: 'split-right',
+          type: 'Inspector'
+        });
       }
       shell.activateById(inspector.id);
+      document.body.dataset[datasetKey] = 'open';
       return inspector;
     }
+    function closeInspector(): void {
+      inspector.dispose();
+      delete document.body.dataset[datasetKey];
+    }
 
-    // Add command to registry.
-    commands.addCommand(command, {
-      caption: trans.__(
-        'Live updating code documentation from the active kernel'
-      ),
+    // Add inspector:open command to registry.
+    const showLabel = trans.__('Show Contextual Help');
+    commands.addCommand(CommandIDs.open, {
+      caption,
       isEnabled: () =>
         !inspector ||
         inspector.isDisposed ||
         !inspector.isAttached ||
         !inspector.isVisible,
-      label,
+      label: showLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
       execute: args => {
         const text = args && (args.text as string);
@@ -108,21 +123,52 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       }
     });
 
-    // Add command to UI where possible.
-    if (palette) {
-      palette.addItem({ command, category: label });
-    }
+    // Add inspector:close command to registry.
+    const closeLabel = trans.__('Hide Contextual Help');
+    commands.addCommand(CommandIDs.close, {
+      caption,
+      isEnabled: () => isInspectorOpen(),
+      label: closeLabel,
+      icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      execute: () => closeInspector()
+    });
+
+    // Add inspector:toggle command to registry.
+    const toggleLabel = trans.__('Show Contextual Help');
+    commands.addCommand(CommandIDs.toggle, {
+      caption,
+      label: toggleLabel,
+      isToggled: () => isInspectorOpen(),
+      execute: args => {
+        if (isInspectorOpen()) {
+          closeInspector();
+        } else {
+          const text = args && (args.text as string);
+          openInspector(text);
+        }
+      }
+    });
+
+    // Add open command to launcher if possible.
     if (launcher) {
-      launcher.add({ command, args: { isLauncher: true } });
+      launcher.add({ command: CommandIDs.open, args: { isLauncher: true } });
+    }
+
+    // Add toggle command to command palette if possible.
+    if (palette) {
+      palette.addItem({ command: CommandIDs.toggle, category: toggleLabel });
     }
 
     // Handle state restoration.
     if (restorer) {
-      void restorer.restore(tracker, { command, name: () => 'inspector' });
+      void restorer.restore(tracker, {
+        command: CommandIDs.toggle,
+        name: () => 'inspector'
+      });
     }
 
     // Create a proxy to pass the `source` to the current inspector.
-    const proxy: IInspector = Object.defineProperty({}, 'source', {
+    const proxy = Object.defineProperty({} as IInspector, 'source', {
       get: (): IInspector.IInspectable | null =>
         !inspector || inspector.isDisposed ? null : inspector.content.source,
       set: (src: IInspector.IInspectable | null) => {
@@ -141,7 +187,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
  * An extension that registers consoles for inspection.
  */
 const consoles: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/console-extension
   id: '@jupyterlab/inspector-extension:consoles',
+  description: 'Adds code introspection support to consoles.',
   requires: [IInspector, IConsoleTracker, ILabShell],
   autoStart: true,
   activate: (
@@ -181,16 +229,13 @@ const consoles: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of console instances and set inspector source.
-    labShell.currentChanged.connect((_, args) => {
-      const widget = args.newValue;
-      if (!widget || !consoles.has(widget)) {
-        return;
+    const setSource = (widget: Widget | null): void => {
+      if (widget && consoles.has(widget) && handlers[widget.id]) {
+        manager.source = handlers[widget.id];
       }
-      const source = handlers[widget.id];
-      if (source) {
-        manager.source = source;
-      }
-    });
+    };
+    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(labShell.currentWidget));
   }
 };
 
@@ -198,7 +243,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
  * An extension that registers notebooks for inspection.
  */
 const notebooks: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/notebook-extension
   id: '@jupyterlab/inspector-extension:notebooks',
+  description: 'Adds code introspection to notebooks.',
   requires: [IInspector, INotebookTracker, ILabShell],
   autoStart: true,
   activate: (
@@ -226,7 +273,11 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
       // Listen for active cell changes.
       parent.content.activeCellChanged.connect((sender, cell) => {
-        handler.editor = cell && cell.editor;
+        void cell?.ready.then(() => {
+          if (cell === parent.content.activeCell) {
+            handler.editor = cell!.editor;
+          }
+        });
       });
 
       // Listen for parent disposal.
@@ -237,16 +288,13 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of notebook instances and set inspector source.
-    labShell.currentChanged.connect((sender, args) => {
-      const widget = args.newValue;
-      if (!widget || !notebooks.has(widget)) {
-        return;
+    const setSource = (widget: Widget | null): void => {
+      if (widget && notebooks.has(widget) && handlers[widget.id]) {
+        manager.source = handlers[widget.id];
       }
-      const source = handlers[widget.id];
-      if (source) {
-        manager.source = source;
-      }
-    });
+    };
+    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(labShell.currentWidget));
   }
 };
 

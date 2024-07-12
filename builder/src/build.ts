@@ -4,12 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import miniSVGDataURI from 'mini-svg-data-uri';
 
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
-import { readJSONFile } from '@jupyterlab/buildutils';
 
 /**
  *  A namespace for JupyterLab build utilities.
@@ -137,7 +137,7 @@ export namespace Build {
         path.join(packagePath, 'package.json')
       );
       const packageDir = path.dirname(packageDataPath);
-      const data = readJSONFile(packageDataPath);
+      const data = fs.readJSONSync(packageDataPath);
       const name = data.name;
       const extension = normalizeExtension(data);
 
@@ -162,7 +162,7 @@ export namespace Build {
         if (fs.existsSync(destination)) {
           try {
             const oldPackagePath = path.join(destination, 'package.json.orig');
-            const oldPackageData = readJSONFile(oldPackagePath);
+            const oldPackageData = fs.readJSONSync(oldPackagePath);
             if (oldPackageData.version === data.version) {
               fs.removeSync(destination);
             }
@@ -198,21 +198,25 @@ export namespace Build {
         output: {
           path: path.resolve(path.join(themeOutput, 'themes', name)),
           // we won't use these JS files, only the extracted CSS
-          filename: '[name].js'
+          filename: '[name].js',
+          hashFunction: 'sha256'
         },
         module: {
           rules: [
             {
               test: /\.css$/,
-              use: [MiniCssExtractPlugin.loader, 'css-loader']
+              use: [MiniCssExtractPlugin.loader, require.resolve('css-loader')]
             },
             {
               test: /\.svg/,
-              use: [{ loader: 'svg-url-loader', options: { encoding: 'none' } }]
+              type: 'asset/inline',
+              generator: {
+                dataUrl: (content: any) => miniSVGDataURI(content.toString())
+              }
             },
             {
               test: /\.(cur|png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-              use: [{ loader: 'url-loader', options: { limit: 10000 } }]
+              type: 'asset'
             }
           ]
         },

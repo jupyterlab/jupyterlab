@@ -9,10 +9,25 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../lsp"
+    },
+    {
       "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
     },
     {
       "path": "../translation"
@@ -24,25 +39,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../statusbar"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

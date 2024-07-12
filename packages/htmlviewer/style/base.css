@@ -6,9 +6,6 @@
 /* Document styles */
 .jp-HTMLViewer {
   overflow: hidden;
-}
-
-.jp-HTMLViewer {
   min-width: 100px;
   min-height: 100px;
   width: 100%;
@@ -20,7 +17,7 @@
 }
 
 /*
-When drag events occur, `p-mod-override-cursor` is added to the body.
+When drag events occur, `lm-mod-override-cursor` is added to the body.
 Because iframes steal all cursor events, the following two rules are necessary
 to suppress pointer events while resize drags are occurring. There may be a
 better solution to this problem.
@@ -29,7 +26,7 @@ body.lm-mod-override-cursor .jp-HTMLViewer {
   position: relative;
 }
 
-body.lm-mod-override-cursor .jp-HTMLViewer:before {
+body.lm-mod-override-cursor .jp-HTMLViewer::before {
   content: '';
   position: absolute;
   top: 0;

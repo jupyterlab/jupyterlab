@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _developer-guide:
 
 General Codebase Orientation
@@ -10,7 +13,7 @@ In particular, there are many TypeScript packages and a single Python package.
 The Python package contains server-side code, and also distributes
 the bundled-and-compiled TypeScript code.
 
-See the `Contributing Guidelines <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
+See the `Contributing Guidelines <https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md>`__
 for detailed developer installation instructions.
 
 Directories
@@ -22,7 +25,7 @@ are described here.
 Python package: ``jupyterlab/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This, along with the ``setup.py``, comprises the Python code for the project.
+This, along with the ``pyproject.toml``, comprises the Python code for the project.
 This includes the notebook server extension, JupyterLab's command line interface,
 entrypoints, and Python tests.
 
@@ -58,7 +61,7 @@ The ``lab-dev`` endpoint is the equivalent of checking out the repo locally and 
 The ``lab-spliced`` endpoint is the equivalent of building JupyterLab in spliced mode and running ``jupyter lab``.
 See the `Development workflow for source extensions <../extension/extension_dev.html#development-workflow-for-source-extensions>`__ for more information on spliced mode.
 
-Build utilities: ``builtutils/``
+Build utilities: ``buildutils/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An ``npm`` package that contains several utility scripts for managing
@@ -83,7 +86,7 @@ Documentation: ``docs/``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 This directory contains the Sphinx project for this documentation.
-You can create an environment to build the documentation using ``conda create -f environment.yml``,
+You can install the dependencies for building the documentation using ``pip install .[docs]``,
 and you can build the documentation by running ``make html``.
 The entry point to the built docs will then be in ``docs/build/index.html``.
 
@@ -121,10 +124,3 @@ Test Utilities: ``testutils/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A small ``npm`` package which is aids in running the tests in ``tests/``.
-
-
-TypeDoc Theming: ``typedoc-theme``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A small theme used to help render our
-`TypeDoc <../api/index.html>`__ documentation.

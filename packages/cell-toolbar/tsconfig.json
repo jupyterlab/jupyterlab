@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../ui-components"
+    }
+  ]
+}

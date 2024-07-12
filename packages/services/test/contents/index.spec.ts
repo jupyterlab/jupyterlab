@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
+import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { Contents, ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
@@ -29,7 +29,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -110,10 +110,10 @@ describe('contents', () => {
   });
 
   describe('#addDrive()', () => {
-    it('should add a new drive to the manager', () => {
+    it('should add a new drive to the manager', async () => {
       contents.addDrive(new Drive({ name: 'other' }));
       handleRequest(contents, 200, DEFAULT_FILE);
-      return contents.get('other:');
+      await expect(contents.get('other:')).resolves.not.toThrow();
     });
   });
 
@@ -260,7 +260,25 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 201, DEFAULT_DIR);
       const get = contents.get('/foo');
-      await expectFailure(get, 'Invalid response: 201 Created');
+      await expect(get).rejects.toThrow(/Invalid response: 201/);
+    });
+
+    it('should store original server path for directory', async () => {
+      const drive = new Drive({ name: 'other', serverSettings });
+      contents.addDrive(drive);
+      handleRequest(drive, 200, DEFAULT_DIR);
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.serverPath).toBe('foo/bar');
+    });
+
+    it('should store original server path for a file', async () => {
+      const drive = new Drive({ name: 'other', serverSettings });
+      contents.addDrive(drive);
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const options: Contents.IFetchOptions = { type: 'file' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.serverPath).toBe('foo/test');
     });
   });
 
@@ -369,27 +387,29 @@ describe('contents', () => {
         ext: 'py'
       };
       const newFile = contents.newUntitled(options);
-      await expectFailure(newFile);
+      await expect(newFile).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, DEFAULT_DIR);
       const newDir = contents.newUntitled();
-      await expectFailure(newDir, 'Invalid response: 200 OK');
+      await expect(newDir).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
   describe('#delete()', () => {
-    it('should delete a file', () => {
+    it('should delete a file', async () => {
       handleRequest(contents, 204, {});
-      return contents.delete('/foo/bar.txt');
+      await expect(contents.delete('/foo/bar.txt')).resolves.not.toThrow();
     });
 
-    it('should delete a file on an additional drive', () => {
+    it('should delete a file on an additional drive', async () => {
       const other = new Drive({ name: 'other', serverSettings });
       contents.addDrive(other);
       handleRequest(other, 204, {});
-      return contents.delete('other:/foo/bar.txt');
+      await expect(
+        contents.delete('other:/foo/bar.txt')
+      ).resolves.not.toThrow();
     });
 
     it('should emit the fileChanged signal', async () => {
@@ -408,19 +428,19 @@ describe('contents', () => {
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, {});
       const del = contents.delete('/foo/bar.txt');
-      await expectFailure(del, 'Invalid response: 200 OK');
+      await expect(del).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw a specific error', async () => {
       handleRequest(contents, 400, {});
       const del = contents.delete('/foo/');
-      await expectFailure(del, '');
+      await expect(del).rejects.toThrow();
     });
 
     it('should throw a general error', async () => {
       handleRequest(contents, 500, {});
       const del = contents.delete('/foo/');
-      await expectFailure(del, '');
+      await expect(del).rejects.toThrow();
     });
   });
 
@@ -462,13 +482,13 @@ describe('contents', () => {
       delete dir.path;
       handleRequest(contents, 200, dir);
       const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
-      await expectFailure(rename);
+      await expect(rename).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 201, DEFAULT_FILE);
       const rename = contents.rename('/foo/bar.txt', '/foo/baz.txt');
-      await expectFailure(rename, 'Invalid response: 201 Created');
+      await expect(rename).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -514,13 +534,13 @@ describe('contents', () => {
       delete file.format;
       handleRequest(contents, 200, file);
       const save = contents.save('/foo', { type: 'file', name: 'test' });
-      await expectFailure(save);
+      await expect(save).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 204, DEFAULT_FILE);
       const save = contents.save('/foo', { type: 'file', name: 'test' });
-      await expectFailure(save, 'Invalid response: 204 No Content');
+      await expect(save).rejects.toThrow(/Invalid response: 204/);
     });
   });
 
@@ -557,13 +577,13 @@ describe('contents', () => {
       delete file.type;
       handleRequest(contents, 201, file);
       const copy = contents.copy('/foo/bar.txt', '/baz');
-      await expectFailure(copy);
+      await expect(copy).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, DEFAULT_FILE);
       const copy = contents.copy('/foo/bar.txt', '/baz');
-      await expectFailure(copy, 'Invalid response: 200 OK');
+      await expect(copy).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -589,13 +609,13 @@ describe('contents', () => {
       delete cp.last_modified;
       handleRequest(contents, 201, cp);
       const checkpoint = contents.createCheckpoint('/foo/bar.txt');
-      await expectFailure(checkpoint);
+      await expect(checkpoint).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 200, DEFAULT_CP);
       const checkpoint = contents.createCheckpoint('/foo/bar.txt');
-      await expectFailure(checkpoint, 'Invalid response: 200 OK');
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -624,27 +644,27 @@ describe('contents', () => {
       await expectFailure(checkpoints);
       handleRequest(contents, 200, DEFAULT_CP);
       const newCheckpoints = contents.listCheckpoints('/foo/bar.txt');
-      await expectFailure(newCheckpoints, 'Invalid Checkpoint list');
+      await expect(newCheckpoints).rejects.toThrow(/Invalid Checkpoint list/);
     });
 
     it('should fail for an incorrect response', async () => {
       handleRequest(contents, 201, {});
       const checkpoints = contents.listCheckpoints('/foo/bar.txt');
-      await expectFailure(checkpoints, 'Invalid response: 201 Created');
+      await expect(checkpoints).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
   describe('#restoreCheckpoint()', () => {
-    it('should restore a checkpoint', () => {
+    it('should restore a checkpoint', async () => {
       handleRequest(contents, 204, {});
       const checkpoint = contents.restoreCheckpoint(
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
-      return checkpoint;
+      await expect(checkpoint).resolves.not.toThrow();
     });
 
-    it('should restore a checkpoint on an additional drive', () => {
+    it('should restore a checkpoint on an additional drive', async () => {
       const other = new Drive({ name: 'other', serverSettings });
       contents.addDrive(other);
       handleRequest(other, 204, {});
@@ -652,7 +672,7 @@ describe('contents', () => {
         'other:/foo/bar.txt',
         DEFAULT_CP.id
       );
-      return checkpoint;
+      await expect(checkpoint).resolves.not.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
@@ -661,21 +681,25 @@ describe('contents', () => {
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
-      await expectFailure(checkpoint, 'Invalid response: 200 OK');
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
   describe('#deleteCheckpoint()', () => {
-    it('should delete a checkpoint', () => {
+    it('should delete a checkpoint', async () => {
       handleRequest(contents, 204, {});
-      return contents.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      await expect(
+        contents.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id)
+      ).resolves.not.toThrow();
     });
 
-    it('should delete a checkpoint on an additional drive', () => {
+    it('should delete a checkpoint on an additional drive', async () => {
       const other = new Drive({ name: 'other', serverSettings });
       contents.addDrive(other);
       handleRequest(other, 204, {});
-      return contents.deleteCheckpoint('other:/foo/bar.txt', DEFAULT_CP.id);
+      await expect(
+        contents.deleteCheckpoint('other:/foo/bar.txt', DEFAULT_CP.id)
+      ).resolves.not.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
@@ -684,7 +708,7 @@ describe('contents', () => {
         '/foo/bar.txt',
         DEFAULT_CP.id
       );
-      await expectFailure(checkpoint, 'Invalid response: 200 OK');
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 });
@@ -795,7 +819,7 @@ describe('drive', () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_DIR);
       const get = drive.get('/foo');
-      await expectFailure(get, 'Invalid response: 201 Created');
+      await expect(get).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -885,14 +909,14 @@ describe('drive', () => {
         ext: 'py'
       };
       const newFile = drive.newUntitled(options);
-      await expectFailure(newFile);
+      await expect(newFile).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_DIR);
       const newDir = drive.newUntitled();
-      await expectFailure(newDir, 'Invalid response: 200 OK');
+      await expect(newDir).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -900,7 +924,7 @@ describe('drive', () => {
     it('should delete a file', async () => {
       const drive = new Drive();
       handleRequest(drive, 204, {});
-      await drive.delete('/foo/bar.txt');
+      await expect(drive.delete('/foo/bar.txt')).resolves.not.toThrow();
     });
 
     it('should emit the fileChanged signal', async () => {
@@ -920,28 +944,28 @@ describe('drive', () => {
     it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
-      await drive.delete('/foo/bar.txt');
+      await expect(drive.delete('/foo/bar.txt')).resolves.not.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, {});
       const del = drive.delete('/foo/bar.txt');
-      await expectFailure(del, 'Invalid response: 200 OK');
+      await expect(del).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw a specific error', async () => {
       const drive = new Drive();
       handleRequest(drive, 400, {});
       const del = drive.delete('/foo/');
-      await expectFailure(del, '');
+      await expect(del).rejects.toThrow();
     });
 
     it('should throw a general error', async () => {
       const drive = new Drive();
       handleRequest(drive, 500, {});
       const del = drive.delete('/foo/');
-      await expectFailure(del, '');
+      await expect(del).rejects.toThrow();
     });
   });
 
@@ -982,14 +1006,14 @@ describe('drive', () => {
       delete dir.path;
       handleRequest(drive, 200, dir);
       const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      await expectFailure(rename);
+      await expect(rename).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, DEFAULT_FILE);
       const rename = drive.rename('/foo/bar.txt', '/foo/baz.txt');
-      await expectFailure(rename, 'Invalid response: 201 Created');
+      await expect(rename).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
@@ -1038,14 +1062,14 @@ describe('drive', () => {
       delete file.format;
       handleRequest(drive, 200, file);
       const save = drive.save('/foo', { type: 'file', name: 'test' });
-      await expectFailure(save);
+      await expect(save).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 204, DEFAULT_FILE);
       const save = drive.save('/foo', { type: 'file', name: 'test' });
-      await expectFailure(save, 'Invalid response: 204 No Content');
+      await expect(save).rejects.toThrow(/Invalid response: 204/);
     });
   });
 
@@ -1084,14 +1108,14 @@ describe('drive', () => {
       delete file.type;
       handleRequest(drive, 201, file);
       const copy = drive.copy('/foo/bar.txt', '/baz');
-      await expectFailure(copy);
+      await expect(copy).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_FILE);
       const copy = drive.copy('/foo/bar.txt', '/baz');
-      await expectFailure(copy, 'Invalid response: 200 OK');
+      await expect(copy).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1118,14 +1142,14 @@ describe('drive', () => {
       delete cp.last_modified;
       handleRequest(drive, 201, cp);
       const checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      await expectFailure(checkpoint);
+      await expect(checkpoint).rejects.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, DEFAULT_CP);
       const checkpoint = drive.createCheckpoint('/foo/bar.txt');
-      await expectFailure(checkpoint, 'Invalid response: 200 OK');
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1155,58 +1179,62 @@ describe('drive', () => {
       await expectFailure(checkpoints);
       handleRequest(drive, 200, DEFAULT_CP);
       const newCheckpoints = drive.listCheckpoints('/foo/bar.txt');
-      await expectFailure(newCheckpoints, 'Invalid Checkpoint list');
+      await expect(newCheckpoints).rejects.toThrow(/Invalid Checkpoint list/);
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 201, {});
       const checkpoints = drive.listCheckpoints('/foo/bar.txt');
-      await expectFailure(checkpoints, 'Invalid response: 201 Created');
+      await expect(checkpoints).rejects.toThrow(/Invalid response: 201/);
     });
   });
 
   describe('#restoreCheckpoint()', () => {
-    it('should restore a checkpoint', () => {
+    it('should restore a checkpoint', async () => {
       const drive = new Drive();
       handleRequest(drive, 204, {});
       const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      return checkpoint;
+      await expect(checkpoint).resolves.not.toThrow();
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
       const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      return checkpoint;
+      await expect(checkpoint).resolves.not.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, {});
       const checkpoint = drive.restoreCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      await expectFailure(checkpoint, 'Invalid response: 200 OK');
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
   describe('#deleteCheckpoint()', () => {
-    it('should delete a checkpoint', () => {
+    it('should delete a checkpoint', async () => {
       const drive = new Drive();
       handleRequest(drive, 204, {});
-      return drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      await expect(
+        drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id)
+      ).resolves.not.toThrow();
     });
 
-    it('should accept server settings', () => {
+    it('should accept server settings', async () => {
       const drive = new Drive({ serverSettings });
       handleRequest(drive, 204, {});
-      return drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
+      await expect(
+        drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id)
+      ).resolves.not.toThrow();
     });
 
     it('should fail for an incorrect response', async () => {
       const drive = new Drive();
       handleRequest(drive, 200, {});
       const checkpoint = drive.deleteCheckpoint('/foo/bar.txt', DEFAULT_CP.id);
-      await expectFailure(checkpoint, 'Invalid response: 200 OK');
+      await expect(checkpoint).rejects.toThrow(/Invalid response: 200/);
     });
   });
 
@@ -1221,6 +1249,7 @@ describe('drive', () => {
         if (content[i].type === 'file') {
           path = content[i].path;
           const msg = await contents.get(path, { type: 'file' });
+          // eslint-disable-next-line jest/no-conditional-expect
           expect(msg.path).toBe(path);
           called = true;
         }
@@ -1243,7 +1272,7 @@ describe('drive', () => {
         format: 'text'
       };
       await contents.save('baz.txt', options);
-      await contents.delete('baz.txt');
+      await expect(contents.delete('baz.txt')).resolves.not.toThrow();
     });
 
     it('should exercise the checkpoint API', async () => {

@@ -10,10 +10,10 @@ export interface IEditorFactoryService {
   /**
    * Create a new editor for inline code.
    */
-  newInlineEditor(options: CodeEditor.IOptions): CodeEditor.IEditor;
+  newInlineEditor: CodeEditor.Factory;
 
   /**
    * Create a new editor for a full document.
    */
-  newDocumentEditor(options: CodeEditor.IOptions): CodeEditor.IEditor;
+  newDocumentEditor: CodeEditor.Factory;
 }

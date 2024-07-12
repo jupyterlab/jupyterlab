@@ -4,6 +4,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-skiplink-wrapper {
+  overflow: visible;
+
+  /* override strict containment added via Lumino PR
+   [#506](https://github.com/jupyterlab/lumino/pull/506) */
+  contain: size style !important;
+}
+
 .jp-skiplink {
   position: absolute;
   top: -100em;

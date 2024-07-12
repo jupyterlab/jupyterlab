@@ -1,21 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog } from '@jupyterlab/apputils';
+import { Dialog, setToolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { toArray } from '@lumino/algorithm';
+import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
 import { FilterFileBrowserModel } from './model';
 import { IFileBrowserFactory } from './tokens';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 /**
  * The class name added to open file dialog
  */
 const OPEN_DIALOG_CLASS = 'jp-Open-Dialog';
+
+/**
+ * The class name added to (optional) label in the file dialog
+ */
+const OPEN_DIALOG_LABEL_CLASS = 'jp-Open-Dialog-label';
 
 /**
  * Namespace for file dialog
@@ -43,6 +49,16 @@ export namespace FileDialog {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Default path to open
+     */
+    defaultPath?: string;
+
+    /**
+     * Text to display above the file browser.
+     */
+    label?: string;
   }
 
   /**
@@ -52,7 +68,7 @@ export namespace FileDialog {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => Partial<IScore> | null;
 
     /**
      * The application language translator.
@@ -70,15 +86,22 @@ export namespace FileDialog {
    *
    * @returns A promise that resolves with whether the dialog was accepted.
    */
-  export function getOpenFiles(
+  export async function getOpenFiles(
     options: IFileOptions
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
+    const openDialog = new OpenDialog(
+      options.manager,
+      options.filter,
+      translator,
+      options.defaultPath,
+      options.label
+    );
     const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
       title: options.title,
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.okButton({
           label: trans.__('Select')
         })
@@ -86,8 +109,11 @@ export namespace FileDialog {
       focusNodeSelector: options.focusNodeSelector,
       host: options.host,
       renderer: options.renderer,
-      body: new OpenDialog(options.manager, options.filter, translator)
+      body: openDialog
     };
+
+    await openDialog.ready;
+
     const dialog = new Dialog(dialogOptions);
     return dialog.launch();
   }
@@ -107,7 +133,9 @@ export namespace FileDialog {
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
     return getOpenFiles({
       ...options,
-      filter: model => false
+      filter: model => {
+        return model.type === 'directory' ? {} : null;
+      }
     });
   }
 }
@@ -117,37 +145,103 @@ export namespace FileDialog {
  */
 class OpenDialog
   extends Widget
-  implements Dialog.IBodyWidget<Contents.IModel[]> {
+  implements Dialog.IBodyWidget<Contents.IModel[]>
+{
   constructor(
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
-    translator?: ITranslator
+    filter?: (value: Contents.IModel) => Partial<IScore> | null,
+    translator?: ITranslator,
+    defaultPath?: string,
+    label?: string,
+    filterDirectories?: boolean
   ) {
     super();
-    translator = translator || nullTranslator;
+    translator = translator ?? nullTranslator;
+    const trans = translator.load('jupyterlab');
     this.addClass(OPEN_DIALOG_CLASS);
 
-    this._browser = Private.createFilteredFileBrowser(
+    Private.createFilteredFileBrowser(
       'filtered-file-browser-dialog',
       manager,
       filter,
       {},
-      translator
-    );
+      translator,
+      defaultPath,
+      filterDirectories
+    )
+      .then(browser => {
+        this._browser = browser;
 
-    // Build the sub widgets
-    const layout = new PanelLayout();
-    layout.addWidget(this._browser);
+        // Add toolbar items
+        setToolbar(this._browser, (browser: FileBrowser) => [
+          {
+            name: 'new-folder',
+            widget: new ToolbarButton({
+              icon: newFolderIcon,
+              onClick: () => {
+                void browser.createNewDirectory();
+              },
+              tooltip: trans.__('New Folder')
+            })
+          },
+          {
+            name: 'refresher',
+            widget: new ToolbarButton({
+              icon: refreshIcon,
+              onClick: () => {
+                browser.model.refresh().catch(reason => {
+                  console.error(
+                    'Failed to refresh file browser in open dialog.',
+                    reason
+                  );
+                });
+              },
+              tooltip: trans.__('Refresh File List')
+            })
+          }
+        ]);
 
-    // Set Widget content
-    this.layout = layout;
+        // Build the sub widgets
+        const layout = new PanelLayout();
+        if (label) {
+          const labelWidget = new Widget();
+          labelWidget.addClass(OPEN_DIALOG_LABEL_CLASS);
+          labelWidget.node.textContent = label;
+          layout.addWidget(labelWidget);
+        }
+        layout.addWidget(this._browser);
+
+        /**
+         * Dispose browser model when OpenDialog
+         * is disposed.
+         */
+        this.dispose = () => {
+          if (this.isDisposed) {
+            return;
+          }
+          this._browser.model.dispose();
+          super.dispose();
+        };
+
+        // Set Widget content
+        this.layout = layout;
+
+        this._ready.resolve();
+      })
+      .catch(reason => {
+        console.error(
+          'Error while creating file browser in open dialog',
+          reason
+        );
+        this._ready.reject(void 0);
+      });
   }
 
   /**
    * Get the selected items.
    */
   getValue(): Contents.IModel[] {
-    const selection = toArray(this._browser.selectedItems());
+    const selection = Array.from(this._browser.selectedItems());
     if (selection.length === 0) {
       // Return current path
       return [
@@ -168,6 +262,14 @@ class OpenDialog
     }
   }
 
+  /**
+   * A promise that resolves when openDialog is successfully created.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
+  }
+
+  private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
   private _browser: FileBrowser;
 }
 
@@ -194,26 +296,34 @@ namespace Private {
    * as the initial ID passed into the factory is used for only one file browser
    * instance.
    */
-  export const createFilteredFileBrowser = (
+  export const createFilteredFileBrowser = async (
     id: string,
     manager: IDocumentManager,
-    filter?: (value: Contents.IModel) => boolean,
+    filter?: (value: Contents.IModel) => Partial<IScore> | null,
     options: IFileBrowserFactory.IOptions = {},
-    translator?: ITranslator
-  ) => {
+    translator?: ITranslator,
+    defaultPath?: string,
+    filterDirectories?: boolean
+  ): Promise<FileBrowser> => {
     translator = translator || nullTranslator;
     const model = new FilterFileBrowserModel({
       manager,
       filter,
       translator,
       driveName: options.driveName,
-      refreshInterval: options.refreshInterval
+      refreshInterval: options.refreshInterval,
+      filterDirectories
     });
+
     const widget = new FileBrowser({
       id,
       model,
       translator
     });
+
+    if (defaultPath) {
+      await widget.model.cd(defaultPath);
+    }
 
     return widget;
   };

@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _running:
 
 Managing Kernels and Terminals
@@ -7,9 +10,14 @@ The Running panel in the left sidebar shows a list of all the kernels and
 terminals currently running across all notebooks, code consoles, and
 directories:
 
-.. image:: images/running_layout.png
+.. image:: ../images/running-layout.png
    :align: center
    :class: jp-screenshot
+   :alt:
+
+.. only:: comment
+
+   Alt text is intentionally left blank because the image content is described directly prior.
 
 .. _reopen-document:
 
@@ -24,6 +32,15 @@ re-open or focus the document linked to a given kernel or terminal:
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/gDM5lwU6Dmo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+The recently closed and currently open documents can be searched in the
+modal view, which can be opened using a keyboard shortcut,
+or by clicking the [↗] icon in the running sidebar.
+
+.. image:: ../images/running-modal.png
+   :align: center
+   :class: jp-screenshot
+   :alt: The modal running dialog
 
 .. _shutdown-kernel:
 

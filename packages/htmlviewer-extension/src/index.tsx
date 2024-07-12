@@ -12,15 +12,30 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  createToolbarFactory,
+  ICommandPalette,
+  IToolbarWidgetRegistry,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
   HTMLViewer,
   HTMLViewerFactory,
-  IHTMLViewerTracker
+  IHTMLViewerTracker,
+  ToolbarItems
 } from '@jupyterlab/htmlviewer';
+import { IObservableList } from '@jupyterlab/observables';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { html5Icon } from '@jupyterlab/ui-components';
+
+const HTML_VIEWER_PLUGIN_ID = '@jupyterlab/htmlviewer-extension:plugin';
+
+/**
+ * Factory name
+ */
+const FACTORY = 'HTML Viewer';
 
 /**
  * Command IDs used by the plugin.
@@ -34,10 +49,16 @@ namespace CommandIDs {
  */
 const htmlPlugin: JupyterFrontEndPlugin<IHTMLViewerTracker> = {
   activate: activateHTMLViewer,
-  id: '@jupyterlab/htmlviewer-extension:plugin',
+  id: HTML_VIEWER_PLUGIN_ID,
+  description: 'Adds HTML file viewer and provides its tracker.',
   provides: IHTMLViewerTracker,
   requires: [ITranslator],
-  optional: [ICommandPalette, ILayoutRestorer],
+  optional: [
+    ICommandPalette,
+    ILayoutRestorer,
+    ISettingRegistry,
+    IToolbarWidgetRegistry
+  ],
   autoStart: true
 };
 
@@ -48,10 +69,35 @@ function activateHTMLViewer(
   app: JupyterFrontEnd,
   translator: ITranslator,
   palette: ICommandPalette | null,
-  restorer: ILayoutRestorer | null
+  restorer: ILayoutRestorer | null,
+  settingRegistry: ISettingRegistry | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): IHTMLViewerTracker {
-  // Add an HTML file type to the docregistry.
+  let toolbarFactory:
+    | ((widget: HTMLViewer) => IObservableList<DocumentRegistry.IToolbarItem>)
+    | undefined;
   const trans = translator.load('jupyterlab');
+
+  if (toolbarRegistry) {
+    toolbarRegistry.addFactory<HTMLViewer>(FACTORY, 'refresh', widget =>
+      ToolbarItems.createRefreshButton(widget, translator)
+    );
+    toolbarRegistry.addFactory<HTMLViewer>(FACTORY, 'trust', widget =>
+      ToolbarItems.createTrustButton(widget, translator)
+    );
+
+    if (settingRegistry) {
+      toolbarFactory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FACTORY,
+        htmlPlugin.id,
+        translator
+      );
+    }
+  }
+
+  // Add an HTML file type to the docregistry.
   const ft: DocumentRegistry.IFileType = {
     name: 'html',
     contentType: 'file',
@@ -65,10 +111,13 @@ function activateHTMLViewer(
 
   // Create a new viewer factory.
   const factory = new HTMLViewerFactory({
-    name: trans.__('HTML Viewer'),
+    name: FACTORY,
+    label: trans.__('HTML Viewer'),
     fileTypes: ['html'],
     defaultFor: ['html'],
-    readOnly: true
+    readOnly: true,
+    toolbarFactory,
+    translator
   });
 
   // Create a widget tracker for HTML documents.
@@ -85,6 +134,26 @@ function activateHTMLViewer(
     });
   }
 
+  let trustByDefault = false;
+
+  if (settingRegistry) {
+    const loadSettings = settingRegistry.load(HTML_VIEWER_PLUGIN_ID);
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      trustByDefault = settings.get('trustByDefault').composite as boolean;
+    };
+
+    Promise.all([loadSettings, app.restored])
+      .then(([settings]) => {
+        updateSettings(settings);
+        settings.changed.connect(settings => {
+          updateSettings(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
+      });
+  }
+
   app.docRegistry.addWidgetFactory(factory);
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
@@ -99,6 +168,8 @@ function activateHTMLViewer(
       app.commands.notifyCommandChanged(CommandIDs.trustHTML);
     });
 
+    widget.trusted = trustByDefault;
+
     widget.title.icon = ft.icon!;
     widget.title.iconClass = ft.iconClass ?? '';
     widget.title.iconLabel = ft.iconLabel ?? '';
@@ -108,6 +179,10 @@ function activateHTMLViewer(
   // allowing script executions in its context.
   app.commands.addCommand(CommandIDs.trustHTML, {
     label: trans.__('Trust HTML File'),
+    caption: trans.__(`Whether the HTML file is trusted.
+    Trusting the file allows scripts to run in it,
+    which may result in security risks.
+    Only enable for files you trust.`),
     isEnabled: () => !!tracker.currentWidget,
     isToggled: () => {
       const current = tracker.currentWidget;
@@ -120,11 +195,16 @@ function activateHTMLViewer(
     execute: () => {
       const current = tracker.currentWidget;
       if (!current) {
-        return false;
+        return;
       }
       current.trusted = !current.trusted;
     }
   });
+
+  tracker.currentChanged.connect(() => {
+    app.commands.notifyCommandChanged(CommandIDs.trustHTML);
+  });
+
   if (palette) {
     palette.addItem({
       command: CommandIDs.trustHTML,

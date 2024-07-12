@@ -1,6 +1,9 @@
-export BLOCKED_EXTENSIONS_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blockedExtensions_simple.json"
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+export BLOCKED_EXTENSIONS_URIS="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/packages/extensionmanager-extension/examples/listings/list/blocked_extensions.json"
 # export BLOCKED_EXTENSIONS_URIS=""
-# export ALLOWED_EXTENSIONS_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/allowedExtensions_only_jlab.json"
+# export ALLOWED_EXTENSIONS_URIS="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/packages/extensionmanager-extension/examples/listings/list/allowed_extensions.json"
 export ALLOWED_EXTENSIONS_URIS=""
 export LISTINGS_REFRESH_SECONDS=120
 export LISTINGS_REQUEST_OPTS="{'timeout': 10}"

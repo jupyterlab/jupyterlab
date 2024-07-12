@@ -1,0 +1,10 @@
+# Run pre-commit with black: https://github.com/jupyterlab/jupyterlab/pull/12279
+6df5e0b6e8ec740ffa2f84f198820d1968e4d74d
+# Add linter rule for sorting import: https://github.com/jupyterlab/jupyterlab/pull/10344
+dbdefed9db9332381fe4104bdf53ec314451951f
+# Bump linters: https://github.com/jupyterlab/jupyterlab/pull/12582
+b57ec962a7b8cda65bb89a72223f195564f8387a
+# Add license header fix job: https://github.com/jupyterlab/jupyterlab/pull/12872
+1bcbf90f26bc9141681965a094c75985b758a2c9
+# Ruff recommends to drop percent string format https://github.com/jupyterlab/jupyterlab/pull/16270
+d86e3cd521b345abf3c6548585d12d63a4226d55

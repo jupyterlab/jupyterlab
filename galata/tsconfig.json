@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+    "module": "commonjs",
+    "types": ["node"],
+    "lib": ["DOM", "DOM.iterable", "es2019.array", "esnext"]
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../packages/application"
+    },
+    {
+      "path": "../packages/apputils"
+    },
+    {
+      "path": "../packages/coreutils"
+    },
+    {
+      "path": "../packages/debugger"
+    },
+    {
+      "path": "../packages/docmanager"
+    },
+    {
+      "path": "../packages/nbformat"
+    },
+    {
+      "path": "../packages/notebook"
+    },
+    {
+      "path": "../packages/services"
+    },
+    {
+      "path": "../packages/settingregistry"
+    }
+  ]
+}

@@ -11,3 +11,15 @@
 .jp-Terminal-body {
   padding: 8px;
 }
+
+[data-term-theme='inherit'] .xterm .xterm-screen canvas {
+  border: 1px solid var(--jp-layout-color0);
+}
+
+[data-term-theme='light'] .xterm .xterm-screen canvas {
+  border: 1px solid #fff;
+}
+
+[data-term-theme='dark'] .xterm .xterm-screen canvas {
+  border: 1px solid #000;
+}

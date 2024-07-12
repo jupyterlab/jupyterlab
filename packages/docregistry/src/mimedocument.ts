@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Printing, showErrorMessage } from '@jupyterlab/apputils';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 import {
   IRenderMime,
@@ -81,7 +82,7 @@ export class MimeContent extends Widget {
   /**
    * Print method. Deferred to the renderer.
    */
-  [Printing.symbol]() {
+  [Printing.symbol](): Printing.OptionalAsyncThunk {
     return Printing.getPrintFunction(this.renderer);
   }
 
@@ -95,7 +96,7 @@ export class MimeContent extends Widget {
   /**
    * Set URI fragment identifier.
    */
-  setFragment(fragment: string) {
+  setFragment(fragment: string): void {
     this._fragment = fragment;
     this.update();
   }
@@ -283,7 +284,9 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
     const ft = this._fileType;
-    const mimeType = ft?.mimeTypes.length ? ft.mimeTypes[0] : 'text/plain';
+    const mimeType = ft?.mimeTypes.length
+      ? ft.mimeTypes[0]
+      : IEditorMimeTypeService.defaultMimeType;
 
     const rendermime = this._rendermime.clone({
       resolver: context.urlResolver
@@ -296,7 +299,8 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
         resolver: rendermime.resolver,
         sanitizer: rendermime.sanitizer,
         linkHandler: rendermime.linkHandler,
-        latexTypesetter: rendermime.latexTypesetter
+        latexTypesetter: rendermime.latexTypesetter,
+        markdownParser: rendermime.markdownParser
       });
     } else {
       renderer = rendermime.createRenderer(mimeType);
@@ -310,7 +314,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
       dataType: this._dataType
     });
 
-    content.title.icon = ft?.icon!;
+    content.title.icon = ft?.icon;
     content.title.iconClass = ft?.iconClass ?? '';
     content.title.iconLabel = ft?.iconLabel ?? '';
 

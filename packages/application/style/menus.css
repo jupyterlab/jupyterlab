@@ -26,16 +26,36 @@
   overflow-x: auto;
 }
 
-.lm-MenuBar-menu {
-  transform: translateY(calc(-2 * var(--jp-border-width)));
+.lm-MenuBar-menu.jp-ThemedContainer {
+  top: calc(-2 * var(--jp-border-width));
 }
 
 .lm-MenuBar-item {
-  padding: 0px 8px;
+  padding: 0 8px;
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   border-top: var(--jp-border-width) solid transparent;
-  line-height: calc(var(--jp-private-menubar-height) - var(--jp-border-width));
+  line-height: calc(
+    var(--jp-private-menubar-height) - var(--jp-border-width) * 2
+  );
+}
+
+.lm-MenuBar-content:focus-visible {
+  outline-offset: -3px; /* this value is a compromise between Firefox, Chrome,
+    and Safari over this outline's visibility and discretion */
+}
+
+.lm-MenuBar:focus-visible {
+  outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
+.lm-MenuBar-menu:focus-visible,
+.lm-MenuBar-item:focus-visible,
+.lm-Menu-item:focus-visible {
+  outline: unset;
+  outline-offset: unset;
+  -moz-outline-radius: unset;
 }
 
 .lm-MenuBar-item.lm-mod-active {
@@ -45,11 +65,13 @@
 .lm-MenuBar.lm-mod-active .lm-MenuBar-item.lm-mod-active {
   z-index: 10001;
   background: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color0);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-elevation-z6);
 }
 
+/* stylelint-disable-next-line selector-max-class */
 .jp-LabShell[data-shell-mode='single-document']
   .lm-MenuBar.lm-mod-active
   .lm-MenuBar-item.lm-mod-active {
@@ -77,9 +99,9 @@
 
 .lm-Menu {
   z-index: 10000;
-  padding: 4px 0px;
+  padding: 4px 0;
   background: var(--jp-layout-color0);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color0);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size1);
   box-shadow: var(--jp-elevation-z6);
@@ -88,7 +110,7 @@
 .lm-Menu-item {
   min-height: var(--jp-private-menu-item-height);
   max-height: var(--jp-private-menu-item-height);
-  padding: 0px;
+  padding: 0;
   line-height: var(--jp-private-menu-item-height);
 }
 
@@ -102,12 +124,12 @@
 
 .lm-Menu-itemIcon {
   width: 21px;
-  padding: 0px 2px 0px 4px;
+  padding: 0 2px 0 4px;
   margin-top: -2px;
 }
 
 .lm-Menu-itemLabel {
-  padding: 0px 32px 0px 2px;
+  padding: 0 32px 0 2px;
 }
 
 .lm-Menu-itemMnemonic {
@@ -115,12 +137,12 @@
 }
 
 .lm-Menu-itemShortcut {
-  padding: 0px;
+  padding: 0;
 }
 
 .lm-Menu-itemSubmenuIcon {
   width: 18px;
-  padding: 0px 4px 0px 0px;
+  padding: 0 4px 0 0;
 }
 
 .lm-Menu-item[data-type='separator'] > div {
@@ -136,7 +158,7 @@
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
 
-/* gray out icon/caret for disable menu items */
+/* gray out icon/caret for disabled menu items */
 .lm-Menu-item.lm-mod-disabled > .lm-Menu-itemIcon,
 .lm-Menu-item[data-type='submenu'].lm-mod-disabled > .lm-Menu-itemSubmenuIcon {
   opacity: 0.4;

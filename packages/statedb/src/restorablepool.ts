@@ -13,8 +13,10 @@ import { IObjectPool, IRestorable } from './interfaces';
  * @typeparam T - The type of object being tracked.
  */
 export class RestorablePool<
-  T extends IObservableDisposable = IObservableDisposable
-> implements IObjectPool<T>, IRestorable<T> {
+    T extends IObservableDisposable = IObservableDisposable
+  >
+  implements IObjectPool<T>, IRestorable<T>
+{
   /**
    * Create a new restorable pool.
    *
@@ -165,7 +167,7 @@ export class RestorablePool<
   /**
    * Find the first object in the pool that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each object.
+   * @param fn The filter function to call on each object.
    */
   find(fn: (obj: T) => boolean): T | undefined {
     const values = this._objects.values();

@@ -1,0 +1,29 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.lm-TabBar .lm-TabBar-addButton {
+  align-items: center;
+  display: flex;
+  padding: 4px;
+  padding-bottom: 5px;
+  margin-right: 1px;
+  background-color: var(--jp-layout-color2);
+}
+
+.lm-TabBar .lm-TabBar-addButton:hover {
+  background-color: var(--jp-layout-color1);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab {
+  width: var(--jp-private-horizontal-tab-width);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-content {
+  flex: unset;
+}
+
+.lm-DockPanel-tabBar[data-orientation='horizontal'] {
+  flex: 1 1 auto;
+}

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 require(['jquery', '@jupyterlab/services'], function($, services) {
   /* eslint-disable no-console */
   console.log('Starting example');
@@ -10,12 +15,20 @@ require(['jquery', '@jupyterlab/services'], function($, services) {
   // start a single kernel for the page
   kernelManager.startNew(kernelOptions).then(function(kernel) {
     console.log('Kernel started:', kernel);
-    kernel.requestKernelInfo().then(function(reply) {
-      const content = reply.content;
-      $('#kernel-info').text(content.banner);
-      console.log('Kernel info:', content);
-      console.log('Example started!');
-    });
+    const waitForIdle = (_, status) => {
+      if( status === 'idle' ) {
+        kernel.statusChanged.disconnect(waitForIdle)
+        kernel.requestKernelInfo().then(function(reply) {
+          const content = reply.content;
+          $('#kernel-info').text(content.banner);
+          console.log('Kernel info:', content);
+          console.log('Example started!');
+        });
+      }
+    };
+
+    kernel.statusChanged.connect(waitForIdle);
+
     $('#run').click(function() {
       const code = $('#cell').val();
       console.log('Executing:', code);

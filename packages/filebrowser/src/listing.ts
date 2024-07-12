@@ -26,19 +26,10 @@ import {
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  filter,
-  find,
-  IIterator,
-  StringExt,
-  toArray
-} from '@lumino/algorithm';
+import { ArrayExt, filter, StringExt } from '@lumino/algorithm';
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
@@ -96,6 +87,17 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 
 /**
+ * The class name added to the listing item file size cell.
+ */
+const ITEM_FILE_SIZE_CLASS = 'jp-DirListing-itemFileSize';
+
+/**
+ * The class name added to the label element that wraps each item's checkbox and
+ * the header's check-all checkbox.
+ */
+const CHECKBOX_WRAPPER_CLASS = 'jp-DirListing-checkboxWrapper';
+
+/**
  * The class name added to the dir listing editor node.
  */
 const EDITOR_CLASS = 'jp-DirListing-editor';
@@ -111,6 +113,11 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
+ * The class name added to the file size column header cell.
+ */
+const FILE_SIZE_ID_CLASS = 'jp-id-filesize';
+
+/**
  * The class name added to the narrow column header cell.
  */
 const NARROW_ID_CLASS = 'jp-id-narrow';
@@ -119,6 +126,11 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+
+/**
+ * The class name added to the size column header cell and size item cell when hidden.
+ */
+const FILE_SIZE_COLUMN_HIDDEN = 'jp-FileSize-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -197,7 +209,7 @@ export class DirListing extends Widget {
   /**
    * Construct a new file browser directory listing widget.
    *
-   * @param model - The file browser view model.
+   * @param options The constructor options
    */
   constructor(options: DirListing.IOptions) {
     super({
@@ -215,7 +227,12 @@ export class DirListing extends Widget {
     this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
+    // Get the width of the "modified" column
+    this._updateModifiedSize(this.node);
+
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+    // hide the file size column by default
+    this._hiddenColumns.add('file_size');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
@@ -291,7 +308,7 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's selected items.
    */
-  selectedItems(): IIterator<Contents.IModel> {
+  selectedItems(): IterableIterator<Contents.IModel> {
     const items = this._sortedItems;
     return filter(items, item => this.selection[item.path]);
   }
@@ -301,15 +318,19 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's sorted items.
    */
-  sortedItems(): IIterator<Contents.IModel> {
-    return new ArrayIterator(this._sortedItems);
+  sortedItems(): IterableIterator<Contents.IModel> {
+    return this._sortedItems[Symbol.iterator]();
   }
 
   /**
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-    this._sortedItems = Private.sort(this.model.items(), state);
+    this._sortedItems = Private.sort(
+      this.model.items(),
+      state,
+      this._sortNotebooksFirst
+    );
     this._sortState = state;
     this.update();
   }
@@ -353,21 +374,22 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this._clipboard, path => {
+    for (const path of this._clipboard) {
       if (this._isCut) {
-        const parts = path.split('/');
+        const localPath = this._manager.services.contents.localPath(path);
+        const parts = localPath.split('/');
         const name = parts[parts.length - 1];
         const newPath = PathExt.join(basePath, name);
         promises.push(this._model.manager.rename(path, newPath));
       } else {
         promises.push(this._model.manager.copy(path, basePath));
       }
-    });
+    }
 
     // Remove any cut modifiers.
-    each(this._items, item => {
+    for (const item of this._items) {
       item.classList.remove(CUT_CLASS);
-    });
+    }
 
     this._clipboard.length = 0;
     this._isCut = false;
@@ -422,6 +444,16 @@ export class DirListing extends Widget {
     if (!this.isDisposed && result.button.accept) {
       await this._delete(items.map(item => item.path));
     }
+
+    // Re-focus
+    let focusIndex = this._focusIndex;
+    const lastIndexAfterDelete = this._sortedItems.length - items.length - 1;
+    if (focusIndex > lastIndexAfterDelete) {
+      // If the focus index after deleting items is out of bounds, set it to the
+      // last item.
+      focusIndex = Math.max(0, lastIndexAfterDelete);
+    }
+    this._focusItem(focusIndex);
   }
 
   /**
@@ -433,11 +465,11 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       if (item.type !== 'directory') {
         promises.push(this._model.manager.copy(item.path, basePath));
       }
-    });
+    }
     return Promise.all(promises)
       .then(() => {
         return undefined;
@@ -455,7 +487,7 @@ export class DirListing extends Widget {
    */
   async download(): Promise<void> {
     await Promise.all(
-      toArray(this.selectedItems())
+      Array.from(this.selectedItems())
         .filter(item => item.type !== 'directory')
         .map(item => this._model.download(item.path))
     );
@@ -471,7 +503,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
     const paths = items.map(item => item.path);
 
-    const promises = toArray(this._model.sessions())
+    const promises = Array.from(this._model.sessions())
       .filter(session => {
         const index = ArrayExt.firstIndexOf(paths, session.path);
         return this.selection[items[index].path];
@@ -580,7 +612,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
 
     return (
-      toArray(
+      Array.from(
         filter(items, item => item.name === name && this.selection[item.path])
       ).length !== 0
     );
@@ -613,11 +645,33 @@ export class DirListing extends Widget {
    * Select an item by name.
    *
    * @param name - The name of the item to select.
-   * @param focus - Whether to move focus the selected item.
+   * @param focus - Whether to move focus to the selected item.
    *
    * @returns A promise that resolves when the name is selected.
    */
   async selectItemByName(name: string, focus: boolean = false): Promise<void> {
+    return this._selectItemByName(name, focus);
+  }
+
+  /**
+   * Select an item by name.
+   *
+   * @param name - The name of the item to select.
+   * @param focus - Whether to move focus to the selected item.
+   * @param force - Whether to proceed with selection even if the file was already selected.
+   *
+   * @returns A promise that resolves when the name is selected.
+   */
+  private async _selectItemByName(
+    name: string,
+    focus: boolean = false,
+    force: boolean = false
+  ): Promise<void> {
+    if (!force && this.isSelected(name)) {
+      // Avoid API polling and DOM updates if already selected
+      return;
+    }
+
     // Make sure the file is available.
     await this.model.refresh();
 
@@ -633,7 +687,6 @@ export class DirListing extends Widget {
     MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
     ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
   }
-
   /**
    * Handle the DOM events for the directory listing.
    *
@@ -681,16 +734,16 @@ export class DirListing extends Widget {
         this._evtScroll(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this.evtDragEnter(event as IDragEvent);
+        this.evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this.evtDragLeave(event as IDragEvent);
+        this.evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this.evtDragOver(event as IDragEvent);
+        this.evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this.evtDrop(event as IDragEvent);
+        this.evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -756,6 +809,100 @@ export class DirListing extends Widget {
     }
   }
 
+  // Update the modified column's size
+  private _updateModifiedSize(node: HTMLElement) {
+    // Look for the modified column's header
+    const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+    this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
+    this._modifiedStyle =
+      this._modifiedWidth < 100
+        ? 'narrow'
+        : this._modifiedWidth > 120
+        ? 'long'
+        : 'short';
+  }
+
+  // Update only the modified dates.
+  protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      if (node && item.last_modified) {
+        const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+        if (this.renderer.updateItemModified !== undefined) {
+          this.renderer.updateItemModified(
+            modified,
+            item.last_modified,
+            this._modifiedStyle
+          );
+        } else {
+          DirListing.defaultRenderer.updateItemModified(
+            modified,
+            item.last_modified,
+            this._modifiedStyle
+          );
+        }
+      }
+    });
+  }
+
+  // Update item nodes based on widget state.
+  protected updateNodes(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      const ft = this._manager.registry.getFileTypeForModel(item);
+      this.renderer.updateItemNode(
+        node,
+        item,
+        ft,
+        this.translator,
+        this._hiddenColumns,
+        this.selection[item.path],
+        this._modifiedStyle
+      );
+      if (
+        this.selection[item.path] &&
+        this._isCut &&
+        this._model.path === this._prevPath
+      ) {
+        node.classList.add(CUT_CLASS);
+      }
+
+      // add metadata to the node
+      node.setAttribute(
+        'data-isdir',
+        item.type === 'directory' ? 'true' : 'false'
+      );
+    });
+
+    // Handle the selectors on the widget node.
+    const selected = Object.keys(this.selection).length;
+    if (selected) {
+      this.addClass(SELECTED_CLASS);
+      if (selected > 1) {
+        this.addClass(MULTI_SELECTED_CLASS);
+      }
+    }
+
+    // Handle file session statuses.
+    const paths = items.map(item => item.path);
+    for (const session of this._model.sessions()) {
+      const index = ArrayExt.firstIndexOf(paths, session.path);
+      const node = nodes[index];
+      // Node may have been filtered out.
+      if (node) {
+        let name = session.kernel?.name;
+        const specs = this._model.specs;
+
+        node.classList.add(RUNNING_CLASS);
+        if (specs && name) {
+          const spec = specs.kernelspecs[name];
+          name = spec ? spec.display_name : this._trans.__('unknown');
+        }
+        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
+      }
+    }
+  }
+
   /**
    * A handler invoked on an `'update-request'` message.
    */
@@ -784,66 +931,52 @@ export class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Remove extra classes from the nodes.
-    nodes.forEach(item => {
-      item.classList.remove(SELECTED_CLASS);
-      item.classList.remove(RUNNING_CLASS);
-      item.classList.remove(CUT_CLASS);
-    });
+    nodes.forEach((node, i) => {
+      // Remove extra classes from the nodes.
+      node.classList.remove(SELECTED_CLASS);
+      node.classList.remove(RUNNING_CLASS);
+      node.classList.remove(CUT_CLASS);
 
-    // Add extra classes to item nodes based on widget state.
-    items.forEach((item, i) => {
-      const node = nodes[i];
-      const ft = this._manager.registry.getFileTypeForModel(item);
-      renderer.updateItemNode(
-        node,
-        item,
-        ft,
-        this.translator,
-        this._hiddenColumns
-      );
-      if (this.selection[item.path]) {
-        node.classList.add(SELECTED_CLASS);
-
-        if (this._isCut && this._model.path === this._prevPath) {
-          node.classList.add(CUT_CLASS);
-        }
+      // Uncheck each file checkbox
+      const checkbox = renderer.getCheckboxNode(node);
+      if (checkbox) {
+        checkbox.checked = false;
       }
 
-      // add metadata to the node
-      node.setAttribute(
-        'data-isdir',
-        item.type === 'directory' ? 'true' : 'false'
-      );
+      // Handle `tabIndex`
+      const nameNode = renderer.getNameNode(node);
+      if (nameNode) {
+        // Must check if the name node is there because it gets replaced by the
+        // edit node when editing the name of the file or directory.
+        nameNode.tabIndex = i === this._focusIndex ? 0 : -1;
+      }
     });
 
-    // Handle the selectors on the widget node.
-    const selected = Object.keys(this.selection).length;
-    if (selected) {
-      this.addClass(SELECTED_CLASS);
-      if (selected > 1) {
-        this.addClass(MULTI_SELECTED_CLASS);
-      }
+    // Put the check-all checkbox in the header into the correct state
+    const checkAllCheckbox = renderer.getCheckboxNode(this.headerNode);
+    if (checkAllCheckbox) {
+      const totalSelected = Object.keys(this.selection).length;
+      const allSelected = items.length > 0 && totalSelected === items.length;
+      const someSelected = !allSelected && totalSelected > 0;
+      checkAllCheckbox.checked = allSelected;
+      checkAllCheckbox.indeterminate = someSelected;
+      // Stash the state in data attributes so we can access them in the click
+      // handler (because in the click handler, checkbox.checked and
+      // checkbox.indeterminate do not hold the previous value; they hold the
+      // next value).
+      checkAllCheckbox.dataset.checked = String(allSelected);
+      checkAllCheckbox.dataset.indeterminate = String(someSelected);
+
+      const trans = this.translator.load('jupyterlab');
+      checkAllCheckbox?.setAttribute(
+        'aria-label',
+        allSelected || someSelected
+          ? trans.__('Deselect all files and directories')
+          : trans.__('Select all files and directories')
+      );
     }
 
-    // Handle file session statuses.
-    const paths = items.map(item => item.path);
-    each(this._model.sessions(), session => {
-      const index = ArrayExt.firstIndexOf(paths, session.path);
-      const node = nodes[index];
-      // Node may have been filtered out.
-      if (node) {
-        let name = session.kernel?.name;
-        const specs = this._model.specs;
-
-        node.classList.add(RUNNING_CLASS);
-        if (specs && name) {
-          const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : 'unknown'; // FIXME-TRANS: Is this localizable?
-        }
-        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
-      }
-    });
+    this.updateNodes(items, nodes);
 
     this._prevPath = this._model.path;
   }
@@ -852,6 +985,14 @@ export class DirListing extends Widget {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
+
+    // Rerender item nodes' modified dates, if the modified style has changed.
+    const oldModifiedStyle = this._modifiedStyle;
+    // Update both size and style
+    this._updateModifiedSize(this.node);
+    if (oldModifiedStyle !== this._modifiedStyle) {
+      this.updateModified(this._sortedItems, this._items);
+    }
   }
 
   setColumnVisibility(
@@ -873,18 +1014,72 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Update the setting to sort notebooks above files.
+   * This sorts the items again if the internal value is modified.
+   */
+  setNotebooksFirstSorting(isEnabled: boolean) {
+    let previousValue = this._sortNotebooksFirst;
+    this._sortNotebooksFirst = isEnabled;
+    if (this._sortNotebooksFirst !== previousValue) {
+      this.sort(this._sortState);
+    }
+  }
+
+  /**
+   * Would this click (or other event type) hit the checkbox by default?
+   */
+  protected isWithinCheckboxHitArea(event: Event): boolean {
+    let element: HTMLElement | null = event.target as HTMLElement;
+    while (element) {
+      if (element.classList.contains(CHECKBOX_WRAPPER_CLASS)) {
+        return true;
+      }
+      element = element.parentElement;
+    }
+    return false;
+  }
+
+  /**
    * Handle the `'click'` event for the widget.
    */
   private _evtClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
     const header = this.headerNode;
+    const renderer = this._renderer;
     if (header.contains(target)) {
-      const state = this.renderer.handleHeaderClick(header, event);
-      if (state) {
-        this.sort(state);
+      const checkbox = renderer.getCheckboxNode(header);
+      if (checkbox && this.isWithinCheckboxHitArea(event)) {
+        const previouslyUnchecked =
+          checkbox.dataset.indeterminate === 'false' &&
+          checkbox.dataset.checked === 'false';
+        // The only time a click on the check-all checkbox should check all is
+        // when it was previously unchecked; otherwise, if the checkbox was
+        // either checked (all selected) or indeterminate (some selected), the
+        // click should clear all.
+        if (previouslyUnchecked) {
+          // Select all items
+          this._sortedItems.forEach(
+            (item: Contents.IModel) => (this.selection[item.path] = true)
+          );
+        } else {
+          // Unselect all items
+          this.clearSelectedItems();
+        }
+        this.update();
+      } else {
+        const state = this.renderer.handleHeaderClick(header, event);
+        if (state) {
+          this.sort(state);
+        }
       }
       return;
+    } else {
+      // Focus the selected file on click to ensure a couple of things:
+      // 1. If a user clicks on the item node, its name node will receive focus.
+      // 2. If a user clicks on blank space in the directory listing, the
+      //    previously focussed item will be focussed.
+      this._focusItem(this._focusIndex);
     }
   }
 
@@ -960,11 +1155,11 @@ export class DirListing extends Widget {
       }
       this._softSelection = '';
     }
-    // Re-focus the selected file. This is needed because nodes corresponding
-    // to files selected in mousedown handler will not retain the focus
-    // as mousedown event is always followed by a blur/focus event.
+    // Re-focus. This is needed because nodes corresponding to files selected in
+    // mousedown handler will not retain the focus as mousedown event is always
+    // followed by a blur/focus event.
     if (event.button === 0) {
-      this._focusSelectedFile();
+      this._focusItem(this._focusIndex);
     }
 
     // Remove the drag listeners if necessary.
@@ -1022,9 +1217,115 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Calculate the next focus index, given the current focus index and a
+   * direction, keeping within the bounds of the directory listing.
+   *
+   * @param index Current focus index
+   * @param direction -1 (up) or 1 (down)
+   * @returns The next focus index, which could be the same as the current focus
+   * index if at the boundary.
+   */
+  private _getNextFocusIndex(index: number, direction: number): number {
+    const nextIndex = index + direction;
+    if (nextIndex === -1 || nextIndex === this._items.length) {
+      // keep focus index within bounds
+      return index;
+    } else {
+      return nextIndex;
+    }
+  }
+
+  /**
+   * Handle the up or down arrow key.
+   *
+   * @param event The keyboard event
+   * @param direction -1 (up) or 1 (down)
+   */
+  private _handleArrowY(event: KeyboardEvent, direction: number) {
+    // We only handle the `ctrl` and `shift` modifiers. If other modifiers are
+    // present, then do nothing.
+    if (event.altKey || event.metaKey) {
+      return;
+    }
+
+    // If folder is empty, there's nothing to do with the up/down key.
+    if (!this._items.length) {
+      return;
+    }
+
+    // Don't handle the arrow key press if it's not on directory item. This
+    // avoids a confusing user experience that can result from when the user
+    // moves the selection and focus index apart (via ctrl + up/down). The last
+    // selected item remains highlighted but the last focussed item loses its
+    // focus ring if it's not actively focussed.  This forces the user to
+    // visibly reveal the last focussed item before moving the focus.
+    if (!(event.target as HTMLElement).classList.contains(ITEM_TEXT_CLASS)) {
+      return;
+    }
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    const focusIndex = this._focusIndex;
+    let nextFocusIndex = this._getNextFocusIndex(focusIndex, direction);
+
+    // The following if-block allows the first press of the down arrow to select
+    // the first (rather than the second) file/directory in the list. This is
+    // the situation when the page first loads or when a user changes directory.
+    if (
+      direction > 0 &&
+      focusIndex === 0 &&
+      !event.ctrlKey &&
+      Object.keys(this.selection).length === 0
+    ) {
+      nextFocusIndex = 0;
+    }
+
+    // Shift key indicates multi-selection. Either the user is trying to grow
+    // the selection, or shrink it.
+    if (event.shiftKey) {
+      this._handleMultiSelect(nextFocusIndex);
+    } else if (!event.ctrlKey) {
+      // If neither the shift nor ctrl keys were used with the up/down arrow,
+      // then we treat it as a normal, unmodified key press and select the
+      // next item.
+      this._selectItem(
+        nextFocusIndex,
+        event.shiftKey,
+        false /* focus = false because we call focus method directly following this */
+      );
+    }
+
+    this._focusItem(nextFocusIndex);
+    this.update();
+  }
+
+  /**
+   * cd ..
+   *
+   * Go up one level in the directory tree.
+   */
+  async goUp() {
+    const model = this.model;
+    if (model.path === model.rootPath) {
+      return;
+    }
+    try {
+      await model.cd('..');
+    } catch (reason) {
+      console.warn(`Failed to go to parent directory of ${model.path}`, reason);
+    }
+  }
+
+  /**
    * Handle the `'keydown'` event for the widget.
    */
   protected evtKeydown(event: KeyboardEvent): void {
+    // Do not handle any keydown events here if in the middle of a file rename.
+    if (this._inRename) {
+      return;
+    }
+
     switch (event.keyCode) {
       case 13: {
         // Enter
@@ -1034,37 +1335,78 @@ export class DirListing extends Widget {
         }
         event.preventDefault();
         event.stopPropagation();
+        for (const item of this.selectedItems()) {
+          this.handleOpen(item);
+        }
+        return;
+      }
+      case 38:
+        // Up arrow
+        this._handleArrowY(event, -1);
+        return;
+      case 40:
+        // Down arrow
+        this._handleArrowY(event, 1);
+        return;
+      case 32: {
+        // Space
+        if (event.ctrlKey) {
+          // Follow the Windows and Ubuntu convention: you must press `ctrl` +
+          // `space` in order to toggle whether an item is selected.
 
-        const selected = Object.keys(this.selection);
-        const path = selected[0];
-        const items = this._sortedItems;
-        const i = ArrayExt.findFirstIndex(items, value => value.path === path);
-        if (i === -1) {
+          // However, do not handle if any other modifiers were pressed.
+          if (event.metaKey || event.shiftKey || event.altKey) {
+            return;
+          }
+
+          // Make sure the ctrl+space key stroke was on a valid, focussed target.
+          const node = this._items[this._focusIndex];
+          if (
+            !(
+              // Event must have occurred within a node whose item can be toggled.
+              (
+                node.contains(event.target as HTMLElement) &&
+                // That node must also contain the currently focussed element.
+                node.contains(document.activeElement)
+              )
+            )
+          ) {
+            return;
+          }
+
+          event.stopPropagation();
+          // Prevent default, otherwise the container will scroll.
+          event.preventDefault();
+
+          // Toggle item selected
+          const { path } = this._sortedItems[this._focusIndex];
+          if (this.selection[path]) {
+            delete this.selection[path];
+          } else {
+            this.selection[path] = true;
+          }
+
+          this.update();
+          // Key was handled, so return.
           return;
         }
-
-        const item = this._sortedItems[i];
-        this.handleOpen(item);
         break;
       }
-      case 38: // Up arrow
-        this.selectPrevious(event.shiftKey);
-        event.stopPropagation();
-        event.preventDefault();
-        break;
-      case 40: // Down arrow
-        this.selectNext(event.shiftKey);
-        event.stopPropagation();
-        event.preventDefault();
-        break;
-      default:
-        break;
     }
 
     // Detects printable characters typed by the user.
     // Not all browsers support .key, but it discharges us from reconstructing
     // characters from key codes.
-    if (!this._inRename && event.key !== undefined && event.key.length === 1) {
+    if (
+      event.key !== undefined &&
+      event.key.length === 1 &&
+      // Don't gobble up the space key on the check-all checkbox (which the
+      // browser treats as a click event).
+      !(
+        (event.key === ' ' || event.keyCode === 32) &&
+        (event.target as HTMLInputElement).type === 'checkbox'
+      )
+    ) {
       if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
         return;
       }
@@ -1092,6 +1434,13 @@ export class DirListing extends Widget {
 
     // Do nothing if any modifier keys are pressed.
     if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+
+    // Do nothing if the double click is on a checkbox. (Otherwise a rapid
+    // check-uncheck on the checkbox will cause the adjacent file/folder to
+    // open, which is probably not what the user intended.)
+    if (this.isWithinCheckboxHitArea(event)) {
       return;
     }
 
@@ -1124,6 +1473,11 @@ export class DirListing extends Widget {
       return;
     }
     event.preventDefault();
+
+    const length = event.dataTransfer?.items.length;
+    if (!length) {
+      return;
+    }
 
     if (event.dataTransfer && event.dataTransfer.items) {
       let items = event.dataTransfer.items;
@@ -1201,7 +1555,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  protected evtDragEnter(event: IDragEvent): void {
+  protected evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const index = Private.hitTestNodes(this._items, event);
       if (index === -1) {
@@ -1221,7 +1575,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  protected evtDragLeave(event: IDragEvent): void {
+  protected evtDragLeave(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
@@ -1233,7 +1587,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  protected evtDragOver(event: IDragEvent): void {
+  protected evtDragOver(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
@@ -1248,7 +1602,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  protected evtDrop(event: IDragEvent): void {
+  protected evtDrop(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     clearTimeout(this._selectTimer);
@@ -1317,7 +1671,7 @@ export class DirListing extends Widget {
     let selectedPaths = Object.keys(this.selection);
     const source = this._items[index];
     const items = this._sortedItems;
-    let selectedItems: Contents.IModel[];
+    let selectedItems: Iterable<Contents.IModel>;
     let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
@@ -1327,8 +1681,8 @@ export class DirListing extends Widget {
       selectedItems = [item];
     } else {
       const path = selectedPaths[0];
-      item = find(items, value => value.path === path);
-      selectedItems = toArray(this.selectedItems());
+      item = items.find(value => value.path === path);
+      selectedItems = this.selectedItems();
     }
 
     if (!item) {
@@ -1433,18 +1787,28 @@ export class DirListing extends Widget {
     const path = items[index].path;
     const selected = Object.keys(this.selection);
 
+    const isLeftClickOnCheckbox =
+      event.button === 0 &&
+      // On Mac, a left-click with the ctrlKey is treated as a right-click.
+      !(IS_MAC && event.ctrlKey) &&
+      this.isWithinCheckboxHitArea(event);
+
     // Handle toggling.
-    if ((IS_MAC && event.metaKey) || (!IS_MAC && event.ctrlKey)) {
+    if (
+      (IS_MAC && event.metaKey) ||
+      (!IS_MAC && event.ctrlKey) ||
+      isLeftClickOnCheckbox
+    ) {
       if (this.selection[path]) {
         delete this.selection[path];
       } else {
         this.selection[path] = true;
       }
-
+      this._focusItem(index);
       // Handle multiple select.
     } else if (event.shiftKey) {
-      this._handleMultiSelect(selected, index);
-
+      this._handleMultiSelect(index);
+      this._focusItem(index);
       // Handle a 'soft' selection
     } else if (path in this.selection && selected.length > 1) {
       this._softSelection = path;
@@ -1452,75 +1816,125 @@ export class DirListing extends Widget {
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
-      return this._selectItem(index, false);
+      return this._selectItem(index, false, true);
     }
     this.update();
   }
 
   /**
-   * (Re-)focus on the selected file.
+   * (Re-)focus an item in the directory listing.
    *
-   * If index is not given, it will be inferred from the current selection;
-   * providing index saves on the iteration time.
+   * @param index The index of the item node to focus
    */
-  private _focusSelectedFile(index?: number): void {
-    if (typeof index === 'undefined') {
-      const selected = Object.keys(this.selection);
-      if (selected.length > 1) {
-        // Multiselect - do not focus on any single file
-        return;
-      }
-      index = ArrayExt.findFirstIndex(
-        this._sortedItems,
-        value => value.path === selected[0]
-      );
-    }
-    if (index === -1) {
+  private _focusItem(index: number): void {
+    const items = this._items;
+    if (items.length === 0) {
+      // Focus the top node if the folder is empty and therefore there are no
+      // items inside the folder to focus.
+      this._focusIndex = 0;
+      this.node.focus();
       return;
     }
-    // Focus on text to make shortcuts works
-    const node = this._items[index];
-    const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
-    if (text) {
-      text.focus();
+    this._focusIndex = index;
+    const node = items[index];
+    const nameNode = this.renderer.getNameNode(node);
+    if (nameNode) {
+      // Make the filename text node focusable so that it receives keyboard
+      // events; text node was specifically chosen to receive shortcuts because
+      // it gets substituted with input element during file name edits which
+      // conveniently deactivates irrelevant shortcuts.
+      nameNode.tabIndex = 0;
+      nameNode.focus();
     }
+  }
+
+  /**
+   * Are all of the items between two provided indices selected?
+   *
+   * The items at the indices are not considered.
+   *
+   * @param j Index of one item.
+   * @param k Index of another item. Note: may be less or greater than first
+   *          index.
+   * @returns True if and only if all items between the j and k are selected.
+   *          Returns undefined if j and k are the same.
+   */
+  private _allSelectedBetween(j: number, k: number): boolean | void {
+    if (j === k) {
+      return;
+    }
+    const [start, end] = j < k ? [j + 1, k] : [k + 1, j];
+    return this._sortedItems
+      .slice(start, end)
+      .reduce((result, item) => result && this.selection[item.path], true);
   }
 
   /**
    * Handle a multiple select on a file item node.
    */
-  private _handleMultiSelect(selected: string[], index: number): void {
-    // Find the "nearest selected".
+  private _handleMultiSelect(index: number): void {
     const items = this._sortedItems;
-    let nearestIndex = -1;
-    for (let i = 0; i < this._items.length; i++) {
-      if (i === index) {
-        continue;
-      }
-      const path = items[i].path;
-      if (selected.indexOf(path) !== -1) {
-        if (nearestIndex === -1) {
-          nearestIndex = i;
-        } else {
-          if (Math.abs(index - i) < Math.abs(nearestIndex - i)) {
-            nearestIndex = i;
-          }
+    const fromIndex = this._focusIndex;
+    const target = items[index];
+    let shouldAdd = true;
+
+    if (index === fromIndex) {
+      // This follows the convention in Ubuntu and Windows, which is to allow
+      // the focussed item to gain but not lose selected status on shift-click.
+      // (MacOS is irrelevant here because MacOS Finder has no notion of a
+      // focused-but-not-selected state.)
+      this.selection[target.path] = true;
+      return;
+    }
+
+    // If the target and all items in-between are selected, then we assume that
+    // the user is trying to shrink rather than grow the group of selected
+    // items.
+    if (this.selection[target.path]) {
+      // However, there is a special case when the distance between the from-
+      // and to- index is just one (for example, when the user is pressing the
+      // shift key plus arrow-up/down). If and only if the situation looks like
+      // the following when going down (or reverse when going up) ...
+      //
+      // - [ante-anchor / previous item] unselected (or boundary)
+      // - [anchor / currently focussed item / item at from-index] selected
+      // - [target / next item / item at to-index] selected
+      //
+      // ... then we shrink the selection / unselect the currently focussed
+      // item.
+      if (Math.abs(index - fromIndex) === 1) {
+        const anchor = items[fromIndex];
+        const anteAnchor = items[fromIndex + (index < fromIndex ? 1 : -1)];
+        if (
+          // Currently focussed item is selected
+          this.selection[anchor.path] &&
+          // Item on other side of focussed item (away from target) is either a
+          // boundary or unselected
+          (!anteAnchor || !this.selection[anteAnchor.path])
+        ) {
+          delete this.selection[anchor.path];
         }
+      } else if (this._allSelectedBetween(fromIndex, index)) {
+        shouldAdd = false;
       }
     }
 
-    // Default to the first element (and fill down).
-    if (nearestIndex === -1) {
-      nearestIndex = 0;
-    }
-
-    // Select the rows between the current and the nearest selected.
-    for (let i = 0; i < this._items.length; i++) {
-      if (
-        (nearestIndex >= i && index <= i) ||
-        (nearestIndex <= i && index >= i)
-      ) {
+    // Select (or unselect) the rows between chosen index (target) and the last
+    // focussed.
+    const step = fromIndex < index ? 1 : -1;
+    for (let i = fromIndex; i !== index + step; i += step) {
+      if (shouldAdd) {
+        if (i === fromIndex) {
+          // Do not change the selection state of the starting (fromIndex) item.
+          continue;
+        }
         this.selection[items[i].path] = true;
+      } else {
+        if (i === index) {
+          // Do not unselect the target item.
+          continue;
+        }
+        delete this.selection[items[i].path];
       }
     }
   }
@@ -1530,9 +1944,9 @@ export class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       this._clipboard.push(item.path);
-    });
+    }
   }
 
   /**
@@ -1554,74 +1968,112 @@ export class DirListing extends Widget {
   /**
    * Allow the user to rename item on a given row.
    */
-  private _doRename(): Promise<string> {
+  private async _doRename(): Promise<string> {
     this._inRename = true;
+
+    const selectedPaths = Object.keys(this.selection);
+
+    // Bail out if nothing has been selected.
+    if (selectedPaths.length === 0) {
+      this._inRename = false;
+      return Promise.resolve('');
+    }
+
+    // Figure out which selected path to use for the rename.
     const items = this._sortedItems;
-    const path = Object.keys(this.selection)[0];
+    let { path } = items[this._focusIndex];
+    if (!this.selection[path]) {
+      // If the currently focused item is not selected, then choose the last
+      // selected item.
+      path = selectedPaths.slice(-1)[0];
+    }
+
+    // Get the corresponding model, nodes, and file name.
     const index = ArrayExt.findFirstIndex(items, value => value.path === path);
     const row = this._items[index];
     const item = items[index];
     const nameNode = this.renderer.getNameNode(row);
     const original = item.name;
+
+    // Seed the text input with current file name, and select and focus it.
     this._editNode.value = original;
-    this._selectItem(index, false);
+    this._selectItem(index, false, true);
 
-    return Private.doRename(nameNode, this._editNode, original).then(
-      newName => {
-        this.node.focus();
-        if (!newName || newName === original) {
-          this._inRename = false;
-          return original;
-        }
-        if (!isValidFileName(newName)) {
-          void showErrorMessage(
-            this._trans.__('showErrorMessage', 'Rename Error'),
-            Error(
-              this._trans._p(
-                'showErrorMessage',
-                '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-                newName
-              )
-            )
-          );
-          this._inRename = false;
-          return original;
-        }
-
-        if (this.isDisposed) {
-          this._inRename = false;
-          throw new Error('File browser is disposed.');
-        }
-
-        const manager = this._manager;
-        const oldPath = PathExt.join(this._model.path, original);
-        const newPath = PathExt.join(this._model.path, newName);
-        const promise = renameFile(manager, oldPath, newPath);
-        return promise
-          .catch(error => {
-            if (error !== 'File not renamed') {
-              void showErrorMessage(
-                this._trans._p('showErrorMessage', 'Rename Error'),
-                error
-              );
-            }
-            this._inRename = false;
-            return original;
-          })
-          .then(() => {
-            if (this.isDisposed) {
-              this._inRename = false;
-              throw new Error('File browser is disposed.');
-            }
-            if (this._inRename) {
-              // No need to catch because `newName` will always exit.
-              void this.selectItemByName(newName);
-            }
-            this._inRename = false;
-            return newName;
-          });
-      }
+    // Wait for user input
+    const newName = await Private.userInputForRename(
+      nameNode,
+      this._editNode,
+      original
     );
+
+    // Check if the widget was disposed during the `await`.
+    if (this.isDisposed) {
+      this._inRename = false;
+      throw new Error('File browser is disposed.');
+    }
+
+    let finalFilename = newName;
+
+    if (!newName || newName === original) {
+      finalFilename = original;
+    } else if (!isValidFileName(newName)) {
+      void showErrorMessage(
+        this._trans.__('Rename Error'),
+        Error(
+          this._trans._p(
+            'showErrorMessage',
+            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+            newName
+          )
+        )
+      );
+      finalFilename = original;
+    } else {
+      // Attempt rename at the file system level.
+
+      const manager = this._manager;
+      const oldPath = PathExt.join(this._model.path, original);
+      const newPath = PathExt.join(this._model.path, newName);
+      try {
+        await renameFile(manager, oldPath, newPath);
+      } catch (error) {
+        if (error !== 'File not renamed') {
+          void showErrorMessage(
+            this._trans._p('showErrorMessage', 'Rename Error'),
+            error
+          );
+        }
+        finalFilename = original;
+      }
+
+      // Check if the widget was disposed during the `await`.
+      if (this.isDisposed) {
+        this._inRename = false;
+        throw new Error('File browser is disposed.');
+      }
+    }
+
+    // If nothing else has been selected, then select the renamed file. In
+    // other words, don't select the renamed file if the user has clicked
+    // away to some other file.
+    if (
+      !this.isDisposed &&
+      Object.keys(this.selection).length === 1 &&
+      // We haven't updated the instance yet to reflect the rename, so unless
+      // the user or something else has updated the selection, the original file
+      // path and not the new file path will be in `this.selection`.
+      this.selection[item.path]
+    ) {
+      try {
+        await this._selectItemByName(finalFilename, true, true);
+      } catch {
+        // do nothing
+        console.warn('After rename, failed to select file', finalFilename);
+      }
+    }
+
+    this._inRename = false;
+    return finalFilename;
   }
 
   /**
@@ -1640,8 +2092,8 @@ export class DirListing extends Widget {
     const path = items[index].path;
     this.selection[path] = true;
 
-    if (!keepExisting && focus) {
-      this._focusSelectedFile(index);
+    if (focus) {
+      this._focusItem(index);
     }
     this.update();
   }
@@ -1653,12 +2105,12 @@ export class DirListing extends Widget {
     // Update the selection.
     const existing = Object.keys(this.selection);
     this.clearSelectedItems();
-    each(this._model.items(), item => {
+    for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
         this.selection[path] = true;
       }
-    });
+    }
     if (this.isVisible) {
       // Update the sorted items.
       this.sort(this.sortState);
@@ -1675,6 +2127,11 @@ export class DirListing extends Widget {
     this.clearSelectedItems();
     // Update the sorted items.
     this.sort(this.sortState);
+    // Reset focus. But wait until the DOM has been updated (hence
+    // `requestAnimationFrame`).
+    requestAnimationFrame(() => {
+      this._focusItem(0);
+    });
   }
 
   /**
@@ -1743,6 +2200,12 @@ export class DirListing extends Widget {
   private _inRename = false;
   private _isDirty = false;
   private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
+  private _sortNotebooksFirst = false;
+  // _focusIndex should never be set outside the range [0, this._items.length - 1]
+  private _focusIndex = 0;
+  // Width of the "last modified" column for an individual file
+  private _modifiedWidth: number;
+  private _modifiedStyle: Time.HumanStyle;
 }
 
 /**
@@ -1783,13 +2246,13 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified';
+    key: 'name' | 'last_modified' | 'file_size';
   }
 
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified';
+  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
 
   /**
    * A file contents model thunk.
@@ -1851,11 +2314,28 @@ export namespace DirListing {
     ): HTMLElement;
 
     /**
+     * Update an item's last modified date.
+     *
+     * @param modified - Element containing the file's last modified date.
+     *
+     * @param modifiedDate - String representation of the last modified date.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     */
+    updateItemModified?(
+      modified: HTMLElement,
+      modifiedDate: string,
+      modifiedStyle: Time.HumanStyle
+    ): void;
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
      *
      * @param model - The model object to use for the item state.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
      *
      * @param fileType - The file type of the item, if applicable.
      */
@@ -1864,7 +2344,9 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean,
+      modifiedStyle?: Time.HumanStyle
     ): void;
 
     /**
@@ -1875,6 +2357,20 @@ export namespace DirListing {
      * @returns The node containing the file name.
      */
     getNameNode(node: HTMLElement): HTMLElement;
+
+    /**
+     * Get the checkbox input element node.
+     *
+     * Downstream interface implementations,such as jupyterlab-unfold, that
+     * don't support checkboxes should simply always return null for this
+     * function.
+     *
+     * @param node A node created by [[createItemNode]] or
+     * [[createHeaderItemNode]]
+     *
+     * @returns The checkbox node.
+     */
+    getCheckboxNode: (node: HTMLElement) => HTMLInputElement | null;
 
     /**
      * Create an appropriate drag image for an item.
@@ -1906,11 +2402,14 @@ export namespace DirListing {
       const node = document.createElement('div');
       const header = document.createElement('div');
       const content = document.createElement('ul');
+      // Allow the node to scroll while dragging items.
+      content.setAttribute('data-lm-dragscroll', 'true');
       content.className = CONTENT_CLASS;
       header.className = HEADER_CLASS;
       node.appendChild(header);
       node.appendChild(content);
-      node.tabIndex = 0;
+      // Set to -1 to allow calling this.node.focus().
+      node.tabIndex = -1;
       return node;
     }
 
@@ -1928,20 +2427,39 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNode(trans.__('Last Modified'));
+      const modified = this._createHeaderItemNodeWithSizes({
+        small: trans.__('Modified'),
+        large: trans.__('Last Modified')
+      });
+      const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
+      fileSize.classList.add(FILE_SIZE_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
+      if (!hiddenColumns?.has('is_selected')) {
+        const checkboxWrapper = this.createCheckboxWrapperNode({
+          alwaysVisible: true,
+          headerNode: true
+        });
+        node.appendChild(checkboxWrapper);
+      }
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // set the initial caret icon
@@ -1964,15 +2482,21 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+      const fileSize = DOMUtils.findElement(node, FILE_SIZE_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-      if (name.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
 
+      const modifiedIcon = DOMUtils.findElement(
+        modified,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const fileSizeIcon = DOMUtils.findElement(
+        fileSize,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
+      if (name.contains(target)) {
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
@@ -1989,16 +2513,13 @@ export namespace DirListing {
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(modifiedIcon, 'left');
+        Private.updateCaret(fileSizeIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
-
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
@@ -2016,7 +2537,34 @@ export namespace DirListing {
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(fileSizeIcon, 'left');
+        return state;
+      }
+      if (fileSize.contains(target)) {
+        state.key = 'file_size';
+        if (fileSize.classList.contains(SELECTED_CLASS)) {
+          if (!fileSize.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            fileSize.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'down');
+          } else {
+            fileSize.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'up');
+          }
+        } else {
+          fileSize.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(fileSizeIcon, 'left', 'up');
+        }
+        fileSize.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       return state;
@@ -2034,25 +2582,105 @@ export namespace DirListing {
       const icon = document.createElement('span');
       const text = document.createElement('span');
       const modified = document.createElement('span');
+      const fileSize = document.createElement('span');
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
+      fileSize.className = ITEM_FILE_SIZE_CLASS;
+      if (!hiddenColumns?.has('is_selected')) {
+        const checkboxWrapper = this.createCheckboxWrapperNode();
+        node.appendChild(checkboxWrapper);
+      }
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
-      // Make the text note focusable so that it receives keyboard events;
-      // text node was specifically chosen to receive shortcuts because
-      // text element gets substituted with input area during file name edits
-      // which conveniently deactivate irrelevant shortcuts.
-      text.tabIndex = 0;
-
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
+      }
+
       return node;
+    }
+
+    /**
+     * Creates a node containing a checkbox.
+     *
+     * We wrap the checkbox in a label element in order to increase its hit
+     * area. This is because the padding of the checkbox itself cannot be
+     * increased via CSS, as the CSS/form compatibility table at the following
+     * url from MDN shows:
+     * https://developer.mozilla.org/en-US/docs/Learn/Forms/Property_compatibility_table_for_form_controls#check_boxes_and_radio_buttons
+     *
+     * @param [options]
+     * @params options.alwaysVisible Should the checkbox be visible even when
+     * not hovered?
+     * @returns A new DOM node that contains a checkbox.
+     */
+    createCheckboxWrapperNode(options?: {
+      alwaysVisible: boolean;
+      headerNode?: boolean;
+    }): HTMLElement {
+      // Wrap the checkbox in a label element in order to increase its hit area.
+      const labelWrapper = document.createElement('label');
+      labelWrapper.classList.add(CHECKBOX_WRAPPER_CLASS);
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      // Prevent the user from clicking (via mouse, keyboard, or touch) the
+      // checkbox since other code handles the mouse and keyboard events and
+      // controls the checked state of the checkbox.
+      if (!options?.headerNode) {
+        checkbox.addEventListener('click', event => {
+          event.preventDefault();
+        });
+      }
+
+      // The individual file checkboxes are visible on hover, but the header
+      // check-all checkbox is always visible.
+      if (options?.alwaysVisible) {
+        labelWrapper.classList.add('jp-mod-visible');
+      } else {
+        // Disable tabbing to all other checkboxes.
+        checkbox.tabIndex = -1;
+      }
+
+      labelWrapper.appendChild(checkbox);
+      return labelWrapper;
+    }
+
+    /**
+     * Update an item's last modified date.
+     *
+     * @param modified - Element containing the file's last modified date.
+     *
+     * @param modifiedDate - String representation of the last modified date.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     */
+    updateItemModified(
+      modified: HTMLElement,
+      modifiedDate: string,
+      modifiedStyle: Time.HumanStyle
+    ): void {
+      let modText = '';
+      let modTitle = '';
+
+      const parsedDate = new Date(modifiedDate);
+      // Render the date in one of multiple formats, depending on the container's size
+      modText = Time.formatHuman(parsedDate, modifiedStyle);
+      modTitle = Time.format(parsedDate);
+
+      modified.textContent = modText;
+      modified.title = modTitle;
     }
 
     /**
@@ -2070,9 +2698,13 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean,
+      modifiedStyle?: Time.HumanStyle
     ): void {
-      translator = translator || nullTranslator;
+      if (selected) {
+        node.classList.add(SELECTED_CLASS);
+      }
 
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
@@ -2083,11 +2715,30 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS);
+      const checkboxWrapper = DOMUtils.findElement(
+        node,
+        CHECKBOX_WRAPPER_CLASS
+      );
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      const showFileCheckboxes = !hiddenColumns?.has('is_selected');
+      if (checkboxWrapper && !showFileCheckboxes) {
+        node.removeChild(checkboxWrapper);
+      } else if (showFileCheckboxes && !checkboxWrapper) {
+        const checkboxWrapper = this.createCheckboxWrapperNode();
+        node.insertBefore(checkboxWrapper, iconContainer);
+      }
+
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // render the file item's icon
@@ -2103,10 +2754,14 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
+        const fileSizeText = Private.formatFileSize(model.size, 1, 1024);
+        fileSize.textContent = fileSizeText;
         hoverText += trans.__(
           '\nSize: %1',
           Private.formatFileSize(model.size, 1, 1024)
         );
+      } else {
+        fileSize.textContent = '';
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
@@ -2120,13 +2775,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.created))
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.last_modified))
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -2139,20 +2794,39 @@ export namespace DirListing {
         node.removeAttribute('data-is-dot');
       }
       // If an item is being edited currently, its text node is unavailable.
+      const indices = !model.indices ? [] : model.indices;
+      let highlightedName = StringExt.highlight(model.name, indices, h.mark);
       if (text) {
-        const indices = !model.indices ? [] : model.indices;
-        let highlightedName = StringExt.highlight(model.name, indices, h.mark);
         VirtualDOM.render(h.span(highlightedName), text);
       }
 
-      let modText = '';
-      let modTitle = '';
-      if (model.last_modified) {
-        modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified), 'lll');
+      // Adds an aria-label to the checkbox element.
+      const checkbox = checkboxWrapper?.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement;
+
+      if (checkbox) {
+        let ariaLabel: string;
+        if (fileType.contentType === 'directory') {
+          ariaLabel = selected
+            ? trans.__('Deselect directory "%1"', highlightedName)
+            : trans.__('Select directory "%1"', highlightedName);
+        } else {
+          ariaLabel = selected
+            ? trans.__('Deselect file "%1"', highlightedName)
+            : trans.__('Select file "%1"', highlightedName);
+        }
+        checkbox.setAttribute('aria-label', ariaLabel);
+        checkbox.checked = selected ?? false;
       }
-      modified.textContent = modText;
-      modified.title = modTitle;
+
+      if (model.last_modified) {
+        this.updateItemModified(
+          modified,
+          model.last_modified,
+          modifiedStyle ?? 'short'
+        );
+      }
     }
 
     /**
@@ -2164,6 +2838,20 @@ export namespace DirListing {
      */
     getNameNode(node: HTMLElement): HTMLElement {
       return DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+    }
+
+    /**
+     * Get the checkbox input element node.
+     *
+     * @param node A node created by [[createItemNode]] or
+     * [[createHeaderItemNode]]
+     *
+     * @returns The checkbox node.
+     */
+    getCheckboxNode(node: HTMLElement): HTMLInputElement | null {
+      return node.querySelector(
+        `.${CHECKBOX_WRAPPER_CLASS} input[type=checkbox]`
+      );
     }
 
     /**
@@ -2219,6 +2907,29 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
+
+    /**
+     * Create a node for a header item with multiple sizes.
+     */
+    private _createHeaderItemNodeWithSizes(labels: {
+      [k: string]: string;
+    }): HTMLElement {
+      const node = document.createElement('div');
+      node.className = HEADER_ITEM_CLASS;
+      const icon = document.createElement('span');
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      for (let k of Object.keys(labels)) {
+        const text = document.createElement('span');
+        text.classList.add(
+          HEADER_ITEM_TEXT_CLASS,
+          HEADER_ITEM_TEXT_CLASS + '-' + k
+        );
+        text.textContent = labels[k];
+        node.appendChild(text);
+      }
+      node.appendChild(icon);
+      return node;
+    }
   }
 
   /**
@@ -2236,7 +2947,7 @@ namespace Private {
    *
    * @returns Boolean indicating whether the name changed.
    */
-  export function doRename(
+  export function userInputForRename(
     text: HTMLElement,
     edit: HTMLInputElement,
     original: string
@@ -2251,7 +2962,7 @@ namespace Private {
       edit.setSelectionRange(0, index);
     }
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<string>(resolve => {
       edit.onblur = () => {
         parent.replaceChild(text, edit);
         resolve(edit.value);
@@ -2268,20 +2979,10 @@ namespace Private {
             event.preventDefault();
             edit.value = original;
             edit.blur();
-            break;
-          case 38: // Up arrow
-            event.stopPropagation();
-            event.preventDefault();
-            if (edit.selectionStart !== edit.selectionEnd) {
-              edit.selectionStart = edit.selectionEnd = 0;
-            }
-            break;
-          case 40: // Down arrow
-            event.stopPropagation();
-            event.preventDefault();
-            if (edit.selectionStart !== edit.selectionEnd) {
-              edit.selectionStart = edit.selectionEnd = edit.value.length;
-            }
+            // Put focus back on the text node. That way the user can, for
+            // example, press the keyboard shortcut to go back into edit mode,
+            // and it will work.
+            text.focus();
             break;
           default:
             break;
@@ -2294,31 +2995,81 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export function sort(
-    items: IIterator<Contents.IModel>,
-    state: DirListing.ISortState
+    items: Iterable<Contents.IModel>,
+    state: DirListing.ISortState,
+    sortNotebooksFirst: boolean = false
   ): Contents.IModel[] {
-    const copy = toArray(items);
+    const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
 
+    /**
+     * Compares two items and returns whether they should have a fixed priority.
+     * The fixed priority enables to always sort the directories above the other files. And to sort the notebook above other files if the `sortNotebooksFirst` is true.
+     */
+    function isPriorityOverridden(a: Contents.IModel, b: Contents.IModel) {
+      if (sortNotebooksFirst) {
+        return a.type !== b.type;
+      }
+      return (a.type === 'directory') !== (b.type === 'directory');
+    }
+
+    /**
+     * Returns the priority of a file.
+     */
+    function getPriority(item: Contents.IModel): number {
+      if (item.type === 'directory') {
+        return 2;
+      }
+      if (item.type === 'notebook' && sortNotebooksFirst) {
+        return 1;
+      }
+      return 0;
+    }
+
+    function compare(
+      compare: (a: Contents.IModel, b: Contents.IModel) => number
+    ) {
+      return (a: Contents.IModel, b: Contents.IModel) => {
+        // Group directory first, then notebooks, then files
+        if (isPriorityOverridden(a, b)) {
+          return getPriority(b) - getPriority(a);
+        }
+
+        const compared = compare(a, b);
+
+        if (compared !== 0) {
+          return compared * reverse;
+        }
+
+        // Default sorting is alphabetical ascending
+        return a.name.localeCompare(b.name);
+      };
+    }
+
     if (state.key === 'last_modified') {
-      // Sort by last modified (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        const valA = new Date(a.last_modified).getTime();
-        const valB = new Date(b.last_modified).getTime();
-
-        return t1 - t2 || (valA - valB) * reverse;
-      });
+      // Sort by last modified
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (
+            new Date(a.last_modified).getTime() -
+            new Date(b.last_modified).getTime()
+          );
+        })
+      );
+    } else if (state.key === 'file_size') {
+      // Sort by size
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (a.size ?? 0) - (b.size ?? 0);
+        })
+      );
     } else {
-      // Sort by name (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        return t1 - t2 || b.name.localeCompare(a.name) * reverse;
-      });
+      // Sort by name
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return b.name.localeCompare(a.name);
+        })
+      );
     }
     return copy;
   }
@@ -2348,10 +3099,10 @@ namespace Private {
   ): string {
     // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
     if (bytes === 0) {
-      return '0 Bytes';
+      return '0 B';
     }
     const dm = decimalPoint || 2;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     if (i >= 0 && i < sizes.length) {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];

@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { LabShell } from '@jupyterlab/application';
-import { framePromise } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { LabShell, LayoutRestorer } from '@jupyterlab/application';
+import { StateDB } from '@jupyterlab/statedb';
+import { framePromise } from '@jupyterlab/testing';
+import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { DockPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -26,7 +27,7 @@ describe('LabShell', () => {
   });
 
   beforeEach(() => {
-    shell = new LabShell();
+    shell = new LabShell({ waitForRestore: false });
     Widget.attach(shell, document.body);
   });
 
@@ -116,11 +117,15 @@ describe('LabShell', () => {
   });
 
   describe('#restored', () => {
-    it('should resolve when the app is restored for the first time', () => {
-      const state = shell.saveLayout();
+    it('should resolve when the app is restored for the first time', async () => {
+      const restorer = new LayoutRestorer({
+        connector: new StateDB(),
+        first: Promise.resolve<void>(void 0),
+        registry: new CommandRegistry()
+      });
       const mode: DockPanel.Mode = 'multiple-document';
-      shell.restoreLayout(mode, state);
-      return shell.restored;
+      await shell.restoreLayout(mode, restorer);
+      await expect(shell.restored).resolves.not.toThrow();
     });
   });
 
@@ -174,14 +179,14 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top');
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(4);
+      expect(Array.from(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(3);
+      expect(Array.from(shell.widgets('top')).length).toEqual(2);
     });
 
     it('should accept options', () => {
@@ -189,7 +194,7 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
       // top-level title and menu area are added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(4);
+      expect(Array.from(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should add widgets according to their ranks', () => {
@@ -200,7 +205,7 @@ describe('LabShell', () => {
       shell.add(foo, 'top', { rank: 10001 });
       shell.add(bar, 'top', { rank: 10000 });
       expect(
-        toArray(shell.widgets('top'))
+        Array.from(shell.widgets('top'))
           .slice(-2)
           .map(v => v.id)
       ).toEqual(['bar', 'foo']);
@@ -426,11 +431,15 @@ describe('LabShell', () => {
   });
 
   describe('#restoreLayout', () => {
-    it('should restore the layout of the shell', () => {
-      const state = shell.saveLayout();
+    it('should restore the layout of the shell', async () => {
+      const restorer = new LayoutRestorer({
+        connector: new StateDB(),
+        first: Promise.resolve<void>(void 0),
+        registry: new CommandRegistry()
+      });
       const mode: DockPanel.Mode = 'multiple-document';
       shell.mode = 'single-document';
-      shell.restoreLayout(mode, state);
+      await shell.restoreLayout(mode, restorer);
       expect(shell.mode).toBe('multiple-document');
     });
   });
@@ -463,29 +472,37 @@ describe('LabShell', () => {
       widget.id = 'main';
       shell.add(widget, 'main');
 
-      expect(toArray(shell.widgets('header')).map(v => v.id)).toEqual([
+      expect(Array.from(shell.widgets('header')).map(v => v.id)).toEqual([
         'header'
       ]);
       expect(
-        toArray(shell.widgets('top'))
+        Array.from(shell.widgets('top'))
           .slice(-1)
           .map(v => v.id)
       ).toEqual(['top']);
-      expect(toArray(shell.widgets('menu')).map(v => v.id)).toEqual(['menu']);
-      expect(toArray(shell.widgets('left')).map(v => v.id)).toEqual(['left']);
-      expect(toArray(shell.widgets('right')).map(v => v.id)).toEqual(['right']);
-      expect(toArray(shell.widgets('main')).map(v => v.id)).toEqual(['main']);
+      expect(Array.from(shell.widgets('menu')).map(v => v.id)).toEqual([
+        'menu'
+      ]);
+      expect(Array.from(shell.widgets('left')).map(v => v.id)).toEqual([
+        'left'
+      ]);
+      expect(Array.from(shell.widgets('right')).map(v => v.id)).toEqual([
+        'right'
+      ]);
+      expect(Array.from(shell.widgets('main')).map(v => v.id)).toEqual([
+        'main'
+      ]);
     });
 
     it('should default to main area', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'main');
-      expect(toArray(shell.widgets()).map(v => v.id)).toEqual(['foo']);
+      expect(Array.from(shell.widgets()).map(v => v.id)).toEqual(['foo']);
     });
 
     it('should throw an error when an unrecognized area is given', () => {
-      expect(() => shell.widgets('foo' as any)).toThrowError(/Invalid area/);
+      expect(() => shell.widgets('foo' as any)).toThrow(/Invalid area/);
     });
   });
 
@@ -498,6 +515,63 @@ describe('LabShell', () => {
       expect(widget.isVisible).toBe(false);
       shell.mode = 'single-document';
       expect(widget.isVisible).toBe(false);
+    });
+  });
+
+  describe('#accessibility', () => {
+    it('menu handler should have a role of navigation and aria label of main', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const menu = document.getElementById('jp-menu-panel');
+      expect(menu?.getAttribute('role')).toEqual('navigation');
+      expect(menu?.getAttribute('aria-label')).toEqual('main menu');
+    });
+
+    it('top handler should have a role of banner', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'top');
+      const topHandler = document.getElementById('jp-top-panel');
+      expect(topHandler?.getAttribute('role')).toEqual('banner');
+    });
+
+    it('bottom panel should have a role of content info', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const bottomPanel = document.getElementById('jp-bottom-panel');
+      expect(bottomPanel?.getAttribute('role')).toEqual('contentinfo');
+    });
+
+    it('left handler should have a role of compelementary and aria label of main sidebar', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'left');
+      const leftHandler = document.getElementsByClassName('jp-mod-left');
+      expect(leftHandler[0]?.getAttribute('role')).toEqual('complementary');
+      expect(leftHandler[0]?.getAttribute('aria-label')).toEqual(
+        'main sidebar'
+      );
+    });
+
+    it('right handler should have a role of complementary and aria label of altenate sidebar', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+      const rightHandler = document.getElementsByClassName('jp-mod-right');
+      expect(rightHandler[0]?.getAttribute('role')).toEqual('complementary');
+      expect(rightHandler[0]?.getAttribute('aria-label')).toEqual(
+        'alternate sidebar'
+      );
+    });
+
+    it('dock panel should have a role of main', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const dock = document.getElementById('jp-main-dock-panel');
+      expect(dock?.getAttribute('role')).toEqual('main');
     });
   });
 });

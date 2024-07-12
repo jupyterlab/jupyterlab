@@ -1,43 +1,62 @@
-# coding: utf-8
 """A tornado based Jupyter lab server."""
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import dataclasses
 import json
 import os
-import os.path as osp
 import sys
-from os.path import join as pjoin
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
-
-from jupyterlab_server import WORKSPACE_EXTENSION, LabServerApp, slugify
-from nbclassic.shim import NBClassicConfigShimMixin
-from traitlets import Bool, Instance, Unicode, default
+from jupyterlab_server import (
+    LabServerApp,
+    LicensesApp,
+    WorkspaceExportApp,
+    WorkspaceImportApp,
+    WorkspaceListApp,
+)
+from notebook_shim.shim import NotebookConfigShimMixin
+from traitlets import Bool, Instance, Type, Unicode, default
 
 from ._version import __version__
 from .commands import (
-    DEV_DIR, HERE, AppOptions, build, clean, ensure_app,
-    ensure_core, ensure_dev, get_app_dir, get_app_version,
-    get_user_settings_dir, get_workspaces_dir, pjoin, watch,
-    watch_dev
+    DEV_DIR,
+    HERE,
+    AppOptions,
+    build,
+    clean,
+    ensure_app,
+    ensure_core,
+    ensure_dev,
+    get_app_dir,
+    get_app_version,
+    get_user_settings_dir,
+    get_workspaces_dir,
+    pjoin,
+    watch,
+    watch_dev,
 )
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
+from .extensions import MANAGERS as EXT_MANAGERS
+from .extensions.manager import PluginManager
+from .extensions.readonly import ReadOnlyExtensionManager
+from .handlers.announcements import (
+    CheckForUpdate,
+    CheckForUpdateABC,
+    CheckForUpdateHandler,
+    NewsHandler,
+    check_update_handler_path,
+    news_handler_path,
+)
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
-from .handlers.extension_manager_handler import ExtensionHandler, ExtensionManager, extensions_handler_path
-from .handlers.yjs_echo_ws import YjsEchoWebSocket
-
-# TODO: remove when oldest compatible jupyterlab_server contains license tooling
-try:
-    from jupyterlab_server import LicensesApp
-except ImportError:
-    LicensesApp = None
+from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
+from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -55,35 +74,35 @@ Running the core application with no additional extensions or settings
 """
 
 build_aliases = dict(base_aliases)
-build_aliases['app-dir'] = 'LabBuildApp.app_dir'
-build_aliases['name'] = 'LabBuildApp.name'
-build_aliases['version'] = 'LabBuildApp.version'
-build_aliases['dev-build'] = 'LabBuildApp.dev_build'
-build_aliases['minimize'] = 'LabBuildApp.minimize'
-build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
+build_aliases["app-dir"] = "LabBuildApp.app_dir"
+build_aliases["name"] = "LabBuildApp.name"
+build_aliases["version"] = "LabBuildApp.version"
+build_aliases["dev-build"] = "LabBuildApp.dev_build"
+build_aliases["minimize"] = "LabBuildApp.minimize"
+build_aliases["debug-log-path"] = "DebugLogFileMixin.debug_log_path"
 
 build_flags = dict(base_flags)
 
-build_flags['dev-build'] = (
-    {'LabBuildApp': {'dev_build': True}},
-    "Build in development mode."
+build_flags["dev-build"] = (
+    {"LabBuildApp": {"dev_build": True}},
+    "Build in development mode.",
 )
-build_flags['no-minimize'] = (
-    {'LabBuildApp': {'minimize': False}},
-    "Do not minimize a production build."
+build_flags["no-minimize"] = (
+    {"LabBuildApp": {"minimize": False}},
+    "Do not minimize a production build.",
 )
-build_flags['splice-source'] = (
-    {'LabBuildApp': {'splice_source': True}},
-    "Splice source packages into app directory."
+build_flags["splice-source"] = (
+    {"LabBuildApp": {"splice_source": True}},
+    "Splice source packages into app directory.",
 )
 
 
 version = __version__
 app_version = get_app_version()
 if version != app_version:
-    version = '%s (dev), %s (app)' % (__version__, app_version)
+    version = f"{__version__} (dev), {app_version} (app)"
 
-buildFailureMsg = """Build failed.
+build_failure_msg = """Build failed.
 Troubleshooting: If the build failed due to an out-of-memory error, you
 may be able to fix it by disabling the `dev_build` and/or `minimize` options.
 
@@ -120,6 +139,7 @@ intensive, so turning it off may help the build finish successfully in
 low-memory environments.
 """
 
+
 class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = version
     description = """
@@ -135,59 +155,81 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     # Not configurable!
     core_config = Instance(CoreConfig, allow_none=True)
 
-    app_dir = Unicode('', config=True,
-        help="The app directory to build in")
+    app_dir = Unicode("", config=True, help="The app directory to build in")
 
-    name = Unicode('JupyterLab', config=True,
-        help="The name of the built application")
+    name = Unicode("JupyterLab", config=True, help="The name of the built application")
 
-    version = Unicode('', config=True,
-        help="The version of the built application")
+    version = Unicode("", config=True, help="The version of the built application")
 
-    dev_build = Bool(None, allow_none=True, config=True,
-        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
+    dev_build = Bool(
+        None,
+        allow_none=True,
+        config=True,
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).",
+    )
 
-    minimize = Bool(True, config=True,
-        help="Whether to minimize a production build (defaults to True).")
+    minimize = Bool(
+        True,
+        config=True,
+        help="Whether to minimize a production build (defaults to True).",
+    )
 
-    pre_clean = Bool(False, config=True,
-        help="Whether to clean before building (defaults to False)")
+    pre_clean = Bool(
+        False, config=True, help="Whether to clean before building (defaults to False)"
+    )
 
-    splice_source = Bool(False, config=True,
-        help="Splice source packages into app directory.")
+    splice_source = Bool(False, config=True, help="Splice source packages into app directory.")
 
     def start(self):
         app_dir = self.app_dir or get_app_dir()
         app_options = AppOptions(
-            app_dir=app_dir, logger=self.log, core_config=self.core_config, splice_source=self.splice_source
+            app_dir=app_dir,
+            logger=self.log,
+            core_config=self.core_config,
+            splice_source=self.splice_source,
         )
-        self.log.info('JupyterLab %s', version)
+        self.log.info(f"JupyterLab {version}")
         with self.debug_logging():
             if self.pre_clean:
-                self.log.info('Cleaning %s' % app_dir)
+                self.log.info(f"Cleaning {app_dir}")
                 clean(app_options=app_options)
-            self.log.info('Building in %s', app_dir)
+            self.log.info(f"Building in {app_dir}")
             try:
                 production = None if self.dev_build is None else not self.dev_build
-                build(name=self.name, version=self.version,
-                  app_options=app_options, production = production, minimize=self.minimize)
+                build(
+                    name=self.name,
+                    version=self.version,
+                    app_options=app_options,
+                    production=production,
+                    minimize=self.minimize,
+                )
             except Exception as e:
-                print(buildFailureMsg)
+                self.log.error(build_failure_msg)
                 raise e
 
 
 clean_aliases = dict(base_aliases)
-clean_aliases['app-dir'] = 'LabCleanApp.app_dir'
+clean_aliases["app-dir"] = "LabCleanApp.app_dir"
 
 ext_warn_msg = "WARNING: this will delete all of your extensions, which will need to be reinstalled"
 
 clean_flags = dict(base_flags)
-clean_flags['extensions'] = ({'LabCleanApp': {'extensions': True}},
-    'Also delete <app-dir>/extensions.\n%s' % ext_warn_msg)
-clean_flags['settings'] = ({'LabCleanApp': {'settings': True}}, 'Also delete <app-dir>/settings')
-clean_flags['static'] = ({'LabCleanApp': {'static': True}}, 'Also delete <app-dir>/static')
-clean_flags['all'] = ({'LabCleanApp': {'all': True}},
-    'Delete the entire contents of the app directory.\n%s' % ext_warn_msg)
+clean_flags["extensions"] = (
+    {"LabCleanApp": {"extensions": True}},
+    f"Also delete <app-dir>/extensions.\n{ext_warn_msg}",
+)
+clean_flags["settings"] = (
+    {"LabCleanApp": {"settings": True}},
+    "Also delete <app-dir>/settings",
+)
+clean_flags["static"] = (
+    {"LabCleanApp": {"static": True}},
+    "Also delete <app-dir>/static",
+)
+clean_flags["all"] = (
+    {"LabCleanApp": {"all": True}},
+    f"Delete the entire contents of the app directory.\n{ext_warn_msg}",
+)
 
 
 class LabCleanAppOptions(AppOptions):
@@ -213,17 +255,19 @@ class LabCleanApp(JupyterApp):
     # Not configurable!
     core_config = Instance(CoreConfig, allow_none=True)
 
-    app_dir = Unicode('', config=True, help='The app directory to clean')
+    app_dir = Unicode("", config=True, help="The app directory to clean")
 
-    extensions = Bool(False, config=True,
-        help="Also delete <app-dir>/extensions.\n%s" % ext_warn_msg)
+    extensions = Bool(False, config=True, help=f"Also delete <app-dir>/extensions.\n{ext_warn_msg}")
 
     settings = Bool(False, config=True, help="Also delete <app-dir>/settings")
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(False, config=True,
-        help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg)
+    all = Bool(
+        False,
+        config=True,
+        help=f"Delete the entire contents of the app directory.\n{ext_warn_msg}",
+    )
 
     def start(self):
         app_options = LabCleanAppOptions(
@@ -233,7 +277,7 @@ class LabCleanApp(JupyterApp):
             extensions=self.extensions,
             settings=self.settings,
             static=self.static,
-            all=self.all
+            all=self.all,
         )
         clean(app_options=app_options)
 
@@ -252,230 +296,123 @@ class LabPathApp(JupyterApp):
         environment variable or it will fall back to
         '/lab/workspaces' in the default Jupyter configuration directory.
     """
+
     def start(self):
-        print('Application directory:   %s' % get_app_dir())
-        print('User Settings directory: %s' % get_user_settings_dir())
-        print('Workspaces directory: %s' % get_workspaces_dir())
+        print(f"Application directory:   {get_app_dir()}")
+        print(f"User Settings directory: {get_user_settings_dir()}")
+        print(f"Workspaces directory: {get_workspaces_dir()}")
 
 
-class LabWorkspaceExportApp(JupyterApp):
+class LabWorkspaceExportApp(WorkspaceExportApp):
     version = version
-    description = """
-    Export a JupyterLab workspace
 
-    If no arguments are passed in, this command will export the default
-        workspace.
-    If a workspace name is passed in, this command will export that workspace.
-    If no workspace is found, this command will export an empty workspace.
-    """
-    def start(self):
-        app = LabApp(config=self.config)
-        base_url = app.settings.get('base_url', '/')
-        directory = app.workspaces_dir
-        app_url = app.app_url
-
-        if len(self.extra_args) > 1:
-            print('Too many arguments were provided for workspace export.')
-            self.exit(1)
-
-        workspaces_url = ujoin(app_url, 'workspaces')
-        raw = (app_url if not self.extra_args
-               else ujoin(workspaces_url, self.extra_args[0]))
-        slug = slugify(raw, base_url)
-        workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
-
-        if osp.exists(workspace_path):
-            with open(workspace_path) as fid:
-                try:  # to load the workspace file.
-                    print(fid.read())
-                except Exception as e:
-                    print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
-        else:
-            print(json.dumps(dict(data=dict(), metadata=dict(id=raw))))
+    @default("workspaces_dir")
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
 
 
-class LabWorkspaceImportApp(JupyterApp):
+class LabWorkspaceImportApp(WorkspaceImportApp):
     version = version
-    description = """
-    Import a JupyterLab workspace
 
-    This command will import a workspace from a JSON file. The format of the
-        file must be the same as what the export functionality emits.
-    """
-    workspace_name = Unicode(
-        None,
-        config=True,
-        allow_none=True,
-        help="""
-        Workspace name. If given, the workspace ID in the imported
-        file will be replaced with a new ID pointing to this
-        workspace name.
-        """
-    )
+    @default("workspaces_dir")
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
 
-    aliases = {
-        'name': 'LabWorkspaceImportApp.workspace_name'
-    }
 
-    def start(self):
-        app = LabApp(config=self.config)
-        base_url = app.settings.get('base_url', '/')
-        directory = app.workspaces_dir
-        app_url = app.app_url
-        workspaces_url = ujoin(app.app_url, 'workspaces')
+class LabWorkspaceListApp(WorkspaceListApp):
+    version = version
 
-        if len(self.extra_args) != 1:
-            print('One argument is required for workspace import.')
-            self.exit(1)
-
-        workspace = dict()
-        with self._smart_open() as fid:
-            try:  # to load, parse, and validate the workspace file.
-                workspace = self._validate(fid, base_url, app_url, workspaces_url)
-            except Exception as e:
-                print('%s is not a valid workspace:\n%s' % (fid.name, e))
-                self.exit(1)
-
-        if not osp.exists(directory):
-            try:
-                os.makedirs(directory)
-            except Exception as e:
-                print('Workspaces directory could not be created:\n%s' % e)
-                self.exit(1)
-
-        slug = slugify(workspace['metadata']['id'], base_url)
-        workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
-
-        # Write the workspace data to a file.
-        with open(workspace_path, 'w') as fid:
-            fid.write(json.dumps(workspace))
-
-        print('Saved workspace: %s' % workspace_path)
-
-    def _smart_open(self):
-        file_name = self.extra_args[0]
-
-        if file_name == '-':
-            return sys.stdin
-        else:
-            file_path = osp.abspath(file_name)
-
-            if not osp.exists(file_path):
-                print('%s does not exist.' % file_name)
-                self.exit(1)
-
-            return open(file_path)
-
-    def _validate(self, data, base_url, app_url, workspaces_url):
-        workspace = json.load(data)
-
-        if 'data' not in workspace:
-            raise Exception('The `data` field is missing.')
-
-        # If workspace_name is set in config, inject the
-        # name into the workspace metadata.
-        if self.workspace_name is not None:
-            if self.workspace_name == "":
-                workspace_id = ujoin(base_url, app_url)
-            else:
-                workspace_id = ujoin(base_url, workspaces_url, self.workspace_name)
-            workspace['metadata'] = {'id': workspace_id}
-        # else check that the workspace_id is valid.
-        else:
-            if 'id' not in workspace['metadata']:
-                raise Exception('The `id` field is missing in `metadata`.')
-            else:
-                id = workspace['metadata']['id']
-                if id != ujoin(base_url, app_url) and not id.startswith(ujoin(base_url, workspaces_url)):
-                    error = '%s does not match app_url or start with workspaces_url.'
-                    raise Exception(error % id)
-
-        return workspace
+    @default("workspaces_dir")
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
 
 
 class LabWorkspaceApp(JupyterApp):
     version = version
     description = """
-    Import or export a JupyterLab workspace
+    Import or export a JupyterLab workspace or list all the JupyterLab workspaces
 
-    There are two sub-commands for export or import of workspaces. This app
+    There are three sub-commands for export, import or listing of workspaces. This app
         should not otherwise do any work.
     """
-    subcommands = dict()
-    subcommands['export'] = (
+    subcommands = {}
+    subcommands["export"] = (
         LabWorkspaceExportApp,
-        LabWorkspaceExportApp.description.splitlines()[0]
+        LabWorkspaceExportApp.description.splitlines()[0],
     )
-    subcommands['import'] = (
+    subcommands["import"] = (
         LabWorkspaceImportApp,
-        LabWorkspaceImportApp.description.splitlines()[0]
+        LabWorkspaceImportApp.description.splitlines()[0],
+    )
+    subcommands["list"] = (
+        LabWorkspaceListApp,
+        LabWorkspaceListApp.description.splitlines()[0],
     )
 
     def start(self):
         try:
             super().start()
-            print('Either `export` or `import` must be specified.')
+            self.log.error("One of `export`, `import` or `list` must be specified.")
             self.exit(1)
         except NoStart:
             pass
         self.exit(0)
 
 
-if LicensesApp is not None:
-    class LabLicensesApp(LicensesApp):
-        version = version
+class LabLicensesApp(LicensesApp):
+    version = version
 
-        dev_mode = Bool(
-            False,
-            config=True,
-            help="""Whether to start the app in dev mode. Uses the unpublished local
-            JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
-            show a red stripe at the top of the page.  It can only be used if JupyterLab
-            is installed as `pip install -e .`.
-            """,
-        )
+    dev_mode = Bool(
+        False,
+        config=True,
+        help="""Whether to start the app in dev mode. Uses the unpublished local
+        JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
+        show a red stripe at the top of the page.  It can only be used if JupyterLab
+        is installed as `pip install -e .`.
+        """,
+    )
 
-        app_dir = Unicode(
-            "", config=True, help="The app directory for which to show licenses"
-        )
+    app_dir = Unicode("", config=True, help="The app directory for which to show licenses")
 
-        aliases = {
-            **LicensesApp.aliases,
-            "app-dir": "LabLicensesApp.app_dir",
-        }
+    aliases = {
+        **LicensesApp.aliases,
+        "app-dir": "LabLicensesApp.app_dir",
+    }
 
-        flags = {
-            **LicensesApp.flags,
-            "dev-mode": (
-                {"LabLicensesApp": {"dev_mode": True}},
-                "Start the app in dev mode for running from source.",
-            ),
-        }
+    flags = {
+        **LicensesApp.flags,
+        "dev-mode": (
+            {"LabLicensesApp": {"dev_mode": True}},
+            "Start the app in dev mode for running from source.",
+        ),
+    }
 
-        @default('app_dir')
-        def _default_app_dir(self):
-            return get_app_dir()
+    @default("app_dir")
+    def _default_app_dir(self):
+        return get_app_dir()
 
-        @default('static_dir')
-        def _default_static_dir(self):
-            return pjoin(self.app_dir, 'static')
+    @default("static_dir")
+    def _default_static_dir(self):
+        return pjoin(self.app_dir, "static")
 
 
 aliases = dict(base_aliases)
-aliases.update({
-    'ip': 'ServerApp.ip',
-    'port': 'ServerApp.port',
-    'port-retries': 'ServerApp.port_retries',
-    'keyfile': 'ServerApp.keyfile',
-    'certfile': 'ServerApp.certfile',
-    'client-ca': 'ServerApp.client_ca',
-    'notebook-dir': 'ServerApp.root_dir',
-    'browser': 'ServerApp.browser',
-    'pylab': 'ServerApp.pylab',
-})
+aliases.update(
+    {
+        "ip": "ServerApp.ip",
+        "port": "ServerApp.port",
+        "port-retries": "ServerApp.port_retries",
+        "keyfile": "ServerApp.keyfile",
+        "certfile": "ServerApp.certfile",
+        "client-ca": "ServerApp.client_ca",
+        "notebook-dir": "ServerApp.root_dir",
+        "browser": "ServerApp.browser",
+        "pylab": "ServerApp.pylab",
+    }
+)
 
 
-class LabApp(NBClassicConfigShimMixin, LabServerApp):
+class LabApp(NotebookConfigShimMixin, LabServerApp):
     version = version
 
     name = "lab"
@@ -514,107 +451,177 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     """
 
     aliases = aliases
-    aliases.update({
-        'watch': 'LabApp.watch',
-    })
-    aliases['app-dir'] = 'LabApp.app_dir'
+    aliases.update(
+        {
+            "watch": "LabApp.watch",
+        }
+    )
+    aliases["app-dir"] = "LabApp.app_dir"
 
     flags = flags
-    flags['core-mode'] = (
-        {'LabApp': {'core_mode': True}},
-        "Start the app in core mode."
+    flags["core-mode"] = (
+        {"LabApp": {"core_mode": True}},
+        "Start the app in core mode.",
     )
-    flags['dev-mode'] = (
-        {'LabApp': {'dev_mode': True}},
-        "Start the app in dev mode for running from source."
+    flags["dev-mode"] = (
+        {"LabApp": {"dev_mode": True}},
+        "Start the app in dev mode for running from source.",
     )
-    flags['watch'] = (
-        {'LabApp': {'watch': True}},
-        "Start the app in watch mode."
+    flags["skip-dev-build"] = (
+        {"LabApp": {"skip_dev_build": True}},
+        "Skip the initial install and JS build of the app in dev mode.",
     )
-    flags['splice-source'] = (
-        {'LabApp': {'splice_source': True}},
-        "Splice source packages into app directory."
+    flags["watch"] = ({"LabApp": {"watch": True}}, "Start the app in watch mode.")
+    flags["splice-source"] = (
+        {"LabApp": {"splice_source": True}},
+        "Splice source packages into app directory.",
     )
-    flags['expose-app-in-browser'] = (
-        {'LabApp': {'expose_app_in_browser': True}},
-        "Expose the global app instance to browser via window.jupyterlab."
+    flags["expose-app-in-browser"] = (
+        {"LabApp": {"expose_app_in_browser": True}},
+        "Expose the global app instance to browser via window.jupyterapp.",
     )
-    flags['extensions-in-dev-mode'] = (
-        {'LabApp': {'extensions_in_dev_mode': True}},
-        "Load prebuilt extensions in dev-mode."
+    flags["extensions-in-dev-mode"] = (
+        {"LabApp": {"extensions_in_dev_mode": True}},
+        "Load prebuilt extensions in dev-mode.",
     )
-    flags['collaborative'] = (
-        {'LabApp': {'collaborative': True}},
-        "Whether to enable collaborative mode."
+    flags["collaborative"] = (
+        {"LabApp": {"collaborative": True}},
+        """To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+        You can install it using pip for example:
+
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
+    )
+    flags["custom-css"] = (
+        {"LabApp": {"custom_css": True}},
+        "Load custom CSS in template html files. Default is False",
     )
 
-    subcommands = dict(
-        build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
-        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        path=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0])
+    subcommands = {
+        "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
+        "clean": (LabCleanApp, LabCleanApp.description.splitlines()[0]),
+        "path": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "paths": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "workspace": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "workspaces": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "licenses": (LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
+    }
+
+    default_url = Unicode("/lab", config=True, help="The default URL to redirect to from `/`")
+
+    override_static_url = Unicode(
+        config=True, help=("The override url for static lab assets, typically a CDN.")
     )
 
-    # TODO: remove when oldest compatible jupyterlab_server contains license tooling
-    if LicensesApp is not None:
-        subcommands.update(
-            licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0])
-        )
+    override_theme_url = Unicode(
+        config=True,
+        help=("The override url for static lab theme assets, typically a CDN."),
+    )
 
-    default_url = Unicode('/lab', config=True,
-        help="The default URL to redirect to from `/`")
+    app_dir = Unicode(None, config=True, help="The app directory to launch JupyterLab from.")
 
-    override_static_url = Unicode(config=True, help=('The override url for static lab assets, typically a CDN.'))
+    user_settings_dir = Unicode(
+        get_user_settings_dir(), config=True, help="The directory for user settings."
+    )
 
-    override_theme_url = Unicode(config=True, help=('The override url for static lab theme assets, typically a CDN.'))
+    workspaces_dir = Unicode(get_workspaces_dir(), config=True, help="The directory for workspaces")
 
-    app_dir = Unicode(None, config=True,
-        help="The app directory to launch JupyterLab from.")
-
-    user_settings_dir = Unicode(get_user_settings_dir(), config=True,
-        help="The directory for user settings.")
-
-    workspaces_dir = Unicode(get_workspaces_dir(), config=True,
-        help="The directory for workspaces")
-
-    core_mode = Bool(False, config=True,
+    core_mode = Bool(
+        False,
+        config=True,
         help="""Whether to start the app in core mode. In this mode, JupyterLab
         will run using the JavaScript assets that are within the installed
         JupyterLab Python package. In core mode, third party extensions are disabled.
         The `--dev-mode` flag is an alias to this to be used when the Python package
         itself is installed in development mode (`pip install -e .`).
-        """)
+        """,
+    )
 
-    dev_mode = Bool(False, config=True,
+    dev_mode = Bool(
+        False,
+        config=True,
         help="""Whether to start the app in dev mode. Uses the unpublished local
         JavaScript packages in the `dev_mode` folder.  In this case JupyterLab will
         show a red stripe at the top of the page.  It can only be used if JupyterLab
         is installed as `pip install -e .`.
-        """)
+        """,
+    )
 
-    extensions_in_dev_mode = Bool(False, config=True,
+    extensions_in_dev_mode = Bool(
+        False,
+        config=True,
         help="""Whether to load prebuilt extensions in dev mode. This may be
         useful to run and test prebuilt extensions in development installs of
         JupyterLab. APIs in a JupyterLab development install may be
         incompatible with published packages, so prebuilt extensions compiled
-        against published packages may not work correctly.""")
+        against published packages may not work correctly.""",
+    )
 
-    watch = Bool(False, config=True,
-        help="Whether to serve the app in watch mode")
+    extension_manager = Unicode(
+        "pypi",
+        config=True,
+        help="""The extension manager factory to use. The default options are:
+        "readonly" for a manager without installation capability or "pypi" for
+        a manager using PyPi.org and pip to install extensions.""",
+    )
 
-    splice_source = Bool(False, config=True,
-        help="Splice source packages into app directory.")
+    watch = Bool(False, config=True, help="Whether to serve the app in watch mode")
 
-    expose_app_in_browser = Bool(False, config=True,
-        help="Whether to expose the global app instance to browser via window.jupyterlab")
+    skip_dev_build = Bool(
+        False,
+        config=True,
+        help="Whether to skip the initial install and JS build of the app in dev mode",
+    )
 
-    collaborative = Bool(False, config=True,
-        help="Whether to enable collaborative mode.")
+    splice_source = Bool(False, config=True, help="Splice source packages into app directory.")
 
-    @default('app_dir')
+    expose_app_in_browser = Bool(
+        False,
+        config=True,
+        help="Whether to expose the global app instance to browser via window.jupyterapp",
+    )
+
+    custom_css = Bool(
+        False,
+        config=True,
+        help="""Whether custom CSS is loaded on the page.
+    Defaults to False.
+    """,
+    )
+
+    collaborative = Bool(
+        False,
+        config=True,
+        help="""To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+        You can install it using pip for example:
+
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
+    )
+
+    news_url = Unicode(
+        "https://jupyterlab.github.io/assets/feed.xml",
+        allow_none=True,
+        help="""URL that serves news Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
+        config=True,
+    )
+
+    lock_all_plugins = Bool(
+        False,
+        config=True,
+        help="Whether all plugins are locked (cannot be enabled/disabled from the UI)",
+    )
+
+    check_for_updates_class = Type(
+        default_value=CheckForUpdate,
+        klass=CheckForUpdateABC,
+        config=True,
+        help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
+    )
+
+    @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
         if self.core_mode:
@@ -623,79 +630,88 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             app_dir = DEV_DIR
         return app_dir
 
-    @default('app_settings_dir')
+    @default("app_settings_dir")
     def _default_app_settings_dir(self):
-        return pjoin(self.app_dir, 'settings')
+        return pjoin(self.app_dir, "settings")
 
-    @default('app_version')
+    @default("app_version")
     def _default_app_version(self):
         return app_version
 
-    @default('cache_files')
+    @default("cache_files")
     def _default_cache_files(self):
         return False
 
-    @default('schemas_dir')
+    @default("schemas_dir")
     def _default_schemas_dir(self):
-        return pjoin(self.app_dir, 'schemas')
+        return pjoin(self.app_dir, "schemas")
 
-    @default('templates_dir')
+    @default("templates_dir")
     def _default_templates_dir(self):
-        return pjoin(self.app_dir, 'static')
+        return pjoin(self.app_dir, "static")
 
-    @default('themes_dir')
+    @default("themes_dir")
     def _default_themes_dir(self):
         if self.override_theme_url:
-            return ''
-        return pjoin(self.app_dir, 'themes')
+            return ""
+        return pjoin(self.app_dir, "themes")
 
-    @default('static_dir')
+    @default("static_dir")
     def _default_static_dir(self):
-        return pjoin(self.app_dir, 'static')
+        return pjoin(self.app_dir, "static")
 
-    @default('static_url_prefix')
+    @default("static_url_prefix")
     def _default_static_url_prefix(self):
         if self.override_static_url:
             return self.override_static_url
         else:
-            static_url = "/static/{name}/".format(
-            name=self.name)
+            static_url = f"/static/{self.name}/"
             return ujoin(self.serverapp.base_url, static_url)
 
-    @default('theme_url')
+    @default("theme_url")
     def _default_theme_url(self):
         if self.override_theme_url:
             return self.override_theme_url
-        return ''
+        return ""
 
     def initialize_templates(self):
         # Determine which model to run JupyterLab
-        if self.core_mode or self.app_dir.startswith(HERE):
+        if self.core_mode or self.app_dir.startswith(HERE + os.sep):
             self.core_mode = True
-            self.log.info('Running JupyterLab in core mode')
+            self.log.info("Running JupyterLab in core mode")
 
-        if self.dev_mode or self.app_dir.startswith(DEV_DIR):
+        if self.dev_mode or self.app_dir.startswith(DEV_DIR + os.sep):
             self.dev_mode = True
-            self.log.info('Running JupyterLab in dev mode')
+            self.log.info("Running JupyterLab in dev mode")
 
         if self.watch and self.core_mode:
-            self.log.warn('Cannot watch in core mode, did you mean --dev-mode?')
+            self.log.warning("Cannot watch in core mode, did you mean --dev-mode?")
             self.watch = False
 
         if self.core_mode and self.dev_mode:
-            self.log.warn('Conflicting modes, choosing dev_mode over core_mode')
+            self.log.warning("Conflicting modes, choosing dev_mode over core_mode")
             self.core_mode = False
 
         # Set the paths based on JupyterLab's mode.
         if self.dev_mode:
-            dev_static_dir = ujoin(DEV_DIR, 'static')
+            dev_static_dir = ujoin(DEV_DIR, "static")
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
             if not self.extensions_in_dev_mode:
-                self.labextensions_path = []
-                self.extra_labextensions_path = []
+                # Add an exception for @jupyterlab/galata-extension
+                galata_extension = pjoin(HERE, "galata")
+                self.labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.labextensions_path)
+                    else []
+                )
+                self.extra_labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.extra_labextensions_path)
+                    else []
+                )
         elif self.core_mode:
-            dev_static_dir = ujoin(HERE, 'static')
+            dev_static_dir = ujoin(HERE, "static")
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
             self.labextensions_path = []
@@ -704,39 +720,50 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
+    def _prepare_templates(self):
+        super()._prepare_templates()
+        self.jinja2_env.globals.update(custom_css=self.custom_css)
 
-    def initialize_settings(self):
-        super().initialize_settings()
-
-
-    def initialize_handlers(self):
-
+    def initialize_handlers(self):  # noqa
         handlers = []
 
         # Set config for Jupyterlab
-        page_config = self.serverapp.web_app.settings.setdefault('page_config_data', {})
-        page_config.setdefault('buildAvailable', not self.core_mode and not self.dev_mode)
-        page_config.setdefault('buildCheck', not self.core_mode and not self.dev_mode)
-        page_config['devMode'] = self.dev_mode
-        page_config['token'] = self.serverapp.token
-        page_config['exposeAppInBrowser'] = self.expose_app_in_browser
-        page_config['quitButton'] = self.serverapp.quit_button
-        page_config['collaborative'] = self.collaborative
+        page_config = self.serverapp.web_app.settings.setdefault("page_config_data", {})
+        page_config.setdefault("buildAvailable", not self.core_mode and not self.dev_mode)
+        page_config.setdefault("buildCheck", not self.core_mode and not self.dev_mode)
+        page_config["devMode"] = self.dev_mode
+        page_config["token"] = self.serverapp.identity_provider.token
+        page_config["exposeAppInBrowser"] = self.expose_app_in_browser
+        page_config["quitButton"] = self.serverapp.quit_button
+        page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
-        page_config['notebookVersion'] = json.dumps(jpserver_version_info)
+        page_config["notebookVersion"] = json.dumps(jpserver_version_info)
 
-        self.log.info('JupyterLab extension loaded from %s' % HERE)
-        self.log.info('JupyterLab application directory is %s' % self.app_dir)
+        self.log.info(f"JupyterLab extension loaded from {HERE!s}")
+        self.log.info(f"JupyterLab application directory is {self.app_dir!s}")
 
-        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir, labextensions_path = self.extra_labextensions_path + self.labextensions_path, splice_source=self.splice_source)
-        builder = Builder(self.core_mode, app_options=build_handler_options)
-        build_handler = (build_path, BuildHandler, {'builder': builder})
+        if self.custom_css:
+            handlers.append(
+                (
+                    r"/custom/(.*)(?<!\.js)$",
+                    self.serverapp.web_app.settings["static_handler_class"],
+                    {
+                        "path": self.serverapp.web_app.settings["static_custom_path"],
+                        "no_cache_paths": ["/"],  # don't cache anything in custom
+                    },
+                )
+            )
+
+        app_options = AppOptions(
+            logger=self.log,
+            app_dir=self.app_dir,
+            labextensions_path=self.extra_labextensions_path + self.labextensions_path,
+            splice_source=self.splice_source,
+        )
+        builder = Builder(self.core_mode, app_options=app_options)
+        build_handler = (build_path, BuildHandler, {"builder": builder})
         handlers.append(build_handler)
-
-        # Yjs Echo WebSocket handler
-        yjs_echo_handler = (r"/api/yjs/(.*)", YjsEchoWebSocket)
-        handlers.append(yjs_echo_handler)
 
         errored = False
 
@@ -744,7 +771,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             self.log.info(CORE_NOTE.strip())
             ensure_core(self.log)
         elif self.dev_mode:
-            if not self.watch:
+            if not (self.watch or self.skip_dev_build):
                 ensure_dev(self.log)
                 self.log.info(DEV_NOTE)
         else:
@@ -753,44 +780,137 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             msgs = ensure_app(self.app_dir)
             if msgs:
                 [self.log.error(msg) for msg in msgs]
-                handler = (self.app_url, ErrorHandler, { 'messages': msgs })
+                handler = (self.app_url, ErrorHandler, {"messages": msgs})
                 handlers.append(handler)
                 errored = True
 
         if self.watch:
-            self.log.info('Starting JupyterLab watch mode...')
+            self.log.info("Starting JupyterLab watch mode...")
             if self.dev_mode:
                 watch_dev(self.log)
             else:
-                watch(app_options=build_handler_options)
-                page_config['buildAvailable'] = False
+                watch(app_options=app_options)
+                page_config["buildAvailable"] = False
             self.cache_files = False
 
         if not self.core_mode and not errored:
-            ext_manager = ExtensionManager(app_options=build_handler_options)
+            # Add extension management handlers
+            provider = self.extension_manager
+            entry_point = EXT_MANAGERS.get(provider)
+            if entry_point is None:
+                self.log.error(f"Extension Manager: No manager defined for provider '{provider}'.")
+                raise NotImplementedError()
+            else:
+                self.log.info(f"Extension Manager is '{provider}'.")
+            manager_factory = entry_point.load()
+            config = self.settings.get("config", {}).get("LabServerApp", {})
+
+            blocked_extensions_uris = config.get("blocked_extensions_uris", "")
+            allowed_extensions_uris = config.get("allowed_extensions_uris", "")
+
+            if (blocked_extensions_uris) and (allowed_extensions_uris):
+                self.log.error(
+                    "Simultaneous LabServerApp.blocked_extensions_uris and LabServerApp.allowed_extensions_uris is not supported. Please define only one of those."
+                )
+                import sys
+
+                sys.exit(-1)
+
+            listings_config = {
+                "blocked_extensions_uris": set(
+                    filter(lambda uri: len(uri) > 0, blocked_extensions_uris.split(","))
+                ),
+                "allowed_extensions_uris": set(
+                    filter(lambda uri: len(uri) > 0, allowed_extensions_uris.split(","))
+                ),
+                "listings_refresh_seconds": config.get("listings_refresh_seconds", 60 * 60),
+                "listings_tornado_options": config.get("listings_tornado_options", {}),
+            }
+            if len(listings_config["blocked_extensions_uris"]) or len(
+                listings_config["allowed_extensions_uris"]
+            ):
+                self.log.debug(f"Extension manager will be constrained by {listings_config}")
+
+            try:
+                ext_manager = manager_factory(app_options, listings_config, self)
+                metadata = dataclasses.asdict(ext_manager.metadata)
+            except Exception as err:
+                self.log.warning(
+                    f"Failed to instantiate the extension manager {provider}. Falling back to read-only manager.",
+                    exc_info=err,
+                )
+                ext_manager = ReadOnlyExtensionManager(app_options, listings_config, self)
+                metadata = dataclasses.asdict(ext_manager.metadata)
+
+            page_config["extensionManager"] = metadata
             ext_handler = (
                 extensions_handler_path,
                 ExtensionHandler,
-                {'manager': ext_manager}
+                {"manager": ext_manager},
             )
             handlers.append(ext_handler)
 
+            # Add plugin manager handlers
+            lock_rules = frozenset(
+                {rule for rule, value in page_config.get("lockedExtensions", {}).items() if value}
+            )
+            handlers.append(
+                (
+                    plugins_handler_path,
+                    PluginHandler,
+                    {
+                        "manager": PluginManager(
+                            app_options=app_options,
+                            ext_options={
+                                "lock_rules": lock_rules,
+                                "all_locked": self.lock_all_plugins,
+                            },
+                            parent=self,
+                        )
+                    },
+                )
+            )
+
+            # Add announcement handlers
+            page_config["news"] = {"disabled": self.news_url is None}
+            handlers.extend(
+                [
+                    (
+                        check_update_handler_path,
+                        CheckForUpdateHandler,
+                        {
+                            "update_checker": self.check_for_updates_class(__version__),
+                        },
+                    ),
+                    (
+                        news_handler_path,
+                        NewsHandler,
+                        {
+                            "news_url": self.news_url,
+                        },
+                    ),
+                ]
+            )
+
         # If running under JupyterHub, add more metadata.
-        if 'hub_prefix' in self.serverapp.tornado_settings:
+        if "hub_prefix" in self.serverapp.tornado_settings:
             tornado_settings = self.serverapp.tornado_settings
-            hub_prefix = tornado_settings['hub_prefix']
-            page_config['hubPrefix'] = hub_prefix
-            page_config['hubHost'] = tornado_settings['hub_host']
-            page_config['hubUser'] = tornado_settings['user']
-            page_config['shareUrl'] = ujoin(hub_prefix, 'user-redirect')
+            hub_prefix = tornado_settings["hub_prefix"]
+            page_config["hubPrefix"] = hub_prefix
+            page_config["hubHost"] = tornado_settings["hub_host"]
+            page_config["hubUser"] = tornado_settings["user"]
+            page_config["shareUrl"] = ujoin(hub_prefix, "user-redirect")
             # Assume the server_name property indicates running JupyterHub 1.0.
-            if hasattr(self.serverapp, 'server_name'):
-                page_config['hubServerName'] = self.serverapp.server_name
-            api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
-            page_config['token'] = api_token
+            if hasattr(self.serverapp, "server_name"):
+                page_config["hubServerName"] = self.serverapp.server_name
+            # avoid setting API token in page config
+            # $JUPYTERHUB_API_TOKEN identifies the server, not the client
+            # but at least make sure we don't use the token
+            # if the serverapp set one
+            page_config["token"] = ""
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
-        self.serverapp.web_app.settings['page_config_data'] = page_config
+        self.serverapp.web_app.settings["page_config_data"] = page_config
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
@@ -799,12 +919,29 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def initialize(self, argv=None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
+        if self.collaborative:
+            try:
+                import jupyter_collaboration  # noqa
+            except ImportError:
+                self.log.critical(
+                    """\
+Jupyter Lab cannot start, because `jupyter_collaboration` was configured but cannot be `import`ed.
 
-#-----------------------------------------------------------------------------
+To fix this, either:
+
+1) install the extension `jupyter-collaboration`; for example: `python -m pip install jupyter-collaboration`
+
+2) disable collaboration; for example, remove the `--collaborative` flag from the commandline.  To see more ways to adjust the collaborative behavior, see https://jupyterlab-realtime-collaboration.readthedocs.io/en/latest/configuration.html .
+"""
+                )
+                sys.exit(1)
+
+
+# -----------------------------------------------------------------------------
 # Main entry point
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 main = launch_new_instance = LabApp.launch_instance
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

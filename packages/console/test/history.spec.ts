@@ -2,13 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
+import { ConsoleHistory } from '@jupyterlab/console';
 import { KernelMessage } from '@jupyterlab/services';
-import { createSessionContext, signalToPromise } from '@jupyterlab/testutils';
-import { ConsoleHistory } from '../src';
+import { createStandaloneCell } from '@jupyter/ydoc';
+import { signalToPromise } from '@jupyterlab/testing';
 
-const mockHistory = ({
+const mockHistory = {
   header: null,
   parent_header: {
     date: '',
@@ -30,7 +32,7 @@ const mockHistory = ({
       [0, 0, 'qux']
     ]
   }
-} as unknown) as KernelMessage.IHistoryReplyMsg;
+} as unknown as KernelMessage.IHistoryReplyMsg;
 
 class TestHistory extends ConsoleHistory {
   methods: string[] = [];
@@ -161,11 +163,17 @@ describe('console/history', () => {
         expect(history.methods).toEqual(
           expect.not.arrayContaining(['onTextChange'])
         );
-        const model = new CodeEditor.Model();
+        const model = new CodeEditor.Model({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
         const host = document.createElement('div');
-        const editor = new CodeMirrorEditor({ model, host });
+        const editor = new CodeMirrorEditor({
+          model,
+          host,
+          extensions: [ybinding({ ytext: (model.sharedModel as any).ysource })]
+        });
         history.editor = editor;
-        model.value.text = 'foo';
+        model.sharedModel.setSource('foo');
         expect(history.methods).toEqual(
           expect.arrayContaining(['onTextChange'])
         );
@@ -179,17 +187,23 @@ describe('console/history', () => {
           expect.not.arrayContaining(['onEdgeRequest'])
         );
         const host = document.createElement('div');
-        const model = new CodeEditor.Model();
-        const editor = new CodeMirrorEditor({ model, host });
+        const model = new CodeEditor.Model({
+          sharedModel: createStandaloneCell({ cell_type: 'code' })
+        });
+        const editor = new CodeMirrorEditor({
+          model,
+          host,
+          extensions: [ybinding({ ytext: (model.sharedModel as any).ysource })]
+        });
         history.editor = editor;
         history.push('foo');
-        const promise = signalToPromise(editor.model.value.changed);
+        const promise = signalToPromise(editor.model.sharedModel.changed);
         editor.edgeRequested.emit('top');
         expect(history.methods).toEqual(
           expect.arrayContaining(['onEdgeRequest'])
         );
         await promise;
-        expect(editor.model.value.text).toBe('foo');
+        expect(editor.model.sharedModel.getSource()).toBe('foo');
       });
     });
   });

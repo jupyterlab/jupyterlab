@@ -20,7 +20,6 @@
 
 .lm-DockPanel-tabBar,
 .lm-TabPanel-tabBar {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
@@ -49,21 +48,48 @@
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   align-items: center;
   min-height: calc(
-    var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
+    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
-  min-width: 0px;
+  min-width: 0;
   margin-left: calc(-1 * var(--jp-border-width));
   line-height: var(--jp-private-horizontal-tab-height);
-  padding: 0px 8px;
+  padding: 0 8px;
   background: var(--jp-layout-color2);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-bottom: none;
   position: relative;
 }
 
+.lm-DockPanel-tabBar .lm-TabBar-tab:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-addButton:focus-visible,
+.lm-TabPanel-tabBar .lm-TabBar-tab:focus-visible {
+  border: 1px solid var(--accent-fill-focus);
+  border-bottom: none;
+
+  /* Thicken the border by 1px within the element border */
+  box-shadow: 0 0 0 1px inset var(--accent-fill-focus);
+  outline: none;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after,
+.lm-TabPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after {
+  border-bottom-color: var(--accent-fill-focus);
+}
+
 .lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current),
 .lm-TabPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current)::after,
+.lm-DockPanel-tabBar .lm-TabBar-addButton::after {
+  position: absolute;
+  content: '';
+  bottom: 0;
+  left: calc(-1 * var(--jp-border-width));
+  width: calc(100% + 2 * var(--jp-border-width));
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .lm-DockPanel-tabBar .lm-TabBar-tab:first-child,
@@ -74,20 +100,16 @@
 /* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
 .lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current {
   background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color0);
-  min-height: calc(
-    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
-  );
-  transform: translateY(var(--jp-border-width));
+  color: var(--jp-ui-font-color1);
 }
 
 .lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current {
   background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
 }
 
 /* This is the main application level current tab: only 1 exists. */
-.lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current:before {
+.lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current::before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width) + 1px);
   left: calc(-1 * var(--jp-border-width));
@@ -99,12 +121,8 @@
 
 /* This is the left tab bar current tab: only 1 exists. */
 .lm-TabBar-tab.lm-mod-current {
-  color: var(--jp-ui-font-color0);
   background: var(--jp-layout-color1);
-}
-
-.lm-TabBar-tab.lm-mod-current:hover {
-  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
 }
 
 .lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab,
@@ -127,6 +145,8 @@
   margin-top: 0;
 }
 
+/* stylelint-disable selector-max-class */
+
 .lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab.lm-mod-current,
 .lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab.lm-mod-current {
   min-width: 80px;
@@ -147,25 +167,18 @@
   margin-right: 4px;
 }
 
-.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon,
-.lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon {
-  margin-bottom: var(--jp-border-width);
-}
-
-.lm-TabBar-WindowTabLabel {
-  margin-top: 4px;
-}
+/* stylelint-enable selector-max-class */
 
 .lm-TabBar-tab.lm-mod-drag-image {
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-top: var(--jp-border-width) solid var(--jp-brand-color1);
   box-shadow: var(--jp-elevation-z4);
-  color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   line-height: var(--jp-private-horizontal-tab-height);
   min-height: var(--jp-private-horizontal-tab-height);
   min-width: var(--jp-private-horizontal-tab-width);
-  padding: 0px 10px;
+  padding: 0 10px;
   transform: translateX(-40%) translateY(-58%);
 }

@@ -1,0 +1,66 @@
+name: Fix License Headers
+
+on:
+  pull_request_target:
+
+jobs:
+  header-license-fix:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git to use https
+        run: git config --global hub.protocol https
+
+        #####
+        # This workflow is triggered by pull_request_target event.
+        # The following step will checkout the PR.
+        # DO NOT, UNDER ANY CIRCUMSTANCES, RUN ANY LOCAL CODE ON THE PR.
+        #####
+      - name: Checkout the branch from the PR that triggered the job
+        run: gh pr checkout ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fix License Header
+        # pin to include https://github.com/apache/skywalking-eyes/pull/168
+        uses: apache/skywalking-eyes/header@cd7b195c51fd3d6ad52afceb760719ddc6b3ee91
+        with:
+          mode: fix
+
+      - name: List files changed
+        id: files-changed
+        shell: bash -l {0}
+        run: |
+          set -ex
+          export CHANGES=$(git status --porcelain | tee /tmp/modified.log | wc -l)
+          cat /tmp/modified.log
+
+          echo "N_CHANGES=${CHANGES}" >> $GITHUB_OUTPUT
+
+          git diff
+
+      - name: Commit any changes
+        if: steps.files-changed.outputs.N_CHANGES != '0'
+        shell: bash -l {0}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git pull --no-tags
+
+          git add *
+          git commit -m "Automatic application of license header"
+
+          git config push.default upstream
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

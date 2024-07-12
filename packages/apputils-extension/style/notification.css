@@ -1,0 +1,246 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+@import '~react-toastify/dist/ReactToastify.min.css';
+
+:root {
+  --toastify-color-light: var(--jp-layout-color1);
+  --toastify-color-dark: var(--jp-layout-color1);
+  --toastify-color-info: var(--jp-info-color1);
+  --toastify-color-success: var(--jp-success-color1);
+  --toastify-color-warning: var(--jp-warn-color1);
+  --toastify-color-error: var(--jp-error-color1);
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-toast-width: 25em;
+  --toastify-toast-background: var(--jp-layout-color1);
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-max-height: 800px;
+  --toastify-font-family: var(--jp-ui-font-family);
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: var(--jp-ui-font-color1);
+  --toastify-text-color-dark: var(--jp-ui-font-color1);
+  --toastify-text-color-info: var(--jp-ui-font-color1);
+  --toastify-text-color-success: var(--jp-ui-font-color1);
+  --toastify-text-color-warning: var(--jp-ui-font-color1);
+  --toastify-text-color-error: var(--jp-ui-font-color1);
+  --toastify-spinner-color: #616161;
+  --toastify-spinner-color-empty-area: #e0e0e0;
+  --toastify-color-progress-light: linear-gradient(
+    to right,
+    #4cd964,
+    #5ac8fa,
+    #007aff,
+    #34aadc,
+    #5856d6,
+    #ff2d55
+  );
+  --toastify-color-progress-dark: #bb86fc;
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+}
+
+.jp-Notification-List {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  width: var(--toastify-toast-width);
+  overflow-y: auto;
+  max-height: 55vh;
+  box-sizing: border-box;
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-Notification-Header {
+  display: flex;
+  font-size: var(--jp-ui-font-size1);
+  padding-left: 8px;
+  padding-right: 4px;
+  margin: 0;
+  align-items: center;
+  user-select: none;
+}
+
+.jp-Notification-List-Item {
+  padding: 2px 0;
+}
+
+.jp-Notification-List .Toastify__toast {
+  margin: 0;
+}
+
+.jp-Notification-Status.jp-mod-selected {
+  background-color: var(--jp-brand-color1);
+}
+
+.jp-Notification-Status.jp-mod-selected .jp-Notification-Status-Text {
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.Toastify__toast {
+  min-height: unset;
+  padding: 4px;
+  font-size: var(--jp-ui-font-size1);
+  border-width: var(--jp-border-width);
+  border-radius: var(--jp-border-radius);
+  border-color: var(--jp-border-color1);
+  box-shadow: var(--jp-elevation-z4);
+  cursor: default;
+}
+
+.Toastify__toast-body {
+  display: flex;
+  flex-grow: 1;
+}
+
+.jp-Notification-Toast-Close {
+  padding: 0;
+  position: absolute;
+  right: 0.1px;
+  cursor: pointer;
+}
+
+.jp-Notification-Toast-Close-Margin {
+  margin-right: 4px;
+}
+
+.jp-toastContainer .jp-Notification-Toast-Close:hover {
+  /* The close button has its own hover style */
+  background: none;
+}
+
+.Toastify__toast.jp-Notification-Toast-error {
+  border-top: 5px solid var(--jp-error-color1);
+}
+
+.Toastify__toast.jp-Notification-Toast-warning {
+  border-top: 5px solid var(--jp-warn-color1);
+}
+
+.Toastify__toast.jp-Notification-Toast-info {
+  border-top: 5px solid var(--jp-info-color1);
+}
+
+.Toastify__toast.jp-Notification-Toast-success {
+  border-top: 5px solid var(--jp-success-color1);
+}
+
+.Toastify__toast.jp-Notification-Toast-in-progress {
+  border-top: 5px solid var(--jp-layout-color1);
+}
+
+.Toastify__toast-body a {
+  color: var(--jp-content-link-color);
+}
+
+.Toastify__toast-body a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+.jp-toast-message {
+  padding-inline-end: 16px;
+}
+
+/* p elements are added by the markdown rendering.
+ * Removing its default margin allows to reduce toast size.
+ */
+.Toastify__toast-body p:first-child,
+.Toastify__toast-body h1:first-child,
+.Toastify__toast-body h2:first-child,
+.Toastify__toast-body h3:first-child,
+.Toastify__toast-body h4:first-child,
+.Toastify__toast-body h5:first-child,
+.Toastify__toast-body h6:first-child,
+.Toastify__toast-body ol:first-child,
+.Toastify__toast-body ul:first-child {
+  margin-top: 0;
+}
+
+.Toastify__toast-body p:last-child,
+.Toastify__toast-body h1:last-child,
+.Toastify__toast-body h2:last-child,
+.Toastify__toast-body h3:last-child,
+.Toastify__toast-body h4:last-child,
+.Toastify__toast-body h5:last-child,
+.Toastify__toast-body h6:last-child,
+.Toastify__toast-body ol:last-child,
+.Toastify__toast-body ul:last-child {
+  margin-bottom: 0;
+}
+
+.jp-toast-buttonBar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+  padding-block-start: 8px;
+}
+
+.jp-toast-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.jp-toast-button {
+  margin-top: 1px;
+  margin-bottom: 1px;
+  margin-right: 0;
+  margin-left: 3px;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color2);
+  border: none;
+}
+
+.jp-toast-button:focus {
+  outline: 1px solid var(--jp-reject-color-normal, var(--jp-layout-color2));
+  outline-offset: 1px;
+  -moz-outline-radius: 0;
+}
+
+.jp-toast-button:focus-visible {
+  border: none;
+}
+
+.jp-toast-button:hover {
+  background-color: var(--jp-layout-color3);
+}
+
+.jp-toast-button.jp-mod-accept {
+  background: var(--jp-accept-color-normal, var(--jp-brand-color1));
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-toast-button.jp-mod-accept:focus {
+  outline-color: var(--jp-accept-color-normal, var(--jp-brand-color1));
+}
+
+.jp-toast-button.jp-mod-accept:hover {
+  background: var(--jp-accept-color-hover, var(--jp-brand-color0));
+}
+
+.jp-toast-button.jp-mod-warn {
+  background: var(--jp-warn-color-normal, var(--jp-warn-color1));
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-toast-button.jp-mod-warn:focus {
+  outline-color: var(--jp-warn-color-normal, var(--jp-warn-color1));
+}
+
+.jp-toast-button.jp-mod-warn:hover {
+  background: var(--jp-warn-color-hover, var(--jp-warn-color0));
+}
+
+.jp-toast-button.jp-mod-link {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+  text-decoration-color: var(--jp-content-link-color);
+}

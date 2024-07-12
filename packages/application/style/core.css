@@ -1,0 +1,92 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-menu-panel-height: 27px;
+}
+
+.lm-Widget.lm-mod-hidden {
+  display: none !important;
+}
+
+.jp-ThemedContainer {
+  font-family: var(--jp-ui-font-family);
+  background: var(--jp-layout-color3);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.jp-LabShell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.jp-LabShell.jp-mod-devMode {
+  border-top: 4px solid red;
+}
+
+#jp-main-dock-panel {
+  padding: 5px;
+}
+
+#jp-main-dock-panel[data-mode='single-document'] {
+  padding: 0;
+}
+
+#jp-main-dock-panel[data-mode='single-document'] .jp-MainAreaWidget {
+  border: none;
+}
+
+#jp-top-panel {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+  background: var(--jp-layout-color1);
+  display: flex;
+  min-height: var(--jp-private-menubar-height);
+  overflow: visible;
+
+  /* relax lumino strict CSS contaiment to allow painting the menu bar item
+  over the menu in order to create an illusion of partial border */
+  contain: style size !important;
+}
+
+#jp-menu-panel {
+  min-height: var(--jp-private-menu-panel-height);
+  background: var(--jp-layout-color1);
+}
+
+#jp-down-stack {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.jp-LabShell[data-shell-mode='single-document'] #jp-top-panel {
+  border-bottom: none;
+}
+
+.jp-LabShell[data-shell-mode='single-document'] #jp-menu-panel {
+  padding-left: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+
+  /* Adjust min-height so open menus show up in the right place */
+  min-height: calc(
+    var(--jp-private-menu-panel-height) + var(--jp-border-width)
+  );
+}
+
+#jp-bottom-panel {
+  background: var(--jp-layout-color1);
+  display: flex;
+}
+
+#jp-single-document-mode {
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+}

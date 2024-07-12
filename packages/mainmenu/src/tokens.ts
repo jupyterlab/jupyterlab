@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker, MenuFactory } from '@jupyterlab/apputils';
+import { MenuFactory } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { Menu, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { IEditMenu } from './edit';
 import { IFileMenu } from './file';
 import { IHelpMenu } from './help';
@@ -13,35 +13,14 @@ import { ISettingsMenu } from './settings';
 import { ITabsMenu } from './tabs';
 import { IViewMenu } from './view';
 
-/* tslint:disable */
 /**
  * The main menu token.
  */
-export const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
-/* tslint:enable */
-
-/**
- * A base interface for a consumer of one of the menu
- * semantic extension points. The IMenuExtender gives
- * a widget tracker which is checked when the menu
- * is deciding which IMenuExtender to delegate to upon
- * selection of the menu item.
- */
-export interface IMenuExtender<T extends Widget> {
-  /**
-   * A widget tracker for identifying the appropriate extender.
-   */
-  tracker: IWidgetTracker<T>;
-
-  /**
-   * An additional function that determines whether the extender
-   * is enabled. By default it is considered enabled if the application
-   * active widget is contained in the `tracker`. If this is also
-   * provided, the criterion is equivalent to
-   * `tracker.has(widget) && extender.isEnabled(widget)`
-   */
-  isEnabled?: (widget: T) => boolean;
-}
+export const IMainMenu = new Token<IMainMenu>(
+  '@jupyterlab/mainmenu:IMainMenu',
+  `A service for the main menu bar for the application.
+  Use this if you want to add your own menu items or provide implementations for standardized menu items for specific activities.`
+);
 
 /**
  * The main menu interface.
@@ -49,8 +28,12 @@ export interface IMenuExtender<T extends Widget> {
 export interface IMainMenu {
   /**
    * Add a new menu to the main menu bar.
+   *
+   * @param menu The menu to add
+   * @param update Whether to update the menu bar or not
+   * @param options Options for adding the menu
    */
-  addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void;
+  addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void;
 
   /**
    * The application "File" menu.

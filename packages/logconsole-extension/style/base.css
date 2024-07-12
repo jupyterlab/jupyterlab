@@ -7,10 +7,12 @@
   0% {
     background-color: var(--jp-brand-color1);
   }
+
   50% {
     color: unset;
     background-color: unset;
   }
+
   100% {
     background-color: var(--jp-brand-color1);
   }
@@ -24,22 +26,21 @@
   background-color: var(--jp-brand-color1);
 }
 
-/* Need to be very specific to override the typestyle styles on status bar components */
+/* Override semi-transparent white with opaque white for higher contrast */
 .jp-LogConsoleStatusItem.jp-mod-selected,
-.jp-LogConsoleStatusItem.jp-mod-selected div,
-.jp-LogConsoleStatusItem.jp-mod-selected div span {
+.jp-LogConsoleStatusItem.jp-mod-selected .jp-StatusBar-TextItem {
   color: white;
 }
 
 .jp-LogConsole .jp-ClearIcon {
   transform: rotate(90deg);
   margin-top: -1px;
-  padding: 0px 8px;
+  padding: 0 8px;
 }
 
 .jp-Toolbar-item.jp-LogConsole-toolbarLogLevel {
   align-items: center;
-  padding: 0px 6px;
+  padding: 0 6px;
 }
 
 /* Matches the disabled style elsewhere in JupyterLab */

@@ -3,8 +3,7 @@
 
 import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import { Widget } from '@lumino/widgets';
-import { IMenuExtender } from './tokens';
+import { SemanticCommand } from '@jupyterlab/apputils';
 
 /**
  * An interface for a File menu.
@@ -21,14 +20,14 @@ export interface IFileMenu extends IRankedMenu {
   readonly newMenu: IRankedMenu;
 
   /**
-   * The close and cleanup extension point.
+   * The close and cleanup semantic command.
    */
-  readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
+  readonly closeAndCleaners: SemanticCommand;
 
   /**
-   * A set storing IConsoleCreators for the File menu.
+   * The console creator semantic command.
    */
-  readonly consoleCreators: Set<IFileMenu.IConsoleCreator<Widget>>;
+  readonly consoleCreators: SemanticCommand;
 }
 
 /**
@@ -39,9 +38,8 @@ export class FileMenu extends RankedMenu implements IFileMenu {
     super(options);
     this.quitEntry = false;
 
-    // Create the "New" submenu.
-    this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
-    this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
+    this.closeAndCleaners = new SemanticCommand();
+    this.consoleCreators = new SemanticCommand();
   }
 
   /**
@@ -60,21 +58,20 @@ export class FileMenu extends RankedMenu implements IFileMenu {
   }
 
   /**
-   * The close and cleanup extension point.
+   * The close and cleanup semantic command.
    */
-  readonly closeAndCleaners: Set<IFileMenu.ICloseAndCleaner<Widget>>;
+  readonly closeAndCleaners: SemanticCommand;
 
   /**
-   * A set storing IConsoleCreators for the Kernel menu.
+   * The console creator semantic command.
    */
-  readonly consoleCreators: Set<IFileMenu.IConsoleCreator<Widget>>;
+  readonly consoleCreators: SemanticCommand;
 
   /**
    * Dispose of the resources held by the file menu.
    */
   dispose(): void {
     this._newMenu?.dispose();
-    this.consoleCreators.clear();
     super.dispose();
   }
 
@@ -84,46 +81,4 @@ export class FileMenu extends RankedMenu implements IFileMenu {
   public quitEntry: boolean;
 
   private _newMenu: RankedMenu;
-}
-
-/**
- * Namespace for IFileMenu
- */
-export namespace IFileMenu {
-  /**
-   * Interface for an activity that has some cleanup action associated
-   * with it in addition to merely closing its widget in the main area.
-   */
-  export interface ICloseAndCleaner<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * A function to create the label for the `closeAndCleanup`action.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
-     */
-    closeAndCleanupLabel?: (n: number) => string;
-
-    /**
-     * A function to perform the close and cleanup action.
-     */
-    closeAndCleanup: (widget: T) => Promise<void>;
-  }
-
-  /**
-   * Interface for a command to create a console for an activity.
-   */
-  export interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
-    /**
-     * A function to create the label for the `createConsole`action.
-     *
-     * This function receives the number of items `n` to be able to provided
-     * correct pluralized forms of translations.
-     */
-    createConsoleLabel?: (n: number) => string;
-
-    /**
-     * The function to create the console.
-     */
-    createConsole: (widget: T) => Promise<void>;
-  }
 }

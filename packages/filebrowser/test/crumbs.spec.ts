@@ -3,9 +3,10 @@
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
-import { framePromise, signalToPromise } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -53,16 +54,12 @@ describe('filebrowser/model', () => {
   let path: string;
 
   beforeAll(async () => {
-    const opener: DocumentManager.IWidgetOpener = {
-      open: widget => {
-        /* no op */
-      }
-    };
+    const opener = new DocumentWidgetOpenerMock();
 
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new Mock.ServiceManagerMock();
+    serviceManager = new ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
@@ -195,6 +192,22 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#fullPath', () => {
+      it('should show/hide full path', async () => {
+        Widget.attach(crumbs, document.body);
+        MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        expect(crumbs.node.textContent).toMatch(
+          /\/\/Untitled Folder.*?\/Untitled Folder.*?\//
+        );
+        crumbs.fullPath = true;
+        MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(crumbs.node.textContent).toMatch(
+          /\/Untitled Folder.*?\/Untitled Folder.*?\/Untitled Folder.*?\//
+        );
+      });
+    });
+
     describe('#onUpdateRequest()', () => {
       it('should be called when the model updates', async () => {
         const model = new FileBrowserModel({ manager });
@@ -208,6 +221,59 @@ describe('filebrowser/model', () => {
         );
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
         expect(items.length).toBe(3);
+        model.dispose();
+      });
+
+      it('should trigger DOM updates if state changes', async () => {
+        const model = new FileBrowserModel({ manager });
+        crumbs = new LogCrumbs({ model });
+        let modifications = 0;
+        const observer = new MutationObserver(() => modifications++);
+        observer.observe(crumbs.node, {
+          attributes: true,
+          childList: true,
+          subtree: true
+        });
+
+        // Should modify the DOM once
+        await model.cd(path);
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        // Should modify the DOM once
+        await model.cd('..');
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(2);
+
+        observer.disconnect();
+        model.dispose();
+      });
+
+      it('should not touch DOM if state is unchanged', async () => {
+        const model = new FileBrowserModel({ manager });
+        crumbs = new LogCrumbs({ model });
+        let modifications = 0;
+        const observer = new MutationObserver(() => modifications++);
+        observer.observe(crumbs.node, {
+          attributes: true,
+          childList: true,
+          subtree: true
+        });
+
+        // Should modify the DOM once
+        await model.cd(path);
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        // Should not increase the number of modifications
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        observer.disconnect();
         model.dispose();
       });
     });

@@ -2,15 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { ServerConnection } from '../src';
 import { getRequestHandler } from './utils';
+import { KernelMessage } from '../src/kernel';
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -25,7 +26,7 @@ describe('ServerConnection', () => {
         {},
         settings
       );
-      expect(response.statusText).toBe('OK');
+      expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toBe('hello');
     });
@@ -63,6 +64,17 @@ describe('ServerConnection', () => {
       expect(settings.token).toBe(defaults.token);
       expect(settings.init.credentials).toBe(defaults.init!.credentials);
     });
+
+    it('should allow swapping serializer', () => {
+      const defaults: Partial<ServerConnection.ISettings> = {
+        serializer: {
+          serialize: (_msg: KernelMessage.IMessage) => '',
+          deserialize: (_data: ArrayBuffer) => ({}) as KernelMessage.IMessage
+        }
+      };
+      const settings = ServerConnection.makeSettings(defaults);
+      expect(settings.serializer).toBe(defaults.serializer);
+    });
   });
 
   describe('.makeError()', () => {
@@ -75,7 +87,46 @@ describe('ServerConnection', () => {
         settings
       );
       const err = new ServerConnection.ResponseError(response);
-      expect(err.message).toBe('Invalid response: 200 OK');
+      expect(err.message).toBe('Invalid response: 200 ');
+    });
+  });
+
+  describe('ResponseError', () => {
+    describe('#create', () => {
+      it.each([
+        {
+          status: 456,
+          statusText: 'Dummy error'
+        },
+        {
+          status: 456,
+          statusText: 'Dummy error',
+          body: { message: 'Nice error message' }
+        },
+        {
+          status: 456,
+          statusText: 'Dummy error',
+          body: { traceback: 'Nice traceback' }
+        },
+        {
+          status: 456,
+          statusText: 'Dummy error',
+          body: {
+            message: 'Nice error message',
+            traceback: 'Nice traceback'
+          }
+        }
+      ])('should create a error response from %j', async response => {
+        const error = await ServerConnection.ResponseError.create({
+          ...response,
+          json: () => Promise.resolve(response.body ?? {})
+        } as any);
+
+        expect(error.message).toEqual(
+          response.body?.message ?? 'Invalid response: 456 Dummy error'
+        );
+        expect(error.traceback).toEqual(response.body?.traceback ?? '');
+      });
     });
   });
 });

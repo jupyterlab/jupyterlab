@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # Set update schedule for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every month
+      interval: "monthly"
+    groups:
+      actions:
+        patterns:
+          - "*"
+  # Set update schedule for pip
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every month
+      # Align with pre-commit configuration .pre-commit-config.yaml
+      interval: "monthly"
+    groups:
+      pip:
+        patterns:
+          - "*"
+    ignore:
+      # Prevent the UI tests from failing, as the version number of ipython is visible
+      # in some of the Galata snapshots
+      - dependency-name: "ipython"
+        update-types: ["version-update:semver-minor", "version-update:semver-patch"]

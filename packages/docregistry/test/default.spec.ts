@@ -11,10 +11,10 @@ import {
   IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
+import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
-import { sleep } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { toArray } from '@lumino/algorithm';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { sleep } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -186,13 +186,21 @@ describe('docregistry/default', () => {
             }
           ]
         });
-        const context = await Mock.createFileContext();
+        const context = await createFileContextWithMockedServices();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
-        expect(toArray(widget.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget2.toolbar.names())).toEqual(['foo', 'bar']);
-        expect(toArray(widget.toolbar.children()).length).toBe(2);
-        expect(toArray(widget2.toolbar.children()).length).toBe(2);
+        expect(Array.from(widget.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(Array.from(widget2.toolbar.names())).toEqual([
+          'foo',
+          'bar',
+          'toolbar-popup-opener'
+        ]);
+        expect(Array.from(widget.toolbar.children()).length).toBe(3);
+        expect(Array.from(widget2.toolbar.children()).length).toBe(3);
       });
     });
 
@@ -223,14 +231,14 @@ describe('docregistry/default', () => {
     describe('#createNew()', () => {
       it('should create a new widget given a document model and a context', async () => {
         const factory = createFactory();
-        const context = await Mock.createFileContext();
+        const context = await createFileContextWithMockedServices();
         const widget = factory.createNew(context);
         expect(widget).toBeInstanceOf(Widget);
       });
 
       it('should take an optional source widget for cloning', async () => {
         const factory = createFactory();
-        const context = await Mock.createFileContext();
+        const context = await createFileContextWithMockedServices();
         const widget = factory.createNew(context);
         const clonedWidget: IDocumentWidget = factory.createNew(
           context,
@@ -274,7 +282,7 @@ describe('docregistry/default', () => {
       });
 
       it('should accept an optional language preference', () => {
-        const model = new DocumentModel('foo');
+        const model = new DocumentModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });
@@ -414,7 +422,7 @@ describe('docregistry/default', () => {
       });
 
       it('should be set by the constructor arg', () => {
-        const model = new DocumentModel('foo');
+        const model = new DocumentModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });
@@ -523,7 +531,7 @@ describe('docregistry/default', () => {
 
       it('should accept a language preference', () => {
         const factory = new TextModelFactory();
-        const model = factory.createNew('foo');
+        const model = factory.createNew({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });
@@ -531,8 +539,8 @@ describe('docregistry/default', () => {
     describe('#preferredLanguage()', () => {
       it('should get the preferred kernel language given an extension', () => {
         const factory = new TextModelFactory();
-        expect(factory.preferredLanguage('.py')).toBe('python');
-        expect(factory.preferredLanguage('.jl')).toBe('julia');
+        expect(factory.preferredLanguage('.py')).toBe('');
+        expect(factory.preferredLanguage('.jl')).toBe('');
       });
     });
   });
@@ -545,13 +553,16 @@ describe('docregistry/default', () => {
     let widget: DocumentWidget;
 
     const setup = async () => {
-      context = await Mock.createFileContext(false, manager);
+      context = (await createFileContextWithMockedServices(
+        false,
+        manager
+      )) as any;
       content = new Widget();
       widget = new DocumentWidget({ context, content });
     };
 
     beforeAll(async () => {
-      manager = new Mock.ServiceManagerMock();
+      manager = new ServiceManagerMock();
       await manager.ready;
     });
 
@@ -571,6 +582,14 @@ describe('docregistry/default', () => {
       it('should add the dirty class when the model is dirty', async () => {
         context.model.fromString('bar');
         expect(widget.title.className).toContain('jp-mod-dirty');
+      });
+
+      it('should remove the dirty class', () => {
+        context.model.dirty = true;
+        context.model.dirty = true;
+        expect(widget.title.className).toContain('jp-mod-dirty');
+        context.model.dirty = false;
+        expect(widget.title.className).not.toContain('jp-mod-dirty');
       });
 
       it('should store the context', () => {

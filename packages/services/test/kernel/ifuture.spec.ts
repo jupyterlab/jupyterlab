@@ -1,27 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { Kernel, KernelAPI, KernelManager, KernelMessage } from '../../src';
 import { KernelTester } from '../utils';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('Kernel.IShellFuture', () => {
+  let server: JupyterServer;
   let tester: KernelTester;
   let kernelManager: KernelManager;
 
-  beforeAll(() => {
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
     kernelManager = new KernelManager();
-  });
+  }, 30000);
 
   afterEach(() => {
     if (tester) {
@@ -32,6 +27,7 @@ describe('Kernel.IShellFuture', () => {
   afterAll(async () => {
     const models = await KernelAPI.listRunning();
     await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
+    await server.shutdown();
   });
 
   it('should have a msg attribute', async () => {
@@ -105,8 +101,10 @@ describe('Kernel.IShellFuture', () => {
           calls.push('first');
           // Check to make sure we actually got the messages we expected.
           if (msg.header.msg_type === 'stream') {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect((msg as KernelMessage.IStreamMsg).content.text).toBe('foo');
           } else {
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(
               (msg as KernelMessage.IStatusMsg).content.execution_state
             ).toBe('idle');

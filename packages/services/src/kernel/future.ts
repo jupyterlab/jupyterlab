@@ -21,7 +21,8 @@ export abstract class KernelFutureHandler<
     REPLY extends KernelMessage.IShellControlMessage
   >
   extends DisposableDelegate
-  implements Kernel.IFuture<REQUEST, REPLY> {
+  implements Kernel.IFuture<REQUEST, REPLY>
+{
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -153,8 +154,11 @@ export abstract class KernelFutureHandler<
   /**
    * Send an `input_reply` message.
    */
-  sendInputReply(content: KernelMessage.IInputReplyMsg['content']): void {
-    this._kernel.sendInputReply(content);
+  sendInputReply(
+    content: KernelMessage.IInputReplyMsg['content'],
+    parent_header: KernelMessage.IInputReplyMsg['parent_header']
+  ): void {
+    this._kernel.sendInputReply(content, parent_header);
   }
 
   /**
@@ -185,6 +189,8 @@ export abstract class KernelFutureHandler<
       // is waiting for the promise to resolve. This prevents the error from
       // being displayed in the console, but does not prevent it from being
       // caught by a client who is waiting for it.
+      // Note: any `.then` and `.finally` attached to the `done` promise
+      // will cause the error to be thrown as uncaught anyways.
       this._done.promise.catch(() => {
         /* no-op */
       });
@@ -206,9 +212,9 @@ export abstract class KernelFutureHandler<
       case 'shell':
         if (
           msg.channel === this.msg.channel &&
-          (msg.parent_header as KernelMessage.IHeader<
-            KernelMessage.MessageType
-          >).msg_id === this.msg.header.msg_id
+          (
+            msg.parent_header as KernelMessage.IHeader<KernelMessage.MessageType>
+          ).msg_id === this.msg.header.msg_id
         ) {
           await this._handleReply(msg as REPLY);
         }
@@ -308,7 +314,8 @@ export abstract class KernelFutureHandler<
 }
 
 export class KernelControlFutureHandler<
-    REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+    REQUEST extends
+      KernelMessage.IControlMessage = KernelMessage.IControlMessage,
     REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
   >
   extends KernelFutureHandler<REQUEST, REPLY>
@@ -325,7 +332,7 @@ namespace Private {
   /**
    * A no-op function.
    */
-  export const noOp = () => {
+  export const noOp = (): void => {
     /* no-op */
   };
 
@@ -460,10 +467,8 @@ namespace Private {
       this._hooks.length -= numNulls;
     }
 
-    private _hooks: (
-      | ((msg: T) => boolean | PromiseLike<boolean>)
-      | null
-    )[] = [];
+    private _hooks: (((msg: T) => boolean | PromiseLike<boolean>) | null)[] =
+      [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

@@ -1,15 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { HoverBox } from '@jupyterlab/apputils';
+import { HoverBox } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { style } from 'typestyle/lib';
-import { clickedItem, interactiveItem } from '../style/statusbar';
-
-const hoverItem = style({
-  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
-});
 
 /**
  * Create and show a popup component.
@@ -20,7 +14,9 @@ const hoverItem = style({
  */
 export function showPopup(options: Popup.IOptions): Popup {
   const dialog = new Popup(options);
-  dialog.launch();
+  if (!options.startHidden) {
+    dialog.launch();
+  }
   return dialog;
 }
 
@@ -31,12 +27,18 @@ export class Popup extends Widget {
   /**
    * Construct a new Popup.
    */
-  constructor(options: Popup.IOptions) {
+  constructor(options: Omit<Popup.IOptions, 'startHidden'>) {
     super();
+    this.addClass('jp-ThemedContainer');
     this._body = options.body;
-    this._body.addClass(hoverItem);
+    this._body.addClass('jp-StatusBar-HoverItem');
     this._anchor = options.anchor;
     this._align = options.align;
+    if (options.hasDynamicSize) {
+      this._observer = new ResizeObserver(() => {
+        this.update();
+      });
+    }
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(options.body);
     this._body.node.addEventListener('resize', () => {
@@ -47,12 +49,12 @@ export class Popup extends Widget {
   /**
    * Attach the popup widget to the page.
    */
-  launch() {
+  launch(): void {
     this._setGeometry();
     Widget.attach(this, document.body);
     this.update();
-    this._anchor.addClass(clickedItem);
-    this._anchor.removeClass(interactiveItem);
+    this._anchor.addClass('jp-mod-clicked');
+    this._anchor.removeClass('jp-mod-highlight');
   }
 
   /**
@@ -70,12 +72,14 @@ export class Popup extends Widget {
     document.addEventListener('click', this, false);
     this.node.addEventListener('keydown', this, false);
     window.addEventListener('resize', this, false);
+    this._observer?.observe(this._body.node);
   }
 
   /**
-   * Handle `'after-detach'` messages for the widget.
+   * Handle `'before-detach'` messages for the widget.
    */
-  protected onAfterDetach(msg: Message): void {
+  protected onBeforeDetach(msg: Message): void {
+    this._observer?.disconnect();
     document.removeEventListener('click', this, false);
     this.node.removeEventListener('keydown', this, false);
     window.removeEventListener('resize', this, false);
@@ -91,10 +95,11 @@ export class Popup extends Widget {
   /**
    * Dispose of the widget.
    */
-  dispose() {
+  dispose(): void {
+    this._observer?.disconnect();
     super.dispose();
-    this._anchor.removeClass(clickedItem);
-    this._anchor.addClass(interactiveItem);
+    this._anchor.removeClass('jp-mod-clicked');
+    this._anchor.addClass('jp-mod-highlight');
   }
 
   /**
@@ -166,6 +171,7 @@ export class Popup extends Widget {
   private _body: Widget;
   private _anchor: Widget;
   private _align: 'left' | 'right' | undefined;
+  private _observer: ResizeObserver | null;
 }
 
 /**
@@ -190,5 +196,20 @@ export namespace Popup {
      * Whether to align the popup to the left or the right of the anchor.
      */
     align?: 'left' | 'right';
+
+    /**
+     * Whether the body has dynamic size or not.
+     * By default, this is `false`.
+     */
+    hasDynamicSize?: boolean;
+
+    /**
+     * Whether to start the popup in hidden mode or not.
+     * By default, this is `false`.
+     *
+     * ### Note
+     * The popup can be displayed using `launch` method.
+     */
+    startHidden?: boolean;
   }
 }

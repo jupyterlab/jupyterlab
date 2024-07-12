@@ -51,52 +51,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../application"
-    },
-    {
-      "path": "../apputils"
-    },
-    {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
-      "path": "../codemirror"
-    },
-    {
-      "path": "../console"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../notebook"
-    },
-    {
-      "path": "../observables"
-    },
-    {
-      "path": "../rendermime"
-    },
-    {
-      "path": "../services"
-    },
-    {
-      "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
+      "path": "../testing"
     }
   ]
 }

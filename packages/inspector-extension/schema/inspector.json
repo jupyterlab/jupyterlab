@@ -27,6 +27,11 @@
       "command": "inspector:open",
       "keys": ["Accel I"],
       "selector": "body"
+    },
+    {
+      "command": "inspector:close",
+      "keys": ["Accel I"],
+      "selector": "body[data-jp-inspector='open']"
     }
   ],
   "properties": {},

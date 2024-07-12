@@ -11,15 +11,8 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  filter,
-  find,
-  IIterator,
-  IterableOrArrayLike
-} from '@lumino/algorithm';
+import { IScore } from '@jupyterlab/ui-components';
+import { ArrayExt, filter } from '@lumino/algorithm';
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
@@ -103,7 +96,7 @@ export class FileBrowserModel implements IDisposable {
         backoff: true,
         max: 300 * 1000
       },
-      standby: 'when-hidden'
+      standby: options.refreshStandby || 'when-hidden'
     });
   }
 
@@ -192,8 +185,8 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Create an iterator over the status of all in progress uploads.
    */
-  uploads(): IIterator<IUploadModel> {
-    return new ArrayIterator(this._uploads);
+  uploads(): IterableIterator<IUploadModel> {
+    return this._uploads[Symbol.iterator]();
   }
 
   /**
@@ -216,8 +209,8 @@ export class FileBrowserModel implements IDisposable {
    *
    * @returns A new iterator over the model's items.
    */
-  items(): IIterator<Contents.IModel> {
-    return new ArrayIterator(this._items);
+  items(): IterableIterator<Contents.IModel> {
+    return this._items[Symbol.iterator]();
   }
 
   /**
@@ -225,8 +218,8 @@ export class FileBrowserModel implements IDisposable {
    *
    * @returns A new iterator over the model's active sessions.
    */
-  sessions(): IIterator<Session.IModel> {
-    return new ArrayIterator(this._sessions);
+  sessions(): IterableIterator<Session.IModel> {
+    return this._sessions[Symbol.iterator]();
   }
 
   /**
@@ -241,22 +234,19 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Change directory.
    *
-   * @param path - The path to the file or directory.
+   * @param path The path to the file or directory.
    *
    * @returns A promise with the contents of the directory.
    */
-  async cd(newValue = '.'): Promise<void> {
-    if (newValue !== '.') {
-      newValue = this.manager.services.contents.resolvePath(
-        this._model.path,
-        newValue
-      );
+  async cd(path = '.'): Promise<void> {
+    if (path !== '.') {
+      path = this.manager.services.contents.resolvePath(this._model.path, path);
     } else {
-      newValue = this._pendingPath || this._model.path;
+      path = this._pendingPath || this._model.path;
     }
     if (this._pending) {
       // Collapse requests to the same directory.
-      if (newValue === this._pendingPath) {
+      if (path === this._pendingPath) {
         return this._pending;
       }
       // Otherwise wait for the pending request to complete before continuing.
@@ -264,13 +254,13 @@ export class FileBrowserModel implements IDisposable {
     }
     const oldValue = this.path;
     const options: Contents.IFetchOptions = { content: true };
-    this._pendingPath = newValue;
-    if (oldValue !== newValue) {
+    this._pendingPath = path;
+    if (oldValue !== path) {
       this._sessions.length = 0;
     }
     const services = this.manager.services;
     this._pending = services.contents
-      .get(newValue, options)
+      .get(path, options)
       .then(contents => {
         if (this.isDisposed) {
           return;
@@ -278,17 +268,17 @@ export class FileBrowserModel implements IDisposable {
         this.handleContents(contents);
         this._pendingPath = null;
         this._pending = null;
-        if (oldValue !== newValue) {
+        if (oldValue !== path) {
           // If there is a state database and a unique key, save the new path.
           // We don't need to wait on the save to continue.
           if (this._state && this._key) {
-            void this._state.save(this._key, { path: newValue });
+            void this._state.save(this._key, { path });
           }
 
           this._pathChanged.emit({
             name: 'path',
             oldValue,
-            newValue
+            newValue: path
           });
         }
         this.onRunningChanged(services.sessions, services.sessions.running());
@@ -297,7 +287,7 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (error.response && error.response.status === 404) {
+        if (error.response && error.response.status === 404 && path !== '/') {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
@@ -374,6 +364,10 @@ export class FileBrowserModel implements IDisposable {
       }
 
       const path = (value as ReadonlyJSONObject)['path'] as string;
+      // need to return to root path if preferred dir is set
+      if (path) {
+        await this.cd('/');
+      }
       const localPath = manager.services.contents.localPath(path);
 
       await manager.services.contents.get(path);
@@ -427,7 +421,7 @@ export class FileBrowserModel implements IDisposable {
     await this.refresh();
     await this._uploadCheckDisposed();
     if (
-      find(this._items, i => i.name === file.name) &&
+      this._items.find(i => i.name === file.name) &&
       !(await shouldOverwrite(file.name))
     ) {
       throw err;
@@ -580,6 +574,7 @@ export class FileBrowserModel implements IDisposable {
       writable: contents.writable,
       created: contents.created,
       last_modified: contents.last_modified,
+      size: contents.size,
       mimetype: contents.mimetype,
       format: contents.format
     };
@@ -595,7 +590,7 @@ export class FileBrowserModel implements IDisposable {
    */
   protected onRunningChanged(
     sender: Session.IManager,
-    models: IterableOrArrayLike<Session.IModel>
+    models: Iterable<Session.IModel>
   ): void {
     this._populateSessions(models);
     this._refreshed.emit(void 0);
@@ -630,13 +625,13 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Populate the model's sessions collection.
    */
-  private _populateSessions(models: IterableOrArrayLike<Session.IModel>): void {
+  private _populateSessions(models: Iterable<Session.IModel>): void {
     this._sessions.length = 0;
-    each(models, model => {
+    for (const model of models) {
       if (this._paths.has(model.path)) {
         this._sessions.push(model);
       }
-    });
+    }
   }
 
   protected translator: ITranslator;
@@ -696,6 +691,11 @@ export namespace FileBrowserModel {
     refreshInterval?: number;
 
     /**
+     * When the model stops polling the API. Defaults to `when-hidden`.
+     */
+    refreshStandby?: Poll.Standby | (() => boolean | Poll.Standby);
+
+    /**
      * An optional state database. If provided, the model will restore which
      * folder was last opened when it is restored.
      */
@@ -709,13 +709,73 @@ export namespace FileBrowserModel {
 }
 
 /**
+ * File browser model where hidden files inclusion can be toggled on/off.
+ */
+export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
+  constructor(options: TogglableHiddenFileBrowserModel.IOptions) {
+    super(options);
+    this._includeHiddenFiles = options.includeHiddenFiles || false;
+  }
+
+  /**
+   * Create an iterator over the model's items filtering hidden files out if necessary.
+   *
+   * @returns A new iterator over the model's items.
+   */
+  items(): IterableIterator<Contents.IModel> {
+    return this._includeHiddenFiles
+      ? super.items()
+      : filter(super.items(), value => !value.name.startsWith('.'));
+  }
+
+  /**
+   * Set the inclusion of hidden files. Triggers a model refresh.
+   */
+  showHiddenFiles(value: boolean): void {
+    this._includeHiddenFiles = value;
+    void this.refresh();
+  }
+
+  private _includeHiddenFiles: boolean;
+}
+
+/**
+ * Namespace for the togglable hidden file browser model
+ */
+export namespace TogglableHiddenFileBrowserModel {
+  /**
+   * Constructor options
+   */
+  export interface IOptions extends FileBrowserModel.IOptions {
+    /**
+     * Whether hidden files should be included in the items.
+     */
+    includeHiddenFiles?: boolean;
+  }
+}
+
+/**
  * File browser model with optional filter on element.
  */
-export class FilterFileBrowserModel extends FileBrowserModel {
+export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
-    this.translator = options.translator || nullTranslator;
-    this._filter = options.filter ? options.filter : model => true;
+    this._filter =
+      options.filter ??
+      (model => {
+        return {};
+      });
+    this._filterDirectories = options.filterDirectories ?? true;
+  }
+
+  /**
+   * Whether to filter directories.
+   */
+  get filterDirectories(): boolean {
+    return this._filterDirectories;
+  }
+  set filterDirectories(value: boolean) {
+    this._filterDirectories = value;
   }
 
   /**
@@ -723,22 +783,25 @@ export class FilterFileBrowserModel extends FileBrowserModel {
    *
    * @returns A new iterator over the model's items.
    */
-  items(): IIterator<Contents.IModel> {
-    return filter(super.items(), (value, index) => {
-      if (value.type === 'directory') {
+  items(): IterableIterator<Contents.IModel> {
+    return filter(super.items(), value => {
+      if (!this._filterDirectories && value.type === 'directory') {
         return true;
       } else {
-        return this._filter(value);
+        const filtered = this._filter(value);
+        value.indices = filtered?.indices;
+        return !!filtered;
       }
     });
   }
 
-  setFilter(filter: (value: Contents.IModel) => boolean) {
+  setFilter(filter: (value: Contents.IModel) => Partial<IScore> | null): void {
     this._filter = filter;
     void this.refresh();
   }
 
-  private _filter: (value: Contents.IModel) => boolean;
+  private _filter: (value: Contents.IModel) => Partial<IScore> | null;
+  private _filterDirectories: boolean;
 }
 
 /**
@@ -748,10 +811,15 @@ export namespace FilterFileBrowserModel {
   /**
    * Constructor options
    */
-  export interface IOptions extends FileBrowserModel.IOptions {
+  export interface IOptions extends TogglableHiddenFileBrowserModel.IOptions {
     /**
      * Filter function on file browser item model
      */
-    filter?: (value: Contents.IModel) => boolean;
+    filter?: (value: Contents.IModel) => Partial<IScore> | null;
+
+    /**
+     * Filter directories
+     */
+    filterDirectories?: boolean;
   }
 }

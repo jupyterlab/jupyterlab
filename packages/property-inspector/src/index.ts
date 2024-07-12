@@ -6,12 +6,12 @@
  */
 
 import { ILabShell } from '@jupyterlab/application';
-import { ReactWidget } from '@jupyterlab/apputils';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { ReactWidget } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
 import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -24,7 +24,8 @@ export { IPropertyInspector, IPropertyInspectorProvider };
  */
 abstract class PropertyInspectorProvider
   extends Widget
-  implements IPropertyInspectorProvider {
+  implements IPropertyInspectorProvider
+{
   /**
    * Construct a new Property Inspector.
    */
@@ -145,6 +146,24 @@ abstract class PropertyInspectorProvider
 }
 
 /**
+ * {@link SideBarPropertyInspectorProvider} constructor options
+ */
+export interface ILabPropertyInspectorOptions {
+  /**
+   * Application shell
+   */
+  shell: ILabShell;
+  /**
+   * Widget placeholder
+   */
+  placeholder?: Widget;
+  /**
+   * Application translation
+   */
+  translator?: ITranslator;
+}
+
+/**
  * A class that adds a property inspector provider to the
  * JupyterLab sidebar.
  */
@@ -152,13 +171,13 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
   /**
    * Construct a new Side Bar Property Inspector.
    */
-  constructor(
-    labshell: ILabShell,
-    placeholder?: Widget,
-    translator?: ITranslator
-  ) {
+  constructor({
+    shell,
+    placeholder,
+    translator
+  }: ILabPropertyInspectorOptions) {
     super();
-    this._labshell = labshell;
+    this._labshell = shell;
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     const layout = (this.layout = new SingletonLayout());
@@ -167,14 +186,21 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
     } else {
       const node = document.createElement('div');
       const content = document.createElement('div');
-      content.textContent = this._trans.__('No properties to inspect.');
+      const placeholderHeadline = document.createElement('h3');
+      const placeholderText = document.createElement('p');
+      placeholderHeadline.textContent = this._trans.__('No Properties');
+      placeholderText.textContent = this._trans.__(
+        'The property inspector allows to view and edit properties of a selected notebook.'
+      );
       content.className = 'jp-PropertyInspector-placeholderContent';
+      content.appendChild(placeholderHeadline);
+      content.appendChild(placeholderText);
       node.appendChild(content);
       this._placeholder = new Widget({ node });
       this._placeholder.addClass('jp-PropertyInspector-placeholder');
     }
     layout.widget = this._placeholder;
-    labshell.currentChanged.connect(this._onShellCurrentChanged, this);
+    this._labshell.currentChanged.connect(this._onShellCurrentChanged, this);
     this._onShellCurrentChanged();
   }
 
@@ -262,7 +288,7 @@ namespace Private {
     /**
      * Whether the property inspector is disposed.
      */
-    get isDisposed() {
+    get isDisposed(): boolean {
       return this._isDisposed;
     }
 

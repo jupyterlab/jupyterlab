@@ -41,7 +41,7 @@ describe('@jupyterlab/statusbar', () => {
         statusBar.registerStatusItem('item', { item: item1 });
         expect(
           statusBar.registerStatusItem.bind(statusBar, 'item', { item: item2 })
-        ).toThrowError();
+        ).toThrow();
       });
 
       it('should put higher rank left items closer to the middle', () => {

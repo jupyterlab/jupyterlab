@@ -1,14 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Button, closeIcon, LabIcon } from '@jupyterlab/ui-components';
-import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  Button,
+  closeIcon,
+  LabIcon,
+  ReactWidget,
+  Styling
+} from '@jupyterlab/ui-components';
+import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { Styling } from './styling';
-import { ReactWidget } from './vdom';
 import { WidgetTracker } from './widgettracker';
 
 /**
@@ -35,11 +40,11 @@ export function showDialog<T>(
  */
 export function showErrorMessage(
   title: string,
-  error: any,
-  buttons: ReadonlyArray<Dialog.IButton> = [
-    Dialog.okButton({ label: 'Dismiss' })
-  ]
+  error: string | Dialog.IError,
+  buttons?: ReadonlyArray<Dialog.IButton>
 ): Promise<void> {
+  const trans = Dialog.translator.load('jupyterlab');
+  buttons = buttons ?? [Dialog.okButton({ label: trans.__('Dismiss') })];
   console.warn('Showing error:', error);
 
   // Cache promises to prevent multiple copies of identical dialogs showing
@@ -79,8 +84,11 @@ export class Dialog<T> extends Widget {
    * @param options - The dialog setup options.
    */
   constructor(options: Partial<Dialog.IOptions<T>> = {}) {
-    super();
+    const dialogNode = document.createElement('dialog');
+    dialogNode.ariaModal = 'true';
+    super({ node: dialogNode });
     this.addClass('jp-Dialog');
+    this.addClass('jp-ThemedContainer');
     const normalized = Private.handleOptions(options);
     const renderer = normalized.renderer;
 
@@ -88,15 +96,32 @@ export class Dialog<T> extends Widget {
     this._defaultButton = normalized.defaultButton;
     this._buttons = normalized.buttons;
     this._hasClose = normalized.hasClose;
-    this._buttonNodes = toArray(
-      map(this._buttons, button => {
-        return renderer.createButtonNode(button);
-      })
-    );
+    this._buttonNodes = this._buttons.map(b => renderer.createButtonNode(b));
+    this._checkboxNode = null;
+    this._lastMouseDownInDialog = false;
+
+    if (normalized.checkbox) {
+      const {
+        label = '',
+        caption = '',
+        checked = false,
+        className = ''
+      } = normalized.checkbox;
+      this._checkboxNode = renderer.createCheckboxNode({
+        label,
+        caption: caption ?? label,
+        checked,
+        className
+      });
+    }
 
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
     content.addClass('jp-Dialog-content');
+    if (typeof options.body === 'string') {
+      content.addClass('jp-Dialog-content-small');
+      dialogNode.ariaLabel = [normalized.title, options.body].join(' ');
+    }
     layout.addWidget(content);
 
     this._body = normalized.body;
@@ -107,16 +132,24 @@ export class Dialog<T> extends Widget {
       options
     );
     const body = renderer.createBody(normalized.body);
-    const footer = renderer.createFooter(this._buttonNodes);
+    const footer = renderer.createFooter(this._buttonNodes, this._checkboxNode);
     content.addWidget(header);
     content.addWidget(body);
     content.addWidget(footer);
 
+    this._bodyWidget = body;
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
 
     // Add new dialogs to the tracker.
     void Dialog.tracker.add(this);
+  }
+
+  /**
+   * A promise that resolves when the Dialog first rendering is done.
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -148,7 +181,11 @@ export class Dialog<T> extends Widget {
     return promises.then(() => {
       // Do not show Dialog if it was disposed of before it was at the front of the launch queue
       if (!this._promise) {
-        return Promise.resolve({ button: Dialog.cancelButton(), value: null });
+        return Promise.resolve({
+          button: Dialog.cancelButton(),
+          isChecked: null,
+          value: null
+        });
       }
       Widget.attach(this, this._host);
       return promise.promise;
@@ -203,8 +240,14 @@ export class Dialog<T> extends Widget {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
+        break;
       case 'click':
         this._evtClick(event as MouseEvent);
+        break;
+      case 'input':
+        this._evtInput(event as InputEvent);
         break;
       case 'focus':
         this._evtFocus(event as FocusEvent);
@@ -226,18 +269,39 @@ export class Dialog<T> extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
+    document.addEventListener('mousedown', this, true);
     document.addEventListener('focus', this, true);
+    document.addEventListener('input', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
-    if (this._focusNodeSelector) {
-      const body = this.node.querySelector('.jp-Dialog-body');
-      const el = body?.querySelector(this._focusNodeSelector);
 
-      if (el) {
-        this._primary = el as HTMLElement;
+    const setFocus = () => {
+      if (this._focusNodeSelector) {
+        const body = this.node.querySelector('.jp-Dialog-body');
+        const el = body?.querySelector(this._focusNodeSelector);
+
+        if (el) {
+          this._primary = el as HTMLElement;
+        }
       }
+      this._primary?.focus();
+      this._ready.resolve();
+    };
+
+    if (
+      this._bodyWidget instanceof ReactWidget &&
+      (this._bodyWidget as ReactWidget).renderPromise !== undefined
+    ) {
+      (this._bodyWidget as ReactWidget)
+        .renderPromise!.then(() => {
+          setFocus();
+        })
+        .catch(() => {
+          console.error("Error while loading Dialog's body");
+        });
+    } else {
+      setFocus();
     }
-    this._primary.focus();
   }
 
   /**
@@ -249,6 +313,8 @@ export class Dialog<T> extends Widget {
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
+    document.removeEventListener('mousedown', this, true);
+    document.removeEventListener('input', this, true);
     this._original.focus();
   }
 
@@ -260,6 +326,19 @@ export class Dialog<T> extends Widget {
       this.reject();
     }
     super.onCloseRequest(msg);
+  }
+  /**
+   * Handle the `'input'` event for dialog's children.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtInput(_event: InputEvent): void {
+    this._hasValidationErrors = !!this.node.querySelector(':invalid');
+    for (let i = 0; i < this._buttons.length; i++) {
+      if (this._buttons[i].accept) {
+        this._buttonNodes[i].disabled = this._hasValidationErrors;
+      }
+    }
   }
 
   /**
@@ -274,7 +353,7 @@ export class Dialog<T> extends Widget {
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
-      if (this._hasClose) {
+      if (this._hasClose && !this._lastMouseDownInDialog) {
         this.reject();
       }
       return;
@@ -307,7 +386,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
-          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) - 1;
+          let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
           if (idx < 0) {
@@ -326,7 +405,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
-          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) + 1;
+          let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
           if (idx == this._buttons.length) {
@@ -360,7 +439,7 @@ export class Dialog<T> extends Widget {
         let index: number | undefined;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl as HTMLElement);
+          index = this._buttonNodes.indexOf(activeEl);
         }
         this.resolve(index);
         break;
@@ -379,14 +458,31 @@ export class Dialog<T> extends Widget {
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      this._buttonNodes[this._defaultButton].focus();
+      this._buttonNodes[this._defaultButton]?.focus();
     }
+  }
+
+  /**
+   * Handle the `'mousedown'` event for the widget.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtMouseDown(event: MouseEvent): void {
+    const content = this.node.getElementsByClassName(
+      'jp-Dialog-content'
+    )[0] as HTMLElement;
+    const target = event.target as HTMLElement;
+    this._lastMouseDownInDialog = content.contains(target as HTMLElement);
   }
 
   /**
    * Resolve a button item.
    */
   private _resolve(button: Dialog.IButton): void {
+    if (this._hasValidationErrors && button.accept) {
+      // Do not allow accepting with validation errors
+      return;
+    }
     // Prevent loopback.
     const promise = this._promise;
     if (!promise) {
@@ -405,11 +501,20 @@ export class Dialog<T> extends Widget {
       value = body.getValue();
     }
     this.dispose();
-    promise.resolve({ button, value });
+    promise.resolve({
+      button,
+      isChecked:
+        this._checkboxNode?.querySelector<HTMLInputElement>('input')?.checked ??
+        null,
+      value
+    });
   }
 
-  private _buttonNodes: ReadonlyArray<HTMLElement>;
+  private _hasValidationErrors: boolean = false;
+  private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
+  private _buttonNodes: ReadonlyArray<HTMLButtonElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
+  private _checkboxNode: HTMLElement | null;
   private _original: HTMLElement;
   private _first: HTMLElement;
   private _primary: HTMLElement;
@@ -418,13 +523,20 @@ export class Dialog<T> extends Widget {
   private _host: HTMLElement;
   private _hasClose: boolean;
   private _body: Dialog.Body<T>;
+  private _lastMouseDownInDialog: boolean;
   private _focusNodeSelector: string | undefined = '';
+  private _bodyWidget: Widget;
 }
 
 /**
  * The namespace for Dialog class statics.
  */
 export namespace Dialog {
+  /**
+   * Translator object.
+   */
+  export let translator: ITranslator = nullTranslator;
+
   /**
    * The body input types.
    */
@@ -449,6 +561,10 @@ export namespace Dialog {
    * The options used to make a button item.
    */
   export interface IButton {
+    /**
+     * The aria label for the button.
+     */
+    ariaLabel: string;
     /**
      * The label for the button.
      */
@@ -491,6 +607,41 @@ export namespace Dialog {
   }
 
   /**
+   * The options used to make a checkbox item.
+   */
+  export interface ICheckbox {
+    /**
+     * The label for the checkbox.
+     */
+    label: string;
+
+    /**
+     * The caption for the checkbox.
+     */
+    caption: string;
+
+    /**
+     * The initial checkbox state.
+     */
+    checked: boolean;
+
+    /**
+     * The extra class name for the checkbox.
+     */
+    className: string;
+  }
+
+  /**
+   * Error object interface
+   */
+  export interface IError {
+    /**
+     * Error message
+     */
+    message: string | React.ReactElement<any>;
+  }
+
+  /**
    * The options used to create a dialog.
    */
   export interface IOptions<T> {
@@ -524,7 +675,12 @@ export namespace Dialog {
     buttons: ReadonlyArray<IButton>;
 
     /**
-     * The index of the default button.  Defaults to the last button.
+     * The checkbox to display in the footer. Defaults no checkbox.
+     */
+    checkbox: Partial<ICheckbox> | null;
+
+    /**
+     * The index of the default button. Defaults to the last button.
      */
     defaultButton: number;
 
@@ -568,7 +724,7 @@ export namespace Dialog {
     /**
      * Create the body of the dialog.
      *
-     * @param value - The input value for the body.
+     * @param body - The input value for the body.
      *
      * @returns A widget for the body.
      */
@@ -578,10 +734,14 @@ export namespace Dialog {
      * Create the footer of the dialog.
      *
      * @param buttons - The button nodes to add to the footer.
+     * @param checkbox - The checkbox node to add to the footer.
      *
      * @returns A widget for the footer.
      */
-    createFooter(buttons: ReadonlyArray<HTMLElement>): Widget;
+    createFooter(
+      buttons: ReadonlyArray<HTMLElement>,
+      checkbox: HTMLElement | null
+    ): Widget;
 
     /**
      * Create a button node for the dialog.
@@ -590,7 +750,16 @@ export namespace Dialog {
      *
      * @returns A node for the button.
      */
-    createButtonNode(button: IButton): HTMLElement;
+    createButtonNode(button: IButton): HTMLButtonElement;
+
+    /**
+     * Create a checkbox node for the dialog.
+     *
+     * @param checkbox - The checkbox data.
+     *
+     * @returns A node for the checkbox.
+     */
+    createCheckboxNode(checkbox: ICheckbox): HTMLElement;
   }
 
   /**
@@ -603,6 +772,14 @@ export namespace Dialog {
     button: IButton;
 
     /**
+     * State of the dialog checkbox.
+     *
+     * #### Notes
+     * It will be null if no checkbox is defined for the dialog.
+     */
+    isChecked: boolean | null;
+
+    /**
      * The value retrieved from `.getValue()` if given on the widget.
      */
     value: T | null;
@@ -613,8 +790,10 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
-    const defaultLabel = value.accept ? 'OK' : 'Cancel';
+    const trans = translator.load('jupyterlab');
+    const defaultLabel = value.accept ? trans.__('Ok') : trans.__('Cancel');
     return {
+      ariaLabel: value.ariaLabel || value.label || defaultLabel,
       label: value.label || defaultLabel,
       iconClass: value.iconClass || '',
       iconLabel: value.iconLabel || '',
@@ -703,6 +882,7 @@ export namespace Dialog {
       };
 
       if (typeof title === 'string') {
+        const trans = translator.load('jupyterlab');
         header = ReactWidget.create(
           <>
             {title}
@@ -711,15 +891,10 @@ export namespace Dialog {
                 className="jp-Dialog-close-button"
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
-                title="Cancel"
+                title={trans.__('Cancel')}
                 minimal
               >
-                <LabIcon.resolveReact
-                  icon={closeIcon}
-                  iconClass="jp-Icon"
-                  className="jp-ToolbarButtonComponent-icon"
-                  tag="span"
-                />
+                <LabIcon.resolveReact icon={closeIcon} tag="span" />
               </Button>
             )}
           </>
@@ -740,37 +915,69 @@ export namespace Dialog {
      * @returns A widget for the body.
      */
     createBody(value: Body<any>): Widget {
+      const styleReactWidget = (widget: ReactWidget) => {
+        if (widget.renderPromise !== undefined) {
+          widget.renderPromise
+            .then(() => {
+              Styling.styleNode(widget.node);
+            })
+            .catch(() => {
+              console.error("Error while loading Dialog's body");
+            });
+        } else {
+          Styling.styleNode(widget.node);
+        }
+      };
+
       let body: Widget;
       if (typeof value === 'string') {
         body = new Widget({ node: document.createElement('span') });
         body.node.textContent = value;
       } else if (value instanceof Widget) {
         body = value;
+        if (body instanceof ReactWidget) {
+          styleReactWidget(body);
+        } else {
+          Styling.styleNode(body.node);
+        }
       } else {
         body = ReactWidget.create(value);
         // Immediately update the body even though it has not yet attached in
         // order to trigger a render of the DOM nodes from the React element.
         MessageLoop.sendMessage(body, Widget.Msg.UpdateRequest);
+        styleReactWidget(body as ReactWidget);
       }
       body.addClass('jp-Dialog-body');
-      Styling.styleNode(body.node);
       return body;
     }
 
     /**
      * Create the footer of the dialog.
      *
-     * @param buttonNodes - The buttons nodes to add to the footer.
+     * @param buttons - The buttons nodes to add to the footer.
+     * @param checkbox - The checkbox node to add to the footer.
      *
      * @returns A widget for the footer.
      */
-    createFooter(buttons: ReadonlyArray<HTMLElement>): Widget {
+    createFooter(
+      buttons: ReadonlyArray<HTMLElement>,
+      checkbox: HTMLElement | null
+    ): Widget {
       const footer = new Widget();
+
       footer.addClass('jp-Dialog-footer');
-      each(buttons, button => {
+      if (checkbox) {
+        footer.node.appendChild(checkbox);
+        footer.node.insertAdjacentHTML(
+          'beforeend',
+          '<div class="jp-Dialog-spacer"></div>'
+        );
+      }
+      for (const button of buttons) {
         footer.node.appendChild(button);
-      });
+      }
       Styling.styleNode(footer.node);
+
       return footer;
     }
 
@@ -781,11 +988,33 @@ export namespace Dialog {
      *
      * @returns A node for the button.
      */
-    createButtonNode(button: IButton): HTMLElement {
+    createButtonNode(button: IButton): HTMLButtonElement {
       const e = document.createElement('button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
       e.appendChild(this.renderLabel(button));
+      return e;
+    }
+
+    /**
+     * Create a checkbox node for the dialog.
+     *
+     * @param checkbox - The checkbox data.
+     *
+     * @returns A node for the checkbox.
+     */
+    createCheckboxNode(checkbox: ICheckbox): HTMLElement {
+      const e = document.createElement('label');
+      e.className = 'jp-Dialog-checkbox';
+      if (checkbox.className) {
+        e.classList.add(checkbox.className);
+      }
+      e.title = checkbox.caption;
+      e.textContent = checkbox.label;
+      const input = document.createElement('input') as HTMLInputElement;
+      input.type = 'checkbox';
+      input.checked = !!checkbox.checked;
+      e.insertAdjacentElement('afterbegin', input);
       return e;
     }
 
@@ -858,6 +1087,7 @@ export namespace Dialog {
       const e = document.createElement('div');
       e.className = 'jp-Dialog-buttonLabel';
       e.title = data.caption;
+      e.ariaLabel = data.ariaLabel;
       e.appendChild(document.createTextNode(data.label));
       return e;
     }
@@ -897,23 +1127,20 @@ namespace Private {
   export function handleOptions<T>(
     options: Partial<Dialog.IOptions<T>> = {}
   ): Dialog.IOptions<T> {
-    const buttons = options.buttons || [
+    const buttons = options.buttons ?? [
       Dialog.cancelButton(),
       Dialog.okButton()
     ];
-    let defaultButton = buttons.length - 1;
-    if (options.defaultButton !== undefined) {
-      defaultButton = options.defaultButton;
-    }
     return {
-      title: options.title || '',
-      body: options.body || '',
-      host: options.host || document.body,
+      title: options.title ?? '',
+      body: options.body ?? '',
+      host: options.host ?? document.body,
+      checkbox: options.checkbox ?? null,
       buttons,
-      defaultButton,
-      renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || '',
-      hasClose: options.hasClose || true
+      defaultButton: options.defaultButton ?? buttons.length - 1,
+      renderer: options.renderer ?? Dialog.defaultRenderer,
+      focusNodeSelector: options.focusNodeSelector ?? '',
+      hasClose: options.hasClose ?? true
     };
   }
 

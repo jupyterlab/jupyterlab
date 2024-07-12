@@ -46,7 +46,7 @@ export interface ILanguageInfoMetadata extends PartialJSONObject {
 export interface INotebookMetadata extends PartialJSONObject {
   kernelspec?: IKernelspecMetadata;
   language_info?: ILanguageInfoMetadata;
-  orig_nbformat: number;
+  orig_nbformat?: number;
 }
 
 /**
@@ -102,7 +102,7 @@ export function validateMimeValue(
   value: MultilineString | PartialJSONObject
 ): boolean {
   // Check if "application/json" or "application/foo+json"
-  const jsonTest = /^application\/(.*?)+\+json$/;
+  const jsonTest = /^application\/.+\+json$/;
   const isJSONType = type === 'application/json' || jsonTest.test(type);
 
   const isString = (x: any) => {
@@ -141,7 +141,7 @@ export function validateMimeValue(
 /**
  * A type which describes the type of cell.
  */
-export type CellType = 'code' | 'markdown' | 'raw';
+export type CellType = 'code' | 'markdown' | 'raw' | string;
 
 /**
  * The Jupyter metadata namespace.

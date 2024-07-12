@@ -7,6 +7,7 @@ import {
   JSONExt,
   JSONObject,
   JSONValue,
+  PartialJSONArray,
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyJSONObject,
@@ -15,7 +16,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import Ajv from 'ajv';
+import Ajv, { Options as AjvOptions } from 'ajv';
 import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
 import { ISettingRegistry } from './tokens';
@@ -25,12 +26,17 @@ import { ISettingRegistry } from './tokens';
  */
 const copy = JSONExt.deepCopy;
 
-/**
- * The default number of milliseconds before a `load()` call to the registry
- * will wait before timing out if it requires a transformation that has not been
- * registered.
+/** Default arguments for Ajv instances.
+ *
+ * https://ajv.js.org/options.html
  */
-const DEFAULT_TRANSFORM_TIMEOUT = 1000;
+const AJV_DEFAULT_OPTIONS: Partial<AjvOptions> = {
+  /**
+   * @todo the implications of enabling strict mode are beyond the scope of
+   *       the initial PR
+   */
+  strict: false
+};
 
 /**
  * The ASCII record separator character.
@@ -50,7 +56,7 @@ export interface ISchemaValidator {
    * @param populate - Whether plugin data should be populated, defaults to
    * `true`.
    *
-   * @return A list of errors if either the schema or data fail to validate or
+   * @returns A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
   validateData(
@@ -68,19 +74,14 @@ export namespace ISchemaValidator {
    */
   export interface IError {
     /**
-     * The path in the data where the error occurred.
-     */
-    dataPath: string;
-
-    /**
      * The keyword whose validation failed.
      */
-    keyword: string;
+    keyword: string | string[];
 
     /**
      * The error message.
      */
-    message: string;
+    message?: string;
 
     /**
      * Optional parameter metadata that might be included in an error.
@@ -91,6 +92,31 @@ export namespace ISchemaValidator {
      * The path in the schema where the error occurred.
      */
     schemaPath: string;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    schema?: unknown;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    instancePath: string;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    propertyName?: string;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    data?: unknown;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    parentSchema?: unknown;
   }
 }
 
@@ -115,7 +141,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * @param populate - Whether plugin data should be populated, defaults to
    * `true`.
    *
-   * @return A list of errors if either the schema or data fail to validate or
+   * @returns A list of errors if either the schema or data fail to validate or
    * `null` if there are no errors.
    */
   validateData(
@@ -133,7 +159,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
           `Setting registry schemas' root-level type must be ` +
           `'object', rejecting type: ${plugin.schema.type}`;
 
-        return [{ dataPath: 'type', keyword, schemaPath: '', message }];
+        return [{ instancePath: 'type', keyword, schemaPath: '', message }];
       }
 
       const errors = this._addSchema(plugin.id, plugin.schema);
@@ -149,7 +175,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
       if (error instanceof SyntaxError) {
         return [
           {
-            dataPath: '',
+            instancePath: '',
             keyword: 'syntax',
             schemaPath: '',
             message: error.message
@@ -162,7 +188,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
 
       return [
         {
-          dataPath: '',
+          instancePath: '',
           keyword: 'parse',
           schemaPath: '',
           message: `${description} (line ${line} column ${column})`
@@ -195,7 +221,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    *
    * @param schema - The schema being added.
    *
-   * @return A list of errors if the schema fails to validate or `null` if there
+   * @returns A list of errors if the schema fails to validate or `null` if there
    * are no errors.
    *
    * #### Notes
@@ -230,8 +256,11 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     return null;
   }
 
-  private _composer = new Ajv({ useDefaults: true });
-  private _validator = new Ajv();
+  private _composer: Ajv = new Ajv({
+    useDefaults: true,
+    ...AJV_DEFAULT_OPTIONS
+  });
+  private _validator: Ajv = new Ajv({ ...AJV_DEFAULT_OPTIONS });
 }
 
 /**
@@ -244,10 +273,16 @@ export class SettingRegistry implements ISettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
-    this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
 
-    // Preload with any available data at instantiation-time.
+    // Plugins with transformation may not be loaded if the transformation function is
+    // not yet available. To avoid fetching again the associated data when the transformation
+    // function is available, the plugin data is kept in cache.
     if (options.plugins) {
+      options.plugins
+        .filter(plugin => plugin.schema['jupyter.lab.transform'])
+        .forEach(plugin => this._unloadedPlugins.set(plugin.id, plugin));
+
+      // Preload with any available data at instantiation-time.
       this._ready = this._preload(options.plugins);
     }
   }
@@ -320,10 +355,15 @@ export class SettingRegistry implements ISettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
+   * @param forceTransform - An optional parameter to force replay the transforms methods.
+   *
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
-  async load(plugin: string): Promise<ISettingRegistry.ISettings> {
+  async load(
+    plugin: string,
+    forceTransform: boolean = false
+  ): Promise<ISettingRegistry.ISettings> {
     // Wait for data preload before allowing normal operation.
     await this._ready;
 
@@ -332,7 +372,26 @@ export class SettingRegistry implements ISettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
+      // Force replaying the transform function if expected.
+      if (forceTransform) {
+        // Empty the composite and user data before replaying the transforms.
+        plugins[plugin].data = { composite: {}, user: {} };
+        await this._load(await this._transform('fetch', plugins[plugin]));
+        this._pluginChanged.emit(plugin);
+      }
       return new Settings({ plugin: plugins[plugin], registry });
+    }
+
+    // If the plugin is not loaded but has already been fetched.
+    if (this._unloadedPlugins.has(plugin) && plugin in this._transformers) {
+      await this._load(
+        await this._transform('fetch', this._unloadedPlugins.get(plugin)!)
+      );
+      if (plugin in plugins) {
+        this._pluginChanged.emit(plugin);
+        this._unloadedPlugins.delete(plugin);
+        return new Settings({ plugin: plugins[plugin], registry });
+      }
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -358,7 +417,7 @@ export class SettingRegistry implements ISettingRegistry {
     if (fetched === undefined) {
       throw [
         {
-          dataPath: '',
+          instancePath: '',
           keyword: 'id',
           message: `Could not fetch settings for ${plugin}.`,
           schemaPath: ''
@@ -460,7 +519,9 @@ export class SettingRegistry implements ISettingRegistry {
     const transformers = this._transformers;
 
     if (plugin in transformers) {
-      throw new Error(`${plugin} already has a transformer.`);
+      const error = new Error(`${plugin} already has a transformer.`);
+      error.name = 'TransformError';
+      throw error;
     }
 
     transformers[plugin] = {
@@ -499,6 +560,13 @@ export class SettingRegistry implements ISettingRegistry {
   }
 
   /**
+   * A promise which resolves when the pre-fetched plugins passed to the registry finished pre-loading.
+   */
+  protected get ready() {
+    return this._ready;
+  }
+
+  /**
    * Load a plugin into the registry.
    */
   private async _load(data: ISettingRegistry.IPlugin): Promise<void> {
@@ -511,10 +579,12 @@ export class SettingRegistry implements ISettingRegistry {
       const output = [`Validating ${plugin} failed:`];
 
       (errors as ISchemaValidator.IError[]).forEach((error, index) => {
-        const { dataPath, schemaPath, keyword, message } = error;
+        const { instancePath, schemaPath, keyword, message } = error;
 
-        if (dataPath || schemaPath) {
-          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+        if (instancePath || schemaPath) {
+          output.push(
+            `${index} - schema @ ${schemaPath}, data @ ${instancePath}`
+          );
         }
         output.push(`{${keyword}} ${message}`);
       });
@@ -534,8 +604,8 @@ export class SettingRegistry implements ISettingRegistry {
           // Apply a transformation to the plugin if necessary.
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
-          /* Ignore preload timeout errors silently. */
-          if (errors[0]?.keyword !== 'timeout') {
+          /* Ignore silently if no transformers. */
+          if (errors[0]?.keyword !== 'unset') {
             console.warn('Ignored setting registry preload errors.', errors);
           }
         }
@@ -566,7 +636,7 @@ export class SettingRegistry implements ISettingRegistry {
     if (fetched === undefined) {
       throw [
         {
-          dataPath: '',
+          instancePath: '',
           keyword: 'id',
           message: `Could not fetch settings for ${plugin}.`,
           schemaPath: ''
@@ -582,13 +652,10 @@ export class SettingRegistry implements ISettingRegistry {
    */
   private async _transform(
     phase: ISettingRegistry.IPlugin.Phase,
-    plugin: ISettingRegistry.IPlugin,
-    started = new Date().getTime()
+    plugin: ISettingRegistry.IPlugin
   ): Promise<ISettingRegistry.IPlugin> {
-    const elapsed = new Date().getTime() - started;
     const id = plugin.id;
     const transformers = this._transformers;
-    const timeout = this._timeout;
 
     if (!plugin.schema['jupyter.lab.transform']) {
       return plugin;
@@ -600,32 +667,21 @@ export class SettingRegistry implements ISettingRegistry {
       if (transformed.id !== id) {
         throw [
           {
-            dataPath: '',
+            instancePath: '',
             keyword: 'id',
             message: 'Plugin transformations cannot change plugin IDs.',
             schemaPath: ''
           } as ISchemaValidator.IError
         ];
       }
-
       return transformed;
     }
-
-    // If the timeout has not been exceeded, stall and try again in 250ms.
-    if (elapsed < timeout) {
-      await new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 250);
-      });
-      return this._transform(phase, plugin, started);
-    }
-
+    // If the plugin has no transformers, throw an error and bail.
     throw [
       {
-        dataPath: '',
-        keyword: 'timeout',
-        message: `Transforming ${plugin.id} timed out.`,
+        instancePath: '',
+        keyword: 'unset',
+        message: `${plugin.id} has no transformers yet.`,
         schemaPath: ''
       } as ISchemaValidator.IError
     ];
@@ -648,22 +704,79 @@ export class SettingRegistry implements ISettingRegistry {
 
   private _pluginChanged = new Signal<this, string>(this);
   private _ready = Promise.resolve();
-  private _timeout: number;
   private _transformers: {
     [plugin: string]: {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
     };
   } = Object.create(null);
+  private _unloadedPlugins = new Map<string, ISettingRegistry.IPlugin>();
+}
+
+/**
+ * Base settings specified by a JSON schema.
+ */
+export class BaseSettings<
+  T extends ISettingRegistry.IProperty = ISettingRegistry.IProperty
+> {
+  constructor(options: { schema: T }) {
+    this._schema = options.schema;
+  }
+
+  /**
+   * The plugin's schema.
+   */
+  get schema(): T {
+    return this._schema;
+  }
+
+  /**
+   * Checks if any fields are different from the default value.
+   */
+  isDefault(user: ReadonlyPartialJSONObject): boolean {
+    for (const key in this.schema.properties) {
+      const value = user[key];
+      const defaultValue = this.default(key);
+      if (
+        value === undefined ||
+        defaultValue === undefined ||
+        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(value, JSONExt.emptyArray)
+      ) {
+        continue;
+      }
+      if (!JSONExt.deepEqual(value, defaultValue)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Calculate the default value of a setting by iterating through the schema.
+   *
+   * @param key - The name of the setting whose default value is calculated.
+   *
+   * @returns A calculated default JSON value for a specific setting.
+   */
+  default(key?: string): PartialJSONValue | undefined {
+    return Private.reifyDefault(this.schema, key);
+  }
+
+  private _schema: T;
 }
 
 /**
  * A manager for a specific plugin's settings.
  */
-export class Settings implements ISettingRegistry.ISettings {
+export class Settings
+  extends BaseSettings<ISettingRegistry.ISchema>
+  implements ISettingRegistry.ISettings
+{
   /**
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
+    super({ schema: options.plugin.schema });
     this.id = options.plugin.id;
     this.registry = options.registry;
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
@@ -705,17 +818,17 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * The plugin's schema.
-   */
-  get schema(): ISettingRegistry.ISchema {
-    return this.plugin.schema;
-  }
-
-  /**
    * The plugin settings raw text value.
    */
   get raw(): string {
     return this.plugin.raw;
+  }
+
+  /**
+   * Whether the settings have been modified by the user or not.
+   */
+  get isModified(): boolean {
+    return !this.isDefault(this.user);
   }
 
   /**
@@ -737,17 +850,6 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   annotatedDefaults(): string {
     return Private.annotatedDefaults(this.schema, this.id);
-  }
-
-  /**
-   * Calculate the default value of a setting by iterating through the schema.
-   *
-   * @param key - The name of the setting whose default value is calculated.
-   *
-   * @returns A calculated default JSON value for a specific setting.
-   */
-  default(key: string): PartialJSONValue | undefined {
-    return Private.reifyDefault(this.schema, key);
   }
 
   /**
@@ -773,9 +875,7 @@ export class Settings implements ISettingRegistry.ISettings {
    * This method returns synchronously because it uses a cached copy of the
    * plugin settings that is synchronized with the registry.
    */
-  get(
-    key: string
-  ): {
+  get(key: string): {
     composite: ReadonlyPartialJSONValue | undefined;
     user: ReadonlyPartialJSONValue | undefined;
   } {
@@ -1018,6 +1118,12 @@ export namespace SettingRegistry {
     return items;
   }
 
+  /**
+   * Remove disabled entries from menu items
+   *
+   * @param items Menu items
+   * @returns Filtered menu items
+   */
   export function filterDisabledItems<T extends ISettingRegistry.IMenuItem>(
     items: T[]
   ): T[] {
@@ -1061,9 +1167,8 @@ export namespace SettingRegistry {
 
     // If a user shortcut collides with another user shortcut warn and filter.
     user = user.filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
         console.warn(
           'Skipping this shortcut because there are no actionable keys on this platform',
@@ -1097,9 +1202,8 @@ export namespace SettingRegistry {
       ...defaults.filter(s => !!s.disabled),
       ...defaults.filter(s => !s.disabled)
     ].filter(shortcut => {
-      const keys = CommandRegistry.normalizeKeys(shortcut).join(
-        RECORD_SEPARATOR
-      );
+      const keys =
+        CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
 
       if (!keys) {
         return false;
@@ -1127,7 +1231,57 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return user.concat(defaults).filter(shortcut => !shortcut.disabled);
+    return Private.upgradeShortcuts(
+      user
+        .concat(defaults)
+        .filter(shortcut => !shortcut.disabled)
+        // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
+        .map(shortcut => {
+          return { args: {}, ...shortcut };
+        })
+    );
+  }
+
+  /**
+   * Merge two set of toolbar items.
+   *
+   * @param reference Reference set of toolbar items
+   * @param addition New items to add
+   * @param warn Whether to warn if item is duplicated; default to false
+   * @returns The merged set of items
+   */
+  export function reconcileToolbarItems(
+    reference?: ISettingRegistry.IToolbarItem[],
+    addition?: ISettingRegistry.IToolbarItem[],
+    warn: boolean = false
+  ): ISettingRegistry.IToolbarItem[] | undefined {
+    if (!reference) {
+      return addition ? JSONExt.deepCopy(addition) : undefined;
+    }
+    if (!addition) {
+      return JSONExt.deepCopy(reference);
+    }
+
+    const items = JSONExt.deepCopy(reference);
+
+    // Merge array element depending on the type
+    addition.forEach(item => {
+      // Name must be unique so it's sufficient to only compare it
+      const refIndex = items.findIndex(ref => ref.name === item.name);
+      if (refIndex < 0) {
+        items.push({ ...item });
+      } else {
+        if (
+          warn &&
+          JSONExt.deepEqual(Object.keys(item), Object.keys(items[refIndex]))
+        ) {
+          console.warn(`Toolbar item '${item.name}' is duplicated.`);
+        }
+        items[refIndex] = { ...items[refIndex], ...item };
+      }
+    });
+
+    return items;
   }
 }
 
@@ -1290,28 +1444,160 @@ namespace Private {
 
   /**
    * Create a fully extrapolated default value for a root key in a schema.
+   *
+   * @todo This function would ideally reuse `getDefaultFormState` from rjsf
+   * with appropriate`defaultFormStateBehavior` setting, as currently
+   * these two implementations duplicate each other.
+   *
+   * Note: absence of a property may mean something else than the default.
    */
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
-    root?: string
+    root?: string,
+    definitions?: PartialJSONObject,
+    required?: boolean
   ): PartialJSONValue | undefined {
+    definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
+    required = root
+      ? schema.required instanceof Array &&
+        schema.required?.includes(root as any)
+      : required;
     schema = (root ? schema.properties?.[root] : schema) || {};
 
-    // If the property has no default or is a primitive, return.
-    if (!('default' in schema) || schema.type !== 'object') {
+    if (schema.type === 'object') {
+      // Make a copy of the default value to populate.
+      const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
+
+      // Iterate through and populate each child property.
+      const props = schema.properties || {};
+      for (const property in props) {
+        result[property] = reifyDefault(
+          props[property],
+          undefined,
+          definitions,
+          schema.required instanceof Array &&
+            schema.required?.includes(property as any)
+        );
+      }
+
+      return result;
+    } else if (schema.type === 'array') {
+      const defaultDefined = typeof schema.default !== 'undefined';
+      const shouldPopulateDefaultArray = defaultDefined || required;
+      if (!shouldPopulateDefaultArray) {
+        return undefined;
+      }
+      // Make a copy of the default value to populate.
+      const result = defaultDefined
+        ? JSONExt.deepCopy(schema.default as PartialJSONArray)
+        : [];
+
+      // Items defines the properties of each item in the array
+      let props = (schema.items as PartialJSONObject) || {};
+      // Use referenced definition if one exists
+      if (props['$ref'] && definitions) {
+        const ref: string = (props['$ref'] as string).replace(
+          '#/definitions/',
+          ''
+        );
+        props = (definitions[ref] as PartialJSONObject) ?? {};
+      }
+      // Iterate through the items in the array and fill in defaults
+      for (const item in result) {
+        if (props.type === 'object') {
+          // Use the values that are hard-coded in the default array over the defaults for each field.
+          const reified =
+            (reifyDefault(
+              props,
+              undefined,
+              definitions
+            ) as PartialJSONObject) ??
+            result[item] ??
+            {};
+          for (const prop in reified) {
+            if ((result[item] as PartialJSONObject)?.[prop]) {
+              reified[prop] = (result[item] as PartialJSONObject)[prop];
+            }
+          }
+          result[item] = reified;
+        }
+      }
+
+      return result;
+    } else {
       return schema.default;
     }
+  }
 
-    // Make a copy of the default value to populate.
-    const result = JSONExt.deepCopy(schema.default as PartialJSONObject);
+  /**
+   * Selectors which were previously warned about.
+   */
+  const selectorsAlreadyWarnedAbout = new Set<string>();
 
-    // Iterate through and populate each child property.
-    const props = schema.properties || {};
-    for (const property in props) {
-      result[property] = reifyDefault(props[property]);
+  /**
+   * Upgrade shortcuts to ensure no breaking changes between minor versions.
+   */
+  export function upgradeShortcuts(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    const selectorDeprecationWarnings = new Set();
+    const changes = [
+      {
+        old: '.jp-Notebook:focus.jp-mod-commandMode',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1.1'
+      },
+      {
+        old: '.jp-Notebook:focus',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-traversable]:focus',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user]:focus',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user] :focus:not(:read-write)',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1.1'
+      }
+    ];
+    const upgraded = shortcuts.map(shortcut => {
+      const oldSelector = shortcut.selector;
+      let newSelector = oldSelector;
+      for (const change of changes) {
+        if (oldSelector.includes(change.old)) {
+          newSelector = oldSelector.replace(change.old, change.new);
+          if (!selectorsAlreadyWarnedAbout.has(oldSelector)) {
+            selectorDeprecationWarnings.add(
+              `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
+            );
+            selectorsAlreadyWarnedAbout.add(oldSelector);
+          }
+        }
+      }
+      shortcut.selector = newSelector;
+      return shortcut;
+    });
+    if (selectorDeprecationWarnings.size > 0) {
+      console.warn(
+        'Deprecated shortcut selectors: ' +
+          [...selectorDeprecationWarnings].join('\n') +
+          '\n\nThe selectors will be substituted transparently this time, but need to be updated at source before next major release.'
+      );
     }
-
-    return result;
+    return upgraded;
   }
 }

@@ -6,13 +6,19 @@
       "path": "../coreutils"
     },
     {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
-      "path": "../../testutils"
-    },
-    {
-      "path": "../coreutils"
+      "path": "../testing"
     }
   ]
 }

@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCellModel } from '@jupyterlab/cells';
-import { NotebookModel, NotebookModelFactory } from '../src';
+import { NotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModelFactory', () => {
@@ -10,29 +9,6 @@ describe('@jupyterlab/notebook', () => {
       it('should create a new notebook model factory', () => {
         const factory = new NotebookModelFactory({});
         expect(factory).toBeInstanceOf(NotebookModelFactory);
-      });
-
-      it('should accept a code cell content factory', () => {
-        const codeCellContentFactory = new CodeCellModel.ContentFactory();
-        const factory = new NotebookModelFactory({ codeCellContentFactory });
-        expect(factory.contentFactory.codeCellContentFactory).toBe(
-          codeCellContentFactory
-        );
-      });
-
-      it('should accept a notebook model content factory', () => {
-        const contentFactory = new NotebookModel.ContentFactory({});
-        const factory = new NotebookModelFactory({ contentFactory });
-        expect(factory.contentFactory).toBe(contentFactory);
-      });
-    });
-
-    describe('#contentFactory', () => {
-      it('should be the content factory used by the model factory', () => {
-        const factory = new NotebookModelFactory({});
-        expect(factory.contentFactory).toBeInstanceOf(
-          NotebookModel.ContentFactory
-        );
       });
     });
 
@@ -90,7 +66,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should accept a language preference', () => {
         const factory = new NotebookModelFactory({});
-        const model = factory.createNew('foo');
+        const model = factory.createNew({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });

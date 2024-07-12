@@ -22,10 +22,13 @@
       "path": "../attachments"
     },
     {
-      "path": "../cells"
+      "path": "../cell-toolbar"
     },
     {
-      "path": "../celltags"
+      "path": "../cell-toolbar-extension"
+    },
+    {
+      "path": "../cells"
     },
     {
       "path": "../celltags-extension"
@@ -71,12 +74,6 @@
     },
     {
       "path": "../docmanager-extension"
-    },
-    {
-      "path": "../docprovider"
-    },
-    {
-      "path": "../docprovider-extension"
     },
     {
       "path": "../docregistry"
@@ -148,6 +145,12 @@
       "path": "../logconsole-extension"
     },
     {
+      "path": "../lsp"
+    },
+    {
+      "path": "../lsp-extension"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -160,10 +163,22 @@
       "path": "../markdownviewer-extension"
     },
     {
-      "path": "../mathjax2"
+      "path": "../markedparser-extension"
     },
     {
-      "path": "../mathjax2-extension"
+      "path": "../mathjax-extension"
+    },
+    {
+      "path": "../mermaid"
+    },
+    {
+      "path": "../mermaid-extension"
+    },
+    {
+      "path": "../metadataform"
+    },
+    {
+      "path": "../metadataform-extension"
     },
     {
       "path": "../nbformat"
@@ -182,6 +197,12 @@
     },
     {
       "path": "../pdf-extension"
+    },
+    {
+      "path": "../pluginmanager"
+    },
+    {
+      "path": "../pluginmanager-extension"
     },
     {
       "path": "../property-inspector"
@@ -214,9 +235,6 @@
       "path": "../settingregistry"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../shortcuts-extension"
     },
     {
@@ -236,6 +254,9 @@
     },
     {
       "path": "../theme-dark-extension"
+    },
+    {
+      "path": "../theme-dark-high-contrast-extension"
     },
     {
       "path": "../theme-light-extension"
@@ -265,13 +286,13 @@
       "path": "../ui-components-extension"
     },
     {
-      "path": "../vdom"
-    },
-    {
-      "path": "../vdom-extension"
-    },
-    {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../workspaces"
+    },
+    {
+      "path": "../workspaces-extension"
     }
   ]
 }

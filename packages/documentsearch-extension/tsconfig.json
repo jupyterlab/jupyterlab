@@ -16,6 +16,9 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../translation"
     }
   ]
