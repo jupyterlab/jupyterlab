@@ -3149,9 +3149,9 @@ namespace Private {
       const entries = await readEntries(reader);
       if (entries.length === 0) {
         done = true;
-        break;
+      } else {
+        allEntries.push(...entries);
       }
-      allEntries.push(...entries);
     }
     return allEntries;
   }
