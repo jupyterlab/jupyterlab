@@ -1479,43 +1479,44 @@ export class DirListing extends Widget {
       return;
     }
 
-    const addDirectory = async (item: FileSystemEntry, path: string) => {
+    const addDirectory = async (entry: FileSystemEntry, path: string) => {
       console.log('logging path: ', path);
 
-      if (Private.isDirectoryEntry(item)) {
+      if (Private.isDirectoryEntry(entry)) {
         const model = await this._model.manager.newUntitled({
           path: path,
           type: 'directory'
         });
         await this._manager.rename(
           `${path}/${model.name}`,
-          `${path}/${item.name}`
+          `${path}/${entry.name}`
         );
         await this._model.cd(`${model.path}`);
 
-        const directoryReader = item.createReader();
+        const directoryReader = entry.createReader();
 
         directoryReader.readEntries((entries: any) => {
           for (let i = 0; i < entries.length; i++) {
-            void addDirectory(entries[i], `${path}/${item.name}`);
+            void addDirectory(entries[i], `${path}/${entry.name}`);
           }
           // entries.forEach(async (entry: any) => {
           //   await addDirectory(entry, this._model.path);
           // });
         });
-      } else if (Private.isFileEntry(item)) {
-        item.file((file: File) => {
+      } else if (Private.isFileEntry(entry)) {
+        entry.file((file: File) => {
           return this._model.upload(file);
         });
       }
     };
 
     for (let i = 0; i < items.length; i++) {
-      const item = items[i].webkitGetAsEntry();
-      if (!item) {
+      const item = items[i];
+      const entry = Private.defensiveGetAsEntry(item);
+      if (!entry) {
         continue;
       }
-      addDirectory(item, this._model.path).catch(err => {
+      addDirectory(entry, this._model.path).catch(err => {
         console.log('error while creating folder: ', err);
       });
     }
@@ -3115,5 +3116,18 @@ namespace Private {
     entry: FileSystemEntry
   ): entry is FileSystemFileEntry {
     return entry.isFile;
+  }
+
+  export function defensiveGetAsEntry(
+    item: DataTransferItem
+  ): FileSystemEntry | null {
+    if (item.webkitGetAsEntry) {
+      return item.webkitGetAsEntry();
+    }
+    if ('getAsEntry' in item) {
+      // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
+      return (item['getAsEntry'] as () => FileSystemEntry | null)();
+    }
+    return null;
   }
 }
