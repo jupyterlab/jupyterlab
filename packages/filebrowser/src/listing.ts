@@ -1468,18 +1468,23 @@ export class DirListing extends Widget {
    * Handle the `drop` event for the widget.
    */
   protected evtNativeDrop(event: DragEvent): void {
-    const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) {
-      return;
-    }
+    // Prevent navigation
     event.preventDefault();
 
     const items = event.dataTransfer?.items;
     if (!items) {
+      // Fallback to simple upload of files (if any)
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) {
+        return;
+      }
+      for (let i = 0; i < files.length; i++) {
+        void this._model.upload(files[i]);
+      }
       return;
     }
 
-    const addDirectory = async (entry: FileSystemEntry, path: string) => {
+    const uploadEntry = async (entry: FileSystemEntry, path: string) => {
       console.log('logging path: ', path);
 
       if (Private.isDirectoryEntry(entry)) {
@@ -1495,14 +1500,11 @@ export class DirListing extends Widget {
 
         const directoryReader = entry.createReader();
 
-        directoryReader.readEntries((entries: any) => {
-          for (let i = 0; i < entries.length; i++) {
-            void addDirectory(entries[i], `${path}/${entry.name}`);
-          }
-          // entries.forEach(async (entry: any) => {
-          //   await addDirectory(entry, this._model.path);
-          // });
-        });
+        const allEntries = await Private.collectEntries(directoryReader);
+        for (const childEntry of allEntries) {
+          //this._model.path
+          void uploadEntry(childEntry, `${path}/${entry.name}`);
+        }
       } else if (Private.isFileEntry(entry)) {
         entry.file((file: File) => {
           return this._model.upload(file);
@@ -1516,13 +1518,9 @@ export class DirListing extends Widget {
       if (!entry) {
         continue;
       }
-      addDirectory(entry, this._model.path).catch(err => {
+      uploadEntry(entry, this._model.path).catch(err => {
         console.log('error while creating folder: ', err);
       });
-    }
-
-    for (let i = 0; i < files.length; i++) {
-      void this._model.upload(files[i]);
     }
   }
 
@@ -3129,5 +3127,28 @@ namespace Private {
       return (item['getAsEntry'] as () => FileSystemEntry | null)();
     }
     return null;
+  }
+
+  function readEntries(reader: FileSystemDirectoryReader) {
+    return new Promise<FileSystemEntry[]>((resolve, reject) =>
+      reader.readEntries(resolve, reject)
+    );
+  }
+
+  export async function collectEntries(reader: FileSystemDirectoryReader) {
+    // Spec requires calling `readEntries` until these are exhausted;
+    // in practice this is only required in Chromium-based browsers for >100 files.
+    // https://issues.chromium.org/issues/41110876
+    const allEntries: FileSystemEntry[] = [];
+    let done = false;
+    while (!done) {
+      const entries = await readEntries(reader);
+      if (entries.length === 0) {
+        done = true;
+        break;
+      }
+      allEntries.push(...entries);
+    }
+    return allEntries;
   }
 }
