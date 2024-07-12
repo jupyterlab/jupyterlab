@@ -403,6 +403,8 @@ class FilterWidget extends ReactWidget implements IFilterProvider {
 }
 
 class ListWidget extends ReactWidget {
+  private _mode: 'tree' | 'list';
+
   constructor(
     private _options: {
       manager: IRunningSessions.IManager;
@@ -416,6 +418,20 @@ class ListWidget extends ReactWidget {
     _options.manager.runningChanged.connect(this._emitUpdate, this);
     if (_options.filterProvider) {
       _options.filterProvider.filterChanged.connect(this._emitUpdate, this);
+    }
+  }
+
+  /**
+   * Whether the items are displayed as a tree view
+   * or a flat list.
+   */
+  get mode(): 'tree' | 'list' {
+    return this._mode;
+  }
+  set mode(v: 'tree' | 'list') {
+    if (this._mode !== v) {
+      this._mode = v;
+      this._update.emit();
     }
   }
 
@@ -440,15 +456,10 @@ class ListWidget extends ReactWidget {
           if (cached) {
             cached = false;
           } else {
-            options.runningItems = options.manager.running();
+            options.runningItems = options.manager.running({ mode: this.mode });
           }
           const classes = ['jp-TreeView'];
-          if (
-            options.manager.name !==
-            (options.translator ?? nullTranslator)
-              .load('jupyterlab')
-              .__('Kernels')
-          ) {
+          if (this.mode === 'list') {
             classes.push('jp-mod-flat');
           }
           return (
@@ -512,6 +523,7 @@ class ListWidget extends ReactWidget {
 class Section extends PanelWithToolbar {
   constructor(options: Section.IOptions) {
     super();
+    this._listView = (options.viewMode ?? 'tree') === 'list';
     this._manager = options.manager;
     this._filterProvider = options.filterProvider;
     const translator = options.translator || nullTranslator;
@@ -526,19 +538,27 @@ class Section extends PanelWithToolbar {
     }
     this._updateEmptyClass();
 
-    let runningItems = options.manager.running();
+    const runningItems = options.manager.running({
+      mode:
+        options.manager.supportsMultipleViews && !this._listView
+          ? 'tree'
+          : 'list'
+    });
 
     if (options.showToolbar !== false) {
       this._initializeToolbar(runningItems);
     }
 
-    this.addWidget(
-      new ListWidget({
-        runningItems,
-        collapseToggled: this._collapseToggled,
-        ...options
-      })
-    );
+    this._listWidget = new ListWidget({
+      runningItems,
+      collapseToggled: this._collapseToggled,
+      ...options
+    });
+    this._listWidget.mode =
+      options.manager.supportsMultipleViews && !this._listView
+        ? 'tree'
+        : 'list';
+    this.addWidget(this._listWidget);
   }
 
   /**
@@ -552,8 +572,12 @@ class Section extends PanelWithToolbar {
       switchViewButton.pressed = newState;
     }
     this._collapseToggled.emit(false);
-    this.toggleClass(LIST_VIEW_CLASS, newState);
+    if (this._manager.supportsMultipleViews === undefined) {
+      this.toggleClass(LIST_VIEW_CLASS, newState);
+    }
     this._updateButtons();
+    this._listWidget.mode =
+      this._manager.supportsMultipleViews && !this._listView ? 'tree' : 'list';
     this._viewChanged.emit({ mode: newState ? 'list' : 'tree' });
   }
 
@@ -652,7 +676,14 @@ class Section extends PanelWithToolbar {
 
   private _updateEmptyClass(): void {
     if (this._filterProvider) {
-      const items = this._manager.running().filter(this._filterProvider.filter);
+      const items = this._manager
+        .running({
+          mode:
+            this._manager.supportsMultipleViews && !this._listView
+              ? 'tree'
+              : 'list'
+        })
+        .filter(this._filterProvider.filter);
       const empty = items.length === 0;
       if (empty) {
         this.node.classList.toggle('jp-mod-empty', true);
@@ -670,10 +701,18 @@ class Section extends PanelWithToolbar {
     if (!this._buttons) {
       return;
     }
-    let runningItems = this._manager.running();
+    let runningItems = this._manager.running({
+      mode:
+        this._manager.supportsMultipleViews && !this._listView ? 'tree' : 'list'
+    });
     const enabled = runningItems.length > 0;
 
-    const hasNesting = runningItems.filter(item => item.children).length !== 0;
+    const hasNesting =
+      // If the flag is undefined fallback to the old behavior
+      // @deprecated we should remove the fallback in the next iteration
+      this._manager.supportsMultipleViews === undefined
+        ? runningItems.filter(item => item.children).length !== 0
+        : this._manager.supportsMultipleViews;
     const inTreeView = hasNesting && !this._buttons['switch-view'].pressed;
 
     this._buttons['switch-view'].node.style.display = hasNesting
@@ -695,6 +734,7 @@ class Section extends PanelWithToolbar {
   } | null = null;
   private _manager: IRunningSessions.IManager;
   private _listView: boolean = false;
+  private _listWidget: ListWidget;
   private _filterProvider?: IFilterProvider;
   private _collapseToggled = new Signal<Section, boolean>(this);
   private _viewChanged = new Signal<Section, Section.IViewState>(this);
@@ -713,6 +753,7 @@ namespace Section {
     showToolbar?: boolean;
     filterProvider?: IFilterProvider;
     translator?: ITranslator;
+    viewMode?: 'tree' | 'list';
   }
   /**
    * Information about section view state.
@@ -1081,7 +1122,8 @@ export class SearchableSessionsList extends Panel {
       manager,
       translator: this._translator,
       showToolbar: false,
-      filterProvider: this._filterWidget
+      filterProvider: this._filterWidget,
+      viewMode: 'list'
     });
     // Do not use tree view in searchable list
     section.toggleListView(true);
@@ -1116,8 +1158,13 @@ export namespace IRunningSessions {
 
     /**
      * List the running models.
+     *
+     * If the manager supports tree view, it should set the flag
+     * {@link supportsMultipleViews}.
+     * It must return nested item if mode is `tree`.
+     * Otherwise it must return a flat list.
      */
-    running(): IRunningItem[];
+    running(options: { mode: 'tree' | 'list' }): IRunningItem[];
 
     /**
      * Force a refresh of the running models.
@@ -1148,6 +1195,12 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Whether the manager supports tree view for its items
+     * or only a flat list.
+     */
+    supportsMultipleViews?: boolean;
   }
 
   /**

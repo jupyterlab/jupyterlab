@@ -2,7 +2,8 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "lib": ["DOM", "ES2019"]
   },
   "include": ["src/*"],
   "references": [

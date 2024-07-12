@@ -41,14 +41,17 @@
   box-shadow: none;
 }
 
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
 .jp-mod-running-list-view .jp-RunningSessions-sectionList {
   padding-left: 0;
 }
 
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
 .jp-mod-running-list-view .jp-mod-running-leaf {
   margin-left: 0;
 }
 
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
 .jp-mod-running-list-view
   .jp-RunningSessions-item.jp-mod-kernelspec::part(positioning-region),
 .jp-mod-running-list-view
@@ -56,6 +59,7 @@
   display: none;
 }
 
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
 .jp-mod-running-list-view
   .jp-RunningSessions-item.jp-mod-kernel-widget::part(content-region) {
   margin-inline-start: -2.6em;
