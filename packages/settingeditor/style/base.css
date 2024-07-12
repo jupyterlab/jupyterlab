@@ -28,8 +28,8 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-#setting-editor>.lm-Widget,
-#json-setting-editor>.lm-Widget {
+#setting-editor > .lm-Widget,
+#json-setting-editor > .lm-Widget {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -111,7 +111,7 @@
   position: relative;
 }
 
-.jp-PluginList-wrapper>.jp-FilterBox {
+.jp-PluginList-wrapper > .jp-FilterBox {
   margin: 8px 12px 0;
 }
 
@@ -222,7 +222,7 @@
   position: relative;
 }
 
-.jp-SettingsForm>.rjsf>.form-group {
+.jp-SettingsForm > .rjsf > .form-group {
   padding-top: 0;
   margin-top: 0;
 }
@@ -260,7 +260,7 @@
   grid-row: span 2;
 }
 
-.jp-SettingsHeader-buttonbar>.jp-RestoreButton {
+.jp-SettingsHeader-buttonbar > .jp-RestoreButton {
   background-color: var(--jp-warn-color-normal);
   border: 0;
   color: var(--jp-ui-inverse-font-color0);
@@ -281,6 +281,6 @@
   padding: 8px;
 }
 
-.jp-SettingsEditor-placeholderContent>h3 {
+.jp-SettingsEditor-placeholderContent > h3 {
   margin-bottom: var(--jp-content-heading-margin-bottom);
 }
