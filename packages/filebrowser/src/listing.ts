@@ -1485,30 +1485,30 @@ export class DirListing extends Widget {
     }
 
     const uploadEntry = async (entry: FileSystemEntry, path: string) => {
+      // TODO: this works but is slow due to frequent cd()
+      // we also need to handle errors (e.g. what happens if a file already exists)
       console.log('logging path: ', path);
-
+      await this._model.cd('/');
       if (Private.isDirectoryEntry(entry)) {
         const model = await this._model.manager.newUntitled({
           path: path,
           type: 'directory'
         });
-        await this._manager.rename(
-          `${path}/${model.name}`,
-          `${path}/${entry.name}`
-        );
-        await this._model.cd(`${model.path}`);
+        const tmpDirPath = PathExt.join(path, model.name);
+        const dirPath = PathExt.join(path, entry.name);
+        await this._manager.rename(tmpDirPath, dirPath);
+        await this._model.cd(dirPath);
 
         const directoryReader = entry.createReader();
 
         const allEntries = await Private.collectEntries(directoryReader);
         for (const childEntry of allEntries) {
-          //this._model.path
-          void uploadEntry(childEntry, `${path}/${entry.name}`);
+          await uploadEntry(childEntry, dirPath);
         }
       } else if (Private.isFileEntry(entry)) {
-        entry.file((file: File) => {
-          return this._model.upload(file);
-        });
+        await this._model.cd(path);
+        const file = await Private.readFile(entry);
+        await this._model.upload(file);
       }
     };
 
@@ -1518,7 +1518,7 @@ export class DirListing extends Widget {
       if (!entry) {
         continue;
       }
-      uploadEntry(entry, this._model.path).catch(err => {
+      uploadEntry(entry, this._model.path ?? '/').catch(err => {
         console.log('error while creating folder: ', err);
       });
     }
@@ -3133,6 +3133,10 @@ namespace Private {
     return new Promise<FileSystemEntry[]>((resolve, reject) =>
       reader.readEntries(resolve, reject)
     );
+  }
+
+  export function readFile(entry: FileSystemFileEntry) {
+    return new Promise<File>((resolve, reject) => entry.file(resolve, reject));
   }
 
   export async function collectEntries(reader: FileSystemDirectoryReader) {
