@@ -51,7 +51,7 @@ export class InspectorPanel
         'No Documentation'
       )}</h3>`;
       const placeholderText = `<p>${this._trans.__(
-        'Select a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
+        'Move the cursor to a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
       )}</p>`;
 
       this._content = InspectorPanel._generateContentWidget(
