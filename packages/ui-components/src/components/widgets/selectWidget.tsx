@@ -62,7 +62,7 @@ function CustomSelect<
     <label>
       {labelValue(label, hideLabel)}
       <Select
-        aria-invalid={rawErrors.length > 0}      
+        aria-invalid={rawErrors.length > 0}
         id={id}
         // multiple={multiple}
         value={dropdownValue}

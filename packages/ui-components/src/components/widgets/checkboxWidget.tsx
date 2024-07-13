@@ -178,16 +178,3 @@ export default function CustomCheckboxWidget<
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
