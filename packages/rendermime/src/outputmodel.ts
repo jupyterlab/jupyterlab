@@ -88,7 +88,8 @@ export class OutputModel implements IOutputModel {
    * Construct a new output model.
    */
   constructor(options: IOutputModel.IOptions) {
-    const { metadata, trusted } = Private.getBundleOptions(options);
+    const { data, metadata, trusted } = Private.getBundleOptions(options);
+    this._rawData = data;
     const newData: { [key: string]: any } = {};
     if (options.value !== undefined) {
       for (const key in options.value) {
@@ -181,6 +182,7 @@ export class OutputModel implements IOutputModel {
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
       this._updateObservable(this._data, options.data);
+      this._rawData = options.data;
     }
     if (options.metadata) {
       this._updateObservable(this._metadata, options.metadata!);
@@ -197,21 +199,17 @@ export class OutputModel implements IOutputModel {
     for (const key in this._raw) {
       output[key] = Private.extract(this._raw, key);
     }
-    const data: { [key: string]: any } = {};
     for (const key of this._data.keys()) {
       if (key === 'text') {
         const text = (this._data.get(key) as unknown as ObservableString).text;
-        data[key] = text;
         output['text'] = text;
-      } else {
-        data[key] = this._data.get(key);
       }
     }
     switch (this.type) {
       case 'display_data':
       case 'execute_result':
       case 'update_display_data':
-        output['data'] = data.data as PartialJSONObject;
+        output['data'] = this._rawData as PartialJSONObject;
         output['metadata'] = this.metadata as PartialJSONObject;
         break;
       default:
@@ -252,6 +250,7 @@ export class OutputModel implements IOutputModel {
   private _changed = new Signal<this, void>(this);
   private _raw: PartialJSONObject = {};
   private _rawMetadata: ReadonlyPartialJSONObject;
+  private _rawData: ReadonlyPartialJSONObject;
   private _data: IObservableJSON;
   private _metadata: IObservableJSON;
 }
