@@ -8,18 +8,6 @@ import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 
 import Form, { FormProps, IChangeEvent } from '@rjsf/core';
 import {
-  ariaDescribedByIds,
-  enumOptionsIndexForValue,
-  enumOptionsValueForIndex,
-  schemaRequiresTrueValue,
-  labelValue,
-  FormContextType,
-  RJSFSchema,
-  StrictRJSFSchema,
-  WidgetProps
-} from '@rjsf/utils';
-import { Checkbox, Option, Select } from '@jupyter/react-components';
-import {
   ADDITIONAL_PROPERTY_FLAG,
   ArrayFieldTemplateProps,
   canExpand,
@@ -635,7 +623,6 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     showModifiedFromDefault,
     translator,
     formContext,
-    widgets,
     ...others
   } = props;
 
@@ -692,140 +679,7 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     <Form
       templates={templates as any}
       formContext={formContext as any}
-      widgets={{ ...customWidgets, ...widgets }}
       {...others}
     />
-  );
-}
-
-function CustomCheckbox<
-  T = any,
-  S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = any
->({
-  schema,
-  id,
-  value,
-  disabled,
-  readonly,
-  label = '',
-  onChange,
-  onBlur,
-  onFocus
-}: WidgetProps<T, S, F>) {
-  // Because an unchecked checkbox will cause html5 validation to fail, only add
-  // the "required" attribute if the field value must be "true", due to the
-  // "const" or "enum" keywords
-  const required = schemaRequiresTrueValue<S>(schema);
-  const _onChange = ({
-    target: { checked }
-  }: React.ChangeEvent<HTMLElement & { checked: boolean }>) =>
-    onChange(checked);
-  const _onBlur = ({
-    target
-  }: React.FocusEvent<HTMLElement & { value: string }>) =>
-    onBlur(id, target && target.value);
-  const _onFocus = ({
-    target
-  }: React.FocusEvent<HTMLElement & { value: string }>) =>
-    onFocus(id, target && target.value);
-  return (
-    <Checkbox
-      id={id}
-      name={id}
-      checked={typeof value === 'undefined' ? false : Boolean(value)}
-      required={required}
-      disabled={disabled || readonly}
-      onChange={_onChange}
-      onBlur={_onBlur}
-      onFocus={_onFocus}
-      aria-describedby={ariaDescribedByIds<T>(id)}
-    >
-      {label}
-      </Checkbox>
-  );
-}
-
-export const customWidgets = {
-  CheckboxWidget: CustomCheckbox,
-  SelectWidget: CustomSelect,
-};
-
-function CustomSelect<
-  T = any,
-  S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = any
-  >({
-  id,
-  options,
-  label,
-  hideLabel,
-  value,
-  required,
-  disabled,
-  readonly,
-  multiple = false,
-  autofocus = false,
-  rawErrors = [],
-  onChange,
-  onBlur,
-  onFocus,
-  schema,
-  placeholder,
-}: WidgetProps<T, S, F>) {
-  const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
-
-  const selectedIndexes = enumOptionsIndexForValue<S>(value, enumOptions, multiple);
-  let selectedIndexesAsArray: string[] = [];
-
-  if (typeof selectedIndexes === 'string') {
-    selectedIndexesAsArray = [selectedIndexes];
-  } else if (Array.isArray(selectedIndexes)) {
-    selectedIndexesAsArray = selectedIndexes.map((index) => String(index));
-  }
-
-  const dropdownValue = selectedIndexesAsArray
-    .map((index) => (enumOptions ? enumOptions[Number(index)].label : undefined))
-    .join(', ');
-
-  const _onBlur = () => onBlur(id, selectedIndexes);
-  const _onFocus = () => onFocus(id, selectedIndexes);
-  const _onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newValue = multiple
-      ? Array.from(event.target.selectedOptions, option => option.value)
-      : event.target.value;
-    onChange(enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal));
-  };
-  const showPlaceholderOption = !multiple && schema.default === undefined;
-
-  return (
-    <label>
-      {labelValue(label, hideLabel)}
-      <Select
-        aria-invalid={rawErrors.length > 0}      
-        id={id}
-        className='form-control'
-        value={dropdownValue}
-        disabled={disabled || readonly}
-        autoFocus={autofocus}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        onOptionSelect={_onChange}
-        selectedOptions={selectedIndexesAsArray}
-        aria-required={required}
-        aria-describedby={ariaDescribedByIds<T>(id)}
-      >
-        {showPlaceholderOption && <Option value=''>{placeholder || ''}</Option>}
-        {Array.isArray(enumOptions) &&
-          enumOptions.map(({ value, label }, i) => {
-            const disabled = enumDisabled && enumDisabled.indexOf(value) !== -1;
-            return (
-              <Option key={i} value={String(i)} disabled={disabled}>
-                {label}
-              </Option>
-            );
-          })}
-      </Select>
-      </label>
   );
 }
