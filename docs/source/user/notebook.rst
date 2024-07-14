@@ -100,7 +100,7 @@ Collapsed (Folded) View:
    :class: jp-screenshot
    :alt: JupyterLab with notebook titled Data.ipynb open. This notebook has some code with comments to demonstrate the collapsed view of a code cell.
 
-Expanded View: 
+Expanded View:
 
 .. image:: ./images/cell-folding/code-cell-expanded.png
    :align: center
