@@ -104,7 +104,7 @@ export class ActivityHelper {
    * @param name Activity name
    * @returns Tab locator
    */
-  getTabLocator(name?: string): Locator {
+  getTabLocator(name?: string | RegExp): Locator {
     return name
       ? this.page.getByRole('main').getByRole('tab', { name })
       : this.page.getByRole('main').locator('.jp-mod-current[role="tab"]');
@@ -172,7 +172,7 @@ export class ActivityHelper {
    *
    * @param name Activity name
    */
-  async closePanel(name: string): Promise<void> {
+  async closePanel(name: string | RegExp): Promise<void> {
     await this.activateTab(name);
     await this.page.evaluate(async () => {
       await window.jupyterapp.commands.execute('application:close');
@@ -186,7 +186,7 @@ export class ActivityHelper {
    * @param name Activity name
    * @returns Whether the action is successful
    */
-  async activateTab(name: string): Promise<boolean> {
+  async activateTab(name: string | RegExp): Promise<boolean> {
     const tab = this.getTabLocator(name);
     if ((await tab.count()) === 1) {
       await tab.click();

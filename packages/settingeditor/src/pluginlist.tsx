@@ -17,7 +17,7 @@ import {
   updateFilterFunction
 } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
-import { PartialJSONObject } from '@lumino/coreutils';
+import { PartialJSONObject, PromiseDelegate } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -50,13 +50,21 @@ export class PluginList extends ReactWidget {
    */
   constructor(options: PluginList.IOptions) {
     super();
-    this.registry = options.registry;
+    this._registry = this.registry = options.registry;
     this.translator = options.translator || nullTranslator;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
-    this.registry.pluginChanged.connect(() => {
-      this.update();
-    }, this);
+    this._model = options.model ?? new PluginList.Model(options);
+    this._model.ready
+      .then(() => {
+        this.update();
+        this._model.changed.connect(() => {
+          this.update();
+        });
+      })
+      .catch(reason => {
+        console.error(`Failed to load the plugin list model:\n${reason}`);
+      });
     this.mapPlugins = this.mapPlugins.bind(this);
     this.setFilter = this.setFilter.bind(this);
     this.setFilter(
@@ -66,42 +74,15 @@ export class PluginList extends ReactWidget {
     this._evtMousedown = this._evtMousedown.bind(this);
     this._query = options.query ?? '';
 
-    this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
-      const { schema } = plugin;
-      const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
-      const editable = Object.keys(schema.properties || {}).length > 0;
-      const extensible = schema.additionalProperties !== false;
-      // Filters out a couple of plugins that take too long to load in the new settings editor.
-      const correctEditor =
-        // If this is the json settings editor, anything is fine
-        this._confirm ||
-        // If this is the new settings editor, remove context menu / main menu settings.
-        (!this._confirm && !(options.toSkip ?? []).includes(plugin.id));
-
-      return !deprecated && correctEditor && (editable || extensible);
-    });
-
-    /**
-     * Loads all settings and stores them for easy access when displaying search results.
-     */
-    const loadSettings = async () => {
-      for (const plugin of this._allPlugins) {
-        const pluginSettings = (await this.registry.load(
-          plugin.id
-        )) as Settings;
-        this._settings[plugin.id] = pluginSettings;
-      }
-      this.update();
-    };
-    void loadSettings();
-
     this._errors = {};
   }
 
   /**
    * The setting registry.
+   * @deprecated - it was not intended as a public property
    */
   readonly registry: ISettingRegistry;
+  private _registry: ISettingRegistry;
 
   /**
    * A signal emitted when a list user interaction happens.
@@ -378,9 +359,9 @@ export class PluginList extends ReactWidget {
         ? trans._p('schema', schema.description)
         : '';
     const itemTitle = `${description}\n${id}\n${version}`;
-    const icon = this.getHint(ICON_KEY, this.registry, plugin);
-    const iconClass = this.getHint(ICON_CLASS_KEY, this.registry, plugin);
-    const iconTitle = this.getHint(ICON_LABEL_KEY, this.registry, plugin);
+    const icon = this.getHint(ICON_KEY, this._registry, plugin);
+    const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
+    const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
     const filteredProperties = this._filter
       ? this._filter(plugin)?.map(fieldValue => {
           const highlightedIndices = StringExt.matchSumOfSquares(
@@ -431,7 +412,7 @@ export class PluginList extends ReactWidget {
   render(): JSX.Element {
     const trans = this.translator.load('jupyterlab');
     // Filter all plugins based on search value before displaying list.
-    const allPlugins = this._allPlugins.filter(plugin => {
+    const allPlugins = this._model.plugins.filter(plugin => {
       if (!this._filter) {
         return false;
       }
@@ -440,7 +421,7 @@ export class PluginList extends ReactWidget {
     });
 
     const modifiedPlugins = allPlugins.filter(plugin => {
-      return this._settings[plugin.id]?.isModified;
+      return this._model.settings[plugin.id]?.isModified;
     });
     const modifiedItems = modifiedPlugins.map(this.mapPlugins);
     const otherItems = allPlugins
@@ -484,14 +465,13 @@ export class PluginList extends ReactWidget {
   private _changed = new Signal<this, void>(this);
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
+  private _model: PluginList.Model;
   private _query: string | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);
   private _updateFilterSignal = new Signal<
     this,
     SettingsEditor.PluginSearchFilter
   >(this);
-  private _allPlugins: ISettingRegistry.IPlugin[] = [];
-  private _settings: { [id: string]: Settings } = {};
   private _confirm?: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';
@@ -516,12 +496,18 @@ export namespace PluginList {
     confirm?: (id: string) => Promise<void>;
 
     /**
+     * Model for the plugin list.
+     */
+    model?: PluginList.Model;
+
+    /**
      * The setting registry for the plugin list.
      */
     registry: ISettingRegistry;
 
     /**
-     * List of plugins to skip
+     * List of plugins to skip.
+     * @deprecated - pass a `model` with `toSkip` option instead
      */
     toSkip?: string[];
 
@@ -538,6 +524,9 @@ export namespace PluginList {
 
   /**
    * Sort a list of plugins by title and ID.
+   * @deprecated - prior to 4.3 this function was used to reimplement
+   * the same ordering between the plugin list and editor; it is no
+   * longer needed as the order is now tracked by the model.
    */
   export function sortPlugins(
     registry: ISettingRegistry
@@ -547,5 +536,155 @@ export namespace PluginList {
       .sort((a, b) => {
         return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
       });
+  }
+
+  /**
+   * Model for plugin list
+   */
+  export class Model {
+    /**
+     * Create a new plugin list model.
+     */
+    constructor(options: PluginList.Model.IOptions) {
+      this._toSkip = options.toSkip ?? [];
+      this._registry = options.registry;
+      this._registry.pluginChanged.connect(async (_emitter, pluginId) => {
+        let changed = false;
+        // Either plugin can be missing (if plugin was not loaded at all yet)
+        // or just plugin's settings may be missing (if transform step has no completed).
+        if (!this._plugins.map(plugin => plugin.id).includes(pluginId)) {
+          this._plugins = this._loadPlugins();
+          changed = true;
+        }
+        if (!this._settings[pluginId]) {
+          const pluginsToLoad = this._plugins.filter(
+            plugin => plugin.id === pluginId
+          );
+          await this._loadSettings(pluginsToLoad);
+          changed = true;
+        }
+        if (changed) {
+          this._changed.emit();
+        }
+      }, this);
+      this._plugins = this._loadPlugins();
+      this._loadSettings(this._plugins)
+        .then(() => {
+          this._ready.resolve(undefined);
+        })
+        .catch(reason => {
+          console.error(`Failed to load the settings:\n${reason}`);
+        });
+    }
+
+    /**
+     * A list of loaded plugins.
+     */
+    get plugins(): ISettingRegistry.IPlugin[] {
+      return this._plugins;
+    }
+
+    /**
+     * A promise which resolves when an initial loading of plugins completed.
+     *
+     * Note: this does not guarantee that all `plugins` nor `settings` are available
+     * as these can be also loaded later as plugins are added or transformed.
+     */
+    get ready(): Promise<void> {
+      return this._ready.promise;
+    }
+
+    /**
+     * Settings keyed by plugin name.
+     *
+     * Note: settings for plugins can be loaded later than the plugin
+     * itself, which is the case for plugins using a `transform` step.
+     */
+    get settings(): Record<string, Settings> {
+      return this._settings;
+    }
+
+    /**
+     * Signal emitted when list of plugins change.
+     *
+     * This signal will be emitted when new plugins are added to the registry,
+     * when settings schema of an already present plugin changes, and when the
+     * settings state changes from default to modified or vice versa.
+     */
+    get changed(): ISignal<PluginList.Model, void> {
+      return this._changed;
+    }
+
+    /**
+     * Loads, sorts and filters plugins from the registry.
+     */
+    private _loadPlugins(): ISettingRegistry.IPlugin[] {
+      return this._sortPlugins(this._registry).filter(plugin => {
+        const { schema } = plugin;
+        const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
+        const editable = Object.keys(schema.properties || {}).length > 0;
+        const extensible = schema.additionalProperties !== false;
+        const correctEditor = !this._toSkip.includes(plugin.id);
+
+        return !deprecated && correctEditor && (editable || extensible);
+      });
+    }
+
+    /**
+     * Loads settings and stores them for easy access when displaying search results.
+     */
+    private async _loadSettings(plugins: ISettingRegistry.IPlugin[]) {
+      for (const plugin of plugins) {
+        const pluginSettings = (await this._registry.load(
+          plugin.id
+        )) as Settings;
+        pluginSettings.changed.connect(() => {
+          if (pluginSettings.isModified !== this._settingsModified[plugin.id]) {
+            this._changed.emit();
+            this._settingsModified[plugin.id] = pluginSettings.isModified;
+          }
+        });
+        this._settings[plugin.id] = pluginSettings;
+        this._settingsModified[plugin.id] = pluginSettings.isModified;
+      }
+    }
+
+    private _sortPlugins(
+      registry: ISettingRegistry
+    ): ISettingRegistry.IPlugin[] {
+      return Object.keys(registry.plugins)
+        .map(plugin => registry.plugins[plugin]!)
+        .sort((a, b) => {
+          return (a.schema.title || a.id).localeCompare(b.schema.title || b.id);
+        });
+    }
+
+    private _plugins: ISettingRegistry.IPlugin[] = [];
+    private _changed: Signal<PluginList.Model, void> = new Signal(this);
+    private _ready = new PromiseDelegate<void>();
+    private _registry: ISettingRegistry;
+    private _settings: Record<string, Settings> = {};
+    private _settingsModified: Record<string, boolean> = {};
+    private _toSkip: string[];
+  }
+
+  /**
+   * A namespace for `PluginList.Model` statics.
+   */
+  export namespace Model {
+    /**
+     * The instantiation options for a plugin list model.
+     */
+    export interface IOptions {
+      /**
+       * The setting registry for the plugin list model.
+       */
+      registry: ISettingRegistry;
+
+      /**
+       * List of plugins to skip.
+       */
+      toSkip?: string[];
+    }
   }
 }

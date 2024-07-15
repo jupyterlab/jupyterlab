@@ -665,10 +665,7 @@ function addCommands(
 
   const readonlyNotification = (contextPath: string) => {
     return Notification.warning(
-      trans.__(
-        `%1 is permissioned as read-only. Use "save as..." instead.`,
-        contextPath
-      ),
+      trans.__(`%1 is read-only. Use "Save as…" instead.`, contextPath),
       { autoClose: 5000 }
     );
   };
@@ -693,7 +690,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.newUntitled, {
-    execute: args => {
+    execute: async args => {
       const errorTitle = (args['error'] as string) || trans.__('Error');
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -714,7 +711,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.open, {
-    execute: args => {
+    execute: async args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       const factory = (args['factory'] as string) || void 0;
@@ -853,7 +850,7 @@ function addCommands(
       }
       if (!isWritable()) {
         return trans.__(
-          `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+          `Document is read-only. "Save" is disabled; use "Save as…" instead`
         );
       }
     }

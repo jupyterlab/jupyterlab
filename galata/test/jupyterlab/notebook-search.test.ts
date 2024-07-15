@@ -61,8 +61,8 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', '14');
     await page.press('[placeholder="Find"]', 'ArrowLeft');
-    await page.type('[placeholder="Find"]', '2');
-    await page.type('[placeholder="Find"]', '3');
+    await page.locator('[placeholder="Find"]').pressSequentially('2');
+    await page.locator('[placeholder="Find"]').pressSequentially('3');
 
     await expect(page.locator('[placeholder="Find"]')).toHaveValue('1234');
   });

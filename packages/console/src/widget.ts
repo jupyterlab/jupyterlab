@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Prec } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
 import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
 import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 import {
@@ -94,11 +92,6 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
  * The data attribute added to a widget that can undo.
  */
 const UNDOER = 'jpUndoer';
-/**
- * The data attribute Whether the console interaction mimics the notebook
- * or terminal keyboard shortcuts.
- */
-const INTERACTION_MODE = 'jpInteractionMode';
 
 /**
  * A widget containing a Jupyter console.
@@ -749,7 +742,7 @@ export class CodeConsole extends Widget {
         if (args.error) {
           for (const cell of this._cells) {
             if ((cell.model as ICodeCellModel).executionCount === null) {
-              cell.setPrompt('');
+              (cell.model as ICodeCellModel).executionState = 'idle';
             }
           }
         }
@@ -788,33 +781,17 @@ export class CodeConsole extends Widget {
    * Create the options used to initialize a code cell widget.
    */
   private _createCodeCellOptions(): CodeCell.IOptions {
-    const { node } = this;
     const contentFactory = this.contentFactory;
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
     const rendermime = this.rendermime;
     const editorConfig = this.editorConfig;
 
-    // Suppress the default "Enter" key handling.
-    const onKeyDown = EditorView.domEventHandlers({
-      keydown: (event: KeyboardEvent, view: EditorView) => {
-        if (
-          event.keyCode === 13 &&
-          node.dataset[INTERACTION_MODE] === 'terminal'
-        ) {
-          event.preventDefault();
-          return true;
-        }
-        return false;
-      }
-    });
-
     return {
       model,
       rendermime,
       contentFactory,
       editorConfig,
-      editorExtensions: [Prec.high(onKeyDown)],
       placeholder: false,
       translator: this._translator
     };

@@ -369,13 +369,13 @@ function createFileMenu(
 
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
-    caption: trans.__('Shut down JupyterLab'),
+    caption: trans.__('Shut down %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
-        body: trans.__('Please confirm you want to shut down JupyterLab.'),
+        body: trans.__('Please confirm you want to shut down %1.', app.name),
         buttons: [
           Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down') })
@@ -412,7 +412,8 @@ function createFileMenu(
                 );
                 const p2 = document.createElement('p');
                 p2.textContent = trans.__(
-                  'To use JupyterLab again, you will need to relaunch it.'
+                  'To use %1 again, you will need to relaunch it.',
+                  app.name
                 );
 
                 body.appendChild(p1);
@@ -437,7 +438,7 @@ function createFileMenu(
 
   commands.addCommand(CommandIDs.logout, {
     label: trans.__('Log Out'),
-    caption: trans.__('Log out of JupyterLab'),
+    caption: trans.__('Log out of %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
     execute: () => {

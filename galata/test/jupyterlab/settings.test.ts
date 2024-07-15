@@ -52,7 +52,7 @@ test.describe('change font-size', () => {
     markdownFile: Locator
   ) => {
     await markdownFile.focus();
-    await markdownFile.type('markdown cell');
+    await markdownFile.pressSequentially('markdown cell');
     await page.keyboard.press('Control');
     await page.keyboard.press('s');
   };
@@ -214,7 +214,7 @@ test('Check codemirror settings can all be set at the same time.', async ({
     'Highlight trailing white space',
     'Highlight white space'
   ];
-  let locators = [];
+  let locators: Locator[] = [];
   for (const selectText of textList) {
     let locator = page.getByLabel(selectText);
     await locator.click();

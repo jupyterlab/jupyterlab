@@ -1279,6 +1279,16 @@ export namespace EditorLanguageRegistry {
         }
       },
       {
+        name: 'Pug',
+        displayName: trans.__('Pug'),
+        mime: 'text/x-pug',
+        extensions: ['pug'],
+        async load() {
+          const m = await import('@codemirror/legacy-modes/mode/pug');
+          return legacy(m.pug);
+        }
+      },
+      {
         name: 'Puppet',
         displayName: trans.__('Puppet'),
         mime: 'text/x-puppet',

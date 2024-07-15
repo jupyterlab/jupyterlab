@@ -35,12 +35,12 @@
       },
       {
         "command": "workspace-ui:import",
-        "selector": ".jp-RunningSessions:has(.jp-mod-workspace)",
+        "selector": ".jp-RunningSessions-section:has(.jp-mod-workspace)",
         "rank": 6
       },
       {
         "command": "workspace-ui:create-new",
-        "selector": ".jp-RunningSessions:has(.jp-mod-workspace)",
+        "selector": ".jp-RunningSessions-section:has(.jp-mod-workspace)",
         "rank": 7
       }
     ]

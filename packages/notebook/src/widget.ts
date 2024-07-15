@@ -38,6 +38,7 @@ import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
+import { CodeCellModel } from '../../cells/src/model';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -83,6 +84,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
  * The class name added to selected cells.
  */
 const SELECTED_CLASS = 'jp-mod-selected';
+
+/**
+ * The class name added to the cell when dirty.
+ */
+const DIRTY_CLASS = 'jp-mod-dirty';
 
 /**
  * The class name added to an active cell when there are other selected cells.
@@ -399,6 +405,8 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
 
     const viewModel: { [k: string]: unknown }[] = new Array(n);
+    let dirtyState: boolean[] = new Array(n);
+
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
       const oldCell = this.widgets[from + i];
@@ -407,6 +415,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           // @ts-expect-error Cell has no index signature
           viewModel[i][k] = oldCell[k];
         }
+      } else if (oldCell.model.type === 'code') {
+        const oldCodeCell = oldCell.model as ICodeCellModel;
+        dirtyState[i] = oldCodeCell.isDirty;
       }
     }
 
@@ -418,6 +429,17 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
+      }
+
+      if (from > to) {
+        if (this.widgets[to + i].model.type === 'code') {
+          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+        }
+      } else {
+        if (this.widgets[to + i - n + 1].model.type === 'code') {
+          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+            dirtyState[i];
+        }
       }
     }
   }
@@ -1278,6 +1300,206 @@ export namespace StaticNotebook {
 }
 
 /**
+ * A virtual scrollbar item representing a notebook cell.
+ */
+class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
+  /**
+   * Construct a scrollbar item.
+   */
+  constructor(options: { notebook: Notebook; model: ICellModel }) {
+    // Note: there should be no DOM operations in the constructor
+    this._model = options.model;
+    this._notebook = options.notebook;
+  }
+
+  /**
+   * Render the scrollbar item as an HTML element.
+   */
+  render = (props: { index: number }) => {
+    if (!this._element) {
+      this._element = this._createElement();
+      this._notebook.activeCellChanged.connect(this._updateActive);
+      this._notebook.selectionChanged.connect(this._updateSelection);
+      if (this._model.type === 'code') {
+        const model = this._model as ICodeCellModel;
+        model.outputs.changed.connect(this._updatePrompt);
+        model.stateChanged.connect(this._updateState);
+      }
+    }
+    // Add cell type (code/markdown/raw)
+    if (this._model.type != this._element.dataset.type) {
+      this._element.dataset.type = this._model.type;
+    }
+    const source = this._model.sharedModel.source;
+    const trimmedSource =
+      source.length > 10000 ? source.substring(0, 10000) : source;
+    if (trimmedSource !== this._source.textContent) {
+      this._source.textContent = trimmedSource;
+    }
+
+    this._updateActive();
+    this._updateSelection();
+    this._updatePrompt();
+    this._updateDirty();
+    return this._element;
+  };
+
+  /**
+   * Unique item key used for caching.
+   */
+  get key(): string {
+    return this._model.id;
+  }
+
+  /**
+   * Test whether the item has been disposed.
+   */
+  get isDisposed(): boolean {
+    // Ensure the state is up-to-date in case if the model was disposed
+    // (the model can be disposed when cells are moved/recreated).
+    if (!this._isDisposed && this._model.isDisposed) {
+      this.dispose();
+    }
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the item.
+   */
+  dispose = () => {
+    this._isDisposed = true;
+    this._notebook.activeCellChanged.disconnect(this._updateActive);
+    this._notebook.selectionChanged.disconnect(this._updateSelection);
+    if (this._model.type === 'code') {
+      const model = this._model as ICodeCellModel;
+      if (model.outputs) {
+        model.outputs.changed.disconnect(this._updatePrompt);
+        model.stateChanged.disconnect(this._updateState);
+      }
+    }
+  };
+
+  private _updateState = (
+    _: ICellModel,
+    change: IChangedArgs<
+      any,
+      any,
+      'trusted' | 'isDirty' | 'executionCount' | 'executionState'
+    >
+  ) => {
+    switch (change.name) {
+      case 'executionCount':
+      case 'executionState':
+        this._updatePrompt();
+        break;
+      case 'isDirty': {
+        this._updateDirty();
+        break;
+      }
+    }
+  };
+
+  private _updateDirty() {
+    if (this._model.type !== 'code' || !this._element) {
+      return;
+    }
+    const model = this._model as ICodeCellModel;
+    const wasDirty = this._element.classList.contains(DIRTY_CLASS);
+    if (wasDirty !== model.isDirty) {
+      if (model.isDirty) {
+        this._element.classList.add(DIRTY_CLASS);
+      } else {
+        this._element.classList.remove(DIRTY_CLASS);
+      }
+    }
+  }
+
+  private _updatePrompt = () => {
+    if (this._model.type !== 'code') {
+      return;
+    }
+    const model = this._model as ICodeCellModel;
+    let hasError = false;
+    for (let i = 0; i < model.outputs.length; i++) {
+      const output = model.outputs.get(i);
+      if (output.type === 'error') {
+        hasError = true;
+        break;
+      }
+    }
+    let content: string;
+    let state: string = '';
+    if (hasError) {
+      content = '[!]';
+      state = 'error';
+    } else if (model.executionState == 'running') {
+      content = '[*]';
+    } else if (model.executionCount) {
+      content = `[${model.executionCount}]`;
+    } else {
+      content = '[ ]';
+    }
+    if (this._executionIndicator.textContent !== content) {
+      this._executionIndicator.textContent = content;
+    }
+    if (this._element!.dataset.output !== state) {
+      this._element!.dataset.output = state;
+    }
+  };
+
+  private _createElement() {
+    const li = document.createElement('li');
+    const executionIndicator = (this._executionIndicator =
+      document.createElement('div'));
+    executionIndicator.className = 'jp-scrollbarItem-executionIndicator';
+    const source = (this._source = document.createElement('div'));
+    source.className = 'jp-scrollbarItem-source';
+    li.append(executionIndicator);
+    li.append(source);
+    return li;
+  }
+  private _executionIndicator: HTMLElement;
+  private _source: HTMLElement;
+
+  private _updateActive = () => {
+    if (!this._element) {
+      this._element = this._createElement();
+    }
+    const li = this._element;
+    const wasActive = li.classList.contains(ACTIVE_CLASS);
+    if (this._notebook.activeCell?.model === this._model) {
+      if (!wasActive) {
+        li.classList.add(ACTIVE_CLASS);
+      }
+    } else if (wasActive) {
+      li.classList.remove(ACTIVE_CLASS);
+      // Needed due to order in which selection and active changed signals fire
+      li.classList.remove(SELECTED_CLASS);
+    }
+  };
+
+  private _updateSelection = () => {
+    if (!this._element) {
+      this._element = this._createElement();
+    }
+    const li = this._element;
+    const wasSelected = li.classList.contains(SELECTED_CLASS);
+    if (this._notebook.selectedCells.some(cell => this._model === cell.model)) {
+      if (!wasSelected) {
+        li.classList.add(SELECTED_CLASS);
+      }
+    } else if (wasSelected) {
+      li.classList.remove(SELECTED_CLASS);
+    }
+  };
+
+  private _model: ICellModel;
+  private _notebook: Notebook;
+  private _isDisposed: boolean = false;
+  private _element: HTMLElement | null = null;
+}
+
+/**
  * A notebook widget that supports interactivity.
  */
 export class Notebook extends StaticNotebook {
@@ -1302,20 +1524,19 @@ export class Notebook extends StaticNotebook {
           return document.createElement('ol');
         },
 
+        createScrollbarViewportIndicator(): HTMLElement {
+          return document.createElement('div');
+        },
+
         createScrollbarItem(
           notebook: Notebook,
-          index: number,
+          _index: number,
           model: ICellModel
-        ): HTMLLIElement {
-          const li = document.createElement('li');
-          li.appendChild(document.createTextNode(`${index + 1}`));
-          if (notebook.activeCellIndex === index) {
-            li.classList.add('jp-mod-active');
-          }
-          if (notebook.selectedCells.some(cell => model === cell.model)) {
-            li.classList.add('jp-mod-selected');
-          }
-          return li;
+        ): WindowedList.IRenderer.IScrollbarItem {
+          return new ScrollbarItem({
+            notebook,
+            model
+          });
         }
       },
       ...options

@@ -156,6 +156,11 @@ export interface ICodeCellModel extends ICellModel {
   executionCount: nbformat.ExecutionCount;
 
   /**
+   * The code cell's state.
+   */
+  executionState: 'running' | 'idle';
+
+  /**
    * The cell outputs.
    */
   readonly outputs: IOutputAreaModel;
@@ -261,7 +266,11 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    */
   readonly stateChanged = new Signal<
     this,
-    IChangedArgs<any, any, 'isDirty' | 'trusted' | 'executionCount'>
+    IChangedArgs<
+      any,
+      any,
+      'isDirty' | 'trusted' | 'executionCount' | 'executionState'
+    >
   >(this);
 
   /**
@@ -640,6 +649,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * The execution state of the cell.
+   */
+  get executionState(): 'idle' | 'running' {
+    return this._executionState;
+  }
+  set executionState(newValue: 'idle' | 'running') {
+    const oldValue = this._executionState;
+    if (oldValue != newValue) {
+      this._executionState = newValue;
+      this.stateChanged.emit({
+        name: 'executionState',
+        oldValue,
+        newValue
+      });
+    }
+  }
+
+  /**
    * Whether the cell is dirty or not.
    *
    * A cell is dirty if it is output is not empty and does not
@@ -649,6 +676,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // Test could be done dynamically with this._executedCode
     // but for performance reason, the diff status is stored in a boolean.
     return this._isDirty;
+  }
+
+  /**
+   * Public Set whether the cell is dirty or not.
+   */
+  set isDirty(dirty: boolean) {
+    this._setDirty(dirty);
   }
 
   /**
@@ -663,6 +697,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   clearExecution(): void {
     this.outputs.clear();
     this.executionCount = null;
+    this.executionState = 'idle';
     this._setDirty(false);
     this.sharedModel.deleteMetadata('execution');
     // We trust this cell as it no longer has any outputs.
@@ -800,6 +835,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
+  private _executionState: 'idle' | 'running' = 'idle';
   private _executedCode = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;

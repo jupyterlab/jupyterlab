@@ -31,7 +31,7 @@
   overflow: auto;
 }
 
-.jp-Inspector-content pre {
+.jp-ThemedContainer .jp-Inspector-content pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   margin: 0;

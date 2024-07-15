@@ -67,6 +67,7 @@ export class Completer extends Widget {
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass('jp-Completer');
+    this.addClass('jp-ThemedContainer');
     this._updateConstraints();
   }
 

@@ -4,7 +4,7 @@
  */
 
 import { ITranslator } from '@jupyterlab/translation';
-import { InputGroup } from '@jupyterlab/ui-components';
+import { FilterBox } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
@@ -109,15 +109,13 @@ export class TopNav extends React.Component<ITopNavProps> {
       <div className="jp-Shortcuts-Top">
         <div className="jp-Shortcuts-TopNav">
           <Symbols />
-          <InputGroup
-            className="jp-Shortcuts-Search"
+          <FilterBox
             aria-label={trans.__('Search shortcuts')}
-            type="text"
-            onChange={event =>
-              this.props.updateSearchQuery(event.target['value'])
+            updateFilter={(_, query) =>
+              this.props.updateSearchQuery(query ?? '')
             }
             placeholder={trans.__('Search…')}
-            rightIcon="ui-components:search"
+            useFuzzyFilter={false}
           />
           <AdvancedOptions
             toggleSelectors={this.props.toggleSelectors}

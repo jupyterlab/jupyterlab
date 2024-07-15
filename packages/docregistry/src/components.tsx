@@ -23,7 +23,7 @@ export function createReadonlyLabel(
       <span
         className="jp-ToolbarLabelComponent"
         title={trans.__(
-          `Document is permissioned read-only; "save" is disabled, use "save as..." instead`
+          `Document is read-only. "Save" is disabled; use "Save as…" instead`
         )}
       >
         {trans.__(`%1 is read-only`, panel.context.contentsModel?.type)}

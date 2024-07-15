@@ -405,8 +405,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Set the prompt for the widget.
+   * @deprecated - set the `executionState` on the model instead.
    */
   setPrompt(value: string): void {
+    return this._setPrompt(value);
+  }
+
+  /**
+   * Set the prompt for the widget.
+   *
+   * Note: this method is protected because it is needed in the CodeCell subclass,
+   * but it cannot be defined there because input is private to Cell class.
+   */
+  protected _setPrompt(value: string): void {
     this.prompt = value;
     this._input?.setPrompt(value);
   }
@@ -1177,7 +1188,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
     super.initializeDOM();
 
-    this.setPrompt(this.prompt);
+    this._updatePrompt();
 
     // Insert the output before the cell footer.
     const outputWrapper = (this._outputWrapper = new Panel());
@@ -1270,7 +1281,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     super.initializeState();
     this.loadScrolledState();
 
-    this.setPrompt(`${this.model.executionCount || ''}`);
+    this._updatePrompt();
     return this;
   }
 
@@ -1583,7 +1594,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
   ): void {
     switch (args.name) {
       case 'executionCount':
-        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        this.model.executionState = 'idle';
+        this._updatePrompt();
+        break;
+      case 'executionState':
+        this._updatePrompt();
         break;
       case 'isDirty':
         if ((model as ICodeCellModel).isDirty) {
@@ -1637,6 +1652,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
         break;
     }
     super.onMetadataChanged(model, args);
+  }
+
+  private _updatePrompt(): void {
+    let prompt: string;
+    if (this.model.executionState == 'running') {
+      prompt = '*';
+    } else {
+      prompt = `${this.model.executionCount || ''}`;
+    }
+    this._setPrompt(prompt);
   }
 
   /**
@@ -1717,7 +1742,8 @@ export namespace CodeCell {
       model.clearExecution();
       cell.outputHidden = false;
     }, false);
-    cell.setPrompt('*');
+    // note: in future we would like to distinguish running from scheduled
+    model.executionState = 'running';
     model.trusted = true;
     let future:
       | Kernel.IFuture<
@@ -1788,7 +1814,7 @@ export namespace CodeCell {
       // If we started executing, and the cell is still indicating this
       // execution, clear the prompt.
       if (future && !cell.isDisposed && cell.outputArea.future === future) {
-        cell.setPrompt('');
+        cell.model.executionState = 'idle';
         if (recordTiming && future.isDisposed) {
           // Record the time when the cell execution was aborted
           const timingInfo: any = Object.assign(
