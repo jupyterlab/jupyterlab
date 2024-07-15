@@ -1478,27 +1478,19 @@ export class DirListing extends Widget {
       if (!files || files.length === 0) {
         return;
       }
-      for (let i = 0; i < files.length; i++) {
-        void this._model.upload(files[i]);
+      for (const file of files) {
+        void this._model.upload(file);
       }
       return;
     }
 
     const uploadEntry = async (entry: FileSystemEntry, path: string) => {
-      // TODO: this works but is slow due to frequent cd()
-      // we also need to handle errors (e.g. what happens if a file already exists)
-      console.log('logging path: ', path);
-      await this._model.cd('/');
       if (Private.isDirectoryEntry(entry)) {
-        const model = await this._model.manager.newUntitled({
-          path: path,
-          type: 'directory'
-        });
-        const tmpDirPath = PathExt.join(path, model.name);
-        const dirPath = PathExt.join(path, entry.name);
-        await this._manager.rename(tmpDirPath, dirPath);
-        await this._model.cd(dirPath);
-
+        const dirPath = await Private.createDirectory(
+          this._model.manager,
+          path,
+          entry.name
+        );
         const directoryReader = entry.createReader();
 
         const allEntries = await Private.collectEntries(directoryReader);
@@ -1506,14 +1498,12 @@ export class DirListing extends Widget {
           await uploadEntry(childEntry, dirPath);
         }
       } else if (Private.isFileEntry(entry)) {
-        await this._model.cd(path);
         const file = await Private.readFile(entry);
-        await this._model.upload(file);
+        await this._model.upload(file, path);
       }
     };
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    for (const item of items) {
       const entry = Private.defensiveGetAsEntry(item);
       if (!entry) {
         continue;
@@ -3103,6 +3093,26 @@ namespace Private {
       LabIcon.remove(container);
       container.className = HEADER_ITEM_ICON_CLASS;
     }
+  }
+
+  export async function createDirectory(
+    manager: IDocumentManager,
+    path: string,
+    name: string
+  ): Promise<string> {
+    const model = await manager.newUntitled({
+      path: path,
+      type: 'directory'
+    });
+    const tmpDirPath = PathExt.join(path, model.name);
+    const dirPath = PathExt.join(path, name);
+    try {
+      await manager.rename(tmpDirPath, dirPath);
+    } catch (e) {
+      // The `dirPath` already exists, remove the temporary new directory
+      await manager.deleteFile(tmpDirPath);
+    }
+    return dirPath;
   }
 
   export function isDirectoryEntry(
