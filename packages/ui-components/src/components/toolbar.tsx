@@ -177,7 +177,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass(TOOLBAR_CLASS);
     this.layout = options.layout ?? new ToolbarLayout();
-    this._noFocusOnClick = options.noFocusOnClick ?? false;
+    this.noFocusOnClick = options.noFocusOnClick ?? false;
   }
 
   /**
@@ -239,7 +239,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
     Private.nameProperty.set(widget, name);
     widget.node.dataset['jpItemName'] = name;
-    if (this._noFocusOnClick) {
+    if (this.noFocusOnClick) {
       widget.node.dataset['noFocusOnClick'] = 'true';
     }
     return true;
@@ -365,7 +365,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     this.node.removeEventListener('click', this);
   }
 
-  private _noFocusOnClick: boolean;
+  noFocusOnClick: boolean;
 }
 
 /**
@@ -790,12 +790,10 @@ export namespace ToolbarButtonComponent {
     disabledTooltip?: string;
 
     /**
-     * Trigger the button on the actual onClick event rather than onMouseDown.
-     *
-     * See note in ToolbarButtonComponent below as to why the default is to
-     * trigger on onMouseDown.
+     * Trigger the button on onMouseDown event rather than onClick, to avoid giving
+     * the focus on the button.
      */
-    actualOnClick?: boolean;
+    noFocusOnClick?: boolean;
 
     /**
      * The application language translator.
@@ -812,47 +810,34 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(
   props: ToolbarButtonComponent.IProps
 ): JSX.Element {
-  const refButton = React.useRef<HTMLElement>(null);
-  const [handleMouseDown, setHandleMouseDown] = React.useState<
-    undefined | ((event: React.MouseEvent) => void)
-  >();
-  const [handleClick, setHandleClick] = React.useState<
-    undefined | ((event: React.MouseEvent) => void)
-  >();
-
-  React.useEffect(() => {
-    const actualOnClick =
-      props.actualOnClick ??
-      refButton.current?.parentElement?.dataset['noFocusOnClick']
-        ? false
-        : true;
-
-    // In some browsers, a button click event moves the focus from the main
-    // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
-    // We avoid a click event by calling preventDefault in mousedown, and
-    // we bind the button action to `mousedown`.
-    setHandleMouseDown(
-      actualOnClick
-        ? undefined
-        : () => (event: React.MouseEvent) => {
-            // Fire action only when left button is pressed.
-            if (event.button === 0) {
-              event.preventDefault();
-              props.onClick?.();
-            }
+  // In some browsers, a button click event moves the focus from the main
+  // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+  const handleClick =
+    props.noFocusOnClick ?? false
+      ? undefined
+      : (event: React.MouseEvent) => {
+          if (event.button === 0) {
+            props.onClick?.();
+            // In safari, the focus do not move to the button on click (see
+            // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+            (event.target as HTMLElement).focus();
           }
-    );
+        };
 
-    setHandleClick(
-      actualOnClick
-        ? () => (event: React.MouseEvent) => {
-            if (event.button === 0) {
-              props.onClick?.();
-            }
+  // To avoid focusing the button, we avoid a click event by calling preventDefault in
+  // mousedown, and we bind the button action to `mousedown`.
+  // Currently this is mostly useful for the notebook panel, to retrieve the focused
+  // cell before the click event.
+  const handleMouseDown =
+    props.noFocusOnClick ?? false
+      ? (event: React.MouseEvent) => {
+          // Fire action only when left button is pressed.
+          if (event.button === 0) {
+            event.preventDefault();
+            props.onClick?.();
           }
-        : undefined
-    );
-  }, []);
+        }
+      : undefined;
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
@@ -876,7 +861,6 @@ export function ToolbarButtonComponent(
 
   return (
     <Button
-      ref={refButton}
       appearance="stealth"
       className={
         props.className
@@ -997,6 +981,7 @@ export class ToolbarButton extends ReactWidget {
     return (
       <ToolbarButtonComponent
         {...this.props}
+        noFocusOnClick={this.props.noFocusOnClick}
         pressed={this.pressed}
         enabled={this.enabled}
         onClick={this.onClick}
@@ -1041,6 +1026,11 @@ export namespace CommandToolbarButtonComponent {
      * Overrides command caption
      */
     caption?: string;
+    /**
+     * Trigger the button on onMouseDown event rather than onClick, to avoid giving
+     * the focus on the button.
+     */
+    noFocusOnClick?: boolean;
   }
 }
 
@@ -1357,6 +1347,7 @@ namespace Private {
     return {
       className,
       dataset: { 'data-command': options.id },
+      noFocusOnClick: options.noFocusOnClick,
       icon,
       iconClass,
       tooltip: options.caption ?? tooltip,
