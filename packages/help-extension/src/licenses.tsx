@@ -183,7 +183,7 @@ export namespace Licenses {
       icon: spreadsheetIcon
     },
     json: {
-      id: 'csv',
+      id: 'json',
       title: 'JSON',
       icon: jsonIcon
     }
