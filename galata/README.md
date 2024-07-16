@@ -536,16 +536,16 @@ Example:
 test.use({ tmpPath: 'test-toc' });
 
 test.describe.serial('Table of Contents', () => {
-  test.beforeAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
   });
 
-  test.afterAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
   });
 });
