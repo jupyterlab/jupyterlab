@@ -63,7 +63,11 @@ export abstract class JupyterFrontEnd<
 
     this.commandLinker =
       options.commandLinker || new CommandLinker({ commands: this.commands });
-    this.docRegistry = options.docRegistry || new DocumentRegistry();
+    this.docRegistry =
+      options.docRegistry ||
+      new DocumentRegistry({
+        entrypoints: options.entrypoints
+      });
     this.restored =
       options.restored ||
       this.started.then(() => restored).catch(() => restored);
@@ -217,6 +221,7 @@ export namespace JupyterFrontEnd {
    */
   export interface IOptions<T extends IShell = IShell, U = any>
     extends Application.IOptions<T> {
+    entrypoints?: any;
     /**
      * The document registry instance used by the application.
      */
