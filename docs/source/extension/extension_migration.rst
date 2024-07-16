@@ -21,6 +21,8 @@ anymore. The side effects for extensions are:
   prepend the class ``.jp-ThemedContainer`` to your rule; e.g.
   ``.jp-Inspector-content pre`` becomes ``.jp-ThemedContainer .jp-Inspector-content pre``
 
+The ``jp-Inspector-default-content`` class was renamed to ``jp-Inspector-placeholderContent``.
+The name of this contextual help class is now consistent with the equivalent table of contents and property inspector classes.
 
 JupyterLab 4.1 to 4.2
 ---------------------
