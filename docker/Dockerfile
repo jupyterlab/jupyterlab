@@ -14,7 +14,7 @@ RUN if grep -q '^ID=alpine$' /etc/os-release; then \
   apk add --no-cache --virtual temp-packages shadow=4.13-r0; \
   fi
 RUN if [ "$(id ${MAMBA_USER} -u)" != "$NEW_MAMBA_USER_ID" ]; then \
-  usermod "-u ${NEW_MAMBA_USER_ID}" "${MAMBA_USER}"; \
+  usermod -o "-u ${NEW_MAMBA_USER_ID}" "${MAMBA_USER}"; \
   fi
 RUN if [ "$(id ${MAMBA_USER} -g)" != "$NEW_MAMBA_USER_GID" ]; then \
   groupmod -o -g ${NEW_MAMBA_USER_GID} ${MAMBA_USER} && \

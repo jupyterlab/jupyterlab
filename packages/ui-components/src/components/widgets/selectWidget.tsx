@@ -15,7 +15,7 @@ function CustomSelect<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
-  >({
+>({
   id,
   options,
   label,
@@ -31,21 +31,25 @@ function CustomSelect<
   onBlur,
   onFocus,
   schema,
-  placeholder,
+  placeholder
 }: WidgetProps<T, S, F>) {
   const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
 
-  const selectedIndexes = enumOptionsIndexForValue<S>(value, enumOptions, multiple);
+  const selectedIndexes = enumOptionsIndexForValue<S>(
+    value,
+    enumOptions,
+    multiple
+  );
   let selectedIndexesAsArray: string[] = [];
 
   if (typeof selectedIndexes === 'string') {
     selectedIndexesAsArray = [selectedIndexes];
   } else if (Array.isArray(selectedIndexes)) {
-    selectedIndexesAsArray = selectedIndexes.map((index) => String(index));
+    selectedIndexesAsArray = selectedIndexes.map(index => String(index));
   }
 
   const dropdownValue = selectedIndexesAsArray
-    .map((index) => (enumOptions ? enumOptions[Number(index)].label : undefined))
+    .map(index => (enumOptions ? enumOptions[Number(index)].label : undefined))
     .join(', ');
 
   const _onBlur = () => onBlur(id, selectedIndexes);
@@ -62,7 +66,7 @@ function CustomSelect<
     <label>
       {labelValue(label, hideLabel)}
       <Select
-        aria-invalid={rawErrors.length > 0}      
+        aria-invalid={rawErrors.length > 0}
         id={id}
         // multiple={multiple}
         value={dropdownValue}
@@ -71,11 +75,10 @@ function CustomSelect<
         onBlur={_onBlur}
         onFocus={_onFocus}
         onChange={_onChange}
-        selectedOptions={selectedIndexesAsArray}
         aria-required={required}
         aria-describedby={ariaDescribedByIds<T>(id)}
       >
-        {showPlaceholderOption && <Option value=''>{placeholder || ''}</Option>}
+        {showPlaceholderOption && <Option value="">{placeholder || ''}</Option>}
         {Array.isArray(enumOptions) &&
           enumOptions.map(({ value, label }, i) => {
             const disabled = enumDisabled && enumDisabled.indexOf(value) !== -1;
@@ -86,11 +89,10 @@ function CustomSelect<
             );
           })}
       </Select>
-      </label>
+    </label>
   );
 }
 
-
 export const customWidgets = {
-  SelectWidget: CustomSelect,
+  SelectWidget: CustomSelect
 };
