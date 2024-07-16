@@ -11,6 +11,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ICellModel } from './model';
 import { runIcon, ToolbarButton } from '@jupyterlab/ui-components';
+import { Message } from '@lumino/messaging';
 
 /**
  * The class name added to input area widgets.
@@ -285,11 +286,13 @@ export class InputPrompt extends Widget implements IInputPrompt {
   constructor() {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
-    // Two sub-classes: prompt text and run button
+    // Two sub-elements: prompt text and run button
     const layout = (this.layout = new PanelLayout());
     const promptIndicator = (this._promptIndicator =
       new InputPromptIndicator());
     layout.addWidget(promptIndicator);
+    // TODO: Localization, run command
+    // TODO: Use CommandToolbarButtonComponent (requires CommandRegistry)
     const runButton = (this._runButton = new ToolbarButton({
       icon: runIcon,
       onClick: () => {
@@ -314,16 +317,57 @@ export class InputPrompt extends Widget implements IInputPrompt {
     this.updateRunButtonVisibility();
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'mouseover':
+        console.log('Detected mouseover!');
+        this._isHovered = true;
+        this.updateRunButtonVisibility();
+        break;
+      case 'mouseout':
+        console.log('Moused out of button!');
+        this._isHovered = false;
+        this.updateRunButtonVisibility();
+        break;
+    }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    this.node.addEventListener('mouseover', this, true);
+    this.node.addEventListener('mouseout', this, true);
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('mouseover', this, true);
+    this.node.removeEventListener('mouseout', this, true);
+  }
+
   private updateRunButtonVisibility() {
+    // Show the run button if we're hovered and if we're in the active cell
+    if (this._isHovered) {
+      this._runButton.show();
+      this._promptIndicator.hide();
+      return;
+    }
+
     // Show the run button if the execution count is null
     if (this.executionCount) {
       this._runButton.hide();
+      this._promptIndicator.show();
     } else {
       this._runButton.show();
+      this._promptIndicator.hide();
     }
   }
 
   private _executionCount: string | null = null;
+  private _isHovered: boolean = false;
   private _promptIndicator: InputPromptIndicator;
   private _runButton: ToolbarButton;
 }
