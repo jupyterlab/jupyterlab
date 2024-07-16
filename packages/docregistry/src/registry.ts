@@ -61,6 +61,17 @@ export class DocumentRegistry implements IDisposable {
       };
       this._fileTypes.push(value);
     });
+
+    const entrypoints = options.entrypoints;
+    if (entrypoints) {
+      for (const entrypoint of entrypoints) {
+        const factory = new DummyWidgetFactory({
+          ...entrypoint,
+          documentRegistry: this
+        });
+        this.addWidgetFactory(factory);
+      }
+    }
   }
 
   /**
@@ -117,10 +128,13 @@ export class DocumentRegistry implements IDisposable {
    */
   addWidgetFactory(factory: DocumentRegistry.WidgetFactory): IDisposable {
     const name = factory.name.toLowerCase();
+    const oldFactory = this._widgetFactories[name];
+    const isDummyFactory =
+      oldFactory && oldFactory instanceof DummyWidgetFactory;
     if (!name || name === 'default') {
       throw Error('Invalid factory name');
     }
-    if (this._widgetFactories[name]) {
+    if (this._widgetFactories[name] && !isDummyFactory) {
       console.warn(`Duplicate registered factory ${name}`);
       return new DisposableDelegate(Private.noOp);
     }
@@ -362,10 +376,8 @@ export class DocumentRegistry implements IDisposable {
    */
   preferredWidgetFactories(path: string): DocumentRegistry.WidgetFactory[] {
     const factories = new Set<string>();
-
     // Get the ordered matching file types.
     const fts = this.getFileTypesForPath(PathExt.basename(path));
-
     // Start with any user overrides for the defaults.
     fts.forEach(ft => {
       if (ft.name in this._defaultWidgetFactoryOverrides) {
@@ -445,7 +457,6 @@ export class DocumentRegistry implements IDisposable {
     const ftNames = this.getFileTypesForPath(PathExt.basename(path)).map(
       ft => ft.name
     );
-
     // Start with any user overrides for the defaults.
     for (const name in ftNames) {
       if (name in this._defaultWidgetFactoryOverrides) {
@@ -525,6 +536,7 @@ export class DocumentRegistry implements IDisposable {
     ) {
       throw Error(`Factory ${factory} cannot view file type ${fileType}`);
     }
+    console.log(fileType, factory);
     this._defaultWidgetFactoryOverrides[fileType] = factory;
   }
 
@@ -760,6 +772,23 @@ export class DocumentRegistry implements IDisposable {
   private _isDisposed = false;
 }
 
+interface IEntrypoint {
+  /**
+   *  The name of the widget factory.
+   */
+  extension: string;
+
+  /**
+   * function tha will active the widget factory
+   */
+  activate: () => void;
+
+  /**
+   * data from the package json
+   */
+  data: any;
+}
+
 /**
  * The namespace for the `DocumentRegistry` class statics.
  */
@@ -789,6 +818,11 @@ export namespace DocumentRegistry {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * The entrypoints for the widgets.
+     */
+    entrypoints?: IEntrypoint[];
   }
 
   /**
@@ -1144,7 +1178,7 @@ export namespace DocumentRegistry {
      * #### Notes
      * It should emit the [widgetCreated] signal with the new widget.
      */
-    createNew(context: IContext<U>, source?: T): T;
+    createNew(context: IContext<U>, source?: T): T | Promise<T>;
   }
 
   /**
@@ -1590,4 +1624,44 @@ namespace Private {
   export function noOp(): void {
     /* no-op */
   }
+}
+
+class DummyWidgetFactory
+  implements
+    DocumentRegistry.IWidgetFactory<
+      IDocumentWidget<Widget, DocumentRegistry.IModel>,
+      DocumentRegistry.IModel
+    >
+{
+  constructor(options: any) {
+    this.activate = options.activate;
+    this.documentRegistry = options.documentRegistry;
+    this.fileTypes = options.data.fileTypes;
+    this.name = options.data.name;
+    this.widgetCreated = new Signal(this);
+    this.isDisposed = false;
+    this.dispose = () => {
+      this.isDisposed = true;
+    };
+    this.defaultFor = options.data.defaultFor;
+  }
+
+  // @ts-ignore
+  async createNew(context, source): Promise<IDocumentWidget<Widget>> {
+    await this.activate();
+    const factory = this.documentRegistry.getWidgetFactory(this.name);
+    if (!factory) {
+      throw Error(`Cannot find widget factory ${this.name}`);
+    }
+    return factory.createNew(context, source);
+  }
+
+  private activate: () => Promise<void>;
+  private documentRegistry: DocumentRegistry;
+  fileTypes: string[];
+  widgetCreated: Signal<this, any>;
+  isDisposed: boolean;
+  dispose: () => void;
+  name: string;
+  defaultFor?: readonly string[] | undefined;
 }

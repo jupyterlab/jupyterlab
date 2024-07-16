@@ -92,7 +92,31 @@
         ],
         "autoStart": false
       }
-    ]
+    ],
+    "entrypoint": {
+      "widgetFactory": [
+        {
+          "pluginId": "@jupyterlab/csvviewer-extension:csv",
+          "name": "CSVTable",
+          "fileTypes": [
+            "csv"
+          ],
+          "defaultFor": [
+            "csv"
+          ]
+        },
+        {
+          "pluginId": "@jupyterlab/csvviewer-extension:tsv",
+          "name": "TSVTable",
+          "fileTypes": [
+            "tsv"
+          ],
+          "defaultFor": [
+            "tsv"
+          ]
+        }
+      ]
+    }
   },
   "styleModule": "style/index.js"
 }

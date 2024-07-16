@@ -1132,10 +1132,11 @@ function addLabCommands(
         return;
       }
       // Clone the widget.
-      const child = docManager.cloneWidget(widget);
-      if (child) {
-        widgetOpener.open(child, options);
-      }
+      docManager.cloneWidget(widget).then(child => {
+        if (child) {
+          widgetOpener.open(child, options);
+        }
+      });
     }
   });
 
