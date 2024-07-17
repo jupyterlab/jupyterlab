@@ -321,7 +321,6 @@ export class InputPrompt extends Widget implements IInputPrompt {
    * Returns true if we're inside the active cell.
    */
   get isInsideActiveCell(): boolean {
-    // Get the closest parent element with class ""
     let parent = this.node.closest('.jp-mod-active');
 
     // If we found a parent element that's an active cell, return true
