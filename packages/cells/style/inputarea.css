@@ -74,11 +74,12 @@
 .jp-InputArea-prompt-run {
   position: absolute;
   top: calc(-1 * var(--jp-code-padding));
-  right: 0;
+  right: 6px;
   z-index: 20;
 
   /* Only display this when the cell is active. */
   display: none;
+  background-color: var(--jp-layout-color2);
 }
 
 /*-----------------------------------------------------------------------------

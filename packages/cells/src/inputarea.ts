@@ -318,6 +318,17 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   /**
+   * Returns true if we're inside the active cell.
+   */
+  get isInsideActiveCell(): boolean {
+    // Get the closest parent element with class ""
+    let parent = this.node.closest('.jp-mod-active');
+
+    // If we found a parent element that's an active cell, return true
+    return parent !== null;
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -349,20 +360,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   private updateRunButtonVisibility() {
-    // Show the run button if we're hovered and if we're in the active cell
-    if (this._isHovered) {
+    if (this.isInsideActiveCell && (this._isHovered || !this.executionCount)) {
       this._runButton.show();
-      this._promptIndicator.hide();
-      return;
-    }
-
-    // Show the run button if the execution count is null
-    if (this.executionCount) {
-      this._runButton.hide();
-      this._promptIndicator.show();
     } else {
-      this._runButton.show();
-      this._promptIndicator.hide();
+      this._runButton.hide();
     }
   }
 
