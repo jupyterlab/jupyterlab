@@ -28,6 +28,15 @@
             "rank": 9.95
           }
         ]
+      },
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "command": "filebrowser:toggle-single-click",
+            "rank": 9.99
+          }
+        ]
       }
     ],
     "context": [
@@ -235,6 +244,12 @@
       "type": "boolean",
       "title": "When sorting by name, group notebooks before other files",
       "description": "Whether to group the notebooks away from files",
+      "default": false
+    },
+    "allowSingleClick": {
+      "type": "boolean",
+      "title": "Navigate files and directories with single click",
+      "description": "Whether to allow single click selection on file browser items",
       "default": false
     }
   },

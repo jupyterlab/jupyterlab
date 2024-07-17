@@ -268,6 +268,22 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to allow single click files and directories
+   */
+  get allowSingleClick(): boolean {
+    return this._allowSingleClick;
+  }
+
+  set allowSingleClick(value: boolean) {
+    if (this.listing.setAllowSingleClickNavigation) {
+      this.listing.setAllowSingleClickNavigation(value);
+      this._allowSingleClick = value;
+    } else {
+      console.warn('Listing does not support single click navigation');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -507,6 +523,7 @@ export class FileBrowser extends SidePanel {
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
+  private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;

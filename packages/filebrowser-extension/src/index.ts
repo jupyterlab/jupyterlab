@@ -145,6 +145,8 @@ namespace CommandIDs {
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
+  export const toggleSingleClick = 'filebrowser:toggle-single-click';
+
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
 
@@ -219,6 +221,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
            */
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
+            allowSingleClick: false,
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
@@ -1306,6 +1309,23 @@ function addCommands(
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleSingleClick, {
+    label: trans.__('Enable single click'),
+    isToggled: () => browser.allowSingleClick,
+    execute: () => {
+      const value = !browser.allowSingleClick;
+      const key = 'allowSingleClick';
+
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set allowSingleClick setting`);
           });
       }
     }

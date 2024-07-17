@@ -818,8 +818,8 @@ export class DirListing extends Widget {
       this._modifiedWidth < 100
         ? 'narrow'
         : this._modifiedWidth > 120
-        ? 'long'
-        : 'short';
+          ? 'long'
+          : 'short';
   }
 
   // Update only the modified dates.
@@ -1026,6 +1026,18 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Update the setting to allow single click navigation.
+   * This enables opening files/directories with a single click.
+   */
+  setAllowSingleClickNavigation(isEnabled: boolean) {
+    this._allowSingleClick = isEnabled;
+  }
+
+  getAllowSingleClickNavigation() {
+    return this._allowSingleClick;
+  }
+
+  /**
    * Would this click (or other event type) hit the checkbox by default?
    */
   protected isWithinCheckboxHitArea(event: Event): boolean {
@@ -1137,6 +1149,10 @@ export class DirListing extends Widget {
       };
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
+    }
+
+    if (this.getAllowSingleClickNavigation()) {
+      this.evtDblClick(event as MouseEvent);
     }
   }
 
@@ -2144,6 +2160,7 @@ export class DirListing extends Widget {
   private _isDirty = false;
   private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
   private _sortNotebooksFirst = false;
+  private _allowSingleClick = false;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
