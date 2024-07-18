@@ -16,13 +16,19 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONExt, PartialJSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PartialJSONObject,
+  PromiseDelegate,
+  UUID
+} from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
 import { CustomEnvWidget } from './custom_env';
+import { Message } from '@lumino/messaging';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -295,10 +301,10 @@ export namespace ISessionContext {
      */
     readonly skipKernelRestartDialog?: boolean;
 
-     /**
+    /**
      * Custom kernel variables
      */
-     customEnvVars?: undefined | PartialJSONObject;
+    customEnvVars?: undefined | PartialJSONObject;
   }
 
   export type KernelDisplayStatus =
@@ -1389,15 +1395,18 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     });
 
     const result = await dialog.launch();
-   
+    console.log('result of dialog');
+    console.dir(result);
 
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
 
     const model = result.value as Kernel.IModel;
+
+    console.log('model');
+    console.dir(model);
     //const dialogResult = result.value as Kernel.IModel;
- 
 
     if (hasCheckbox && result.isChecked !== null) {
       if (model && sessionContext.kernelPreference?.customEnvVars) {
@@ -1405,8 +1414,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       }
 
       if (model && model.custom_env_vars) {
-        sessionContext.kernelPreference.customEnvVars =
-          model.custom_env_vars;
+        sessionContext.kernelPreference.customEnvVars = model.custom_env_vars;
       }
 
       sessionContext.kernelPreference = {
@@ -1415,7 +1423,6 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       };
     }
 
- 
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
@@ -1519,26 +1526,78 @@ namespace Private {
    * A widget that provides a kernel selection.
    */
   export class KernelSelector extends Widget {
+    sessionContext: ISessionContext;
+    translator: ITranslator | undefined;
     /**
      * Create a new kernel selector widget.
      */
     constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super({ node: createSelectorNode(sessionContext, translator) });
+      this.sessionContext = sessionContext;
+      this.translator = translator;
     }
 
     /**
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
+      console.log('getValue');
       const selector = this.node.querySelector('select') as HTMLSelectElement;
       let kernelData = JSON.parse(selector.value) as Kernel.IModel;
+      let tmp = {} as PartialJSONObject;
+      const envVarsBlock = this.node.querySelector(
+        'div.jp-custom-env-vars-block'
+      );
 
-      const custmEnvParameters = this.node.getAttribute('data-custom-env-vars');
-      
-      if (custmEnvParameters) {
-        kernelData['custom_env_vars'] = JSON.parse(custmEnvParameters);
+      if (envVarsBlock) {
+        let customEnvParameters = envVarsBlock.getAttribute(
+          'data-custom-env-vars'
+        );
+        console.log('customEnvParameters');
+        console.dir(customEnvParameters);
+        if (customEnvParameters) {
+          console.log('???');
+          let envParameters = JSON.parse(
+            customEnvParameters
+          ) as PartialJSONObject;
+          console.log('envParameters');
+          console.dir(envParameters);
+
+          for (let index in envParameters) {
+            let env = envParameters[index] as PartialJSONObject;
+            let envName: string =
+              env && typeof env.name === 'string' ? env.name : '';
+            let envValue: string =
+              env && typeof env.value === 'string' ? env.value : ('' as string);
+            if (envName && envValue) {
+              tmp[envName] = envValue;
+            }
+          }
+          console.log('tmp');
+          console.dir(tmp);
+
+          kernelData['custom_env_vars'] = tmp;
+        }
       }
       return kernelData;
+    }
+
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      const envVarsDiv = this.node.querySelector(
+        'div.jp-custom-env-vars-block'
+      ) as HTMLDivElement;
+      console.log('envVarsDiv');
+      console.log(envVarsDiv);
+      const allow_custom_env_variables =
+        PageConfig.getOption('allow_custom_env_variables') === 'true'
+          ? true
+          : false;
+      console.log('allow_custom_env_variables');
+      console.log(allow_custom_env_variables);
+      if (allow_custom_env_variables) {
+        addEnvBlock(envVarsDiv, this.sessionContext, this.translator);
+      }
     }
   }
 
@@ -1562,6 +1621,9 @@ namespace Private {
 
     const options = getKernelSearch(sessionContext);
     const selector = document.createElement('select');
+    const envVarsDiv = document.createElement('div');
+    envVarsDiv.setAttribute('class', 'jp-custom-env-vars-block');
+    envVarsDiv.setAttribute('data-custom-env-vars', '');
     populateKernelSelect(
       selector,
       options,
@@ -1569,47 +1631,37 @@ namespace Private {
       !sessionContext.hasNoKernel ? sessionContext.kernelDisplayName : null
     );
     body.appendChild(selector);
-
-
-
-    const allow_custom_env_variables = PageConfig.getOption('allow_custom_env_variables') === 'true' ? true: false; 
-    console.log('allow_custom_env_variables');
-    console.log(allow_custom_env_variables);
-    body.setAttribute('data-custom-env-vars', '')
-    
-    if (allow_custom_env_variables){
-      
-      addEnvBlock(body);
-    }
+    body.appendChild(envVarsDiv);
     return body;
   }
 
-  function addEnvBlock(body: HTMLDivElement){
-   
-  let envConfiguration:PartialJSONObject = {};
+  function addEnvBlock(
+    body: HTMLDivElement,
+    sessionContext: ISessionContext,
+    translator?: ITranslator
+  ) {
+    let envConfiguration: PartialJSONObject = {};
+    body.setAttribute(
+      'data-custom-env-vars',''
+    );
+    let defaultEnvValues = sessionContext.kernelPreference?.customEnvVars as PartialJSONObject;
 
-
-  let customEnvBlock = new CustomEnvWidget(
-    envConfiguration,
-    formData => {
+    let customEnvBlock = new CustomEnvWidget(envConfiguration, defaultEnvValues, formData => {
       envConfiguration = formData as PartialJSONObject;
-
       console.log('envConfiguration');
-      console.dir(envConfiguration)
+      console.dir(envConfiguration);
       body.setAttribute(
         'data-custom-env-vars',
         JSON.stringify(envConfiguration)
       );
-    },
-  );
-
-  //Update widget
-  if (customEnvBlock) {
-    Widget.attach(customEnvBlock, body);
-  }
+    }, translator);
+    //trans.__('Start Preferred Kernel');
+    //Update widget
     
+    if (customEnvBlock) {
+      Widget.attach(customEnvBlock, body);
+    }
   }
-  
 
   /**
    * Get the default kernel name given select options.

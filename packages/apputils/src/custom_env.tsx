@@ -1,30 +1,58 @@
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import { PartialJSONObject } from '@lumino/coreutils';
 import React, { ChangeEvent, ChangeEventHandler, useEffect, useState } from 'react';
 
 interface EnvProps {
   updateFormData: (formData: PartialJSONObject)=>void;
+  defaultEnvValues: PartialJSONObject;
+  translator?:ITranslator | undefined;
 }
 
 interface EnvBlockProps {
-  handleChange:(event: ChangeEvent)=>void;
+  handleChange:(envVars: PartialJSONObject)=>void;
   id: string;
+  envData: PartialJSONObject;
 }
 
-function EnvBlock({handleChange, id}:EnvBlockProps ){
-  let dataEnvName = `env_name_${id}`;
-  let dataEnvValue = `env_value_${id}`;
+function EnvBlock({handleChange, id, envData}:EnvBlockProps ){
+  const [newEnvName, setEnvName] = useState<string>(envData.name as string);
+  const [newEnvValue, setEnvValue] = useState<string>(envData.value as string);
+
+  useEffect(()=>{
+    let envVar = {} as PartialJSONObject;
+    envVar[id] = {
+      name:newEnvName,
+      value:newEnvValue
+    };
+    console.log('envVar');
+    console.dir(envVar);
+    handleChange(envVar);
+  },[newEnvName, newEnvValue]);
+
+  const onChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    console.log('name', name);
+    console.log('value', value);
+    if (name === "env_name") {
+      setEnvName(value);
+    } else if (name === "env_value") {
+      setEnvValue(value);
+    }
+  };
+
+
 
 return (
-  <div id={id}>
+  <div id={id} style={{marginBottom: 10}}>
   <label>
     Name:
     <input
       type="text"
       name="env_name"
-      data-name= {dataEnvName}
-      value=""
-      onChange={handleChange}
+      data-name= "env_name"
+      value={newEnvName}
+      onChange={onChange}
     />
   </label>
   <br />
@@ -33,33 +61,43 @@ return (
     <input
       type="text"
       name="env_value"
-      data-name={dataEnvValue}
-      value=""
-      onChange={handleChange}
+      data-name="env_value"
+      value={newEnvValue}
+      onChange={onChange}
     />
   </label>
+  <br />
   </div>)
 }
 
 
-function CustomEnv({updateFormData }: EnvProps) {
-  const [formData, setInputs] = useState<PartialJSONObject>({});
-  const [countEnvBlock, setCountEnvBlock] = useState(1);
+function CustomEnv({updateFormData, defaultEnvValues, translator }: EnvProps) {
+  const [formData, setInputs] = useState<PartialJSONObject>(defaultEnvValues);
+  const [countEnvBlock, setCountEnvBlock] = useState(Object.keys(formData).length);
+
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
 
   useEffect(()=>{
     updateFormData(formData);
   },[formData]);
+
+  useEffect(()=>{
+    let count = defaultEnvValues && Object.keys(defaultEnvValues).length>0? Object.keys(this.defaultEnvValues).length : 1;
+    setCountEnvBlock(count);
+  },[defaultEnvValues])
 
   const addMoreEnvVariables = ()=>{
     let newCountEnvBlock = countEnvBlock +1;
     setCountEnvBlock(newCountEnvBlock);
   }
 
-  const handleChange: ChangeEventHandler<HTMLInputElement> = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+  const handleChange = (envVars: PartialJSONObject) => {
+    console.log('envVars');
+    console.dir(envVars);
     setInputs({
       ...formData,
-      [name]: value
+      ...envVars
     });
   };
 
@@ -70,14 +108,17 @@ function CustomEnv({updateFormData }: EnvProps) {
   };
 
   let envBlock = [];
-
-  for(let index=0; index< countEnvBlock; index++) {
-    envBlock.push(<EnvBlock id={`${index}`} handleChange={handleChange}/>)
+  for(let index=0; index<countEnvBlock; index++) {
+    let envData = formData[`${index}`];
+    envBlock.push(<EnvBlock id={`${index}`} key={index} handleChange={handleChange}/>)
   }
+
+  let header = `${trans.__('Setup custom env variables:')}`
  
   return (
     <div>
-      <h1>Setup custom env variables <span><button onClick={addMoreEnvVariables}>Add more env variables</button></span></h1>
+      <h4>{header}</h4>
+      <div><button onClick={addMoreEnvVariables}>Add more env variables</button></div>
       <form onSubmit={handleSubmit}>
        {envBlock}
       </form>
@@ -93,16 +134,22 @@ export default CustomEnv;
 export class CustomEnvWidget extends ReactWidget {
   updateFormData: (formData: PartialJSONObject) => void;
   envConfiguration: PartialJSONObject;
+  defaultEnvValues: PartialJSONObject;
+  translator?: ITranslator | undefined;
   /**
    * Constructs a new FormWidget.
    */
   constructor(
     envConfiguration: PartialJSONObject,
-    updateFormData: (formData: PartialJSONObject) => void
+    defaultEnvValues:PartialJSONObject, 
+    updateFormData: (formData: PartialJSONObject) => void,
+    translator?: ITranslator,
   ) {
     super();
     this.envConfiguration = envConfiguration;
     this.updateFormData = updateFormData;
+    this.translator = translator;
+    this.defaultEnvValues = defaultEnvValues;
   }
 
   getValue(): PartialJSONObject {
@@ -110,9 +157,21 @@ export class CustomEnvWidget extends ReactWidget {
   }
 
   render(): JSX.Element {
+    let k = 1;
+    let tmp = {} as PartialJSONObject;
+    for (let index in this.defaultEnvValues) {
+      let envVarsIndex = `${k}`;
+      tmp[envVarsIndex] = {
+        'name': index,
+        'value':this.defaultEnvValues[index]
+      };
+      k+=1;
+    }
+    console.log('default obj');
+    console.dir(tmp);
     return (
       <CustomEnv
-        updateFormData={this.updateFormData}
+        updateFormData={this.updateFormData} defaultEnvValues={tmp} translator={this.translator}
       />
     );
   }
