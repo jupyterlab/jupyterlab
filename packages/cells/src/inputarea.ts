@@ -329,16 +329,6 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   /**
-   * Returns true if we're inside the active cell.
-   */
-  get isInsideActiveCell(): boolean {
-    let parent = this.node.closest('.jp-mod-active');
-
-    // If we found a parent element that's an active cell, return true
-    return parent !== null;
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -357,6 +347,11 @@ export class InputPrompt extends Widget implements IInputPrompt {
     }
   }
 
+  update(): void {
+    this.updateToolbarVisibility();
+    super.update();
+  }
+
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('mouseover', this, true);
     this.node.addEventListener('mouseout', this, true);
@@ -368,7 +363,7 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   private updateToolbarVisibility() {
-    if (this.isInsideActiveCell && (this._isHovered || !this.executionCount)) {
+    if (this._isHovered || !this.executionCount) {
       this.runButtonToolbar.show();
     } else {
       this.runButtonToolbar.hide();
