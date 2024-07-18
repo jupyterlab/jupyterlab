@@ -16,6 +16,7 @@ set BUILDDIR=build
 set SPHINXPROJ=JupyterLab
 
 if "%1" == "" goto help
+if "%1" == "serve" goto serve
 
 if not exist "%APIDIR%" (
     echo Creating api directory...
