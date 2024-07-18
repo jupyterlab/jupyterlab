@@ -18,10 +18,9 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import {
+  CommandToolbarButton,
   ReactWidget,
-  runIcon,
-  Toolbar,
-  ToolbarButton
+  Toolbar
 } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -224,18 +223,18 @@ export class CellToolbarTracker implements IDisposable {
         }
       }
       // Add the helper buttons to the cell's input area.
-      if (this._helperButtons.find(e => e === 'run-cell-and-select-next')) {
+      if (
+        this._commands &&
+        this._helperButtons.find(e => e === 'run-cell-and-select-next')
+      ) {
         cell.inputArea!.prompt.runButtonToolbar?.addItem(
           'run-cell-and-select-next',
-          new ToolbarButton({
-            icon: runIcon,
-            onClick: () => {
-              console.log('Run this cell');
-              if (this._commands) {
-                this._commands.execute('notebook:run-cell-and-select-next');
-              }
-            },
-            tooltip: 'Run this cell'
+          new CommandToolbarButton({
+            commands: this._commands,
+            id: 'notebook:run-cell-and-select-next',
+            args: { toolbar: true },
+            // Do not display a text label beside the button
+            label: ''
           })
         );
         // runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
