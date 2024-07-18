@@ -78,10 +78,6 @@
   box-shadow: none;
 }
 
-.jp-RunningSessions-icon {
-  margin: 0 4px;
-}
-
 .jp-RunningSessions-toolbar {
   min-width: max-content;
 }
@@ -110,14 +106,9 @@ span.jp-RunningSessions-icon > svg {
 .jp-RunningSessions-itemLabel {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 55%;
-  padding: 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}
-
-.jp-RunningSessions-itemLabel:focus {
-  background-color: var(--jp-layout-color2);
 }
 
 .jp-RunningSessions-itemDetail {
@@ -127,17 +118,6 @@ span.jp-RunningSessions-icon > svg {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}
-
-.jp-RunningSessions-caret {
-  align-items: center;
-  display: flex;
-  padding-right: 4px;
-}
-
-.jp-RunningSessions-caret > svg {
-  height: 16px;
-  width: 16px;
 }
 
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
