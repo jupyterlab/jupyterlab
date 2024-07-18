@@ -347,12 +347,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'mouseover':
-        console.log('Detected mouseover!');
         this._isHovered = true;
         this.updateToolbarVisibility();
         break;
       case 'mouseout':
-        console.log('Moused out of button!');
         this._isHovered = false;
         this.updateToolbarVisibility();
         break;
