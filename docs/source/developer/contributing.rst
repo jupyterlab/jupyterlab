@@ -670,7 +670,7 @@ provided in the report. You can use these information to debug failing tests. Ga
 report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
 named ``galata-report`` and once you extract it, you can access the report by launching
 a server to serve the files ``python -m http.server -d <path-to-extracted-report>``.
-Then open *http://localhost:8000* with your web browser.
+Then open http://localhost:8000/ with your web browser.
 
 Main reasons for UI test failures are:
 
@@ -899,7 +899,16 @@ The Read the Docs pages can be built using ``make``:
    cd docs
    make html
 
-Or with ``jlpm``:
+The JupyterLab API reference documentation is also included in the previous step.
+To access the documentation, first launch a server to serve the generated files:
+
+.. code:: bash
+
+   make serve
+
+And then go to http://localhost:8000/ in your browser.
+
+The JupyterLab API reference documentation can be built separately using ``jlpm``:
 
 .. code:: bash
 
