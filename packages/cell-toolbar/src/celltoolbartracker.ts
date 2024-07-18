@@ -17,7 +17,12 @@ import {
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import { ReactWidget, Toolbar } from '@jupyterlab/ui-components';
+import {
+  ReactWidget,
+  runIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -62,13 +67,17 @@ export class CellToolbarTracker implements IDisposable {
     toolbar?: IObservableList<ToolbarRegistry.IToolbarItem>,
     toolbarFactory?: (
       widget: Cell
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    helperButtons?: string[],
+    commands?: CommandRegistry
   ) {
     this._panel = panel;
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
     this._enabled = true; // If this has been set to false, it will be modified after settings are available
+    this._helperButtons = helperButtons ?? [];
+    this._commands = commands ?? new CommandRegistry();
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -214,6 +223,24 @@ export class CellToolbarTracker implements IDisposable {
           }
         }
       }
+      // Add the helper buttons to the cell's input area.
+      if (this._helperButtons.find(e => e === 'run-cell-and-select-next')) {
+        cell.inputArea!.prompt.runButtonToolbar?.addItem(
+          'run-cell-and-select-next',
+          new ToolbarButton({
+            icon: runIcon,
+            onClick: () => {
+              console.log('Run this cell');
+              if (this._commands) {
+                this._commands.execute('notebook:run-cell-and-select-next');
+              }
+            },
+            tooltip: 'Run this cell'
+          })
+        );
+        // runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
+      }
+
       promises.push(cell.ready);
 
       // Wait for all the buttons to be rendered before attaching the toolbar.
@@ -474,6 +501,8 @@ export class CellToolbarTracker implements IDisposable {
   private _toolbarFactory:
     | ((widget: Cell) => IObservableList<ToolbarRegistry.IToolbarItem>)
     | null = null;
+  private _helperButtons: string[];
+  private _commands: CommandRegistry;
 }
 
 const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
@@ -514,10 +543,12 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     commands: CommandRegistry,
     toolbarFactory?: (
       widget: Widget
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    helperButtons?: string[]
   ) {
     this._commands = commands;
     this._toolbarFactory = toolbarFactory ?? this.defaultToolbarFactory;
+    this._helperButtons = helperButtons ?? ['run-cell-and-select-next'];
   }
 
   protected get defaultToolbarFactory(): (
@@ -539,7 +570,9 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     return (this._tracker = new CellToolbarTracker(
       panel,
       undefined,
-      this._toolbarFactory
+      this._toolbarFactory,
+      this._helperButtons,
+      this._commands
     ));
   }
 
@@ -560,6 +593,7 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   private _commands: CommandRegistry;
+  private _helperButtons: string[];
   private _toolbarFactory: (
     widget: Widget
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
