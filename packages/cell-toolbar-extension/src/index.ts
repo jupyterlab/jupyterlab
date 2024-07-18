@@ -14,6 +14,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import {
+  CommandToolbarButton,
   createToolbarFactory,
   IToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
@@ -57,7 +58,17 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           )
         : undefined;
 
-    const extension = new CellBarExtension(app.commands, toolbarItems);
+    const helperButtons = [
+      new CommandToolbarButton({
+        commands: app.commands,
+        id: 'notebook:run-cell-and-select-next',
+        args: { toolbar: true },
+        // Do not display a text label beside the button
+        label: ''
+      })
+    ];
+
+    const extension = new CellBarExtension(app.commands, toolbarItems, helperButtons);
 
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
