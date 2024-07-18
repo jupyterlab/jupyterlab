@@ -10,7 +10,7 @@ import { Widget } from '@lumino/widgets';
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ICellModel } from './model';
-import { runIcon, ToolbarButton } from '@jupyterlab/ui-components';
+import { Toolbar } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 
 /**
@@ -35,9 +35,9 @@ const INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS =
   'jp-InputArea-prompt-indicator-empty';
 
 /**
- * The class name added to the prompt area's run button
+ * The class name added to the prompt area's toolbar
  */
-const INPUT_AREA_PROMPT_RUN_CLASS = 'jp-InputArea-prompt-run';
+const INPUT_AREA_PROMPT_TOOLBAR_CLASS = 'jp-InputArea-prompt-run';
 
 /**
  * The class name added to OutputPrompt.
@@ -106,6 +106,13 @@ export class InputArea extends Widget {
    */
   get editor(): CodeEditor.IEditor {
     return this._editor.editor;
+  }
+
+  /**
+   * Get the prompt widget used by the cell.
+   */
+  public get prompt(): IInputPrompt {
+    return this._prompt;
   }
 
   /**
@@ -277,6 +284,8 @@ export interface IInputPrompt extends Widget {
    * The execution count of the prompt.
    */
   executionCount: string | null;
+
+  runButtonToolbar: Toolbar | null;
 }
 
 export class InputPrompt extends Widget implements IInputPrompt {
@@ -286,23 +295,18 @@ export class InputPrompt extends Widget implements IInputPrompt {
   constructor() {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
-    // Two sub-elements: prompt text and run button
+
+    // Two sub-elements: prompt text and run button toolbar
     const layout = (this.layout = new PanelLayout());
     const promptIndicator = (this._promptIndicator =
       new InputPromptIndicator());
     layout.addWidget(promptIndicator);
-    // TODO: Localization, run command
-    // TODO: Use CommandToolbarButtonComponent (requires CommandRegistry)
-    const runButton = (this._runButton = new ToolbarButton({
-      icon: runIcon,
-      onClick: () => {
-        console.log('Run this cell');
-      },
-      tooltip: 'Run this cell'
-    }));
-    runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
-    layout.addWidget(runButton);
-    this.updateRunButtonVisibility();
+
+    const toolbar = (this._runButtonToolbar = new Toolbar());
+    toolbar.addClass(INPUT_AREA_PROMPT_TOOLBAR_CLASS);
+    layout.addWidget(toolbar);
+
+    this.updateToolbarVisibility();
   }
 
   /**
@@ -314,7 +318,14 @@ export class InputPrompt extends Widget implements IInputPrompt {
   set executionCount(value: string | null) {
     this._executionCount = value;
     this._promptIndicator.executionCount = value;
-    this.updateRunButtonVisibility();
+    this.updateToolbarVisibility();
+  }
+
+  /**
+   * A toolbar showing a helper button for running this cell.
+   */
+  public get runButtonToolbar(): Toolbar {
+    return this._runButtonToolbar;
   }
 
   /**
@@ -338,12 +349,12 @@ export class InputPrompt extends Widget implements IInputPrompt {
       case 'mouseover':
         console.log('Detected mouseover!');
         this._isHovered = true;
-        this.updateRunButtonVisibility();
+        this.updateToolbarVisibility();
         break;
       case 'mouseout':
         console.log('Moused out of button!');
         this._isHovered = false;
-        this.updateRunButtonVisibility();
+        this.updateToolbarVisibility();
         break;
     }
   }
@@ -358,21 +369,21 @@ export class InputPrompt extends Widget implements IInputPrompt {
     this.node.removeEventListener('mouseout', this, true);
   }
 
-  private updateRunButtonVisibility() {
+  private updateToolbarVisibility() {
     if (this.isInsideActiveCell && (this._isHovered || !this.executionCount)) {
-      this._runButton.show();
+      this.runButtonToolbar.show();
     } else {
-      this._runButton.hide();
+      this.runButtonToolbar.hide();
     }
   }
 
   private _executionCount: string | null = null;
   private _isHovered: boolean = false;
   private _promptIndicator: InputPromptIndicator;
-  private _runButton: ToolbarButton;
+  private _runButtonToolbar: Toolbar;
 }
 
-export class InputPromptIndicator extends Widget implements IInputPrompt {
+export class InputPromptIndicator extends Widget {
   /*
    * Create an input prompt widget.
    */
