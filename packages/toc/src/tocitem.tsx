@@ -57,7 +57,7 @@ export class TableOfContentsItem extends React.PureComponent<
 
     return (
       <TreeItem
-        className={'jp-tocItem jp-TreeItem'}
+        className={'jp-tocItem jp-TreeItem nested'}
         selected={isActive}
         expanded={!heading.collapsed}
         onExpand={handleToggle}

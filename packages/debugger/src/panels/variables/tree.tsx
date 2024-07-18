@@ -337,7 +337,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 
   return (
     <TreeItem
-      className="jp-TreeItem"
+      className="jp-TreeItem nested"
       expanded={expanded}
       onSelect={onSelectChange}
       onExpand={fetchChildren}

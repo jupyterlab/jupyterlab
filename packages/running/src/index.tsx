@@ -245,7 +245,7 @@ function Item(props: {
   return (
     <>
       <TreeItem
-        className={`${classList.join(' ')} jp-TreeItem`}
+        className={`${classList.join(' ')} jp-TreeItem nested`}
         onClick={onClick}
         data-context={runningItem.context || ''}
         expanded={!collapsed}
