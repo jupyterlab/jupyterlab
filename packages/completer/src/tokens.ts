@@ -430,6 +430,22 @@ export interface IInlineCompleterSettings {
    */
   streamingAnimation: 'none' | 'uncover';
   /**
+   * Minimum lines to show.
+   */
+  minLines: number;
+  /**
+   * Maximum lines to show.
+   */
+  maxLines: number;
+  /**
+   * Delay between resizing the editor after an incline completion was cancelled.
+   */
+  editorResizeDelay: number;
+  /*
+   * Reserve space for the longest of the completions candidates.
+   */
+  reserveSpaceForLongest: boolean;
+  /**
    * Provider settings.
    */
   providers: {
