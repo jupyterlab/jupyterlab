@@ -37,7 +37,7 @@ const INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS =
 /**
  * The class name added to the prompt area's toolbar
  */
-const INPUT_AREA_PROMPT_TOOLBAR_CLASS = 'jp-InputArea-prompt-run';
+const INPUT_AREA_PROMPT_TOOLBAR_CLASS = 'jp-InputArea-prompt-toolbar';
 
 /**
  * The class name added to OutputPrompt.
