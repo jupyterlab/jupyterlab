@@ -216,15 +216,6 @@ export class CellToolbarTracker implements IDisposable {
           }
         }
       }
-      // Add the helper buttons to the cell's input area.
-      if (cell.inputArea) {
-        this._helperButtons.forEach(
-          b => cell.inputArea!.prompt.runButtonToolbar?.addItem(b.id, b)
-        );
-        // Show the toolbar, if necessary.
-        cell.inputArea!.prompt.update();
-      }
-
       promises.push(cell.ready);
 
       // Wait for all the buttons to be rendered before attaching the toolbar.
@@ -251,6 +242,15 @@ export class CellToolbarTracker implements IDisposable {
 
           // Hide the cell toolbar if it overlaps with cell contents
           this._updateCellForToolbarOverlap(cell);
+
+          // Add the helper buttons to the cell's input area.
+          if (cell.inputArea) {
+            this._helperButtons.forEach(
+              b => cell.inputArea!.prompt.runButtonToolbar?.addItem(b.id, b)
+            );
+            // Show the toolbar, if necessary.
+            cell.inputArea!.prompt.update();
+          }
         })
         .catch(e => {
           console.error('Error rendering buttons of the cell toolbar: ', e);
