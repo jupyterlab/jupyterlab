@@ -1,38 +1,18 @@
-/*
- * Copyright (c) Jupyter Development Team.
- * Distributed under the terms of the Modified BSD License.
- */
-
-import { getTemplate, FormContextType, RJSFSchema, StrictRJSFSchema, WidgetProps } from '@rjsf/utils';
-
-/** The `TextWidget` component uses the `BaseInputTemplate`.
- *
- * @param props - The `WidgetProps` for this component
- */
-export default function TextWidget<T = any, S extends StrictRJSFSchema = RJSFSchema, F extends FormContextType = any>(
-  props: WidgetProps<T, S, F>
-) {
-  const { options, registry } = props;
-  const BaseInputTemplate = getTemplate<'BaseInputTemplate', T, S, F>('BaseInputTemplate', registry, options);
-  return <BaseInputTemplate {...props} />;
-}
-
-
-import { ChangeEvent, FocusEvent } from 'react';
-import { Input, InputNumber } from 'antd';
+import React, { ChangeEvent, FocusEvent } from 'react';
+import { NumberField, TextField } from '@jupyter/react-components';
 import {
   ariaDescribedByIds,
   BaseInputTemplateProps,
   examplesId,
-  getInputProps,
   FormContextType,
   GenericObjectType,
+  getInputProps,
   RJSFSchema,
-  StrictRJSFSchema,
+  StrictRJSFSchema
 } from '@rjsf/utils';
 
 const INPUT_STYLE = {
-  width: '100%',
+  width: '100%'
 };
 
 /** The `BaseInputTemplate` is the template to use to render the basic `<input>` component for the `core` theme.
@@ -59,24 +39,35 @@ export default function BaseInputTemplate<
     readonly,
     schema,
     value,
-    type,
+    type
   } = props;
+
   const inputProps = getInputProps<T, S, F>(schema, type, options, false);
+  const { type: type_, step, ...otherProps } = inputProps;
   const { readonlyAsDisabled = true } = formContext as GenericObjectType;
 
-  const handleNumberChange = (nextValue: number | null) => onChange(nextValue);
+  const handleNumberChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextValue = event.target.valueAsNumber;
+    onChange(nextValue);
+  };
 
   const handleTextChange = onChangeOverride
     ? onChangeOverride
-    : ({ target }: ChangeEvent<HTMLInputElement>) => onChange(target.value === '' ? options.emptyValue : target.value);
+    : ({ target }: ChangeEvent<HTMLInputElement>) => {
+        onChange(target.value === '' ? options.emptyValue : target.value);
+      };
 
-  const handleBlur = ({ target }: FocusEvent<HTMLInputElement>) => onBlur(id, target && target.value);
+  const handleBlur = ({ target }: FocusEvent<HTMLInputElement>) => {
+    onBlur(id, target?.value);
+  };
 
-  const handleFocus = ({ target }: FocusEvent<HTMLInputElement>) => onFocus(id, target && target.value);
+  const handleFocus = ({ target }: FocusEvent<HTMLInputElement>) => {
+    onFocus(id, target?.value);
+  };
 
   const input =
     inputProps.type === 'number' || inputProps.type === 'integer' ? (
-      <InputNumber
+      <NumberField
         disabled={disabled || (readonlyAsDisabled && readonly)}
         id={id}
         name={id}
@@ -86,12 +77,14 @@ export default function BaseInputTemplate<
         placeholder={placeholder}
         style={INPUT_STYLE}
         list={schema.examples ? examplesId<T>(id) : undefined}
-        {...inputProps}
+        {...otherProps}
+        step={step as any}
+        // type={type_}
         value={value}
         aria-describedby={ariaDescribedByIds<T>(id, !!schema.examples)}
       />
     ) : (
-      <Input
+      <TextField
         disabled={disabled || (readonlyAsDisabled && readonly)}
         id={id}
         name={id}
@@ -101,8 +94,9 @@ export default function BaseInputTemplate<
         placeholder={placeholder}
         style={INPUT_STYLE}
         list={schema.examples ? examplesId<T>(id) : undefined}
-        {...inputProps}
-        value={value}
+        {...otherProps}
+        type={type_ as any}
+        value={value as string | undefined}
         aria-describedby={ariaDescribedByIds<T>(id, !!schema.examples)}
       />
     );
@@ -113,10 +107,14 @@ export default function BaseInputTemplate<
       {Array.isArray(schema.examples) && (
         <datalist id={examplesId<T>(id)}>
           {(schema.examples as string[])
-            .concat(schema.default && !schema.examples.includes(schema.default) ? ([schema.default] as string[]) : [])
-            .map((example) => {
-              return <option key={example} value={example} />;
-            })}
+            .concat(
+              schema.default && !schema.examples.includes(schema.default)
+                ? ([schema.default] as string[])
+                : []
+            )
+            .map(example => (
+              <option key={example} value={example} />
+            ))}
         </datalist>
       )}
     </>
