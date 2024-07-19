@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import React, { ChangeEvent, FocusEvent } from 'react';
 import { Checkbox } from '@jupyter/react-components';
 import {
