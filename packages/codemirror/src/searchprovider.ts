@@ -59,7 +59,7 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
  * - `'selection-start'` - search from selection head/anchor whichever is smaller
  * - `'start'` - from start of the editor
  */
-type SearchStartAnchor =
+export type SearchStartAnchor =
   | 'auto'
   | 'selection'
   | 'selection-start'
@@ -278,7 +278,7 @@ export abstract class EditorSearchProvider<
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
         // Note: the loop logic is only used in single-editor (e.g. file editor)
-        // provider sub-classes, notebook has it's own loop logic and ignores
+        // provider sub-classes, notebook has its own loop logic and ignores
         // `currentIndex` as set here.
         this.currentIndex = loop ? 0 : null;
       }
@@ -336,8 +336,6 @@ export abstract class EditorSearchProvider<
       return Promise.resolve(false);
     }
 
-    let occurred = false;
-
     if (
       this.currentIndex !== null &&
       this.currentIndex < this.cmHandler.matches.length
@@ -346,30 +344,56 @@ export abstract class EditorSearchProvider<
       if (!match) {
         this.currentIndex = null;
       } else {
-        this.cmHandler.matches.splice(this.currentIndex, 1);
-        const cmMatchesRemaining = this.cmHandler.matches.length;
-
-        // End at the end of the CodeMirror matches list; do not loop
-        // Let the caller call highlightNext if we've reached the end of the current code cell
-        this.currentIndex =
-          this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
-
         const substitutedText = options?.regularExpression
           ? match!.text.replace(this.query!, newText)
           : newText;
         const insertText = options?.preserveCase
           ? GenericSearchProvider.preserveCase(match.text, substitutedText)
           : substitutedText;
+
         this.model.sharedModel.updateSource(
           match!.position,
           match!.position + match!.text.length,
           insertText
         );
-        occurred = true;
+
+        // Regenerate the match list, then iterate through it.
+        return new Promise((resolve, reject) => {
+          this.updateCodeMirror(this.model.sharedModel.getSource())
+            .then(() => {
+              const allMatches = this.cmHandler.matches;
+              const positionAfterReplacement =
+                match!.position + insertText.length;
+              let nextMatchFound = false;
+              for (
+                let matchIdx = this.currentIndex || 0;
+                matchIdx < allMatches.length;
+                matchIdx++
+              ) {
+                if (allMatches[matchIdx].position >= positionAfterReplacement) {
+                  this.currentIndex = matchIdx;
+                  nextMatchFound = true;
+                  break;
+                }
+
+                // Move the highlight forward from the previous match, not looping.
+                void this.highlightNext(false, { from: 'previous-match' });
+              }
+              if (!nextMatchFound) {
+                this.currentIndex = null; // No more matches in this string
+              }
+              resolve(true);
+            })
+            .catch(err => {
+              const errorMessage = `Failed to regenerate match list: ${err}`;
+              console.error(errorMessage);
+              reject(errorMessage);
+            });
+        });
       }
     }
 
-    return Promise.resolve(occurred);
+    return Promise.resolve(false);
   }
 
   /**

@@ -120,7 +120,6 @@ const UNUSED: Dict<string[]> = {
     '@babel/core',
     '@babel/preset-env',
     'fs-extra',
-    'node-fetch',
     'identity-obj-proxy',
     'jest-environment-jsdom',
     'jest-junit'
@@ -283,7 +282,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
-    '@jupyterlab/vega5-extension'
+    '@jupyterlab/vega5-extension',
+    '@jupyterlab/workspaces-extension'
   ],
   '@jupyterlab/notebook': ['@jupyterlab/application'],
   '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],
@@ -850,23 +850,6 @@ export async function ensureIntegrity(): Promise<boolean> {
   if (utils.writePackageData(corePath, coreData)) {
     messages['top'] = ['Update package.json'];
   }
-
-  // Handle the refs in the top level tsconfigdoc.json
-  const tsConfigDocExclude = [
-    'application-extension',
-    'metapackage',
-    'nbconvert-css',
-    'testing'
-  ];
-  const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
-  const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
-  tsConfigdocData.references = utils
-    .getCorePaths()
-    .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
-    .map(pth => {
-      return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
-    });
-  utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle buildutils
   ensureBuildUtils();

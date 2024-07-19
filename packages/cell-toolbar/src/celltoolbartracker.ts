@@ -193,6 +193,7 @@ export class CellToolbarTracker implements IDisposable {
           }
         }
       }
+      promises.push(cell.ready);
 
       // Wait for all the buttons to be rendered before attaching the toolbar.
       Promise.all(promises)
@@ -202,7 +203,13 @@ export class CellToolbarTracker implements IDisposable {
             return;
           }
 
-          (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
+          // Hide the toolbar by default, to avoid temporary overlapping.
+          cell.node.classList.add(TOOLBAR_OVERLAP_CLASS);
+
+          (cell.inputArea!.layout as PanelLayout).insertWidget(
+            0,
+            toolbarWidget
+          );
 
           // For rendered markdown, watch for resize events.
           cell.displayChanged.connect(this._resizeEventCallback, this);
@@ -230,7 +237,10 @@ export class CellToolbarTracker implements IDisposable {
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
     }
     model.contentChanged.disconnect(this._changedEventCallback, this);
-    if (this._toolbar?.parent === cell && this._toolbar?.isDisposed === false) {
+    if (
+      this._toolbar?.parent === cell?.inputArea &&
+      this._toolbar?.isDisposed === false
+    ) {
       this._toolbar.dispose();
     }
   }
@@ -269,10 +279,12 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
-    // When we do change in cell, If we don't wait the browser might not have
-    // completed the layout update, resulting in the previous width being returned
-    // using `getBoundingClientRect().width` in later functions.
-    requestAnimationFrame(() => {
+    // When we do change in cell, the browser might not have completed the layout
+    // update if we don't wait, resulting in the previous width being returned
+    // using `getBoundingClientRect().width` in later functions. This also wait for
+    // the toolbar to be rendered the first time (on page reload), allowing us to
+    // retrieve the right widgets width.
+    requestIdleCallback(() => {
       // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
       const activeCellElement = activeCell.node;
       activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
@@ -414,7 +426,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarRect(activeCell: Cell<ICellModel>): DOMRect | null {
-    if (this._toolbar?.parent !== activeCell) {
+    if (this._toolbar?.parent !== activeCell.inputArea) {
       return null;
     }
     const activeCellToolbar = this._toolbar.node;

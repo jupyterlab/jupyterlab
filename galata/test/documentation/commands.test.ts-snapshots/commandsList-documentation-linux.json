@@ -109,15 +109,15 @@
     "id": "application:toggle-side-tabbar",
     "label": "Show Left Activity Bar",
     "caption": "",
-    "shortcuts": [
-      "Alt 1"
-    ]
+    "shortcuts": []
   },
   {
     "id": "application:toggle-sidebar-widget",
     "label": "Toggle Sidebar Element",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Alt 1"
+    ]
   },
   {
     "id": "apputils:activate-command-palette",
@@ -177,7 +177,7 @@
   },
   {
     "id": "apputils:display-shortcuts",
-    "label": "Show Keyboard Shortcuts",
+    "label": "Show Keyboard Shortcuts…",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
@@ -256,6 +256,38 @@
     "label": "Open Code Viewer",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "codemirror:delete-line",
+    "label": "Delete the current line",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl D"
+    ]
+  },
+  {
+    "id": "codemirror:select-next-occurrence",
+    "label": "Select Next Occurrence",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Shift D"
+    ]
+  },
+  {
+    "id": "codemirror:toggle-block-comment",
+    "label": "Toggle Block Comment",
+    "caption": "Toggles block commends in languages which support it (e.g. C, JavaScript)",
+    "shortcuts": [
+      "Alt A"
+    ]
+  },
+  {
+    "id": "codemirror:toggle-comment",
+    "label": "Toggle Comment",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl /"
+    ]
   },
   {
     "id": "completer:invoke-console",
@@ -368,6 +400,12 @@
     "shortcuts": []
   },
   {
+    "id": "console:redo",
+    "label": "Redo",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
@@ -410,6 +448,12 @@
   {
     "id": "console:toggle-show-all-kernel-activity",
     "label": "Show All Kernel Activity",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:undo",
+    "label": "Undo",
     "caption": "",
     "shortcuts": []
   },
@@ -515,6 +559,12 @@
     ]
   },
   {
+    "id": "docmanager:clear-recents",
+    "label": "Clear Recent Documents",
+    "caption": "Clear the list of recently opened items.",
+    "shortcuts": []
+  },
+  {
     "id": "docmanager:clone",
     "label": "New View for ",
     "caption": "",
@@ -583,7 +633,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
+    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -875,6 +925,12 @@
   {
     "id": "filebrowser:toggle-file-checkboxes",
     "label": "Show File Checkboxes",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-file-filter",
+    "label": "Toggle File Filter",
     "caption": "",
     "shortcuts": []
   },
@@ -1536,7 +1592,7 @@
   },
   {
     "id": "notebook:close-and-shutdown",
-    "label": "Close and Shut Down Notebook",
+    "label": "Close and Shut Down Notebook…",
     "caption": "",
     "shortcuts": []
   },
@@ -2033,8 +2089,8 @@
   },
   {
     "id": "notebook:toggle-virtual-scrollbar",
-    "label": "Virtual Scrollbar",
-    "caption": "Toggle virtual scrollbar (enabled with windowing mode: full)",
+    "label": "Show Virtual Scrollbar",
+    "caption": "Show virtual scrollbar (enabled with windowing mode: full)",
     "shortcuts": []
   },
   {
@@ -2075,6 +2131,20 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift U"
+    ]
+  },
+  {
+    "id": "recentmenu:open-recent",
+    "label": "Open a Recent Document (given by `recent` argument)",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "recentmenu:reopen-last",
+    "label": "Reopen Closed Document",
+    "caption": "Reopen recently closed file or notebook.",
+    "shortcuts": [
+      "Ctrl Shift T"
     ]
   },
   {
@@ -2134,6 +2204,14 @@
     "shortcuts": []
   },
   {
+    "id": "running:show-modal",
+    "label": "Search Tabs and Running Sessions",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Alt A"
+    ]
+  },
+  {
     "id": "running:show-panel",
     "label": "Sessions and Tabs",
     "caption": "",
@@ -2173,6 +2251,36 @@
     "id": "settingsmenu:open",
     "label": "Open Settings Menu",
     "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:add-keybinding",
+    "label": "Add Keybinding",
+    "caption": "Add new keybinding for existing shortcut target",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:delete-keybinding",
+    "label": "Delete Keybinding",
+    "caption": "Delete chosen keybinding",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:edit-keybinding",
+    "label": "Edit Keybinding",
+    "caption": "Edit existing keybinding",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:reset-all",
+    "label": "Reset All",
+    "caption": "Reset all shortcuts",
+    "shortcuts": []
+  },
+  {
+    "id": "shortcuts:toggle-selectors",
+    "label": "Toggle Selectors",
+    "caption": "Toggle command selectors",
     "shortcuts": []
   },
   {
@@ -2360,6 +2468,54 @@
   {
     "id": "viewmenu:word-wrap",
     "label": "Wrap Words",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:clone",
+    "label": "Clone Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:create-new",
+    "label": "Create New Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:delete",
+    "label": "Delete Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:export",
+    "label": "Export Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:import",
+    "label": "Import Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:open",
+    "label": "Open Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:rename",
+    "label": "Rename Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:reset",
+    "label": "Reset Workspace…",
     "caption": "",
     "shortcuts": []
   },

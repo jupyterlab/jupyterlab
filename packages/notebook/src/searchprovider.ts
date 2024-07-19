@@ -9,10 +9,7 @@ import {
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import {
-  CodeMirrorEditor,
-  IHighlightAdjacentMatchOptions
-} from '@jupyterlab/codemirror';
+import { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
@@ -289,16 +286,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns Initial value used to populate the search box.
    */
   getInitialQuery(): string {
-    const activeCell = this.widget.content.activeCell;
-    const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    if (!editor) {
-      return '';
-    }
-    const selection = editor.state.sliceDoc(
-      editor.state.selection.main.from,
-      editor.state.selection.main.to
-    );
-    return selection;
+    // Get whatever is selected in the browser window.
+    return window.getSelection()?.toString() || '';
   }
 
   /**
@@ -477,11 +466,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop);
+        await this.highlightNext(loop, { from: 'previous-match' });
       }
     }
 
-    // TODO: markdown undrendering/highlighting sequence is likely incorrect
+    // TODO: markdown unrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
     await unrenderMarkdownCell(true);
     return replaceOccurred;
@@ -669,7 +658,30 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
+    // If we're looking for the next match after the previous match,
+    // and we've reached the end of the current cell, start at the next one, if possible
+    const from = options?.from ?? '';
+    const atEndOfCurrentCell =
+      from === 'previous-match' &&
+      this._searchProviders[this._currentProviderIndex].currentMatchIndex ===
+        null;
+
     const startIndex = this._currentProviderIndex;
+    // If we need to move to the next cell or loop, reset the position of the current search provider.
+    if (atEndOfCurrentCell) {
+      void this._searchProviders[this._currentProviderIndex].clearHighlight();
+    }
+
+    // If we're at the end of the last cell in the provider list and we need to loop, do so
+    if (
+      loop &&
+      atEndOfCurrentCell &&
+      this._currentProviderIndex + 1 >= this._searchProviders.length
+    ) {
+      this._currentProviderIndex = 0;
+    } else {
+      this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
+    }
     do {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 

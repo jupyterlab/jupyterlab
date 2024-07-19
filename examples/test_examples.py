@@ -9,6 +9,7 @@ there are no console errors or uncaught errors prior to a sentinel
 string being printed (see test/example.spec.ts for the sentinel strings
 checked before the browser.close() call).
 """
+
 import argparse
 import glob
 import os.path as osp
@@ -32,14 +33,14 @@ def main():
     parser.add_argument("--testPath", help="paths containing this string are tested")
     args = parser.parse_args()
 
-    paths = [i for i in glob.glob("%s/*" % here) if osp.isdir(i)]
+    paths = [i for i in glob.glob(f"{here}/*") if osp.isdir(i)]
 
     services_dir = osp.abspath(osp.join(here, "../packages/services/examples"))
-    paths += list(glob.glob("%s/*" % services_dir))
+    paths += list(glob.glob(f"{services_dir}/*"))
     if args.testPath:
         paths = [p for p in paths if args.testPath in p]
 
-    print("Testing %s" % paths)
+    print(f"Testing {paths}")
     count = 0
     failed = []
     for path in sorted(paths):
@@ -63,7 +64,7 @@ def main():
         msg = "The following examples failed:\n-{}".format("\n-".join(failed))
         raise AssertionError(msg)
 
-    print("\n\n%s tests complete!" % count)
+    print(f"\n\n{count} tests complete!")
 
 
 if __name__ == "__main__":

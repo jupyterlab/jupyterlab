@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-Dialog {
+.jp-Dialog.jp-ThemedContainer {
   position: absolute;
   z-index: 10000;
   display: flex;
@@ -50,6 +50,10 @@
   overflow: visible;
 }
 
+button.jp-Dialog-button:disabled {
+  opacity: 0.6;
+}
+
 button.jp-Dialog-button:focus {
   outline: 1px solid var(--jp-brand-color1);
   outline-offset: 4px;
@@ -76,7 +80,7 @@ button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus {
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
-  outline: 1px solid var(--jp-reject-color-normal, var(--md-grey-600));
+  outline: 1px solid var(--jp-reject-color-normal, var(--md-grey-600, #757575));
 }
 
 button.jp-Dialog-close-button {

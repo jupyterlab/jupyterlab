@@ -9,6 +9,7 @@ import {
   ServerConnection,
   Session
 } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -287,6 +288,11 @@ export namespace ISessionContext {
      * found (default `false`).
      */
     readonly autoStartDefault?: boolean;
+
+    /**
+     * Skip showing the kernel restart dialog if checked (default `false`).
+     */
+    readonly skipKernelRestartDialog?: boolean;
   }
 
   export type KernelDisplayStatus =
@@ -326,6 +332,10 @@ export namespace ISessionContext {
      * Application translator object
      */
     translator?: ITranslator;
+    /**
+     * Optional setting registry used to access restart dialog preference.
+     */
+    settingRegistry?: ISettingRegistry | null;
   }
 }
 
@@ -420,7 +430,7 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * A flag indicating if the session has ending input, proxied from the kernel.
+   * A flag indicating if the session has pending input, proxied from the kernel.
    */
   get pendingInput(): boolean {
     return this._pendingInput;
@@ -1319,6 +1329,7 @@ export namespace SessionContext {
 export class SessionContextDialogs implements ISessionContext.IDialogs {
   constructor(options: ISessionContext.IDialogsOptions = {}) {
     this._translator = options.translator ?? nullTranslator;
+    this._settingRegistry = options.settingRegistry || null;
   }
 
   /**
@@ -1415,6 +1426,21 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       throw new Error('No kernel to restart');
     }
 
+    // Skip the dialog and restart the kernel
+    const kernelPluginId = '@jupyterlab/apputils-extension:sessionDialogs';
+    const skipKernelRestartDialog =
+      sessionContext.kernelPreference?.skipKernelRestartDialog ?? false;
+    const skipKernelRestartDialogSetting = (
+      await this._settingRegistry?.get(
+        kernelPluginId,
+        'skipKernelRestartDialog'
+      )
+    )?.composite as boolean;
+    if (skipKernelRestartDialogSetting || skipKernelRestartDialog) {
+      await sessionContext.restartKernel();
+      return true;
+    }
+
     const restartBtn = Dialog.warnButton({
       label: trans.__('Restart'),
       ariaLabel: trans.__('Confirm Kernel Restart')
@@ -1428,13 +1454,26 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       buttons: [
         Dialog.cancelButton({ ariaLabel: trans.__('Cancel Kernel Restart') }),
         restartBtn
-      ]
+      ],
+      checkbox: {
+        label: trans.__('Do not ask me again.'),
+        caption: trans.__(
+          'If checked, the kernel will restart without confirmation prompt in the future; you can change this back in the settings.'
+        )
+      }
     });
 
     if (kernel.isDisposed) {
       return false;
     }
     if (result.button.accept) {
+      if (typeof result.isChecked === 'boolean' && result.isChecked == true) {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          skipKernelRestartDialog: true
+        };
+      }
+
       await sessionContext.restartKernel();
       return true;
     }
@@ -1442,6 +1481,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
   }
 
   private _translator: ITranslator;
+  private _settingRegistry: ISettingRegistry | null;
 }
 
 /**

@@ -79,6 +79,12 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
+    // wait for the debugger bug icon to settle
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -569,15 +575,44 @@ test.describe('General', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
-    await expect(
-      page.locator(
-        '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
+    // Wait up to 5s for both kernels to startup
+    await expect
+      .soft(page.locator('.jp-RunningSessions-item.jp-mod-kernel'))
+      .toHaveCount(2, { timeout: 5000 });
+
+    const freeezeKernelIds = async () => {
+      return page.evaluate(() => {
+        const mockedKernelIds = ['abcd1234', 'wxyz5678'];
+        document
+          .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
+          .forEach((span, i) => {
+            span.innerText = `(${mockedKernelIds[i]})`;
+          });
+      });
+    };
+    await freeezeKernelIds();
+
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 27, x: 0, width: 283, height: 400 }
+        })
       )
-    ).toHaveCount(2);
+      .toMatchSnapshot('running_layout.png');
+
+    await page.click('jp-button[data-command="running:show-modal"]');
+    await freeezeKernelIds();
+
+    // Playwright uses shadow-piercing selectors so this works with webcomponents too
+    await expect
+      .soft(page.locator('.jp-SearchableSessions-modal input'))
+      .toBeFocused();
 
     expect(
-      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('running_layout.png');
+      await page
+        .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
+        .screenshot()
+    ).toMatchSnapshot('running_modal.png');
   });
 
   test('Command Palette', async ({ page }) => {
@@ -594,6 +629,9 @@ test.describe('General', () => {
     await page.goto(`tree/${tmpPath}`);
 
     await page.notebook.createNew();
+
+    // Ensure focus on a cell
+    await page.notebook.enterCellEditingMode(0);
 
     await page.keyboard.press('Control+Shift+H');
 
@@ -626,11 +664,6 @@ test.describe('General', () => {
 
   test('HTML Display', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -651,22 +684,21 @@ test.describe('General', () => {
 
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
-      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
+      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))",
+      {
+        delay: 0
+      }
     );
     await page.keyboard.press('Shift+Enter');
 
-    expect(await page.screenshot()).toMatchSnapshot(
+    const main = page.getByRole('main');
+    expect(await main.screenshot()).toMatchSnapshot(
       'file_formats_html_display.png'
     );
   });
 
   test('Altair', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -683,8 +715,10 @@ test.describe('General', () => {
     // Need to wait for altair to update the canvas
     await page.locator('summary').waitFor();
 
+    const main = page.getByRole('main');
+
     // The menu button '...' color of Altair is flaky increase threshold tolerance
-    expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png', {
+    expect(await main.screenshot()).toMatchSnapshot('file_formats_altair.png', {
       threshold: 0.3
     });
   });

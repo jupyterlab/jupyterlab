@@ -228,6 +228,11 @@
         "command": "filemenu:create-console",
         "selector": "[data-type=\"document-title\"].jp-mod-current",
         "rank": 10
+      },
+      {
+        "command": "recentmenu:reopen-last",
+        "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
+        "rank": 6
       }
     ]
   },
@@ -305,6 +310,11 @@
     {
       "command": "tabsmenu:activate-previously-used-tab",
       "keys": ["Accel Shift '"],
+      "selector": "body"
+    },
+    {
+      "command": "recentmenu:reopen-last",
+      "keys": ["Accel Shift T"],
       "selector": "body"
     }
   ],

@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import { InputGroup } from './inputgroup';
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Search } from '@jupyter/react-components';
+import { searchIcon } from '../icon';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -39,6 +39,11 @@ export interface IFilterBoxProps {
    * Optional placeholder for the search box.
    */
   placeholder?: string;
+
+  /**
+   * Whether to show a search icon in the box.
+   */
+  showIcon?: boolean;
 
   /**
    * A function to callback when filter is updated.
@@ -172,30 +177,38 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   /**
    * Handler for search input changes.
    */
-  const handleChange = (e: React.FormEvent<HTMLElement>) => {
-    const target = e.target as HTMLInputElement;
-    setFilter(target.value);
-    props.updateFilter(
-      updateFilterFunction(
-        target.value,
-        props.useFuzzyFilter,
-        props.caseSensitive
-      ),
-      target.value
-    );
-  };
+  const handleChange = useCallback(
+    (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      setFilter(target.value);
+      props.updateFilter(
+        updateFilterFunction(
+          target.value,
+          props.useFuzzyFilter,
+          props.caseSensitive
+        ),
+        target.value
+      );
+    },
+    [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]
+  );
 
+  // Show the icon by default, or if the caller specifically requests it
+  const showSearchIcon = props.showIcon ?? true;
+
+  // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
   return (
-    <InputGroup
+    <Search
       className="jp-FilterBox"
-      inputRef={props.inputRef}
-      type="text"
-      disabled={props.disabled}
-      rightIcon="ui-components:search"
-      placeholder={props.placeholder}
-      onChange={handleChange}
+      ref={props.inputRef as React.Ref<any>}
       value={filter}
-    />
+      onChange={handleChange}
+      onInput={handleChange}
+      placeholder={props.placeholder}
+      disabled={props.disabled}
+    >
+      {showSearchIcon && <searchIcon.react slot="end" tag={null} />}
+    </Search>
   );
 };
 
@@ -203,13 +216,5 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
  * A widget which hosts a input textbox to filter on file names.
  */
 export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(
-    <FilterBox
-      updateFilter={props.updateFilter}
-      useFuzzyFilter={props.useFuzzyFilter}
-      placeholder={props.placeholder}
-      forceRefresh={props.forceRefresh}
-      caseSensitive={props.caseSensitive}
-    />
-  );
+  return ReactWidget.create(<FilterBox {...props} />);
 };

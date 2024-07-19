@@ -31,18 +31,18 @@
   overflow: auto;
 }
 
-.jp-Inspector-content pre {
+.jp-ThemedContainer .jp-Inspector-content pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
   margin: 0;
   white-space: pre-wrap;
 }
 
-.jp-Inspector-default-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: xx-large;
-  font-style: italic;
-  color: darkgray;
+.jp-Inspector-placeholderContent {
+  text-align: center;
+  color: var(--jp-content-font-color2);
+}
+
+.jp-Inspector-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
 }

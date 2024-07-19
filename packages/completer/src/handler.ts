@@ -459,7 +459,10 @@ export class CompletionHandler implements IDisposable {
     }
 
     const line = editor.getLine(position.line);
-    if (typeof line === 'undefined' || position.column < line.length) {
+    if (
+      trigger === InlineCompletionTriggerKind.Automatic &&
+      (typeof line === 'undefined' || position.column < line.length)
+    ) {
       // only auto-trigger on end of line
       return;
     }

@@ -14,6 +14,11 @@
   /* Changed to auto to autogrow */
 }
 
+/* Suppress automatic focus indicator outline */
+.cm-editor.cm-focused {
+  outline: unset;
+}
+
 .cm-editor pre {
   padding: 0 var(--jp-code-padding);
 }
@@ -84,8 +89,9 @@
 }
 
 .jp-current-match > .cm-searching::selection,
+.jp-current-match > .cm-searching span::selection,
 .cm-searching > .jp-current-match::selection,
-.jp-current-match > .cm-searching span::selection {
+.cm-searching > .jp-current-match span::selection {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
 }

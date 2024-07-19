@@ -273,7 +273,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
   /**
    * Render the status item.
    */
-  render(): React.ReactElement<LineColComponent.IProps> | null {
+  render(): JSX.Element | null {
     if (this.model === null) {
       return null;
     } else {

@@ -283,6 +283,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    shell.currentChanged?.connect(() => {
+      [
+        CommandIDs.close,
+        CommandIDs.closeOtherTabs,
+        CommandIDs.closeRightTabs
+      ].forEach(cmd => commands.notifyCommandChanged(cmd));
+    });
+
     if (labShell) {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
@@ -363,7 +371,20 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
-        label: trans.__('Toggle Sidebar Element'),
+        label: args =>
+          args === undefined ||
+          args.side === undefined ||
+          args.index === undefined
+            ? trans.__('Toggle Sidebar Element')
+            : args.side === 'right'
+            ? trans.__(
+                'Toggle Element %1 in Right Sidebar',
+                parseInt(args.index as string, 10) + 1
+              )
+            : trans.__(
+                'Toggle Element %1 in Left Sidebar',
+                parseInt(args.index as string, 10) + 1
+              ),
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -593,12 +614,6 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         message: body
       });
     }
-
-    // If the application shell layout is modified,
-    // trigger a refresh of the commands.
-    app.shell.layoutModified.connect(() => {
-      app.commands.notifyCommandChanged();
-    });
 
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.

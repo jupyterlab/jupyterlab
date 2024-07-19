@@ -6,7 +6,7 @@
 Installation
 ============
 
-JupyterLab can be installed using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker``.
+JupyterLab can be installed as a terminal-launched application accessible via a web browser (default), or as a desktop application which is running in its own window and can be opened by clicking on a desktop shortcut (`JupyterLab Desktop <https://github.com/jupyterlab/jupyterlab-desktop>`__). This page describes installation of the default (terminal-launched) JupyterLab application using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker`` and assumes basic knowledge of the terminal. For JupyterLab Desktop instructions see the `Installation section <https://github.com/jupyterlab/jupyterlab-desktop#installation>`__ in the JupyterLab Desktop repository.
 
 .. warning::
     New versions of JupyterLab may break backwards compatibility with extensions and other
@@ -97,6 +97,38 @@ Usage with JupyterHub
 
 Read the details on our :ref:`JupyterLab on JupyterHub documentation page <jupyterhub>`.
 
+
+Usage with Jupyverse
+--------------------
+
+`Jupyverse <https://github.com/jupyter-server/jupyverse/>`__ is a next-generation Jupyter server based on
+`FastAPI <https://fastapi.tiangolo.com/>`__. It can be used instead of
+`jupyter-server <https://github.com/jupyter-server/jupyter_server/>`__, the Jupyter server installed by default with JupyterLab.
+Note that ``jupyter-server`` extensions won't work with ``jupyverse`` (for which there might be equivalent plugins).
+
+You can install ``jupyverse`` with ``pip``:
+
+.. code:: bash
+
+    pip install jupyverse[auth, jupyterlab]
+
+or with ``conda``:
+
+.. code:: bash
+
+    conda install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
+or with ``mamba``:
+
+.. code:: bash
+
+    mamba install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
+And run it with:
+
+.. code:: bash
+
+    jupyverse
 
 Supported browsers
 ------------------

@@ -118,6 +118,10 @@ yarn-error.log
 .pnp.*
 jupyterlab/staging/.yarn/*
 jupyterlab/staging/.pnp.*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.yarn/*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.pnp/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.yarn/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.pnp/*
 
 # copied changelog file
 docs/source/getting_started/changelog.md
@@ -144,3 +148,9 @@ packages/lsp/src/_*
 # generated reports
 webpack-bundle-analyzer.html
 examples/**/test-results/
+
+# untitled (default name) files
+Untitled*.ipynb
+untitled*.md
+untitled*.py
+untitled*.txt

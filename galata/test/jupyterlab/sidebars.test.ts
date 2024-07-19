@@ -1,16 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, Handle, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+
 import { Locator } from '@playwright/test';
 
-const sidebarIds: galata.SidebarTabId[] = [
-  'filebrowser',
-  'jp-property-inspector',
-  'jp-running-sessions',
-  'table-of-contents',
-  'extensionmanager.main-view'
-];
+const sidebarElementIds = {
+  'left-sidebar': [
+    'filebrowser',
+    'jp-running-sessions',
+    'table-of-contents',
+    'extensionmanager.main-view'
+  ],
+  'right-sidebar': ['jp-property-inspector', 'jp-debugger-sidebar']
+};
+
+const sidebarIds: galata.SidebarTabId[] = sidebarElementIds[
+  'left-sidebar'
+].concat(sidebarElementIds['right-sidebar']);
+
+test.use({
+  mockState: true
+});
 
 /**
  * Add provided text as label on first tab in given tabbar.
@@ -61,7 +72,6 @@ test.describe('Sidebars', () => {
     await page.notebook.createNew('notebook.ipynb');
 
     const unusedRules = await page.style.findUnusedStyleRules({
-      page,
       fragments: ['jp-DirListing', 'jp-FileBrowser'],
       exclude: [
         // active during renaming
@@ -71,7 +81,9 @@ test.describe('Sidebars', () => {
         // filtering results
         '.jp-DirListing-content mark',
         // only added after resizing
-        'jp-DirListing-narrow'
+        'jp-DirListing-narrow',
+        // used in "open file" dialog containing a file browser
+        '.jp-Open-Dialog'
       ]
     });
     expect(unusedRules.length).toEqual(0);
@@ -197,5 +209,78 @@ test.describe('Sidebars', () => {
       'Table of Contents section'
     );
     expect(tableOfContentsElementRole).toEqual('region');
+  });
+});
+
+const elementAriaLabels = {
+  'jp-running-sessions': [
+    'Open Tabs Section',
+    'Kernels Section',
+    'Language servers Section',
+    'Recently Closed Section',
+    'Workspaces Section',
+    'Terminals Section'
+  ],
+  'jp-debugger-sidebar': [
+    'Variables Section',
+    'Callstack Section',
+    'Breakpoints Section',
+    'Source Section',
+    'Kernel Sources Section'
+  ],
+  'extensionmanager.main-view': [
+    'Warning Section',
+    'Installed Section',
+    'Discover Section'
+  ]
+};
+
+test.describe('Sidebar keyboard navigation @a11y', () => {
+  Object.keys(sidebarElementIds).forEach(sideBar => {
+    test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
+      const keyValueArray: string[] = sidebarElementIds[sideBar];
+
+      for (let dataId of keyValueArray) {
+        await page.goto();
+        await page.sidebar.close('right');
+        await page.sidebar.close('left');
+        await page.activity.keyToElement(
+          `[data-id='${keyValueArray[0]}']`,
+          'Tab'
+        );
+
+        await page.activity.keyToElement(`[data-id='${dataId}']`, 'ArrowDown');
+
+        await page.keyboard.press('Enter');
+
+        expect(await page.sidebar.isTabOpen(dataId)).toEqual(true);
+      }
+    });
+  });
+
+  Object.keys(elementAriaLabels).forEach(tabName => {
+    test(`Open accordion panels ${tabName} via keyboard navigation`, async ({
+      page
+    }) => {
+      await page.sidebar.openTab(tabName);
+
+      const keyValueArray: string[] = elementAriaLabels[tabName];
+
+      for (let ariaLabel of keyValueArray) {
+        const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
+        let initialState = await elementLocator.getAttribute('aria-expanded');
+
+        await page.activity.keyToElement(`[aria-label='${ariaLabel}']`, 'Tab');
+        await page.keyboard.press('Enter');
+        let stateAfter = await elementLocator.getAttribute('aria-expanded');
+
+        expect(initialState).not.toEqual(stateAfter);
+
+        await page.keyboard.press('Enter');
+        let finalState = await elementLocator.getAttribute('aria-expanded');
+
+        expect(initialState).toEqual(finalState);
+      }
+    });
   });
 });

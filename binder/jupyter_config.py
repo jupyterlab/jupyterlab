@@ -1,4 +1,5 @@
 """An INSECURE configuration for Jupyter Server, intended only for mybinder.org."""
+
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import logging
@@ -8,7 +9,7 @@ common = [
     "--debug",
     "--port={port}",
     "--ServerApp.ip=127.0.0.1",
-    '--ServerApp.token=""',
+    '--IdentityProvider.token=""',
     # Disable dns rebinding protection here, since our 'Host' header
     # is not going to be localhost when coming from hub.mybinder.org
     "--ServerApp.allow_remote_access=True",

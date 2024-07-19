@@ -307,8 +307,6 @@ export class Context<
   /**
    * Download a file.
    *
-   * @param path - The path of the file to be downloaded.
-   *
    * @returns A promise which resolves when the file has begun
    *   downloading.
    */

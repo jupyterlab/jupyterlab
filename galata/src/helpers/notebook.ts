@@ -1126,11 +1126,16 @@ export class NotebookHelper {
     const gutter = gutters.nth(line);
     for (let i = 0; i < 3; i++) {
       await gutter.click({ position: { x: 5, y: 5 } });
-      await Utils.waitForCondition(
-        async () => ((await gutter.textContent())?.length ?? 0) > 0,
-        500
-      );
-      if ((await gutter.textContent())?.length) {
+      let break_ = true;
+      try {
+        await Utils.waitForCondition(
+          async () => ((await gutter.textContent())?.length ?? 0) > 0,
+          1000
+        );
+      } catch (reason) {
+        break_ = false;
+      }
+      if (break_) {
         break;
       }
     }
@@ -1255,14 +1260,37 @@ export class NotebookHelper {
 
     await this._setCellMode(cell, 'Edit');
     await cell.getByRole('textbox').press('Control+A');
-    await cell
-      .getByRole('textbox')
-      .type(source, { delay: cellType === 'code' ? 100 : 0 });
+    await cell.getByRole('textbox').pressSequentially(source);
     await this._setCellMode(cell, 'Command');
 
-    // give CodeMirror time to style properly
     if (cellType === 'code') {
-      await this.page.waitForTimeout(500);
+      // Wait until the CodeMirror highlighting is stable
+      // over 10 consecutive animation frames.
+      await cell.evaluate((cell: HTMLElement) => {
+        let _resolve: () => void;
+        const promise = new Promise<void>(resolve => {
+          _resolve = resolve;
+        });
+        let framesWithoutChange = 0;
+        let content = cell.querySelector('.cm-content')!.innerHTML;
+        const waitUntilNextFrame = () => {
+          window.requestAnimationFrame(() => {
+            const newContent = cell.querySelector('.cm-content')!.innerHTML;
+            if (content === newContent) {
+              framesWithoutChange += 1;
+            } else {
+              framesWithoutChange = 0;
+            }
+            if (framesWithoutChange < 10) {
+              waitUntilNextFrame();
+            } else {
+              _resolve();
+            }
+          });
+        };
+        waitUntilNextFrame();
+        return promise;
+      });
     }
 
     return true;

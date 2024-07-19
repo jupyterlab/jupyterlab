@@ -20,6 +20,11 @@ jobs:
       - name: Configure git to use https
         run: git config --global hub.protocol https
 
+        #####
+        # This workflow is triggered by pull_request_target event.
+        # The following step will checkout the PR.
+        # DO NOT, UNDER ANY CIRCUMSTANCES, RUN ANY LOCAL CODE ON THE PR.
+        #####
       - name: Checkout the branch from the PR that triggered the job
         run: gh pr checkout ${{ github.event.pull_request.number }}
         env:
@@ -27,7 +32,7 @@ jobs:
 
       - name: Fix License Header
         # pin to include https://github.com/apache/skywalking-eyes/pull/168
-        uses: apache/skywalking-eyes/header@ed436a5593c63a25f394ea29da61b0ac3731a9fe
+        uses: apache/skywalking-eyes/header@cd7b195c51fd3d6ad52afceb760719ddc6b3ee91
         with:
           mode: fix
 
