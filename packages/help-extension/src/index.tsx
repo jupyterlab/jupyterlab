@@ -315,7 +315,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       }
     ];
 
-    resources.sort((a: any, b: any) => {
+    resources.sort((a, b) => {
       return a.text.localeCompare(b.text);
     });
 
@@ -572,7 +572,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
     // register license-related commands
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
-      execute: (args: any) => {
+      execute: (args: unknown) => {
         const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
         shell.add(licenseMain, 'main', { type: 'Licenses' });
 
@@ -648,7 +648,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   about,
   jupyterForum,
   open,

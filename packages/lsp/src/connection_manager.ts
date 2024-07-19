@@ -274,6 +274,7 @@ export class DocumentConnectionManager
    * singletons).
    */
   onNewConnection = (connection: LSPConnection): void => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorSignalSlot = (_: ILSPConnection, e: any): void => {
       console.error(e);
       let error: Error = e.length && e.length >= 1 ? e[0] : new Error();

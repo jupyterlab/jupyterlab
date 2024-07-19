@@ -95,7 +95,7 @@ export namespace SettingsFormEditor {
     /**
      * Form context
      */
-    formContext?: any;
+    formContext?: unknown;
   }
 }
 
@@ -306,6 +306,6 @@ export class SettingsFormEditor extends React.Component<
     return filteredFormData as ReadonlyJSONObject;
   }
 
-  private _debouncer: Debouncer<void, any>;
+  private _debouncer: Debouncer<void, unknown>;
   private _formData: ReadonlyJSONObject;
 }

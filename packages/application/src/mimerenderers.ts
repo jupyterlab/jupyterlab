@@ -34,7 +34,7 @@ export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterFrontEndPlugin<void | IMimeDocumentTracker, any, any>[] {
+): JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] {
   const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';
@@ -45,6 +45,7 @@ export function createRendermimePlugins(
 
     // Handle CommonJS exports.
     if (!mod.hasOwnProperty('__esModule')) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data = mod as any;
     }
     if (!Array.isArray(data)) {

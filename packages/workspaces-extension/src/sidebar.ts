@@ -69,6 +69,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         return trans.__(
           '%1 workspace with %2 tabs, last modified on %3',
           this._workspace.metadata.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
             ?.widgets?.length,
           this._workspace.metadata['last_modified']

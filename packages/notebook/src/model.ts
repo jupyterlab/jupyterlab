@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ICellModel } from '@jupyterlab/cells';
@@ -140,14 +141,14 @@ export class NotebookModel implements INotebookModel {
   /**
    * Signal emitted when notebook metadata changes.
    */
-  get metadataChanged(): ISignal<INotebookModel, IMapChange<any>> {
+  get metadataChanged(): ISignal<INotebookModel, IMapChange<unknown>> {
     return this._metadataChanged;
   }
 
   /**
    * A signal emitted when the document state changes.
    */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+  get stateChanged(): ISignal<this, IChangedArgs<unknown>> {
     return this._stateChanged;
   }
 
@@ -464,7 +465,7 @@ close the notebook without saving it.`,
   /**
    * Trigger a state change signal.
    */
-  protected triggerStateChange(args: IChangedArgs<any>): void {
+  protected triggerStateChange(args: IChangedArgs<unknown>): void {
     this._stateChanged.emit(args);
   }
 
@@ -496,7 +497,7 @@ close the notebook without saving it.`,
   private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<unknown>>(this);
 
   private _trans: TranslationBundle;
   private _cells: CellList;

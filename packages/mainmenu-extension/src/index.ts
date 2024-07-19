@@ -804,7 +804,7 @@ namespace Private {
         .concat([schema['jupyter.lab.menus']?.main ?? []])
         .reduceRight(
           (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
-          schema.properties!.menus.default as any[]
+          schema.properties!.menus.default as ISettingRegistry.IMenu[]
         );
 
       // Apply default value as last step to take into account overrides.json
@@ -812,7 +812,7 @@ namespace Private {
       // to define their default value.
       schema.properties!.menus.default = SettingRegistry.reconcileMenus(
         pluginDefaults,
-        schema.properties!.menus.default as any[],
+        schema.properties!.menus.default as ISettingRegistry.IMenu[],
         true
       )
         // flatten one level
@@ -867,7 +867,8 @@ namespace Private {
     const settings = await registry.load(PLUGIN_ID);
 
     const currentMenus: ISettingRegistry.IMenu[] =
-      JSONExt.deepCopy(settings.composite.menus as any) ?? [];
+      JSONExt.deepCopy(settings.composite.menus as ISettingRegistry.IMenu[]) ??
+      [];
     const menus = new Array<Menu>();
     // Create menu for non-disabled element
     MenuFactory.createMenus(
@@ -888,7 +889,8 @@ namespace Private {
     settings.changed.connect(() => {
       // As extension may change menu through API, prompt the user to reload if the
       // menu has been updated.
-      const newMenus = (settings.composite.menus as any) ?? [];
+      const newMenus =
+        (settings.composite.menus as ISettingRegistry.IMenu[]) ?? [];
       if (!JSONExt.deepEqual(currentMenus, newMenus)) {
         void displayInformation(trans);
       }

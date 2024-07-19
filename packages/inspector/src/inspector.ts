@@ -119,7 +119,7 @@ export class InspectorPanel
    * Handle inspector update signals.
    */
   protected onInspectorUpdate(
-    sender: any,
+    sender: unknown,
     args: IInspector.IInspectorUpdate
   ): void {
     const { content } = args;
@@ -138,7 +138,7 @@ export class InspectorPanel
   /**
    * Handle source disposed signals.
    */
-  protected onSourceDisposed(sender: any, args: void): void {
+  protected onSourceDisposed(sender: unknown, args: void): void {
     this.source = null;
   }
 

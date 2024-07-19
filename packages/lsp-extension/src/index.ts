@@ -161,6 +161,7 @@ function activateSettings(
   settingRegistry.transform(plugin.id, {
     fetch: plugin => {
       const schema = plugin.schema.properties!;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const defaultValue: { [key: string]: any } = {};
       languageServerManager.sessions.forEach((_, key) => {
         defaultValue[key] = { rank: 50, configuration: {} };
@@ -183,6 +184,7 @@ function activateSettings(
       if (serverUserSettings) {
         serverComposite = { ...serverComposite, ...serverUserSettings };
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const composite: { [key: string]: any } = {
         [LANGUAGE_SERVERS]: serverComposite
       };
@@ -275,7 +277,7 @@ function addRunningSessionManager(
   translator: ITranslator
 ) {
   const trans = translator.load('jupyterlab');
-  const signal = new Signal<any, any>(lsManager);
+  const signal = new Signal<unknown, unknown>(lsManager);
   lsManager.connected.connect(() => signal.emit(lsManager));
   lsManager.disconnected.connect(() => signal.emit(lsManager));
   lsManager.closed.connect(() => signal.emit(lsManager));

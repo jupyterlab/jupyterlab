@@ -80,8 +80,10 @@ export const NOTEBOOK_PATHS: { [kernelName: string]: string[] } = {
 export function cloneKernel(
   kernel: Kernel.IKernelConnection
 ): Kernel.IKernelConnection {
-  return (kernel as any).clone();
+  return kernel.clone();
 }
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 /**
  * A mock kernel object.
@@ -118,7 +120,7 @@ export const KernelMock = jest.fn<
         iopubMessageSignal.emit(args);
       });
       newKernel.statusChanged.connect((_, args) => {
-        (thisObject as any).status = args;
+        (thisObject as Writeable<Kernel.IKernelConnection>).status = args;
         statusChangedSignal.emit(args);
       });
       return newKernel;
@@ -187,10 +189,10 @@ export const KernelMock = jest.fn<
   const pendingInputSignal = new Signal<Kernel.IKernelConnection, boolean>(
     thisObject
   );
-  (thisObject as any).statusChanged = statusChangedSignal;
-  (thisObject as any).iopubMessage = iopubMessageSignal;
-  (thisObject as any).pendingInput = pendingInputSignal;
-  (thisObject as any).hasPendingInput = false;
+  thisObject.statusChanged = statusChangedSignal;
+  thisObject.iopubMessage = iopubMessageSignal;
+  thisObject.pendingInput = pendingInputSignal;
+  thisObject.hasPendingInput = false;
   return thisObject;
 });
 
@@ -232,17 +234,17 @@ export const SessionConnectionMock = jest.fn<
     }),
     shutdown: jest.fn(() => Promise.resolve(void 0)),
     setPath: jest.fn(path => {
-      (thisObject as any).path = path;
+      (thisObject as Writeable<Session.ISessionConnection>).path = path;
       propertyChangedSignal.emit('path');
       return Promise.resolve();
     }),
     setName: jest.fn(name => {
-      (thisObject as any).name = name;
+      (thisObject as Writeable<Session.ISessionConnection>).name = name;
       propertyChangedSignal.emit('name');
       return Promise.resolve();
     }),
     setType: jest.fn(type => {
-      (thisObject as any).type = type;
+      (thisObject as Writeable<Session.ISessionConnection>).type = type;
       propertyChangedSignal.emit('type');
       return Promise.resolve();
     })
@@ -292,14 +294,16 @@ export const SessionConnectionMock = jest.fn<
     pendingInputSignal.emit(args);
   }, thisObject);
 
-  (thisObject as any).disposed = disposedSignal;
-  (thisObject as any).connectionStatusChanged = connectionStatusChangedSignal;
-  (thisObject as any).propertyChanged = propertyChangedSignal;
-  (thisObject as any).statusChanged = statusChangedSignal;
-  (thisObject as any).kernelChanged = kernelChangedSignal;
-  (thisObject as any).iopubMessage = iopubMessageSignal;
-  (thisObject as any).unhandledMessage = unhandledMessageSignal;
-  (thisObject as any).pendingInput = pendingInputSignal;
+  (thisObject as Writeable<Session.ISessionConnection>).disposed =
+    disposedSignal;
+  thisObject.connectionStatusChanged = connectionStatusChangedSignal;
+  (thisObject as Writeable<Session.ISessionConnection>).propertyChanged =
+    propertyChangedSignal;
+  thisObject.statusChanged = statusChangedSignal;
+  thisObject.kernelChanged = kernelChangedSignal;
+  thisObject.iopubMessage = iopubMessageSignal;
+  thisObject.unhandledMessage = unhandledMessageSignal;
+  thisObject.pendingInput = pendingInputSignal;
   return thisObject;
 });
 
@@ -375,8 +379,9 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       }
       const driveName = dummy.driveName(path);
       const localPath = dummy.localPath(path);
-      (files.get(driveName)!.get(localPath) as any).content =
-        checkPointContent.get(path);
+      (
+        files.get(driveName)!.get(localPath) as Writeable<Contents.IModel>
+      ).content = checkPointContent.get(path);
       return Promise.resolve();
     }),
     getSharedModelFactory: jest.fn(() => {
@@ -536,7 +541,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
     Contents.IManager,
     Contents.IChangedArgs
   >(thisObject);
-  (thisObject as any).fileChanged = fileChangedSignal;
+  (thisObject as Writeable<Contents.IManager>).fileChanged = fileChangedSignal;
   return thisObject;
 });
 
@@ -573,7 +578,8 @@ export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
   const runningChangedSignal = new Signal<Session.IManager, Session.IModel[]>(
     thisObject
   );
-  (thisObject as any).runningChanged = runningChangedSignal;
+  (thisObject as Writeable<Session.IManager>).runningChanged =
+    runningChangedSignal;
   return thisObject;
 });
 
@@ -631,8 +637,8 @@ export function changeKernel(
       return model.id === partialModel.id;
     });
     if (kernelIdx !== -1) {
-      (kernel.model as any) = Private.RUNNING_KERNELS[kernelIdx].model;
-      (kernel.id as any) = partialModel.id;
+      (kernel.model as unknown) = Private.RUNNING_KERNELS[kernelIdx].model;
+      (kernel.id as unknown) = partialModel.id;
       return Promise.resolve(Private.RUNNING_KERNELS[kernelIdx]);
     } else {
       throw new Error(
@@ -644,8 +650,8 @@ export function changeKernel(
       return model.name === partialModel.name;
     });
     if (kernelIdx !== -1) {
-      (kernel.model as any) = Private.RUNNING_KERNELS[kernelIdx].model;
-      (kernel.id as any) = partialModel.id;
+      (kernel.model as unknown) = Private.RUNNING_KERNELS[kernelIdx].model;
+      (kernel.id as unknown) = partialModel.id;
       return Promise.resolve(Private.RUNNING_KERNELS[kernelIdx]);
     } else {
       throw new Error(

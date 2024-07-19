@@ -301,7 +301,7 @@ function activateJSON(
       // Notify the command registry when the visibility status of the setting
       // editor's commands change. The setting editor toolbar listens for this
       // signal from the command registry.
-      editor.commandsChanged.connect((sender: any, args: string[]) => {
+      editor.commandsChanged.connect((sender: unknown, args: string[]) => {
         args.forEach(id => {
           commands.notifyCommandChanged(id);
         });

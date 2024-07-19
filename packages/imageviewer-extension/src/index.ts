@@ -96,7 +96,7 @@ function activate(
   const namespace = 'image-widget';
 
   function onWidgetCreated(
-    sender: any,
+    sender: unknown,
     widget: IDocumentWidget<ImageViewer, DocumentRegistry.IModel>
   ) {
     // Notify the widget tracker if restore data needs to update.

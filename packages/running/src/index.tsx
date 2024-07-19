@@ -1128,7 +1128,7 @@ export namespace IRunningSessions {
     /**
      * A signal that should be emitted when the item list has changed.
      */
-    runningChanged: ISignal<any, any>;
+    runningChanged: ISignal<unknown, unknown>;
 
     /**
      * A string used to describe the shutdown action.

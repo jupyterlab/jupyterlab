@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { AttachmentsModel, IAttachmentsModel } from '@jupyterlab/attachments';
@@ -328,7 +330,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * @param key Metadata key
    */
-  deleteMetadata(key: string): any {
+  deleteMetadata(key: string): void {
     return this.sharedModel.deleteMetadata(key);
   }
 

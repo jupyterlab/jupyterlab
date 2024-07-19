@@ -94,6 +94,6 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
   protected extensions: IEditorExtensionRegistry;
   protected languages: IEditorLanguageRegistry;
   protected translator: ITranslator;
-  protected inlineCodeMirrorConfig: Record<string, any>;
-  protected documentCodeMirrorConfig: Record<string, any>;
+  protected inlineCodeMirrorConfig: Record<string, unknown>;
+  protected documentCodeMirrorConfig: Record<string, unknown>;
 }

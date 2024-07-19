@@ -13,7 +13,7 @@ export class LabStatus implements ILabStatus {
   /**
    * Construct a new  status object.
    */
-  constructor(app: JupyterFrontEnd<any, any>) {
+  constructor(app: JupyterFrontEnd) {
     this._busySignal = new Signal(app);
     this._dirtySignal = new Signal(app);
   }

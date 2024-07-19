@@ -57,6 +57,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       if (!('cmView' in node)) {
         return;
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (node.cmView as any).view as EditorView;
     };
 

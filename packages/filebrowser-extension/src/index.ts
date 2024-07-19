@@ -1353,7 +1353,7 @@ function addCommands(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   factory,
   defaultFileBrowser,
   browser,

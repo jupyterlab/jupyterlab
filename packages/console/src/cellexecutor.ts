@@ -24,12 +24,12 @@ export async function runCell({
       // Use deprecated payloads for backwards compatibility.
       if (content.payload && content.payload.length) {
         const setNextInput = content.payload.filter(i => {
-          return (i as any).source === 'set_next_input';
+          return i.source === 'set_next_input';
         })[0];
         if (setNextInput) {
-          const text = (setNextInput as any).text;
+          const text = setNextInput.text;
           // Ignore the `replace` value and always set the next cell.
-          cell.model.sharedModel.setSource(text);
+          cell.model.sharedModel.setSource(text as string);
         }
       }
 
@@ -60,6 +60,7 @@ export async function runCell({
     return false;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onFailure = (reason: any) => {
     onCellExecuted({
       cell,

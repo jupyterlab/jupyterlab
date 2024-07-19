@@ -324,7 +324,7 @@ export namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be revealed.
      */
-    reveal?: Promise<any>;
+    reveal?: Promise<unknown>;
 
     /**
      * The application language translator.
@@ -357,6 +357,6 @@ export namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be revealed.
      */
-    reveal?: Promise<any>;
+    reveal?: Promise<unknown>;
   }
 }

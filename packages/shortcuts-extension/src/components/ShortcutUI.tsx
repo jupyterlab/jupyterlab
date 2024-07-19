@@ -416,6 +416,7 @@ export class ShortcutUI
         });
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await settings.set('shortcuts', newUserShortcuts as any);
     await this._refreshShortcutList();
   }

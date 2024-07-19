@@ -315,7 +315,7 @@ export class BreadCrumbs extends Widget {
     const manager = model.manager;
 
     // Move all of the items.
-    const promises: Promise<any>[] = [];
+    const promises: Promise<unknown>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
       const localOldPath = manager.services.contents.localPath(oldPath);

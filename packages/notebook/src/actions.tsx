@@ -81,7 +81,7 @@ export class NotebookActions {
    * A signal that emits whenever a cell completes execution.
    */
   static get executed(): ISignal<
-    any,
+    unknown,
     {
       notebook: Notebook;
       cell: Cell;
@@ -96,7 +96,7 @@ export class NotebookActions {
    * A signal that emits whenever a cell execution is scheduled.
    */
   static get executionScheduled(): ISignal<
-    any,
+    unknown,
     { notebook: Notebook; cell: Cell }
   > {
     return Private.executionScheduled;
@@ -106,7 +106,7 @@ export class NotebookActions {
    * A signal that emits when one notebook's cells are all executed.
    */
   static get selectionExecuted(): ISignal<
-    any,
+    unknown,
     { notebook: Notebook; lastCell: Cell }
   > {
     return Private.selectionExecuted;
@@ -115,7 +115,10 @@ export class NotebookActions {
   /**
    * A signal that emits when a cell's output is cleared.
    */
-  static get outputCleared(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+  static get outputCleared(): ISignal<
+    unknown,
+    { notebook: Notebook; cell: Cell }
+  > {
     return Private.outputCleared;
   }
 
@@ -1816,7 +1819,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function collapseAllHeadings(notebook: Notebook): any {
+  export function collapseAllHeadings(notebook: Notebook): void {
     const state = Private.getState(notebook);
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
@@ -1833,7 +1836,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function expandAllHeadings(notebook: Notebook): any {
+  export function expandAllHeadings(notebook: Notebook): void {
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, false, notebook);
@@ -2025,7 +2028,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function toggleCurrentHeadingCollapse(notebook: Notebook): any {
+  export function toggleCurrentHeadingCollapse(notebook: Notebook): void {
     if (!notebook.activeCell || notebook.activeCellIndex === undefined) {
       return;
     }
@@ -2050,7 +2053,7 @@ export namespace NotebookActions {
    * @param cell - The cell to collapse / expand
    * @param collapsing - Whether to collapse or expand the given cell
    */
-  export function setCellCollapse(cell: Cell, collapsing: boolean): any {
+  export function setCellCollapse(cell: Cell, collapsing: boolean): void {
     if (cell instanceof MarkdownCell) {
       cell.headingCollapsed = collapsing;
     } else {
@@ -2252,7 +2255,7 @@ namespace Private {
    * A signal that emits whenever a cell completes execution.
    */
   export const executed = new Signal<
-    any,
+    unknown,
     {
       notebook: Notebook;
       cell: Cell;
@@ -2265,7 +2268,7 @@ namespace Private {
    * A signal that emits whenever a cell execution is scheduled.
    */
   export const executionScheduled = new Signal<
-    any,
+    unknown,
     { notebook: Notebook; cell: Cell }
   >({});
 
@@ -2273,7 +2276,7 @@ namespace Private {
    * A signal that emits when one notebook's cells are all executed.
    */
   export const selectionExecuted = new Signal<
-    any,
+    unknown,
     { notebook: Notebook; lastCell: Cell }
   >({});
 
@@ -2281,7 +2284,7 @@ namespace Private {
    * A signal that emits when one notebook's cells are all executed.
    */
   export const outputCleared = new Signal<
-    any,
+    unknown,
     { notebook: Notebook; cell: Cell }
   >({});
 

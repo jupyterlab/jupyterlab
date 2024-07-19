@@ -36,6 +36,7 @@ export class RenderedPDF extends Widget implements IRenderMime.IRenderer {
       this._object = iframe.contentWindow!.document.createElement('object');
       // work around for https://discussions.apple.com/thread/252247740
       // Detect if running on Desktop Safari
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!(window as any).safari) {
         this._object.type = MIME_TYPE;
       }

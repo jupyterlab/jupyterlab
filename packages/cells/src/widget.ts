@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Extension } from '@codemirror/state';
 
@@ -564,7 +565,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    *
    * @param v Partial editor configuration
    */
-  updateEditorConfig(v: Record<string, any>): void {
+  updateEditorConfig(v: Record<string, unknown>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
       this.editor.setOptions(this._editorConfig);
@@ -1587,7 +1588,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the model.
    */
-  protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onStateChanged(
+    model: ICellModel,
+    args: IChangedArgs<unknown>
+  ): void {
     switch (args.name) {
       case 'executionCount':
         this.model.executionState = 'idle';

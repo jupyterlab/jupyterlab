@@ -341,7 +341,7 @@ export class PluginListModel extends VDomModel {
    *
    * @param pending A promise that resolves when the action is completed.
    */
-  private _addPendingAction(pending: Promise<any>): void {
+  private _addPendingAction(pending: Promise<unknown>): void {
     // Add to pending actions collection
     this._pendingActions.push(pending);
 
@@ -429,6 +429,7 @@ export class PluginListModel extends VDomModel {
    * @returns The response body interpreted as JSON
    */
   private async _requestAPI<T>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryArgs: { [k: string]: any } = {},
     init: RequestInit = {}
   ): Promise<T> {
@@ -447,6 +448,7 @@ export class PluginListModel extends VDomModel {
       throw new ServerConnection.NetworkError(error);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let data: any = await response.text();
 
     if (data.length > 0) {
@@ -467,7 +469,7 @@ export class PluginListModel extends VDomModel {
   private _trackerDataChanged: Signal<PluginListModel, void> = new Signal(this);
   private _available: Map<string, IEntry>;
   private _isLoading = false;
-  private _pendingActions: Promise<any>[] = [];
+  private _pendingActions: Promise<unknown>[] = [];
   private _serverSettings: ServerConnection.ISettings;
   private _ready = new PromiseDelegate<void>();
   private _query: string;

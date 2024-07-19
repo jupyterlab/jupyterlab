@@ -132,6 +132,7 @@ export namespace MenuSvg {
     // override renderer, if needed
     if (menu.renderer === Menu.defaultRenderer) {
       // cast away readonly on menu.renderer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (menu as any).renderer = MenuSvg.defaultRenderer;
     }
 
@@ -146,7 +147,9 @@ export namespace MenuSvg {
     };
 
     // recurse through submenus
-    for (const item of (menu as any)._items as Menu.IItem[]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items = (menu as any)._items as Menu.IItem[];
+    for (const item of items) {
       if (item.submenu) {
         overrideDefaultRenderer(item.submenu);
       }

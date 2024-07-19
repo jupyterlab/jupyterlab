@@ -404,8 +404,10 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { message, type } = args as any;
-        const options = (args.options as any) ?? {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const options = args.options ?? ({} as any);
 
         return Notification.manager.notify(message, type ?? 'default', {
           ...options,
@@ -442,6 +444,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { id, message, type, ...options } = args as any;
 
         return Notification.manager.update({
@@ -479,6 +482,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.dismiss, {
       label: trans.__('Dismiss a notification'),
       execute: args => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { id } = args as any;
 
         Notification.manager.dismiss(id);
@@ -844,6 +848,7 @@ namespace Private {
    */
   function ToastButton({ action, closeToast }: IToastButtonProps): JSX.Element {
     const clickHandler = (event: React.MouseEvent): void => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       action.callback(event as any);
       if (!event.defaultPrevented) {
         closeToast();
@@ -929,12 +934,12 @@ namespace Private {
     const toastOptions = {
       autoClose:
         autoClose ?? (actions && actions.length > 0 ? false : undefined),
-      data: data as any,
+      data: data!,
       className: `jp-Notification-Toast-${type}`,
       toastId,
-      type: type === 'in-progress' ? null : type,
+      type: type === 'in-progress' ? undefined : type,
       isLoading: type === 'in-progress'
-    } as any;
+    };
 
     return t(
       ({ closeToast }: { closeToast?: () => void }) =>

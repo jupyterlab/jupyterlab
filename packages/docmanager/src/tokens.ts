@@ -82,7 +82,7 @@ export interface IDocumentManager extends IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  readonly stateChanged: ISignal<IDocumentManager, IChangedArgs<any>>;
+  readonly stateChanged: ISignal<IDocumentManager, IChangedArgs<unknown>>;
 
   /**
    * Clone a widget.

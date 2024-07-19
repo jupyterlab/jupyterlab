@@ -82,6 +82,7 @@ export class FileBrowserModel implements IDisposable {
       if (this._uploads.length > 0) {
         const confirmationMessage = this._trans.__('Files still uploading');
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (e as any).returnValue = confirmationMessage;
         return confirmationMessage;
       }

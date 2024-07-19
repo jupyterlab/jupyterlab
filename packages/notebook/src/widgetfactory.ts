@@ -78,6 +78,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const translator = (context as any).translator;
     const kernelHistory = new NotebookHistory({
       sessionContext: context.sessionContext,

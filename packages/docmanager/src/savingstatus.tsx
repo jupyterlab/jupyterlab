@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { TextItem } from '@jupyterlab/statusbar';
@@ -145,7 +146,7 @@ export namespace SavingStatus {
      * React to a saving status change from the current document widget.
      */
     private _onStatusChange = (
-      _: any,
+      _: unknown,
       newStatus: DocumentRegistry.SaveState
     ) => {
       this._status = newStatus;

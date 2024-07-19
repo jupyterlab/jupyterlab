@@ -466,6 +466,7 @@ class Gettext {
     let key: string = msgctxt
       ? msgctxt + this._contextDelimiter + msgid
       : msgid;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let options: any = { pluralForm: false };
     let exist: boolean = false;
     let locale: string = this._locale;
@@ -666,13 +667,13 @@ class Gettext {
   }
 
   private _stringsPrefix: string;
-  private _pluralForms: any;
-  private _dictionary: any;
+  private _pluralForms: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  private _dictionary: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   private _locale: string;
   private _domain: string;
   private _contextDelimiter: string;
-  private _pluralFuncs: any;
-  private _defaults: any;
+  private _pluralFuncs: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  private _defaults: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export { Gettext };

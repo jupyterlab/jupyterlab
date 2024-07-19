@@ -311,6 +311,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
 
         const workspace =
           await app.serviceManager.workspaces.fetch(workspaceId);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tabs = (workspace.data['layout-restorer:data'] as any)?.main?.dock
           ?.widgets?.length;
 

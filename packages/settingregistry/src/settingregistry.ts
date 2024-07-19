@@ -96,7 +96,7 @@ export namespace ISchemaValidator {
     /**
      * @todo handle new fields from ajv8
      **/
-    schema?: unknown;
+    schema?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * @todo handle new fields from ajv8
@@ -111,12 +111,12 @@ export namespace ISchemaValidator {
     /**
      * @todo handle new fields from ajv8
      **/
-    data?: unknown;
+    data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * @todo handle new fields from ajv8
      **/
-    parentSchema?: unknown;
+    parentSchema?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 }
 
@@ -944,7 +944,7 @@ export class Settings
   /**
    * Handle plugin changes in the setting registry.
    */
-  private _onPluginChanged(sender: any, plugin: string): void {
+  private _onPluginChanged(sender: unknown, plugin: string): void {
     if (plugin === this.plugin.id) {
       this._changed.emit(undefined);
     }
@@ -1080,9 +1080,7 @@ export namespace SettingRegistry {
                 ...items[refIndex],
                 ...item,
                 submenu: reconcileMenus(
-                  items[refIndex].submenu
-                    ? [items[refIndex].submenu as any]
-                    : null,
+                  items[refIndex].submenu ? [items[refIndex].submenu!] : null,
                   [item.submenu],
                   warn,
                   addNewItems
@@ -1460,8 +1458,7 @@ namespace Private {
     definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
     required = root
-      ? schema.required instanceof Array &&
-        schema.required?.includes(root as any)
+      ? schema.required instanceof Array && schema.required?.includes(root)
       : required;
     schema = (root ? schema.properties?.[root] : schema) || {};
 
@@ -1477,7 +1474,7 @@ namespace Private {
           undefined,
           definitions,
           schema.required instanceof Array &&
-            schema.required?.includes(property as any)
+            schema.required?.includes(property)
         );
       }
 

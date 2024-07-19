@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* global RequestInit */
 
@@ -571,7 +572,7 @@ export class ListModel extends VDomModel {
    *
    * @param pending A promise that resolves when the action is completed.
    */
-  protected addPendingAction(pending: Promise<any>): void {
+  protected addPendingAction(pending: Promise<unknown>): void {
     // Add to pending actions collection
     this._pendingActions.push(pending);
 
@@ -623,7 +624,7 @@ export class ListModel extends VDomModel {
 
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
-  private _pendingActions: Promise<any>[] = [];
+  private _pendingActions: Promise<unknown>[] = [];
   private _debouncedSearch: Debouncer<void, void>;
 }
 

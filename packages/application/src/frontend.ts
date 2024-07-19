@@ -218,6 +218,7 @@ export namespace JupyterFrontEnd {
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export interface IOptions<T extends IShell = IShell, U = any>
     extends Application.IOptions<T> {
     /**

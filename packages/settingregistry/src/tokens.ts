@@ -677,7 +677,7 @@ export namespace ISettingRegistry {
     /**
      * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
      */
-    properties: { [option: string]: any };
+    properties: { [option: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * The required fields.

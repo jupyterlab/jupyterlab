@@ -80,11 +80,14 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if (change.type !== 'removed') {
           return;
         }
-        const { id, tags }: { id?: string; tags?: Array<string> } = (change
-          .notification.options.data ?? {}) as any;
+        const { id, tags } = (change.notification.options.data ?? {}) as {
+          id?: string;
+          tags?: Array<string>;
+        };
         if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
           const update: { [k: string]: INewsState } = {};
           update[id] = { seen: true, dismissed: true };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           config.update(update as any).catch(reason => {
             console.error(
               `Failed to update the announcements config:\n${reason}`
@@ -132,22 +135,26 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     .catch(reason => {
                       console.error(`Failed to get the news:\n${reason}`);
                     });
-                  settings?.set('fetchNews', 'true').catch((reason: any) => {
-                    console.error(
-                      `Failed to save setting 'fetchNews':\n${reason}`
-                    );
-                  });
+                  settings
+                    ?.set('fetchNews', 'true')
+                    .catch((reason: unknown) => {
+                      console.error(
+                        `Failed to save setting 'fetchNews':\n${reason}`
+                      );
+                    });
                 }
               },
               {
                 label: trans.__('No'),
                 callback: () => {
                   Notification.dismiss(notificationId);
-                  settings?.set('fetchNews', 'false').catch((reason: any) => {
-                    console.error(
-                      `Failed to save setting 'fetchNews':\n${reason}`
-                    );
-                  });
+                  settings
+                    ?.set('fetchNews', 'false')
+                    .catch((reason: unknown) => {
+                      console.error(
+                        `Failed to save setting 'fetchNews':\n${reason}`
+                      );
+                    });
                 }
               }
             ]
@@ -182,6 +189,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       config.update(update as any).catch(reason => {
                         console.error(
                           `Failed to update the announcements config:\n${reason}`
@@ -204,6 +212,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
                   update[id] = { seen: true };
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   config.update(update as any).catch(reason => {
                     console.error(
                       `Failed to update the announcements config:\n${reason}`
@@ -250,7 +259,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                       .then(() => {
                         Notification.dismiss(notificationId);
                       })
-                      .catch((reason: any) => {
+                      .catch((reason: unknown) => {
                         console.error(
                           'Failed to set the `checkForUpdates` setting.',
                           reason
@@ -273,6 +282,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};
                 update[id] = { seen: true };
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 config.update(update as any).catch(reason => {
                   console.error(
                     `Failed to update the announcements config:\n${reason}`

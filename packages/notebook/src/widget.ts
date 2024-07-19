@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DOMUtils } from '@jupyterlab/apputils';
 import {
@@ -403,7 +404,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       return;
     }
 
-    const viewModel: { [k: string]: any }[] = new Array(n);
+    const viewModel: { [k: string]: unknown }[] = new Array(n);
     let dirtyState: boolean[] = new Array(n);
 
     for (let i = 0; i < n; i++) {
@@ -1597,7 +1598,7 @@ export class Notebook extends StaticNotebook {
   /**
    * A signal emitted when the state of the notebook changes.
    */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+  get stateChanged(): ISignal<this, IChangedArgs<unknown>> {
     return this._stateChanged;
   }
 
@@ -2044,7 +2045,7 @@ export class Notebook extends StaticNotebook {
       };
     }
     return {
-      kind: parts[0] as any,
+      kind: parts[0] as 'heading' | 'cell-id',
       value: parts.slice(1).join('=')
     };
   }
@@ -2540,7 +2541,7 @@ export class Notebook extends StaticNotebook {
           case Cell.HeadingType.Markdown:
             {
               const mdHeading =
-                heading as any as TableOfContentsUtils.Markdown.IMarkdownHeading;
+                heading as unknown as TableOfContentsUtils.Markdown.IMarkdownHeading;
               id = await TableOfContentsUtils.Markdown.getHeadingId(
                 this.rendermime.markdownParser!,
                 mdHeading.raw,
@@ -3161,7 +3162,7 @@ export class Notebook extends StaticNotebook {
   } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell | null>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<unknown>>(this);
   private _selectionChanged = new Signal<this, void>(this);
 
   // Attributes for optimized cell refresh:

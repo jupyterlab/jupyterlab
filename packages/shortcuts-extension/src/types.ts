@@ -24,6 +24,7 @@ export namespace CommandIDs {
  * The layout of shortcuts settings as defined in schema.
  */
 export interface IShortcutsSettingsLayout {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [index: string]: any;
   shortcuts?: CommandRegistry.IKeyBindingOptions[];
 }

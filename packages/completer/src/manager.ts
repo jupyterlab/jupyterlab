@@ -308,7 +308,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     for (const [id, providerSettings] of Object.entries(
       this._inlineCompleterSettings.providers
     )) {
-      if ((providerSettings as any).enabled === true) {
+      if (providerSettings.enabled === true) {
         enabledProviders.push(id);
       }
     }

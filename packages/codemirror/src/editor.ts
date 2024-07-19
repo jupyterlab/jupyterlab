@@ -216,7 +216,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Record<string, any>): void {
+  setOptions(options: Record<string, unknown>): void {
     this._configurator.setOptions(options);
   }
 
@@ -569,7 +569,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
   protected onConfigChanged(
     configurator: IExtensionsHandler,
-    changes: Record<string, any>
+    changes: Record<string, unknown>
   ): void {
     configurator.reconfigureExtensions(this._editor, changes);
     // when customStyles change and the editor is not initialized
