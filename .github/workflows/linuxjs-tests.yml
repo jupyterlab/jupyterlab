@@ -35,6 +35,7 @@ jobs:
             js-documentsearch,
             js-filebrowser,
             js-fileeditor,
+            js-hub-extension,
             js-imageviewer,
             js-inspector,
             js-logconsole,
@@ -61,6 +62,7 @@ jobs:
             js-translation,
             js-ui-components,
             js-vega5-extension,
+            js-workspaces,
           ]
       fail-fast: false
     runs-on: ubuntu-22.04

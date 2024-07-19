@@ -65,9 +65,6 @@ test('Search with a text and replacement', async ({ page }) => {
 test('Populate search box with selected text', async ({ page }) => {
   const imageName = 'text-editor-search-from-selection.png';
 
-  // Enter first cell
-  await page.notebook.enterCellEditingMode(0);
-
   // Go to first line
   await page.keyboard.press('PageUp');
   // Select first line
@@ -94,29 +91,29 @@ test('Populate search box with selected text', async ({ page }) => {
   await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
 
   // Expect the first match to be highlighted
-  await page.waitForSelector('text=1/2');
+  await page.locator('text=1/2').waitFor();
 
-  const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
+  const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
 
-  expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+  expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
 });
 
 test.describe('File search from selection', () => {
-  test('should expand the selection to the next occurence', async ({
+  test('should expand the selection to the next occurrence', async ({
     page
   }) => {
     // This could be improved as the following statement will double click
     // on the last line that will result in the last word being selected.
     await page.getByRole('textbox').getByText('in').last().dblclick();
 
-    await page.keyboard.press('Control+d');
+    await page.keyboard.press('Control+Shift+d');
 
     await expect(
       page.getByRole('main').locator('.cm-selectionBackground')
     ).toHaveCount(2);
   });
 
-  test('should expand the selection to all occurence', async ({ page }) => {
+  test('should expand the selection to all occurrences', async ({ page }) => {
     // This could be improved as the following statement will double click
     // on the last line that will result in the last word being selected.
     await page.getByRole('textbox').getByText('in').last().dblclick();

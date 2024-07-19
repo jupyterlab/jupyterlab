@@ -50,4 +50,22 @@ export namespace DOMUtils {
   export function createDomID(): string {
     return `id-${UUID.uuid4()}`;
   }
+
+  /**
+   * Check whether the active element descendant from given parent is editable.
+   * When checking active elements it includes elements in the open shadow DOM.
+   */
+  export function hasActiveEditableElement(
+    parent: Node | DocumentFragment,
+    root: ShadowRoot | Document = document
+  ): boolean {
+    const element = root.activeElement;
+    return !!(
+      element &&
+      parent.contains(element) &&
+      (element.matches(':read-write') ||
+        (element.shadowRoot &&
+          hasActiveEditableElement(element.shadowRoot, element.shadowRoot)))
+    );
+  }
 }

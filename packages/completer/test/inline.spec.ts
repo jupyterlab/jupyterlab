@@ -7,12 +7,16 @@ import {
 } from '@jupyterlab/completer';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { nullTranslator } from '@jupyterlab/translation';
-import { simulate } from '@jupyterlab/testing';
+import { framePromise, simulate } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { MessageLoop } from '@lumino/messaging';
 import { Doc, Text } from 'yjs';
+
+const GHOST_TEXT_CLASS = 'jp-GhostText';
+const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
+const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
 
 describe('completer/inline', () => {
   const exampleProvider: IInlineCompletionProvider = {
@@ -36,9 +40,15 @@ describe('completer/inline', () => {
     let editorWidget: CodeEditorWrapper;
     let model: InlineCompleter.Model;
     let suggestionsAbc: CompletionHandler.IInlineItem[];
+    const findInHost = (selector: string) =>
+      editorWidget.editor.host.querySelector(selector);
 
     beforeEach(() => {
       editorWidget = createEditorWidget();
+      // Mock coordinate for position as jest does not implement layout
+      editorWidget.editor.getCoordinateForPosition = () => {
+        return { left: 0, top: 0, right: 0, bottom: 0 };
+      };
       model = new InlineCompleter.Model();
       model.cursor = {
         line: 0,
@@ -75,6 +85,102 @@ describe('completer/inline', () => {
         expect(editorWidget.editor.model.sharedModel.source).toBe(
           'suggestion a'
         );
+      });
+    });
+
+    describe('#_setText()', () => {
+      it('should render the completion as it is streamed', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        const stream = new Signal<any, CompletionHandler.StraemEvent>(
+          {} as any
+        );
+        const item: CompletionHandler.IInlineItem = {
+          insertText: 'this',
+          streaming: true,
+          provider: exampleProvider,
+          isIncomplete: true,
+          stream
+        };
+        model.setCompletions({ items: [item] });
+        await framePromise();
+
+        stream.emit(CompletionHandler.StraemEvent.opened);
+
+        let ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        let streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+
+        expect(ghost.innerText).toBe('this');
+        expect(streamingIndicator).toBeDefined();
+
+        item.insertText = 'this is';
+        stream.emit(CompletionHandler.StraemEvent.update);
+        expect(ghost.innerText).toBe('this is');
+
+        item.insertText = 'this is a';
+        stream.emit(CompletionHandler.StraemEvent.update);
+        expect(ghost.innerText).toBe('this is a');
+
+        item.insertText = 'this is a test';
+        item.streaming = false;
+        item.isIncomplete = false;
+        stream.emit(CompletionHandler.StraemEvent.closed);
+
+        const errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`);
+        expect(ghost.innerText).toBe('this is a test');
+        expect(errorIndicator).toBeNull();
+        // On runtime streaming indicator gets removed because innerText gets called,
+        // but behold jsdom which does not implement innerText as of 2024 and thus
+        // setting innerText on an element does not clear its children in tests, see
+        // https://github.com/jsdom/jsdom/issues/1245
+        // streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+        // expect(streamingIndicator).toBeNull();
+      });
+
+      it('should render the error if stream errors out', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        const stream = new Signal<any, CompletionHandler.StraemEvent>(
+          {} as any
+        );
+        const item: CompletionHandler.IInlineItem = {
+          insertText: 'this',
+          streaming: true,
+          provider: exampleProvider,
+          isIncomplete: true,
+          stream
+        };
+        model.setCompletions({ items: [item] });
+        await framePromise();
+
+        stream.emit(CompletionHandler.StraemEvent.opened);
+
+        let ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        let streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+        let errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`) as
+          | HTMLElement
+          | undefined;
+
+        expect(ghost.innerText).toBe('this');
+        expect(streamingIndicator).toBeDefined();
+        expect(errorIndicator).toBeNull();
+
+        item.insertText = 'this is';
+        stream.emit(CompletionHandler.StraemEvent.update);
+
+        item.error = { message: 'Completion generation failed' };
+        stream.emit(CompletionHandler.StraemEvent.update);
+        errorIndicator = findInHost(`.${ERROR_INDICATOR_CLASS}`) as HTMLElement;
+        streamingIndicator = findInHost(`.${STREAMING_INDICATOR_CLASS}`);
+        // should not remove suggestion
+        expect(ghost.innerText).toBe('this is');
+        // should show error indicator
+        expect(errorIndicator).toBeDefined();
+        // should hide streaming indicator
+        expect(streamingIndicator).toBeNull();
+
+        // the error indicator should include the title
+        expect(errorIndicator.title).toBe('Completion generation failed');
       });
     });
 
@@ -150,6 +256,71 @@ describe('completer/inline', () => {
           showShortcuts: false
         });
         expect(completer.node.dataset.showShortcuts).toBe('false');
+      });
+
+      it('`maxLines` should limit the number of lines visible', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          maxLines: 3
+        });
+        const item: CompletionHandler.IInlineItem = {
+          ...itemDefaults,
+          insertText: 'line1\nline2\nline3\nline4\nline5'
+        };
+        model.setCompletions({ items: [item] });
+
+        const ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        expect(ghost.innerText).toBe('line1\nline2\nline3');
+      });
+
+      const getGhostTextContent = () => {
+        const ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        // jest-dom does not support textContent/innerText properly, we need to extract it manually
+        return (
+          ghost.innerText +
+          [...ghost.childNodes].map(node => node.textContent).join('')
+        );
+      };
+
+      it('`minLines` should add empty lines when needed', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          minLines: 3
+        });
+        const item: CompletionHandler.IInlineItem = {
+          ...itemDefaults,
+          insertText: 'line1'
+        };
+        model.setCompletions({ items: [item] });
+
+        expect(getGhostTextContent()).toBe('line1\n\n');
+      });
+
+      it('`reserveSpaceForLongest` should add empty lines when needed', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          reserveSpaceForLongest: true
+        });
+        model.setCompletions({
+          items: [
+            {
+              ...itemDefaults,
+              insertText: 'line1'
+            },
+            {
+              ...itemDefaults,
+              insertText: 'line1\nline2\nline3'
+            }
+          ]
+        });
+
+        expect(getGhostTextContent()).toBe('line1\n\n');
       });
     });
 

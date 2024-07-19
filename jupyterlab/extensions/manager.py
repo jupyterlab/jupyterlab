@@ -207,7 +207,7 @@ class PluginManager(LoggingConfigurable):
     ) -> None:
         super().__init__(parent=parent)
         self.log.debug(
-            "Plugins in %s will managed on the %s level", self.__class__.__name__, self.level
+            f"Plugins in {self.__class__.__name__} will managed on the {self.level} level"
         )
         self.app_options = _ensure_options(app_options)
         plugin_options_field = {f.name for f in fields(PluginManagerOptions)}

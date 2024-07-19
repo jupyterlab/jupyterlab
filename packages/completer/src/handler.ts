@@ -7,7 +7,14 @@ import {
   COMPLETER_ENABLED_CLASS
 } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import {
+  CellChange,
+  FileChange,
+  ISharedBaseCell,
+  ISharedFile,
+  ISharedText,
+  SourceChange
+} from '@jupyter/ydoc';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
@@ -70,7 +77,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.disconnect(this.onTextChanged, this);
+      model.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
     }
 
     // Reset completer state.
@@ -84,7 +91,15 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.connect(this.onTextChanged, this);
+      // We expect the model to be an editor, a file editor, or a cell.
+      const sharedModel = model.sharedModel as
+        | ISharedText
+        | ISharedFile
+        | ISharedBaseCell;
+      // For cells and files the `changed` signal is not limited to text,
+      // but also fires on changes to metadata, outputs, execution count,
+      // and state changes, hence we need to filter the change type.
+      sharedModel.changed.connect(this._onSharedModelChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
       if (this.inlineCompleter) {
@@ -383,6 +398,18 @@ export class CompletionHandler implements IDisposable {
   }
 
   /**
+   * Handle a text shared model change signal from an editor.
+   */
+  private async _onSharedModelChanged(
+    str: ISharedText,
+    changed: SourceChange | CellChange | FileChange
+  ): Promise<void> {
+    if (changed.sourceChange) {
+      await this.onTextChanged(str, changed);
+    }
+  }
+
+  /**
    * Make a completion request.
    */
   private _makeRequest(
@@ -432,7 +459,10 @@ export class CompletionHandler implements IDisposable {
     }
 
     const line = editor.getLine(position.line);
-    if (typeof line === 'undefined' || position.column < line.length) {
+    if (
+      trigger === InlineCompletionTriggerKind.Automatic &&
+      (typeof line === 'undefined' || position.column < line.length)
+    ) {
       // only auto-trigger on end of line
       return;
     }

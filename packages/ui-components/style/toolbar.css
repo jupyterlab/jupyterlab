@@ -23,7 +23,7 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
-  padding: 2px;
+  padding: 0 2px;
   z-index: 8;
 }
 
@@ -34,9 +34,6 @@
   height: 100%;
   display: flex;
   align-items: center;
-
-  /* Increase density for toolbar items */
-  --density: -4;
 }
 
 .jp-Toolbar::part(positioning-region) {
@@ -72,6 +69,10 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   padding-left: 2px;
   color: var(--jp-ui-font-color1);
   font-family: var(--jp-ui-font-family);
+}
+
+.jp-Toolbar .jp-ToolbarButtonComponent {
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-ToolbarButtonComponent::part(content) {

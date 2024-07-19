@@ -300,6 +300,10 @@ const print: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.print);
+    });
   }
 };
 
@@ -336,6 +340,11 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.toggleHeader);
+    });
+
     if (palette) {
       palette.addItem({ command: CommandIDs.toggleHeader, category });
     }
@@ -566,11 +575,16 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   description: 'Provides the session context dialogs.',
   provides: ISessionContextDialogs,
-  optional: [ITranslator],
+  optional: [ITranslator, ISettingRegistry],
   autoStart: true,
-  activate: async (app: JupyterFrontEnd, translator: ITranslator | null) => {
+  activate: async (
+    app: JupyterFrontEnd,
+    translator: ITranslator | null,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     return new SessionContextDialogs({
-      translator: translator ?? nullTranslator
+      translator: translator ?? nullTranslator,
+      settingRegistry: settingRegistry ?? null
     });
   }
 };
@@ -641,7 +655,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.displayShortcuts, {
-      label: trans.__('Show Keyboard Shortcuts'),
+      label: trans.__('Show Keyboard Shortcuts…'),
       caption: trans.__(
         'Show relevant keyboard shortcuts for the current active widget'
       ),

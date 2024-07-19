@@ -12,6 +12,18 @@ async function openNotebook(page: IJupyterLabPageFixture, tmpPath, fileName) {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 }
 
+test('Move Debugger to right', async ({ page }) => {
+  await page.sidebar.moveTabToRight('jp-debugger-sidebar');
+  expect(await page.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
+    'right'
+  );
+});
+
+test('Open Debugger on right', async ({ page }) => {
+  await page.sidebar.openTab('jp-debugger-sidebar');
+  expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
+});
+
 test.describe('Debugger Tests', () => {
   test.afterEach(async ({ page }) => {
     await page.debugger.switchOff();
@@ -19,21 +31,10 @@ test.describe('Debugger Tests', () => {
     await page.notebook.close();
   });
 
-  test('Move Debugger to right', async ({ page }) => {
-    await page.sidebar.moveTabToRight('jp-debugger-sidebar');
-    expect(await page.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
-      'right'
-    );
-  });
-
-  test('Open Debugger on right', async ({ page }) => {
-    await page.sidebar.openTab('jp-debugger-sidebar');
-    expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
-  });
-
   test('Start debug session', async ({ page, tmpPath }) => {
     await openNotebook(page, tmpPath, 'code_notebook.ipynb');
 
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
 
@@ -41,10 +42,10 @@ test.describe('Debugger Tests', () => {
     await page.notebook.clickCellGutter(0, 2);
 
     await page.debugger.waitForBreakPoints();
-    const breakpointsPanel = await page.debugger.getBreakPointsPanel();
+    const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
-    const callStackPanel = await page.debugger.getCallStackPanel();
+    const callStackPanel = await page.debugger.getCallStackPanelLocator();
     expect(await callStackPanel.innerText()).toBe('');
 
     // don't add await, run will be blocked by the breakpoint
@@ -54,13 +55,13 @@ test.describe('Debugger Tests', () => {
     expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
 
     await page.debugger.waitForVariables();
-    const variablesPanel = await page.debugger.getVariablesPanel();
+    const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-variables.png'
     );
 
     await page.debugger.waitForSources();
-    const sourcesPanel = await page.debugger.getSourcePanel();
+    const sourcesPanel = await page.debugger.getSourcePanelLocator();
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-sources.png'
     );
@@ -80,6 +81,7 @@ test.describe('Debugger Tests', () => {
 
     await openNotebook(page, tmpPath, notebookName);
 
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
 
@@ -92,16 +94,16 @@ test.describe('Debugger Tests', () => {
     await page.debugger.waitForCallStack();
 
     await page.debugger.waitForVariables();
-    const variablesPanel = await page.debugger.getVariablesPanel();
+    const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'image-debug-session-global-variables.png'
     );
 
     await page.debugger.renderVariable(globalVar);
-    let richVariableTab = await page.activity.getPanel(
+    let richVariableTab = await page.activity.getPanelLocator(
       `${globalVar} - ${notebookName}`
     );
-    expect(await richVariableTab.screenshot()).toMatchSnapshot(
+    expect(await richVariableTab?.screenshot()).toMatchSnapshot(
       'image-debug-session-global-rich-variable.png'
     );
 
@@ -112,10 +114,10 @@ test.describe('Debugger Tests', () => {
     await page.debugger.waitForVariables();
 
     await page.debugger.renderVariable(localVar);
-    richVariableTab = await page.activity.getPanel(
+    richVariableTab = await page.activity.getPanelLocator(
       `${localVar} - ${notebookName}`
     );
-    expect(await richVariableTab.screenshot()).toMatchSnapshot(
+    expect(await richVariableTab?.screenshot()).toMatchSnapshot(
       'image-debug-session-local-rich-variable.png'
     );
   });
@@ -127,14 +129,16 @@ test.describe('Debugger Tests', () => {
       button: 'right'
     });
 
-    const menu = await page.menu.getOpenMenu();
-    await (await menu.$('[data-command="fileeditor:create-console"]')).click();
+    const menu = await page.menu.getOpenMenuLocator();
+    await menu?.locator('[data-command="fileeditor:create-console"]')?.click();
 
-    await page.waitForSelector('.jp-Dialog-body');
-    const select = await page.$('.jp-Dialog-body >> select');
-    const option = await select.$('option:has-text("ipykernel")');
-    await select.selectOption(option);
+    await page.locator('.jp-Dialog-body').waitFor();
+    const select = page.locator('.jp-Dialog-body >> select');
+    const option = select.locator('option:has-text("ipykernel")');
+    await select.selectOption(await option.textContent());
     await page.click('div.jp-Dialog-content >> button:has-text("Select")');
+
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
     // activate the script tab
     await page.click('.jp-FileEditor');
@@ -144,10 +148,10 @@ test.describe('Debugger Tests', () => {
     await page.notebook.clickCodeGutter(2);
 
     await page.debugger.waitForBreakPoints();
-    const breakpointsPanel = await page.debugger.getBreakPointsPanel();
+    const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
-    const callStackPanel = await page.debugger.getCallStackPanel();
+    const callStackPanel = await page.debugger.getCallStackPanelLocator();
     expect(await callStackPanel.innerText()).toBe('');
 
     // don't add await, run will be blocked by the breakpoint
@@ -157,13 +161,13 @@ test.describe('Debugger Tests', () => {
     expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
 
     await page.debugger.waitForVariables();
-    const variablesPanel = await page.debugger.getVariablesPanel();
+    const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-script-variables.png'
     );
 
     await page.debugger.waitForSources();
-    const sourcesPanel = await page.debugger.getSourcePanel();
+    const sourcesPanel = await page.debugger.getSourcePanelLocator();
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-script-sources.png'
     );
@@ -315,14 +319,17 @@ test.describe('Debugger Variables', () => {
 async function createNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.createNew();
 
-  await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 }
 
 async function setBreakpoint(page: IJupyterLabPageFixture) {
+  // Close left side panel to avoid side effect when entering the cell editor.
+  await page.sidebar.close('left');
+
   await page.notebook.setCell(
     0,
     'code',
-    'global_var = 1\ndef add(a, b):\nlocal_var = a + b\nreturn local_var'
+    'global_var = 1\ndef add(a, b):\n    local_var = a + b\n    return local_var'
   );
   await page.notebook.run();
   await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');

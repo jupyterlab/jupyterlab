@@ -4,7 +4,60 @@
 .. _extension_migration:
 
 Extension Migration Guide
-================================================
+=========================
+
+JupyterLab 4.2 to 4.3
+---------------------
+
+CSS styling
+^^^^^^^^^^^
+
+Previously JupyterLab was leaking CSS rules globally. Starting from 4.3, this is not the case
+anymore. The side effects for extensions are:
+
+- DOM elements attached outside the application shell may have broken styles. To fix this,
+  you should add the class ``jp-ThemedContainer`` to the DOM elements added outside the application shell.
+- DOM elements ``code``, ``kbd``, ``pre``, ``samp`` and ``tt`` may have broken styles. To fix this,
+  prepend the class ``.jp-ThemedContainer`` to your rule; e.g.
+  ``.jp-Inspector-content pre`` becomes ``.jp-ThemedContainer .jp-Inspector-content pre``
+
+The ``jp-Inspector-default-content`` class was renamed to ``jp-Inspector-placeholderContent``.
+The name of this contextual help class is now consistent with the equivalent table of contents and property inspector classes.
+
+JupyterLab 4.1 to 4.2
+---------------------
+
+API updates
+^^^^^^^^^^^
+
+- The ``CodeEditor.ICoordinate`` interface was corrected to not include ``toJSON()``, ``x``, ``y``,
+  ``width`` and ``height``; these properties were never set by methods returning ``ICoordinate``
+  and they were never used by methods accepting it.
+- ``CodeEditor.getCoordinateForPosition`` return type was corrected to clarify that it can return
+  ``null``; previously ``null`` could be returned despite the return type indicating it would always
+  return a non-null ``ICoordinate`` value.
+- The commands ``workspace-ui:save`` and ``workspace-ui:save-as`` were moved
+  from the ``@jupyterlab/apputils-extension:workspaces`` plugin to a new dedicated
+  ``@jupyterlab/workspaces-extension`` package and can be explicitly required by
+  requesting the ``IWorkspaceCommands`` token. This token is by default provided
+  by the new ``@jupyterlab/workspaces-extension:commands`` plugin.
+  The ``@jupyterlab/apputils-extension:workspaces`` plugin now only defines the
+  workspace MIME type renderer used to open files with ``.jupyterlab-workspace``
+  extension as JupyterLab workspaces.
+- The cell toolbar node has been moved from the cell node to the cell input node.
+  Therefore the parent of the cell toolbar has changed and can not be used directly to
+  retrieve the corresponding cell node anymore.
+
+Shortcuts extension rework
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``@jupyterlab/shortcuts-extension`` package was reworked to fix multiple bugs and increase type safety.
+While this package does not expose any programmatic APIs, and changes to the theming were minimal,
+the major version of the package was increased to 5.0 to reflect the extend of the changes.
+
+No action is required from extension authors (unless you used non-public components from `/lib`),
+however the authors of applications built on top of JupyterLab components are encouraged to upgrade
+to this new version as it can significantly improve the user experience.
 
 JupyterLab 4.0 to 4.1
 ---------------------
@@ -36,7 +89,7 @@ The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now re
 This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
 and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
 
-See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+See https://github.com/jupyterlab/frontends-team-compass/issues/143 for more context on the change.
 
 - Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
 
@@ -89,10 +142,12 @@ between cells, especially impacting users with accessibility needs.
 In JupyterLab 4.1+ the focus stays on the active cell when switching to command
 mode; this requires all shortcut selectors to be adjusted as follows:
 
-- ``.jp-Notebook:focus.jp-mod-commandMode`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
-- ``.jp-Notebook:focus`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
-- ``[data-jp-traversable]:focus`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
-- ``[data-jp-kernel-user]:focus`` should be replaced with ``[data-jp-kernel-user] :focus:not(:read-write)``
+- ``.jp-Notebook:focus.jp-mod-commandMode``, ``.jp-Notebook:focus``, and ``[data-jp-traversable]:focus`` should be replaced with:
+  - ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus`` for JupyterLab 4.1.1+
+- ``[data-jp-kernel-user]:focus`` should be replaced with:
+  - ``[data-jp-kernel-user] :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)`` for JupyterLab 4.1.1+
 
 Please note that ``:not(:read-write)`` fragment disables shortcuts
 when text fields  (such as cell editor) are focused to avoid intercepting
@@ -100,6 +155,17 @@ characters typed by the user into the text fields, however if your shortcut
 does not correspond to any key/typographic character (e.g. most shortcuts
 with :kbd:`Ctrl` modifier) you may prefer to drop this fragment
 if you want the shortcut to be active in text fields.
+
+Further, JupyterLab 4.1.1 introduced indicator class ``.jp-mod-readWrite``
+that is applied to the notebook node when the active element accepts
+keyboard input as defined by ``:read-write`` selector. This indicator
+class is required to detect ``:read-write`` elements which are nested
+within an *open* shadow DOM (such as Panel framework widgets).
+
+If your framework uses a *closed* shadow DOM, or expects keyboard
+interactions on elements that are not recognised as editable by browser
+heuristics of ``:read-write`` selector, you need to set a data attribute
+`lm-suppress-shortcuts` on the outer host element to suppress shortcuts.
 
 To prevent breaking the user experience these changes are made transparently
 in the background, but will emit a warning and extension developers should
@@ -133,15 +199,14 @@ First, make sure to update to JupyterLab 4 and install ``copier`` and some depen
 
 .. code:: bash
 
-   pip install -U jupyterlab
-   pip install "copier~=8.0" jinja2-time tomli-w
+   pip install -U jupyterlab[upgrade-extension]
 
 
 Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=4 "copier=8" jinja2-time tomli-w
+   conda install -c conda-forge jupyterlab=4 "copier=9" jinja2-time
 
 
 Then at the root folder of the extension, run:

@@ -126,7 +126,14 @@ To debug tests, a good way is to use the inspector tool of playwright:
 
 ```
 jupyter lab --config jupyter_server_test_config.py &
-PWDEBUG=1 jlpm playwright test
+jlpm playwright test --debug
+```
+
+Or the [UI mode](https://playwright.dev/docs/test-ui-mode):
+
+```
+jupyter lab --config jupyter_server_test_config.py &
+jlpm playwright test --ui
 ```
 
 ### Dealing with login
@@ -518,7 +525,7 @@ test('should return the active terminals', async ({ page, terminals }) => {
 
 - type: \< string >
 
-Unique test temporary path created on the server.
+Unique test temporary path created on the server. Required if uploading files in `beforeAll()` as otherwise the files would not be accessible from consecutive tests because by default `tmpPath` has a random component added for each test.
 
 Note: if you override this string, you will need to take care of creating the
 folder and cleaning it.
@@ -529,16 +536,16 @@ Example:
 test.use({ tmpPath: 'test-toc' });
 
 test.describe.serial('Table of Contents', () => {
-  test.beforeAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
   });
 
-  test.afterAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
   });
 });

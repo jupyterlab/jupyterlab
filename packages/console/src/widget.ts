@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Prec } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
 import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
-import { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 import {
   AttachmentsCellModel,
   Cell,
@@ -28,7 +26,9 @@ import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import { runCell } from './cellexecutor';
 import { ConsoleHistory, IConsoleHistory } from './history';
+import type { IConsoleCellExecutor } from './tokens';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -71,6 +71,14 @@ const CONTENT_CLASS = 'jp-CodeConsole-content';
 const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
+ * The class name added to the console when an element within it is focused
+ * and takes keyboard input, such as <input> and <div contenteditable>
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
+
+/**
  * The timeout in ms for execution requests to the kernel.
  */
 const EXECUTION_TIMEOUT = 250;
@@ -79,6 +87,11 @@ const EXECUTION_TIMEOUT = 250;
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+/**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
 
 /**
  * A widget containing a Jupyter console.
@@ -94,9 +107,11 @@ export class CodeConsole extends Widget {
   constructor(options: CodeConsole.IOptions) {
     super();
     this._translator = options.translator ?? nullTranslator;
+    this._executor = options.executor ?? Object.freeze({ runCell });
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
     this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
@@ -551,6 +566,12 @@ export class CodeConsole extends Widget {
       case 'mouseup':
         this._evtMouseUp(event as MouseEvent);
         break;
+      case 'focusin':
+        this._evtFocusIn(event as MouseEvent);
+        break;
+      case 'focusout':
+        this._evtFocusOut(event as MouseEvent);
+        break;
       default:
         break;
     }
@@ -564,6 +585,8 @@ export class CodeConsole extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
     node.addEventListener('mousedown', this);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -580,6 +603,8 @@ export class CodeConsole extends Widget {
     const node = this.node;
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('click', this);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
   }
 
   /**
@@ -604,7 +629,16 @@ export class CodeConsole extends Widget {
     if (promptCell) {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
-      Signal.clearData(promptCell.editor);
+
+      // Schedule execution of signal clearance to happen later so that
+      // the `readOnly` configuration gets updated before editor signals
+      // get disconnected (see `Cell.onUpdateRequest`).
+      const oldCell = promptCell;
+      requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
+        Signal.clearData(oldCell.editor);
+      });
+
       // Ensure to clear the cursor
       promptCell.editor?.blur();
       const child = input.widgets[0];
@@ -665,9 +699,25 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+  }
+
+  /**
+   * Handle `focusout` events for the widget.
+   */
+  private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+  }
+
+  /**
    * Execute the code in the current prompt cell.
    */
-  private _execute(cell: CodeCell): Promise<void> {
+  private async _execute(cell: CodeCell): Promise<void> {
     const source = cell.model.sharedModel.getSource();
     this._history.push(source);
     // If the source of the console is just "clear", clear the console as we
@@ -677,45 +727,36 @@ export class CodeConsole extends Widget {
       return Promise.resolve(void 0);
     }
     cell.model.contentChanged.connect(this.update, this);
-    const onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (value && value.content.status === 'ok') {
-        const content = value.content;
-        // Use deprecated payloads for backwards compatibility.
-        if (content.payload && content.payload.length) {
-          const setNextInput = content.payload.filter(i => {
-            return (i as any).source === 'set_next_input';
-          })[0];
-          if (setNextInput) {
-            const text = (setNextInput as any).text;
-            // Ignore the `replace` value and always set the next cell.
-            cell.model.sharedModel.setSource(text);
-          }
-        }
-      } else if (value && value.content.status === 'error') {
-        for (const cell of this._cells) {
-          if ((cell.model as ICodeCellModel).executionCount === null) {
-            cell.setPrompt('');
+
+    const options = {
+      cell,
+      sessionContext: this.sessionContext,
+      onCellExecuted: (args: {
+        cell: CodeCell;
+        executionDate: Date;
+        success: boolean;
+        error?: Error | null;
+      }) => {
+        this._executed.emit(args.executionDate);
+
+        if (args.error) {
+          for (const cell of this._cells) {
+            if ((cell.model as ICodeCellModel).executionCount === null) {
+              (cell.model as ICodeCellModel).executionState = 'idle';
+            }
           }
         }
       }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-      this._executed.emit(new Date());
-    };
-    const onFailure = () => {
-      if (this.isDisposed) {
-        return;
+    } satisfies IConsoleCellExecutor.IRunCellOptions;
+
+    try {
+      await this._executor.runCell(options);
+    } finally {
+      if (!this.isDisposed) {
+        cell.model.contentChanged.disconnect(this.update, this);
+        this.update();
       }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-    };
-    return CodeCell.execute(cell, this.sessionContext).then(
-      onSuccess,
-      onFailure
-    );
+    }
   }
 
   /**
@@ -746,23 +787,11 @@ export class CodeConsole extends Widget {
     const rendermime = this.rendermime;
     const editorConfig = this.editorConfig;
 
-    // Suppress the default "Enter" key handling.
-    const onKeyDown = EditorView.domEventHandlers({
-      keydown: (event: KeyboardEvent, view: EditorView) => {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          return true;
-        }
-        return false;
-      }
-    });
-
     return {
       model,
       rendermime,
       contentFactory,
       editorConfig,
-      editorExtensions: [Prec.high(onKeyDown)],
       placeholder: false,
       translator: this._translator
     };
@@ -846,9 +875,19 @@ export class CodeConsole extends Widget {
     }
   }
 
+  /**
+   * Update the console node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    // TODO: de-duplicate with code in notebook/src/widget.ts
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
+  }
+
   private _banner: RawCell | null = null;
   private _cells: IObservableList<Cell>;
   private _content: Panel;
+  private _executor: IConsoleCellExecutor;
   private _executed = new Signal<this, Date>(this);
   private _history: IConsoleHistory;
   private _input: Panel;
@@ -879,6 +918,11 @@ export namespace CodeConsole {
      * The content factory for the console widget.
      */
     contentFactory: IContentFactory;
+
+    /**
+     * Console cell executor
+     */
+    executor?: IConsoleCellExecutor;
 
     /**
      * The model factory for the console widget.

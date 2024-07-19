@@ -40,7 +40,7 @@ import { Contents } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
   closeIcon,
@@ -49,10 +49,9 @@ import {
   downloadIcon,
   editIcon,
   fileIcon,
-  FilenameSearcher,
+  filterIcon,
   folderIcon,
   IDisposableMenuItem,
-  IScore,
   linkIcon,
   markdownIcon,
   newFolderIcon,
@@ -62,17 +61,15 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { find, map } from '@lumino/algorithm';
+import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 
+/**
+ * Toolbar factory for the top toolbar in the widget
+ */
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
-
-/**
- * The class name added to the filebrowser filterbox node.
- */
-const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -130,6 +127,8 @@ namespace CommandIDs {
   // For main browser only.
   export const toggleBrowser = 'filebrowser:toggle-main';
 
+  export const toggleFileFilter = 'filebrowser:toggle-file-filter';
+
   export const toggleNavigateToCurrentDirectory =
     'filebrowser:toggle-navigate-to-current-directory';
 
@@ -157,7 +156,7 @@ const namespace = 'filebrowser';
 /**
  * The default file browser extension.
  */
-const browser: JupyterFrontEndPlugin<void> = {
+const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
   id: FILE_BROWSER_PLUGIN_ID,
   description: 'Set up the default file browser (commands, settings,...).',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
@@ -178,7 +177,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
-  ): Promise<void> => {
+  ): Promise<IFileBrowserCommands> => {
     const browser = defaultFileBrowser;
 
     // Let the application restorer track the primary file browser (that is
@@ -206,7 +205,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       commandPalette
     );
 
-    return void Promise.all([app.restored, browser.model.restored]).then(() => {
+    void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
           treePathUpdater(args.newValue);
@@ -251,6 +250,9 @@ const browser: JupyterFrontEndPlugin<void> = {
         });
       }
     });
+    return {
+      openPath: CommandIDs.openPath
+    };
   }
 };
 
@@ -313,21 +315,50 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
-  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
+  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell, ITranslator],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    translator: ITranslator | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
 
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
       restore: false
     });
+
+    // Set attributes when adding the browser to the UI
+    defaultBrowser.node.setAttribute('role', 'region');
+    defaultBrowser.node.setAttribute(
+      'aria-label',
+      trans.__('File Browser Section')
+    );
+    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
+    defaultBrowser.title.icon = folderIcon;
+
+    // Show the current file browser shortcut in its title.
+    const updateBrowserTitle = () => {
+      const binding = app.commands.keyBindings.find(
+        b => b.command === CommandIDs.toggleBrowser
+      );
+      if (binding) {
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
+        defaultBrowser.title.caption = trans.__('File Browser (%1)', ks);
+      } else {
+        defaultBrowser.title.caption = trans.__('File Browser');
+      }
+    };
+    updateBrowserTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateBrowserTitle();
+    });
+
     void Private.restoreBrowser(
       defaultBrowser,
       commands,
@@ -434,57 +465,12 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
 
-    // Set attributes when adding the browser to the UI
-    browser.node.setAttribute('role', 'region');
-    browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
-    browser.title.icon = folderIcon;
-
-    // Show the current file browser shortcut in its title.
-    const updateBrowserTitle = () => {
-      const binding = find(
-        app.commands.keyBindings,
-        b => b.command === CommandIDs.toggleBrowser
-      );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        browser.title.caption = trans.__('File Browser (%1)', ks);
-      } else {
-        browser.title.caption = trans.__('File Browser');
-      }
-    };
-    updateBrowserTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateBrowserTitle();
-    });
-
-    // Toolbar
+    // Top-level toolbar
     toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
       'uploader',
       (browser: FileBrowser) =>
         new Uploader({ model: browser.model, translator })
-    );
-
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'fileNameSearcher',
-      (browser: FileBrowser) => {
-        const searcher = FilenameSearcher({
-          updateFilter: (
-            filterFn: (item: string) => Partial<IScore> | null,
-            query?: string
-          ) => {
-            browser.model.setFilter(value => {
-              return filterFn(value.name.toLowerCase());
-            });
-          },
-          useFuzzyFilter: true,
-          placeholder: trans.__('Filter files by name'),
-          forceRefresh: true
-        });
-        searcher.addClass(FILTERBOX_CLASS);
-        return searcher;
-      }
     );
 
     setToolbar(
@@ -1245,6 +1231,20 @@ function addCommands(
     },
     icon: stopIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Shut Down Kernel')
+  });
+
+  commands.addCommand(CommandIDs.toggleFileFilter, {
+    execute: () => {
+      // Update toggled state, then let the toolbar button update
+      browser.showFileFilter = !browser.showFileFilter;
+      commands.notifyCommandChanged(CommandIDs.toggleFileFilter);
+    },
+    isToggled: () => {
+      const toggled = browser.showFileFilter;
+      return toggled;
+    },
+    icon: filterIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Toggle File Filter')
   });
 
   commands.addCommand(CommandIDs.toggleLastModified, {

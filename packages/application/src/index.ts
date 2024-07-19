@@ -20,6 +20,7 @@ export {
 } from './mimerenderers';
 export { Router } from './router';
 export { ILabShell, LabShell } from './shell';
+export * from './status';
 export * from './tokens';
 export { ITreePathUpdater } from './treepathupdater';
 export * from './utils';

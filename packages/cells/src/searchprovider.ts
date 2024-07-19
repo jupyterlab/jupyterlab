@@ -131,11 +131,20 @@ class CodeCellSearchProvider extends CellSearchProvider {
     loop?: boolean,
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    if (this.matchesCount === 0 || !this.isActive) {
+    // If we're scanning from the previous match, test whether we're
+    // at the end of the matches list.
+    const from = options?.from ?? '';
+    if (
+      this.matchesCount === 0 ||
+      (from === 'previous-match' &&
+        this.currentIndex !== null &&
+        this.currentIndex + 1 >= this.cmHandler.matches.length) ||
+      !this.isActive
+    ) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
-        const match = await super.highlightNext(true, options);
+        const match = await super.highlightNext(loop, options);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
           return match;
@@ -317,7 +326,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * @returns The next match if there is one.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(
+    loop = true,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
     if (!this.isActive) {
       return match;
@@ -332,7 +344,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       await waitForRendered;
     }
 
-    match = await super.highlightNext();
+    match = await super.highlightNext(loop, options);
 
     return match;
   }

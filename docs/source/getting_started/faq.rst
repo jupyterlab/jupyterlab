@@ -45,7 +45,7 @@ Tips and Tricks
 
 - How do I start JupyterLab with a clean workspace every time?
 
-Add ``'c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``.
+Add ``c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``.
 See `How to create a jupyter_server_config.py <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`__ for more information.
 
 
@@ -56,8 +56,8 @@ Development
 -  `How can you
    contribute? <https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md>`__
 -  :ref:`How can you extend or customize JupyterLab? <user_extensions>`
--  In the classic Notebook, `I could use custom Javascript outputted by a cell to programmatically
-   control the Notebook <https://stackoverflow.com/a/32769976/907060>`__. Can I do the same thing in JupyterLab?
+-  In the classic Notebook, I could use custom Javascript outputted by a cell to programmatically
+   control the Notebook. Can I do the same thing in JupyterLab?
 
    JupyterLab was built to support a wide variety of extensibility, including dynamic behavior based on notebook
    outputs. To access this extensibility, you should write a custom JupyterLab extension. If you would
@@ -65,4 +65,6 @@ Development
    mimetype (:ref:`rendermime`). We currently don't allow access to the JupyterLab
    API from the Javascript renderer, because this would tie the kernel and the notebook output to JupyterLab
    and make it hard for other frontends to support it.
-   If you have comments or suggestions on changes here, please comment on `this issue <https://github.com/jupyterlab/jupyterlab/issues/4623>`__.
+   For more discussion and potential alternative solutions, please see issues
+   `#4623 <https://github.com/jupyterlab/jupyterlab/issues/4623>`__ and
+   `#5789 <https://github.com/jupyterlab/jupyterlab/issues/5789>`__.

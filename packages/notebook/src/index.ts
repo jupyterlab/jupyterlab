@@ -6,9 +6,11 @@
  */
 
 export * from './actions';
+export * from './cellexecutor';
 export * from './celllist';
 export * from './default-toolbar';
 export * from './executionindicator';
+export * from './history';
 export * from './model';
 export * from './modelfactory';
 export * from './modestatus';

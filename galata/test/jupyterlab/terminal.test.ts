@@ -11,7 +11,7 @@ const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
     await page.menu.clickMenuItem('File>New>Terminal');
-    await page.waitForSelector(TERMINAL_SELECTOR);
+    await page.locator(TERMINAL_SELECTOR).waitFor();
   });
 
   test.describe('Open', () => {
@@ -90,7 +90,7 @@ test.describe('Terminal', () => {
 });
 
 test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
-  await page.waitForSelector(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`);
+  await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
 
   await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
@@ -105,7 +105,7 @@ test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
 });
 
 test('Terminal web link', async ({ page, tmpPath }) => {
-  await page.waitForSelector(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`);
+  await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
 
   await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
@@ -118,7 +118,7 @@ test('Terminal web link', async ({ page, tmpPath }) => {
   await page.waitForTimeout(1000);
   await Promise.all([
     terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-    terminal.locator('canvas.xterm-cursor-layer').hover({
+    terminal.locator('canvas.xterm-link-layer').hover({
       position: {
         x: 60,
         y: 23

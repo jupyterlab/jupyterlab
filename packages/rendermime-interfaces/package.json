@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-interfaces",
-  "version": "3.9.0",
+  "version": "3.11.0-alpha.2",
   "description": "JupyterLab - Interfaces for Mime Renderers",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,16 +27,14 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc  src",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@lumino/coreutils": "^1.11.0 || ^2.1.2",
-    "@lumino/widgets": "^1.37.2 || ^2.3.1"
+    "@lumino/widgets": "^1.37.2 || ^2.3.2"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typedoc": "~0.24.7",
     "typescript": "~5.1.6"
   },
   "publishConfig": {

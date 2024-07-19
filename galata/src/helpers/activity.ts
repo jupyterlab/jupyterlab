@@ -50,12 +50,32 @@ export class ActivityHelper {
         .inputValue();
       return activeTab === name;
     } else {
-      const tab = await this.getTab(name);
-      if (!tab) {
+      const tab = this.getTabLocator(name);
+      if (!(await tab.count())) {
         return false;
       }
-      const classes = ((await tab.getAttribute('class')) ?? '').split(' ');
+      const classes = await Utils.getLocatorClassList(tab);
       return classes.includes('jp-mod-current');
+    }
+  }
+
+  /**
+   * Continually press navigation key until specified element is focused
+   *
+   * @param selector name of attribute selector
+   * @param key navigation key to press
+   */
+  async keyToElement(
+    selector: string,
+    key: 'Tab' | 'ArrowDown' | 'ArrowUp'
+  ): Promise<void> {
+    while (
+      !(await this.page.evaluate(
+        selector => document.activeElement?.matches(selector),
+        selector
+      ))
+    ) {
+      await this.page.keyboard.press(key);
     }
   }
 
@@ -64,15 +84,19 @@ export class ActivityHelper {
    *
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
+   *
+   * @deprecated You should use locator instead {@link getTabLocator}
    */
   async getTab(name?: string): Promise<ElementHandle<Element> | null> {
-    let handle: ElementHandle<Element> | null = null;
-    try {
-      handle = await this.getTabLocator(name).elementHandle({ timeout: 500 });
-    } catch {
-      handle = null;
+    const locator = this.getTabLocator(name);
+    const start = Date.now();
+    while ((await locator.count()) == 0 && Date.now() - start < 500) {
+      await this.page.waitForTimeout(50);
     }
-    return handle;
+    if ((await locator.count()) > 0) {
+      return locator.elementHandle();
+    }
+    return null;
   }
 
   /**
@@ -80,7 +104,7 @@ export class ActivityHelper {
    * @param name Activity name
    * @returns Tab locator
    */
-  getTabLocator(name?: string): Locator {
+  getTabLocator(name?: string | RegExp): Locator {
     return name
       ? this.page.getByRole('main').getByRole('tab', { name })
       : this.page.getByRole('main').locator('.jp-mod-current[role="tab"]');
@@ -91,6 +115,8 @@ export class ActivityHelper {
    *
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
+   *
+   * @deprecated You should use locator instead {@link getPanelLocator}
    */
   async getPanel(name?: string): Promise<ElementHandle<Element> | null> {
     const page = this.page;
@@ -108,14 +134,14 @@ export class ActivityHelper {
       locator = page.getByRole('main').locator(`[role="tabpanel"][id="${id}"]`);
     }
 
-    let handle: ElementHandle<Element> | null = null;
-    try {
-      handle = await locator.elementHandle({ timeout: 500 });
-    } catch {
-      handle = null;
+    const start = Date.now();
+    while ((await locator.count()) == 0 && Date.now() - start < 500) {
+      await this.page.waitForTimeout(50);
     }
-
-    return handle;
+    if ((await locator.count()) > 0) {
+      return locator.elementHandle();
+    }
+    return null;
   }
 
   /**
@@ -146,7 +172,7 @@ export class ActivityHelper {
    *
    * @param name Activity name
    */
-  async closePanel(name: string): Promise<void> {
+  async closePanel(name: string | RegExp): Promise<void> {
     await this.activateTab(name);
     await this.page.evaluate(async () => {
       await window.jupyterapp.commands.execute('application:close');
@@ -160,17 +186,13 @@ export class ActivityHelper {
    * @param name Activity name
    * @returns Whether the action is successful
    */
-  async activateTab(name: string): Promise<boolean> {
-    const tab = await this.getTab(name);
-    if (tab) {
+  async activateTab(name: string | RegExp): Promise<boolean> {
+    const tab = this.getTabLocator(name);
+    if ((await tab.count()) === 1) {
       await tab.click();
-      await this.page.waitForFunction(
-        ({ tab }) => {
-          return tab.ariaSelected === 'true';
-        },
-        { tab }
+      await Utils.waitForCondition(
+        async () => (await tab.getAttribute('aria-selected')) === 'true'
       );
-
       return true;
     }
 

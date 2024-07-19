@@ -60,7 +60,7 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('Python 3 (ipykernel)');
 
-      await page.menu.clickMenuItem('File>Close and Shut Down Notebook');
+      await page.menu.clickMenuItem('File>Close and Shut Down Notebook…');
 
       await Promise.all([
         page

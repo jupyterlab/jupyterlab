@@ -79,6 +79,12 @@ uninstall_flags["all"] = (
     "Uninstall all extensions",
 )
 
+list_flags = copy(flags)
+list_flags["verbose"] = (
+    {"ListLabExtensionsApp": {"verbose": True}},
+    "Increase verbosity level",
+)
+
 aliases = dict(base_aliases)
 aliases["app-dir"] = "BaseExtensionApp.app_dir"
 aliases["dev-build"] = "BaseExtensionApp.dev_build"
@@ -181,7 +187,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     def deprecation_warning(self, msg):
         return self.log.warning(
-            "\033[33m(Deprecated) %s\n\n%s \033[0m", msg, LABEXTENSION_COMMAND_WARNING
+            f"\033[33m(Deprecated) {msg}\n\n{LABEXTENSION_COMMAND_WARNING} \033[0m"
         )
 
     def _log_format_default(self):
@@ -412,6 +418,8 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
+    verbose = Bool(False, help="Increase verbosity level.").tag(config=True)
+    flags = list_flags
 
     def run_task(self):
         list_extensions(
@@ -420,6 +428,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
                 logger=self.log,
                 core_config=self.core_config,
                 labextensions_path=self.labextensions_path,
+                verbose=self.verbose,
             )
         )
 
@@ -580,7 +589,7 @@ class LabExtensionApp(JupyterApp):
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.
         subcmds = ", ".join(sorted(self.subcommands))
-        self.exit("Please supply at least one subcommand: %s" % subcmds)
+        self.exit(f"Please supply at least one subcommand: {subcmds}")
 
 
 main = LabExtensionApp.launch_instance

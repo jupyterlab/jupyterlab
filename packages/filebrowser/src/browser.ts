@@ -2,11 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { SidePanel } from '@jupyterlab/ui-components';
+import {
+  FilenameSearcher,
+  IScore,
+  SidePanel,
+  Toolbar
+} from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
+import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import { FilterFileBrowserModel } from './model';
@@ -32,9 +39,19 @@ const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
 const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
 
 /**
+ * The class name added to the filebrowser filter toolbar node.
+ */
+const FILTER_TOOLBAR_CLASS = 'jp-FileBrowser-filterToolbar';
+
+/**
  * The class name added to the filebrowser listing node.
  */
 const LISTING_CLASS = 'jp-FileBrowser-listing';
+
+/**
+ * The class name added to the filebrowser filterbox node.
+ */
+const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * A widget which hosts a file browser.
@@ -75,6 +92,29 @@ export class FileBrowser extends SidePanel {
     this.crumbs = new BreadCrumbs({ model, translator });
     this.crumbs.addClass(CRUMBS_CLASS);
 
+    // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
+    const searcher = FilenameSearcher({
+      updateFilter: (
+        filterFn: (item: string) => Partial<IScore> | null,
+        query?: string
+      ) => {
+        this.model.setFilter(value => {
+          return filterFn(value.name.toLowerCase());
+        });
+      },
+      useFuzzyFilter: true,
+      placeholder: this._trans.__('Filter files by name'),
+      forceRefresh: false,
+      showIcon: false,
+      inputRef: this._fileFilterRef
+    });
+    searcher.addClass(FILTERBOX_CLASS);
+
+    this.filterToolbar = new Toolbar();
+    this.filterToolbar.addClass(FILTER_TOOLBAR_CLASS);
+    this.filterToolbar.addItem('fileNameSearcher', searcher);
+    this.filterToolbar.setHidden(!this.showFileFilter);
+
     this.listing = this.createDirListing({
       model,
       renderer,
@@ -83,6 +123,7 @@ export class FileBrowser extends SidePanel {
     this.listing.addClass(LISTING_CLASS);
 
     this.mainPanel.addWidget(this.crumbs);
+    this.mainPanel.addWidget(this.filterToolbar);
     this.mainPanel.addWidget(this.listing);
 
     this.addWidget(this.mainPanel);
@@ -180,6 +221,37 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show a text box to filter files by name.
+   */
+  get showFileFilter(): boolean {
+    return this._showFileFilter;
+  }
+
+  set showFileFilter(value: boolean) {
+    // If the old value was true and the new value is false, clear the filter
+    const oldValue = this.showFileFilter;
+    if (oldValue && !value) {
+      // Clear the search box input
+      if (this._fileFilterRef.current) {
+        this._fileFilterRef.current.value = '';
+      }
+
+      // Set a filter that doesn't exclude anything.
+      this.model.setFilter(value => {
+        return {};
+      });
+      this.model.refresh().catch(console.warn);
+    }
+    this._showFileFilter = value;
+
+    // Update widget visibility
+    this.filterToolbar.setHidden(!this.showFileFilter);
+    if (this.showFileFilter) {
+      this._fileFilterRef.current?.focus();
+    }
+  }
+
+  /**
    * Whether to sort notebooks above other files
    */
   get sortNotebooksFirst(): boolean {
@@ -252,6 +324,11 @@ export class FileBrowser extends SidePanel {
   private async _createNew(
     options: Contents.ICreateOptions
   ): Promise<Contents.IModel> {
+    // normalize the path if the file is created from a custom drive
+    if (options.path) {
+      const localPath = this._manager.services.contents.localPath(options.path);
+      options.path = this._toDrivePath(this.model.driveName, localPath);
+    }
     try {
       const model = await this._manager.newUntitled(options);
       await this.listing.selectItemByName(model.name, true);
@@ -403,18 +480,38 @@ export class FileBrowser extends SidePanel {
     }
   }
 
+  /**
+   * Given a drive name and a local path, return the full
+   * drive path which includes the drive name and the local path.
+   *
+   * @param driveName the name of the drive
+   * @param localPath the local path on the drive.
+   *
+   * @returns the full drive path
+   */
+  private _toDrivePath(driveName: string, localPath: string): string {
+    if (driveName === '') {
+      return localPath;
+    } else {
+      return `${driveName}:${PathExt.removeSlash(localPath)}`;
+    }
+  }
+
+  protected filterToolbar: Toolbar;
   protected listing: DirListing;
   protected crumbs: BreadCrumbs;
   protected mainPanel: Panel;
 
-  private _manager: IDocumentManager;
   private _directoryPending: Promise<Contents.IModel> | null = null;
   private _filePending: Promise<Contents.IModel> | null = null;
+  private _fileFilterRef = createRef<HTMLInputElement>();
+  private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
-  private _showLastModifiedColumn: boolean = true;
+  private _showFileCheckboxes: boolean = false;
+  private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
-  private _showFileCheckboxes: boolean = false;
+  private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
 }
 

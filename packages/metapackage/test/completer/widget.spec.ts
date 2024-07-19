@@ -969,7 +969,7 @@ describe('completer/widget', () => {
           Widget.attach(panel, document.body);
 
           const position = code.editor.getPositionAt(text.length)!;
-          const coords = code.editor.getCoordinateForPosition(position);
+          const coords = code.editor.getCoordinateForPosition(position)!;
 
           editor.setCursorPosition(position);
 

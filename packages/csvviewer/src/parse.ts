@@ -20,7 +20,7 @@ Possible options to add to the parser:
 /**
  * Interface for a delimiter-separated data parser.
  *
- * @param options: The parser options
+ * @param options The parser options
  * @returns An object giving the offsets for the rows or columns parsed.
  *
  * #### Notes
@@ -147,7 +147,7 @@ enum ROW_DELIMITER {
 /**
  * Parse delimiter-separated data.
  *
- * @param options: The parser options
+ * @param options The parser options
  * @returns An object giving the offsets for the rows or columns parsed.
  *
  * #### Notes
@@ -476,7 +476,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 /**
  * Parse delimiter-separated data where no delimiter is quoted.
  *
- * @param options: The parser options
+ * @param options The parser options
  * @returns An object giving the offsets for the rows or columns parsed.
  *
  * #### Notes

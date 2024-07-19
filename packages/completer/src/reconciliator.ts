@@ -17,7 +17,8 @@ import { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
 
 // Shorthand for readability.
-type InlineResult = IInlineCompletionList<CompletionHandler.IInlineItem> | null;
+export type InlineResult =
+  IInlineCompletionList<CompletionHandler.IInlineItem> | null;
 
 /**
  * The reconciliator which is used to fetch and merge responses from multiple completion providers.
@@ -127,6 +128,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
       // Stream an update.
       item.insertText = updated.insertText;
       item.lastStreamed = addition;
+      item.error = reply.response.error;
       streamed.emit(CompletionHandler.StraemEvent.update);
     }
 

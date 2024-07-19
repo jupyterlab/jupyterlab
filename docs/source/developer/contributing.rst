@@ -51,6 +51,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    internationalization
    css
    performance
+   security
    api
 
 .. contents:: Table of contents
@@ -86,9 +87,11 @@ breaking changes. Consider documenting your maintenance plans to users in these 
 You may also wish to consider pinning the major version of JupyterLab when developing
 extensions (in your package metadata).
 
-We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
-All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+We maintain a major version of JupyterLab for **one year after its successor's first release**.
+See `version lifecycle <../getting_started/lifecycle.html>`__ for details.
+JupyterLab v4 was released on May 15, 2023, so JupyterLab v3 will be maintained
+until May 15, 2024. JupyterLab v1 and v2 are no longer maintained.
+All JupyterLab v2 and v3 users are strongly advised to upgrade as soon as possible.
 
 Languages, Tools and Processes
 ------------------------------
@@ -227,7 +230,7 @@ furthers the goals of the Jupyter project.
 * The issue represents work that one developer can commit to owning, even if
   they collaborate with other developers for feedback. Excessively large issues
   should be split into multiple issues, each triaged individually, or into
-  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  `team-compass <https://github.com/jupyterlab/frontends-team-compass>`__ issues to discuss
   more substantive changes.
 
 Labels Used by Triagers
@@ -277,13 +280,17 @@ Contributing from within the browser
 Contributing to JupyterLab codebase is also possible without setting up
 a local environment, directly from the Web browser:
 
--  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
-   however it is not actively maintained,
+-  GitHub's
+   `codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository>`__
+   is available (free account have
+   `limited monthly resources <https://docs.github.com/en/billing/managing-billing-for-github-codespaces/about-billing-for-github-codespaces#monthly-included-storage-and-core-hours-for-personal-accounts>`__).
 -  GitHub's
    `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
    is suitable for contributing very small fixes,
 -  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
    editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
+-  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
+   however it is not actively maintained,
 -  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
@@ -300,14 +307,21 @@ about 7 minutes again.
 
 Setting up a local development environment
 ------------------------------------------
+
+.. note::
+
+   Look at the :ref:`automated dev environment <automatic_local_dev_env>` section,
+   for some automation ways to set up a local development environment.
+
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__
+and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 18+, as defined in the
+development version requires Node.js version 20+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
@@ -315,7 +329,7 @@ If you use `conda <https://conda.io>`__, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge nodejs
+   conda install -c conda-forge nodejs=20
 
 If you use `Homebrew <https://brew.sh>`__ on macOS:
 
@@ -332,37 +346,48 @@ To check which version of Node.js is installed:
 
    node -v
 
-.. _Installing Node.js and jlpm section:
-
-The canvas node package is not properly packaged for macOS with ARM architectures (M1 and M2).
-To build JupyterLab on such platforms, you need a few additional packages:
-
-With conda:
-
-.. code:: bash
-
-   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib pixman
-   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
-
-With Homebrew:
-
-.. code:: bash
-
-   brew install pkg-config cairo pango libpng jpeg giflib librsvg
+.. _automatic_local_dev_env:
 
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+While there is a lot to learn by following the steps above, they can be automated to save time.
+The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
-This section shows how to do that using Docker and Vagrant.
+This section shows how to do that using VS Code dev containers, Docker and Vagrant.
+
+**Setup for VS Code**
+"""""""""""""""""""""
+
+To start a local development environment for JupyterLab using VS Code dev containers,
+you need to:
+
+1. Install the VS Code `Dev Containers extension <https://code.visualstudio.com/docs/devcontainers/tutorial>`__.
+
+2. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
+
+3. Clone your fork locally:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+
+4. Open the local clone with VS Code.
+
+5. Open the repository in a container.
+   VS Code should prompt you with a pop-up to do so. In case it does not, you can click on the
+   icon ``><`` on the bottom left. Then choose *Reopen in container*.
+
+.. note::
+
+   It will take quite some times the first time.
 
 **Setup using Docker**
-""""""""""""""""""""""""
+""""""""""""""""""""""
 
 To start a JupyterLab development container in a UNIX system with docker installed:
 
-1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab>`__.
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
 
 2. Start the container:
 
@@ -399,7 +424,7 @@ To add TypeScript dependencies to the project, you need to log into the containe
    bash docker/start.sh build
 
 **Setup using Vagrant**
-""""""""""""""""""""""""""""
+"""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.
@@ -430,17 +455,21 @@ Additionally, you might want to execute the following optional commands:
    # Build the app dir assets (optional)
    jupyter lab build
 
-Notes:
+Frequent issues
+^^^^^^^^^^^^^^^
+
+.. important::
+
+   On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+   by activating the 'Developer Mode'. That may not be allowed by your administrators.
+   See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
+   for instructions.
+.. Note: The same important section is present in the extension/extension_tutorial.rst too. If you modify it here, ensure to update it there as well.
 
 -  A few of the scripts will run "python". If your target python is
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
-   returned exit status 127 while in binding.gyp`` while running the
-   ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
-   of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
@@ -521,14 +550,6 @@ appropriate package folder:
     ``--runInBand`` option will run all tests serially in the current process.
     We advice to use it as some tests are spinning a Jupyter Server that does not
     like to be executed in parallel.
-
-If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dylib'``
-(or a different library, such as ``libcairo.2.dylib`` for Mac computers with Apple
-Silicon chips) while running the
-``jlpm test`` command above, you may be missing packages required
-by ``canvas``. Please see
-`Installing Node.js and jlpm section`_
-of this guide for instructions on how to install these packages.
 
 We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
@@ -649,7 +670,7 @@ provided in the report. You can use these information to debug failing tests. Ga
 report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
 named ``galata-report`` and once you extract it, you can access the report by launching
 a server to serve the files ``python -m http.server -d <path-to-extracted-report>``.
-Then open *http://localhost:8000* with your web browser.
+Then open http://localhost:8000/ with your web browser.
 
 Main reasons for UI test failures are:
 
@@ -878,7 +899,16 @@ The Read the Docs pages can be built using ``make``:
    cd docs
    make html
 
-Or with ``jlpm``:
+The JupyterLab API reference documentation is also included in the previous step.
+To access the documentation, first launch a server to serve the generated files:
+
+.. code:: bash
+
+   make serve
+
+And then go to http://localhost:8000/ in your browser.
+
+The JupyterLab API reference documentation can be built separately using ``jlpm``:
 
 .. code:: bash
 

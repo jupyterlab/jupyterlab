@@ -15,8 +15,8 @@ export class IFrame extends Widget {
     this.addClass('jp-IFrame');
     this.sandbox = options.sandbox || [];
     this.referrerPolicy = options.referrerPolicy || 'no-referrer';
+    this.loading = options.loading || 'eager';
   }
-
   /**
    * Referrer policy for the iframe.
    *
@@ -36,6 +36,27 @@ export class IFrame extends Widget {
     this._referrerPolicy = value;
     const iframe = this.node.querySelector('iframe')!;
     iframe.setAttribute('referrerpolicy', value);
+  }
+
+  /**
+   * Loading for the iFrame
+   *
+   * ### Notes
+   * By default, 'eager' loading is chosen
+   *
+   * For more information, see
+   * https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/loading
+   */
+  get loading(): IFrame.Loading {
+    return this._loading;
+  }
+  set loading(value: IFrame.Loading) {
+    if (this._loading === value) {
+      return;
+    }
+    this._loading = value;
+    const iframe = this.node.querySelector('iframe')!;
+    iframe.setAttribute('loading', value);
   }
 
   /**
@@ -73,6 +94,7 @@ export class IFrame extends Widget {
 
   private _sandbox: IFrame.SandboxExceptions[] = [];
   private _referrerPolicy: IFrame.ReferrerPolicy;
+  private _loading: IFrame.Loading;
 }
 
 /**
@@ -119,6 +141,12 @@ export namespace IFrame {
     | 'allow-top-navigation-by-user-activation';
 
   /**
+   * The loading attribute for the iframe.
+   * It can be either 'eager' or 'lazy'.
+   */
+  export type Loading = 'eager' | 'lazy';
+
+  /**
    * Options for creating a new IFrame widget.
    */
   export interface IOptions {
@@ -131,6 +159,11 @@ export namespace IFrame {
      * Referrer policy for the iframe.
      */
     referrerPolicy?: ReferrerPolicy;
+
+    /**
+     * The loading attribute for the iframe.
+     */
+    loading?: Loading;
   }
 }
 

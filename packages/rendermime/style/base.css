@@ -21,9 +21,9 @@
   font-family: var(--jp-code-font-family);
 }
 
-.jp-RenderedText pre,
-.jp-RenderedJavaScript pre,
-.jp-RenderedHTMLCommon pre {
+.jp-ThemedContainer .jp-RenderedText pre,
+.jp-ThemedContainer .jp-RenderedJavaScript pre,
+.jp-ThemedContainer .jp-RenderedHTMLCommon pre {
   color: var(--jp-content-font-color1);
   font-size: var(--jp-code-font-size);
   border: none;
@@ -391,12 +391,12 @@
   margin-bottom: 1em;
 }
 
-.jp-RenderedHTMLCommon > pre {
+.jp-ThemedContainer .jp-RenderedHTMLCommon > pre {
   margin: 1.5em 2em;
 }
 
-.jp-RenderedHTMLCommon pre,
-.jp-RenderedHTMLCommon code {
+.jp-ThemedContainer .jp-RenderedHTMLCommon pre,
+.jp-ThemedContainer .jp-RenderedHTMLCommon code {
   border: 0;
   background-color: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
@@ -407,7 +407,7 @@
   white-space: pre-wrap;
 }
 
-.jp-RenderedHTMLCommon :not(pre) > code {
+.jp-ThemedContainer .jp-RenderedHTMLCommon :not(pre) > code {
   background-color: var(--jp-layout-color2);
   padding: 1px 5px;
 }
@@ -587,7 +587,7 @@
 a.jp-InternalAnchorLink {
   visibility: hidden;
   margin-left: 8px;
-  color: var(--md-blue-800);
+  color: var(--md-blue-800, #1565c0);
 }
 
 h1:hover .jp-InternalAnchorLink,
@@ -599,7 +599,7 @@ h6:hover .jp-InternalAnchorLink {
   visibility: visible;
 }
 
-.jp-RenderedHTMLCommon kbd {
+.jp-ThemedContainer .jp-RenderedHTMLCommon kbd {
   background-color: var(--jp-rendermime-table-row-background);
   border: 1px solid var(--jp-border-color0);
   border-bottom-color: var(--jp-border-color2);

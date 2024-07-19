@@ -6,6 +6,7 @@ import { expect, galata, test } from '@jupyterlab/galata';
 const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
+const GHOST_LINE_SPACER_CLASS = '.jp-GhostText-lineSpacer';
 const PLUGIN_ID = '@jupyterlab/completer-extension:inline-completer';
 const SHORTCUTS_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
@@ -21,7 +22,10 @@ test.describe('Inline Completer', () => {
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
     await page.notebook.setCell(0, 'code', 'suggestion_1 = 1');
-    await page.notebook.addCell('code', 'suggestion_2 = 2');
+    await page.notebook.addCell(
+      'code',
+      'suggestion_2 = 2\n# second line\n# third line'
+    );
     await page.notebook.addCell('code', 's');
     await page.notebook.runCell(0, true);
     await page.notebook.runCell(1, true);
@@ -61,8 +65,8 @@ test.describe('Inline Completer', () => {
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
 
       // Should hide on moving cursor away
-      const toolbar = await page.notebook.getToolbar();
-      await toolbar.hover();
+      const toolbar = await page.notebook.getToolbarLocator();
+      await toolbar!.hover();
       await completer.waitFor({ state: 'hidden' });
     });
   });
@@ -179,8 +183,8 @@ test.describe('Inline Completer', () => {
 
       await page.keyboard.press('Tab');
 
-      const cellEditor = await page.notebook.getCellInput(2);
-      const text = await cellEditor.textContent();
+      const cellEditor = await page.notebook.getCellInputLocator(2);
+      const text = await cellEditor!.textContent();
       expect(text).toMatch(/estion.*/);
     });
   });
@@ -197,24 +201,68 @@ test.describe('Inline Completer', () => {
     });
 
     test('Ghost text updates on typing', async ({ page }) => {
+      const cellEditor = await page.notebook.getCellInputLocator(2);
       await page.keyboard.press('u');
 
       // Ghost text shows up
-      const ghostText = page.locator(GHOST_SELECTOR);
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
       await ghostText.waitFor();
 
       // Ghost text should be updated from "ggestion" to "estion"
       await page.keyboard.type('gg');
       await expect(ghostText).toHaveText(/estion.*/);
 
-      const cellEditor = await page.notebook.getCellInput(2);
       const imageName = 'editor-with-ghost-text.png';
-      expect(await cellEditor.screenshot()).toMatchSnapshot(imageName);
+      expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
 
       // Ghost text should hide
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(ghostText).toBeHidden();
+    });
+
+    test('Empty space is retained to avoid jitter', async ({ page }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      const measureEditorHeight = async () =>
+        (await cellEditor.boundingBox())!.height;
+      const noGhostTextHeight = await measureEditorHeight();
+
+      await page.keyboard.type('uggestion_2');
+
+      // Ghost text shows up
+      const ghostText = cellEditor.locator(
+        `${GHOST_SELECTOR}:not(${GHOST_LINE_SPACER_CLASS})`
+      );
+      const lineSpacer = cellEditor.locator(GHOST_LINE_SPACER_CLASS);
+
+      await ghostText.waitFor();
+      await expect(lineSpacer).toBeHidden();
+      await expect(ghostText).toHaveText(/ = 2# second line# third line/);
+
+      const ghostTextShownHeight = await measureEditorHeight();
+      expect(ghostTextShownHeight).toBeGreaterThan(noGhostTextHeight);
+
+      // Ghost text should disappear and line spacer appear
+      await page.keyboard.type('x');
+
+      await lineSpacer.waitFor();
+      await expect(lineSpacer).toBeVisible();
+      await expect(ghostText).toBeHidden();
+
+      const spacerExpandedHeight = await measureEditorHeight();
+      expect(ghostTextShownHeight).toEqual(spacerExpandedHeight);
+
+      // By default the hiding animation starts after 700ms and lasts for 300ms
+
+      // When animation starts the editor height should reduce
+      await page.waitForTimeout(750);
+      const spacerAnimatingHeight = await measureEditorHeight();
+      expect(spacerAnimatingHeight).toBeLessThan(ghostTextShownHeight);
+
+      // After animation is done the height should be back to the initial height
+      await page.waitForTimeout(300);
+      const finalHeight = await measureEditorHeight();
+      expect(noGhostTextHeight).toEqual(finalHeight);
     });
   });
 });

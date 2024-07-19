@@ -58,7 +58,7 @@ export class KernelSourcesBody extends ReactWidget {
     return (
       <React.Fragment>
         <div className={filterClass} key={'filter'}>
-          <KernelSourcesFilter model={this._model} />
+          <KernelSourcesFilter model={this._model} trans={this._trans} />
         </div>
         <UseSignal signal={this._model.changed}>
           {(_, kernelSources) => {
