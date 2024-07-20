@@ -23,6 +23,12 @@
         "icon": "ui-components:delete",
         "name": "delete-cell"
       }
+    ],
+    "CellPrompt": [
+      {
+        "name": "run-cell-and-advance",
+        "command": "notebook:run-cell-and-select-next"
+      }
     ]
   },
   "jupyter.lab.transform": true,
@@ -41,6 +47,12 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "default": []
+    },
+    "cellRunButton": {
+      "title": "Show a run button for each cell",
+      "description": "Show a run button over the cell prompt when hovering over the active cell's prompt, and over the prompt when a cell has never been run.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

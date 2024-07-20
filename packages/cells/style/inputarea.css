@@ -75,13 +75,17 @@
 
 .jp-InputArea-prompt-toolbar {
   position: absolute;
-  top: calc(-1 * var(--jp-code-padding));
+  top: -3px;
   right: 6px;
   z-index: 20;
+
+  /* Trim the toolbar on the top and bottom. */
+  clip-path: inset(3px 0 6px 0);
 
   /* Only display this when the cell is active. */
   display: none;
   background-color: var(--jp-layout-color2);
+  box-shadow: none;
 }
 
 /*-----------------------------------------------------------------------------
