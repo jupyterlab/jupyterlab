@@ -14,7 +14,7 @@
 }
 
 .jp-TreeView.jp-mod-flat > .jp-TreeItem::part(content-region) {
-  margin-inline-start: calc(var(--design-unit) * 1px);
+  margin-inline-start: calc(var(--design-unit) * 2px);
 }
 
 /* Styles for tree item */
