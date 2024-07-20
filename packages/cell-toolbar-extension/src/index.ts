@@ -41,15 +41,27 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           )
         : undefined;
 
-    const helperButtons = [
-      new CommandToolbarButton({
-        commands: app.commands,
-        id: 'notebook:run-cell-and-select-next',
-        args: { toolbar: true },
-        // Do not display a text label beside the button
-        label: ''
-      })
-    ];
+    const helperButtons = [];
+
+    // Only display a run button if the settings say to do so. Default to use.
+    let showRunButton = true;
+    if (settingRegistry !== null) {
+      const settings = settingRegistry!.load(cellToolbar.id);
+      showRunButton = (await settings).get('cellRunButton')
+        .composite as boolean;
+    }
+
+    if (showRunButton) {
+      helperButtons.push(
+        new CommandToolbarButton({
+          commands: app.commands,
+          id: 'notebook:run-cell-and-select-next',
+          args: { toolbar: true },
+          // Do not display a text label beside the button
+          label: ''
+        })
+      );
+    }
 
     app.docRegistry.addWidgetExtension(
       'Notebook',
