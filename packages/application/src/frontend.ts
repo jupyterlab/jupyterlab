@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CommandLinker } from '@jupyterlab/apputils';
+import { IEntrypoint } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
@@ -221,7 +222,7 @@ export namespace JupyterFrontEnd {
    */
   export interface IOptions<T extends IShell = IShell, U = any>
     extends Application.IOptions<T> {
-    entrypoints?: any;
+    entrypoints?: Record<string, IEntrypoint[]>;
     /**
      * The document registry instance used by the application.
      */

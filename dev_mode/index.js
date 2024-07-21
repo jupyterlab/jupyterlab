@@ -64,7 +64,7 @@ export async function main() {
   var deferred = [];
   var ignorePlugins = [];
   var register = [];
-  var entrypoints = []
+  var entrypoints = {}
 
 
   const federatedExtensionPromises = [];
@@ -179,19 +179,20 @@ export async function main() {
         const entryPointData = pkgJson['jupyterlab']['entrypoint'];
 
         if(entryPointData){
-          for(const widgetFactory of entryPointData.widgetFactory){
-            entrypoints.push({
-              extension: '{{@key}}',
-              data : {
-                name: widgetFactory.name,
-                fileTypes: widgetFactory.fileTypes,
-                defaultFor: widgetFactory.defaultFor
-              },
-              activate: async ()=>{
-                return pluginRegistry.activatePlugin(widgetFactory.pluginId)
-              }
+          Object.entries(entryPointData).forEach(([entryPoint, data]) => {
+            if (!entrypoints[entryPoint]) {
+              entrypoints[entryPoint] = []
+            }
+            data.forEach(pluginData=>{
+              entrypoints[entryPoint].push({
+                extension: '{{@key}}',
+                data : pluginData,
+                activate: () => {
+                  return pluginRegistry.activatePlugin(pluginData.pluginId)
+                }
+              })
             })
-          }
+          });
         }
         for(let plugin of processPlugins(pkgPlugins, '{{@key}}')) {
           register.push({...plugin, loader: async () => {
