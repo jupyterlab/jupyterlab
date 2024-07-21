@@ -45,6 +45,16 @@
   padding-left: 14px;
 }
 
+.jp-mod-kernel-widget .jp-RunningSessions-item-label-kernel-id {
+  display: none;
+}
+
+.jp-mod-running-list-view
+  .jp-mod-kernel-widget
+  .jp-RunningSessions-item-label-kernel-id {
+  display: inline;
+}
+
 .jp-RunningSessions-item {
   display: flex;
   flex-direction: row;
