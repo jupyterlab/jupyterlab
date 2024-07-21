@@ -68,20 +68,20 @@ export default function CheckboxesWidget<
         );
         const itemDisabled = enumDisabled?.includes(option.value) || false;
         return (
-          <label key={optionId(id, index)} style={{ display: 'block' }}>
-            <Checkbox
-              id={optionId(id, index)}
-              name={id}
-              checked={checked}
-              disabled={disabled || itemDisabled || readonly}
-              // autoFocus={autofocus && index === 0}
-              onChange={_onChange(index)}
-              onBlur={_onBlur}
-              onFocus={_onFocus}
-              aria-describedby={ariaDescribedByIds<T>(id)}
-            />
+          <Checkbox
+            id={optionId(id, index)}
+            key={optionId(id, index)}
+            name={id}
+            checked={checked}
+            disabled={disabled || itemDisabled || readonly}
+            // autoFocus={autofocus && index === 0}
+            onChange={_onChange(index)}
+            onBlur={_onBlur}
+            onFocus={_onFocus}
+            aria-describedby={ariaDescribedByIds<T>(id)}
+          >
             {option.label}
-          </label>
+          </Checkbox>
         );
       })}
     </fieldset>
