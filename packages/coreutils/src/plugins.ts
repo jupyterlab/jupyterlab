@@ -31,6 +31,23 @@ export interface IPluginModule {
   default: IPlugin<any, any> | IPlugin<any, any>[];
 }
 
+export interface IEntrypoint {
+  /**
+   *  The name of the widget factory.
+   */
+  extension: string;
+
+  /**
+   * function tha will active the widget factory
+   */
+  activate: () => Promise<void>;
+
+  /**
+   * data from the package json
+   */
+  data: any;
+}
+
 export interface IPlugin2<T = any, U = any>
   extends Omit<
     IPlugin<T, U>,

@@ -5,6 +5,7 @@ import { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   IChangedArgs as IChangedArgsGeneric,
+  IEntrypoint,
   PathExt
 } from '@jupyterlab/coreutils';
 import { IObservableList } from '@jupyterlab/observables';
@@ -64,7 +65,7 @@ export class DocumentRegistry implements IDisposable {
 
     const entrypoints = options.entrypoints;
     if (entrypoints) {
-      for (const entrypoint of entrypoints) {
+      for (const entrypoint of entrypoints.widgetFactory) {
         const factory = new DummyWidgetFactory({
           ...entrypoint,
           documentRegistry: this
@@ -376,6 +377,7 @@ export class DocumentRegistry implements IDisposable {
    */
   preferredWidgetFactories(path: string): DocumentRegistry.WidgetFactory[] {
     const factories = new Set<string>();
+
     // Get the ordered matching file types.
     const fts = this.getFileTypesForPath(PathExt.basename(path));
     // Start with any user overrides for the defaults.
@@ -536,7 +538,6 @@ export class DocumentRegistry implements IDisposable {
     ) {
       throw Error(`Factory ${factory} cannot view file type ${fileType}`);
     }
-    console.log(fileType, factory);
     this._defaultWidgetFactoryOverrides[fileType] = factory;
   }
 
@@ -772,23 +773,6 @@ export class DocumentRegistry implements IDisposable {
   private _isDisposed = false;
 }
 
-interface IEntrypoint {
-  /**
-   *  The name of the widget factory.
-   */
-  extension: string;
-
-  /**
-   * function tha will active the widget factory
-   */
-  activate: () => void;
-
-  /**
-   * data from the package json
-   */
-  data: any;
-}
-
 /**
  * The namespace for the `DocumentRegistry` class statics.
  */
@@ -820,9 +804,9 @@ export namespace DocumentRegistry {
     translator?: ITranslator;
 
     /**
-     * The entrypoints for the widgets.
+     * Document registry entry points.
      */
-    entrypoints?: IEntrypoint[];
+    entrypoints?: Record<string, IEntrypoint[]>;
   }
 
   /**
