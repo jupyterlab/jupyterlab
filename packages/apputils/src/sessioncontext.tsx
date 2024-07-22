@@ -1511,22 +1511,50 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 }
 
 export namespace SessionContextDialogs {
-  type KernelOptions = {
+  /**
+   * An interface that abstracts the available kernel switching choices.
+   */
+  export interface IKernelOptions {
+    /**
+     * Whether kernel options should be disabled.
+     */
     disabled?: boolean;
-    groups: Array<KernelOptionGroup>;
-  };
 
-  type KernelOption = {
-    selected?: boolean;
-    text: string;
-    title?: string;
-    value: string;
-  };
+    /**
+     * An array of kernel option groups that correspond with `<optgroup>`.
+     */
+    groups: Array<{
+      /**
+       * The option group label.
+       */
+      label: string;
 
-  type KernelOptionGroup = {
-    label: string;
-    options: Array<KernelOption>;
-  };
+      /**
+       * Individual kernel (and spec) options that correspond with `<option>`.
+       */
+      options: Array<{
+        /**
+         * Whether the option is selected.
+         */
+        selected?: boolean;
+
+        /**
+         * The display text of the option.
+         */
+        text: string;
+
+        /**
+         * The display title of the option.
+         */
+        title?: string;
+
+        /**
+         * The underlying (stringified JSON) value of the option.
+         */
+        value: string;
+      }>;
+    }>;
+  }
 
   /**
    * Returns available kernel options grouped based on session context.
@@ -1563,11 +1591,8 @@ export namespace SessionContextDialogs {
   export function kernelOptions(
     sessionContext: ISessionContext,
     translator: ITranslator | null = null
-  ): KernelOptions {
-    const options: KernelOptions = {
-      disabled: false,
-      groups: []
-    };
+  ): IKernelOptions {
+    const options: IKernelOptions = { disabled: false, groups: [] };
     // Create mapping of sessions and kernel ids.
     const kernels = Array.from(
       sessionContext.kernelManager?.running() ??
@@ -1641,7 +1666,7 @@ export namespace SessionContextDialogs {
       kernel: Kernel.IModel,
       displayName?: string,
       session?: Session.IModel
-    ): KernelOption => {
+    ): IKernelOptions['groups'][number]['options'][number] => {
       const sessionName = session
         ? session.name || PathExt.basename(session.path)
         : kernel.name || trans.__('Unknown Kernel');
@@ -1655,7 +1680,9 @@ export namespace SessionContextDialogs {
         value: JSON.stringify({ id: kernel.id })
       };
     };
-    const optionForSpec = (spec: KernelSpec.ISpecModel): KernelOption => ({
+    const optionForSpec = (
+      spec: KernelSpec.ISpecModel
+    ): IKernelOptions['groups'][number]['options'][number] => ({
       text: spec.display_name,
       value: JSON.stringify({ name: spec.name })
     });
@@ -1670,19 +1697,19 @@ export namespace SessionContextDialogs {
     // Create kernel option groups based on whether language preference exists.
     if (language) {
       // Add all kernelspecs, separating out the preferred language first.
-      const preferred: KernelOptionGroup = {
+      const preferred: IKernelOptions['groups'][number] = {
         label: labels.startPreferred,
         options: []
       };
-      const other: KernelOptionGroup = {
+      const other: IKernelOptions['groups'][number] = {
         label: labels.startOther,
         options: []
       };
-      const preferredRunning: KernelOptionGroup = {
+      const preferredRunning: IKernelOptions['groups'][number] = {
         label: labels.connectToPreferred,
         options: []
       };
-      const otherRunning: KernelOptionGroup = {
+      const otherRunning: IKernelOptions['groups'][number] = {
         label: labels.connectToOther,
         options: []
       };
