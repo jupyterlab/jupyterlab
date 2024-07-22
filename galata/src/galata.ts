@@ -286,7 +286,7 @@ export namespace galata {
       await Mock.mockRunners(page, kernels, 'kernels');
     }
     if (sessions) {
-      await Mock.mockRunners(page, sessions, 'sessions');
+      await Mock.mockRunners(page, sessions, 'sessions', kernels ?? undefined);
     }
     if (terminals) {
       await Mock.mockRunners(page, terminals, 'terminals');
@@ -431,7 +431,7 @@ export namespace galata {
      *
      * The id will be prefixed by '/'.
      */
-    export const kernels = /.*\/api\/kernels(?<id>\/[@:-\w]+)?/;
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
 
     /**
      * Sessions API
@@ -822,7 +822,8 @@ export namespace galata {
     export function mockRunners(
       page: Page,
       runners: Map<string, any>,
-      type: 'kernels' | 'sessions' | 'terminals'
+      type: 'kernels' | 'sessions' | 'terminals',
+      kernels?: Map<string, Kernel.IModel>
     ): Promise<void> {
       const routeRegex = routes[type];
       // Listen for closing connection (may happen when request are still being processed)
@@ -941,6 +942,10 @@ export namespace galata {
             const data = await response.json();
             // Update stored runners
             runners.set(type === 'terminals' ? data.name : data.id, data);
+            // Update kernels
+            if (kernels && type === 'sessions' && data.kernel.id) {
+              kernels.set(data.kernel.id, data.kernel);
+            }
 
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
@@ -966,6 +971,10 @@ export namespace galata {
             const data = await response.json();
             const id = type === 'terminals' ? data.name : data.id;
             runners.set(id, data);
+            // Update kernels
+            if (kernels && type === 'sessions' && data.kernel.id) {
+              kernels.set(data.kernel.id, data.kernel);
+            }
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
                 status: type === 'terminals' ? 200 : 201,

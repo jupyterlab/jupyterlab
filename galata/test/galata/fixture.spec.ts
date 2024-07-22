@@ -108,14 +108,21 @@ test.describe('mockState', () => {
 test.describe('kernels', () => {
   test('should return the active kernels', async ({ page, kernels }) => {
     await page.notebook.createNew();
+    await page.locator('text= | Idle').waitFor();
 
-    // Wait for the poll to tick
-    await page.waitForResponse(
-      async response =>
-        response.url().includes('api/kernels') &&
-        response.request().method() === 'GET' &&
-        ((await response.json()) as any[]).length === 1
-    );
+    await page
+      .getByRole('tab', { name: 'Running Terminals and Kernels' })
+      .click();
+
+    await Promise.all([
+      page.waitForResponse(
+        async response =>
+          response.url().includes('api/kernels') &&
+          response.request().method() === 'GET' &&
+          ((await response.json()) as any[]).length === 1
+      ),
+      page.getByRole('button', { name: 'Refresh List' }).click()
+    ]);
 
     expect.soft(kernels.size).toEqual(1);
 
@@ -124,6 +131,7 @@ test.describe('kernels', () => {
     await page.click('.jp-Dialog .jp-mod-accept');
     await page.locator('text= | Idle').waitFor();
 
+    await page.getByRole('button', { name: 'Refresh List' }).click();
     expect(kernels.size).toEqual(2);
   });
 
