@@ -23,12 +23,6 @@
         "icon": "ui-components:delete",
         "name": "delete-cell"
       }
-    ],
-    "CellPrompt": [
-      {
-        "name": "run-cell-and-advance",
-        "command": "notebook:run-cell-and-select-next"
-      }
     ]
   },
   "jupyter.lab.transform": true,
