@@ -8,7 +8,7 @@ JupyterLab Accessibility Statement
 
 .. note::
 
-    This statement was last updated on the 19th of April 2024.
+    This statement was last updated on the 22nd of July 2024.
 
 Jupyter audits
 --------------
@@ -36,7 +36,7 @@ Jupyter accessibility statements are living documents. This statement was first 
 Conformance status
 """"""""""""""""""
 
-The `Web Content Accessibility Guidelines (WCAG) <https://www.w3.org/WAI/standards-guidelines/wcag>`_ defines requirements for designers and developers to improve accessibility for people with disabilities. It defines three levels of conformance: Level A, Level AA, and Level AAA. JupyterLab is nonconforming with WCAG 2.1 level AA. Nonconforming means that the content does not meet the accessibility standard.
+The `Web Content Accessibility Guidelines (WCAG) <https://www.w3.org/WAI/standards-guidelines/wcag>`_ defines requirements for designers and developers to improve accessibility for people with disabilities. It defines three levels of conformance: Level A, Level AA, and Level AAA. JupyterLab is nonconforming with WCAG 2.0 Level AA (equivalent to Section 508 in the United States). Nonconforming means that the content does not meet the accessibility standard.
 
 JupyterLab's accessibility does not exist in isolation. JupyterLab inherits much from the many projects it is built upon and its accessibility conformance may impact projects built off of JupyterLab or its components. The accessibility of this ecosystem is interlinked, so conformance may need to be resolved at different levels in order to impact JupyterLab positively.
 
@@ -69,7 +69,7 @@ JupyterLab is not compatible with
 **Browsers (mobile and desktop):**
 
 * Internet Explorer
-* Edge
+* Edge < 79
 
 **Assistive technology:**
 
