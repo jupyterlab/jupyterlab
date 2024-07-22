@@ -105,6 +105,33 @@ test.describe('mockState', () => {
   });
 });
 
+test.describe('kernels', () => {
+  test('should return the active kernels', async ({ page, kernels }) => {
+    await page.notebook.createNew();
+
+    // Wait for the poll to tick
+    await page.waitForResponse(
+      async response =>
+        response.url().includes('api/kernels') &&
+        response.request().method() === 'GET' &&
+        ((await response.json()) as any[]).length === 1
+    );
+
+    expect.soft(kernels.size).toEqual(1);
+
+    await page.menu.clickMenuItem('File>New>Console');
+    await page.locator('.jp-Dialog').waitFor();
+    await page.click('.jp-Dialog .jp-mod-accept');
+    await page.locator('text= | Idle').waitFor();
+
+    expect(kernels.size).toEqual(2);
+  });
+
+  test('should have no kernels at first', ({ kernels }) => {
+    expect(kernels.size).toEqual(0);
+  });
+});
+
 test.describe('sessions', () => {
   test('should return the active sessions', async ({ page, sessions }) => {
     await page.notebook.createNew();
