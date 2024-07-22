@@ -10,6 +10,25 @@ JupyterLab Accessibility Statement
 
     This statement was last updated on the 22nd of July 2024.
 
+Jupyter Notebook versus JupyterLab
+----------------------------------
+
+For accessibility purposes, it is recommended to use `Jupyter Notebook
+<https://jupyter-notebook.readthedocs.io/en/stable/>` over JupyterLab.
+
+A comparison of the two apps will help to explain this recommendation. Jupyter
+Notebook and JupyterLab are both web apps for authoring computational notebooks.
+But Jupyter Notebook has a document-centric user interface whereas JupyterLab
+provides multiple panels and tabs designed to work with several notebooks and
+extensions in the same interface. Jupyter Notebook is more like Google Docs, in
+which each document opens in a separate browser tab. JupyterLab is more like VS
+Code for the Web, in which the app provides its own, in-app tabs so that
+multiple documents can be opened without having to open more browser tabs.
+Because Jupyter Notebook has a simplified UI, it poses fewer accessibility
+challenges than JupyterLab (in particular, it's easier to zoom in). But because
+it shares the same codebase, it also benefits from all of the accessibility work
+done in JupyterLab. This is why Jupyter Notebook is recommended over JupyterLab.
+
 Jupyter audits
 --------------
 
