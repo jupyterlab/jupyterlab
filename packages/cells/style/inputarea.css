@@ -27,6 +27,7 @@
 
 .jp-InputPrompt {
   flex: 0 0 var(--jp-cell-prompt-width);
+  min-height: 28px;
   width: var(--jp-cell-prompt-width);
   color: var(--jp-cell-inprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
@@ -122,6 +123,21 @@
 
   .jp-InputPrompt {
     flex: 0 0 auto;
+  }
+
+  .jp-InputArea-prompt-indicator {
     text-align: left;
+    position: absolute;
+    top: var(--jp-code-padding);
+    left: var(--jp-code-padding);
+  }
+
+  .jp-InputArea-prompt-toolbar {
+    position: absolute;
+    top: -3px;
+    left: var(--jp-code-padding);
+
+    /* Trim the toolbar on the top, bottom, and right. */
+    clip-path: inset(3px 16px 6px 0);
   }
 }
