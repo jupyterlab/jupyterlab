@@ -50,7 +50,7 @@ function EnvBlock({handleChange, id, defaultName,defaultEnvValue, translator }:E
 return (
    <>
    <label>
-  {`${trans.__('Name:')}`}
+  <span>{`${trans.__('Name:')}`}</span>
     <input
       type="text"
       name="env_name"
@@ -61,7 +61,7 @@ return (
   </label>
   <br />
   <label>
-  {`${trans.__('Value')}`}
+  <span>{`${trans.__('Value:')}`}</span>
     <input
       type="text"
       name="env_value"
@@ -115,6 +115,7 @@ function CustomEnv({updateFormData, defaultEnvValues, translator }: EnvProps) {
   console.log('countEnvBlock');
   console.log(countEnvBlock);
   for(let index=1; index<=countEnvBlock; index++) {
+    console.log('loop');
     let envData = formData[`${index}`] as PartialJSONObject | undefined;
     console.log('---envData---');
     console.dir(envData);
@@ -128,15 +129,16 @@ function CustomEnv({updateFormData, defaultEnvValues, translator }: EnvProps) {
     envBlock.push(<EnvBlock id={`${index}`} key={index} handleChange={handleChange} defaultName={defaultName as string} defaultEnvValue={defaultEnvValue as string} translator={translator}/>)
   }
 
-  let header = `${trans.__('Setup custom env variables:')}`;
+  const header = `${trans.__('Setup custom env variables:')}`;
+  const addMoreVarLabel= trans.__('Add');
  
   return (
     <div>
-      <h4 className="jp-Dialog-header">{header}</h4>
-      <div><button onClick={addMoreEnvVariables}>Add more env variables</button></div>
-      <form onSubmit={handleSubmit}>
+      <div className="jp-Dialog-header">{header}</div>
+      <form className="js-Dialog-form-custom-env" onSubmit={handleSubmit}>
        {envBlock}
       </form>
+      <button onClick={addMoreEnvVariables} className="jp-Dialog-button jp-mod-accept jp-mod-styled js-custom-env"><div className="jp-Dialog-buttonIcon"></div><div className="jp-Dialog-buttonLabel" title="" aria-label={addMoreVarLabel}>{addMoreVarLabel}</div></button>
     </div>
   );
 }

@@ -1408,14 +1408,22 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     console.dir(model);
     //const dialogResult = result.value as Kernel.IModel;
 
-    if (hasCheckbox && result.isChecked !== null) {
-      if (model && sessionContext.kernelPreference?.customEnvVars) {
-        sessionContext.kernelPreference.customEnvVars = undefined;
-      }
+    if (model && sessionContext.kernelPreference?.customEnvVars) {
+      console.log('fr')
+      sessionContext.kernelPreference.customEnvVars = undefined;
+    }
+    console.log('model.custom_env_vars meaning');
+    console.dir(model.custom_env_vars);
+    if (model.custom_env_vars) {
+      console.log('model.custom_env_vars');
+      console.dir(model.custom_env_vars);
+      sessionContext.kernelPreference.customEnvVars = model.custom_env_vars;
+    }
 
-      if (model && model.custom_env_vars) {
-        sessionContext.kernelPreference.customEnvVars = model.custom_env_vars;
-      }
+    console.log('sessionContext.kernelPreference.customEnvVars');
+    console.dir(sessionContext.kernelPreference.customEnvVars);
+
+    if (hasCheckbox && result.isChecked !== null) {
 
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
@@ -1645,6 +1653,9 @@ namespace Private {
       'data-custom-env-vars',''
     );
     let defaultEnvValues = sessionContext.kernelPreference?.customEnvVars as PartialJSONObject;
+
+    console.log('session context defaultEnvValues');
+    console.dir(defaultEnvValues);
 
     let customEnvBlock = new CustomEnvWidget(envConfiguration, defaultEnvValues, formData => {
       envConfiguration = formData as PartialJSONObject;

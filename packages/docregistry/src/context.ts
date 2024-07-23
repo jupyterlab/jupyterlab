@@ -538,7 +538,8 @@ export class Context<
     if (this.isDisposed) {
       return;
     }
-
+console.log('_populate this.sessionContext.kernelPreference.customEnvVars');
+console.dir(this.sessionContext.kernelPreference.customEnvVars);
     if (
       (!customEnvVars || Object.keys(customEnvVars).length === 0) &&
       this.sessionContext.kernelPreference.customEnvVars
@@ -546,6 +547,9 @@ export class Context<
       customEnvVars =
         this.sessionContext.kernelPreference.customEnvVars;
     }
+
+    console.log('customEnvVars');
+    console.dir(customEnvVars);
 
     // Update the kernel preference.
     const name =
