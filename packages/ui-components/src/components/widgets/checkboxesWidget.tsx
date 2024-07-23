@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import React, { ChangeEvent, FocusEvent } from 'react';
+import React, { FocusEvent } from 'react';
 import { Checkbox } from '@jupyter/react-components';
 import {
   ariaDescribedByIds,
@@ -40,19 +40,15 @@ export default function CheckboxesWidget<
   const { enumOptions, enumDisabled, inline, emptyValue } = options;
   const checkboxesValues = Array.isArray(value) ? value : [value];
 
-  const _onChange =
-    (index: number) =>
-    ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
-      if (checked) {
-        onChange(
-          enumOptionsSelectValue<S>(index, checkboxesValues, enumOptions)
-        );
-      } else {
-        onChange(
-          enumOptionsDeselectValue<S>(index, checkboxesValues, enumOptions)
-        );
-      }
-    };
+  const _onChange = (index: number) => (event: CustomEvent) => {
+    if (event.detail.checked) {
+      onChange(enumOptionsSelectValue<S>(index, checkboxesValues, enumOptions));
+    } else {
+      onChange(
+        enumOptionsDeselectValue<S>(index, checkboxesValues, enumOptions)
+      );
+    }
+  };
 
   const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) =>
     onBlur(id, enumOptionsValueForIndex<S>(value, enumOptions, emptyValue));

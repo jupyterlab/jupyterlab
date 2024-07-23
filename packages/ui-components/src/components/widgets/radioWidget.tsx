@@ -59,10 +59,12 @@ export default function CustomRadioWidget<
 
   const { enumOptions, enumDisabled, inline, emptyValue } = options;
 
-  const _onChange = ({
-    target: { checked }
-  }: React.ChangeEvent<HTMLElement & { checked: boolean }>) =>
-    onChange(checked);
+  const _onChange = ({ target }: CustomEvent<HTMLInputElement>) => {
+    const inputTarget = target as HTMLInputElement;
+    if (inputTarget !== null) {
+      onChange(inputTarget.checked);
+    }
+  };
   const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) =>
     onBlur(id, enumOptionsValueForIndex<S>(value, enumOptions, emptyValue));
   const _onFocus = ({ target: { value } }: FocusEvent<HTMLInputElement>) =>

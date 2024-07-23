@@ -59,12 +59,17 @@ function CustomSelect<
 
   const _onBlur = () => onBlur(id, selectedIndexes);
   const _onFocus = () => onFocus(id, selectedIndexes);
-  const _onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const _onChange = (event: CustomEvent) => {
+    const details = event.detail;
     const newValue = multiple
-      ? Array.from(event.target.selectedOptions, option => option.value)
-      : event.target.value;
+      ? Array.from(
+          details.selectedOptions as HTMLOptionElement[],
+          option => option.value
+        )
+      : (details.selectedOptions as HTMLOptionElement).value;
     onChange(enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal));
   };
+
   const showPlaceholderOption = !multiple && schema.default === undefined;
 
   return (

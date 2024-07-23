@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {
   ariaDescribedByIds,
   FormContextType,
@@ -33,10 +32,12 @@ export default function CustomCheckboxWidget<
   // the "required" attribute if the field value must be "true", due to the
   // "const" or "enum" keywords
   const required = schemaRequiresTrueValue<S>(schema);
-  const _onChange = ({
-    target: { checked }
-  }: React.ChangeEvent<HTMLElement & { checked: boolean }>) =>
-    onChange(checked);
+  const _onChange = ({ target }: CustomEvent<HTMLInputElement>) => {
+    const inputTarget = target as HTMLInputElement;
+    if (inputTarget !== null) {
+      onChange(inputTarget.checked);
+    }
+  };
   const _onBlur = ({
     target
   }: React.FocusEvent<HTMLElement & { value: string }>) =>

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ChangeEvent, FocusEvent, useCallback } from 'react';
+import { FocusEvent, useCallback } from 'react';
 import {
   ariaDescribedByIds,
   FormContextType,
@@ -36,8 +36,12 @@ function TextareaWidget<
   onFocus
 }: WidgetProps<T, S, F>) {
   const handleChange = useCallback(
-    ({ target: { value } }: ChangeEvent<HTMLTextAreaElement>) =>
-      onChange(value === '' ? options.emptyValue : value),
+    ({ target }: CustomEvent) =>
+      onChange(
+        (target as any).value === ''
+          ? options.emptyValue
+          : (target as any).value
+      ),
     [onChange, options.emptyValue]
   );
 
@@ -62,7 +66,7 @@ function TextareaWidget<
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      readonly={readonly}
+      readOnly={readonly}
       autofocus={autofocus}
       onBlur={handleBlur}
       onFocus={handleFocus}
