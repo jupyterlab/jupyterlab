@@ -77,6 +77,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     const runButton = await page
+      .locator('.jp-NotebookPanel-toolbar')
       .locator('.jp-Toolbar-item')
       .locator('[data-command="notebook:run-cell-and-select-next"]')
       .getByRole('button');
