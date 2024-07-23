@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Button } from '@jupyter/react-components';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   FilterBox,
@@ -13,7 +14,6 @@ import {
   ToolbarButton,
   ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
-import { Button } from '@jupyter/react-components';
 import { Message } from '@lumino/messaging';
 import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
@@ -139,7 +139,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                             entry.name,
                             entry.latest_version
                           )}
-                          scale="xsmall"
                           appearance="stealth"
                         >
                           {trans.__('Update to %1', entry.latest_version)}
@@ -148,7 +147,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       <Button
                         onClick={() => props.performAction!('uninstall', entry)}
                         title={trans.__('Uninstall "%1"', entry.name)}
-                        scale="xsmall"
                         appearance="stealth"
                       >
                         {trans.__('Uninstall')}
@@ -159,7 +157,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                     <Button
                       onClick={() => props.performAction!('disable', entry)}
                       title={trans.__('Disable "%1"', entry.name)}
-                      scale="xsmall"
                       appearance="stealth"
                     >
                       {trans.__('Disable')}
@@ -168,7 +165,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                     <Button
                       onClick={() => props.performAction!('enable', entry)}
                       title={trans.__('Enable "%1"', entry.name)}
-                      scale="xsmall"
                       appearance="stealth"
                     >
                       {trans.__('Enable')}
@@ -180,7 +176,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   <Button
                     onClick={() => props.performAction!('install', entry)}
                     title={trans.__('Install "%1"', entry.name)}
-                    scale="xsmall"
                     appearance="stealth"
                   >
                     {trans.__('Install')}

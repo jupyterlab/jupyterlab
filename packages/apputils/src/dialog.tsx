@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Button } from '@jupyter/react-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { closeIcon, ReactWidget, Styling } from '@jupyterlab/ui-components';
-import { Button } from '@jupyter/react-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
@@ -888,7 +888,6 @@ export namespace Dialog {
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
                 title={trans.__('Cancel')}
-                scale="xsmall"
               >
                 <closeIcon.react tag={null} />
               </Button>
@@ -1047,12 +1046,18 @@ export namespace Dialog {
       return name;
     }
 
-    createItemAppearance(
+    /**
+     * Set the appearance of the button.
+     *
+     * @param data Button description
+     * @returns The value for the jp-button `appearance` attribute
+     */
+    protected createItemAppearance(
       data: IButton
     ): 'accent' | 'error' | 'lightweight' | 'neutral' | 'outline' | 'stealth' {
-      if(data.displayType === 'warn') {
+      if (data.displayType === 'warn') {
         return 'error';
-      } else if(data.accept) {
+      } else if (data.accept) {
         return 'accent';
       } else {
         return 'neutral';
