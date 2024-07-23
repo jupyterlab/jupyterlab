@@ -68,6 +68,7 @@ export function addOpenTabsSessionManager(
 
   managers.add({
     name: trans.__('Open Tabs'),
+    supportsMultipleViews: false,
     running: () => {
       return Array.from(labShell.widgets('main')).map((widget: Widget) => {
         signaler.addWidget(widget);

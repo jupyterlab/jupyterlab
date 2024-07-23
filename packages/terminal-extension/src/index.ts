@@ -314,6 +314,7 @@ function addRunningSessionManager(
 
   managers.add({
     name: trans.__('Terminals'),
+    supportsMultipleViews: false,
     running: () =>
       Array.from(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),

@@ -88,3 +88,29 @@ export function getReactAttrs(
       return d;
     }, {});
 }
+
+// Toolkit helpers
+
+/**
+ * Test whether an object is a tree item or not.
+ * @param el Element to test
+ * @returns Result
+ */
+function isTreeItemElement(el: HTMLElement | null): boolean {
+  return el instanceof HTMLElement && el.getAttribute('role') === 'treeitem';
+}
+
+/**
+ * Find the tree item encapsulating the element.
+ *
+ * @param el Starting element
+ * @returns The tree item
+ */
+export function getTreeItemElement(el: HTMLElement): HTMLElement | null {
+  let item = el as HTMLElement | null;
+  while (item && !isTreeItemElement(item)) {
+    item = item.parentElement;
+  }
+
+  return isTreeItemElement(item) ? item : null;
+}

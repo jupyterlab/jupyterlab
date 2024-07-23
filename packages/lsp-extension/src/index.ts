@@ -283,6 +283,7 @@ function addRunningSessionManager(
   let currentRunning: RunningLanguageServer[] = [];
   managers.add({
     name: trans.__('Language servers'),
+    supportsMultipleViews: false,
     running: () => {
       const connections = new Set([...lsManager.connections.values()]);
 

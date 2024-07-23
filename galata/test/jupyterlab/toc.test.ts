@@ -23,7 +23,9 @@ test.describe('Table of Contents', () => {
 
     await page.sidebar.openTab('table-of-contents');
 
-    await page.click('.jp-toc-numberingButton');
+    await page
+      .getByRole('button', { name: 'Show heading number in the' })
+      .click();
   });
 
   test.afterEach(async ({ page }) => {
@@ -50,13 +52,11 @@ test.describe('Table of Contents', () => {
     const tocPanel = page.sidebar.getContentPanelLocator(
       (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
-    const numberingButton = tocPanel.locator(
-      'jp-button[data-command="toc:display-numbering"]'
-    );
-    await expect(numberingButton).toHaveCount(1);
 
     const imageName = 'toggle-numbered-list.png';
-    await numberingButton.click();
+    await page
+      .getByRole('button', { name: 'Show heading number in the' })
+      .click();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
   });
@@ -68,26 +68,17 @@ test.describe('Table of Contents', () => {
       (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
 
-    await Promise.all([
-      page.locator(
-        '.jp-TableOfContents-tree >> .jp-tocItem-active >> text="2. Multiple output types"'
-      ),
-      page
-        .locator('.jp-TableOfContents-tree >> text="2. Multiple output types"')
-        .click({
-          button: 'right'
-        })
-    ]);
+    await page.getByRole('treeitem', { name: 'Multiple output types' }).click({
+      button: 'right'
+    });
 
     const menu = await page.menu.getOpenMenuLocator();
 
     await menu
-      ?.locator('text=Select and Run Cell(s) for this Heading')
-      ?.click();
+      ?.getByRole('menuitem', { name: 'Select and Run Cell(s) for' })
+      .click();
 
-    await page
-      .locator('.jp-TableOfContents-tree >> text="2. HTML title"')
-      .waitFor();
+    await page.getByRole('treeitem', { name: 'HTML title' }).waitFor();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'notebook-output-headings.png'
