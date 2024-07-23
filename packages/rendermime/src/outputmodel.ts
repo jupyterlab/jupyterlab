@@ -5,6 +5,7 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   IObservableJSON,
+  IObservableString,
   ObservableJSON,
   ObservableString
 } from '@jupyterlab/observables';
@@ -42,7 +43,7 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
   /**
    * The observable data.
    */
-  readonly observableData: IObservableJSON;
+  readonly observableText?: IObservableString;
 
   /**
    * Whether the output is trusted.
@@ -90,16 +91,9 @@ export class OutputModel implements IOutputModel {
   constructor(options: IOutputModel.IOptions) {
     const { data, metadata, trusted } = Private.getBundleOptions(options);
     this._rawData = data;
-    const newData: { [key: string]: any } = {};
-    if (options.value !== undefined) {
-      for (const key in options.value) {
-        newData[key] = options.value[key];
-      }
-      if (nbformat.isStream(options.value)) {
-        newData['text'] = new ObservableString(options.value['text'] as string);
-      }
+    if (options.value !== undefined && nbformat.isStream(options.value)) {
+      this._text = new ObservableString(options.value['text'] as string);
     }
-    this._data = new ObservableJSON({ values: newData });
     this._metadata = new ObservableJSON({ values: metadata as JSONObject });
     this._rawMetadata = metadata;
     this.trusted = trusted;
@@ -149,7 +143,7 @@ export class OutputModel implements IOutputModel {
    * Dispose of the resources used by the output model.
    */
   dispose(): void {
-    this._data.dispose();
+    this._text?.dispose();
     this._metadata.dispose();
     Signal.clearData(this);
   }
@@ -161,8 +155,8 @@ export class OutputModel implements IOutputModel {
     return Private.getData(this.toJSON());
   }
 
-  get observableData(): IObservableJSON {
-    return this._data;
+  get observableText(): IObservableString | undefined {
+    return this._text;
   }
 
   /**
@@ -181,7 +175,6 @@ export class OutputModel implements IOutputModel {
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
-      this._updateObservable(this._data, options.data);
       this._rawData = options.data;
     }
     if (options.metadata) {
@@ -199,11 +192,8 @@ export class OutputModel implements IOutputModel {
     for (const key in this._raw) {
       output[key] = Private.extract(this._raw, key);
     }
-    for (const key of this._data.keys()) {
-      if (key === 'text') {
-        const text = (this._data.get(key) as unknown as ObservableString).text;
-        output['text'] = text;
-      }
+    if (this._text !== undefined) {
+      output['text'] = this._text.text;
     }
     switch (this.type) {
       case 'display_data':
@@ -251,7 +241,7 @@ export class OutputModel implements IOutputModel {
   private _raw: PartialJSONObject = {};
   private _rawMetadata: ReadonlyPartialJSONObject;
   private _rawData: ReadonlyPartialJSONObject;
-  private _data: IObservableJSON;
+  private _text?: IObservableString = undefined;
   private _metadata: IObservableJSON;
 }
 

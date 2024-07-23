@@ -13,11 +13,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import {
-  IObservableString,
-  ObservableString,
-  ObservableValue
-} from '@jupyterlab/observables';
+import { IObservableString, ObservableValue } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -765,9 +761,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         case 'add': {
           for (const output of event.newValues) {
             if (output.type === 'stream') {
-              (
-                output.observableData.get('text') as unknown as ObservableString
-              ).changed.connect(
+              output.observableText!.changed.connect(
                 (
                   sender: IObservableString,
                   textEvent: IObservableString.IChangedArgs
