@@ -97,8 +97,7 @@ function CustomEnv({updateFormData, defaultEnvValues, translator }: EnvProps) {
   }
 
   const handleChange = (envVars: PartialJSONObject) => {
-    console.log('envVars');
-    console.dir(envVars);
+
     setInputs({
       ...formData,
       ...envVars
@@ -112,25 +111,17 @@ function CustomEnv({updateFormData, defaultEnvValues, translator }: EnvProps) {
   };
 
   let envBlock = [];
-  console.log('countEnvBlock');
-  console.log(countEnvBlock);
   for(let index=1; index<=countEnvBlock; index++) {
-    console.log('loop');
     let envData = formData[`${index}`] as PartialJSONObject | undefined;
-    console.log('---envData---');
-    console.dir(envData);
+
     let defaultName = envData && envData.name? envData.name: '';
     let defaultEnvValue = envData && envData.value? envData.value: '';
-    console.log('defaultName');
-    console.log(defaultName);
 
-    console.log('defaultEnvValue');
-    console.log(defaultEnvValue);
     envBlock.push(<EnvBlock id={`${index}`} key={index} handleChange={handleChange} defaultName={defaultName as string} defaultEnvValue={defaultEnvValue as string} translator={translator}/>)
   }
 
   const header = `${trans.__('Setup custom env variables:')}`;
-  const addMoreVarLabel= trans.__('Add');
+  const addMoreVarLabel= trans.__('Add more');
  
   return (
     <div>
@@ -176,20 +167,14 @@ export class CustomEnvWidget extends ReactWidget {
   render(): JSX.Element {
     let k = 1;
     let tmp = {} as PartialJSONObject;
-    console.log('this.defaultEnvValues');
-    console.dir(this.defaultEnvValues)
     for (let index in this.defaultEnvValues) {
       let envVarsIndex = `${k}`;
-      console.log('envVarsIndex');
-      console.log(envVarsIndex);
       tmp[envVarsIndex] = {
         'name': index,
         'value':this.defaultEnvValues[index]
       };
       k+=1;
     }
-    console.log('default obj');
-    console.dir(tmp);
     return (
       <CustomEnv
         updateFormData={this.updateFormData} defaultEnvValues={tmp} translator={this.translator}

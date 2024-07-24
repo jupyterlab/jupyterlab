@@ -1420,9 +1420,6 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       sessionContext.kernelPreference.customEnvVars = model.custom_env_vars;
     }
 
-    console.log('sessionContext.kernelPreference.customEnvVars');
-    console.dir(sessionContext.kernelPreference.customEnvVars);
-
     if (hasCheckbox && result.isChecked !== null) {
 
       sessionContext.kernelPreference = {
@@ -1430,6 +1427,9 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
         autoStartDefault: result.isChecked
       };
     }
+
+    console.log('sessionContext.kernelPreference.customEnvVars');
+    console.dir(sessionContext.kernelPreference.customEnvVars);
 
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();

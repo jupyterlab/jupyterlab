@@ -136,6 +136,8 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
+import { ISpecModel } from '@jupyterlab/services/src/kernelspec/restapi';
+import { CustomEnvWidget } from '@jupyterlab/apputils/src/custom_env';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -329,6 +331,8 @@ namespace CommandIDs {
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
+
+  export const setupCustomEnv = 'notebook:setup-custom-env';
 }
 
 /**
@@ -1988,6 +1992,72 @@ function activateNotebookHandler(
     }
   });
 
+  const showCustomEnvVarsDialog = async(
+    spec: ISpecModel | undefined
+  ) => {
+    let envConfiguration: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Setup'),
+        ariaLabel: trans.__('setup custom env variables')
+      })
+    ];
+  
+    let defaultEnvValues = {}
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new CustomEnvWidget(envConfiguration, defaultEnvValues, formData => {
+        envConfiguration = formData as PartialJSONObject;
+        console.log('envConfiguration');
+        console.dir(envConfiguration);
+      }, translator),
+      buttons
+    });
+
+    const result = await dialog.launch();
+  
+    if (!result.button.accept) {
+      return;
+    }
+    if (result.value) {
+      //saveve for each kernel spec
+    }
+  };
+
+  const LAUNCHER_LABEL = "jp-LauncherCard";
+  const isLauncherLabel = (node: HTMLElement) =>
+    node.classList.contains(LAUNCHER_LABEL);
+  let selectedSpec: ISpecModel | undefined;
+
+  // add command for context menu on Launch app icon
+  app.commands.addCommand(CommandIDs.setupCustomEnv, {
+    label: trans.__('Setup custom env variables'),
+    caption: trans.__('Setup custom env variables for running a kernel'),
+    execute: async (args?: any) => {
+      const node = app.contextMenuHitTest(isLauncherLabel);
+      if (!node) {
+        return;
+      }
+      const specs = services.kernelspecs.specs;
+      if (!specs) {
+        return;
+      }
+      let defaultName = node.getAttribute('titile'); 
+      for (const name in specs.kernelspecs) {
+        const spec = specs.kernelspecs[name];
+        if (spec && spec.display_name === defaultName) {
+          selectedSpec = spec;
+        }
+      }
+      showCustomEnvVarsDialog(selectedSpec);
+    }
+  });
+
+ 
   // Add a launcher item if the launcher is available.
   if (launcher) {
     void services.ready.then(() => {
@@ -2026,6 +2096,12 @@ function activateNotebookHandler(
       };
       onSpecsChanged();
       services.kernelspecs.specsChanged.connect(onSpecsChanged);
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.setupCustomEnv,
+      selector: '.jp-LauncherCard',
+      rank: 0
     });
   }
 
