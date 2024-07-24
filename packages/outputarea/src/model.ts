@@ -335,18 +335,16 @@ export class OutputAreaModel implements IOutputAreaModel {
       // This creates a text change event.
       const prev = this.list.get(this.length - 1) as IOutputModel;
       const curText = prev.streamText!;
-      const newText = value.text as string;
+      const newText =
+        typeof value.text === 'string' ? value.text : value.text.join('');
       Private.addText(curText, newText);
       return this.length;
     }
 
     let newText = '';
     if (nbformat.isStream(value)) {
-      if (typeof value.text === 'string') {
-        newText = value.text as string;
-      } else {
-        newText = (value.text as string[]).join();
-      }
+      newText =
+        typeof value.text === 'string' ? value.text : value.text.join('');
       value.text = '';
     }
 

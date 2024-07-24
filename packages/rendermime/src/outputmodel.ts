@@ -92,7 +92,11 @@ export class OutputModel implements IOutputModel {
     const { data, metadata, trusted } = Private.getBundleOptions(options);
     this._rawData = data;
     if (options.value !== undefined && nbformat.isStream(options.value)) {
-      this._text = new ObservableString(options.value['text'] as string);
+      this._text = new ObservableString(
+        typeof options.value.text === 'string'
+          ? options.value.text
+          : options.value.text.join('')
+      );
     }
     this._metadata = new ObservableJSON({ values: metadata as JSONObject });
     this._rawMetadata = metadata;
