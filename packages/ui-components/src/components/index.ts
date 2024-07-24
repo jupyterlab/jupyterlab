@@ -19,3 +19,4 @@ export * from './table';
 export * from './toolbar';
 export * from './vdom';
 export * from './windowedlist';
+export * from './customenvvars';

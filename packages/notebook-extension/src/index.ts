@@ -137,7 +137,7 @@ import {
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
 import { ISpecModel } from '@jupyterlab/services/src/kernelspec/restapi';
-import { CustomEnvWidget } from '@jupyterlab/apputils/src/custom_env';
+import { CustomEnvWidget } from '@jupyterlab/ui-components/src/components';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -2009,7 +2009,7 @@ function activateNotebookHandler(
   
     let defaultEnvValues = {}
     const dialog = new Dialog({
-      title: trans.__('Select Kernel'),
+      title: trans.__('Setup custom environment variables'),
       body: new CustomEnvWidget(envConfiguration, defaultEnvValues, formData => {
         envConfiguration = formData as PartialJSONObject;
         console.log('envConfiguration');
@@ -2023,6 +2023,9 @@ function activateNotebookHandler(
     if (!result.button.accept) {
       return;
     }
+
+    console.log('result.value');
+    console.dir(result.value);
     if (result.value) {
       //saveve for each kernel spec
     }
@@ -2046,13 +2049,20 @@ function activateNotebookHandler(
       if (!specs) {
         return;
       }
+
+      console.log('node');
+      console.dir(node);
       let defaultName = node.getAttribute('titile'); 
+        console.log('defaultName');
+       console.dir(defaultName);
       for (const name in specs.kernelspecs) {
         const spec = specs.kernelspecs[name];
         if (spec && spec.display_name === defaultName) {
           selectedSpec = spec;
         }
       }
+      console.log('selectedSpec');
+      console.dir(selectedSpec);
       showCustomEnvVarsDialog(selectedSpec);
     }
   });

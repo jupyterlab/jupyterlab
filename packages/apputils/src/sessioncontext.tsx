@@ -27,8 +27,8 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
-import { CustomEnvWidget } from './custom_env';
 import { Message } from '@lumino/messaging';
+import { CustomEnvWidget } from '@jupyterlab/ui-components';
 
 /**
  * A context object to manage a widget's kernel session connection.

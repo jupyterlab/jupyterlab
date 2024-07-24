@@ -1,15 +1,15 @@
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ReactWidget } from '@jupyterlab/ui-components';
+import { ReactWidget } from './vdom';
 import { PartialJSONObject } from '@lumino/coreutils';
 import React, { ChangeEvent, ChangeEventHandler, useEffect, useState } from 'react';
 
-interface EnvProps {
+interface IEnvProps {
   updateFormData: (formData: PartialJSONObject)=>void;
   defaultEnvValues: PartialJSONObject;
   translator?: ITranslator | undefined;
 }
 
-interface EnvBlockProps {
+interface IEnvBlockProps {
   handleChange:(envVars: PartialJSONObject)=>void;
   id: string;
   defaultName: string;
@@ -17,7 +17,7 @@ interface EnvBlockProps {
   translator: ITranslator | undefined;
 }
 
-function EnvBlock({handleChange, id, defaultName,defaultEnvValue, translator }:EnvBlockProps ){
+function EnvBlock({handleChange, id, defaultName,defaultEnvValue, translator }:IEnvBlockProps ){
   const [newEnvName, setEnvName] = useState<string>(defaultName);
   const [newEnvValue, setEnvValue] = useState<string>(defaultEnvValue);
   translator = translator || nullTranslator;
@@ -75,7 +75,7 @@ return (
 }
 
 
-function CustomEnv({updateFormData, defaultEnvValues, translator }: EnvProps) {
+function CustomEnv({updateFormData, defaultEnvValues, translator }: IEnvProps) {
   const [formData, setInputs] = useState<PartialJSONObject>(defaultEnvValues);
   const [countEnvBlock, setCountEnvBlock] = useState(Object.keys(formData).length);
 
