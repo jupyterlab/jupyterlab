@@ -110,7 +110,7 @@ class CheckForUpdate(CheckForUpdateABC):
                 trans = translator.load("jupyterlab")
                 return (
                     trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("Open changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    (trans.__("Changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None

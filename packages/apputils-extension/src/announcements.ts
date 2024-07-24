@@ -240,9 +240,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               let notificationId: string;
               options.actions = [
                 {
-                  label: trans.__('Do not check for updates'),
+                  label: trans.__('Ignore'),
                   caption: trans.__(
-                    'If pressed, you will not be prompted if a new JupyterLab version is found.'
+                    'Do not prompt me if a new JupyterLab version is available.'
                   ),
                   callback: () => {
                     settings
