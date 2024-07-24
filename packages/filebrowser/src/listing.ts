@@ -1478,9 +1478,16 @@ export class DirListing extends Widget {
       if (!files || files.length === 0) {
         return;
       }
+      const promises = [];
       for (const file of files) {
-        void this._model.upload(file);
+        const promise = this._model.upload(file);
+        promises.push(promise);
       }
+      Promise.all(promises)
+        .then(() => this._uploadedAll.emit())
+        .catch(err => {
+          console.warn('Error while uploading files: ', err);
+        });
       return;
     }
 
@@ -1503,15 +1510,28 @@ export class DirListing extends Widget {
       }
     };
 
+    const promises = [];
     for (const item of items) {
       const entry = Private.defensiveGetAsEntry(item);
+
       if (!entry) {
         continue;
       }
-      uploadEntry(entry, this._model.path ?? '/').catch(err => {
-        console.log('error while creating folder: ', err);
-      });
+      const promise = uploadEntry(entry, this._model.path ?? '/');
+      promises.push(promise);
     }
+    Promise.all(promises)
+      .then(() => this._uploadedAll.emit())
+      .catch(err => {
+        console.warn('Error while uploading files: ', err);
+      });
+  }
+
+  /**
+   * Signal emitted on when all files were uploaded after native drag.
+   */
+  protected get uploadedAll(): ISignal<DirListing, void> {
+    return this._uploadedAll;
   }
 
   /**
@@ -2168,6 +2188,7 @@ export class DirListing extends Widget {
   // Width of the "last modified" column for an individual file
   private _modifiedWidth: number;
   private _modifiedStyle: Time.HumanStyle;
+  private _uploadedAll = new Signal<DirListing, void>(this);
 }
 
 /**
