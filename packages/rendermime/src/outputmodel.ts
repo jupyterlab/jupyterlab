@@ -41,9 +41,9 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
   readonly executionCount: nbformat.ExecutionCount;
 
   /**
-   * The observable data.
+   * The observable text, present when the output `type` is set to `"stream"`.
    */
-  readonly observableText?: IObservableString;
+  readonly streamText?: IObservableString;
 
   /**
    * Whether the output is trusted.
@@ -155,7 +155,7 @@ export class OutputModel implements IOutputModel {
     return Private.getData(this.toJSON());
   }
 
-  get observableText(): IObservableString | undefined {
+  get streamText(): IObservableString | undefined {
     return this._text;
   }
 

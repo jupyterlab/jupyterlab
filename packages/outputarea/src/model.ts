@@ -334,7 +334,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       // We append the new text to the current text.
       // This creates a text change event.
       const prev = this.list.get(this.length - 1) as IOutputModel;
-      const curText = prev.observableText!;
+      const curText = prev.streamText!;
       const newText = value.text as string;
       Private.addText(curText, newText);
       return this.length;
@@ -342,7 +342,11 @@ export class OutputAreaModel implements IOutputAreaModel {
 
     let newText = '';
     if (nbformat.isStream(value)) {
-      newText = value.text as string;
+      if (typeof value.text === 'string') {
+        newText = value.text as string;
+      } else {
+        newText = (value.text as string[]).join();
+      }
       value.text = '';
     }
 
@@ -355,7 +359,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Update the stream information.
     if (nbformat.isStream(value)) {
       this._lastStreamName = value.name;
-      const curText = item.observableText!;
+      const curText = item.streamText!;
       Private.addText(curText, newText);
     } else {
       this._lastStreamName = '';

@@ -288,7 +288,7 @@ export class OutputArea extends Widget {
         this._insertOutput(args.newIndex, output);
         if (output.type === 'stream') {
           // A stream ouput has been added, follow changes to the text.
-          output.observableText!.changed.connect(
+          output.streamText!.changed.connect(
             (
               sender: IObservableString,
               event: IObservableString.IChangedArgs

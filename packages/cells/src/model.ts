@@ -761,7 +761,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         case 'add': {
           for (const output of event.newValues) {
             if (output.type === 'stream') {
-              output.observableText!.changed.connect(
+              output.streamText!.changed.connect(
                 (
                   sender: IObservableString,
                   textEvent: IObservableString.IChangedArgs
