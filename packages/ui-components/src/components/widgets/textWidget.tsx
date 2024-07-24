@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import React, { ChangeEvent, FocusEvent } from 'react';
+import React, { FocusEvent } from 'react';
 import { NumberField, TextField } from '@jupyter/react-components';
 import {
   ariaDescribedByIds,
@@ -51,15 +51,18 @@ export default function BaseInputTemplate<
   const { type: type_, step, ...otherProps } = inputProps;
   const { readonlyAsDisabled = true } = formContext as GenericObjectType;
 
-  const handleNumberChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextValue = event.target.valueAsNumber;
-    onChange(nextValue);
+  const handleNumberChange = (event: CustomEvent) => {
+    if (event.detail.valueAsNumber !== undefined) {
+      onChange(event.detail.valueAsNumber);
+    }
   };
 
   const handleTextChange = onChangeOverride
-    ? onChangeOverride
-    : ({ target }: ChangeEvent<HTMLInputElement>) => {
-        onChange(target.value === '' ? options.emptyValue : target.value);
+    ? (onChangeOverride as any)
+    : (event: CustomEvent) => {
+        const textValue =
+          event.detail.value === '' ? options.emptyValue : event.detail.value;
+        onChange(textValue);
       };
 
   const handleBlur = ({ target }: FocusEvent<HTMLInputElement>) => {
