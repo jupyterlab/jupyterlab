@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReactWidget } from './vdom';
 import { PartialJSONObject } from '@lumino/coreutils';

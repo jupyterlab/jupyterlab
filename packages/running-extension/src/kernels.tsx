@@ -52,7 +52,8 @@ export async function addKernelRunningSessionManager(
   // Add the kernels pane to the running sidebar.
   managers.add({
     name: trans.__('Kernels'),
-    running: () => {
+    supportsMultipleViews: true,
+    running: (options: { mode: 'tree' | 'list' }) => {
       const kernelsBySpec = new Map<string, Private.RunningKernel[]>();
 
       for (const kernel of kernels.running()) {
@@ -69,7 +70,7 @@ export async function addKernelRunningSessionManager(
         );
       }
 
-      return Array.from(kernelsBySpec.entries()).map(
+      const treeItems = Array.from(kernelsBySpec.entries()).map(
         ([spec, kernels]) =>
           new Private.KernelSpecItem({
             name: spec,
@@ -78,6 +79,11 @@ export async function addKernelRunningSessionManager(
             trans
           })
       );
+      return options.mode === 'tree'
+        ? treeItems
+        : treeItems
+            .map(item => item.children.map(i => i.children ?? []).flat())
+            .flat();
     },
     shutdownAll: () => kernels.shutdownAll(),
     refreshRunning: () =>
