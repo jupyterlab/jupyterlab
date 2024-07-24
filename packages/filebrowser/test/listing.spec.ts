@@ -38,8 +38,8 @@ class TestDirListing extends DirListing {
     // Allows us to spy on onUpdateRequest.
     this.updated.emit();
   }
-  public get uploadedAll() {
-    return super.uploadedAll;
+  public get allUploaded() {
+    return super.allUploaded;
   }
 }
 
@@ -138,7 +138,7 @@ describe('filebrowser/listing', () => {
         const dirListing = new TestDirListing(options);
         Widget.attach(dirListing, document.body);
         dirListing.handleEvent(event);
-        await signalToPromise(dirListing.uploadedAll);
+        await signalToPromise(dirListing.allUploaded);
         const topLevel = getItemTitles(dirListing);
         expect(topLevel).toStrictEqual(['test-dir']);
         await dirListing.model.cd('test-dir');
