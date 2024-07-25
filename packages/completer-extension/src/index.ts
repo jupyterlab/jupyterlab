@@ -123,8 +123,14 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
           ) => {
             const command = change.binding.command;
             if (labelCache.hasOwnProperty(command)) {
-              labelCache[command as keyof typeof labelCache] =
-                describeShortcut(command);
+              const cached = labelCache[command as keyof typeof labelCache];
+              const newLabel = describeShortcut(command);
+              if (newLabel !== cached) {
+                // Update cache
+                labelCache[command as keyof typeof labelCache] = newLabel;
+                // Re-render any UI elements using this command
+                app.commands.notifyCommandChanged(command);
+              }
             }
           }
         );
@@ -159,6 +165,20 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             caption: trans.__('Accept')
           })
         );
+        inlineCompleter.model!.suggestionsChanged.connect(() => {
+          // Enabled state of these commands depends on whether
+          // there are any suggestions (or whether there is more
+          // than one suggestion) so the UI needs to be modified
+          // when the suggestions change to reflect the enabled
+          // state in the buttons state.
+          for (const command of [
+            CommandIDs.previousInline,
+            CommandIDs.nextInline,
+            CommandIDs.acceptInline
+          ]) {
+            app.commands.notifyCommandChanged(command);
+          }
+        });
         return inlineCompleter;
       }
     };
