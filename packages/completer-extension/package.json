@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.3.0-alpha.2",
+    "@jupyterlab/codeeditor": "^4.3.0-alpha.2",
     "@jupyterlab/completer": "^4.3.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.3.0-alpha.2",
     "@jupyterlab/translation": "^4.3.0-alpha.2",

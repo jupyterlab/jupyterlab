@@ -13,6 +13,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { CompletionHandler } from './handler';
+import { INLINE_COMPLETER_ACTIVE_CLASS } from './inline';
 
 /**
  * The class name added to completer menu items.
@@ -182,6 +183,11 @@ export class Completer extends Widget {
   }
 
   /**
+   * Whether to suppress the tab completer when inline completions are presented.
+   */
+  suppressIfInlineCompleterActive: boolean;
+
+  /**
    * Dispose of the resources held by the completer widget.
    */
   dispose(): void {
@@ -319,6 +325,14 @@ export class Completer extends Widget {
     }
 
     let items = model.completionItems();
+
+    // If it ought to be suppressed, suppress it.
+    const inlineCompleterActive = this.editor?.host.classList.contains(
+      INLINE_COMPLETER_ACTIVE_CLASS
+    );
+    if (this.suppressIfInlineCompleterActive && inlineCompleterActive) {
+      return;
+    }
 
     // If there are no items, reset and bail.
     if (!items.length) {
