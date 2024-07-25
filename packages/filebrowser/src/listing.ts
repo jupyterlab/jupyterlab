@@ -1486,7 +1486,7 @@ export class DirListing extends Widget {
       Promise.all(promises)
         .then(() => this._allUploaded.emit())
         .catch(err => {
-          console.warn('Error while uploading files: ', err);
+          console.error('Error while uploading files: ', err);
         });
       return;
     }
@@ -1523,7 +1523,7 @@ export class DirListing extends Widget {
     Promise.all(promises)
       .then(() => this._allUploaded.emit())
       .catch(err => {
-        console.warn('Error while uploading files: ', err);
+        console.error('Error while uploading files: ', err);
       });
   }
 
