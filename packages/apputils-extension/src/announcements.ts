@@ -240,7 +240,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               let notificationId: string;
               options.actions = [
                 {
-                  label: trans.__('Disable updates'),
+                  label: trans.__('Disable update notifications'),
                   caption: trans.__(
                     'Do not prompt me if a new JupyterLab version is available.'
                   ),
