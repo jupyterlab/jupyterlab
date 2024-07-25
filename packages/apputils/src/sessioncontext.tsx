@@ -1665,7 +1665,7 @@ namespace Private {
         'data-custom-env-vars',
         JSON.stringify(envConfiguration)
       );
-    }, translator);
+    }, false, translator);
     //trans.__('Start Preferred Kernel');
     //Update widget
     

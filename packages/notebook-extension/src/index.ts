@@ -114,7 +114,8 @@ import {
   refreshIcon,
   runIcon,
   stopIcon,
-  tableRowsIcon
+  tableRowsIcon,
+  CustomEnvWidget
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -137,7 +138,6 @@ import {
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
 import { ISpecModel } from '@jupyterlab/services/src/kernelspec/restapi';
-import { CustomEnvWidget } from '@jupyterlab/ui-components/src/components';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1992,9 +1992,7 @@ function activateNotebookHandler(
     }
   });
 
-  const showCustomEnvVarsDialog = async(
-    spec: ISpecModel | undefined
-  ) => {
+  const showCustomEnvVarsDialog = async (spec: ISpecModel | undefined, node: HTMLElement) => {
     let envConfiguration: PartialJSONObject = {};
     let label = trans.__('Cancel');
     const buttons = [
@@ -2003,35 +2001,41 @@ function activateNotebookHandler(
       }),
       Dialog.okButton({
         label: trans.__('Setup'),
-        ariaLabel: trans.__('setup custom env variables')
+        ariaLabel: trans.__('Setup custom env variables')
       })
     ];
-  
-    let defaultEnvValues = {}
+
+    let defaultEnvValues = {};
     const dialog = new Dialog({
-      title: trans.__('Setup custom environment variables'),
-      body: new CustomEnvWidget(envConfiguration, defaultEnvValues, formData => {
-        envConfiguration = formData as PartialJSONObject;
-        console.log('envConfiguration');
-        console.dir(envConfiguration);
-      }, translator),
+      title: '',
+      body: new CustomEnvWidget(
+        envConfiguration,
+        defaultEnvValues,
+        formData => {
+          envConfiguration = formData as PartialJSONObject;
+          console.log('envConfiguration');
+          console.dir(envConfiguration);
+        }, true,
+        translator
+      ),
       buttons
     });
 
     const result = await dialog.launch();
-  
+
     if (!result.button.accept) {
       return;
     }
 
     console.log('result.value');
     console.dir(result.value);
-    if (result.value) {
+    if (Object.keys(envConfiguration).length>0 && spec) {
+      node.setAttribute("custom-env-vars", JSON.stringify(envConfiguration));
       //saveve for each kernel spec
     }
   };
 
-  const LAUNCHER_LABEL = "jp-LauncherCard";
+  const LAUNCHER_LABEL = 'jp-LauncherCard';
   const isLauncherLabel = (node: HTMLElement) =>
     node.classList.contains(LAUNCHER_LABEL);
   let selectedSpec: ISpecModel | undefined;
@@ -2052,9 +2056,9 @@ function activateNotebookHandler(
 
       console.log('node');
       console.dir(node);
-      let defaultName = node.getAttribute('titile'); 
-        console.log('defaultName');
-       console.dir(defaultName);
+      let defaultName = node.innerText;
+      console.log('defaultName');
+      console.dir(defaultName);
       for (const name in specs.kernelspecs) {
         const spec = specs.kernelspecs[name];
         if (spec && spec.display_name === defaultName) {
@@ -2063,11 +2067,10 @@ function activateNotebookHandler(
       }
       console.log('selectedSpec');
       console.dir(selectedSpec);
-      showCustomEnvVarsDialog(selectedSpec);
+      showCustomEnvVarsDialog(selectedSpec, node);
     }
   });
 
- 
   // Add a launcher item if the launcher is available.
   if (launcher) {
     void services.ready.then(() => {
@@ -2107,12 +2110,17 @@ function activateNotebookHandler(
       onSpecsChanged();
       services.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.setupCustomEnv,
-      selector: '.jp-LauncherCard',
-      rank: 0
-    });
+    const allow_custom_env_variables =
+      PageConfig.getOption('allow_custom_env_variables') === 'true'
+        ? true
+        : false;
+    if (allow_custom_env_variables) {
+      app.contextMenu.addItem({
+        command: CommandIDs.setupCustomEnv,
+        selector: '.jp-LauncherCard',
+        rank: 0
+      });
+    }
   }
 
   return tracker;
