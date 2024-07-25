@@ -83,14 +83,20 @@ test('should update window height on resize', async ({ page, tmpPath }) => {
 
 test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+  let initialHeight = 0;
+  let previousHeight = 0;
+  let counter = 0;
 
   // Wait to ensure the rendering logic is stable.
-  await page.waitForTimeout(200);
+  do {
+    previousHeight = initialHeight;
+    await page.waitForTimeout(200);
 
-  const notebook = await page.notebook.getNotebookInPanelLocator();
-  const initialHeight = await getInnerHeight(notebook!);
+    initialHeight = await getInnerHeight(notebook!);
+  } while (previousHeight !== initialHeight && counter++ < 10);
 
-  expect(initialHeight).toBeGreaterThan(0);
+  expect.soft(initialHeight).toBeGreaterThan(0);
 
   // Add a new launcher covering the notebook.
   await page.menu.clickMenuItem('File>New Launcher');

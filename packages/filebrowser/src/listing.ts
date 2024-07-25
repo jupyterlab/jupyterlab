@@ -811,12 +811,13 @@ export class DirListing extends Widget {
 
   // Update the modified column's size
   private _updateModifiedSize(node: HTMLElement) {
-    const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+    // Look for the modified column's header
+    const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
     this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
     this._modifiedStyle =
-      this._modifiedWidth < 90
+      this._modifiedWidth < 100
         ? 'narrow'
-        : this._modifiedWidth > 110
+        : this._modifiedWidth > 120
         ? 'long'
         : 'short';
   }
@@ -825,7 +826,7 @@ export class DirListing extends Widget {
   protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
     items.forEach((item, i) => {
       const node = nodes[i];
-      if (item.last_modified) {
+      if (node && item.last_modified) {
         const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
         if (this.renderer.updateItemModified !== undefined) {
           this.renderer.updateItemModified(
@@ -987,6 +988,7 @@ export class DirListing extends Widget {
 
     // Rerender item nodes' modified dates, if the modified style has changed.
     const oldModifiedStyle = this._modifiedStyle;
+    // Update both size and style
     this._updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
       this.updateModified(this._sortedItems, this._items);
@@ -1466,31 +1468,70 @@ export class DirListing extends Widget {
    * Handle the `drop` event for the widget.
    */
   protected evtNativeDrop(event: DragEvent): void {
-    const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) {
-      return;
-    }
-    const length = event.dataTransfer?.items.length;
-    if (!length) {
-      return;
-    }
-    for (let i = 0; i < length; i++) {
-      let entry = event.dataTransfer?.items[i].webkitGetAsEntry();
-      if (entry?.isDirectory) {
-        console.log('currently not supporting drag + drop for folders');
-        void showDialog({
-          title: this._trans.__('Error Uploading Folder'),
-          body: this._trans.__(
-            'Drag and Drop is currently not supported for folders'
-          ),
-          buttons: [Dialog.cancelButton({ label: this._trans.__('Close') })]
-        });
-      }
-    }
+    // Prevent navigation
     event.preventDefault();
-    for (let i = 0; i < files.length; i++) {
-      void this._model.upload(files[i]);
+
+    const items = event.dataTransfer?.items;
+    if (!items) {
+      // Fallback to simple upload of files (if any)
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) {
+        return;
+      }
+      const promises = [];
+      for (const file of files) {
+        const promise = this._model.upload(file);
+        promises.push(promise);
+      }
+      Promise.all(promises)
+        .then(() => this._allUploaded.emit())
+        .catch(err => {
+          console.error('Error while uploading files: ', err);
+        });
+      return;
     }
+
+    const uploadEntry = async (entry: FileSystemEntry, path: string) => {
+      if (Private.isDirectoryEntry(entry)) {
+        const dirPath = await Private.createDirectory(
+          this._model.manager,
+          path,
+          entry.name
+        );
+        const directoryReader = entry.createReader();
+
+        const allEntries = await Private.collectEntries(directoryReader);
+        for (const childEntry of allEntries) {
+          await uploadEntry(childEntry, dirPath);
+        }
+      } else if (Private.isFileEntry(entry)) {
+        const file = await Private.readFile(entry);
+        await this._model.upload(file, path);
+      }
+    };
+
+    const promises = [];
+    for (const item of items) {
+      const entry = Private.defensiveGetAsEntry(item);
+
+      if (!entry) {
+        continue;
+      }
+      const promise = uploadEntry(entry, this._model.path ?? '/');
+      promises.push(promise);
+    }
+    Promise.all(promises)
+      .then(() => this._allUploaded.emit())
+      .catch(err => {
+        console.error('Error while uploading files: ', err);
+      });
+  }
+
+  /**
+   * Signal emitted on when all files were uploaded after native drag.
+   */
+  protected get allUploaded(): ISignal<DirListing, void> {
+    return this._allUploaded;
   }
 
   /**
@@ -2147,6 +2188,7 @@ export class DirListing extends Widget {
   // Width of the "last modified" column for an individual file
   private _modifiedWidth: number;
   private _modifiedStyle: Time.HumanStyle;
+  private _allUploaded = new Signal<DirListing, void>(this);
 }
 
 /**
@@ -2368,7 +2410,10 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNode(trans.__('Modified'));
+      const modified = this._createHeaderItemNodeWithSizes({
+        small: trans.__('Modified'),
+        large: trans.__('Last Modified')
+      });
       const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
@@ -2845,6 +2890,29 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
+
+    /**
+     * Create a node for a header item with multiple sizes.
+     */
+    private _createHeaderItemNodeWithSizes(labels: {
+      [k: string]: string;
+    }): HTMLElement {
+      const node = document.createElement('div');
+      node.className = HEADER_ITEM_CLASS;
+      const icon = document.createElement('span');
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      for (let k of Object.keys(labels)) {
+        const text = document.createElement('span');
+        text.classList.add(
+          HEADER_ITEM_TEXT_CLASS,
+          HEADER_ITEM_TEXT_CLASS + '-' + k
+        );
+        text.textContent = labels[k];
+        node.appendChild(text);
+      }
+      node.appendChild(icon);
+      return node;
+    }
   }
 
   /**
@@ -3046,5 +3114,76 @@ namespace Private {
       LabIcon.remove(container);
       container.className = HEADER_ITEM_ICON_CLASS;
     }
+  }
+
+  export async function createDirectory(
+    manager: IDocumentManager,
+    path: string,
+    name: string
+  ): Promise<string> {
+    const model = await manager.newUntitled({
+      path: path,
+      type: 'directory'
+    });
+    const tmpDirPath = PathExt.join(path, model.name);
+    const dirPath = PathExt.join(path, name);
+    try {
+      await manager.rename(tmpDirPath, dirPath);
+    } catch (e) {
+      // The `dirPath` already exists, remove the temporary new directory
+      await manager.deleteFile(tmpDirPath);
+    }
+    return dirPath;
+  }
+
+  export function isDirectoryEntry(
+    entry: FileSystemEntry
+  ): entry is FileSystemDirectoryEntry {
+    return entry.isDirectory;
+  }
+  export function isFileEntry(
+    entry: FileSystemEntry
+  ): entry is FileSystemFileEntry {
+    return entry.isFile;
+  }
+
+  export function defensiveGetAsEntry(
+    item: DataTransferItem
+  ): FileSystemEntry | null {
+    if (item.webkitGetAsEntry) {
+      return item.webkitGetAsEntry();
+    }
+    if ('getAsEntry' in item) {
+      // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
+      return (item['getAsEntry'] as () => FileSystemEntry | null)();
+    }
+    return null;
+  }
+
+  function readEntries(reader: FileSystemDirectoryReader) {
+    return new Promise<FileSystemEntry[]>((resolve, reject) =>
+      reader.readEntries(resolve, reject)
+    );
+  }
+
+  export function readFile(entry: FileSystemFileEntry) {
+    return new Promise<File>((resolve, reject) => entry.file(resolve, reject));
+  }
+
+  export async function collectEntries(reader: FileSystemDirectoryReader) {
+    // Spec requires calling `readEntries` until these are exhausted;
+    // in practice this is only required in Chromium-based browsers for >100 files.
+    // https://issues.chromium.org/issues/41110876
+    const allEntries: FileSystemEntry[] = [];
+    let done = false;
+    while (!done) {
+      const entries = await readEntries(reader);
+      if (entries.length === 0) {
+        done = true;
+      } else {
+        allEntries.push(...entries);
+      }
+    }
+    return allEntries;
   }
 }

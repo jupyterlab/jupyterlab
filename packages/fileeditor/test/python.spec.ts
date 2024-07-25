@@ -26,6 +26,16 @@ describe('@jupyterlab/fileeditor', () => {
           ]
         ],
         [
+          'async def async_function():',
+          [
+            {
+              text: 'async def async_function():',
+              level: 1,
+              line: 0
+            }
+          ]
+        ],
+        [
           'class Klass:',
           [
             {

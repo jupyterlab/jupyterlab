@@ -559,8 +559,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     const toolbarPadding = 2 + 5;
     let width = opener.isHidden ? toolbarPadding : toolbarPadding + openerWidth;
 
-    this._getWidgetsToRemove(width, toolbarWidth, openerWidth)
-      .then(values => {
+    return this._getWidgetsToRemove(width, toolbarWidth, openerWidth)
+      .then(async values => {
         let { width, widgetsToRemove } = values;
         while (widgetsToRemove.length > 0) {
           // Insert the widget at the right position in the opener popup, relatively
@@ -626,7 +626,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
           opener.hide();
         }
         if (callTwice) {
-          void this._onResize();
+          await this._onResize();
         }
       })
       .catch(msg => {
@@ -640,14 +640,14 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     openerWidth: number
   ) {
     const opener = this.popupOpener;
-    const layout = this.layout as ToolbarLayout;
-    const toIndex = layout.widgets.length - 1;
+    const widgets = [...(this.layout as ToolbarLayout).widgets];
+    const toIndex = widgets.length - 1;
 
     const widgetsToRemove = [];
 
     let index = 0;
     while (index < toIndex) {
-      const widget = layout.widgets[index];
+      const widget = widgets[index];
       const name = Private.nameProperty.get(widget);
       // Compute the widget size only if
       // - the zoom has changed.
@@ -843,6 +843,9 @@ export function ToolbarButtonComponent(
     }
   };
 
+  const title = getTooltip();
+  const disabled = props.enabled === false;
+
   return (
     <Button
       appearance="stealth"
@@ -851,15 +854,15 @@ export function ToolbarButtonComponent(
           ? props.className + ' jp-ToolbarButtonComponent'
           : 'jp-ToolbarButtonComponent'
       }
+      aria-disabled={disabled}
+      aria-label={props.label || title}
       aria-pressed={props.pressed}
-      aria-disabled={props.enabled === false}
       {...props.dataset}
-      disabled={props.enabled === false}
+      disabled={disabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
-      title={getTooltip()}
-      minimal
+      title={title}
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
@@ -1110,6 +1113,7 @@ class ToolbarPopup extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
+    this.addClass('jp-ThemedContainer');
     this.layout = new PanelLayout();
     Widget.attach(this, document.body);
     this.hide();

@@ -358,16 +358,24 @@ export class ShortcutUI
     const userShortcuts = settings.user.shortcuts ?? [];
     const newUserShortcuts = [];
     let found = false;
+    // Copy over existing user keybindings
     for (let shortcut of userShortcuts) {
+      // If this is the query keybinding, update it with new `keys`
       if (
         shortcut.command === target.command &&
         shortcut.selector === target.selector &&
-        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
+        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
+        keybinding &&
+        JSONExt.deepEqual(keybinding.keys, shortcut.keys)
       ) {
         const matchesDefault =
           keybinding &&
           keybinding.isDefault &&
           JSONExt.deepEqual(keybinding.keys, keys);
+
+        // If the new `keys` are empty, do not copy this one over.
+        // Also, if the keybinding is a default keybinding and the desired
+        // new `keys` are the same as default, it does not need to be added.
         if (keys.length !== 0 && !matchesDefault) {
           newUserShortcuts.push({
             command: shortcut.command,
@@ -376,6 +384,12 @@ export class ShortcutUI
           });
         }
         found = true;
+      } else if (
+        keybinding &&
+        !JSONExt.deepEqual(keybinding.keys, shortcut.keys) &&
+        keys.length === 0
+      ) {
+        continue;
       } else {
         newUserShortcuts.push(shortcut);
       }

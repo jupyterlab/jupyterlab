@@ -229,6 +229,9 @@ function main(): void {
     panel.scrollTo(scrollToOffset.valueAsNumber);
   });
 
+  // Ensure Jupyter styling
+  panel.addClass('jp-ThemedContainer');
+
   // Attach the panel to the DOM.
   Widget.attach(panel, document.body);
 

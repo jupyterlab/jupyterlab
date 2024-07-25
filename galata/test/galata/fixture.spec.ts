@@ -105,6 +105,41 @@ test.describe('mockState', () => {
   });
 });
 
+test.describe('kernels', () => {
+  test('should return the active kernels', async ({ page, kernels }) => {
+    await page.notebook.createNew();
+    await page.locator('text= | Idle').waitFor();
+
+    await page
+      .getByRole('tab', { name: 'Running Terminals and Kernels' })
+      .click();
+
+    await Promise.all([
+      page.waitForResponse(
+        async response =>
+          response.url().includes('api/kernels') &&
+          response.request().method() === 'GET' &&
+          ((await response.json()) as any[]).length === 1
+      ),
+      page.getByRole('button', { name: 'Refresh List' }).click()
+    ]);
+
+    expect.soft(kernels.size).toEqual(1);
+
+    await page.menu.clickMenuItem('File>New>Console');
+    await page.locator('.jp-Dialog').waitFor();
+    await page.click('.jp-Dialog .jp-mod-accept');
+    await page.locator('text= | Idle').waitFor();
+
+    await page.getByRole('button', { name: 'Refresh List' }).click();
+    expect(kernels.size).toEqual(2);
+  });
+
+  test('should have no kernels at first', ({ kernels }) => {
+    expect(kernels.size).toEqual(0);
+  });
+});
+
 test.describe('sessions', () => {
   test('should return the active sessions', async ({ page, sessions }) => {
     await page.notebook.createNew();
@@ -161,8 +196,10 @@ test.describe('terminals', () => {
 
 test.describe('tmpPath', () => {
   test('should return an unique test folder', ({ tmpPath }) => {
-    expect(tmpPath).toEqual(
-      'test-galata-fixture-tmpPath-should-return-an-unique-test-folder-galata'
+    // Use regex as Playwright is preventing the unique test name to be too long
+    // by replacing the name center part with a hash of 5 characters.
+    expect(tmpPath).toMatch(
+      /test-galata-fixture-tmpPat-\w{5}-eturn-an-unique-test-folder-galata/
     );
   });
 });

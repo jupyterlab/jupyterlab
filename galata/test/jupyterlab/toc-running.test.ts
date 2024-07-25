@@ -16,9 +16,7 @@ test.describe('ToC Running indicator', () => {
     await page.sidebar.openTab('table-of-contents');
     // Wait until the last heading has loaded into the ToC
     await page
-      .locator(
-        '.jp-TableOfContents-content[data-document-type="notebook"] >> text=Title 1.3'
-      )
+      .getByRole('treeitem', { name: 'Title 1.3', exact: true })
       .waitFor();
   });
 
@@ -71,13 +69,16 @@ test.describe('ToC Running indicator', () => {
     await page.notebook.run();
 
     // Collapse ToC
-    await page.click(
-      '[aria-label="Table of Contents section"] >> button:left-of(:text("Title 1"))'
-    );
+    await page
+      .getByRole('treeitem', { name: 'Title 1', exact: true })
+      .locator('.expand-collapse-button')
+      .click();
 
     const executed = page.notebook.runCell(5);
 
-    await tocPanel.locator('[data-running="1"]').waitFor();
+    await expect(
+      tocPanel.getByTitle('Title 1', { exact: true })
+    ).toHaveAttribute('data-running', '1');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'
     );

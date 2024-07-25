@@ -86,6 +86,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         manager.isLight(currentTheme)
       );
       document.body.dataset.jpThemeName = currentTheme;
+      document.body.style.colorScheme = manager.isLight(currentTheme)
+        ? 'light'
+        : 'dark';
       if (
         document.body.dataset.jpThemeScrollbars !==
         String(manager.themeScrollbars(currentTheme))
