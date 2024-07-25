@@ -20,7 +20,7 @@ import { CompletionHandler } from './handler';
 import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
-export const INLINE_COMPLETER_ACTIVE_CLASS = 'jp-mod-inline-completer-active';
+const INLINE_COMPLETER_ACTIVE_CLASS = 'jp-mod-inline-completer-active';
 const HOVER_CLASS = 'jp-InlineCompleter-hover';
 const PROGRESS_BAR_CLASS = 'jp-InlineCompleter-progressBar';
 
