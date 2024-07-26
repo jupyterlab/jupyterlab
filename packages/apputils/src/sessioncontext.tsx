@@ -1604,7 +1604,8 @@ namespace Private {
       console.log('allow_custom_env_variables');
       console.log(allow_custom_env_variables);
       if (allow_custom_env_variables) {
-        addEnvBlock(envVarsDiv, this.sessionContext, this.translator);
+        let defaultEnvValues = this.sessionContext.kernelPreference?.customEnvVars as PartialJSONObject;
+        addEnvBlock(envVarsDiv, this.sessionContext, defaultEnvValues, this.translator);
       }
     }
   }
@@ -1628,10 +1629,27 @@ namespace Private {
     body.appendChild(text);
 
     const options = getKernelSearch(sessionContext);
+    console.log('options');
+    console.dir(options);
     const selector = document.createElement('select');
     const envVarsDiv = document.createElement('div');
     envVarsDiv.setAttribute('class', 'jp-custom-env-vars-block');
     envVarsDiv.setAttribute('data-custom-env-vars', '');
+    selector.onchange = () => {
+      selector.setAttribute('data-kernel-spec', '');
+      const allow_custom_env_variables =
+      PageConfig.getOption('allow_custom_env_variables') === 'true'
+        ? true
+        : false;
+    console.log('allow_custom_env_variables');
+    console.log(allow_custom_env_variables);
+    if (allow_custom_env_variables) {
+      let defaultEnvValue = {};
+      envVarsDiv.innerHTML = ''
+      addEnvBlock(envVarsDiv, sessionContext, defaultEnvValue, this.translator);
+     
+    }
+    };
     populateKernelSelect(
       selector,
       options,
@@ -1646,13 +1664,13 @@ namespace Private {
   function addEnvBlock(
     body: HTMLDivElement,
     sessionContext: ISessionContext,
+    defaultEnvValues:PartialJSONObject,
     translator?: ITranslator
   ) {
     let envConfiguration: PartialJSONObject = {};
     body.setAttribute(
       'data-custom-env-vars',''
     );
-    let defaultEnvValues = sessionContext.kernelPreference?.customEnvVars as PartialJSONObject;
 
     console.log('session context defaultEnvValues');
     console.dir(defaultEnvValues);

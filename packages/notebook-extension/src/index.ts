@@ -1992,7 +1992,7 @@ function activateNotebookHandler(
     }
   });
 
-  const showCustomEnvVarsDialog = async (spec: ISpecModel | undefined, node: HTMLElement) => {
+  const showCustomEnvVarsDialog = async (spec: ISpecModel | undefined, node: HTMLElement, cwd: string, kernelId: string, kernelName: string) => {
     let envConfiguration: PartialJSONObject = {};
     let label = trans.__('Cancel');
     const buttons = [
@@ -2027,24 +2027,34 @@ function activateNotebookHandler(
       return;
     }
 
-    console.log('result.value');
-    console.dir(result.value);
     if (Object.keys(envConfiguration).length>0 && spec) {
-      node.setAttribute("custom-env-vars", JSON.stringify(envConfiguration));
-      //saveve for each kernel spec
+      let tmp = {} as PartialJSONObject;
+      for (let index in envConfiguration) {
+        let env = envConfiguration[index] as PartialJSONObject;
+        let envName: string =
+          env && typeof env.name === 'string' ? env.name : '';
+        let envValue: string =
+          env && typeof env.value === 'string' ? env.value : ('' as string);
+        if (envName && envValue) {
+          tmp[envName] = envValue;
+        }
+      }
+      return createNew(cwd, kernelId, kernelName, tmp);
     }
   };
 
   const LAUNCHER_LABEL = 'jp-LauncherCard';
   const isLauncherLabel = (node: HTMLElement) =>
     node.classList.contains(LAUNCHER_LABEL);
-  let selectedSpec: ISpecModel | undefined;
+  
 
   // add command for context menu on Launch app icon
   app.commands.addCommand(CommandIDs.setupCustomEnv, {
-    label: trans.__('Setup custom env variables'),
-    caption: trans.__('Setup custom env variables for running a kernel'),
+    label: trans.__('Launch kernel with custom env vars...'),
+    caption: trans.__('Launch kernel with custom env vars...'),
     execute: async (args?: any) => {
+      console.log('args');
+      console.dir(args);
       const node = app.contextMenuHitTest(isLauncherLabel);
       if (!node) {
         return;
@@ -2053,6 +2063,8 @@ function activateNotebookHandler(
       if (!specs) {
         return;
       }
+      let selectedSpec: ISpecModel | undefined;
+      let kernelName = '';
 
       console.log('node');
       console.dir(node);
@@ -2063,11 +2075,17 @@ function activateNotebookHandler(
         const spec = specs.kernelspecs[name];
         if (spec && spec.display_name === defaultName) {
           selectedSpec = spec;
+          kernelName = name;
         }
       }
       console.log('selectedSpec');
       console.dir(selectedSpec);
-      showCustomEnvVarsDialog(selectedSpec, node);
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
+      const kernelId = (args['kernelId'] as string) || '';
+
+      return showCustomEnvVarsDialog(selectedSpec, node, cwd, kernelId, kernelName);
     }
   });
 

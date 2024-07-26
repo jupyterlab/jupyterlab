@@ -163,12 +163,13 @@ function CustomEnv({
   return (
     <div>
       <div className="jp-Dialog-header">
-        {header}{' '}
+        {header}
+        {!showBlock &&
         <input
           type="checkbox"
           checked={isShownBlock}
           onChange={showCustomEnvBlock}
-        />
+        />}
       </div>
       {isShownBlock && (
         <>
