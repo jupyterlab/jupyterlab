@@ -1,6 +1,11 @@
 # https://github.com/marketplace/actions/auto-author-assign
 name: 'Auto Author Assign'
 
+#####
+# This workflow is triggered by pull_request_target event.
+# Never checkout the PR and run ANY local code on it.
+#####
+
 on:
   pull_request_target:
     types: [opened, reopened]

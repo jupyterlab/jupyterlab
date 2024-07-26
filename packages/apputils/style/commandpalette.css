@@ -29,7 +29,7 @@
 | Modal variant
 |----------------------------------------------------------------------------*/
 
-.jp-ModalCommandPalette {
+.jp-ModalCommandPalette.jp-ThemedContainer {
   position: absolute;
   z-index: 10000;
   top: 38px;
