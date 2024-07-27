@@ -947,12 +947,6 @@
     "shortcuts": []
   },
   {
-    "id": "filebrowser:toggle-single-click",
-    "label": "Enable single click",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "filebrowser:toggle-last-modified",
     "label": "Show Last Modified Column",
     "caption": "",
