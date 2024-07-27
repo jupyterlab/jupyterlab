@@ -42,11 +42,8 @@
   "dependencies": {
     "@jupyterlab/application": "^4.3.0-alpha.2",
     "@jupyterlab/notebook": "^4.3.0-alpha.2",
-    "@jupyterlab/translation": "^4.3.0-alpha.2",
     "@jupyterlab/ui-components": "^4.3.0-alpha.2",
-    "@lumino/algorithm": "^2.0.1",
-    "@rjsf/utils": "^5.13.4",
-    "react": "^18.2.0"
+    "@rjsf/utils": "^5.13.4"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

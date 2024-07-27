@@ -3631,22 +3631,6 @@ function addCommands(
       }
     }
   });
-  app.commands.addCommand(CommandIDs.filterCells, {
-    label: trans.__('Filter Cells'),
-    caption: trans.__('Filter cells with tags'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-
-      if (current) {
-        return showDialog({
-          body: new CellFiltersView(current.model?),
-          buttons: []
-        });
-      }
-    },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
-    icon: args => (args.toolbar ? filterIcon : undefined)
-  });
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Show Virtual Scrollbar'),
