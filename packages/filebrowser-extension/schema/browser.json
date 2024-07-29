@@ -28,15 +28,6 @@
             "rank": 9.95
           }
         ]
-      },
-      {
-        "id": "jp-mainmenu-view",
-        "items": [
-          {
-            "command": "filebrowser:toggle-single-click",
-            "rank": 9.99
-          }
-        ]
       }
     ],
     "context": [
