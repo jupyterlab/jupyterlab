@@ -61,6 +61,10 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
       {types.size ? (
         <fieldset className="jp-cell-filters-types">
           <legend>{trans.__('Cell types')}</legend>
+          <div style={{ marginBottom: '10px' }}>
+            Select below the type of cells used for filtering. Cells that{' '}
+            <b> do not have </b> this type will be collapsed
+          </div>
           {[...types].map(item => {
             return (
               <label key={item}>
@@ -103,6 +107,10 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
           <legend>{trans.__('Cell tags')}</legend>
 
           <ul className="jp-cell-filters-tags">
+            <div style={{ marginBottom: '10px' }}>
+              Select below the tags used for filtering. Cells that{' '}
+              <b> do not have </b> those tags will be collapsed
+            </div>
             {[...tags].map(item => {
               return (
                 <li key={item}>
