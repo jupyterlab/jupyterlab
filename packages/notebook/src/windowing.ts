@@ -61,9 +61,12 @@ export class NotebookViewModel extends WindowedListModel {
     if (model instanceof CodeCellModel) {
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
-        outputsLines = ((output.data['text/plain'] as string) ?? '').split(
-          '\n'
-        ).length;
+        const data = output.data['text/plain'];
+        if (typeof data === 'string') {
+          outputsLines += data.split('\n').length;
+        } else if (Array.isArray(data)) {
+          outputsLines += data.join('\n').split('\n').length;
+        }
       }
     }
     return (
