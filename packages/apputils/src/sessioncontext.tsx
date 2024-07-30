@@ -1855,14 +1855,20 @@ namespace Private {
     sessionContext: ISessionContext,
     translator?: ITranslator
   ) =>
-    new KernelSelector({
-      node: createSelectorNode(sessionContext, translator)
-    });
+    new KernelSelector(sessionContext, translator);
 
   /**
    * A widget that provides a kernel selection.
    */
   export class KernelSelector extends Widget {
+    sessionContext: ISessionContext;
+    translator: ITranslator | undefined;
+
+    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
+      super({ node: createSelectorNode(sessionContext, translator) });
+      this.sessionContext = sessionContext;
+      this.translator = translator;
+    }
     /**
      * Get the value of the kernel selector widget.
      */
@@ -1907,6 +1913,30 @@ namespace Private {
       }
       return kernelData;
     }
+
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      const envVarsDiv = this.node.querySelector(
+        'div.jp-custom-env-vars-block'
+      ) as HTMLDivElement;
+      console.log('envVarsDiv');
+      console.log(envVarsDiv);
+      const allow_custom_env_variables =
+        PageConfig.getOption('allow_custom_env_variables') === 'true'
+          ? true
+          : false;
+      console.log('allow_custom_env_variables');
+      console.log(allow_custom_env_variables);
+      if (allow_custom_env_variables) {
+        /*let defaultEnvValues = this.sessionContext.kernelPreference?.customEnvVars as PartialJSONObject;
+        const options = SessionContextDialogs.kernelOptions(
+          this.sessionContext,
+          this.translator
+        );*/
+       // toogleAddEnvBlock(envVarsDiv, this.sessionContext, defaultEnvValues, options, this.translator)
+        
+      }
+    }
   }
 
   /**
@@ -1932,6 +1962,20 @@ namespace Private {
       sessionContext,
       translator
     );
+
+    const allow_custom_env_variables =
+    PageConfig.getOption('allow_custom_env_variables') === 'true'
+      ? true
+      : false;
+  console.log('allow_custom_env_variables');
+  console.log(allow_custom_env_variables);
+  const envVarsDiv = document.createElement('div');
+  envVarsDiv.setAttribute('class', 'jp-custom-env-vars-block');
+  envVarsDiv.setAttribute('data-custom-env-vars', '');
+  
+
+    console.log('options');
+    console.dir(options);
     if (options.disabled) select.disabled = true;
     for (const group of options.groups) {
       const { label, options } = group;
@@ -1939,7 +1983,19 @@ namespace Private {
       optgroup.label = label;
       for (const { selected, text, title, value } of options) {
         const option = document.createElement('option');
-        if (selected) option.selected = true;
+        if (selected) {
+          option.selected = true;
+          let val = JSON.parse(value);
+          let id = val && val.id? val.id: '';
+          console.log("id");
+          console.dir(id);
+          if (allow_custom_env_variables && !id) {
+            let defaultEnvValue = {};
+            envVarsDiv.innerHTML = ''
+            addEnvBlock(envVarsDiv, sessionContext, defaultEnvValue, translator);
+          }
+        }
+
         if (title) option.title = title;
         option.text = text;
         option.value = value;
@@ -1947,7 +2003,21 @@ namespace Private {
       }
       select.appendChild(optgroup);
     }
+   
+    select.onchange = () => {
+      let kernelData = JSON.parse(select.value) as Kernel.IModel;
+      console.log('kernelData');
+      console.dir(kernelData);
+      if (allow_custom_env_variables && !kernelData.id) {
+        console.log('--allow_custom_env_variables--');
+        let defaultEnvValue = {};
+        envVarsDiv.innerHTML = ''
+        addEnvBlock(envVarsDiv, sessionContext, defaultEnvValue, translator);
+
+      }
+    }
     body.appendChild(select);
+    body.appendChild(envVarsDiv);
     return body;
   }
 
@@ -1981,7 +2051,20 @@ namespace Private {
       Widget.attach(customEnvBlock, body);
     }
   }
+ /* function toogleAddEnvBlock(
+    body: HTMLDivElement,
+    sessionContext: ISessionContext,
+    defaultEnvValues:PartialJSONObject,
+    options:SessionContextDialogs.IKernelOptions,
+    translator?: ITranslator
+  ) {
+    
 
+    addEnvBlock(body, sessionContext, defaultEnvValues, translator);
+  }
+    */
+
+  
   /**
    * Get the default kernel name given select options.
    */
