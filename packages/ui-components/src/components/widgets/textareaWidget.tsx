@@ -18,7 +18,7 @@ import { TextArea } from '@jupyter/react-components';
  *
  * @param props - The `WidgetProps` for this component
  */
-function TextareaWidget<
+export function TextareaWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
@@ -75,5 +75,3 @@ function TextareaWidget<
     />
   );
 }
-
-export default TextareaWidget;

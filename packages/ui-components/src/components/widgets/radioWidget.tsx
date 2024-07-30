@@ -23,7 +23,7 @@ import { Radio, RadioGroup } from '@jupyter/react-components';
  *
  * @param props - The `WidgetProps` for this component
  */
-export default function CustomRadioWidget<
+export function RadioWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any

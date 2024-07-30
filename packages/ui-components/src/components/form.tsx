@@ -19,6 +19,7 @@ import {
 } from '@rjsf/utils';
 
 import React from 'react';
+
 import {
   addIcon,
   caretDownIcon,
@@ -26,6 +27,12 @@ import {
   closeIcon,
   LabIcon
 } from '../icon';
+import { BaseInputTemplate } from './widgets/textWidget';
+import { CheckboxesWidget } from './widgets/checkboxesWidget';
+import { CheckboxWidget } from './widgets/checkboxWidget';
+import { RadioWidget } from './widgets/radioWidget';
+import { SelectWidget } from './widgets/selectWidget';
+import { TextareaWidget } from './widgets/textareaWidget';
 
 /**
  * Default `ui:options` for the UiSchema.
@@ -623,6 +630,7 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     showModifiedFromDefault,
     translator,
     formContext,
+    widgets,
     ...others
   } = props;
 
@@ -672,13 +680,22 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
   const templates: Record<string, React.FunctionComponent> = {
     FieldTemplate: fieldTemplate,
     ArrayFieldTemplate: arrayTemplate,
-    ObjectFieldTemplate: objectTemplate
+    ObjectFieldTemplate: objectTemplate,
+    BaseInputTemplate
   };
 
   return (
     <Form
       templates={templates as any}
       formContext={formContext as any}
+      widgets={{
+        CheckboxesWidget,
+        CheckboxWidget,
+        RadioWidget,
+        SelectWidget,
+        TextareaWidget,
+        ...widgets
+      }}
       {...others}
     />
   );

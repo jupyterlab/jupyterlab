@@ -16,7 +16,7 @@ import {
 } from '@rjsf/utils';
 import { Option, Select } from '@jupyter/react-components';
 
-function CustomSelect<
+export function SelectWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
@@ -102,7 +102,3 @@ function CustomSelect<
     </label>
   );
 }
-
-export const customWidgets = {
-  SelectWidget: CustomSelect
-};

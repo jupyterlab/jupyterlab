@@ -14,7 +14,7 @@ import {
 } from '@rjsf/utils';
 import { Checkbox } from '@jupyter/react-components';
 
-export default function CustomCheckboxWidget<
+export function CheckboxWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any

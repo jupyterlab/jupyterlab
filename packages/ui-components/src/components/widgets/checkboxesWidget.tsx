@@ -23,7 +23,7 @@ import {
  *
  * @param props - The `WidgetProps` for this component
  */
-export default function CheckboxesWidget<
+export function CheckboxesWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any
