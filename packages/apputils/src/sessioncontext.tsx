@@ -1990,6 +1990,7 @@ namespace Private {
           console.log("id");
           console.dir(id);
           if (allow_custom_env_variables && !id) {
+            console.log('+++');
             let defaultEnvValue = {};
             envVarsDiv.innerHTML = ''
             addEnvBlock(envVarsDiv, sessionContext, defaultEnvValue, translator);
@@ -2008,10 +2009,18 @@ namespace Private {
       let kernelData = JSON.parse(select.value) as Kernel.IModel;
       console.log('kernelData');
       console.dir(kernelData);
+      envVarsDiv.innerHTML = '';
+      body.setAttribute(
+        'data-custom-env-vars',''
+      );
       if (allow_custom_env_variables && !kernelData.id) {
+        console.log('--kernelData.id--');
+        console.dir(kernelData.id);
         console.log('--allow_custom_env_variables--');
+        console.dir(allow_custom_env_variables);
         let defaultEnvValue = {};
-        envVarsDiv.innerHTML = ''
+        console.log('select change envVarsDiv');
+        console.dir(envVarsDiv)
         addEnvBlock(envVarsDiv, sessionContext, defaultEnvValue, translator);
 
       }
