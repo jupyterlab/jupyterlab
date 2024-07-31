@@ -155,10 +155,10 @@ button.jp-Dialog-button.jp-mod-styled.js-custom-env {
   margin-right: 12px;
 }
 
-.jp-Dialog-body .js-Dialog-form-custom-env label span{
- display: inline-block;
- width: 40px;
- margin-right: 10px;
+.jp-Dialog-body .js-Dialog-form-custom-env label span {
+  display: inline-block;
+  width: 40px;
+  margin-right: 10px;
 }
 .jp-Dialog-body .js-Dialog-form-custom-env input {
   margin-top: 10px;

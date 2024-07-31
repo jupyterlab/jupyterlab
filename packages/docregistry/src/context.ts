@@ -23,7 +23,11 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-import { PartialJSONObject, PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
+import {
+  PartialJSONObject,
+  PartialJSONValue,
+  PromiseDelegate
+} from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -529,7 +533,9 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private async _populate(customEnvVars?: undefined | PartialJSONObject): Promise<void> {
+  private async _populate(
+    customEnvVars?: undefined | PartialJSONObject
+  ): Promise<void> {
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
@@ -539,14 +545,13 @@ export class Context<
     if (this.isDisposed) {
       return;
     }
-console.log('_populate this.sessionContext.kernelPreference.customEnvVars');
-console.dir(this.sessionContext.kernelPreference.customEnvVars);
+    console.log('_populate this.sessionContext.kernelPreference.customEnvVars');
+    console.dir(this.sessionContext.kernelPreference.customEnvVars);
     if (
       (!customEnvVars || Object.keys(customEnvVars).length === 0) &&
       this.sessionContext.kernelPreference.customEnvVars
     ) {
-      customEnvVars =
-        this.sessionContext.kernelPreference.customEnvVars;
+      customEnvVars = this.sessionContext.kernelPreference.customEnvVars;
     }
 
     console.log('customEnvVars');

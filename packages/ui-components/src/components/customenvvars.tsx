@@ -162,15 +162,18 @@ function CustomEnv({
 
   return (
     <div>
-      <div className="jp-Dialog-header">
-        {header}
-        {!showBlock &&
-        <input
-          type="checkbox"
-          checked={isShownBlock}
-          onChange={showCustomEnvBlock}
-        />}
-      </div>
+      {!showBlock && (
+        <label className="jp-Dialog-checkbox" title={header}>
+          <input
+            type="checkbox"
+            checked={isShownBlock}
+            onChange={showCustomEnvBlock}
+            className="jp-mod-styled"
+          />
+          {header}
+        </label>
+      )}
+      {showBlock && <div className="jp-Dialog-header">{header}</div>}
       {isShownBlock && (
         <>
           <form className="js-Dialog-form-custom-env">{envBlock}</form>

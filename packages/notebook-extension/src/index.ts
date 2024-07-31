@@ -102,6 +102,7 @@ import {
   addBelowIcon,
   buildIcon,
   copyIcon,
+  CustomEnvWidget,
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
@@ -114,8 +115,7 @@ import {
   refreshIcon,
   runIcon,
   stopIcon,
-  tableRowsIcon,
-  CustomEnvWidget
+  tableRowsIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -1992,7 +1992,13 @@ function activateNotebookHandler(
     }
   });
 
-  const showCustomEnvVarsDialog = async (spec: ISpecModel | undefined, node: HTMLElement, cwd: string, kernelId: string, kernelName: string) => {
+  const showCustomEnvVarsDialog = async (
+    spec: ISpecModel | undefined,
+    node: HTMLElement,
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
     let envConfiguration: PartialJSONObject = {};
     let label = trans.__('Cancel');
     const buttons = [
@@ -2015,7 +2021,8 @@ function activateNotebookHandler(
           envConfiguration = formData as PartialJSONObject;
           console.log('envConfiguration');
           console.dir(envConfiguration);
-        }, true,
+        },
+        true,
         translator
       ),
       buttons
@@ -2027,7 +2034,7 @@ function activateNotebookHandler(
       return;
     }
 
-    if (Object.keys(envConfiguration).length>0 && spec) {
+    if (Object.keys(envConfiguration).length > 0 && spec) {
       let tmp = {} as PartialJSONObject;
       for (let index in envConfiguration) {
         let env = envConfiguration[index] as PartialJSONObject;
@@ -2046,7 +2053,6 @@ function activateNotebookHandler(
   const LAUNCHER_LABEL = 'jp-LauncherCard';
   const isLauncherLabel = (node: HTMLElement) =>
     node.classList.contains(LAUNCHER_LABEL);
-  
 
   // add command for context menu on Launch app icon
   app.commands.addCommand(CommandIDs.setupCustomEnv, {
@@ -2085,7 +2091,13 @@ function activateNotebookHandler(
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
 
-      return showCustomEnvVarsDialog(selectedSpec, node, cwd, kernelId, kernelName);
+      return showCustomEnvVarsDialog(
+        selectedSpec,
+        node,
+        cwd,
+        kernelId,
+        kernelName
+      );
     }
   });
 
@@ -2128,6 +2140,7 @@ function activateNotebookHandler(
       onSpecsChanged();
       services.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
+
     const allow_custom_env_variables =
       PageConfig.getOption('allow_custom_env_variables') === 'true'
         ? true
