@@ -62,12 +62,14 @@ export class CellToolbarTracker implements IDisposable {
     toolbar?: IObservableList<ToolbarRegistry.IToolbarItem>,
     toolbarFactory?: (
       widget: Cell
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    showCellToolbar?: boolean
   ) {
     this._panel = panel;
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
+    this._showCellToolbar = showCellToolbar ?? true;
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -167,6 +169,10 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _addToolbar(model: ICellModel): void {
+    if (!this._showCellToolbar) {
+      return; // Don't actually show the toolbar!
+    }
+
     const cell = this._getCell(model);
 
     if (cell && !cell.isDisposed) {
@@ -447,6 +453,7 @@ export class CellToolbarTracker implements IDisposable {
   private _toolbarFactory:
     | ((widget: Cell) => IObservableList<ToolbarRegistry.IToolbarItem>)
     | null = null;
+  private _showCellToolbar: boolean;
 }
 
 const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
@@ -487,10 +494,12 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     commands: CommandRegistry,
     toolbarFactory?: (
       widget: Widget
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    showCellToolbar?: boolean
   ) {
     this._commands = commands;
     this._toolbarFactory = toolbarFactory ?? this.defaultToolbarFactory;
+    this._showCellToolbar = showCellToolbar ?? true;
   }
 
   protected get defaultToolbarFactory(): (
@@ -509,11 +518,17 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, undefined, this._toolbarFactory);
+    return new CellToolbarTracker(
+      panel,
+      undefined,
+      this._toolbarFactory,
+      this._showCellToolbar
+    );
   }
 
   private _commands: CommandRegistry;
   private _toolbarFactory: (
     widget: Widget
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
+  private _showCellToolbar: boolean;
 }
