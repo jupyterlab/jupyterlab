@@ -535,13 +535,15 @@ function createKernelMenu(
   commands.addCommand(CommandIDs.shutdownAllKernels, {
     label: trans.__('Shut Down All Kernels…'),
     isEnabled: () => {
-      return !app.serviceManager.sessions.running().next().done;
+      return !app.serviceManager.kernels.running().next().done;
     },
     execute: () => {
       return showDialog({
         title: trans.__('Shut Down All?'),
-        body: trans.__(
-          'Are you sure you want to permanently shut down all running kernels?'
+        body: trans._n(
+          'Are you sure you want to permanently shut down the running kernel?',
+          'Are you sure you want to permanently shut down the %1 running kernels?',
+          app.serviceManager.kernels.runningCount()
         ),
         buttons: [
           Dialog.cancelButton(),
@@ -549,7 +551,7 @@ function createKernelMenu(
         ]
       }).then(result => {
         if (result.button.accept) {
-          return app.serviceManager.sessions.shutdownAll();
+          return app.serviceManager.kernels.shutdownAll();
         }
       });
     }
