@@ -25,13 +25,9 @@ export function CheckboxWidget<
   disabled,
   readonly,
   label,
-  hideLabel,
-  autofocus = false,
   onBlur,
   onFocus,
-  onChange,
-  uiSchema,
-  registry
+  onChange
 }: WidgetProps<T, S, F>) {
   // Because an unchecked checkbox will cause html5 validation to fail, only add
   // the "required" attribute if the field value must be "true", due to the
@@ -59,7 +55,6 @@ export function CheckboxWidget<
       checked={typeof value === 'undefined' ? false : Boolean(value)}
       required={required}
       disabled={disabled || readonly}
-      // autoFocus={autofocus}
       onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}

@@ -70,7 +70,6 @@ export function CheckboxesWidget<
             name={id}
             checked={checked}
             disabled={disabled || itemDisabled || readonly}
-            // autoFocus={autofocus && index === 0}
             onChange={_onChange(index)}
             onBlur={_onBlur}
             onFocus={_onFocus}

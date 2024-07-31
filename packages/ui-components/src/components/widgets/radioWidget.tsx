@@ -92,7 +92,6 @@ export function RadioWidget<
                 name={id}
                 value={String(index)}
                 disabled={disabled || itemDisabled || readonly}
-                // autofocus={autofocus && index === 0}
                 readonly={readonly}
                 onChange={_onChange}
                 onBlur={_onBlur}

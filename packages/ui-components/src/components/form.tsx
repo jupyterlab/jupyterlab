@@ -27,6 +27,7 @@ import {
   closeIcon,
   LabIcon
 } from '../icon';
+import { Button } from '@jupyter/react-components';
 import { BaseInputTemplate } from './widgets/textWidget';
 import { CheckboxesWidget } from './widgets/checkboxesWidget';
 import { CheckboxWidget } from './widgets/checkboxWidget';
@@ -156,13 +157,13 @@ export const MoveButton = (
     props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
 
   return (
-    <button
-      className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+    <Button
+      className="jp-ArrayOperationsButton"
       onClick={props.item.onReorderClick(props.item.index, moveTo)}
       disabled={disabled()}
     >
       {buttonContent}
-    </button>
+    </Button>
   );
 };
 
@@ -190,12 +191,13 @@ export const DropButton = (
   }
 
   return (
-    <button
-      className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
+    <Button
+      appearance="error"
+      className="jp-ArrayOperationsButton"
       onClick={props.item.onDropIndexClick(props.item.index)}
     >
       {buttonContent}
-    </button>
+    </Button>
   );
 };
 
@@ -219,12 +221,9 @@ export const AddButton = (
   }
 
   return (
-    <button
-      className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
-      onClick={props.onAddClick}
-    >
+    <Button className="jp-ArrayOperationsButton" onClick={props.onAddClick}>
       {buttonContent}
-    </button>
+    </Button>
   );
 };
 

@@ -9,7 +9,6 @@ import {
   enumOptionsIndexForValue,
   enumOptionsValueForIndex,
   FormContextType,
-  labelValue,
   RJSFSchema,
   StrictRJSFSchema,
   WidgetProps
@@ -23,14 +22,11 @@ export function SelectWidget<
 >({
   id,
   options,
-  label,
-  hideLabel,
   value,
   required,
   disabled,
   readonly,
   multiple = false,
-  // autofocus = false,
   rawErrors = [],
   onChange,
   onBlur,
@@ -73,32 +69,27 @@ export function SelectWidget<
   const showPlaceholderOption = !multiple && schema.default === undefined;
 
   return (
-    <label>
-      {labelValue(label, hideLabel)}
-      <Select
-        aria-invalid={rawErrors.length > 0}
-        id={id}
-        // multiple={multiple}
-        value={dropdownValue}
-        disabled={disabled || readonly}
-        // autoFocus={autofocus}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        onChange={_onChange}
-        aria-required={required}
-        aria-describedby={ariaDescribedByIds<T>(id)}
-      >
-        {showPlaceholderOption && <Option value="">{placeholder || ''}</Option>}
-        {Array.isArray(enumOptions) &&
-          enumOptions.map(({ value, label }, i) => {
-            const disabled = enumDisabled && enumDisabled.indexOf(value) !== -1;
-            return (
-              <Option key={i} value={String(i)} disabled={disabled}>
-                {label}
-              </Option>
-            );
-          })}
-      </Select>
-    </label>
+    <Select
+      aria-invalid={rawErrors.length > 0}
+      id={id}
+      value={dropdownValue}
+      disabled={disabled || readonly}
+      onBlur={_onBlur}
+      onFocus={_onFocus}
+      onChange={_onChange}
+      aria-required={required}
+      aria-describedby={ariaDescribedByIds<T>(id)}
+    >
+      {showPlaceholderOption && <Option value="">{placeholder || ''}</Option>}
+      {Array.isArray(enumOptions) &&
+        enumOptions.map(({ value, label }, i) => {
+          const disabled = enumDisabled && enumDisabled.indexOf(value) !== -1;
+          return (
+            <Option key={i} value={String(i)} disabled={disabled}>
+              {label}
+            </Option>
+          );
+        })}
+    </Select>
   );
 }

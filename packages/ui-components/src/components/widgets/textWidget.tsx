@@ -87,7 +87,6 @@ export function BaseInputTemplate<
         list={schema.examples ? examplesId<T>(id) : undefined}
         {...otherProps}
         step={step as any}
-        // type={type_}
         value={value}
         aria-describedby={ariaDescribedByIds<T>(id, !!schema.examples)}
       />
