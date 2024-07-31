@@ -342,7 +342,6 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       'aria-label',
       trans.__('File Browser Section')
     );
-    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
     defaultBrowser.title.icon = folderIcon;
 
     // Show the current file browser shortcut in its title.
