@@ -143,11 +143,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
-   * Count the number of running kernels.
-   *
-   * @returns The number of running kernels.
+   * The number of running kernels.
    */
-  runningCount(): number {
+  get runningCount(): number {
     return this._models.size;
   }
 

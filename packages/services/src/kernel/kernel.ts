@@ -618,11 +618,9 @@ export interface IManager extends IBaseManager {
   running(): IterableIterator<IModel>;
 
   /**
-   * Count the number of running kernels.
-   *
-   * @returns The number of running kernels.
+   * The number of running kernels.
    */
-  runningCount(): number;
+  readonly runningCount: number;
 
   /**
    * Force a refresh of the running kernels.

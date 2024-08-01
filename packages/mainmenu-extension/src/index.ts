@@ -543,7 +543,7 @@ function createKernelMenu(
         body: trans._n(
           'Are you sure you want to permanently shut down the running kernel?',
           'Are you sure you want to permanently shut down the %1 running kernels?',
-          app.serviceManager.kernels.runningCount()
+          app.serviceManager.kernels.runningCount
         ),
         buttons: [
           Dialog.cancelButton(),

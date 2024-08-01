@@ -95,7 +95,7 @@ export async function addKernelRunningSessionManager(
       trans._n(
         'Are you sure you want to permanently shut down the running kernel?',
         'Are you sure you want to permanently shut down the %1 running kernels?',
-        kernels.runningCount()
+        kernels.runningCount
       )
   });
 
