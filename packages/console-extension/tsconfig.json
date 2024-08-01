@@ -22,6 +22,9 @@
       "path": "../console"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../filebrowser"
     },
     {
@@ -32,6 +35,9 @@
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../services"
     },
     {
       "path": "../settingregistry"

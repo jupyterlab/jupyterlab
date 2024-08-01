@@ -329,8 +329,6 @@ async function activateConsole(
         defaultEnvValues,
         formData => {
           envConfiguration = formData as PartialJSONObject;
-          console.log('envConfiguration');
-          console.dir(envConfiguration);
         },
         true,
         translator
@@ -356,7 +354,7 @@ async function activateConsole(
           tmp[envName] = envValue;
         }
       }
-
+      // add { isLauncher: true, kernelPreference: { name } },
       if (args.kernelPreference) {
         let kernelPreference =
           args.kernelPreference as ReadonlyPartialJSONObject;
@@ -365,6 +363,7 @@ async function activateConsole(
           customEnvVars: tmp
         };
       }
+
       return createConsole({ basePath, ...newArgs });
     }
   };
@@ -377,8 +376,6 @@ async function activateConsole(
     label: trans.__('Launch kernel with custom env vars...'),
     caption: trans.__('Launch kernel with custom env vars...'),
     execute: async (args?: any) => {
-      console.log('args');
-      console.dir(args);
       const node = app.contextMenuHitTest(isLauncherLabel);
       if (!node) {
         return;
@@ -388,28 +385,24 @@ async function activateConsole(
         return;
       }
       let selectedSpec: ISpecModel | undefined;
+      let kernelName = '';
 
-      console.log('node');
-      console.dir(node);
       let defaultName = node.innerText;
-      console.log('defaultName');
-      console.dir(defaultName);
       for (const name in specs.kernelspecs) {
         const spec = specs.kernelspecs[name];
         if (spec && spec.display_name === defaultName) {
           selectedSpec = spec;
+          kernelName = name;
         }
       }
-      console.log('selectedSpec');
-      console.dir(selectedSpec);
 
       const basePath =
         ((args['basePath'] as string) ||
           (args['cwd'] as string) ||
           filebrowser?.model.path) ??
         '';
-
-      return showCustomEnvVarsDialog(selectedSpec, basePath, args);
+      let kernelPreference = { kernelPreference: { name: kernelName } };
+      return showCustomEnvVarsDialog(selectedSpec, basePath, kernelPreference);
     }
   });
 
@@ -453,14 +446,14 @@ async function activateConsole(
     });
   }
 
-  const allow_custom_env_variables =
+  const allowCustomEnvVariables =
     PageConfig.getOption('allow_custom_env_variables') === 'true'
       ? true
       : false;
-  if (allow_custom_env_variables) {
+  if (allowCustomEnvVariables) {
     app.contextMenu.addItem({
       command: CommandIDs.setupCustomEnv,
-      selector: '.jp-LauncherCard',
+      selector: '.jp-LauncherCard[data-category="Console"]',
       rank: 0
     });
   }

@@ -47,8 +47,6 @@ function EnvBlock({
       name: newEnvName,
       value: newEnvValue
     };
-    console.log('envVar');
-    console.dir(envVar);
     handleChange(envVar);
   }, [newEnvName, newEnvValue]);
 
@@ -56,8 +54,6 @@ function EnvBlock({
     event: ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = event.target;
-    console.log('name', name);
-    console.log('value', value);
     if (name === 'env_name') {
       setEnvName(value);
     } else if (name === 'env_value') {
