@@ -79,6 +79,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
     }
     managers.add({
       name: trans.__('Workspaces'),
+      supportsMultipleViews: false,
       running: () => {
         return model.workspaces.map((workspace: Workspace.IWorkspace) => {
           return new WorkspaceItem(workspace);
