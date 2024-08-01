@@ -126,7 +126,11 @@ describe('@jupyterlab/notebook', () => {
         {
           output_type: 'execute_result',
           data: {
-            'text/plain': ['Output line 1', 'Output line 2', 'Output line 3'],
+            'text/plain': [
+              'Output line 1\n',
+              'Output line 2\n',
+              'Output line 3\n'
+            ],
             'text/html': []
           },
           execution_count: 4,
@@ -137,7 +141,7 @@ describe('@jupyterlab/notebook', () => {
         cell_type: 'code',
         execution_count: 1,
         outputs: outputObj,
-        source: ['for i in range(3):\n', '    print(f"Line {i+1}")'],
+        source: ['for i in range(3):\n', '    print(f"Output line {i+1}")'],
         metadata: {}
       }) as YCodeCell;
 
@@ -146,7 +150,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(107); // (2 source_line + 3 output_line) * 17 (line_height) + 22 (cell_margin)
+      expect(height).toBe(124); // (2 source_line + 4 output_line) * 17 (line_height) + 22 (cell_margin)
     });
   });
 });

@@ -65,7 +65,7 @@ export class NotebookViewModel extends WindowedListModel {
         if (typeof data === 'string') {
           outputsLines += data.split('\n').length;
         } else if (Array.isArray(data)) {
-          outputsLines += data.join('\n').split('\n').length;
+          outputsLines += data.join('').split('\n').length;
         }
       }
     }
