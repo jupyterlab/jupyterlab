@@ -149,6 +149,9 @@ export function createDefaultFactory(
         const id = tId ?? '';
         const args = { toolbar: true, ...tArgs };
         const icon = tIcon ? LabIcon.resolve({ icon: tIcon }) : undefined;
+
+        const toolbar = (widget as any).toolbar as Toolbar;
+
         // If there is an icon, undefined label will results in no label
         // otherwise the label will be set using the setting or the command label
         const label = icon ?? commands.icon(id, args) ? tLabel ?? '' : tLabel;
@@ -158,7 +161,8 @@ export function createDefaultFactory(
           args,
           icon,
           label,
-          caption: tCaption as string
+          caption: tCaption as string,
+          noFocusOnClick: toolbar?.noFocusOnClick ?? false
         });
       }
       case 'spacer':
