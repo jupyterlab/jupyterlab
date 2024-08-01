@@ -1315,10 +1315,10 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleSingleClick, {
     label: trans.__('Enable Single Click Navigation'),
-    isToggled: () => browser.allowSingleClick,
+    isToggled: () => browser.singleClickNavigation,
     execute: () => {
-      const value = !browser.allowSingleClick;
-      const key = 'allowSingleClick';
+      const value = !browser.singleClickNavigation;
+      const key = 'singleClickNavigation';
 
       if (settingRegistry) {
         return settingRegistry
