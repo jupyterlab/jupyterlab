@@ -274,7 +274,7 @@ export class FileBrowser extends SidePanel {
     return this._allowSingleClick;
   }
 
-  set allowSingleClick(value: boolean) {
+  set singleClickNavigation(value: boolean) {
     if (this.listing.setAllowSingleClickNavigation) {
       this.listing.setAllowSingleClickNavigation(value);
       this._allowSingleClick = value;
