@@ -145,7 +145,7 @@ namespace CommandIDs {
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
-  export const toggleSingleClick = 'filebrowser:toggle-single-click';
+  export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
