@@ -55,23 +55,25 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           removeWidgetExtension.dispose();
         }
 
-        let toolbarItems =
-          settingRegistry && toolbarRegistry
-            ? createToolbarFactory(
-                toolbarRegistry,
-                settingRegistry,
-                CellBarExtension.FACTORY_NAME,
-                cellToolbar.id,
-                translator ?? nullTranslator
-              )
-            : undefined;
-
-        removeWidgetExtension = app.docRegistry.addWidgetExtension(
-          'Notebook',
-          new CellBarExtension(app.commands, toolbarItems, showCellToolbar)
-        );
+        if (showCellToolbar) {
+          removeWidgetExtension = app.docRegistry.addWidgetExtension(
+            'CellToolbar',
+            new CellBarExtension(app.commands, toolbarItems)
+          );
+        }
       }
     }
+
+    let toolbarItems =
+      settingRegistry && toolbarRegistry
+        ? createToolbarFactory(
+            toolbarRegistry,
+            settingRegistry,
+            CellBarExtension.FACTORY_NAME,
+            cellToolbar.id,
+            translator ?? nullTranslator
+          )
+        : undefined;
 
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
@@ -91,19 +93,8 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
         });
     }
 
-    let toolbarItems =
-      settingRegistry && toolbarRegistry
-        ? createToolbarFactory(
-            toolbarRegistry,
-            settingRegistry,
-            CellBarExtension.FACTORY_NAME,
-            cellToolbar.id,
-            translator ?? nullTranslator
-          )
-        : undefined;
-
     removeWidgetExtension = app.docRegistry.addWidgetExtension(
-      'Notebook',
+      'CellToolbar',
       new CellBarExtension(app.commands, toolbarItems)
     );
   },
