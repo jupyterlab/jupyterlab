@@ -1324,7 +1324,7 @@ function addCommands(
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
-            console.error(`Failed to set allowSingleClick setting`);
+            console.error(`Failed to set singleClickNavigation setting`);
           });
       }
     }
