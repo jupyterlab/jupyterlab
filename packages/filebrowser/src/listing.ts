@@ -1147,7 +1147,7 @@ export class DirListing extends Widget {
       document.addEventListener('mousemove', this, true);
     }
 
-    if (this.getAllowSingleClickNavigation()) {
+    if (this._allowSingleClick) {
       this.evtDblClick(event as MouseEvent);
     }
   }
