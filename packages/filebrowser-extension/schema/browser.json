@@ -237,7 +237,7 @@
       "description": "Whether to group the notebooks away from files",
       "default": false
     },
-    "allowSingleClick": {
+    "singleClickNavigation": {
       "type": "boolean",
       "title": "Navigate files and directories with single click",
       "description": "Whether to allow single click selection on file browser items",
