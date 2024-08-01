@@ -48,7 +48,6 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           ? true
           : (setting.get('showToolbar').composite as boolean);
 
-      console.log(`Show cell toolbar? ${showCellToolbar}`);
       // If this has changed, re-render the extension
       if (oldShowCellToolbar !== showCellToolbar) {
         if (removeWidgetExtension && !removeWidgetExtension.isDisposed) {
@@ -88,7 +87,8 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
         })
         .catch(reason => {
           console.error(
-            `Something went wrong when reading the settings.\n${reason}`
+            'Something went wrong when reading the settings: ',
+            reason
           );
         });
     }
