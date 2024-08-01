@@ -137,7 +137,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.open(model.path)!;
+        widget = (await manager.open(model.path))!;
         expect(widget.hasClass('WidgetFactory')).toBe(true);
         await dismissDialog();
       });
@@ -153,7 +153,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'test'
         });
         const id = session.kernel!.id;
-        widget = manager.open(session.path, 'default', { id })!;
+        widget = (await manager.open(session.path, 'default', { id }))!;
         context = manager.contextForWidget(widget)!;
         await context.ready;
         await context.sessionContext.ready;
@@ -166,7 +166,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.open(model.path, 'default')!;
+        widget = (await manager.open(model.path, 'default'))!;
         context = manager.contextForWidget(widget)!;
         await dismissDialog();
         expect(context.sessionContext.session?.kernel).toBeFalsy();
@@ -177,7 +177,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.open(model.path, 'foo');
+        widget = await manager.open(model.path, 'foo');
         expect(widget).toBeUndefined();
       });
 
@@ -192,7 +192,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.open(model.path, 'foo');
+        widget = await manager.open(model.path, 'foo');
         expect(widget).toBeUndefined();
       });
     });
@@ -203,7 +203,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path)!;
+        widget = (await manager.createNew(model.path))!;
         expect(widget.hasClass('WidgetFactory')).toBe(true);
         await dismissDialog();
       });
@@ -219,7 +219,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'test'
         });
         const id = session.kernel!.id;
-        widget = manager.createNew(session.path, 'default', { id })!;
+        widget = (await manager.createNew(session.path, 'default', { id }))!;
         context = manager.contextForWidget(widget)!;
         await context.ready;
         await context.sessionContext.ready;
@@ -232,7 +232,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path, 'default')!;
+        widget = (await manager.createNew(model.path, 'default'))!;
         context = manager.contextForWidget(widget)!;
         await dismissDialog();
         expect(context.sessionContext.session?.kernel).toBeFalsy();
@@ -243,7 +243,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path, 'foo');
+        widget = await manager.createNew(model.path, 'foo');
         expect(widget).toBeUndefined();
       });
 
@@ -258,7 +258,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path, 'foo');
+        widget = await manager.createNew(model.path, 'foo');
         expect(widget).toBeUndefined();
       });
     });
@@ -269,7 +269,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path);
+        widget = await manager.createNew(model.path);
         expect(manager.findWidget(model.path, 'test')).toBe(widget);
         await dismissDialog();
       });
@@ -279,7 +279,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path);
+        widget = await manager.createNew(model.path);
         expect(manager.findWidget(model.path)).toBe(widget);
         await dismissDialog();
       });
@@ -298,7 +298,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path, 'test2');
+        widget = await manager.createNew(model.path, 'test2');
         expect(manager.findWidget(model.path)).toBeUndefined();
       });
 
@@ -312,7 +312,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path, 'test2');
+        widget = await manager.createNew(model.path, 'test2');
         expect(manager.findWidget(model.path, null)).toBe(widget);
         await dismissDialog();
       });
@@ -324,7 +324,7 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path)!;
+        widget = (await manager.createNew(model.path))!;
         context = manager.contextForWidget(widget)!;
         expect(context.path).toBe(model.path);
         await dismissDialog();
@@ -342,33 +342,35 @@ describe('@jupyterlab/docmanager', () => {
           type: 'file',
           ext: '.txt'
         });
-        widget = manager.createNew(model.path)!;
-        const clone = manager.cloneWidget(widget)!;
+        widget = (await manager.createNew(model.path))!;
+        const clone = (await manager.cloneWidget(widget))!;
         expect(manager.contextForWidget(widget)).toBe(
           manager.contextForWidget(clone)
         );
         await dismissDialog();
       });
 
-      it('should return undefined if the source widget is not managed', () => {
+      it('should return undefined if the source widget is not managed', async () => {
         widget = new Widget();
-        expect(manager.cloneWidget(widget)).toBeUndefined();
+        const clonedWidget = await manager.cloneWidget(widget);
+        expect(clonedWidget).toBeUndefined();
       });
 
-      it('should allow widget factories to have custom clone behavior', () => {
-        widget = manager.createNew('foo', 'CloneTestWidget')!;
-        const clonedWidget: CloneTestWidget = manager.cloneWidget(
+      it('should allow widget factories to have custom clone behavior', async () => {
+        widget = (await manager.createNew('foo', 'CloneTestWidget'))!;
+        const clonedWidget: CloneTestWidget = (await manager.cloneWidget(
           widget
-        ) as CloneTestWidget;
+        )) as CloneTestWidget;
         expect(clonedWidget.counter).toBe(1);
-        const newWidget: CloneTestWidget = manager.createNew(
+        const newWidget: CloneTestWidget = (await manager.createNew(
           'bar',
           'CloneTestWidget'
-        ) as CloneTestWidget;
+        )) as CloneTestWidget;
         expect(newWidget.counter).toBe(0);
-        expect(
-          (manager.cloneWidget(clonedWidget) as CloneTestWidget).counter
-        ).toBe(2);
+        const newClonedWidget = (await manager.cloneWidget(
+          clonedWidget
+        )) as CloneTestWidget;
+        expect(newClonedWidget.counter).toBe(2);
       });
     });
 
@@ -381,8 +383,8 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         path = model.path;
-        widget = manager.createNew(path)!;
-        const clone = manager.cloneWidget(widget)!;
+        widget = (await manager.createNew(path))!;
+        const clone = (await manager.cloneWidget(widget))!;
 
         widget.disposed.connect(() => {
           called++;
@@ -409,12 +411,12 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         path = model.path;
-        const widget0 = manager.createNew(path)!;
+        const widget0 = (await manager.createNew(path))!;
         widget0.disposed.connect(() => {
           called++;
         });
         await dismissDialog();
-        const widget1 = manager.createNew(path)!;
+        const widget1 = (await manager.createNew(path))!;
         widget1.disposed.connect(() => {
           called++;
         });
