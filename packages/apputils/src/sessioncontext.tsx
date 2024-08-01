@@ -1984,10 +1984,8 @@ namespace Private {
       false,
       translator
     );
-
-    if (customEnvBlock) {
-      Widget.attach(customEnvBlock, body);
-    }
+    
+    Widget.attach(customEnvBlock, body);
   }
 
   /**
