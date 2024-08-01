@@ -114,13 +114,13 @@ describe('@jupyterlab/docmanager', () => {
         expect(widget).toBeInstanceOf(Widget);
       });
 
-      it('should emit the widgetCreated signal', () => {
+      it('should emit the widgetCreated signal', async () => {
         let called = false;
 
         widgetFactory.widgetCreated.connect(() => {
           called = true;
         });
-        manager.createWidget(widgetFactory, context);
+        await manager.createWidget(widgetFactory, context);
         expect(called).toBe(true);
       });
     });

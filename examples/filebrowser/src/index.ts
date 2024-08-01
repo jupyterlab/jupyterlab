@@ -151,9 +151,8 @@ function createApp(
           type: 'file',
           path: fbModel.path
         })
-        .then(model => {
-          docManager.open(model.path);
-        });
+        .then(model => docManager.open(model.path))
+        .catch(console.error);
     }
   });
   fbWidget.toolbar.insertItem(0, 'create', creator);
@@ -184,7 +183,7 @@ function createApp(
     mnemonic: 0,
     execute: () => {
       for (const item of fbWidget.selectedItems()) {
-        docManager.openOrReveal(item.path);
+        docManager.openOrReveal(item.path).catch(console.error);
       }
     }
   });

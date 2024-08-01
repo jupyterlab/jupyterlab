@@ -61,7 +61,7 @@ function main(): void {
   });
 }
 
-function createApp(manager: ServiceManager.IManager): void {
+async function createApp(manager: ServiceManager.IManager): Promise<void> {
   // Initialize the command registry with the bindings.
   const commands = new CommandRegistry();
   const useCapture = true;
@@ -216,7 +216,7 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addWidgetFactory(wFactory);
 
   const notebookPath = PageConfig.getOption('notebookPath');
-  const nbWidget = docManager.open(notebookPath) as NotebookPanel;
+  const nbWidget = (await docManager.open(notebookPath)) as NotebookPanel;
   const palette = new CommandPalette({ commands });
   palette.addClass('notebookCommandPalette');
 

@@ -1212,7 +1212,7 @@ export class DirListing extends Widget {
         );
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path);
+      this._manager.openOrReveal(path).catch(console.error);
     }
   }
 
@@ -1730,7 +1730,7 @@ export class DirListing extends Widget {
                 void 0,
                 options
               );
-              this._manager.openOrReveal(item!.path);
+              this._manager.openOrReveal(item!.path).catch(console.error);
             });
           });
           firstWidgetPlaced.resolve(void 0);
