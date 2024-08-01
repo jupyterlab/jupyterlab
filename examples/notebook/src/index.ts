@@ -56,9 +56,7 @@ import { COMMAND_IDS, setupCommands } from './commands';
 
 function main(): void {
   const manager = new ServiceManager();
-  void manager.ready.then(() => {
-    createApp(manager);
-  });
+  void manager.ready.then(() => createApp(manager)).catch(console.error);
 }
 
 async function createApp(manager: ServiceManager.IManager): Promise<void> {
