@@ -270,7 +270,7 @@ export class FileBrowser extends SidePanel {
   /**
    * Whether to allow single click files and directories
    */
-  get allowSingleClick(): boolean {
+  get singleClickNavigation(): boolean {
     return this._allowSingleClick;
   }
 
