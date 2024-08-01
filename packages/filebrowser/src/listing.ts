@@ -1033,10 +1033,6 @@ export class DirListing extends Widget {
     this._allowSingleClick = isEnabled;
   }
 
-  getAllowSingleClickNavigation() {
-    return this._allowSingleClick;
-  }
-
   /**
    * Would this click (or other event type) hit the checkbox by default?
    */
