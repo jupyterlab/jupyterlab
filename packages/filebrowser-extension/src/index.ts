@@ -221,7 +221,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
            */
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
-            allowSingleClick: false,
+            singleClickNavigation: false,
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
