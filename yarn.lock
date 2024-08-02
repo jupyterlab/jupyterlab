@@ -2593,6 +2593,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/completer-extension@workspace:packages/completer-extension"
   dependencies:
+    "@jupyter/react-components": ^0.16.3
     "@jupyterlab/application": ^4.3.0-alpha.1
     "@jupyterlab/completer": ^4.3.0-alpha.1
     "@jupyterlab/settingregistry": ^4.3.0-alpha.1
