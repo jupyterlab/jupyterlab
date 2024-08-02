@@ -1212,7 +1212,7 @@ export class DirListing extends Widget {
         );
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path);
+      this._manager.openOrReveal(path).catch(console.error);
     }
   }
 
@@ -1706,31 +1706,31 @@ export class DirListing extends Widget {
 
     if (item && item.type !== 'directory') {
       const otherPaths = selectedPaths.slice(1).reverse();
-      this._drag.mimeData.setData(FACTORY_MIME, () => {
+      this._drag.mimeData.setData(FACTORY_MIME, async () => {
         if (!item) {
           return;
         }
         const path = item.path;
         let widget = this._manager.findWidget(path);
         if (!widget) {
-          widget = this._manager.open(item.path);
+          widget = await this._manager.open(item.path);
         }
         if (otherPaths.length) {
           const firstWidgetPlaced = new PromiseDelegate<void>();
           void firstWidgetPlaced.promise.then(() => {
             let prevWidget = widget;
-            otherPaths.forEach(path => {
+            otherPaths.forEach(async path => {
               const options: DocumentRegistry.IOpenOptions = {
                 ref: prevWidget?.id,
                 mode: 'tab-after'
               };
-              prevWidget = this._manager.openOrReveal(
+              prevWidget = await this._manager.openOrReveal(
                 path,
                 void 0,
                 void 0,
                 options
               );
-              this._manager.openOrReveal(item!.path);
+              this._manager.openOrReveal(item!.path).catch(console.error);
             });
           });
           firstWidgetPlaced.resolve(void 0);

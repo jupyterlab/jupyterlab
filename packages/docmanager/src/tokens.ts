@@ -95,7 +95,7 @@ export interface IDocumentManager extends IDisposable {
    *  Uses the same widget factory and context as the source, or returns
    *  `undefined` if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): IDocumentWidget | undefined;
+  cloneWidget(widget: Widget): Promise<IDocumentWidget | undefined>;
 
   /**
    * Close all of the open documents.
@@ -153,7 +153,7 @@ export interface IDocumentManager extends IDisposable {
     path: string,
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>
-  ): Widget | undefined;
+  ): Promise<Widget | undefined>;
 
   /**
    * Delete a file.
@@ -223,7 +223,7 @@ export interface IDocumentManager extends IDisposable {
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
-  ): IDocumentWidget | undefined;
+  ): Promise<IDocumentWidget | undefined>;
 
   /**
    * Open a file and return the widget used to view it.
@@ -246,7 +246,7 @@ export interface IDocumentManager extends IDisposable {
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
-  ): IDocumentWidget | undefined;
+  ): Promise<IDocumentWidget | undefined>;
 
   /**
    * Overwrite a file.

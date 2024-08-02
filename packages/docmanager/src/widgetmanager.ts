@@ -93,11 +93,11 @@ export class DocumentWidgetManager implements IDisposable {
    *
    * @throws If the factory is not registered.
    */
-  createWidget(
+  async createWidget(
     factory: DocumentRegistry.WidgetFactory,
     context: DocumentRegistry.Context
-  ): IDocumentWidget {
-    const widget = factory.createNew(context);
+  ): Promise<IDocumentWidget> {
+    const widget = await Promise.resolve(factory.createNew(context));
     this._initializeWidget(widget, factory, context);
     return widget;
   }
@@ -204,7 +204,7 @@ export class DocumentWidgetManager implements IDisposable {
    *  Uses the same widget factory and context as the source, or throws
    *  if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): IDocumentWidget | undefined {
+  async cloneWidget(widget: Widget): Promise<IDocumentWidget | undefined> {
     const context = Private.contextProperty.get(widget);
     if (!context) {
       return undefined;
@@ -213,7 +213,9 @@ export class DocumentWidgetManager implements IDisposable {
     if (!factory) {
       return undefined;
     }
-    const newWidget = factory.createNew(context, widget as IDocumentWidget);
+    const newWidget = await Promise.resolve(
+      factory.createNew(context, widget as IDocumentWidget)
+    );
     this._initializeWidget(newWidget, factory, context);
     return newWidget;
   }

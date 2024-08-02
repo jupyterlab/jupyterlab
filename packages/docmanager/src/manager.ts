@@ -246,7 +246,7 @@ export class DocumentManager implements IDocumentManager {
    *  Uses the same widget factory and context as the source, or returns
    *  `undefined` if the source widget is not managed by this manager.
    */
-  cloneWidget(widget: Widget): IDocumentWidget | undefined {
+  async cloneWidget(widget: Widget): Promise<IDocumentWidget | undefined> {
     return this._widgetManager.cloneWidget(widget);
   }
 
@@ -315,11 +315,11 @@ export class DocumentManager implements IDocumentManager {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  createNew(
+  async createNew(
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>
-  ): Widget | undefined {
+  ): Promise<Widget | undefined> {
     return this._createOrOpenDocument('create', path, widgetName, kernel);
   }
 
@@ -431,12 +431,12 @@ export class DocumentManager implements IDocumentManager {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  open(
+  async open(
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
-  ): IDocumentWidget | undefined {
+  ): Promise<IDocumentWidget | undefined> {
     return this._createOrOpenDocument(
       'open',
       path,
@@ -462,12 +462,12 @@ export class DocumentManager implements IDocumentManager {
    * This function will return `undefined` if a valid widget factory
    * cannot be found.
    */
-  openOrReveal(
+  async openOrReveal(
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
-  ): IDocumentWidget | undefined {
+  ): Promise<IDocumentWidget | undefined> {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget, {
@@ -627,13 +627,13 @@ export class DocumentManager implements IDocumentManager {
    * The two cases differ in how the document context is handled, but the creation
    * of the widget and launching of the kernel are identical.
    */
-  private _createOrOpenDocument(
+  private async _createOrOpenDocument(
     which: 'open' | 'create',
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
-  ): IDocumentWidget | undefined {
+  ): Promise<IDocumentWidget | undefined> {
     const widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
       return undefined;
@@ -672,7 +672,10 @@ export class DocumentManager implements IDocumentManager {
       throw new Error(`Invalid argument 'which': ${which}`);
     }
 
-    const widget = this._widgetManager.createWidget(widgetFactory, context);
+    const widget = await this._widgetManager.createWidget(
+      widgetFactory,
+      context
+    );
     this._opener.open(widget, { type: widgetFactory.name, ...options });
 
     // If the initial opening of the context fails, dispose of the widget.

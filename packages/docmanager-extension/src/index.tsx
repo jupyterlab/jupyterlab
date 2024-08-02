@@ -719,7 +719,8 @@ function addCommands(
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
         .get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options));
+        .then(() => docManager.openOrReveal(path, factory, kernel, options))
+        .catch(console.error);
     },
     iconClass: args => (args['icon'] as string) || '',
     label: args =>
@@ -1132,10 +1133,14 @@ function addLabCommands(
         return;
       }
       // Clone the widget.
-      const child = docManager.cloneWidget(widget);
-      if (child) {
-        widgetOpener.open(child, options);
-      }
+      docManager
+        .cloneWidget(widget)
+        .then(child => {
+          if (child) {
+            widgetOpener.open(child, options);
+          }
+        })
+        .catch(console.error);
     }
   });
 

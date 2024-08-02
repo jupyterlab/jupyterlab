@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CommandLinker } from '@jupyterlab/apputils';
+import { IEntrypoint } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
@@ -66,7 +67,11 @@ export abstract class JupyterFrontEnd<
 
     this.commandLinker =
       options.commandLinker || new CommandLinker({ commands: this.commands });
-    this.docRegistry = options.docRegistry || new DocumentRegistry();
+    this.docRegistry =
+      options.docRegistry ||
+      new DocumentRegistry({
+        entrypoints: options.entrypoints
+      });
     this.restored =
       options.restored ||
       this.started.then(() => restored).catch(() => restored);
@@ -220,6 +225,7 @@ export namespace JupyterFrontEnd {
    */
   export interface IOptions<T extends IShell = IShell, U = any>
     extends Application.IOptions<T> {
+    entrypoints?: Record<string, IEntrypoint[]>;
     /**
      * The document registry instance used by the application.
      */

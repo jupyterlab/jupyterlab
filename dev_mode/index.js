@@ -64,6 +64,7 @@ export async function main() {
   var deferred = [];
   var ignorePlugins = [];
   var register = [];
+  var entrypoints = {}
 
 
   const federatedExtensionPromises = [];
@@ -175,6 +176,24 @@ export async function main() {
 
       const pkgPlugins = pkgJson['jupyterlab']['plugins'];
       if (pkgPlugins) {
+        const entryPointData = pkgJson['jupyterlab']['entrypoint'];
+
+        if(entryPointData){
+          Object.entries(entryPointData).forEach(([entryPoint, data]) => {
+            if (!entrypoints[entryPoint]) {
+              entrypoints[entryPoint] = []
+            }
+            data.forEach(pluginData=>{
+              entrypoints[entryPoint].push({
+                extension: '{{@key}}',
+                data : pluginData,
+                activate: () => {
+                  return pluginRegistry.activatePlugin(pluginData.pluginId)
+                }
+              })
+            })
+          });
+        }
         for(let plugin of processPlugins(pkgPlugins, '{{@key}}')) {
           register.push({...plugin, loader: async () => {
             const candidate = modulesCache.get('{{@key}}{{#if this}}/{{this}}{{/if}}');
@@ -183,7 +202,6 @@ export async function main() {
             }
             const delegate = new PromiseDelegate();
             modulesCache.set('{{@key}}{{#if this}}/{{this}}{{/if}}', delegate.promise);
-            console.debug('Loading {{@key}}{{#if this}}/{{this}}{{/if}}…');
             let ext = await import('{{@key}}{{#if this}}/{{this}}{{/if}}');
             ext.__scope__ = '{{@key}}';
             delegate.resolve(ext);
@@ -225,6 +243,7 @@ export async function main() {
 
   const lab = new JupyterLab({
     pluginRegistry,
+    entrypoints,
     mimeExtensions,
     disabled: {
       matches: disabled,
