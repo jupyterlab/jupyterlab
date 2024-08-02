@@ -2399,7 +2399,6 @@ __metadata:
     "@jupyterlab/cell-toolbar": ^4.3.0-alpha.2
     "@jupyterlab/settingregistry": ^4.3.0-alpha.2
     "@jupyterlab/translation": ^4.3.0-alpha.2
-    "@lumino/disposable": ^2.1.2
     rimraf: ~5.0.5
     typescript: ~5.1.6
   languageName: unknown

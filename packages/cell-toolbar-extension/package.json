@@ -38,8 +38,7 @@
     "@jupyterlab/apputils": "^4.4.0-alpha.2",
     "@jupyterlab/cell-toolbar": "^4.3.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.3.0-alpha.2",
-    "@jupyterlab/translation": "^4.3.0-alpha.2",
-    "@lumino/disposable": "^2.1.2"
+    "@jupyterlab/translation": "^4.3.0-alpha.2"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
