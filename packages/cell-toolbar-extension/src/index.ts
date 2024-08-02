@@ -18,7 +18,6 @@ import {
   IToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IDisposable } from '@lumino/disposable';
 
 const PLUGIN_ID = '@jupyterlab/cell-toolbar-extension:plugin';
 
@@ -33,7 +32,6 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     translator: ITranslator | null
   ) => {
     let showCellToolbar: boolean | null;
-    let removeWidgetExtension: IDisposable | null;
 
     /**
      * Load the settings for this extension
@@ -47,17 +45,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           ? true
           : (setting.get('showToolbar').composite as boolean);
 
-      // Re-render the extension, with new buttons and new visibility
-      if (removeWidgetExtension && !removeWidgetExtension.isDisposed) {
-        removeWidgetExtension.dispose();
-      }
-
-      if (showCellToolbar) {
-        removeWidgetExtension = app.docRegistry.addWidgetExtension(
-          'Notebook',
-          new CellBarExtension(app.commands, toolbarItems)
-        );
-      }
+      extension.visible = showCellToolbar;
     }
 
     let toolbarItems =
@@ -70,6 +58,8 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
             translator ?? nullTranslator
           )
         : undefined;
+
+    const extension = new CellBarExtension(app.commands, toolbarItems);
 
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
@@ -90,10 +80,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
         });
     }
 
-    removeWidgetExtension = app.docRegistry.addWidgetExtension(
-      'Notebook',
-      new CellBarExtension(app.commands, toolbarItems)
-    );
+    app.docRegistry.addWidgetExtension('Notebook', extension);
   },
   optional: [ISettingRegistry, IToolbarWidgetRegistry, ITranslator]
 };

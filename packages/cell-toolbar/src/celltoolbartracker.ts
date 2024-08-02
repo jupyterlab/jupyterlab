@@ -68,6 +68,7 @@ export class CellToolbarTracker implements IDisposable {
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
+    this._visible = true; // TODO: make this an option
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -152,6 +153,15 @@ export class CellToolbarTracker implements IDisposable {
     return this._isDisposed;
   }
 
+  get visible(): boolean {
+    return this._visible;
+  }
+
+  set visible(value: boolean) {
+    this._visible = value;
+    this._onToolbarChanged();
+  }
+
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -167,6 +177,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _addToolbar(model: ICellModel): void {
+    // Do nothing if the toolbar shouldn't be visible.
+    if (!this.visible) {
+      return;
+    }
+
     const cell = this._getCell(model);
 
     if (cell && !cell.isDisposed) {
@@ -447,6 +462,7 @@ export class CellToolbarTracker implements IDisposable {
   private _toolbarFactory:
     | ((widget: Cell) => IObservableList<ToolbarRegistry.IToolbarItem>)
     | null = null;
+  private _visible: boolean;
 }
 
 const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
@@ -509,11 +525,20 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, undefined, this._toolbarFactory);
+    return (this._tracker = new CellToolbarTracker(
+      panel,
+      undefined,
+      this._toolbarFactory
+    ));
+  }
+
+  set visible(value: boolean) {
+    this._tracker.visible = value;
   }
 
   private _commands: CommandRegistry;
   private _toolbarFactory: (
     widget: Widget
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
+  private _tracker: CellToolbarTracker;
 }
