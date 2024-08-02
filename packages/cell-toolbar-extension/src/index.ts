@@ -41,25 +41,22 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
      * @param setting Extension settings
      */
     function loadSetting(setting: ISettingRegistry.ISettings | null): void {
-      // Read the settings and convert to the correct type
-      const oldShowCellToolbar = showCellToolbar;
+      // Read the setting and convert to the correct type
       showCellToolbar =
         setting === null
           ? true
           : (setting.get('showToolbar').composite as boolean);
 
-      // If this has changed, re-render the extension
-      if (oldShowCellToolbar !== showCellToolbar) {
-        if (removeWidgetExtension && !removeWidgetExtension.isDisposed) {
-          removeWidgetExtension.dispose();
-        }
+      // Re-render the extension, with new buttons and new visibility
+      if (removeWidgetExtension && !removeWidgetExtension.isDisposed) {
+        removeWidgetExtension.dispose();
+      }
 
-        if (showCellToolbar) {
-          removeWidgetExtension = app.docRegistry.addWidgetExtension(
-            'CellToolbar',
-            new CellBarExtension(app.commands, toolbarItems)
-          );
-        }
+      if (showCellToolbar) {
+        removeWidgetExtension = app.docRegistry.addWidgetExtension(
+          'Notebook',
+          new CellBarExtension(app.commands, toolbarItems)
+        );
       }
     }
 
@@ -94,7 +91,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     }
 
     removeWidgetExtension = app.docRegistry.addWidgetExtension(
-      'CellToolbar',
+      'Notebook',
       new CellBarExtension(app.commands, toolbarItems)
     );
   },
