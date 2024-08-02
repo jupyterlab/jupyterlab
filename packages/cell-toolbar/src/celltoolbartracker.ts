@@ -68,7 +68,7 @@ export class CellToolbarTracker implements IDisposable {
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
-    this._visible = true; // TODO: make this an option
+    this._visible = true; // If this has been set to false, it will be modified after settings are available
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
