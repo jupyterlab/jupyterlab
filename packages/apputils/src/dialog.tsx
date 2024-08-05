@@ -844,7 +844,7 @@ export namespace Dialog {
   /**
    * The default implementation of a dialog renderer.
    */
-  export class Renderer {
+  export class Renderer implements IRenderer {
     /**
      * Create the header of the dialog.
      *
@@ -984,13 +984,22 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('jp-button') as HTMLButtonElement;
-      e.className = this.createItemClass(button);
-      e.appendChild(this.renderIcon(button));
-      e.appendChild(this.renderLabel(button));
+      const e = document.createElement('jp-button');
+      e.classList.add('jp-Dialog-button');
+      if (button.className) {
+        e.classList.add(button.className);
+      }
+
+      if (button.iconClass || button.iconLabel) {
+        e.appendChild(this.renderIcon(button));
+      }
+      e.textContent = button.label;
+      e.title = button.caption;
+      e.ariaLabel = button.ariaLabel;
       const appearance = this.createItemAppearance(button);
       e.setAttribute('appearance', appearance);
-      return e;
+      e.setAttribute('scale', 'large');
+      return e as HTMLButtonElement;
     }
 
     /**
@@ -1013,37 +1022,6 @@ export namespace Dialog {
       input.checked = !!checkbox.checked;
       e.insertAdjacentElement('afterbegin', input);
       return e;
-    }
-
-    /**
-     * Create the class name for the button.
-     *
-     * @param data - The data to use for the class name.
-     *
-     * @returns The full class name for the button.
-     */
-    createItemClass(data: IButton): string {
-      // Setup the initial class name.
-      let name = 'jp-Dialog-button';
-
-      // Add the other state classes.
-      if (data.accept) {
-        name += ' jp-mod-accept';
-      } else {
-        name += ' jp-mod-reject';
-      }
-      if (data.displayType === 'warn') {
-        name += ' jp-mod-warn';
-      }
-
-      // Add the extra class.
-      const extra = data.className;
-      if (extra) {
-        name += ` ${extra}`;
-      }
-
-      // Return the complete class name.
-      return name;
     }
 
     /**
@@ -1072,9 +1050,10 @@ export namespace Dialog {
      * @returns An HTML element representing the icon.
      */
     renderIcon(data: IButton): HTMLElement {
-      const e = document.createElement('div');
+      const e = document.createElement('span');
       e.className = this.createIconClass(data);
       e.appendChild(document.createTextNode(data.iconLabel));
+      e.slot = 'start';
       return e;
     }
 
@@ -1089,22 +1068,6 @@ export namespace Dialog {
       const name = 'jp-Dialog-buttonIcon';
       const extra = data.iconClass;
       return extra ? `${name} ${extra}` : name;
-    }
-
-    /**
-     * Render the label element for a button.
-     *
-     * @param data - The data to use for rendering the label.
-     *
-     * @returns An HTML element representing the item label.
-     */
-    renderLabel(data: IButton): HTMLElement {
-      const e = document.createElement('div');
-      e.className = 'jp-Dialog-buttonLabel';
-      e.title = data.caption;
-      e.ariaLabel = data.ariaLabel;
-      e.appendChild(document.createTextNode(data.label));
-      return e;
     }
   }
 

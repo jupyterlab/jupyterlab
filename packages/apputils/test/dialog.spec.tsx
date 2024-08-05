@@ -448,8 +448,14 @@ describe('@jupyterlab/apputils', () => {
         it('should create a button node for the dialog', () => {
           const node = renderer.createButtonNode(data);
           expect(node.className).toContain('jp-Dialog-button');
+          expect(node.className).toContain(data.className);
           expect(node.querySelector('.jp-Dialog-buttonIcon')).toBeTruthy();
-          expect(node.querySelector('.jp-Dialog-buttonLabel')).toBeTruthy();
+          expect(node.title).toBe(data.caption);
+          expect(node.ariaLabel).toBe(data.ariaLabel);
+          expect(node.lastElementChild?.nodeType).toBeInstanceOf(
+            document.TEXT_NODE
+          );
+          expect(node.lastElementChild).toBe(data.label);
         });
       });
 
@@ -470,29 +476,11 @@ describe('@jupyterlab/apputils', () => {
         });
       });
 
-      describe('#createItemClass()', () => {
-        it('should create the class name for the button', () => {
-          const value = renderer.createItemClass(data);
-          expect(value).toContain('jp-Dialog-button');
-          expect(value).toContain('jp-mod-reject');
-          expect(value).toContain(data.className);
-        });
-      });
-
       describe('#createIconClass()', () => {
         it('should create the class name for the button icon', () => {
           const value = renderer.createIconClass(data);
           expect(value).toContain('jp-Dialog-buttonIcon');
           expect(value).toContain(data.iconClass);
-        });
-      });
-
-      describe('#renderLabel()', () => {
-        it('should render a label element for a button', () => {
-          const node = renderer.renderLabel(data);
-          expect(node.className).toBe('jp-Dialog-buttonLabel');
-          expect(node.title).toBe(data.caption);
-          expect(node.textContent).toBe(data.label);
         });
       });
     });
