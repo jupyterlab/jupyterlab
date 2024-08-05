@@ -52,6 +52,8 @@ export class Tooltip extends Widget {
   constructor(options: Tooltip.IOptions) {
     super();
 
+    this.addClass('jp-ThemedContainer');
+
     const layout = (this.layout = new PanelLayout());
     const model = new MimeModel({ data: options.bundle });
 

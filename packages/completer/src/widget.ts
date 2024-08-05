@@ -67,6 +67,7 @@ export class Completer extends Widget {
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass('jp-Completer');
+    this.addClass('jp-ThemedContainer');
     this._updateConstraints();
   }
 
@@ -179,6 +180,11 @@ export class Completer extends Widget {
   get showDocsPanel(): boolean {
     return this._showDoc;
   }
+
+  /**
+   * Whether to suppress the tab completer when inline completions are presented.
+   */
+  suppressIfInlineCompleterActive: boolean;
 
   /**
    * Dispose of the resources held by the completer widget.

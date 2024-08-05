@@ -106,6 +106,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
    */
   constructor(options: IRankedMenu.IOptions) {
     super(options);
+    this.addClass('jp-ThemedContainer');
     this._rank = options.rank;
     this._includeSeparators = options.includeSeparators ?? true;
   }

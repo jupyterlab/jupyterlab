@@ -145,6 +145,8 @@ namespace CommandIDs {
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
+  export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
+
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
 
@@ -219,6 +221,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
            */
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
+            singleClickNavigation: false,
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
@@ -339,7 +342,6 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       'aria-label',
       trans.__('File Browser Section')
     );
-    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
     defaultBrowser.title.icon = folderIcon;
 
     // Show the current file browser shortcut in its title.
@@ -1306,6 +1308,23 @@ function addCommands(
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleSingleClick, {
+    label: trans.__('Enable Single Click Navigation'),
+    isToggled: () => browser.singleClickNavigation,
+    execute: () => {
+      const value = !browser.singleClickNavigation;
+      const key = 'singleClickNavigation';
+
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set singleClickNavigation setting`);
           });
       }
     }

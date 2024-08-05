@@ -1026,6 +1026,14 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Update the setting to allow single click navigation.
+   * This enables opening files/directories with a single click.
+   */
+  setAllowSingleClickNavigation(isEnabled: boolean) {
+    this._allowSingleClick = isEnabled;
+  }
+
+  /**
    * Would this click (or other event type) hit the checkbox by default?
    */
   protected isWithinCheckboxHitArea(event: Event): boolean {
@@ -1137,6 +1145,10 @@ export class DirListing extends Widget {
       };
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
+    }
+
+    if (this._allowSingleClick) {
+      this.evtDblClick(event as MouseEvent);
     }
   }
 
@@ -1468,31 +1480,70 @@ export class DirListing extends Widget {
    * Handle the `drop` event for the widget.
    */
   protected evtNativeDrop(event: DragEvent): void {
-    const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) {
-      return;
-    }
-    const length = event.dataTransfer?.items.length;
-    if (!length) {
-      return;
-    }
-    for (let i = 0; i < length; i++) {
-      let entry = event.dataTransfer?.items[i].webkitGetAsEntry();
-      if (entry?.isDirectory) {
-        console.log('currently not supporting drag + drop for folders');
-        void showDialog({
-          title: this._trans.__('Error Uploading Folder'),
-          body: this._trans.__(
-            'Drag and Drop is currently not supported for folders'
-          ),
-          buttons: [Dialog.cancelButton({ label: this._trans.__('Close') })]
-        });
-      }
-    }
+    // Prevent navigation
     event.preventDefault();
-    for (let i = 0; i < files.length; i++) {
-      void this._model.upload(files[i]);
+
+    const items = event.dataTransfer?.items;
+    if (!items) {
+      // Fallback to simple upload of files (if any)
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) {
+        return;
+      }
+      const promises = [];
+      for (const file of files) {
+        const promise = this._model.upload(file);
+        promises.push(promise);
+      }
+      Promise.all(promises)
+        .then(() => this._allUploaded.emit())
+        .catch(err => {
+          console.error('Error while uploading files: ', err);
+        });
+      return;
     }
+
+    const uploadEntry = async (entry: FileSystemEntry, path: string) => {
+      if (Private.isDirectoryEntry(entry)) {
+        const dirPath = await Private.createDirectory(
+          this._model.manager,
+          path,
+          entry.name
+        );
+        const directoryReader = entry.createReader();
+
+        const allEntries = await Private.collectEntries(directoryReader);
+        for (const childEntry of allEntries) {
+          await uploadEntry(childEntry, dirPath);
+        }
+      } else if (Private.isFileEntry(entry)) {
+        const file = await Private.readFile(entry);
+        await this._model.upload(file, path);
+      }
+    };
+
+    const promises = [];
+    for (const item of items) {
+      const entry = Private.defensiveGetAsEntry(item);
+
+      if (!entry) {
+        continue;
+      }
+      const promise = uploadEntry(entry, this._model.path ?? '/');
+      promises.push(promise);
+    }
+    Promise.all(promises)
+      .then(() => this._allUploaded.emit())
+      .catch(err => {
+        console.error('Error while uploading files: ', err);
+      });
+  }
+
+  /**
+   * Signal emitted on when all files were uploaded after native drag.
+   */
+  protected get allUploaded(): ISignal<DirListing, void> {
+    return this._allUploaded;
   }
 
   /**
@@ -2144,11 +2195,13 @@ export class DirListing extends Widget {
   private _isDirty = false;
   private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
   private _sortNotebooksFirst = false;
+  private _allowSingleClick = false;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
   private _modifiedWidth: number;
   private _modifiedStyle: Time.HumanStyle;
+  private _allUploaded = new Signal<DirListing, void>(this);
 }
 
 /**
@@ -3074,5 +3127,76 @@ namespace Private {
       LabIcon.remove(container);
       container.className = HEADER_ITEM_ICON_CLASS;
     }
+  }
+
+  export async function createDirectory(
+    manager: IDocumentManager,
+    path: string,
+    name: string
+  ): Promise<string> {
+    const model = await manager.newUntitled({
+      path: path,
+      type: 'directory'
+    });
+    const tmpDirPath = PathExt.join(path, model.name);
+    const dirPath = PathExt.join(path, name);
+    try {
+      await manager.rename(tmpDirPath, dirPath);
+    } catch (e) {
+      // The `dirPath` already exists, remove the temporary new directory
+      await manager.deleteFile(tmpDirPath);
+    }
+    return dirPath;
+  }
+
+  export function isDirectoryEntry(
+    entry: FileSystemEntry
+  ): entry is FileSystemDirectoryEntry {
+    return entry.isDirectory;
+  }
+  export function isFileEntry(
+    entry: FileSystemEntry
+  ): entry is FileSystemFileEntry {
+    return entry.isFile;
+  }
+
+  export function defensiveGetAsEntry(
+    item: DataTransferItem
+  ): FileSystemEntry | null {
+    if (item.webkitGetAsEntry) {
+      return item.webkitGetAsEntry();
+    }
+    if ('getAsEntry' in item) {
+      // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
+      return (item['getAsEntry'] as () => FileSystemEntry | null)();
+    }
+    return null;
+  }
+
+  function readEntries(reader: FileSystemDirectoryReader) {
+    return new Promise<FileSystemEntry[]>((resolve, reject) =>
+      reader.readEntries(resolve, reject)
+    );
+  }
+
+  export function readFile(entry: FileSystemFileEntry) {
+    return new Promise<File>((resolve, reject) => entry.file(resolve, reject));
+  }
+
+  export async function collectEntries(reader: FileSystemDirectoryReader) {
+    // Spec requires calling `readEntries` until these are exhausted;
+    // in practice this is only required in Chromium-based browsers for >100 files.
+    // https://issues.chromium.org/issues/41110876
+    const allEntries: FileSystemEntry[] = [];
+    let done = false;
+    while (!done) {
+      const entries = await readEntries(reader);
+      if (entries.length === 0) {
+        done = true;
+      } else {
+        allEntries.push(...entries);
+      }
+    }
+    return allEntries;
   }
 }
