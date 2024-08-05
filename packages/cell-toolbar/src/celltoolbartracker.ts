@@ -532,6 +532,10 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     ));
   }
 
+  get visible(): boolean {
+    return this._tracker.visible;
+  }
+
   set visible(value: boolean) {
     this._tracker.visible = value;
   }
