@@ -64,20 +64,13 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
     if (settingRegistry !== null) {
-      Promise.all([app.restored, settingRegistry.load(PLUGIN_ID)])
-        .then(([, setting]) => {
-          // Read the settings
-          loadSetting(setting);
+      settingRegistry.load(PLUGIN_ID).then(setting => {
+        // Read the settings
+        loadSetting(setting);
 
-          // Listen for your plugin setting changes using Signal
-          setting.changed.connect(loadSetting);
-        })
-        .catch(reason => {
-          console.error(
-            'Something went wrong when reading the settings: ',
-            reason
-          );
-        });
+        // Listen for your plugin setting changes using Signal
+        setting.changed.connect(loadSetting);
+      });
     }
 
     app.docRegistry.addWidgetExtension('Notebook', extension);
