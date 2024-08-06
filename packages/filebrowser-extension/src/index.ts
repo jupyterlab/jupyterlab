@@ -272,7 +272,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
-    state: IStateDB | null,
+    stateDB: IStateDB | null,
     info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -280,6 +280,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       id: string,
       options: IFileBrowserFactory.IOptions = {}
     ) => {
+      const state =
+        options.state === null
+          ? undefined
+          : options.state || stateDB || undefined;
       const model = new FilterFileBrowserModel({
         translator: translator,
         auto: options.auto ?? true,
@@ -292,13 +296,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
           }
           return 'when-hidden';
         },
-        state:
-          options.state === null
-            ? undefined
-            : options.state || state || undefined
+        state
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator });
+      const widget = new FileBrowser({ id, model, restore, translator, state });
 
       // Track the newly created file browser.
       void tracker.add(widget);
