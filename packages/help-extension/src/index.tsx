@@ -135,7 +135,11 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2024 Project Jupyter Contributors')}
+            {trans.__(
+              '© %1-%2 Project Jupyter Contributors',
+              2015,
+              new Date().getUTCFullYear()
+            )}
           </span>
         );
         const body = (
