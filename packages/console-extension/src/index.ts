@@ -447,7 +447,7 @@ async function activateConsole(
   }
 
   const allowCustomEnvVariables =
-    PageConfig.getOption('allow_custom_env_variables') === 'true'
+    PageConfig.getOption('allow_setup_custom_env_variables') === 'true'
       ? true
       : false;
   if (allowCustomEnvVariables) {
