@@ -64,7 +64,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
     if (settingRegistry !== null) {
-      settingRegistry.load(PLUGIN_ID).then(setting => {
+      void settingRegistry.load(PLUGIN_ID).then(setting => {
         // Read the settings
         loadSetting(setting);
 
