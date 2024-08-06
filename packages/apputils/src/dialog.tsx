@@ -268,7 +268,7 @@ export class Dialog<T> extends Widget {
     document.addEventListener('focus', this, true);
     document.addEventListener('input', this, true);
     this._first = Private.findFirstFocusable(this.node);
-    this._original = document.activeElement as HTMLElement;
+    this._original = document.activeElement as HTMLElement | null;
 
     const setFocus = () => {
       if (this._focusNodeSelector) {
@@ -310,7 +310,7 @@ export class Dialog<T> extends Widget {
     document.removeEventListener('focus', this, true);
     document.removeEventListener('mousedown', this, true);
     document.removeEventListener('input', this, true);
-    this._original.focus();
+    this._original?.focus();
   }
 
   /**
@@ -378,9 +378,9 @@ export class Dialog<T> extends Widget {
         break;
       case 37: {
         // Left arrow
-        const activeEl = document.activeElement;
+        const activeEl = document.activeElement as HTMLButtonElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (this._buttonNodes.includes(activeEl)) {
           let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
@@ -397,9 +397,9 @@ export class Dialog<T> extends Widget {
       }
       case 39: {
         // Right arrow
-        const activeEl = document.activeElement;
+        const activeEl = document.activeElement as HTMLButtonElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (this._buttonNodes.includes(activeEl)) {
           let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
@@ -431,12 +431,10 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined;
-
-        if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl);
-        }
-        this.resolve(index);
+        const index = activeEl
+          ? this._buttonNodes.indexOf(activeEl as HTMLButtonElement)
+          : -1;
+        this.resolve(index < 0 ? undefined : index);
         break;
       }
       default:
@@ -510,7 +508,7 @@ export class Dialog<T> extends Widget {
   private _buttonNodes: ReadonlyArray<HTMLButtonElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
-  private _original: HTMLElement;
+  private _original: HTMLElement | null;
   private _first: HTMLElement;
   private _primary: HTMLElement;
   private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
