@@ -985,10 +985,7 @@ export namespace Dialog {
      */
     createButtonNode(button: IButton): HTMLButtonElement {
       const e = document.createElement('jp-button');
-      e.classList.add('jp-Dialog-button');
-      if (button.className) {
-        e.classList.add(button.className);
-      }
+      e.className = this.createItemClass(button);
 
       if (button.iconClass || button.iconLabel) {
         e.appendChild(this.renderIcon(button));
@@ -1022,6 +1019,37 @@ export namespace Dialog {
       input.checked = !!checkbox.checked;
       e.insertAdjacentElement('afterbegin', input);
       return e;
+    }
+
+    /**
+     * Create the class name for the button.
+     *
+     * @param data - The data to use for the class name.
+     *
+     * @returns The full class name for the button.
+     */
+    createItemClass(data: IButton): string {
+      // Setup the initial class name.
+      let name = 'jp-Dialog-button';
+
+      // Add the other state classes.
+      if (data.accept) {
+        name += ' jp-mod-accept';
+      } else {
+        name += ' jp-mod-reject';
+      }
+      if (data.displayType === 'warn') {
+        name += ' jp-mod-warn';
+      }
+
+      // Add the extra class.
+      const extra = data.className;
+      if (extra) {
+        name += ` ${extra}`;
+      }
+
+      // Return the complete class name.
+      return name;
     }
 
     /**
