@@ -2672,10 +2672,14 @@ export class Notebook extends StaticNotebook {
       // We don't want to prevent the default selection behavior
       // if there is currently text selected in an output.
       const hasSelection = (window.getSelection() ?? '').toString() !== '';
+      // We don't want to prevent the default behavior
+      // if the current cell is the active cell.
+      const isActiveCell = index == this.activeCellIndex;
       if (
         button === 0 &&
         shiftKey &&
         !hasSelection &&
+        !isActiveCell &&
         !['INPUT', 'OPTION'].includes(target.tagName)
       ) {
         // Prevent browser selecting text in prompt or output
