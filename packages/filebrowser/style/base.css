@@ -148,6 +148,7 @@
 
 .jp-DirListing-headerItem {
   padding: 4px 12px 2px;
+  padding-left: 4px;
   font-weight: 500;
   overflow: hidden;
   white-space: nowrap;
@@ -270,6 +271,7 @@
 
 .jp-DirListing-item > :last-child {
   flex-grow: 1;
+  margin-right: 2px;
 }
 
 .jp-DirListing-checkboxWrapper {

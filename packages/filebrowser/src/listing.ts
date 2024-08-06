@@ -2416,8 +2416,17 @@ export class DirListing extends Widget {
     index: number;
   } | null = null;
   private _resizeData: {
+    /**
+     * Cursor position when the resize started.
+     */
     pressX: number;
+    /**
+     * Identifier of the column being resized.
+     */
     column: DirListing.ResizableColumn;
+    /**
+     * Size of the column when the cursor grabbed the resize handle.
+     */
     initialSize: number;
     /**
      * The disposable to clear the cursor override and resize handle.
@@ -2674,7 +2683,7 @@ export namespace DirListing {
       id: 'is_selected' as const,
       className: CHECKBOX_WRAPPER_CLASS,
       itemClassName: CHECKBOX_WRAPPER_CLASS,
-      minWidth: 20
+      minWidth: 18
     },
     {
       id: 'name' as const,
