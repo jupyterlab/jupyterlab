@@ -62,12 +62,14 @@ export class CellToolbarTracker implements IDisposable {
     toolbar?: IObservableList<ToolbarRegistry.IToolbarItem>,
     toolbarFactory?: (
       widget: Cell
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    helperButtons?: Widget[]
   ) {
     this._panel = panel;
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
+    this._helperButtons = helperButtons ?? [];
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -219,6 +221,15 @@ export class CellToolbarTracker implements IDisposable {
 
           // Hide the cell toolbar if it overlaps with cell contents
           this._updateCellForToolbarOverlap(cell);
+
+          // Add the helper buttons to the cell's input area.
+          if (cell.inputArea) {
+            this._helperButtons.forEach(
+              b => cell.inputArea!.prompt.runButtonToolbar?.addItem(b.id, b)
+            );
+            // Show the toolbar, if necessary.
+            cell.inputArea!.prompt.update();
+          }
         })
         .catch(e => {
           console.error('Error rendering buttons of the cell toolbar: ', e);
@@ -447,6 +458,7 @@ export class CellToolbarTracker implements IDisposable {
   private _toolbarFactory:
     | ((widget: Cell) => IObservableList<ToolbarRegistry.IToolbarItem>)
     | null = null;
+  private _helperButtons: Widget[];
 }
 
 const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
@@ -487,10 +499,12 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     commands: CommandRegistry,
     toolbarFactory?: (
       widget: Widget
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    helperButtons?: Widget[]
   ) {
     this._commands = commands;
     this._toolbarFactory = toolbarFactory ?? this.defaultToolbarFactory;
+    this._helperButtons = helperButtons ?? [];
   }
 
   protected get defaultToolbarFactory(): (
@@ -509,10 +523,16 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, undefined, this._toolbarFactory);
+    return new CellToolbarTracker(
+      panel,
+      undefined,
+      this._toolbarFactory,
+      this._helperButtons
+    );
   }
 
   private _commands: CommandRegistry;
+  private _helperButtons: Widget[];
   private _toolbarFactory: (
     widget: Widget
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;

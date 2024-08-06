@@ -35,6 +35,12 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "default": []
+    },
+    "cellRunButton": {
+      "title": "Show a run button for each cell",
+      "description": "Show a run button over the cell prompt when hovering over the active cell's prompt, and over the prompt when a cell has never been run.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,
