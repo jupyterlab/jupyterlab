@@ -1252,6 +1252,11 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[2].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(2);
           expect(selected(widget)).toEqual([2, 3]);
+
+          // shift click no-op
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
         });
 
         it('should not extend a selection if there is text selected in the output', () => {
