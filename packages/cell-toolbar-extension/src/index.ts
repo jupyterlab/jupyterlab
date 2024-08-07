@@ -62,7 +62,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
     if (settingRegistry !== null) {
-      Promise.all([app.restored, settingRegistry.load(PLUGIN_ID)]).then(
+      void Promise.all([app.restored, settingRegistry.load(PLUGIN_ID)]).then(
         ([, setting]) => {
           // Read the settings
           loadSetting(setting);
