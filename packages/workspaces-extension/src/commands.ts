@@ -362,7 +362,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
               ? {}
               : null,
           label: trans.__(
-            'You choose one or more workspace files to import. A Jupyter Workspace File has %1 extension.',
+            'Choose one or more workspace files to import. A Jupyter workspace file has the extension "%1".',
             WORKSPACE_EXT
           ),
           translator

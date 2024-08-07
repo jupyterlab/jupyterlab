@@ -29,6 +29,7 @@ export function addRecentlyClosedSessionManager(
 
   managers.add({
     name: trans.__('Recently Closed'),
+    supportsMultipleViews: false,
     running: () => {
       return recentsManager.recentlyClosed.map((recent: RecentDocument) => {
         return new RecentItem(recent);

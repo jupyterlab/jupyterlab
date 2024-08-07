@@ -93,13 +93,14 @@ function activate(
             // if applicable.
             const factory =
               docManager.registry.defaultRenderedWidgetFactory(path);
-            docManager.openOrReveal(path, factory.name).then(widget => {
+              return docManager.openOrReveal(path, factory.name).then(widget => {
               // Handle the hash if one has been provided.
               if (widget && id) {
                 widget.setFragment(id);
               }
             });
-          });
+          })
+          .catch(console.error);
       }
     });
   }

@@ -190,6 +190,9 @@ export async function main() {
                 extension: '{{@key}}',
                 pluginId: pluginData.pluginId,
                 data : pluginData,
+                activate: () => {
+                  return pluginRegistry.activatePlugin(pluginData.pluginId)
+                }
               })
             })
           });
@@ -306,6 +309,11 @@ export async function main() {
   }
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
+
+  // FIXME to delete - for testing set csv plugin loaded at arbitrary later time
+  // setTimeout(() => {
+  //   pluginRegistry.activatePlugin("@jupyterlab/csvviewer-extension:csv")
+  // }, 8000)
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';

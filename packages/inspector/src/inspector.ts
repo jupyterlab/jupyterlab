@@ -23,7 +23,7 @@ const CONTENT_CLASS = 'jp-Inspector-content';
 /**
  * The class name added to default inspector content.
  */
-const DEFAULT_CONTENT_CLASS = 'jp-Inspector-default-content';
+const DEFAULT_CONTENT_CLASS = 'jp-Inspector-placeholderContent';
 
 /**
  * A panel which contains a set of inspectors.
@@ -47,10 +47,15 @@ export class InspectorPanel
         `<p>${options.initialContent}</p>`
       );
     } else {
+      const placeholderHeadline = `<h3>${this._trans.__(
+        'No Documentation'
+      )}</h3>`;
+      const placeholderText = `<p>${this._trans.__(
+        'Move the cursor to a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
+      )}</p>`;
+
       this._content = InspectorPanel._generateContentWidget(
-        '<p>' +
-          this._trans.__('Click on a function to see documentation.') +
-          '</p>'
+        `${placeholderHeadline}${placeholderText}`
       );
     }
 

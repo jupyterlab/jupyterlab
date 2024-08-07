@@ -20,6 +20,11 @@ jobs:
       - name: Configure git to use https
         run: git config --global hub.protocol https
 
+        #####
+        # This workflow is triggered by pull_request_target event.
+        # The following step will checkout the PR.
+        # DO NOT, UNDER ANY CIRCUMSTANCES, RUN ANY LOCAL CODE ON THE PR.
+        #####
       - name: Checkout the branch from the PR that triggered the job
         run: gh pr checkout ${{ github.event.pull_request.number }}
         env:
