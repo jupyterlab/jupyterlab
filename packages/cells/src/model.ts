@@ -13,7 +13,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { ObservableValue } from '@jupyterlab/observables';
+import { IObservableString, ObservableValue } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -759,8 +759,37 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
+          for (const output of event.newValues) {
+            if (output.type === 'stream') {
+              output.streamText!.changed.connect(
+                (
+                  sender: IObservableString,
+                  textEvent: IObservableString.IChangedArgs
+                ) => {
+                  const codeCell = this.sharedModel as YCodeCell;
+                  if (textEvent.type === 'remove') {
+                    codeCell.removeStreamOutput(
+                      event.newIndex,
+                      textEvent.start
+                    );
+                  } else {
+                    codeCell.appendStreamOutput(
+                      event.newIndex,
+                      textEvent.value
+                    );
+                  }
+                },
+                this
+              );
+            }
+          }
           const outputs = event.newValues.map(output => output.toJSON());
-          codeCell.updateOutputs(event.newIndex, event.newIndex, outputs);
+          codeCell.updateOutputs(
+            event.newIndex,
+            event.newIndex,
+            outputs,
+            'silent-change'
+          );
           break;
         }
         case 'set': {
@@ -768,12 +797,18 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,
-            newValues
+            newValues,
+            'silent-change'
           );
           break;
         }
         case 'remove':
-          codeCell.updateOutputs(event.oldIndex, event.oldValues.length);
+          codeCell.updateOutputs(
+            event.oldIndex,
+            event.oldValues.length,
+            [],
+            'silent-change'
+          );
           break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
@@ -790,8 +825,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     if (change.outputsChange) {
       globalModelDBMutex(() => {
-        this.outputs.clear();
-        slot.getOutputs().forEach(output => this._outputs.add(output));
+        let retain = 0;
+        for (const outputsChange of change.outputsChange!) {
+          if ('retain' in outputsChange) {
+            retain += outputsChange.retain!;
+          }
+          if ('delete' in outputsChange) {
+            for (let i = 0; i < outputsChange.delete!; i++) {
+              this._outputs.remove(retain);
+            }
+          }
+          if ('insert' in outputsChange) {
+            // Inserting an output always results in appending it.
+            for (const output of outputsChange.insert!) {
+              this._outputs.add(output.toJSON());
+            }
+          }
+        }
       });
     }
 
