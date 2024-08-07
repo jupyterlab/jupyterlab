@@ -4,6 +4,7 @@
  */
 
 import { PromiseDelegate } from '@lumino/coreutils';
+import { DisposableSet } from '@lumino/disposable';
 import { PageConfig, PluginRegistry2 } from '@jupyterlab/coreutils';
 
 import './style.js';
@@ -186,10 +187,8 @@ export async function main() {
             data.forEach(pluginData=>{
               entrypoints[entryPoint].push({
                 extension: '{{@key}}',
+                pluginId: pluginData.pluginId,
                 data : pluginData,
-                activate: () => {
-                  return pluginRegistry.activatePlugin(pluginData.pluginId)
-                }
               })
             })
           });
@@ -241,6 +240,14 @@ export async function main() {
     console.error(reason);
   });
 
+  if(entrypoints.widgetFactory){
+    entrypoints.widgetFactory.forEach((pluginEntrypoint)=>{
+      pluginEntrypoint.activate = () => {
+        return pluginRegistry.activatePlugin(pluginEntrypoint.pluginId)
+      }
+    })
+  }
+
   const lab = new JupyterLab({
     pluginRegistry,
     entrypoints,
@@ -258,6 +265,27 @@ export async function main() {
     availablePlugins: allPlugins
   });
   register.forEach(function(item) { pluginRegistry.registerPlugin(item); });
+
+  // Add this for extensionmanager and csvviewwer
+  if(entrypoints.commandFactory){
+    const disposableMap = {};
+    entrypoints.commandFactory.forEach(pluginCommandFactory=>{
+      const dispose = lab.commands.addCommand(pluginCommandFactory.data.name, {
+        // Translator needs to be exposed.
+        label:   pluginCommandFactory.data.label,
+        execute: async ()=>{
+          disposableMap[pluginCommandFactory.extension].dispose();
+          disposableMap[pluginCommandFactory.extension] = null;
+          await pluginRegistry.activatePlugin(pluginCommandFactory.pluginId)
+          lab.commands.execute(pluginCommandFactory.data.name)
+        }
+      });
+      if(!disposableMap[pluginCommandFactory.extension]){
+        disposableMap[pluginCommandFactory.extension] = new DisposableSet();
+      }
+      disposableMap[pluginCommandFactory.extension].add(dispose)
+  })
+}
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
