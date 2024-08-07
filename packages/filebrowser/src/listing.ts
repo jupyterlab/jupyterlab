@@ -524,14 +524,14 @@ export class DirListing extends Widget {
       }
 
       const sizes = (columns as ReadonlyJSONObject)['sizes'] as
-        | Record<DirListing.ResizableColumn, number | null>
+        | Record<DirListing.IColumn['id'], number | null>
         | undefined;
 
       if (!sizes) {
         return;
       }
       for (const [key, size] of Object.entries(sizes)) {
-        this._columnSizes[key as DirListing.ResizableColumn] = size;
+        this._columnSizes[key as DirListing.IColumn['id']] = size;
       }
       this._updateColumnSizes();
     } catch (error) {
@@ -2446,7 +2446,7 @@ export class DirListing extends Widget {
   private _inRename = false;
   private _isDirty = false;
   private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
-  private _columnSizes: Record<DirListing.ResizableColumn, number | null> = {
+  private _columnSizes: Record<DirListing.IColumn['id'], number | null> = {
     name: null,
     file_size: null,
     is_selected: null,
@@ -2519,11 +2519,7 @@ export namespace DirListing {
   /**
    * Resizable columns.
    */
-  export type ResizableColumn =
-    | 'name'
-    | 'last_modified'
-    | 'is_selected'
-    | 'file_size';
+  export type ResizableColumn = 'name' | 'last_modified' | 'file_size';
 
   /**
    * Sortable columns.
@@ -2567,7 +2563,7 @@ export namespace DirListing {
       node: HTMLElement,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>
     ): void;
 
     /**
@@ -2588,7 +2584,7 @@ export namespace DirListing {
      */
     createItemNode(
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>
     ): HTMLElement;
 
     /**
@@ -2625,7 +2621,7 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>
     ): void;
 
     /**
@@ -2635,7 +2631,7 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>
     ): void;
 
     /**
@@ -2796,7 +2792,7 @@ export namespace DirListing {
       node: HTMLElement,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
     ): void {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
@@ -2926,7 +2922,7 @@ export namespace DirListing {
      */
     createItemNode(
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
     ): HTMLElement {
       const node = document.createElement('li');
 
@@ -3050,7 +3046,7 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3191,7 +3187,7 @@ export namespace DirListing {
       node: HTMLElement,
       model: Contents.IModel,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<ResizableColumn, number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
     ): void {
       if (columnsSizes) {
         for (const column of columns) {
