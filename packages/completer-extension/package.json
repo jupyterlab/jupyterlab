@@ -37,6 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyter/react-components": "^0.17.0",
     "@jupyterlab/application": "^4.3.0-alpha.2",
     "@jupyterlab/codeeditor": "^4.3.0-alpha.2",
     "@jupyterlab/completer": "^4.3.0-alpha.2",
