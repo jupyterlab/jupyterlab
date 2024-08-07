@@ -2683,25 +2683,29 @@ export namespace DirListing {
       id: 'is_selected' as const,
       className: CHECKBOX_WRAPPER_CLASS,
       itemClassName: CHECKBOX_WRAPPER_CLASS,
-      minWidth: 18
+      minWidth: 18,
+      resizable: false
     },
     {
       id: 'name' as const,
       className: NAME_ID_CLASS,
       itemClassName: ITEM_NAME_COLUMN_CLASS,
-      minWidth: 60
+      minWidth: 60,
+      resizable: true
     },
     {
       id: 'last_modified' as const,
       className: MODIFIED_ID_CLASS,
       itemClassName: ITEM_MODIFIED_CLASS,
-      minWidth: 60
+      minWidth: 60,
+      resizable: true
     },
     {
       id: 'file_size' as const,
       className: FILE_SIZE_ID_CLASS,
       itemClassName: ITEM_FILE_SIZE_CLASS,
-      minWidth: 60
+      minWidth: 60,
+      resizable: true
     }
   ];
 
@@ -2775,7 +2779,7 @@ export namespace DirListing {
         }
         node.appendChild(element);
 
-        if (!isLastVisible) {
+        if (column.resizable && !isLastVisible) {
           const resizer = document.createElement('div');
           resizer.classList.add(RESIZE_HANDLE_CLASS);
           resizer.dataset.column = column.id;
