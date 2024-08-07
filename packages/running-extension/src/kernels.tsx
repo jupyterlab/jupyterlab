@@ -157,9 +157,12 @@ export async function addKernelRunningSessionManager(
     runningChanged,
     shutdownLabel: trans.__('Shut Down Kernel'),
     shutdownAllLabel: trans.__('Shut Down All'),
-    shutdownAllConfirmationText: trans.__(
-      'Are you sure you want to permanently shut down all running kernels?'
-    ),
+    shutdownAllConfirmationText: () =>
+      trans._n(
+        'Are you sure you want to permanently shut down the running kernel?',
+        'Are you sure you want to permanently shut down the %1 running kernels?',
+        kernels.runningCount
+      ),
     toolbarButtons: [
       new CommandToolbarButton({
         commands,
