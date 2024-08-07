@@ -54,7 +54,51 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "plugins": [
+      {
+        "id": "@jupyterlab/extensionmanager-extension:plugin",
+        "description": "Adds the extension manager plugin.",
+        "requires": [
+          "@jupyterlab/coreutils:ISettingRegistry"
+        ],
+        "optional": [
+          "@jupyterlab/translation:ITranslator",
+          "@jupyterlab/application:ILayoutRestorer",
+          "@jupyterlab/apputils:ICommandPalette"
+        ],
+        "autoStart": false
+      }
+    ],
+    "entrypoint": {
+      "commandFactory": [
+        {
+          "name": "extensionmanager:show-panel",
+          "label": "Extension Manager",
+          "pluginId": "@jupyterlab/extensionmanager-extension:plugin"
+        }
+      ],
+      "panelFactory": [
+        {
+          "pluginId": "@jupyterlab/extensionmanager-extension:plugin",
+          "id": "extensionmanager.main-view",
+          "iconName": "ui-components:extension",
+          "caption": "Extension Manager",
+          "attributes": [
+            {
+              "name": "role",
+              "value": "region"
+            },
+            {
+              "name": "aria-label",
+              "value": "Extension Manager section"
+            }
+          ],
+          "rank": 1000,
+          "position": "left"
+        }
+      ]
+    }
   },
   "styleModule": "style/index.js"
 }

@@ -165,3 +165,33 @@ export namespace SidePanel {
     translator?: ITranslator;
   }
 }
+
+export namespace DummySidePanel {
+  export interface IOptions {
+    activate: () => Promise<void>;
+  }
+}
+
+export class DummySidePanel extends SidePanel {
+  constructor(options: DummySidePanel.IOptions) {
+    super();
+    this._activate = options.activate;
+  }
+
+  /**
+   * Dispose of the widget and its descendant widgets.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    super.dispose();
+  }
+
+  protected async onBeforeShow(): Promise<void> {
+    this.dispose();
+    await this._activate();
+  }
+
+  _activate: () => Promise<void>;
+}

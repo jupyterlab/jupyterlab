@@ -4,9 +4,10 @@
  */
 
 import { PromiseDelegate } from '@lumino/coreutils';
+import { DisposableSet } from '@lumino/disposable';
 import { PageConfig, PluginRegistry2 } from '@jupyterlab/coreutils';
-
 import './style.js';
+import { LabIcon, DummySidePanel } from '@jupyterlab/ui-components';
 
 async function createModule(scope, module) {
   try {
@@ -59,6 +60,7 @@ export async function main() {
   }
 
   const pluginRegistry = new PluginRegistry2();
+  var EntrypointJupyterLab = (await import('@jupyterlab/application')).EntrypointJupyterLab;
   var JupyterLab = (await import('@jupyterlab/application')).JupyterLab;
   var disabled = [];
   var deferred = [];
@@ -186,6 +188,7 @@ export async function main() {
             data.forEach(pluginData=>{
               entrypoints[entryPoint].push({
                 extension: '{{@key}}',
+                pluginId: pluginData.pluginId,
                 data : pluginData,
                 activate: () => {
                   return pluginRegistry.activatePlugin(pluginData.pluginId)
@@ -241,7 +244,15 @@ export async function main() {
     console.error(reason);
   });
 
-  const lab = new JupyterLab({
+  if(entrypoints.widgetFactory){
+    entrypoints.widgetFactory.forEach((pluginEntrypoint)=>{
+      pluginEntrypoint.activate = () => {
+        return pluginRegistry.activatePlugin(pluginEntrypoint.pluginId)
+      }
+    })
+  }
+  const EnhancedJupyterLab = EntrypointJupyterLab(JupyterLab)
+  const lab = new EnhancedJupyterLab({
     pluginRegistry,
     entrypoints,
     mimeExtensions,
@@ -258,6 +269,44 @@ export async function main() {
     availablePlugins: allPlugins
   });
   register.forEach(function(item) { pluginRegistry.registerPlugin(item); });
+
+  const commandEntrypoints = lab.getEntrypoint('commandFactory')
+  if(commandEntrypoints){
+    commandEntrypoints.forEach(pluginCommandFactory=>{
+      const dispose = lab.commands.addCommand(pluginCommandFactory.data.name, {
+        // Translator needs to be exposed.
+        label: pluginCommandFactory.data.label,
+        execute: async ()=>{
+          lab.disposeEntrypointPlaceholder(pluginCommandFactory.extension)
+          await pluginRegistry.activatePlugin(pluginCommandFactory.pluginId)
+          lab.commands.execute(pluginCommandFactory.data.name)
+        }
+      });
+      lab.setEntrypointDisposables(pluginCommandFactory.extension, dispose);
+    })
+  }
+  const panelFactoryEntrypoints = lab.getEntrypoint('panelFactory')
+  if(panelFactoryEntrypoints){
+    panelFactoryEntrypoints.forEach(factory=>{
+        const v = new DummySidePanel({
+          activate : async ()=>{
+            lab.disposeEntrypointPlaceholder(factory.extension)
+            await pluginRegistry.activatePlugin(factory.pluginId)
+            lab.shell.activateById(factory.data.id)
+          }
+        })
+        v.id = factory.data.id;
+        const extensionIcon = LabIcon.resolve({icon: factory.data.iconName})
+        v.title.icon = extensionIcon;
+        // Should be translated
+        v.title.caption = 'Extension Manager';
+        factory.data.attributes.forEach(({name,value})=>{
+          v.node.setAttribute(name, value);
+        })
+        lab.setEntrypointDisposables(factory.extension, v)
+        lab.shell.add(v, factory.data.position, { rank: factory.data.rank });
+    })
+  }
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
 

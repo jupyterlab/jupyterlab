@@ -115,6 +115,18 @@
             "tsv"
           ]
         }
+      ],
+      "commandFactory": [
+        {
+          "name": "csv:go-to-line",
+          "label": "Go to Line",
+          "pluginId": "@jupyterlab/csvviewer-extension:csv"
+        },
+        {
+          "name": "tsv:go-to-line",
+          "label": "Go to Line",
+          "pluginId": "@jupyterlab/csvviewer-extension:tsv"
+        }
       ]
     }
   },

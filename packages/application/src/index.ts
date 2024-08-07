@@ -11,7 +11,7 @@ export {
   JupyterFrontEndContextMenu,
   JupyterFrontEndPlugin
 } from './frontend';
-export { JupyterLab } from './lab';
+export { JupyterLab, EntrypointJupyterLab } from './lab';
 export { ILayoutRestorer, LayoutRestorer } from './layoutrestorer';
 export {
   createRendermimePlugin,
