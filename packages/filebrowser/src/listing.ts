@@ -2508,7 +2508,7 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified' | 'file_size';
+    key: SortableColumn;
   }
 
   /**
@@ -2524,6 +2524,11 @@ export namespace DirListing {
     | 'last_modified'
     | 'is_selected'
     | 'file_size';
+
+  /**
+   * Sortable columns.
+   */
+  export type SortableColumn = 'name' | 'last_modified' | 'file_size';
 
   /**
    * A file contents model thunk.
@@ -2675,37 +2680,88 @@ export namespace DirListing {
     ): HTMLElement;
   }
 
+  interface IBaseColumn {
+    /**
+     * Name of the header class, must be unique among other columns.
+     */
+    className: string;
+    /**
+     * Name of the item class, must be unique among other columns.
+     */
+    itemClassName: string;
+    /**
+     * Minimum size the column should occupy.
+     */
+    minWidth: number;
+  }
+  interface IFixedColumn extends IBaseColumn {
+    id: 'is_selected';
+    resizable: false;
+    sortable: false;
+  }
+  /**
+   * Sortable column.
+   */
+  export interface ISortableColumn extends IBaseColumn {
+    id: SortableColumn;
+    sortable: true;
+    caretSide: 'left' | 'right';
+  }
+  /**
+   * Resizable column.
+   */
+  export interface IResizableColumn extends IBaseColumn {
+    id: ResizableColumn;
+    resizable: true;
+  }
+
+  /**
+   * Columns types supported by DirListing.
+   */
+  export type IColumn =
+    | IFixedColumn
+    | ISortableColumn
+    | IResizableColumn
+    | (ISortableColumn & IResizableColumn);
+
   /**
    * Column definitions.
    */
-  export const columns = [
+  export const columns: IColumn[] = [
     {
       id: 'is_selected' as const,
       className: CHECKBOX_WRAPPER_CLASS,
       itemClassName: CHECKBOX_WRAPPER_CLASS,
       minWidth: 18,
-      resizable: false
+      resizable: false,
+      sortable: false
     },
     {
       id: 'name' as const,
       className: NAME_ID_CLASS,
       itemClassName: ITEM_NAME_COLUMN_CLASS,
       minWidth: 60,
-      resizable: true
+      resizable: true,
+      sortable: true,
+      caretSide: 'right'
     },
     {
       id: 'last_modified' as const,
       className: MODIFIED_ID_CLASS,
       itemClassName: ITEM_MODIFIED_CLASS,
       minWidth: 60,
-      resizable: true
+      resizable: true,
+      sortable: true,
+      caretSide: 'left'
     },
     {
       id: 'file_size' as const,
       className: FILE_SIZE_ID_CLASS,
       itemClassName: ITEM_FILE_SIZE_CLASS,
       minWidth: 60,
-      resizable: true
+      resizable: true,
+      sortable: true,
+      caretSide: 'left'
     }
   ];
 
@@ -2779,7 +2835,7 @@ export namespace DirListing {
         }
         node.appendChild(element);
 
-        if (column.resizable && !isLastVisible) {
+        if (Private.isResizable(column) && !isLastVisible) {
           const resizer = document.createElement('div');
           resizer.classList.add(RESIZE_HANDLE_CLASS);
           resizer.dataset.column = column.id;
@@ -2808,92 +2864,57 @@ export namespace DirListing {
      * @returns The sort state of the header after the click event.
      */
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
-      const name = DOMUtils.findElement(node, NAME_ID_CLASS);
-      const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
-      const fileSize = DOMUtils.findElement(node, FILE_SIZE_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
 
-      const modifiedIcon = DOMUtils.findElement(
-        modified,
-        HEADER_ITEM_ICON_CLASS
-      );
-      const fileSizeIcon = DOMUtils.findElement(
-        fileSize,
-        HEADER_ITEM_ICON_CLASS
-      );
-      const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+      const sortableColumns = DirListing.columns.filter(Private.isSortable);
+      console.log(sortableColumns);
 
-      if (name.contains(target)) {
-        if (name.classList.contains(SELECTED_CLASS)) {
-          if (!name.classList.contains(DESCENDING_CLASS)) {
-            state.direction = 'descending';
-            name.classList.add(DESCENDING_CLASS);
-            Private.updateCaret(nameIcon, 'right', 'down');
-          } else {
-            name.classList.remove(DESCENDING_CLASS);
-            Private.updateCaret(nameIcon, 'right', 'up');
-          }
-        } else {
-          name.classList.remove(DESCENDING_CLASS);
-          Private.updateCaret(nameIcon, 'right', 'up');
+      for (const column of sortableColumns) {
+        const header = node.querySelector(`.${column.className}`);
+        if (!header) {
+          // skip if the column is hidden
+          continue;
         }
-        name.classList.add(SELECTED_CLASS);
-        modified.classList.remove(SELECTED_CLASS);
-        modified.classList.remove(DESCENDING_CLASS);
-        fileSize.classList.remove(SELECTED_CLASS);
-        fileSize.classList.remove(DESCENDING_CLASS);
-        Private.updateCaret(modifiedIcon, 'left');
-        Private.updateCaret(fileSizeIcon, 'left');
-        return state;
-      }
-      if (modified.contains(target)) {
-        state.key = 'last_modified';
-        if (modified.classList.contains(SELECTED_CLASS)) {
-          if (!modified.classList.contains(DESCENDING_CLASS)) {
-            state.direction = 'descending';
-            modified.classList.add(DESCENDING_CLASS);
-            Private.updateCaret(modifiedIcon, 'left', 'down');
+        if (header.contains(target)) {
+          state.key = column.id;
+          const headerIcon = DOMUtils.findElement(
+            header as HTMLElement,
+            HEADER_ITEM_ICON_CLASS
+          );
+          if (header.classList.contains(SELECTED_CLASS)) {
+            if (!header.classList.contains(DESCENDING_CLASS)) {
+              state.direction = 'descending';
+              header.classList.add(DESCENDING_CLASS);
+              Private.updateCaret(headerIcon, column.caretSide, 'down');
+            } else {
+              header.classList.remove(DESCENDING_CLASS);
+              Private.updateCaret(headerIcon, column.caretSide, 'up');
+            }
           } else {
-            modified.classList.remove(DESCENDING_CLASS);
-            Private.updateCaret(modifiedIcon, 'left', 'up');
+            header.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(headerIcon, column.caretSide, 'up');
           }
-        } else {
-          modified.classList.remove(DESCENDING_CLASS);
-          Private.updateCaret(modifiedIcon, 'left', 'up');
-        }
-        modified.classList.add(SELECTED_CLASS);
-        name.classList.remove(SELECTED_CLASS);
-        name.classList.remove(DESCENDING_CLASS);
-        fileSize.classList.remove(SELECTED_CLASS);
-        fileSize.classList.remove(DESCENDING_CLASS);
-        Private.updateCaret(nameIcon, 'right');
-        Private.updateCaret(fileSizeIcon, 'left');
-        return state;
-      }
-      if (fileSize.contains(target)) {
-        state.key = 'file_size';
-        if (fileSize.classList.contains(SELECTED_CLASS)) {
-          if (!fileSize.classList.contains(DESCENDING_CLASS)) {
-            state.direction = 'descending';
-            fileSize.classList.add(DESCENDING_CLASS);
-            Private.updateCaret(fileSizeIcon, 'left', 'down');
-          } else {
-            fileSize.classList.remove(DESCENDING_CLASS);
-            Private.updateCaret(fileSizeIcon, 'left', 'up');
+          header.classList.add(SELECTED_CLASS);
+          for (const otherColumn of sortableColumns) {
+            if (otherColumn.id === column.id) {
+              continue;
+            }
+            const otherHeader = node.querySelector(`.${otherColumn.className}`);
+            if (!otherHeader) {
+              // skip if hidden
+              continue;
+            }
+            otherHeader.classList.remove(SELECTED_CLASS);
+            otherHeader.classList.remove(DESCENDING_CLASS);
+            const otherHeaderIcon = DOMUtils.findElement(
+              otherHeader as HTMLElement,
+              HEADER_ITEM_ICON_CLASS
+            );
+            Private.updateCaret(otherHeaderIcon, otherColumn.caretSide);
           }
-        } else {
-          fileSize.classList.remove(DESCENDING_CLASS);
-          Private.updateCaret(fileSizeIcon, 'left', 'up');
+          return state;
         }
-        fileSize.classList.add(SELECTED_CLASS);
-        name.classList.remove(SELECTED_CLASS);
-        name.classList.remove(DESCENDING_CLASS);
-        modified.classList.remove(SELECTED_CLASS);
-        modified.classList.remove(DESCENDING_CLASS);
-        Private.updateCaret(nameIcon, 'right');
-        Private.updateCaret(modifiedIcon, 'left');
-        return state;
       }
       return state;
     }
@@ -3478,6 +3499,24 @@ namespace Private {
     }
     return copy;
   }
+
+  /**
+   * Check if the column is resizable.
+   */
+  export const isResizable = (
+    column: DirListing.IColumn
+  ): column is DirListing.IResizableColumn => {
+    return 'resizable' in column && column.resizable;
+  };
+
+  /**
+   * Check if the column is sortable.
+   */
+  export const isSortable = (
+    column: DirListing.IColumn
+  ): column is DirListing.ISortableColumn => {
+    return 'sortable' in column && column.sortable;
+  };
 
   /**
    * Get the index of the node at a client position, or `-1`.
