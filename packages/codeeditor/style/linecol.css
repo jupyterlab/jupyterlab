@@ -20,7 +20,8 @@
 
 .jp-baseLineForm {
   border: none;
-  border-radius: 0;
+  border-top-right-radius: var(--jp-border-radius);
+  border-bottom-right-radius: var(--jp-border-radius);
   position: absolute;
   background-size: 16px;
   background-repeat: no-repeat;
@@ -59,13 +60,15 @@
   overflow: hidden;
   padding: 0 8px;
   border: 1px solid var(--jp-border-color0);
+  border-top-left-radius: var(--jp-border-radius);
+  border-bottom-left-radius: var(--jp-border-radius);
   background-color: var(--jp-input-active-background);
   height: 22px;
 }
 
 .jp-lineFormWrapperFocusWithin {
-  border: var(--jp-border-width) solid var(--md-blue-500, #2196f3);
-  box-shadow: inset 0 0 4px var(--md-blue-300, #64b5f6);
+  border: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
 }
 
 .jp-lineFormInput {
@@ -75,5 +78,5 @@
   border: none;
   outline: none;
   color: var(--jp-ui-font-color0);
-  line-height: 28px;
+  padding: 0;
 }

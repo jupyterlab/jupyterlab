@@ -5,19 +5,20 @@
  * @module running
  */
 
+import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
-  caretDownIcon,
-  caretRightIcon,
   closeIcon,
   collapseAllIcon,
   expandAllIcon,
   FilterBox,
+  getTreeItemElement,
   IScore,
   LabIcon,
   PanelWithToolbar,
@@ -27,18 +28,16 @@ import {
   tableRowsIcon,
   Toolbar,
   ToolbarButton,
-  ToolbarButtonComponent,
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode } from 'react';
+import React, { isValidElement, ReactNode, useCallback } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -59,11 +58,6 @@ const SECTION_CLASS = 'jp-RunningSessions-section';
  * The class name added to a section container.
  */
 const CONTAINER_CLASS = 'jp-RunningSessions-sectionContainer';
-
-/**
- * The class name added to the running kernel sessions section list.
- */
-const LIST_CLASS = 'jp-RunningSessions-sectionList';
 
 /**
  * The class name added to the running sessions items.
@@ -89,11 +83,6 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
-
-/**
- * The class name added to a collapse/expand carets.
- */
-const CARET_CLASS = 'jp-RunningSessions-caret';
 
 /**
  * The class name added to icons.
@@ -213,15 +202,16 @@ function Item(props: {
   const trans = translator.load('jupyterlab');
 
   // Handle shutdown requests.
-  let stopPropagation = false;
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
   const shutdownLabel =
     (typeof props.shutdownLabel === 'function'
       ? props.shutdownLabel(runningItem)
       : props.shutdownLabel) ?? trans.__('Shut Down');
-  const shutdown = () => {
-    stopPropagation = true;
-    runningItem.shutdown?.();
+  const shutdown = (event: React.MouseEvent) => {
+    if (!event.defaultPrevented) {
+      event.preventDefault();
+      runningItem.shutdown?.();
+    }
   };
 
   // Materialise getter to avoid triggering it repeatedly
@@ -230,9 +220,18 @@ function Item(props: {
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
   const [collapsed, collapse] = React.useState(false);
   const collapsible = !!children?.length;
-  const onClick = collapsible
-    ? () => !stopPropagation && collapse(!collapsed)
-    : undefined;
+  const onClick = useCallback(
+    (event: React.MouseEvent) => {
+      const item = getTreeItemElement(event.target as HTMLElement);
+      if (event.currentTarget !== item) {
+        return;
+      }
+      if (collapsible) {
+        collapse(!collapsed);
+      }
+    },
+    [collapsible, collapsed]
+  );
 
   // Listen to signal to collapse from outside
   props.collapseToggled.connect((_emitter, newCollapseState) =>
@@ -242,61 +241,50 @@ function Item(props: {
   if (runningItem.className) {
     classList.push(runningItem.className);
   }
-  if (props.child) {
-    classList.push('jp-mod-running-child');
-  }
-  if (props.child && !children) {
-    classList.push('jp-mod-running-leaf');
-  }
 
   return (
     <>
-      <li>
-        <div
-          className={classList.join(' ')}
-          onClick={onClick}
-          data-context={runningItem.context || ''}
+      <TreeItem
+        className={`${classList.join(' ')} jp-TreeItem nested`}
+        onClick={onClick}
+        data-context={runningItem.context || ''}
+        expanded={!collapsed}
+      >
+        {icon ? (
+          typeof icon === 'string' ? (
+            <img src={icon} className={ITEM_ICON_CLASS} slot="start" />
+          ) : (
+            <icon.react slot="start" tag="span" className={ITEM_ICON_CLASS} />
+          )
+        ) : undefined}
+        <span
+          className={ITEM_LABEL_CLASS}
+          title={title}
+          onClick={runningItem.open && (() => runningItem.open!())}
         >
-          {collapsible &&
-            (collapsed ? (
-              <caretRightIcon.react tag="span" className={CARET_CLASS} />
-            ) : (
-              <caretDownIcon.react tag="span" className={CARET_CLASS} />
-            ))}
-          {icon ? (
-            typeof icon === 'string' ? (
-              <img src={icon} className={ITEM_ICON_CLASS} />
-            ) : (
-              <icon.react tag="span" className={ITEM_ICON_CLASS} />
-            )
-          ) : undefined}
-          <span
-            className={ITEM_LABEL_CLASS}
-            title={title}
-            onClick={runningItem.open && (() => runningItem.open!())}
+          {runningItem.label()}
+        </span>
+        {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
+        {runningItem.shutdown && (
+          <Button
+            appearance="stealth"
+            className={SHUTDOWN_BUTTON_CLASS}
+            onClick={shutdown}
+            title={shutdownLabel}
+            slot="end"
           >
-            {runningItem.label()}
-          </span>
-          {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
-          {runningItem.shutdown && (
-            <ToolbarButtonComponent
-              className={SHUTDOWN_BUTTON_CLASS}
-              icon={shutdownItemIcon}
-              onClick={shutdown}
-              tooltip={shutdownLabel}
-            />
-          )}
-        </div>
-        {collapsible && !collapsed && (
+            <shutdownItemIcon.react tag={null} />
+          </Button>
+        )}
+        {children && (
           <List
-            child={true}
             runningItems={children!}
             shutdownItemIcon={shutdownItemIcon}
             translator={translator}
             collapseToggled={props.collapseToggled}
           />
         )}
-      </li>
+      </TreeItem>
     </>
   );
 }
@@ -326,7 +314,7 @@ function List(props: {
         .map(({ item }) => item)
     : props.runningItems;
   return (
-    <ul className={LIST_CLASS}>
+    <>
       {items.map((item, i) => (
         <Item
           child={props.child}
@@ -338,7 +326,7 @@ function List(props: {
           collapseToggled={props.collapseToggled}
         />
       ))}
-    </ul>
+    </>
   );
 }
 
@@ -415,6 +403,8 @@ class FilterWidget extends ReactWidget implements IFilterProvider {
 }
 
 class ListWidget extends ReactWidget {
+  private _mode: 'tree' | 'list';
+
   constructor(
     private _options: {
       manager: IRunningSessions.IManager;
@@ -428,6 +418,20 @@ class ListWidget extends ReactWidget {
     _options.manager.runningChanged.connect(this._emitUpdate, this);
     if (_options.filterProvider) {
       _options.filterProvider.filterChanged.connect(this._emitUpdate, this);
+    }
+  }
+
+  /**
+   * Whether the items are displayed as a tree view
+   * or a flat list.
+   */
+  get mode(): 'tree' | 'list' {
+    return this._mode;
+  }
+  set mode(v: 'tree' | 'list') {
+    if (this._mode !== v) {
+      this._mode = v;
+      this._update.emit();
     }
   }
 
@@ -452,18 +456,24 @@ class ListWidget extends ReactWidget {
           if (cached) {
             cached = false;
           } else {
-            options.runningItems = options.manager.running();
+            options.runningItems = options.manager.running({ mode: this.mode });
+          }
+          const classes = ['jp-TreeView'];
+          if (this.mode === 'list') {
+            classes.push('jp-mod-flat');
           }
           return (
             <div className={CONTAINER_CLASS}>
-              <List
-                runningItems={options.runningItems}
-                shutdownLabel={options.manager.shutdownLabel}
-                shutdownItemIcon={options.manager.shutdownItemIcon}
-                filter={options.filterProvider?.filter}
-                translator={options.translator}
-                collapseToggled={options.collapseToggled}
-              />
+              <TreeView className={classes.join(' ')}>
+                <List
+                  runningItems={options.runningItems}
+                  shutdownLabel={options.manager.shutdownLabel}
+                  shutdownItemIcon={options.manager.shutdownItemIcon}
+                  filter={options.filterProvider?.filter}
+                  translator={options.translator}
+                  collapseToggled={options.collapseToggled}
+                />
+              </TreeView>
             </div>
           );
         }}
@@ -513,6 +523,7 @@ class ListWidget extends ReactWidget {
 class Section extends PanelWithToolbar {
   constructor(options: Section.IOptions) {
     super();
+    this._listView = (options.viewMode ?? 'tree') === 'list';
     this._manager = options.manager;
     this._filterProvider = options.filterProvider;
     const translator = options.translator || nullTranslator;
@@ -527,19 +538,27 @@ class Section extends PanelWithToolbar {
     }
     this._updateEmptyClass();
 
-    let runningItems = options.manager.running();
+    const runningItems = options.manager.running({
+      mode:
+        options.manager.supportsMultipleViews && !this._listView
+          ? 'tree'
+          : 'list'
+    });
 
     if (options.showToolbar !== false) {
       this._initializeToolbar(runningItems);
     }
 
-    this.addWidget(
-      new ListWidget({
-        runningItems,
-        collapseToggled: this._collapseToggled,
-        ...options
-      })
-    );
+    this._listWidget = new ListWidget({
+      runningItems,
+      collapseToggled: this._collapseToggled,
+      ...options
+    });
+    this._listWidget.mode =
+      options.manager.supportsMultipleViews && !this._listView
+        ? 'tree'
+        : 'list';
+    this.addWidget(this._listWidget);
   }
 
   /**
@@ -553,8 +572,12 @@ class Section extends PanelWithToolbar {
       switchViewButton.pressed = newState;
     }
     this._collapseToggled.emit(false);
-    this.toggleClass(LIST_VIEW_CLASS, newState);
+    if (this._manager.supportsMultipleViews === undefined) {
+      this.toggleClass(LIST_VIEW_CLASS, newState);
+    }
     this._updateButtons();
+    this._listWidget.mode =
+      this._manager.supportsMultipleViews && !this._listView ? 'tree' : 'list';
     this._viewChanged.emit({ mode: newState ? 'list' : 'tree' });
   }
 
@@ -653,7 +676,14 @@ class Section extends PanelWithToolbar {
 
   private _updateEmptyClass(): void {
     if (this._filterProvider) {
-      const items = this._manager.running().filter(this._filterProvider.filter);
+      const items = this._manager
+        .running({
+          mode:
+            this._manager.supportsMultipleViews && !this._listView
+              ? 'tree'
+              : 'list'
+        })
+        .filter(this._filterProvider.filter);
       const empty = items.length === 0;
       if (empty) {
         this.node.classList.toggle('jp-mod-empty', true);
@@ -671,17 +701,25 @@ class Section extends PanelWithToolbar {
     if (!this._buttons) {
       return;
     }
-    let runningItems = this._manager.running();
+    let runningItems = this._manager.running({
+      mode:
+        this._manager.supportsMultipleViews && !this._listView ? 'tree' : 'list'
+    });
     const enabled = runningItems.length > 0;
 
-    const hasNesting = runningItems.filter(item => item.children).length !== 0;
+    const hasNesting =
+      // If the flag is undefined fallback to the old behavior
+      // @deprecated we should remove the fallback in the next iteration
+      this._manager.supportsMultipleViews === undefined
+        ? runningItems.filter(item => item.children).length !== 0
+        : this._manager.supportsMultipleViews;
     const inTreeView = hasNesting && !this._buttons['switch-view'].pressed;
 
     this._buttons['switch-view'].node.style.display = hasNesting
-      ? 'block'
+      ? 'flex'
       : 'none';
     this._buttons['collapse-expand'].node.style.display = inTreeView
-      ? 'block'
+      ? 'flex'
       : 'none';
 
     this._buttons['collapse-expand'].enabled = enabled;
@@ -696,6 +734,7 @@ class Section extends PanelWithToolbar {
   } | null = null;
   private _manager: IRunningSessions.IManager;
   private _listView: boolean = false;
+  private _listWidget: ListWidget;
   private _filterProvider?: IFilterProvider;
   private _collapseToggled = new Signal<Section, boolean>(this);
   private _viewChanged = new Signal<Section, Section.IViewState>(this);
@@ -714,6 +753,7 @@ namespace Section {
     showToolbar?: boolean;
     filterProvider?: IFilterProvider;
     translator?: ITranslator;
+    viewMode?: 'tree' | 'list';
   }
   /**
    * Information about section view state.
@@ -1082,7 +1122,8 @@ export class SearchableSessionsList extends Panel {
       manager,
       translator: this._translator,
       showToolbar: false,
-      filterProvider: this._filterWidget
+      filterProvider: this._filterWidget,
+      viewMode: 'list'
     });
     // Do not use tree view in searchable list
     section.toggleListView(true);
@@ -1117,8 +1158,13 @@ export namespace IRunningSessions {
 
     /**
      * List the running models.
+     *
+     * If the manager supports tree view, it should set the flag
+     * {@link supportsMultipleViews}.
+     * It must return nested item if mode is `tree`.
+     * Otherwise it must return a flat list.
      */
-    running(): IRunningItem[];
+    running(options: { mode: 'tree' | 'list' }): IRunningItem[];
 
     /**
      * Force a refresh of the running models.
@@ -1149,6 +1195,12 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Whether the manager supports tree view for its items
+     * or only a flat list.
+     */
+    supportsMultipleViews?: boolean;
   }
 
   /**

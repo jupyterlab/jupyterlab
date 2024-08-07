@@ -152,7 +152,7 @@
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
-  box-shadow: var(--jp-input-box-shadow);
+  box-shadow: var(--jp-cell-editor-box-shadow);
   background-color: var(--jp-cell-editor-active-background);
 }
 
@@ -286,11 +286,6 @@
 .jp-MetadataEditorTool label,
 .jp-NumberSetter label {
   line-height: 1.4;
-}
-
-.jp-NotebookTools .jp-select-wrapper {
-  margin-top: 4px;
-  margin-bottom: 0;
 }
 
 .jp-NumberSetter input {

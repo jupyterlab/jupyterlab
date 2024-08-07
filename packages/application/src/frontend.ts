@@ -47,6 +47,9 @@ export abstract class JupyterFrontEnd<
   constructor(options: JupyterFrontEnd.IOptions<T>) {
     super(options);
 
+    // Class to scope global Jupyter CSS rules
+    options.shell.addClass('jp-ThemedContainer');
+
     // render context menu/submenus with inline svg icon tweaks
     this.contextMenu = new ContextMenuSvg({
       commands: this.commands,

@@ -16,6 +16,7 @@ set BUILDDIR=build
 set SPHINXPROJ=JupyterLab
 
 if "%1" == "" goto help
+if "%1" == "serve" goto serve
 
 if not exist "%APIDIR%" (
     echo Creating api directory...
@@ -36,6 +37,14 @@ if errorlevel 9009 (
 )
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+goto end
+
+:serve
+if exist %BUILDDIR%\html (
+    python -m http.server --directory %BUILDDIR%\html
+) else (
+    echo %BUILDDIR%\html does not exist. Run make html first.
+)
 goto end
 
 :help

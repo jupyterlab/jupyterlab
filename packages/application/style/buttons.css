@@ -17,11 +17,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-button {
+.jp-ThemedContainer button {
   border-radius: var(--jp-border-radius);
 }
 
-button:focus-visible {
+.jp-ThemedContainer button:focus-visible {
   outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
   outline-offset: -1px;
 }

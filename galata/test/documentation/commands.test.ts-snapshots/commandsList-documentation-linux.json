@@ -929,6 +929,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-filter",
+    "label": "Toggle File Filter",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-file-size",
     "label": "Show File Size Column",
     "caption": "",

@@ -1,18 +1,18 @@
 {
   "name": "@jupyterlab/example-terminal",
-  "version": "4.3.0-alpha.1",
+  "version": "4.3.0-alpha.2",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyter/web-components": "^0.15.3",
-    "@jupyterlab/application": "^4.3.0-alpha.1",
-    "@jupyterlab/coreutils": "^6.3.0-alpha.1",
-    "@jupyterlab/services": "^7.3.0-alpha.1",
-    "@jupyterlab/terminal": "^4.3.0-alpha.1",
-    "@jupyterlab/theme-light-extension": "^4.3.0-alpha.1",
+    "@jupyter/web-components": "^0.16.6",
+    "@jupyterlab/application": "^4.3.0-alpha.2",
+    "@jupyterlab/coreutils": "^6.3.0-alpha.2",
+    "@jupyterlab/services": "^7.3.0-alpha.2",
+    "@jupyterlab/terminal": "^4.3.0-alpha.2",
+    "@jupyterlab/theme-light-extension": "^4.3.0-alpha.2",
     "@lumino/widgets": "^2.4.0"
   },
   "devDependencies": {
