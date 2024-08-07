@@ -10,6 +10,7 @@ import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
 import { ILabShell, LabShell } from './shell';
 import { LabStatus } from './status';
+import { DisposableSet } from '@lumino/disposable';
 
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
@@ -485,4 +486,53 @@ namespace Private {
    * The value represents the number in milliseconds.
    */
   export const INPUT_GUARD_TIMEOUT = 10;
+}
+
+type Entrypoint = Record<
+  string,
+  {
+    extension: string;
+    pluginId: string;
+    // TODO this needed to be specified
+    data: any;
+  }[]
+>;
+
+// TODO should apply constrained like args should have entrypoint data.
+type Constructor<
+  T = {
+    entrypoints: Entrypoint;
+  }
+> = new (...args: any[]) => T;
+
+export function EntrypointJupyterLab<TBase extends Constructor>(Base: TBase) {
+  return class FastJupyterLab extends Base {
+    _entrypoints: Entrypoint = {};
+    _disposables: Record<string, DisposableSet | null> = {};
+
+    constructor(...options: any[]) {
+      super(...options);
+      this._entrypoints = options[0].entrypoints;
+    }
+
+    setEntrypointDisposables(extensionId: string, disposables: DisposableSet) {
+      if (!this._disposables[extensionId]) {
+        this._disposables[extensionId] = new DisposableSet();
+      }
+      this._disposables[extensionId]!.add(disposables);
+    }
+
+    getEntrypoint(type: string) {
+      return this._entrypoints[type];
+    }
+
+    async disposeEntrypointPlaceholder(extensionId: string) {
+      const disposables = this._disposables[extensionId];
+      if (disposables) {
+        await disposables.dispose();
+        this._disposables[extensionId] = null;
+      }
+      return true;
+    }
+  };
 }

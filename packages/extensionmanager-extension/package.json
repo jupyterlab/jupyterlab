@@ -77,6 +77,26 @@
           "label": "Extension Manager",
           "pluginId": "@jupyterlab/extensionmanager-extension:plugin"
         }
+      ],
+      "panelFactory": [
+        {
+          "pluginId": "@jupyterlab/extensionmanager-extension:plugin",
+          "id": "extensionmanager.main-view",
+          "iconName": "ui-components:extension",
+          "caption": "Extension Manager",
+          "attributes": [
+            {
+              "name": "role",
+              "value": "region"
+            },
+            {
+              "name": "aria-label",
+              "value": "Extension Manager section"
+            }
+          ],
+          "rank": 1000,
+          "position": "left"
+        }
       ]
     }
   },

@@ -6,8 +6,8 @@
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
 import { PageConfig, PluginRegistry2 } from '@jupyterlab/coreutils';
-
 import './style.js';
+import { LabIcon, DummySidePanel } from '@jupyterlab/ui-components';
 
 async function createModule(scope, module) {
   try {
@@ -60,6 +60,7 @@ export async function main() {
   }
 
   const pluginRegistry = new PluginRegistry2();
+  var EntrypointJupyterLab = (await import('@jupyterlab/application')).EntrypointJupyterLab;
   var JupyterLab = (await import('@jupyterlab/application')).JupyterLab;
   var disabled = [];
   var deferred = [];
@@ -247,8 +248,8 @@ export async function main() {
       }
     })
   }
-
-  const lab = new JupyterLab({
+  const EnhancedJupyterLab = EntrypointJupyterLab(JupyterLab)
+  const lab = new EnhancedJupyterLab({
     pluginRegistry,
     entrypoints,
     mimeExtensions,
@@ -266,33 +267,45 @@ export async function main() {
   });
   register.forEach(function(item) { pluginRegistry.registerPlugin(item); });
 
-  // Add this for extensionmanager and csvviewwer
-  if(entrypoints.commandFactory){
-    const disposableMap = {};
-    entrypoints.commandFactory.forEach(pluginCommandFactory=>{
+  const commandEntrypoints = lab.getEntrypoint('commandFactory')
+  if(commandEntrypoints){
+    commandEntrypoints.forEach(pluginCommandFactory=>{
       const dispose = lab.commands.addCommand(pluginCommandFactory.data.name, {
         // Translator needs to be exposed.
-        label:   pluginCommandFactory.data.label,
+        label: pluginCommandFactory.data.label,
         execute: async ()=>{
-          disposableMap[pluginCommandFactory.extension].dispose();
-          disposableMap[pluginCommandFactory.extension] = null;
+          lab.disposeEntrypointPlaceholder(pluginCommandFactory.extension)
           await pluginRegistry.activatePlugin(pluginCommandFactory.pluginId)
           lab.commands.execute(pluginCommandFactory.data.name)
         }
       });
-      if(!disposableMap[pluginCommandFactory.extension]){
-        disposableMap[pluginCommandFactory.extension] = new DisposableSet();
-      }
-      disposableMap[pluginCommandFactory.extension].add(dispose)
-  })
-}
+      lab.setEntrypointDisposables(pluginCommandFactory.extension, dispose);
+    })
+  }
+  const panelFactoryEntrypoints = lab.getEntrypoint('panelFactory')
+  if(panelFactoryEntrypoints){
+    panelFactoryEntrypoints.forEach(factory=>{
+        const v = new DummySidePanel({
+          activate : async ()=>{
+            lab.disposeEntrypointPlaceholder(factory.extension)
+            await pluginRegistry.activatePlugin(factory.pluginId)
+            lab.shell.activateById(factory.data.id)
+          }
+        })
+        v.id = factory.data.id;
+        const extensionIcon = LabIcon.resolve({icon: factory.data.iconName})
+        v.title.icon = extensionIcon;
+        // Should be translated
+        v.title.caption = 'Extension Manager';
+        factory.data.attributes.forEach(({name,value})=>{
+          v.node.setAttribute(name, value);
+        })
+        lab.setEntrypointDisposables(factory.extension, v)
+        lab.shell.add(v, factory.data.position, { rank: factory.data.rank });
+    })
+  }
 
   lab.start({ ignorePlugins, bubblingKeydown: true });
-
-  // FIXME to delete - for testing set csv plugin loaded at arbitrary later time
-  // setTimeout(() => {
-  //   pluginRegistry.activatePlugin("@jupyterlab/csvviewer-extension:csv")
-  // }, 8000)
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
