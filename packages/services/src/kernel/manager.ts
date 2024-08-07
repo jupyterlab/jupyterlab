@@ -143,6 +143,13 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
+   * The number of running kernels.
+   */
+  get runningCount(): number {
+    return this._models.size;
+  }
+
+  /**
    * Force a refresh of the running kernels.
    *
    * @returns A promise that resolves when the running list has been refreshed.
