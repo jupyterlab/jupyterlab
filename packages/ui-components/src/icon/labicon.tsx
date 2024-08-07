@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Icon, IconElement } from '@jupyter/react-components';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
@@ -212,50 +213,14 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   constructor({
     name,
     svgstr,
-    render,
-    unrender,
     _loading = false
   }: LabIcon.IOptions & { _loading?: boolean }) {
-    if (!(name && svgstr)) {
-      // sanity check failed
-      console.error(
-        `When defining a new LabIcon, name and svgstr must both be non-empty strings. name: ${name}, svgstr: ${svgstr}`
-      );
-      return badIcon;
-    }
-
+    this.name = name;
+    Icon.register({ name, svgStr: svgstr }); // Register the icon with Icon.register
     // currently this needs to be set early, before checks for existing icons
     this._loading = _loading;
 
-    // check to see if this is a redefinition of an existing icon
-    if (LabIcon._instances.has(name)) {
-      // fetch the existing icon, replace its svg, then return it
-      const icon = LabIcon._instances.get(name)!;
-      if (this._loading) {
-        // replace the placeholder svg in icon
-        icon.svgstr = svgstr;
-        this._loading = false;
-        return icon;
-      } else {
-        // already loaded icon svg exists; replace it and warn
-        if (LabIcon._debug) {
-          console.warn(
-            `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
-          );
-        }
-        icon.svgstr = svgstr;
-        return icon;
-      }
-    }
-
     this.name = name;
-    this.react = this._initReact(name);
-    this.svgstr = svgstr;
-
-    // setup custom render/unrender methods, if passed in
-    this._initRender({ render, unrender });
-
-    LabIcon._instances.set(this.name, this);
   }
 
   /**
@@ -450,98 +415,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
 
   protected _initReact(displayName: string) {
-    const component = React.forwardRef(
-      (props: LabIcon.IProps = {}, ref: LabIcon.IReactRef) => {
-        const {
-          className,
-          container,
-          label,
-          title,
-          slot,
-          tag = 'div',
-          ...styleProps
-        }: LabIcon.IProps = { ...this._props, ...props };
-
-        // set up component state via useState hook
-        const [, setId] = React.useState(this._uuid);
-
-        // subscribe to svg replacement via useEffect hook
-        React.useEffect(() => {
-          const onSvgReplaced = () => {
-            setId(this._uuid);
-          };
-
-          this._svgReplaced.connect(onSvgReplaced);
-
-          // specify cleanup callback as hook return
-          return () => {
-            this._svgReplaced.disconnect(onSvgReplaced);
-          };
-        });
-
-        // make it so that tag can be used as a jsx component
-        const Tag = tag ?? React.Fragment;
-
-        // ensure that svg html is valid
-        if (!(this.svgInnerHTML && this.svgReactAttrs)) {
-          // bail if failing silently
-          return <></>;
-        }
-
-        const svgProps = { ...this.svgReactAttrs };
-        if (!tag) {
-          Object.assign(svgProps, {
-            className:
-              className || styleProps
-                ? classes(className, LabIconStyle.styleClass(styleProps))
-                : undefined,
-            title: title,
-            slot: slot
-          });
-        }
-
-        const svgComponent = (
-          <svg
-            {...svgProps}
-            {...this.svgReactAttrs}
-            dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
-            ref={ref}
-          />
-        );
-
-        if (container) {
-          Private.initContainer({ container, className, styleProps, title });
-
-          return (
-            <React.Fragment>
-              {svgComponent}
-              {label}
-            </React.Fragment>
-          );
-        } else {
-          let attributes = {};
-          if (Tag !== React.Fragment) {
-            attributes = {
-              className:
-                className || styleProps
-                  ? classes(className, LabIconStyle.styleClass(styleProps))
-                  : undefined,
-              title: title,
-              slot: slot
-            };
-          }
-          return (
-            <Tag {...attributes}>
-              {svgComponent}
-              {label}
-            </Tag>
-          );
-        }
-      }
+    const cpt = React.forwardRef<IconElement, Omit<LabIcon.IReactProps, 'tag'>>(
+      (props: any, ref) => <Icon name={this.name} {...props} ref={ref} />
     );
-
-    component.displayName = `LabIcon_${displayName}`;
-    return component;
+    cpt.displayName = `LabIcon_${displayName}`;
+    return cpt;
   }
 
   protected _initRender({
@@ -564,27 +442,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     title,
     uuid
   }: { title?: string; uuid?: string } = {}): HTMLElement | null {
-    const svgElement = LabIcon.resolveSvg(this);
-
-    if (!svgElement) {
-      // bail on null svg element
-      return svgElement;
+    const el = document.createElement('jp-icon');
+    el.setAttribute('name', this.name);
+    el.dataset.icon = this.name;
+    if (uuid) {
+      el.dataset.iconId = uuid;
     }
 
-    if (svgElement.tagName !== 'parsererror') {
-      // svgElement is an actual svg node, augment it
-      svgElement.dataset.icon = this.name;
-
-      if (uuid) {
-        svgElement.dataset.iconId = uuid;
-      }
-
-      if (title) {
-        Private.setTitleSvg(svgElement, title);
-      }
+    if (title) {
+      el.title = title;
     }
-
-    return svgElement;
+    return el;
   }
 
   readonly name: string;

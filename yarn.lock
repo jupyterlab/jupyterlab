@@ -2051,25 +2051,26 @@ __metadata:
   checksum: 9d703b859cff5cd83b7308fd457a431387db5db96bd781a63bf48e183418dd9d3d44e76b9e4ae13237f6abeeb25d739ec9215c1d5bfdd08f66f750a50074a339
   languageName: node
   linkType: hard
-"@jupyter/react-components@npm:^0.16.7":
-  version: 0.16.7
-  resolution: "@jupyter/react-components@npm:0.16.7"
+
+"@jupyter/react-components@npm:^0.17.0":
+  version: 0.17.0
+  resolution: "@jupyter/react-components@npm:0.17.0"
   dependencies:
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/web-components": ^0.17.0
     react: ">=17.0.0 <19.0.0"
-  checksum: 37894347e63ebb528725e8b8b4038d138019823f5c9e28e3f6abb93b46d771b2ee3cc004d5ff7d9a06a93f2d90e41000bd2abae14364be34ba99c5e05864810e
+  checksum: 6aca62c47ac6eae472facf5dced03b6c1aef7bb6079408a563ec817d25eb2232d9c3985ced8adf19417bf639a0e20c29ced898cfe09262d36d4c5cf56f1078cd
   languageName: node
   linkType: hard
 
-"@jupyter/web-components@npm:^0.16.7":
-  version: 0.16.7
-  resolution: "@jupyter/web-components@npm:0.16.7"
+"@jupyter/web-components@npm:^0.17.0":
+  version: 0.17.0
+  resolution: "@jupyter/web-components@npm:0.17.0"
   dependencies:
     "@microsoft/fast-colors": ^5.3.1
     "@microsoft/fast-element": ^1.12.0
     "@microsoft/fast-foundation": ^2.49.4
     "@microsoft/fast-web-utilities": ^5.4.1
-  checksum: ec3336247bbabb2e2587c2cf8b9d0e80786b454916dd600b3d6791bf08c3d1e45a7ec1becf366a5491ab56b0be020baa8c50a5b6067961faf5ec904de31243aa
+  checksum: 61e1eea3b3f7bf3d7434c1201096bd874e222fca1411c4b6cf9d0a7b71aced8778e6cd492128585719de901242f1f0edcb8a2525a522e188e5907e4444f604c1
   languageName: node
   linkType: hard
 
@@ -2592,7 +2593,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/completer-extension@workspace:packages/completer-extension"
   dependencies:
-    "@jupyter/react-components": ^0.16.7
+    "@jupyter/react-components": ^0.17.0
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/codeeditor": ^4.3.0-alpha.2
     "@jupyterlab/completer": ^4.3.0-alpha.2
@@ -2797,7 +2798,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.3
-    "@jupyter/react-components": ^0.16.7
+    "@jupyter/react-components": ^0.17.0
     "@jupyter/ydoc": ^2.0.1
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/apputils": ^4.4.0-alpha.2
@@ -3014,7 +3015,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-cell@workspace:examples/cell"
   dependencies:
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/web-components": ^0.17.0
     "@jupyter/ydoc": ^2.0.1
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/apputils": ^4.4.0-alpha.2
@@ -3043,7 +3044,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/web-components": ^0.17.0
     "@jupyter/ydoc": ^2.0.1
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/codemirror": ^4.3.0-alpha.2
@@ -3159,7 +3160,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/web-components": ^0.17.0
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/apputils": ^4.4.0-alpha.2
     "@jupyterlab/codemirror": ^4.3.0-alpha.2
@@ -3189,7 +3190,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/web-components": ^0.17.0
     "@jupyter/ydoc": ^2.0.1
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/apputils": ^4.4.0-alpha.2
@@ -3277,7 +3278,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-terminal@workspace:examples/terminal"
   dependencies:
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/web-components": ^0.17.0
     "@jupyterlab/application": ^4.3.0-alpha.2
     "@jupyterlab/coreutils": ^6.3.0-alpha.2
     "@jupyterlab/services": ^7.3.0-alpha.2
@@ -4500,7 +4501,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
-    "@jupyter/react-components": ^0.16.6
+    "@jupyter/react-components": ^0.17.0
     "@jupyterlab/apputils": ^4.4.0-alpha.2
     "@jupyterlab/statedb": ^4.3.0-alpha.2
     "@jupyterlab/translation": ^4.3.0-alpha.2
@@ -4852,7 +4853,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/toc@workspace:packages/toc"
   dependencies:
-    "@jupyter/react-components": ^0.16.6
+    "@jupyter/react-components": ^0.17.0
     "@jupyterlab/apputils": ^4.4.0-alpha.2
     "@jupyterlab/coreutils": ^6.3.0-alpha.2
     "@jupyterlab/docregistry": ^4.3.0-alpha.2
@@ -4960,8 +4961,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components@workspace:packages/ui-components"
   dependencies:
-    "@jupyter/react-components": ^0.16.7
-    "@jupyter/web-components": ^0.16.7
+    "@jupyter/react-components": ^0.17.0
+    "@jupyter/web-components": ^0.17.0
     "@jupyterlab/coreutils": ^6.3.0-alpha.2
     "@jupyterlab/observables": ^5.3.0-alpha.2
     "@jupyterlab/rendermime-interfaces": ^3.11.0-alpha.2
