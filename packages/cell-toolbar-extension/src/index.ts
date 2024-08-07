@@ -31,8 +31,6 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     toolbarRegistry: IToolbarWidgetRegistry | null,
     translator: ITranslator | null
   ) => {
-    let showCellToolbar: boolean | null;
-
     /**
      * Load the settings for this extension
      *
@@ -40,15 +38,15 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
      */
     function loadSetting(setting: ISettingRegistry.ISettings | null): void {
       // Read the setting and convert to the correct type
-      showCellToolbar =
+      const showCellToolbar: boolean | null =
         setting === null
           ? true
           : (setting.get('showToolbar').composite as boolean);
 
-      extension.visible = showCellToolbar;
+      extension.enabled = showCellToolbar;
     }
 
-    let toolbarItems =
+    const toolbarItems =
       settingRegistry && toolbarRegistry
         ? createToolbarFactory(
             toolbarRegistry,
@@ -64,13 +62,15 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
     if (settingRegistry !== null) {
-      void settingRegistry.load(PLUGIN_ID).then(setting => {
-        // Read the settings
-        loadSetting(setting);
+      Promise.all([app.restored, settingRegistry.load(PLUGIN_ID)]).then(
+        ([, setting]) => {
+          // Read the settings
+          loadSetting(setting);
 
-        // Listen for your plugin setting changes using Signal
-        setting.changed.connect(loadSetting);
-      });
+          // Listen for your plugin setting changes using Signal
+          setting.changed.connect(loadSetting);
+        }
+      );
     }
 
     app.docRegistry.addWidgetExtension('Notebook', extension);
