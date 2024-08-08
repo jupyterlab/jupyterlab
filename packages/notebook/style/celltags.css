@@ -53,6 +53,15 @@
   align-items: center;
 }
 
+/* Hide the browser's default checkbox */
+.jp-CellTags-Holder > input[type='checkbox'] {
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+  margin: 0;
+}
+
 .jp-CellTags-Empty {
   width: 4em;
 }
