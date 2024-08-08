@@ -16,6 +16,7 @@ import {
 import {
   closeIcon,
   collapseAllIcon,
+  CommandToolbarButton,
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
@@ -559,6 +560,12 @@ class Section extends PanelWithToolbar {
         ? 'tree'
         : 'list';
     this.addWidget(this._listWidget);
+
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(button.id, button)
+      );
+    }
   }
 
   /**
@@ -1198,6 +1205,11 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Used to add arbitrary buttons to this section
+     */
+    toolbarButtons?: (ToolbarButton | CommandToolbarButton)[];
 
     /**
      * Whether the manager supports tree view for its items
