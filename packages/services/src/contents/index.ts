@@ -296,6 +296,11 @@ export namespace Contents {
     readonly serverSettings: ServerConnection.ISettings;
 
     /**
+     * Set the default `IDrive` in the manager.
+     */
+    setDefaultDrive(driveName: string): void;
+
+    /**
      * Add an `IDrive` to the manager.
      */
     addDrive(drive: IDrive): void;
@@ -637,8 +642,40 @@ export class ContentsManager implements Contents.IManager {
   constructor(options: ContentsManager.IOptions = {}) {
     const serverSettings = (this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings());
-    this._defaultDrive = options.defaultDrive ?? new Drive({ serverSettings });
-    this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
+    // Create a drive for the Jupyter Server REST API.
+    let contentsDrive = new Drive({ serverSettings, name: 'contents' });
+    this._additionalDrives.set('contents', contentsDrive);
+    // If a different drive is given in options, also add it here.
+    let defaultDriveName = 'contents';
+    // Set the default drive based on the given options.
+    if (options.defaultDrive) {
+      defaultDriveName = options.defaultDrive.name;
+      this._additionalDrives.set(
+        options.defaultDrive.name,
+        options.defaultDrive
+      );
+    }
+    this.setDefaultDrive(defaultDriveName);
+  }
+
+  /**
+   * Set the default drive of the contents manager. This can be changed
+   * at any time.
+   *
+   * The default drive does not use its drive prefix when displaying
+   * paths.
+   */
+  setDefaultDrive(driveName: string): void {
+    let drive = this._additionalDrives.get(driveName);
+    if (drive) {
+      // Remove the signal from the previous default drive.
+      if (this._defaultDrive) {
+        this._defaultDrive.fileChanged.disconnect(this._onFileChanged);
+      }
+      // Set the new Drive.
+      this._defaultDrive = drive;
+      this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
+    }
   }
 
   /**
@@ -1517,6 +1554,9 @@ export namespace ContentsManager {
   export interface IOptions {
     /**
      * The default drive backend for the contents manager.
+     *
+     * The default drive means all implicit paths (i.e. no drive prefix)
+     * will use this drive by default.
      */
     defaultDrive?: Contents.IDrive;
 
