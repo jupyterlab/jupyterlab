@@ -1233,6 +1233,12 @@ describe('@jupyter/notebook', () => {
         it('should extend selection if invoked with shift', () => {
           widget.activeCellIndex = 3;
 
+          // shift click no-op
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+          expect(widget._mouseMode.toBe(null));
+
           // shift click below
           simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(4);
@@ -1253,10 +1259,11 @@ describe('@jupyter/notebook', () => {
           expect(widget.activeCellIndex).toBe(2);
           expect(selected(widget)).toEqual([2, 3]);
 
-          // shift click no-op
+          // shift click deselect
           simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(3);
           expect(selected(widget)).toEqual([]);
+          expect(widget._mouseMode.toBe('select'));
         });
 
         it('should not extend a selection if there is text selected in the output', () => {
