@@ -33,6 +33,12 @@
       "type": "boolean",
       "default": true
     },
+    "cellRunButton": {
+      "title": "Show a run button for each cell",
+      "description": "Show a run button over the cell prompt when hovering over the active cell's prompt, and over the prompt when a cell has never been run.",
+      "type": "boolean",
+      "default": true
+    },
     "toolbar": {
       "title": "List of toolbar items",
       "description": "An item is defined by a 'name', a 'command' name, and an 'icon' name",
@@ -41,12 +47,6 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "default": []
-    },
-    "cellRunButton": {
-      "title": "Show a run button for each cell",
-      "description": "Show a run button over the cell prompt when hovering over the active cell's prompt, and over the prompt when a cell has never been run.",
-      "type": "boolean",
-      "default": true
     }
   },
   "additionalProperties": false,
