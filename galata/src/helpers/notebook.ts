@@ -1430,7 +1430,7 @@ export class NotebookHelper {
     const page = this.page;
     await page.locator('.jp-Dialog').waitFor();
 
-    if (options && option.kernel !== undefined) {
+    if (options && options.kernel !== undefined) {
       if (options.kernel === null) {
         await page
           .getByRole('dialog')
