@@ -1423,7 +1423,7 @@ export class NotebookHelper {
    */
   async createNew(
     name?: string,
-    options?: { kernel?: string }
+    options?: { kernel?: string | null }
   ): Promise<string | null> {
     await this.menu.clickMenuItem('File>New>Notebook');
 
@@ -1431,7 +1431,7 @@ export class NotebookHelper {
     await page.locator('.jp-Dialog').waitFor();
 
     if (options?.kernel) {
-      if (options.kernel === 'null') {
+      if (options.kernel === null) {
         await page
           .getByRole('dialog')
           .getByRole('combobox')

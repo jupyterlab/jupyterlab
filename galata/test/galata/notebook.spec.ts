@@ -35,7 +35,7 @@ test.describe('Notebook Tests', () => {
     tmpPath
   }) => {
     const fileName = 'create_no_kernel_test.ipynb';
-    await page.notebook.createNew(fileName, { kernel: 'null' });
+    await page.notebook.createNew(fileName, { kernel: null });
     await page.getByRole('main').getByText(fileName).waitFor();
 
     expect(await page.contents.fileExists(`${tmpPath}/${fileName}`)).toEqual(
