@@ -268,10 +268,10 @@ describe('@jupyterlab/apputils', () => {
         input.dispatchEvent(new Event('input'));
 
         const acceptButton = node.querySelector(
-          'button.jp-mod-accept'
+          '.jp-Dialog-button.jp-mod-accept'
         ) as HTMLButtonElement;
         const dismissButton = node.querySelector(
-          'button.jp-mod-reject'
+          '.jp-Dialog-button.jp-mod-reject'
         ) as HTMLButtonElement;
         expect(acceptButton.disabled).toBe(true);
         expect(dismissButton.disabled).toBe(false);
@@ -300,10 +300,10 @@ describe('@jupyterlab/apputils', () => {
         input.dispatchEvent(new Event('input'));
 
         const acceptButton = node.querySelector(
-          'button.jp-mod-accept'
+          '.jp-Dialog-button.jp-mod-accept'
         ) as HTMLButtonElement;
         const dismissButton = node.querySelector(
-          'button.jp-mod-reject'
+          '.jp-Dialog-button.jp-mod-reject'
         ) as HTMLButtonElement;
         expect(acceptButton.disabled).toBe(false);
         expect(dismissButton.disabled).toBe(false);
