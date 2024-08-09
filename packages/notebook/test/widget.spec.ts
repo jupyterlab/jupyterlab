@@ -1271,9 +1271,9 @@ describe('@jupyter/notebook', () => {
           // test that selecting mode was entered; in selecting mode we listen
           // to the `mouseup` event to stop selecting when the mouse button gets
           // released; this event gets default prevented as handled by the notebook.
-          const mouseUpEvent = new MouseEvent('mouseup');
-          widget.widgets[3].node.dispatchEvent(mouseUpEvent);
-          expect(mouseUpEvent.defaultPrevented).toBe(true);
+          const blockedMouseUpEvent = new MouseEvent('mouseup');
+          widget.widgets[3].node.dispatchEvent(blockedMouseUpEvent);
+          expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
         it('should not extend a selection if there is text selected in the output', () => {
