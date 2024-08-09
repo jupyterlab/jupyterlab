@@ -3,26 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+const rspack = require('@rspack/core');
 
 module.exports = {
   entry: './raw.js',
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'style'),
-    hashFunction: 'sha256'
+    hashFunction: 'xxhash64'
   },
-  plugins: [
-    new MiniCssExtractPlugin({
-      filename: 'index.css'
-    })
-  ],
+  plugins: [new rspack.CssExtractRspackPlugin({ filename: 'index.css' })],
+  experiments: { css: false },
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader']
+        test: /\.css$/i,
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,

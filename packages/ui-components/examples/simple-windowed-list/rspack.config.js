@@ -3,7 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-const webpack = require('webpack');
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
@@ -13,13 +12,10 @@ module.exports = {
     filename: 'bundle.js'
   },
   bail: true,
-  devtool: 'cheap-source-map',
   mode: 'development',
   module: {
     rules: [
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.html$/, type: 'asset/resource' },
-      { test: /\.md$/, type: 'asset/source' },
       { test: /\.js.map$/, type: 'asset/resource' },
       {
         // In .css files, svg is loaded as a data URI.
@@ -27,7 +23,10 @@ module.exports = {
         issuer: /\.css$/,
         type: 'asset/inline',
         generator: {
-          dataUrl: content => miniSVGDataURI(content.toString())
+          dataUrl: {
+            content: content => miniSVGDataURI(content.content),
+            mimetype: 'image/svg+xml'
+          }
         }
       },
       {
@@ -36,17 +35,7 @@ module.exports = {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.js$/,
         type: 'asset/source'
-      },
-      {
-        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        type: 'asset'
       }
     ]
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      // Needed for various packages using cwd(), like the path polyfill
-      process: { cwd: () => '/', env: {} }
-    })
-  ]
+  }
 };
