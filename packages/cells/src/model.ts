@@ -21,6 +21,7 @@ import {
   CellChange,
   createMutex,
   createStandaloneCell,
+  IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
   ISharedCell,
@@ -156,7 +157,7 @@ export interface ICodeCellModel extends ICellModel {
   /**
    * The code cell's state.
    */
-  executionState: 'running' | 'idle';
+  executionState: IExecutionState;
 
   /**
    * The cell outputs.
@@ -649,19 +650,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * The execution state of the cell.
    */
-  get executionState(): 'idle' | 'running' {
-    return this._executionState;
+  get executionState(): IExecutionState {
+    return this.sharedModel.executionState;
   }
-  set executionState(newValue: 'idle' | 'running') {
-    const oldValue = this._executionState;
-    if (oldValue != newValue) {
-      this._executionState = newValue;
-      this.stateChanged.emit({
-        name: 'executionState',
-        oldValue,
-        newValue
-      });
-    }
+  set executionState(newValue: IExecutionState) {
+    this.sharedModel.executionState = newValue;
   }
 
   /**
@@ -859,6 +852,14 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       });
     }
 
+    if (change.executionStateChange) {
+      this.stateChanged.emit({
+        name: 'executionState',
+        oldValue: change.executionStateChange.oldValue,
+        newValue: change.executionStateChange.newValue
+      });
+    }
+
     if (change.sourceChange && this.executionCount !== null) {
       this._setDirty(
         this._executedCode !== this.sharedModel.getSource().trim()
@@ -883,7 +884,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
-  private _executionState: 'idle' | 'running' = 'idle';
   private _executedCode = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;
