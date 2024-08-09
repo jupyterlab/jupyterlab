@@ -164,7 +164,7 @@ function CustomEnv({
             type="checkbox"
             checked={isShownBlock}
             onChange={showCustomEnvBlock}
-            className="jp-mod-styled"
+            className="jp-mod-styled jp-custom-env-vars-checkbox"
           />
           {header}
         </label>

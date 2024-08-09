@@ -71,6 +71,8 @@ describe('@jupyterlab/apputils', () => {
           // eslint-disable-next-line camelcase
           allow_external_kernels: true,
           // eslint-disable-next-line camelcase
+          allow_setup_custom_env_variables: true,
+          // eslint-disable-next-line camelcase
           external_connection_dir: external
         }
       }
@@ -147,6 +149,25 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#kernelChanged', () => {
+      it('should be emitted when the kernel changes', async () => {
+        let called = false;
+        sessionContext.kernelChanged.connect(
+          (sender, { oldValue, newValue }) => {
+            if (oldValue !== null) {
+              return;
+            }
+            expect(sender).toBe(sessionContext);
+            expect(oldValue).toBeNull();
+            expect(newValue).toBe(sessionContext.session?.kernel || null);
+            called = true;
+          }
+        );
+        await sessionContext.initialize();
+        expect(called).toBe(true);
+      });
+    });
+
+    describe('#kernelChanged with custom env variables', () => {
       it('should be emitted when the kernel changes', async () => {
         let called = false;
         sessionContext.kernelChanged.connect(
