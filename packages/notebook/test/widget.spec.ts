@@ -1237,7 +1237,8 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(3);
           expect(selected(widget)).toEqual([]);
-          // test that selecting mode was NOT entered; in selecting mode we listen
+          // test that selecting mode handler does not prevent default
+          // if no cells were selected; in the selecting mode we listen
           // to the `mouseup` event to stop selecting when the mouse button gets
           // released; this event gets default prevented as handled by the notebook.
           const mouseUpEvent = new MouseEvent('mouseup', {
