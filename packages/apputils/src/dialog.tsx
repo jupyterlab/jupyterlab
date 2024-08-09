@@ -44,7 +44,7 @@ export function showErrorMessage(
   buttons?: ReadonlyArray<Dialog.IButton>
 ): Promise<void> {
   const trans = Dialog.translator.load('jupyterlab');
-  buttons = buttons ?? [Dialog.okButton({ label: trans.__('Dismiss') })];
+  buttons = buttons ?? [Dialog.cancelButton({ label: trans.__('Close') })];
   console.warn('Showing error:', error);
 
   // Cache promises to prevent multiple copies of identical dialogs showing
