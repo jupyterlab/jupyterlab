@@ -437,9 +437,11 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-200, #eee);
   --jp-switch-color: var(--md-grey-400, #bdbdbd);
   --jp-switch-true-position-color: var(--md-orange-700, #f57c00);
+}
 
-  /* Completer specific styles */
+/* Completer specific styles */
 
+.jp-Completer {
   --jp-completer-type-background0: transparent;
   --jp-completer-type-background1: #1f77b4;
   --jp-completer-type-background2: #ff7f0e;
