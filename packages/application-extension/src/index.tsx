@@ -110,6 +110,9 @@ namespace CommandIDs {
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
 
+  export const toggleFullscreenMode: string =
+    'application:toggle-fullscreen-mode';
+
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
@@ -371,20 +374,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
-        label: args =>
-          args === undefined ||
-          args.side === undefined ||
-          args.index === undefined
-            ? trans.__('Toggle Sidebar Element')
-            : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+        label: trans.__('Toggle Sidebar Element'),
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -443,6 +433,25 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         isToggled: () => labShell.presentationMode,
         isVisible: () => true
+      });
+
+      commands.addCommand(CommandIDs.toggleFullscreenMode, {
+        label: () => trans.__('Fullscreen Mode'),
+        execute: () => {
+          labShell.fullscreenMode = !labShell.fullscreenMode;
+
+          if (labShell.fullscreenMode) {
+            document.documentElement.requestFullscreen();
+            document.onfullscreenchange = () => {
+              !document.fullscreenElement
+                ? (labShell.fullscreenMode = false)
+                : null;
+            };
+          } else {
+            document.exitFullscreen();
+          }
+        },
+        isToggled: () => labShell.fullscreenMode
       });
 
       commands.addCommand(CommandIDs.setMode, {
@@ -533,6 +542,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
+        CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
         CommandIDs.resetLayout
       ].forEach(command => palette.addItem({ command, category }));
