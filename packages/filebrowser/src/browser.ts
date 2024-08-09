@@ -5,6 +5,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
+import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
@@ -118,7 +119,8 @@ export class FileBrowser extends SidePanel {
     this.listing = this.createDirListing({
       model,
       renderer,
-      translator
+      translator,
+      state: options.state
     });
     this.listing.addClass(LISTING_CLASS);
 
@@ -131,6 +133,8 @@ export class FileBrowser extends SidePanel {
     if (options.restore !== false) {
       void model.restore(this.id);
     }
+    // restore listing regardless of the restore option
+    void this.listing.restore(this.id);
   }
 
   /**
@@ -571,6 +575,12 @@ export namespace FileBrowser {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional state database. If provided, the widget will restore
+     * the columns sizes
+     */
+    state?: IStateDB;
   }
 
   /**

@@ -24,6 +24,7 @@ export namespace DOMUtils {
 
   /**
    * Find the first element matching a class name.
+   * Only use this function when the element existence is guaranteed.
    */
   export function findElement(
     parent: HTMLElement,
