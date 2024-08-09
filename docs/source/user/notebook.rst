@@ -166,6 +166,18 @@ commonly-used functions, if there is enough room to display it on the first line
 If you would like to disable the cell toolbar, open the Settings Editor, choose the
 Cell Toolbar in the left panel, and uncheck "Show cell toolbar".
 
+Administrators can turn off the cell toolbar by disabling its extension, by running:
+
+.. code:: bash
+
+    jupyter labextension disable @jupyterlab/cell-toolbar-extension
+
+on the command line. Administrators can turn it back on by running:
+
+.. code:: bash
+
+    jupyter labextension enable @jupyterlab/cell-toolbar-extension
+
 .. _notebook-trust:
 
 Trust
