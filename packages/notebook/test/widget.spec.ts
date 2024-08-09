@@ -1237,7 +1237,12 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(3);
           expect(selected(widget)).toEqual([]);
-          expect(widget._mouseMode).toBe(null);
+          // test that selecting mode was NOT entered; in selecting mode we listen
+          // to the `mouseup` event to stop selecting when the mouse button gets
+          // released; this event gets default prevented as handled by the notebook.
+          const mouseUpEvent = new MouseEvent('mouseup', { shiftKey: true });
+          widget.widgets[3].node.dispatchEvent(mouseUpEvent);
+          expect(mouseUpEvent.defaultPrevented).toBe(false);
 
           // shift click below
           simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
@@ -1263,7 +1268,12 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(3);
           expect(selected(widget)).toEqual([]);
-          expect(widget._mouseMode).toBe('select');
+          // test that selecting mode was entered; in selecting mode we listen
+          // to the `mouseup` event to stop selecting when the mouse button gets
+          // released; this event gets default prevented as handled by the notebook.
+          const mouseUpEvent = new MouseEvent('mouseup');
+          widget.widgets[3].node.dispatchEvent(mouseUpEvent);
+          expect(mouseUpEvent.defaultPrevented).toBe(true);
         });
 
         it('should not extend a selection if there is text selected in the output', () => {
