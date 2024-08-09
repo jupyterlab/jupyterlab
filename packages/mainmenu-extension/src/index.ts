@@ -540,9 +540,13 @@ function createKernelMenu(
     execute: () => {
       return showDialog({
         title: trans.__('Shut Down All?'),
-        body: trans.__('Shut down all kernels?'),
+        body: trans._n(
+          'Are you sure you want to permanently shut down the running kernel?',
+          'Are you sure you want to permanently shut down the %1 running kernels?',
+          app.serviceManager.kernels.runningCount
+        ),
         buttons: [
-          Dialog.cancelButton({ label: trans.__('Dismiss') }),
+          Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down All') })
         ]
       }).then(result => {
