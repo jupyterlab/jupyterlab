@@ -560,12 +560,6 @@ class Section extends PanelWithToolbar {
         ? 'tree'
         : 'list';
     this.addWidget(this._listWidget);
-
-    if (this._manager.toolbarButtons) {
-      this._manager.toolbarButtons.forEach(button =>
-        this.toolbar.addItem(button.id, button)
-      );
-    }
   }
 
   /**
@@ -669,6 +663,16 @@ class Section extends PanelWithToolbar {
     // Update buttons once defined and before adding to DOM
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
+
+    // Add manager-specific buttons
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(
+          button instanceof CommandToolbarButton ? button.commandId : button.id,
+          button
+        )
+      );
+    }
 
     for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
       this.toolbar.addItem(
