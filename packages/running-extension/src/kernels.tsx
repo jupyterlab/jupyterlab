@@ -70,7 +70,7 @@ export async function addKernelRunningSessionManager(
 
   async function checkShutdownUnusedEnabled() {
     const wasEnabled = shutdownUnusedEnabled;
-    shutdownUnusedEnabled = (await getUnusedKernels()).length > 0;
+    shutdownUnusedEnabled = getUnusedKernels().length > 0;
     if (wasEnabled !== shutdownUnusedEnabled) {
       commands.notifyCommandChanged(CommandIDs.kernelShutDownUnused);
     }
