@@ -77,7 +77,7 @@ export async function addKernelRunningSessionManager(
   }
 
   commands.addCommand(CommandIDs.kernelShutDownUnused, {
-    caption: args => (args.toolbar ? '' : shutdownUnusedLabel),
+    label: args => (args.toolbar ? '' : shutdownUnusedLabel),
     icon: args => (args.toolbar ? cleaningIcon : undefined),
     execute: async () => {
       const unusedKernels = getUnusedKernels();
