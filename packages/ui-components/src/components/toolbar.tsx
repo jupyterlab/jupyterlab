@@ -187,9 +187,14 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   names(): IterableIterator<string> {
     const layout = this.layout as ToolbarLayout;
-    return map(layout.widgets, widget => {
-      return Private.nameProperty.get(widget);
-    });
+    if (layout === null) {
+      // An empty iterator
+      return map([], i => '');
+    } else {
+      return map(layout.widgets, widget => {
+        return Private.nameProperty.get(widget);
+      });
+    }
   }
 
   /**
@@ -232,7 +237,15 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       return false;
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
+
+    // The layout is commonly false if something other than a widget with
+    // a toolbar is active.
+    // For example, if the user is in the Settings Editor, and makes a
+    // change to the toolbar, there is no active toolbar layout.
     const layout = this.layout as ToolbarLayout;
+    if (layout === null) {
+      return false;
+    }
 
     const j = Math.max(0, Math.min(index, layout.widgets.length));
     layout.insertWidget(j, widget);
