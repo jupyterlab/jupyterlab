@@ -88,13 +88,20 @@ export async function addKernelRunningSessionManager(
 
       const confirmed = await showDialog({
         title: shutdownUnusedLabel,
-        body:
-          trans.__(
-            'Are you sure you want to shut down the following unused kernels?'
-          ) +
-          `\n${unusedKernels
-            .map(kernel => `${kernel.name} (${kernel.id.slice(0, 8)})`)
-            .join(',\n')}`,
+        body: (
+          <>
+            {trans.__(
+              'Are you sure you want to shut down the following unused kernels?'
+            )}
+            <ul>
+              {unusedKernels.map(kernel => (
+                <li key={kernel.id}>
+                  {trans.__('%1 (%2)', kernel.name, kernel.id.slice(0, 8))}
+                </li>
+              ))}
+            </ul>
+          </>
+        ),
         buttons: [
           Dialog.cancelButton(),
           Dialog.warnButton({ label: shutdownUnusedLabel })
