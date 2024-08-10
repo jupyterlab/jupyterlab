@@ -41,9 +41,7 @@
   display: none;
 }
 
-.jp-mod-running-list-view
-  .jp-mod-kernel-widget
-  .jp-RunningSessions-item-label-kernel-id {
+.jp-mod-flat .jp-mod-kernel-widget .jp-RunningSessions-item-label-kernel-id {
   display: inline;
 }
 
