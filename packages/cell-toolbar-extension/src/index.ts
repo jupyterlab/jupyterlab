@@ -44,7 +44,13 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           ? true
           : (setting.get('showToolbar').composite as boolean);
 
+      const showRunButton: boolean | null =
+        setting === null
+          ? true
+          : (setting.get('showRunButton').composite as boolean);
+
       extension.enabled = showCellToolbar;
+      extension.showHelperButtons = showRunButton;
     }
 
     const toolbarItems =
@@ -64,7 +70,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     let showRunButton = true;
     if (settingRegistry !== null) {
       const settings = settingRegistry!.load(cellToolbar.id);
-      showRunButton = (await settings).get('cellRunButton')
+      showRunButton = (await settings).get('showRunButton')
         .composite as boolean;
     }
 
@@ -80,7 +86,11 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
       );
     }
 
-    const extension = new CellBarExtension(app.commands, toolbarItems, helperButtons);
+    const extension = new CellBarExtension(
+      app.commands,
+      toolbarItems,
+      helperButtons
+    );
 
     // Wait for the application to be restored and
     // for the settings for this plugin to be loaded
