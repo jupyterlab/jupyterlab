@@ -2930,7 +2930,7 @@ export namespace DirListing {
         if (column.id != 'name' && hiddenColumns?.has(column.id)) {
           continue;
         }
-        const createElement = this._itemFactories[column.id];
+        const createElement = this.itemFactories[column.id];
         const element = createElement();
         node.appendChild(element);
 
@@ -3084,7 +3084,7 @@ export namespace DirListing {
       if (modified && !showModified) {
         node.removeChild(modified);
       } else if (showModified && !modified) {
-        modified = this._itemFactories.last_modified();
+        modified = this.itemFactories.last_modified();
         nameColumn.insertAdjacentElement('afterend', modified);
       }
 
@@ -3092,7 +3092,7 @@ export namespace DirListing {
       if (fileSize && !showFileSize) {
         node.removeChild(fileSize);
       } else if (showFileSize && !fileSize) {
-        fileSize = this._itemFactories.file_size();
+        fileSize = this.itemFactories.file_size();
         (modified ?? nameColumn).insertAdjacentElement('afterend', fileSize);
       }
 
@@ -3281,7 +3281,7 @@ export namespace DirListing {
     /**
      * Factories for individual parts of the item.
      */
-    protected _itemFactories = {
+    protected itemFactories = {
       name: () => {
         const name = document.createElement('span');
         const icon = document.createElement('span');
