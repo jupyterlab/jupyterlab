@@ -30,7 +30,6 @@ const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
 const KERNELSPEC_ITEM_CLASS = 'jp-mod-kernelspec';
 const WIDGET_ITEM_CLASS = 'jp-mod-kernel-widget';
 const KERNEL_LABEL_ID = 'jp-RunningSessions-item-label-kernel-id';
-const SHUTDOWN_UNUSED_BUTTON_CLASS = 'jp-RunningSessions-shutdownUnused';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -73,11 +72,11 @@ export async function addKernelRunningSessionManager(
     const wasEnabled = shutdownUnusedEnabled;
     shutdownUnusedEnabled = (await getUnusedKernels()).length > 0;
     if (wasEnabled !== shutdownUnusedEnabled) {
-      commands.notifyCommandChanged(SHUTDOWN_UNUSED_BUTTON_CLASS);
+      commands.notifyCommandChanged(CommandIDs.kernelShutDownUnused);
     }
   }
 
-  commands.addCommand(SHUTDOWN_UNUSED_BUTTON_CLASS, {
+  commands.addCommand(CommandIDs.kernelShutDownUnused, {
     caption: args => (args.toolbar ? '' : shutdownUnusedLabel),
     icon: args => (args.toolbar ? cleaningIcon : undefined),
     execute: async () => {
@@ -166,7 +165,7 @@ export async function addKernelRunningSessionManager(
     toolbarButtons: [
       new CommandToolbarButton({
         commands,
-        id: SHUTDOWN_UNUSED_BUTTON_CLASS,
+        id: CommandIDs.kernelShutDownUnused,
         caption: shutdownUnusedLabel,
         args: { toolbar: true }
       })
