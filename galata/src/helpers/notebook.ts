@@ -1126,11 +1126,16 @@ export class NotebookHelper {
     const gutter = gutters.nth(line);
     for (let i = 0; i < 3; i++) {
       await gutter.click({ position: { x: 5, y: 5 } });
-      await Utils.waitForCondition(
-        async () => ((await gutter.textContent())?.length ?? 0) > 0,
-        500
-      );
-      if ((await gutter.textContent())?.length) {
+      let break_ = true;
+      try {
+        await Utils.waitForCondition(
+          async () => ((await gutter.textContent())?.length ?? 0) > 0,
+          1000
+        );
+      } catch (reason) {
+        break_ = false;
+      }
+      if (break_) {
         break;
       }
     }
@@ -1255,7 +1260,7 @@ export class NotebookHelper {
 
     await this._setCellMode(cell, 'Edit');
     await cell.getByRole('textbox').press('Control+A');
-    await cell.getByRole('textbox').type(source, { delay: 0 });
+    await cell.getByRole('textbox').pressSequentially(source);
     await this._setCellMode(cell, 'Command');
 
     if (cellType === 'code') {
@@ -1409,16 +1414,36 @@ export class NotebookHelper {
   }
 
   /**
-   * Create a new notebook
+   * Creates a new notebook.
    *
-   * @param name Name of the notebook
-   * @returns Name of the created notebook or null if it failed
+   * @param name - The name of the notebook. If provided, the notebook will be renamed to this name.
+   * @param options - Parameters for creating the notebook.
+   * @param options.kernel - The kernel to use for the notebook.
+   * @returns A Promise that resolves to the name of the created notebook, or `null` if the notebook creation failed.
    */
-  async createNew(name?: string): Promise<string | null> {
+  async createNew(
+    name?: string,
+    options?: { kernel?: string | null }
+  ): Promise<string | null> {
     await this.menu.clickMenuItem('File>New>Notebook');
 
     const page = this.page;
     await page.locator('.jp-Dialog').waitFor();
+
+    if (options && options.kernel !== undefined) {
+      if (options.kernel === null) {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption('null');
+      } else {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption(`{"name":"${options.kernel}"}`);
+      }
+    }
+
     await page.click('.jp-Dialog .jp-mod-accept');
 
     const activeTab = this.activity.getTabLocator();

@@ -20,20 +20,21 @@
 @import './switch.css';
 @import './table.css';
 @import './toolbar.css';
+@import './toolkit.css';
 @import './windowedlist.css';
 
-body {
+.jp-ThemedContainer {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
 /* Disable native link decoration styles everywhere outside of dialog boxes */
-a {
+.jp-ThemedContainer a {
   text-decoration: unset;
   color: unset;
 }
 
-a:hover {
+.jp-ThemedContainer a:hover {
   text-decoration: unset;
   color: unset;
 }
@@ -105,7 +106,7 @@ a:hover {
 .jp-InputGroup input {
   box-sizing: border-box;
   border: none;
-  border-radius: 0;
+  border-radius: var(--jp-border-radius);
   background-color: transparent;
   color: var(--jp-ui-font-color0);
   box-shadow: inset 0 0 0 var(--jp-border-width) var(--jp-input-border-color);
@@ -145,7 +146,7 @@ a:hover {
 }
 
 .jp-InputGroup input::placeholder,
-input::placeholder {
+.jp-ThemedContainer input::placeholder {
   color: var(--jp-ui-font-color2);
 }
 
@@ -154,6 +155,11 @@ input::placeholder {
   bottom: 1px;
   right: 0;
   padding: 6px;
+}
+
+.jp-HTMLSelect.jp-DefaultStyle {
+  /* Leave space for the focus outline */
+  padding: 0 2px;
 }
 
 .jp-HTMLSelect.jp-DefaultStyle select {
@@ -184,6 +190,10 @@ input::placeholder {
   cursor: not-allowed;
 }
 
+.jp-HTMLSelect.jp-DefaultStyle select:focus-visible {
+  outline: 2px solid var(--accent-fill-focus, var(--jp-brand-color1));
+}
+
 /* Use our own theme for hover and option styles */
 /* stylelint-disable-next-line selector-max-type */
 .jp-HTMLSelect.jp-DefaultStyle select:hover,
@@ -192,6 +202,6 @@ input::placeholder {
   color: var(--jp-ui-font-color0);
 }
 
-select {
+.jp-ThemedContainer select {
   box-sizing: border-box;
 }

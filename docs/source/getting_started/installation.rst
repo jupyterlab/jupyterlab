@@ -98,6 +98,38 @@ Usage with JupyterHub
 Read the details on our :ref:`JupyterLab on JupyterHub documentation page <jupyterhub>`.
 
 
+Usage with Jupyverse
+--------------------
+
+`Jupyverse <https://github.com/jupyter-server/jupyverse/>`__ is a next-generation Jupyter server based on
+`FastAPI <https://fastapi.tiangolo.com/>`__. It can be used instead of
+`jupyter-server <https://github.com/jupyter-server/jupyter_server/>`__, the Jupyter server installed by default with JupyterLab.
+Note that ``jupyter-server`` extensions won't work with ``jupyverse`` (for which there might be equivalent plugins).
+
+You can install ``jupyverse`` with ``pip``:
+
+.. code:: bash
+
+    pip install jupyverse[auth, jupyterlab]
+
+or with ``conda``:
+
+.. code:: bash
+
+    conda install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
+or with ``mamba``:
+
+.. code:: bash
+
+    mamba install -c conda-forge jupyverse fps-auth fps-jupyterlab
+
+And run it with:
+
+.. code:: bash
+
+    jupyverse
+
 Supported browsers
 ------------------
 

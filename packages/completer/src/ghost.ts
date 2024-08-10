@@ -14,6 +14,8 @@ const TRANSIENT_LETTER_SPACER_CLASS = 'jp-GhostText-letterSpacer';
 const GHOST_TEXT_CLASS = 'jp-GhostText';
 const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
+const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
+const HIDDEN_LINES_CLASS = 'jp-GhostText-hiddenLines';
 
 /**
  * Ghost text content and placement.
@@ -40,6 +42,23 @@ export interface IGhostText {
    */
   streaming?: boolean;
   /**
+   * Maximum number of lines to show.
+   */
+  maxLines?: number;
+  /**
+   * Minimum number of lines to reserve (to avoid frequent resizing).
+   */
+  minLines?: number;
+  /**
+   * An error occurred in the request.
+   */
+  error?: {
+    /**
+     * A message explaining the error.
+     */
+    message?: string;
+  };
+  /**
    * Callback to execute when pointer enters the boundary of the ghost text.
    */
   onPointerOver?: () => void;
@@ -58,6 +77,16 @@ export class GhostTextManager {
    * Typing animation.
    */
   static streamingAnimation: 'none' | 'uncover' = 'uncover';
+
+  /**
+   * Delay for removal of line spacer.
+   */
+  static spacerRemovalDelay: number = 700;
+
+  /**
+   * Duration for line spacer removal.
+   */
+  static spacerRemovalDuration: number = 300;
 
   /**
    * Place ghost text in an editor.
@@ -107,7 +136,8 @@ class GhostTextWidget extends WidgetType {
   eq(other: GhostTextWidget) {
     return (
       other.content == this.content &&
-      other.options.streaming === this.options.streaming
+      other.options.streaming === this.options.streaming &&
+      other.options.error === this.options.error
     );
   }
 
@@ -139,28 +169,120 @@ class GhostTextWidget extends WidgetType {
     return wrap;
   }
 
+  private _removeErrorAnimation(dom: HTMLElement) {
+    const elementsToRemove = dom.querySelectorAll(`.${ERROR_INDICATOR_CLASS}`);
+
+    elementsToRemove.forEach(element => {
+      element.remove();
+    });
+  }
+
+  /**
+   * Mount the error animation DOM and remove the streaming indicator if any.
+   */
+  private _mountErrorAnimation(dom: HTMLElement) {
+    const errorIndicator = document.createElement('span');
+    errorIndicator.className = ERROR_INDICATOR_CLASS;
+    const error = this.options.error;
+    if (error?.message) {
+      errorIndicator.title = error?.message;
+    }
+
+    // Delete stream and previous error animation
+    const elementsToRemove = dom.querySelectorAll(
+      `.${STREAMING_INDICATOR_CLASS}, .${ERROR_INDICATOR_CLASS}`
+    );
+
+    elementsToRemove.forEach(element => {
+      element.remove();
+    });
+
+    dom.appendChild(errorIndicator);
+  }
+
   private _updateDOM(dom: HTMLElement) {
-    const content = this.content;
+    if (this.options.error) {
+      this._mountErrorAnimation(dom);
+
+      this._clearErrorTimeout = setTimeout(() => {
+        this._removeErrorAnimation(dom);
+        this._clearErrorTimeout = null;
+      }, 5000);
+      return;
+    }
+    // If not in an error anymore, clear the error indicator
+    if (this._clearErrorTimeout !== null) {
+      clearTimeout(this._clearErrorTimeout);
+      this._removeErrorAnimation(dom);
+      this._clearErrorTimeout = null;
+    }
+
+    let content = this.content;
+    let hiddenContent = '';
     let addition = this.options.addedPart;
-    if (addition && !this.isSpacer) {
+
+    if (addition) {
       if (addition.startsWith('\n')) {
         // Show the new line straight away to ensure proper positioning.
         addition = addition.substring(1);
       }
-      dom.innerText = content.substring(0, content.length - addition.length);
+      content = content.substring(0, content.length - addition.length);
+    }
+
+    if (this.options.maxLines) {
+      // Split into content to show immediately and the hidden part
+      const lines = content.split('\n');
+      content = lines.slice(0, this.options.maxLines).join('\n');
+      hiddenContent = lines.slice(this.options.maxLines).join('\n');
+    }
+
+    const minLines = Math.min(
+      this.options.minLines ?? 0,
+      this.options.maxLines ?? Infinity
+    );
+    const linesToAdd = Math.max(0, minLines - content.split('\n').length + 1);
+    const placeHolderLines = new Array(linesToAdd).fill('').join('\n');
+
+    if (this.isSpacer) {
+      dom.innerText = content + placeHolderLines;
+      return;
+    }
+    dom.innerText = content;
+
+    let streamedTokenHost = dom;
+
+    if (hiddenContent.length > 0) {
+      const hiddenWrapper = document.createElement('span');
+      hiddenWrapper.className = 'jp-GhostText-hiddenWrapper';
+      dom.appendChild(hiddenWrapper);
+      const expandOnHover = document.createElement('span');
+      expandOnHover.className = 'jp-GhostText-expandHidden';
+      expandOnHover.innerText = '⇓';
+      const hiddenPart = document.createElement('span');
+      hiddenWrapper.appendChild(expandOnHover);
+      hiddenPart.className = HIDDEN_LINES_CLASS;
+      hiddenPart.innerText = '\n' + hiddenContent;
+      hiddenWrapper.appendChild(hiddenPart);
+      streamedTokenHost = hiddenPart;
+    }
+
+    if (addition) {
       const addedPart = document.createElement('span');
       addedPart.className = STREAMED_TOKEN_CLASS;
       addedPart.innerText = addition;
-      dom.appendChild(addedPart);
-    } else {
-      // just set text
-      dom.innerText = content;
+      streamedTokenHost.appendChild(addedPart);
     }
+
     // Add "streaming-in-progress" indicator
-    if (!this.isSpacer && this.options.streaming) {
+    if (this.options.streaming) {
       const streamingIndicator = document.createElement('span');
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
-      dom.appendChild(streamingIndicator);
+      streamedTokenHost.appendChild(streamingIndicator);
+    }
+
+    if (placeHolderLines.length > 0) {
+      const placeholderLinesNode = document.createTextNode(placeHolderLines);
+      streamedTokenHost.appendChild(placeholderLinesNode);
     }
   }
   destroy(dom: HTMLElement) {
@@ -172,6 +294,8 @@ class GhostTextWidget extends WidgetType {
     }
     super.destroy(dom);
   }
+
+  private _clearErrorTimeout: ReturnType<typeof setTimeout> | null = null;
 }
 
 export namespace GhostTextManager {
@@ -200,6 +324,9 @@ class TransientLineSpacerWidget extends TransientSpacerWidget {
   toDOM() {
     const wrap = super.toDOM();
     wrap.classList.add(TRANSIENT_LINE_SPACER_CLASS);
+    wrap.style.animationDelay = GhostTextManager.spacerRemovalDelay + 'ms';
+    wrap.style.animationDuration =
+      GhostTextManager.spacerRemovalDuration + 'ms';
     return wrap;
   }
 }

@@ -97,8 +97,8 @@ def update_extension(  # noqa
     if python_name is None:
         if setup_file.exists():
             python_name = (
-                subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"],  # noqa: S603
+                subprocess.check_output(  # noqa: S603
+                    [sys.executable, "setup.py", "--name"],
                     cwd=target,
                 )
                 .decode("utf8")
@@ -341,7 +341,7 @@ if __name__ == "__main__":
     if answer_file.exists():
         msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
         if tuple(copier.__version__.split(".")) >= ("8", "0", "0"):
-            msg += " --UNSAFE"
+            msg += " --trust"
         print(msg)
     else:
         update_extension(args.path, args.vcs_ref, args.no_input is False)

@@ -288,6 +288,48 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(data.user.shortcuts).toHaveLength(0);
       });
 
+      it('should reset default overrides for given shortcut target', async () => {
+        const defaultKeybinding = {
+          keys: ['Ctrl A'],
+          isDefault: true
+        };
+
+        const replacedKeybinding = {
+          keys: ['Ctrl D'],
+          isDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [defaultKeybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, defaultKeybinding);
+        await shortcutUI.replaceKeybinding(target, defaultKeybinding, [
+          'Ctrl D'
+        ]);
+
+        //update the target to the new keybinding.
+        target.keybindings = [replacedKeybinding];
+
+        expect(data.user.shortcuts).toHaveLength(2);
+        expect(data.user.shortcuts[0]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl A'],
+          selector: 'body',
+          disabled: true
+        });
+        expect(data.user.shortcuts[1]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl D'],
+          selector: 'body'
+        });
+        await shortcutUI.resetKeybindings(target);
+        expect(data.user.shortcuts).toHaveLength(0);
+      });
+
       it('should clear defaults overrides for given shortcut target', async () => {
         const keybinding = {
           keys: ['Ctrl A'],

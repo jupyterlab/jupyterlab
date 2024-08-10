@@ -2,7 +2,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Session, TerminalAPI, User } from '@jupyterlab/services';
+import type { Kernel, Session, TerminalAPI, User } from '@jupyterlab/services';
 import {
   test as base,
   Page,
@@ -56,6 +56,16 @@ export type GalataOptions = {
    * Default: true
    */
   autoGoto: boolean;
+  /**
+   * Kernels created during the test.
+   *
+   * Possible values are:
+   * - null: The kernels API won't be mocked
+   * - Map<string, Kernel.IModel>: The kernels created during a test.
+   *
+   * By default the kernels created during a test will be tracked and disposed at the end.
+   */
+  kernels: Map<string, Kernel.IModel> | null;
   /**
    * Mock JupyterLab config in-memory or not.
    *
@@ -180,6 +190,24 @@ export const test: TestType<
    * Note: Setting it to false allows to register new route mock-ups for example.
    */
   autoGoto: [true, { option: true }],
+  /**
+   * Kernels created during the test.
+   *
+   * Possible values are:
+   * - null: The kernels API won't be mocked
+   * - Map<string, Kernel.IModel>: The kernels created during a test.
+   *
+   * By default the kernels created during a test will be tracked and disposed at the end.
+   */
+  kernels: async ({ request }, use) => {
+    const kernels = new Map<string, Kernel.IModel>();
+
+    await use(kernels);
+
+    if (kernels.size > 0) {
+      await galata.Mock.clearRunners(request, [...kernels.keys()], 'kernels');
+    }
+  },
   /**
    * Mock JupyterLab config in-memory or not.
    *
@@ -353,6 +381,7 @@ export const test: TestType<
       appPath,
       autoGoto,
       baseURL,
+      kernels,
       mockConfig,
       mockSettings,
       mockState,
@@ -378,7 +407,8 @@ export const test: TestType<
         sessions,
         terminals,
         tmpPath,
-        waitForApplication
+        waitForApplication,
+        kernels
       )
     );
   }

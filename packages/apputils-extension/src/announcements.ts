@@ -240,9 +240,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               let notificationId: string;
               options.actions = [
                 {
-                  label: trans.__('Do not check for updates'),
+                  label: trans.__('Ignore all updates'),
                   caption: trans.__(
-                    'If pressed, you will not be prompted if a new JupyterLab version is found.'
+                    'Do not prompt me if a new JupyterLab version is available.'
                   ),
                   callback: () => {
                     settings
@@ -266,7 +266,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   callback: () => {
                     window.open(link[1], '_blank', 'noreferrer');
                   },
-                  displayType: 'link'
+                  // Because the link to the changelog is the primary option,
+                  // display it in an accent color.
+                  displayType: 'accent'
                 });
               }
               if (!state.seen) {

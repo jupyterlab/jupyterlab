@@ -68,6 +68,7 @@ export class CellToolbarTracker implements IDisposable {
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
+    this._enabled = true; // If this has been set to false, it will be modified after settings are available
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -152,6 +153,21 @@ export class CellToolbarTracker implements IDisposable {
     return this._isDisposed;
   }
 
+  /**
+   * Whether the cell toolbar is shown, if there is enough room
+   */
+  get enabled(): boolean {
+    return this._enabled;
+  }
+
+  /**
+   * Sets whether the cell toolbar is shown, if there is enough room
+   */
+  set enabled(value: boolean) {
+    this._enabled = value;
+    this._onToolbarChanged();
+  }
+
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -167,6 +183,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _addToolbar(model: ICellModel): void {
+    // Do nothing if the toolbar shouldn't be visible.
+    if (!this.enabled) {
+      return;
+    }
+
     const cell = this._getCell(model);
 
     if (cell && !cell.isDisposed) {
@@ -202,6 +223,9 @@ export class CellToolbarTracker implements IDisposable {
             toolbarWidget.dispose();
             return;
           }
+
+          // Hide the toolbar by default, to avoid temporary overlapping.
+          cell.node.classList.add(TOOLBAR_OVERLAP_CLASS);
 
           (cell.inputArea!.layout as PanelLayout).insertWidget(
             0,
@@ -276,10 +300,12 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
-    // When we do change in cell, If we don't wait the browser might not have
-    // completed the layout update, resulting in the previous width being returned
-    // using `getBoundingClientRect().width` in later functions.
-    requestAnimationFrame(() => {
+    // When we do change in cell, the browser might not have completed the layout
+    // update if we don't wait, resulting in the previous width being returned
+    // using `getBoundingClientRect().width` in later functions. This also wait for
+    // the toolbar to be rendered the first time (on page reload), allowing us to
+    // retrieve the right widgets width.
+    requestIdleCallback(() => {
       // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
       const activeCellElement = activeCell.node;
       activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
@@ -433,6 +459,7 @@ export class CellToolbarTracker implements IDisposable {
     return this._cellToolbarRect(activeCell)?.left || null;
   }
 
+  private _enabled: boolean;
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
@@ -504,11 +531,30 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, undefined, this._toolbarFactory);
+    return (this._tracker = new CellToolbarTracker(
+      panel,
+      undefined,
+      this._toolbarFactory
+    ));
+  }
+
+  /**
+   * Whether the cell toolbar is displayed, if there is enough room for it
+   */
+  get enabled(): boolean {
+    return this._tracker.enabled;
+  }
+
+  /**
+   * Sets whether the cell toolbar is displayed, if there is enough room for it
+   */
+  set enabled(value: boolean) {
+    this._tracker.enabled = value;
   }
 
   private _commands: CommandRegistry;
   private _toolbarFactory: (
     widget: Widget
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
+  private _tracker: CellToolbarTracker;
 }

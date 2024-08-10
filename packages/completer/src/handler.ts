@@ -384,6 +384,7 @@ export class CompletionHandler implements IDisposable {
   protected onVisibilityChanged(completer: Completer): void {
     // Completer is not active.
     if (completer.isDisposed || completer.isHidden) {
+      this._tabCompleterActive = false;
       if (this._editor) {
         this._editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
         this._editor.focus();
@@ -392,9 +393,8 @@ export class CompletionHandler implements IDisposable {
     }
 
     // Completer is active.
-    if (this._editor) {
-      this._editor.host.classList.add(COMPLETER_ACTIVE_CLASS);
-    }
+    this._tabCompleterActive = true;
+    this._editor?.host.classList.add(COMPLETER_ACTIVE_CLASS);
   }
 
   /**
@@ -436,6 +436,13 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
+        if (
+          this.completer.suppressIfInlineCompleterActive &&
+          this.inlineCompleter?.isActive
+        ) {
+          return;
+        }
+
         if (model.setCompletionItems) {
           model.setCompletionItems(reply.items);
         }
@@ -459,7 +466,10 @@ export class CompletionHandler implements IDisposable {
     }
 
     const line = editor.getLine(position.line);
-    if (typeof line === 'undefined' || position.column < line.length) {
+    if (
+      trigger === InlineCompletionTriggerKind.Automatic &&
+      (typeof line === 'undefined' || position.column < line.length)
+    ) {
       // only auto-trigger on end of line
       return;
     }
@@ -474,6 +484,7 @@ export class CompletionHandler implements IDisposable {
 
     const current = ++this._fetchingInline;
     const promises = this._reconciliator.fetchInline(request, trigger);
+    let cancelled = false;
 
     const completed = new Set<
       Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>
@@ -481,7 +492,7 @@ export class CompletionHandler implements IDisposable {
     for (const promise of promises) {
       promise
         .then(result => {
-          if (!result || !result.items) {
+          if (cancelled || !result || !result.items) {
             return;
           }
           if (current !== this._fetchingInline) {
@@ -489,6 +500,13 @@ export class CompletionHandler implements IDisposable {
           }
           completed.add(promise);
           if (completed.size === 1) {
+            if (
+              this.inlineCompleter?.suppressIfTabCompleterActive &&
+              this._tabCompleterActive
+            ) {
+              cancelled = true;
+              return;
+            }
             model.setCompletions(result);
           } else {
             model.appendCompletions(result);
@@ -553,6 +571,7 @@ export class CompletionHandler implements IDisposable {
   private _isDisposed = false;
   private _autoCompletion = false;
   private _continuousInline = true;
+  private _tabCompleterActive = false;
 }
 
 /**

@@ -214,11 +214,12 @@
   width: 100%;
 }
 
-.jp-Licenses-Grid.jp-RenderedHTMLCommon code {
+.jp-Licenses .jp-Licenses-Grid.jp-RenderedHTMLCommon code {
   background-color: transparent;
+  padding: 0;
 }
 
-.jp-Licenses-Grid tr.jp-mod-selected {
+.jp-Licenses-Grid.jp-RenderedHTMLCommon tr.jp-mod-selected {
   background-color: var(--jp-brand-color1);
   color: #fff;
 }

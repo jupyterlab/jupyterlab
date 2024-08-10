@@ -52,8 +52,12 @@ class ProxiedTransport(xmlrpc.client.Transport):
 xmlrpc_transport_override = None
 
 all_proxy_url = environ.get("ALL_PROXY")
-http_proxy_url = environ.get("HTTP_PROXY") or all_proxy_url
-https_proxy_url = environ.get("HTTPS_PROXY") or all_proxy_url or http_proxy_url
+# For historical reasons, we also support the lowercase environment variables.
+# Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
+http_proxy_url = environ.get("http_proxy") or environ.get("HTTP_PROXY") or all_proxy_url
+https_proxy_url = (
+    environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
+)
 proxies = None
 
 if http_proxy_url:
@@ -399,21 +403,23 @@ class PyPIExtensionManager(ExtensionManager):
                         if response.status_code < 400:  # noqa PLR2004
                             if download_url.endswith(".whl"):
                                 with ZipFile(io.BytesIO(response.content)) as wheel:
-                                    for name in filter(
+                                    for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         wheel.namelist(),
                                     ):
-                                        data = json.loads(wheel.read(name))
+                                        data = json.loads(wheel.read(filename))
                                         jlab_metadata = data.get("jupyterlab")
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
                                 with TarFile(io.BytesIO(response.content)) as sdist:
-                                    for name in filter(
+                                    for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
                                     ):
-                                        data = json.load(sdist.extractfile(sdist.getmember(name)))
+                                        data = json.load(
+                                            sdist.extractfile(sdist.getmember(filename))
+                                        )
                                         jlab_metadata = data.get("jupyterlab")
                                         if jlab_metadata is not None:
                                             break
@@ -434,7 +440,7 @@ class PyPIExtensionManager(ExtensionManager):
 
                 return ActionResult(status="ok", needs_restart=follow_ups)
             else:
-                self.log.error(f"Failed to installed {name}: code {result.returncode}\n{error}")
+                self.log.error(f"Failed to installed {filename}: code {result.returncode}\n{error}")
                 return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:

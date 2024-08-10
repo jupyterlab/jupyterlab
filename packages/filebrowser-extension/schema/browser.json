@@ -236,6 +236,12 @@
       "title": "When sorting by name, group notebooks before other files",
       "description": "Whether to group the notebooks away from files",
       "default": false
+    },
+    "singleClickNavigation": {
+      "type": "boolean",
+      "title": "Navigate files and directories with single click",
+      "description": "Whether to allow single click selection on file browser items",
+      "default": false
     }
   },
   "additionalProperties": false,

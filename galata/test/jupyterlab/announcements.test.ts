@@ -28,7 +28,7 @@ test('Announcements requires user agreement', async ({ page }) => {
 test.describe('Update available', () => {
   const id = 'update-id';
   const message = 'A newer version (1000.0) of JupyterLab is available.';
-  const actionLabel = 'Changelog';
+  const actionLabel = 'Read more…';
 
   test.use({
     autoGoto: false,
