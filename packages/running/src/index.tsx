@@ -16,6 +16,7 @@ import {
 import {
   closeIcon,
   collapseAllIcon,
+  CommandToolbarButton,
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
@@ -663,6 +664,16 @@ class Section extends PanelWithToolbar {
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
 
+    // Add manager-specific buttons
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(
+          button instanceof CommandToolbarButton ? button.commandId : button.id,
+          button
+        )
+      );
+    }
+
     for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
       this.toolbar.addItem(
         name,
@@ -1198,6 +1209,11 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Used to add arbitrary buttons to this section
+     */
+    toolbarButtons?: (ToolbarButton | CommandToolbarButton)[];
 
     /**
      * Whether the manager supports tree view for its items

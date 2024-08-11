@@ -30,6 +30,7 @@
   --jp-icon-check: url('icons/toolbar/check.svg');
   --jp-icon-circle-empty: url('icons/toolbar/circle-empty.svg');
   --jp-icon-circle: url('icons/toolbar/circle.svg');
+  --jp-icon-cleaning: url('icons/toolbar/cleaning.svg');
   --jp-icon-clear: url('icons/toolbar/clear.svg');
   --jp-icon-close: url('icons/toolbar/close.svg');
   --jp-icon-code-check: url('icons/lsp/code-check.svg');
@@ -190,6 +191,10 @@
 
 .jp-CircleIcon {
   background-image: var(--jp-icon-circle);
+}
+
+.jp-CleaningIcon {
+  background-image: var(--jp-icon-cleaning);
 }
 
 .jp-ClearIcon {

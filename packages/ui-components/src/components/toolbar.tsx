@@ -1115,6 +1115,12 @@ export class CommandToolbarButton extends ReactWidget {
   render(): JSX.Element {
     return <CommandToolbarButtonComponent {...this.props} />;
   }
+  /**
+   * Identifier of the underlying command.
+   */
+  get commandId(): string {
+    return this.props.id;
+  }
 }
 
 /**
