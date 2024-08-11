@@ -57,7 +57,8 @@
     "@jupyterlab/rendermime": "^4.3.0-alpha.2",
     "@jupyterlab/services": "^7.3.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.3.0-alpha.2",
-    "@jupyterlab/translation": "^4.3.0-alpha.2"
+    "@jupyterlab/translation": "^4.3.0-alpha.2",
+    "@lumino/commands": "^2.3.0"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.3.0-alpha.2",
