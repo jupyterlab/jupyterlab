@@ -137,7 +137,8 @@ export async function addKernelRunningSessionManager(
             kernel,
             kernels,
             sessions,
-            trans
+            trans,
+            mode: options.mode
           })
         );
       }
@@ -338,6 +339,7 @@ namespace Private {
       this.kernels = options.kernels;
       this.sessions = options.sessions;
       this.trans = options.trans;
+      this._mode = options.mode;
     }
 
     readonly className: string;
@@ -372,6 +374,9 @@ namespace Private {
                 ? notebookIcon
                 : jupyterIcon,
             label: () => {
+              if (this._mode === 'tree') {
+                return name;
+              }
               const kernelIdPrefix = this.kernel.id.split('-')[0];
               return (
                 <>
@@ -434,6 +439,8 @@ namespace Private {
         );
       }
     }
+
+    private _mode: 'list' | 'tree';
   }
 
   export namespace RunningKernel {
@@ -444,6 +451,7 @@ namespace Private {
       sessions: Session.IManager;
       spec?: KernelSpec.ISpecModel;
       trans: IRenderMime.TranslationBundle;
+      mode: 'list' | 'tree';
     }
   }
 
