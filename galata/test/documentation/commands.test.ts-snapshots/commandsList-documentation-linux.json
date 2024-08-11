@@ -937,6 +937,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-filter",
+    "label": "Toggle File Filter",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-file-size",
     "label": "Show File Size Column",
     "caption": "",
@@ -2091,8 +2097,8 @@
   },
   {
     "id": "notebook:toggle-virtual-scrollbar",
-    "label": "Virtual Scrollbar",
-    "caption": "Toggle virtual scrollbar (enabled with windowing mode: full)",
+    "label": "Show Virtual Scrollbar",
+    "caption": "Show virtual scrollbar (enabled with windowing mode: full)",
     "shortcuts": []
   },
   {

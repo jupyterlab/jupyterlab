@@ -13,7 +13,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { ObservableValue } from '@jupyterlab/observables';
+import { IObservableString, ObservableValue } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -21,6 +21,7 @@ import {
   CellChange,
   createMutex,
   createStandaloneCell,
+  IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
   ISharedCell,
@@ -154,6 +155,11 @@ export interface ICodeCellModel extends ICellModel {
   executionCount: nbformat.ExecutionCount;
 
   /**
+   * The code cell's state.
+   */
+  executionState: IExecutionState;
+
+  /**
    * The cell outputs.
    */
   readonly outputs: IOutputAreaModel;
@@ -259,7 +265,11 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    */
   readonly stateChanged = new Signal<
     this,
-    IChangedArgs<any, any, 'isDirty' | 'trusted' | 'executionCount'>
+    IChangedArgs<
+      any,
+      any,
+      'isDirty' | 'trusted' | 'executionCount' | 'executionState'
+    >
   >(this);
 
   /**
@@ -638,6 +648,16 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   }
 
   /**
+   * The execution state of the cell.
+   */
+  get executionState(): IExecutionState {
+    return this.sharedModel.executionState;
+  }
+  set executionState(newValue: IExecutionState) {
+    this.sharedModel.executionState = newValue;
+  }
+
+  /**
    * Whether the cell is dirty or not.
    *
    * A cell is dirty if it is output is not empty and does not
@@ -668,6 +688,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   clearExecution(): void {
     this.outputs.clear();
     this.executionCount = null;
+    this.executionState = 'idle';
     this._setDirty(false);
     this.sharedModel.deleteMetadata('execution');
     // We trust this cell as it no longer has any outputs.
@@ -731,8 +752,37 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
+          for (const output of event.newValues) {
+            if (output.type === 'stream') {
+              output.streamText!.changed.connect(
+                (
+                  sender: IObservableString,
+                  textEvent: IObservableString.IChangedArgs
+                ) => {
+                  const codeCell = this.sharedModel as YCodeCell;
+                  if (textEvent.type === 'remove') {
+                    codeCell.removeStreamOutput(
+                      event.newIndex,
+                      textEvent.start
+                    );
+                  } else {
+                    codeCell.appendStreamOutput(
+                      event.newIndex,
+                      textEvent.value
+                    );
+                  }
+                },
+                this
+              );
+            }
+          }
           const outputs = event.newValues.map(output => output.toJSON());
-          codeCell.updateOutputs(event.newIndex, event.newIndex, outputs);
+          codeCell.updateOutputs(
+            event.newIndex,
+            event.newIndex,
+            outputs,
+            'silent-change'
+          );
           break;
         }
         case 'set': {
@@ -740,12 +790,18 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,
-            newValues
+            newValues,
+            'silent-change'
           );
           break;
         }
         case 'remove':
-          codeCell.updateOutputs(event.oldIndex, event.oldValues.length);
+          codeCell.updateOutputs(
+            event.oldIndex,
+            event.oldValues.length,
+            [],
+            'silent-change'
+          );
           break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
@@ -762,8 +818,23 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     if (change.outputsChange) {
       globalModelDBMutex(() => {
-        this.outputs.clear();
-        slot.getOutputs().forEach(output => this._outputs.add(output));
+        let retain = 0;
+        for (const outputsChange of change.outputsChange!) {
+          if ('retain' in outputsChange) {
+            retain += outputsChange.retain!;
+          }
+          if ('delete' in outputsChange) {
+            for (let i = 0; i < outputsChange.delete!; i++) {
+              this._outputs.remove(retain);
+            }
+          }
+          if ('insert' in outputsChange) {
+            // Inserting an output always results in appending it.
+            for (const output of outputsChange.insert!) {
+              this._outputs.add(output.toJSON());
+            }
+          }
+        }
       });
     }
 
@@ -778,6 +849,14 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         name: 'executionCount',
         oldValue: change.executionCountChange.oldValue,
         newValue: change.executionCountChange.newValue
+      });
+    }
+
+    if (change.executionStateChange) {
+      this.stateChanged.emit({
+        name: 'executionState',
+        oldValue: change.executionStateChange.oldValue,
+        newValue: change.executionStateChange.newValue
       });
     }
 

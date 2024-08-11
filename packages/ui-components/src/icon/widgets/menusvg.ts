@@ -102,6 +102,7 @@ export class MenuSvg extends Menu {
   constructor(options: Menu.IOptions) {
     options.renderer = options.renderer || MenuSvg.defaultRenderer;
     super(options);
+    this.addClass('jp-ThemedContainer');
   }
 
   /**

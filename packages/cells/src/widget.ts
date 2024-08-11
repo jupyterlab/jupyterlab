@@ -404,8 +404,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Set the prompt for the widget.
+   * @deprecated - set the `executionState` on the model instead.
    */
   setPrompt(value: string): void {
+    return this._setPrompt(value);
+  }
+
+  /**
+   * Set the prompt for the widget.
+   *
+   * Note: this method is protected because it is needed in the CodeCell subclass,
+   * but it cannot be defined there because input is private to Cell class.
+   */
+  protected _setPrompt(value: string): void {
     this.prompt = value;
     this._input?.setPrompt(value);
   }
@@ -1176,7 +1187,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
     super.initializeDOM();
 
-    this.setPrompt(this.prompt);
+    this._updatePrompt();
 
     // Insert the output before the cell footer.
     const outputWrapper = (this._outputWrapper = new Panel());
@@ -1269,7 +1280,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     super.initializeState();
     this.loadScrolledState();
 
-    this.setPrompt(`${this.model.executionCount || ''}`);
+    this._updatePrompt();
     return this;
   }
 
@@ -1379,26 +1390,30 @@ export class CodeCell extends Cell<ICodeCellModel> {
     // to changes in metadata until we have fully committed our changes.
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
-    this.model.sharedModel.transact(() => {
-      super.saveCollapseState();
+    this.model.sharedModel.transact(
+      () => {
+        super.saveCollapseState();
 
-      const collapsed = this.model.getMetadata('collapsed');
+        const collapsed = this.model.getMetadata('collapsed');
 
-      if (
-        (this.outputHidden && collapsed === true) ||
-        (!this.outputHidden && collapsed === undefined)
-      ) {
-        return;
-      }
+        if (
+          (this.outputHidden && collapsed === true) ||
+          (!this.outputHidden && collapsed === undefined)
+        ) {
+          return;
+        }
 
-      // Do not set jupyter.outputs_hidden since it is redundant. See
-      // and https://github.com/jupyter/nbformat/issues/137
-      if (this.outputHidden) {
-        this.model.setMetadata('collapsed', true);
-      } else {
-        this.model.deleteMetadata('collapsed');
-      }
-    }, false);
+        // Do not set jupyter.outputs_hidden since it is redundant. See
+        // and https://github.com/jupyter/nbformat/issues/137
+        if (this.outputHidden) {
+          this.model.setMetadata('collapsed', true);
+        } else {
+          this.model.deleteMetadata('collapsed');
+        }
+      },
+      false,
+      'silent-change'
+    );
   }
 
   /**
@@ -1579,7 +1594,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
-        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        this.model.executionState = 'idle';
+        this._updatePrompt();
+        break;
+      case 'executionState':
+        this._updatePrompt();
         break;
       case 'isDirty':
         if ((model as ICodeCellModel).isDirty) {
@@ -1633,6 +1652,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
         break;
     }
     super.onMetadataChanged(model, args);
+  }
+
+  private _updatePrompt(): void {
+    let prompt: string;
+    if (this.model.executionState == 'running') {
+      prompt = '*';
+    } else {
+      prompt = `${this.model.executionCount || ''}`;
+    }
+    this._setPrompt(prompt);
   }
 
   /**
@@ -1697,9 +1726,13 @@ export namespace CodeCell {
     const model = cell.model;
     const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
-      model.sharedModel.transact(() => {
-        model.clearExecution();
-      }, false);
+      model.sharedModel.transact(
+        () => {
+          model.clearExecution();
+        },
+        false,
+        'silent-change'
+      );
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
@@ -1709,11 +1742,16 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.sharedModel.transact(() => {
-      model.clearExecution();
-      cell.outputHidden = false;
-    }, false);
-    cell.setPrompt('*');
+    model.sharedModel.transact(
+      () => {
+        model.clearExecution();
+        cell.outputHidden = false;
+      },
+      false,
+      'silent-change'
+    );
+    // note: in future we would like to distinguish running from scheduled
+    model.executionState = 'running';
     model.trusted = true;
     let future:
       | Kernel.IFuture<
@@ -1784,7 +1822,7 @@ export namespace CodeCell {
       // If we started executing, and the cell is still indicating this
       // execution, clear the prompt.
       if (future && !cell.isDisposed && cell.outputArea.future === future) {
-        cell.setPrompt('');
+        cell.model.executionState = 'idle';
         if (recordTiming && future.isDisposed) {
           // Record the time when the cell execution was aborted
           const timingInfo: any = Object.assign(

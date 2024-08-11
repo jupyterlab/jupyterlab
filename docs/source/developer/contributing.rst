@@ -51,6 +51,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    internationalization
    css
    performance
+   security
    api
 
 .. contents:: Table of contents
@@ -345,24 +346,6 @@ To check which version of Node.js is installed:
 
    node -v
 
-.. _Installing Node.js and jlpm section:
-
-The canvas node package is not properly packaged for macOS with ARM architectures (M1 and M2).
-To build JupyterLab on such platforms, you need a few additional packages:
-
-With conda:
-
-.. code:: bash
-
-   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib pixman
-   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
-
-With Homebrew:
-
-.. code:: bash
-
-   brew install pkg-config cairo pango libpng jpeg giflib librsvg
-
 .. _automatic_local_dev_env:
 
 Using automation to set up a local development environment
@@ -472,17 +455,21 @@ Additionally, you might want to execute the following optional commands:
    # Build the app dir assets (optional)
    jupyter lab build
 
-Notes:
+Frequent issues
+^^^^^^^^^^^^^^^
+
+.. important::
+
+   On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+   by activating the 'Developer Mode'. That may not be allowed by your administrators.
+   See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
+   for instructions.
+.. Note: The same important section is present in the extension/extension_tutorial.rst too. If you modify it here, ensure to update it there as well.
 
 -  A few of the scripts will run "python". If your target python is
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
-   returned exit status 127 while in binding.gyp`` while running the
-   ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
-   of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
@@ -563,14 +550,6 @@ appropriate package folder:
     ``--runInBand`` option will run all tests serially in the current process.
     We advice to use it as some tests are spinning a Jupyter Server that does not
     like to be executed in parallel.
-
-If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dylib'``
-(or a different library, such as ``libcairo.2.dylib`` for Mac computers with Apple
-Silicon chips) while running the
-``jlpm test`` command above, you may be missing packages required
-by ``canvas``. Please see
-`Installing Node.js and jlpm section`_
-of this guide for instructions on how to install these packages.
 
 We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
@@ -691,7 +670,7 @@ provided in the report. You can use these information to debug failing tests. Ga
 report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
 named ``galata-report`` and once you extract it, you can access the report by launching
 a server to serve the files ``python -m http.server -d <path-to-extracted-report>``.
-Then open *http://localhost:8000* with your web browser.
+Then open http://localhost:8000/ with your web browser.
 
 Main reasons for UI test failures are:
 
@@ -920,7 +899,16 @@ The Read the Docs pages can be built using ``make``:
    cd docs
    make html
 
-Or with ``jlpm``:
+The JupyterLab API reference documentation is also included in the previous step.
+To access the documentation, first launch a server to serve the generated files:
+
+.. code:: bash
+
+   make serve
+
+And then go to http://localhost:8000/ in your browser.
+
+The JupyterLab API reference documentation can be built separately using ``jlpm``:
 
 .. code:: bash
 

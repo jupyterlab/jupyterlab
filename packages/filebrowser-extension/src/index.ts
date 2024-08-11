@@ -49,10 +49,9 @@ import {
   downloadIcon,
   editIcon,
   fileIcon,
-  FilenameSearcher,
+  filterIcon,
   folderIcon,
   IDisposableMenuItem,
-  IScore,
   linkIcon,
   markdownIcon,
   newFolderIcon,
@@ -66,12 +65,11 @@ import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 
+/**
+ * Toolbar factory for the top toolbar in the widget
+ */
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
-/**
- * The class name added to the filebrowser filterbox node.
- */
-const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -129,6 +127,8 @@ namespace CommandIDs {
   // For main browser only.
   export const toggleBrowser = 'filebrowser:toggle-main';
 
+  export const toggleFileFilter = 'filebrowser:toggle-file-filter';
+
   export const toggleNavigateToCurrentDirectory =
     'filebrowser:toggle-navigate-to-current-directory';
 
@@ -144,6 +144,8 @@ namespace CommandIDs {
   export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
+
+  export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
@@ -219,6 +221,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
            */
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
+            singleClickNavigation: false,
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
@@ -269,7 +272,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
-    state: IStateDB | null,
+    stateDB: IStateDB | null,
     info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -277,6 +280,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       id: string,
       options: IFileBrowserFactory.IOptions = {}
     ) => {
+      const state =
+        options.state === null
+          ? undefined
+          : options.state || stateDB || undefined;
       const model = new FilterFileBrowserModel({
         translator: translator,
         auto: options.auto ?? true,
@@ -289,13 +296,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
           }
           return 'when-hidden';
         },
-        state:
-          options.state === null
-            ? undefined
-            : options.state || state || undefined
+        state
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator });
+      const widget = new FileBrowser({ id, model, restore, translator, state });
 
       // Track the newly created file browser.
       void tracker.add(widget);
@@ -339,7 +343,6 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       'aria-label',
       trans.__('File Browser Section')
     );
-    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
     defaultBrowser.title.icon = folderIcon;
 
     // Show the current file browser shortcut in its title.
@@ -465,34 +468,12 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
 
-    // Toolbar
+    // Top-level toolbar
     toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
       'uploader',
       (browser: FileBrowser) =>
         new Uploader({ model: browser.model, translator })
-    );
-
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'fileNameSearcher',
-      (browser: FileBrowser) => {
-        const searcher = FilenameSearcher({
-          updateFilter: (
-            filterFn: (item: string) => Partial<IScore> | null,
-            query?: string
-          ) => {
-            browser.model.setFilter(value => {
-              return filterFn(value.name.toLowerCase());
-            });
-          },
-          useFuzzyFilter: true,
-          placeholder: trans.__('Filter files by name'),
-          forceRefresh: true
-        });
-        searcher.addClass(FILTERBOX_CLASS);
-        return searcher;
-      }
     );
 
     setToolbar(
@@ -1255,6 +1236,20 @@ function addCommands(
     label: trans.__('Shut Down Kernel')
   });
 
+  commands.addCommand(CommandIDs.toggleFileFilter, {
+    execute: () => {
+      // Update toggled state, then let the toolbar button update
+      browser.showFileFilter = !browser.showFileFilter;
+      commands.notifyCommandChanged(CommandIDs.toggleFileFilter);
+    },
+    isToggled: () => {
+      const toggled = browser.showFileFilter;
+      return toggled;
+    },
+    icon: filterIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Toggle File Filter')
+  });
+
   commands.addCommand(CommandIDs.toggleLastModified, {
     label: trans.__('Show Last Modified Column'),
     isToggled: () => browser.showLastModifiedColumn,
@@ -1314,6 +1309,23 @@ function addCommands(
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleSingleClick, {
+    label: trans.__('Enable Single Click Navigation'),
+    isToggled: () => browser.singleClickNavigation,
+    execute: () => {
+      const value = !browser.singleClickNavigation;
+      const key = 'singleClickNavigation';
+
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set singleClickNavigation setting`);
           });
       }
     }

@@ -135,7 +135,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2023 Project Jupyter Contributors')}
+            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2024)}
           </span>
         );
         const body = (
@@ -226,7 +226,8 @@ const open: JupyterFrontEndPlugin<void> = {
       // can prevent some content from being loaded onto the
       // help pages.
       const content = new IFrame({
-        sandbox: ['allow-scripts', 'allow-forms']
+        sandbox: ['allow-scripts', 'allow-forms'],
+        loading: 'lazy'
       });
       content.url = url;
       content.addClass(HELP_CLASS);

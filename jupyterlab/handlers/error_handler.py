@@ -16,7 +16,7 @@ TEMPLATE = """
 </head>
 <body>
 <h1>JupyterLab Error<h1>
-%s
+{messages}
 </body>
 """
 
@@ -29,5 +29,5 @@ class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
     @web.authenticated
     @web.removeslash
     def get(self):
-        msgs = ["<h2>%s</h2>" % msg for msg in self.messages]
-        self.write(TEMPLATE % "\n".join(msgs))
+        msgs = [f"<h2>{msg}</h2>" for msg in self.messages]
+        self.write(TEMPLATE.format(messages="\n".join(msgs)))
