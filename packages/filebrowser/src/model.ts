@@ -383,6 +383,7 @@ export class FileBrowserModel implements IDisposable {
    * Upload a `File` object.
    *
    * @param file - The `File` object to upload.
+   * @param path - The directory into which the file should be uploaded; defaults to current directory.
    *
    * @returns A promise containing the new file contents model.
    *
@@ -392,7 +393,7 @@ export class FileBrowserModel implements IDisposable {
    * Jupyter Server, it will ask for confirmation then upload the file in 1 MB
    * chunks.
    */
-  async upload(file: File): Promise<Contents.IModel> {
+  async upload(file: File, path?: string): Promise<Contents.IModel> {
     // We do not support Jupyter Notebook version less than 4, and Jupyter
     // Server advertises itself as version 1 and supports chunked
     // uploading. We assume any version less than 4.0.0 to be Jupyter Server
@@ -428,7 +429,7 @@ export class FileBrowserModel implements IDisposable {
     }
     await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
-    return await this._upload(file, chunkedUpload);
+    return await this._upload(file, chunkedUpload, path);
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
@@ -451,10 +452,12 @@ export class FileBrowserModel implements IDisposable {
    */
   private async _upload(
     file: File,
-    chunked: boolean
+    chunked: boolean,
+    uploadPath?: string
   ): Promise<Contents.IModel> {
     // Gather the file model parameters.
-    let path = this._model.path;
+    let path =
+      typeof uploadPath === 'undefined' ? this._model.path : uploadPath;
     path = path ? path + '/' + file.name : file.name;
     const name = file.name;
     const type: Contents.ContentType = 'file';

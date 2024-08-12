@@ -40,6 +40,8 @@ describe('completer/inline', () => {
     let editorWidget: CodeEditorWrapper;
     let model: InlineCompleter.Model;
     let suggestionsAbc: CompletionHandler.IInlineItem[];
+    const findInHost = (selector: string) =>
+      editorWidget.editor.host.querySelector(selector);
 
     beforeEach(() => {
       editorWidget = createEditorWidget();
@@ -87,9 +89,6 @@ describe('completer/inline', () => {
     });
 
     describe('#_setText()', () => {
-      const findInHost = (selector: string) =>
-        editorWidget.editor.host.querySelector(selector);
-
       it('should render the completion as it is streamed', async () => {
         Widget.attach(editorWidget, document.body);
         Widget.attach(completer, document.body);
@@ -257,6 +256,71 @@ describe('completer/inline', () => {
           showShortcuts: false
         });
         expect(completer.node.dataset.showShortcuts).toBe('false');
+      });
+
+      it('`maxLines` should limit the number of lines visible', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          maxLines: 3
+        });
+        const item: CompletionHandler.IInlineItem = {
+          ...itemDefaults,
+          insertText: 'line1\nline2\nline3\nline4\nline5'
+        };
+        model.setCompletions({ items: [item] });
+
+        const ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        expect(ghost.innerText).toBe('line1\nline2\nline3');
+      });
+
+      const getGhostTextContent = () => {
+        const ghost = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
+        // jest-dom does not support textContent/innerText properly, we need to extract it manually
+        return (
+          ghost.innerText +
+          [...ghost.childNodes].map(node => node.textContent).join('')
+        );
+      };
+
+      it('`minLines` should add empty lines when needed', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          minLines: 3
+        });
+        const item: CompletionHandler.IInlineItem = {
+          ...itemDefaults,
+          insertText: 'line1'
+        };
+        model.setCompletions({ items: [item] });
+
+        expect(getGhostTextContent()).toBe('line1\n\n');
+      });
+
+      it('`reserveSpaceForLongest` should add empty lines when needed', async () => {
+        Widget.attach(editorWidget, document.body);
+        Widget.attach(completer, document.body);
+        completer.configure({
+          ...InlineCompleter.defaultSettings,
+          reserveSpaceForLongest: true
+        });
+        model.setCompletions({
+          items: [
+            {
+              ...itemDefaults,
+              insertText: 'line1'
+            },
+            {
+              ...itemDefaults,
+              insertText: 'line1\nline2\nline3'
+            }
+          ]
+        });
+
+        expect(getGhostTextContent()).toBe('line1\n\n');
       });
     });
 

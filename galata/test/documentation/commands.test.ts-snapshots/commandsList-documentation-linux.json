@@ -70,6 +70,14 @@
     "shortcuts": []
   },
   {
+    "id": "application:toggle-fullscreen-mode",
+    "label": "Fullscreen Mode",
+    "caption": "",
+    "shortcuts": [
+      "F11"
+    ]
+  },
+  {
     "id": "application:toggle-header",
     "label": "Show Header",
     "caption": "",
@@ -925,6 +933,12 @@
   {
     "id": "filebrowser:toggle-file-checkboxes",
     "label": "Show File Checkboxes",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-file-filter",
+    "label": "Toggle File Filter",
     "caption": "",
     "shortcuts": []
   },

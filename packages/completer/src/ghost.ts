@@ -15,6 +15,7 @@ const GHOST_TEXT_CLASS = 'jp-GhostText';
 const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
 const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
+const HIDDEN_LINES_CLASS = 'jp-GhostText-hiddenLines';
 
 /**
  * Ghost text content and placement.
@@ -40,6 +41,14 @@ export interface IGhostText {
    * Whether streaming is in progress.
    */
   streaming?: boolean;
+  /**
+   * Maximum number of lines to show.
+   */
+  maxLines?: number;
+  /**
+   * Minimum number of lines to reserve (to avoid frequent resizing).
+   */
+  minLines?: number;
   /**
    * An error occurred in the request.
    */
@@ -68,6 +77,16 @@ export class GhostTextManager {
    * Typing animation.
    */
   static streamingAnimation: 'none' | 'uncover' = 'uncover';
+
+  /**
+   * Delay for removal of line spacer.
+   */
+  static spacerRemovalDelay: number = 700;
+
+  /**
+   * Duration for line spacer removal.
+   */
+  static spacerRemovalDuration: number = 300;
 
   /**
    * Place ghost text in an editor.
@@ -198,27 +217,72 @@ class GhostTextWidget extends WidgetType {
       this._clearErrorTimeout = null;
     }
 
-    const content = this.content;
+    let content = this.content;
+    let hiddenContent = '';
     let addition = this.options.addedPart;
-    if (addition && !this.isSpacer) {
+
+    if (addition) {
       if (addition.startsWith('\n')) {
         // Show the new line straight away to ensure proper positioning.
         addition = addition.substring(1);
       }
-      dom.innerText = content.substring(0, content.length - addition.length);
+      content = content.substring(0, content.length - addition.length);
+    }
+
+    if (this.options.maxLines) {
+      // Split into content to show immediately and the hidden part
+      const lines = content.split('\n');
+      content = lines.slice(0, this.options.maxLines).join('\n');
+      hiddenContent = lines.slice(this.options.maxLines).join('\n');
+    }
+
+    const minLines = Math.min(
+      this.options.minLines ?? 0,
+      this.options.maxLines ?? Infinity
+    );
+    const linesToAdd = Math.max(0, minLines - content.split('\n').length + 1);
+    const placeHolderLines = new Array(linesToAdd).fill('').join('\n');
+
+    if (this.isSpacer) {
+      dom.innerText = content + placeHolderLines;
+      return;
+    }
+    dom.innerText = content;
+
+    let streamedTokenHost = dom;
+
+    if (hiddenContent.length > 0) {
+      const hiddenWrapper = document.createElement('span');
+      hiddenWrapper.className = 'jp-GhostText-hiddenWrapper';
+      dom.appendChild(hiddenWrapper);
+      const expandOnHover = document.createElement('span');
+      expandOnHover.className = 'jp-GhostText-expandHidden';
+      expandOnHover.innerText = '⇓';
+      const hiddenPart = document.createElement('span');
+      hiddenWrapper.appendChild(expandOnHover);
+      hiddenPart.className = HIDDEN_LINES_CLASS;
+      hiddenPart.innerText = '\n' + hiddenContent;
+      hiddenWrapper.appendChild(hiddenPart);
+      streamedTokenHost = hiddenPart;
+    }
+
+    if (addition) {
       const addedPart = document.createElement('span');
       addedPart.className = STREAMED_TOKEN_CLASS;
       addedPart.innerText = addition;
-      dom.appendChild(addedPart);
-    } else {
-      // just set text
-      dom.innerText = content;
+      streamedTokenHost.appendChild(addedPart);
     }
+
     // Add "streaming-in-progress" indicator
-    if (!this.isSpacer && this.options.streaming) {
+    if (this.options.streaming) {
       const streamingIndicator = document.createElement('span');
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
-      dom.appendChild(streamingIndicator);
+      streamedTokenHost.appendChild(streamingIndicator);
+    }
+
+    if (placeHolderLines.length > 0) {
+      const placeholderLinesNode = document.createTextNode(placeHolderLines);
+      streamedTokenHost.appendChild(placeholderLinesNode);
     }
   }
   destroy(dom: HTMLElement) {
@@ -260,6 +324,9 @@ class TransientLineSpacerWidget extends TransientSpacerWidget {
   toDOM() {
     const wrap = super.toDOM();
     wrap.classList.add(TRANSIENT_LINE_SPACER_CLASS);
+    wrap.style.animationDelay = GhostTextManager.spacerRemovalDelay + 'ms';
+    wrap.style.animationDuration =
+      GhostTextManager.spacerRemovalDuration + 'ms';
     return wrap;
   }
 }

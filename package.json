@@ -104,7 +104,6 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
-    "@jupyterlab/services/ws": "8.12.0",
     "@types/react": "^18.0.26",
     "react": "^18.2.0",
     "yjs": "^13.5.40"

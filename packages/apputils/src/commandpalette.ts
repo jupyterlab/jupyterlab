@@ -19,6 +19,7 @@ export class ModalCommandPalette extends Panel {
   constructor(options: ModalCommandPalette.IOptions) {
     super();
     this.addClass('jp-ModalCommandPalette');
+    this.addClass('jp-ThemedContainer');
     this.id = 'modal-command-palette';
     this.palette = options.commandPalette;
     this._commandPalette.commands.commandExecuted.connect(() => {

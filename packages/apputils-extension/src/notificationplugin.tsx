@@ -169,7 +169,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
             </span>
             <span className="jp-Toolbar-item jp-Toolbar-spacer"></span>
             <ToolbarButtonComponent
-              actualOnClick={true}
+              noFocusOnClick={false}
               onClick={() => {
                 manager.dismiss();
               }}
@@ -178,7 +178,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
               enabled={manager.count > 0}
             />
             <ToolbarButtonComponent
-              actualOnClick={true}
+              noFocusOnClick={false}
               onClick={onClose}
               icon={closeIcon}
               tooltip={trans.__('Hide notifications')}
@@ -631,6 +631,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         rank: -1
       });
     } else {
+      notificationStatus.addClass('jp-ThemedContainer');
       // if the status bar is not available, position the notification
       // status in the bottom right corner of the page
       notificationStatus.node.style.position = 'fixed';
@@ -784,6 +785,7 @@ namespace Private {
         document.createElement('div')
       );
       container.id = 'react-toastify-container';
+      container.classList.add('jp-ThemedContainer');
       const root = createRoot(container);
 
       root.render(
