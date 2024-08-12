@@ -618,6 +618,11 @@ export interface IManager extends IBaseManager {
   running(): IterableIterator<IModel>;
 
   /**
+   * The number of running kernels.
+   */
+  readonly runningCount: number;
+
+  /**
    * Force a refresh of the running kernels.
    *
    * @returns A promise that resolves when the models are refreshed.

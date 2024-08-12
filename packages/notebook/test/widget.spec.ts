@@ -1233,6 +1233,21 @@ describe('@jupyter/notebook', () => {
         it('should extend selection if invoked with shift', () => {
           widget.activeCellIndex = 3;
 
+          // shift click no-op
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+          // test that selecting mode handler does not prevent default
+          // if no cells were selected; in the selecting mode we listen
+          // to the `mouseup` event to stop selecting when the mouse button gets
+          // released; this event gets default prevented as handled by the notebook.
+          const mouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true
+          });
+          widget.widgets[3].node.dispatchEvent(mouseUpEvent);
+          expect(mouseUpEvent.defaultPrevented).toBe(false);
+
           // shift click below
           simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(4);
@@ -1252,6 +1267,27 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[2].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(2);
           expect(selected(widget)).toEqual([2, 3]);
+
+          // shift click deselect
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+
+          // shift click select by dragging from active cell
+          expect(widget.activeCellIndex).toBe(3);
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          simulate(widget.widgets[4].node, 'mousemove', { shiftKey: true });
+          expect(selected(widget)).toEqual([3, 4]);
+          // test that selecting mode mouse up handler prevents default;
+          // in selecting mode we listen to the `mouseup` event to stop
+          // selecting when the mouse button gets released
+          const blockedMouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true
+          });
+          widget.widgets[4].node.dispatchEvent(blockedMouseUpEvent);
+          expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
         it('should not extend a selection if there is text selected in the output', () => {

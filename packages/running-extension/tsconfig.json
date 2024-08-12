@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "lib": ["DOM", "DOM.Iterable", "ES2019", "ES2020.Intl"]
+    "lib": ["DOM", "DOM.Iterable", "ES2020", "ES2020.Intl"]
   },
   "include": ["src/*"],
   "references": [
