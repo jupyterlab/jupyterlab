@@ -221,6 +221,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._loading = _loading;
 
     this.name = name;
+    this.react = this._initReact(name);
   }
 
   /**
@@ -284,50 +285,47 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       ...styleProps
     }: LabIcon.IProps = { ...this._props, ...props };
 
-    // check if icon element is already set
-    const maybeSvgElement = container?.firstChild as HTMLElement;
+    // Ensure the container is created if not provided
+    container = container || document.createElement(tag || 'div');
+
+    // Remove any existing content from the container
+    LabIcon.remove(container);
+
+    // Ensure that _uuid is set
+    this._uuid = this._uuid || UUID.uuid4();
+
+    // Check if the icon element is already set and matches _uuid
+    const maybeSvgElement = container.firstChild as HTMLElement;
     if (maybeSvgElement?.dataset?.iconId === this._uuid) {
-      // return the existing icon element
-      return maybeSvgElement;
+      return container;
     }
 
-    // ensure that svg html is valid
+    // Bail out if SVG element is not valid
     if (!this.svgElement) {
-      // bail if failing silently, return blank element
       return document.createElement('div');
     }
 
-    if (container) {
-      // take ownership by removing any existing children
-      while (container.firstChild) {
-        container.firstChild.remove();
-      }
-    } else if (tag) {
-      // create a container if needed
-      container = document.createElement(tag);
-    }
-
+    // Clone the SVG element
     const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
-    if (!container) {
-      if (label) {
-        console.warn();
-      }
-      return svgElement;
-    }
+    svgElement.dataset.iconId = this._uuid; // Set the iconId to the SVG element
 
+    // Append the SVG element to the container
+    container.appendChild(svgElement);
+
+    // Apply the label, if provided
     if (label != null) {
-      container.textContent = label;
+      const labelElement = document.createElement('span');
+      labelElement.textContent = label;
+      container.appendChild(labelElement);
     }
 
+    // Initialize container with additional properties
     Private.initContainer({
       container: container!,
       className,
       styleProps,
       title
     });
-
-    // add the svg node to the container
-    container.appendChild(svgElement);
 
     return container;
   }
@@ -611,19 +609,19 @@ export namespace LabIcon {
   /**
    * The type of the svg node ref that can be passed into icon React components
    */
-  export type IReactRef = React.RefObject<SVGElement>;
+  export type IReactRef = React.RefObject<IconElement>;
 
   /**
    * The properties that can be passed into the React component stored in
    * the .react field of a LabIcon.
    */
-  export type IReactProps = IProps & React.RefAttributes<SVGElement>;
+  export type IReactProps = IProps & React.RefAttributes<IconElement>;
 
   /**
    * The complete type of the React component stored in the .react
    * field of a LabIcon.
    */
-  export type IReact = React.ForwardRefExoticComponent<IReactProps>;
+  export type IReact = React.FunctionComponent<IReactProps>;
 }
 
 namespace Private {
