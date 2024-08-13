@@ -627,7 +627,7 @@ async function activateConsole(
           let schema = metadata.parameters as RJSFSchema;
           return showKernelSpecDialog(schema, basePath, args);
         } else {
-          return createConsole({ basePath, ...args });      
+          return createConsole({ basePath, ...args });
         }
       }
     }

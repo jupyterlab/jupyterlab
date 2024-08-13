@@ -2051,7 +2051,7 @@ function activateNotebookHandler(
             let schema = metadata.parameters as RJSFSchema;
             showKernelSpecDialog(schema, cwd, kernelId, kernelName);
         } else {
-            return createNew(cwd, kernelId, kernelName);      
+            return createNew(cwd, kernelId, kernelName);
         }
       }
     }
