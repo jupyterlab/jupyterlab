@@ -30,7 +30,6 @@ import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
 import { DialogWidget } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Message } from '@lumino/messaging';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -1870,34 +1869,6 @@ namespace Private {
       this.translator = translator;
     }
 
-    protected onAfterAttach(msg: Message): void {
-      super.onAfterAttach(msg);
-      this.setupDefaultKernelSpecs(this.sessionContext, this.translator);
-    }
-
-    setupDefaultKernelSpecs(
-      sessionContext: ISessionContext,
-      translator: ITranslator | undefined
-    ) {
-      translator = translator || nullTranslator;
-      const trans = translator.load('jupyterlab');
-      if (this.node) {
-        const selector = this.node.querySelector(
-          'select#js-kernel-selector'
-        ) as HTMLSelectElement;
-        selector.setAttribute('data-kernel-spec', '');
-        const kernelSpeccSelectorContainer = this.node.querySelector(
-          'div#js-kernel-specs-selector-container'
-        ) as HTMLDivElement;
-        checkCustomKernelSpecs(
-          sessionContext,
-          selector,
-          trans,
-          kernelSpeccSelectorContainer
-        );
-      }
-    }
-
     /**
      * Get the value of the kernel selector widget.
      */
@@ -1931,11 +1902,11 @@ namespace Private {
 
     const kernelSpecsContainer = document.createElement('div');
 
-    container.setAttribute('id', 'js-kernel-selector-container');
+    container.setAttribute('id', 'js-kernel-select-container');
 
     kernelSpecsContainer.setAttribute(
       'id',
-      'js-kernel-specs-selector-container'
+      'js-kernel-specs-select-container'
     );
 
     const text = document.createElement('label');
@@ -1957,7 +1928,15 @@ namespace Private {
       optgroup.label = label;
       for (const { selected, text, title, value } of options) {
         const option = document.createElement('option');
-        if (selected) option.selected = true;
+        if (selected) {
+          option.selected = true;
+          let val = JSON.parse(value);
+          let id = val && val.id ? val.id : '';
+          if (!id) {
+            select.setAttribute('data-kernel-spec', '');
+            checkCustomKernelSpecs(sessionContext, select, trans);
+          }
+        }
         if (title) option.title = title;
         option.text = text;
         option.value = value;
@@ -1972,20 +1951,21 @@ namespace Private {
     };
 
     body.appendChild(select);
+    body.appendChild(kernelSpecsContainer);
     return body;
   }
 
   function checkCustomKernelSpecs(
     sessionContext: ISessionContext,
-    selector: HTMLSelectElement,
+    select: HTMLSelectElement,
     trans: IRenderMime.TranslationBundle,
     kernelSpeccSelectorContainer?: HTMLDivElement
   ) {
     let kernelConfiguration: PartialJSONObject = {};
-    let selectedKernel = JSON.parse(selector.value) as Kernel.IModel;
+    let selectedKernel = JSON.parse(select.value) as Kernel.IModel;
 
     let kernelSpecsContainer = document.querySelector(
-      '#js-kernel-specs-selector-container'
+      '#js-kernel-specs-select-container'
     ) as HTMLElement;
 
     if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
@@ -2045,7 +2025,7 @@ namespace Private {
             kernelConfiguration,
             formData => {
               kernelConfiguration = formData as PartialJSONObject;
-              selector.setAttribute(
+              select.setAttribute(
                 'data-kernel-spec',
                 JSON.stringify(kernelConfiguration)
               );
