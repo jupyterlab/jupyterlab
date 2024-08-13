@@ -137,7 +137,7 @@
     "@lumino/properties": "^2.0.0",
     "@lumino/signaling": "^2.0.0",
     "@lumino/virtualdom": "^2.0.0",
-    "@lumino/widgets": "^2.3.1-alpha.0",
+    "@lumino/widgets": "^2.5.0",
     "@microsoft/fast-element": "^1.12.0",
     "@microsoft/fast-foundation": "^2.49.2",
     "react": "^18.2.0",
