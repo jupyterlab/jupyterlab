@@ -285,7 +285,9 @@ export interface IInputPrompt extends Widget {
    */
   executionCount: string | null;
 
-  runButtonToolbar: Toolbar | null;
+  promptToolbar: Toolbar | null;
+
+  promptToolbarEnabled: boolean;
 }
 
 export class InputPrompt extends Widget implements IInputPrompt {
@@ -302,7 +304,8 @@ export class InputPrompt extends Widget implements IInputPrompt {
       new InputPromptIndicator());
     layout.addWidget(promptIndicator);
 
-    const toolbar = (this._runButtonToolbar = new Toolbar());
+    const toolbar = (this._promptToolbar = new Toolbar());
+    this._promptToolbarEnabled = true;
     toolbar.addClass(INPUT_AREA_PROMPT_TOOLBAR_CLASS);
     layout.addWidget(toolbar);
 
@@ -322,10 +325,19 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   /**
-   * A toolbar showing a helper button for running this cell.
+   * A toolbar showing buttons that can appear over the prompt.
    */
-  public get runButtonToolbar(): Toolbar {
-    return this._runButtonToolbar;
+  public get promptToolbar(): Toolbar {
+    return this._promptToolbar;
+  }
+
+  public get promptToolbarEnabled(): boolean {
+    return this._promptToolbarEnabled;
+  }
+
+  public set promptToolbarEnabled(value: boolean) {
+    this._promptToolbarEnabled = value;
+    this.updateToolbarVisibility();
   }
 
   /**
@@ -363,17 +375,21 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   private updateToolbarVisibility() {
-    if (this._isHovered || !this.executionCount) {
-      this.runButtonToolbar.show();
+    if (
+      this.promptToolbarEnabled &&
+      (this._isHovered || !this.executionCount)
+    ) {
+      this.promptToolbar.show();
     } else {
-      this.runButtonToolbar.hide();
+      this.promptToolbar.hide();
     }
   }
 
   private _executionCount: string | null = null;
   private _isHovered: boolean = false;
   private _promptIndicator: InputPromptIndicator;
-  private _runButtonToolbar: Toolbar;
+  private _promptToolbar: Toolbar;
+  private _promptToolbarEnabled: boolean;
 }
 
 export class InputPromptIndicator extends Widget {

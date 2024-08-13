@@ -257,12 +257,19 @@ export class CellToolbarTracker implements IDisposable {
           }
 
           // Add the helper buttons to the cell's input area, if desired.
-          if (cell.inputArea && this.showHelperButtons) {
-            this._helperButtons.forEach(
-              b => cell.inputArea!.prompt.runButtonToolbar?.addItem(b.id, b)
-            );
-            // Show the toolbar, if necessary.
-            cell.inputArea!.prompt.update();
+          if (cell.inputArea) {
+            if (this.showHelperButtons) {
+              cell.inputArea.prompt.promptToolbarEnabled = true;
+              this._helperButtons.forEach(
+                b => cell.inputArea!.prompt.promptToolbar?.addItem(b.id, b)
+              );
+              // Show the toolbar, if necessary.
+              cell.inputArea.prompt.update();
+            } else {
+              // If no helper buttons are desired, don't show the helper button toolbar
+              cell.inputArea.prompt.promptToolbarEnabled = false;
+              cell.inputArea.prompt.update();
+            }
           }
         })
         .catch(e => {
