@@ -181,5 +181,5 @@ Dialogs
 Buttons in dialogs with a single, dismissal button (e.g., *About JupyterLab*)
 should have the following attributes:
 
--  Button role: Cancel (``Dialog.cancelButton()``)
+-  Button variant: Cancel (``Dialog.cancelButton()``)
 -  Label: ``Close``
