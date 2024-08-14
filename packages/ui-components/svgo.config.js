@@ -67,13 +67,14 @@ module.exports = {
       params: {
         overrides: {
           removeUnknownsAndDefaults: {
-            // To maintain fill and stroke attributes because they are considered for styling (e.g., .jp-icon0[fill]).
+            // To maintain fill and stroke attributes because they are considered for styling (e.g., .jp-icon0[fill] and html5 icon).
             defaultAttrs: false
           },
           removeViewBox: false
         }
       }
     },
+    'cleanupListOfValues',
     // To ensure unique IDs (e.g., for the <clipPath> elements of the add-above and add-below icons).
     // More info: https://svgo.dev/docs/plugins/cleanupIds/
     {
