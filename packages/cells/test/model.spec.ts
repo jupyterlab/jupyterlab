@@ -614,7 +614,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(1);
-        expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output0);
+        expect(sharedModel.ymodel.get('outputs').get(0).toJSON()).toEqual(
+          output0
+        );
 
         const newEvent1 = {
           type: 'add',
@@ -625,7 +627,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-        expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output1);
+        expect(sharedModel.ymodel.get('outputs').get(1).toJSON()).toEqual(
+          output1
+        );
       });
 
       it('should set new items correctly', () => {
@@ -644,7 +648,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-        expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output2);
+        expect(sharedModel.ymodel.get('outputs').get(0).toJSON()).toEqual(
+          output2
+        );
         const newEvent1 = {
           type: 'set',
           newValues: [{ toJSON: () => output2 }],
@@ -654,7 +660,9 @@ describe('cells/model', () => {
         } as any;
         model['onOutputsChange'](null as any, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
-        expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output2);
+        expect(sharedModel.ymodel.get('outputs').get(1).toJSON()).toEqual(
+          output2
+        );
       });
 
       it('should remove items correctly', () => {

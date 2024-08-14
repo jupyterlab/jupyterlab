@@ -27,6 +27,12 @@
   },
   "jupyter.lab.transform": true,
   "properties": {
+    "showToolbar": {
+      "title": "Show cell toolbar",
+      "description": "Show a toolbar inside the active cell, if there is enough room for one",
+      "type": "boolean",
+      "default": true
+    },
     "toolbar": {
       "title": "List of toolbar items",
       "description": "An item is defined by a 'name', a 'command' name, and an 'icon' name",

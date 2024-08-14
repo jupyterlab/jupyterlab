@@ -211,6 +211,23 @@ export class InlineCompleter extends Widget {
     this._minLines = settings.minLines;
     this._maxLines = settings.maxLines;
     this._reserveSpaceForLongest = settings.reserveSpaceForLongest;
+    this._suppressIfTabCompleterActive = settings.suppressIfTabCompleterActive;
+  }
+
+  /**
+   * Whether to suppress the inline completer when tab completer is active.
+   */
+  get suppressIfTabCompleterActive(): boolean {
+    return this._suppressIfTabCompleterActive;
+  }
+
+  /**
+   * Whether the inline completer is active.
+   */
+  get isActive(): boolean {
+    return !!this.editor?.host.classList.contains(
+      INLINE_COMPLETER_ACTIVE_CLASS
+    );
   }
 
   /**
@@ -529,6 +546,7 @@ export class InlineCompleter extends Widget {
   private _toolbar = new Toolbar<Widget>();
   private _progressBar: HTMLElement;
   private _reserveSpaceForLongest: boolean;
+  private _suppressIfTabCompleterActive: boolean;
 }
 
 /**
@@ -572,7 +590,8 @@ export namespace InlineCompleter {
     minLines: 2,
     maxLines: 4,
     editorResizeDelay: 1000,
-    reserveSpaceForLongest: false
+    reserveSpaceForLongest: false,
+    suppressIfTabCompleterActive: true
   };
 
   /**
