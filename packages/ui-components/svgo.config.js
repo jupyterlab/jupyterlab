@@ -3,5 +3,22 @@
  */
 module.exports = {
   multipass: true,
-  plugins: ['preset-default']
+  plugins: [
+    {
+      name: 'preset-default',
+      params: {
+        overrides: {
+          collapseGroups: false,
+          removeTitle: false,
+          removeUnknownsAndDefaults: {
+            defaultAttrs: false
+          },
+          removeUselessStrokeAndFill: {
+            removeNone: true
+          },
+          removeViewBox: false
+        }
+      }
+    }
+  ]
 };
