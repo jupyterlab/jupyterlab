@@ -31,7 +31,7 @@
     "build": "tsc -b",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "clean:svg": "svgo --folder style --recursive",
+    "clean:svg": "svgo --folder style/icons --recursive",
     "docs:init": "bash docs/build.sh",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
