@@ -698,6 +698,22 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'raw');
         expect(widget.activeCell).toBeInstanceOf(RawCell);
       });
+
+      it('should not change cell type when the cell is not editable', async () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        let cell = widget.activeCell as MarkdownCell;
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+        cell.model.setMetadata('editable', false);
+
+        // Try to change cell type
+        NotebookActions.changeCellType(widget, 'raw');
+        // Cell type should stay unchanged.
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+
+        // Should show a dialog informing user why cell type could not be changed
+        await waitForDialog();
+        await acceptDialog();
+      });
     });
 
     describe('#run()', () => {
