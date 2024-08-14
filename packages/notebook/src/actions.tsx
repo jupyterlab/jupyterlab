@@ -2620,9 +2620,9 @@ namespace Private {
         const trans = translator.load('jupyterlab');
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
-          title: trans.__('Cell type not editable'),
+          title: trans.__('Cell is not editable'),
           body: trans.__(
-            'The cell type is not editable, its type cannot be changed!'
+            'The cell is not editable, its type cannot be changed!'
           ),
           buttons: [Dialog.okButton()]
         });
