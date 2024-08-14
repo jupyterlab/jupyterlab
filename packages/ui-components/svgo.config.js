@@ -9,7 +9,6 @@ module.exports = {
       params: {
         overrides: {
           collapseGroups: false,
-          removeTitle: false,
           removeUnknownsAndDefaults: {
             defaultAttrs: false
           },
