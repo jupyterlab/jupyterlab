@@ -433,6 +433,14 @@ export interface IInlineCompleterActions {
   accept(id: string): void;
 
   /**
+   * Check if the inline compelter is active (showing ghost text)
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  isActive(id: string): boolean;
+
+  /**
    * Configure the inline completer.
    * @experimental
    *
@@ -457,6 +465,10 @@ export interface IInlineCompleterSettings {
    * Transition effect used when streaming tokens from model.
    */
   streamingAnimation: 'none' | 'uncover';
+  /**
+   * Whether to suppress the inline completer when tab completer is active.
+   */
+  suppressIfTabCompleterActive: boolean;
   /**
    * Minimum lines to show.
    */

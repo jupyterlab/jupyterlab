@@ -52,13 +52,24 @@ import {
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
 
-function notifyCommands(app: JupyterFrontEnd): void {
+function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
-    if (app.commands.hasCommand(command)) {
-      app.commands.notifyCommandChanged(command);
+    if (commands.hasCommand(command)) {
+      commands.notifyCommandChanged(command);
     }
   });
+}
+
+function updateState(commands: CommandRegistry, debug: IDebugger): void {
+  const hasStoppedThreads = debug.hasStoppedThreads();
+  if (hasStoppedThreads) {
+    document.body.dataset.jpDebuggerStoppedThreads = 'true';
+  } else {
+    delete document.body.dataset.jpDebuggerStoppedThreads;
+  }
+  notifyCommands(commands);
 }
 
 /**
@@ -89,7 +100,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
-      notifyCommands(app);
+      updateState(app.commands, debug);
     };
 
     if (labShell) {
@@ -154,7 +165,7 @@ const files: JupyterFrontEndPlugin<void> = {
           activeSessions[model.id] = session;
         }
         await handler.update(widget, session);
-        notifyCommands(app);
+        updateState(app.commands, debug);
       } catch {
         return;
       }
@@ -251,7 +262,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
       }
-      notifyCommands(app);
+      updateState(app.commands, service);
     };
 
     if (labShell) {
@@ -900,7 +911,7 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.restart();
-        notifyCommands(app);
+        updateState(app.commands, service);
       }
     });
 
@@ -978,7 +989,7 @@ const main: JupyterFrontEndPlugin<void> = {
     }
 
     service.eventMessage.connect((_, event): void => {
-      notifyCommands(app);
+      updateState(app.commands, service);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
       } else if (
@@ -992,7 +1003,7 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     service.sessionChanged.connect(_ => {
-      notifyCommands(app);
+      updateState(app.commands, service);
     });
 
     if (restorer) {

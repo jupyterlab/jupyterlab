@@ -145,6 +145,8 @@ namespace CommandIDs {
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
+  export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
+
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
 
@@ -219,6 +221,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
            */
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
+            singleClickNavigation: false,
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
@@ -269,7 +272,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
-    state: IStateDB | null,
+    stateDB: IStateDB | null,
     info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -277,6 +280,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       id: string,
       options: IFileBrowserFactory.IOptions = {}
     ) => {
+      const state =
+        options.state === null
+          ? undefined
+          : options.state || stateDB || undefined;
       const model = new FilterFileBrowserModel({
         translator: translator,
         auto: options.auto ?? true,
@@ -289,13 +296,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
           }
           return 'when-hidden';
         },
-        state:
-          options.state === null
-            ? undefined
-            : options.state || state || undefined
+        state
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator });
+      const widget = new FileBrowser({ id, model, restore, translator, state });
 
       // Track the newly created file browser.
       void tracker.add(widget);
@@ -1305,6 +1309,23 @@ function addCommands(
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleSingleClick, {
+    label: trans.__('Enable Single Click Navigation'),
+    isToggled: () => browser.singleClickNavigation,
+    execute: () => {
+      const value = !browser.singleClickNavigation;
+      const key = 'singleClickNavigation';
+
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set singleClickNavigation setting`);
           });
       }
     }

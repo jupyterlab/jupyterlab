@@ -5,6 +5,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
+import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
@@ -118,7 +119,8 @@ export class FileBrowser extends SidePanel {
     this.listing = this.createDirListing({
       model,
       renderer,
-      translator
+      translator,
+      state: options.state
     });
     this.listing.addClass(LISTING_CLASS);
 
@@ -131,6 +133,8 @@ export class FileBrowser extends SidePanel {
     if (options.restore !== false) {
       void model.restore(this.id);
     }
+    // restore listing regardless of the restore option
+    void this.listing.restore(this.id);
   }
 
   /**
@@ -264,6 +268,22 @@ export class FileBrowser extends SidePanel {
       this._sortNotebooksFirst = value;
     } else {
       console.warn('Listing does not support sorting notebooks first');
+    }
+  }
+
+  /**
+   * Whether to allow single click files and directories
+   */
+  get singleClickNavigation(): boolean {
+    return this._allowSingleClick;
+  }
+
+  set singleClickNavigation(value: boolean) {
+    if (this.listing.setAllowSingleClickNavigation) {
+      this.listing.setAllowSingleClickNavigation(value);
+      this._allowSingleClick = value;
+    } else {
+      console.warn('Listing does not support single click navigation');
     }
   }
 
@@ -507,6 +527,7 @@ export class FileBrowser extends SidePanel {
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
+  private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;
@@ -554,6 +575,12 @@ export namespace FileBrowser {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional state database. If provided, the widget will restore
+     * the columns sizes
+     */
+    state?: IStateDB;
   }
 
   /**
