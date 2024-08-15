@@ -458,6 +458,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (this._currentProviderIndex !== null) {
       await unrenderMarkdownCell();
 
+      const activeCell = this.widget?.content.activeCell;
+      if (activeCell?.model.getMetadata('editable') == false) {
+        return false;
+      }
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(
         newText,

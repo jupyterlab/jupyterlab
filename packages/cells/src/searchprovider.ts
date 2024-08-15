@@ -249,6 +249,20 @@ class CodeCellSearchProvider extends CellSearchProvider {
     }
   }
 
+  /**
+   * Replace all matches in the cell source with the provided text
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceAllMatches(newText: string): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceAllMatches(newText);
+    return result;
+  }
+
   private async _onOutputsChanged(
     outputArea: OutputArea,
     changes: number
@@ -393,6 +407,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @returns Whether a replace occurred.
    */
   async replaceAllMatches(newText: string): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
     const result = await super.replaceAllMatches(newText);
     // if the cell is rendered force update
     if ((this.cell as MarkdownCell).rendered) {
