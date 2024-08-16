@@ -16,6 +16,7 @@ import {
 import {
   closeIcon,
   collapseAllIcon,
+  CommandToolbarButton,
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
@@ -601,11 +602,14 @@ class Section extends PanelWithToolbar {
 
     const shutdownAllLabel = this._shutdownAllLabel;
     const shutdownTitle = `${shutdownAllLabel}?`;
-    const shutdownAllConfirmationText =
-      this._manager.shutdownAllConfirmationText ||
-      `${shutdownAllLabel} ${this._manager.name}`;
 
     const onShutdown = () => {
+      const shutdownAllConfirmationText =
+        (typeof this._manager.shutdownAllConfirmationText === 'function'
+          ? this._manager.shutdownAllConfirmationText()
+          : this._manager.shutdownAllConfirmationText) ??
+        `${shutdownAllLabel} ${this._manager.name}`;
+
       void showDialog({
         title: shutdownTitle,
         body: shutdownAllConfirmationText,
@@ -659,6 +663,16 @@ class Section extends PanelWithToolbar {
     // Update buttons once defined and before adding to DOM
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
+
+    // Add manager-specific buttons
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(
+          button instanceof CommandToolbarButton ? button.commandId : button.id,
+          button
+        )
+      );
+    }
 
     for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
       this.toolbar.addItem(
@@ -1189,12 +1203,17 @@ export namespace IRunningSessions {
     /**
      * A string used as the body text in the shutdown all confirmation dialog.
      */
-    shutdownAllConfirmationText?: string;
+    shutdownAllConfirmationText?: string | (() => string);
 
     /**
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Used to add arbitrary buttons to this section
+     */
+    toolbarButtons?: (ToolbarButton | CommandToolbarButton)[];
 
     /**
      * Whether the manager supports tree view for its items
