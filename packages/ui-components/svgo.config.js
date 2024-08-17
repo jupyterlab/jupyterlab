@@ -59,7 +59,9 @@ module.exports = {
   multipass: true,
   js2svg: {
     eol: 'lf',
-    finalNewline: true
+    finalNewline: true,
+    indent: 2,
+    pretty: true
   },
   plugins: [
     {
