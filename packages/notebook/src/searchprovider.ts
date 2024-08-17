@@ -454,8 +454,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         }
       }
     };
+
     if (this._currentProviderIndex !== null) {
       await unrenderMarkdownCell();
+
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(
         newText,
@@ -467,6 +469,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         await this.highlightNext(loop, { from: 'previous-match' });
       }
     }
+
     // TODO: markdown unrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
     await unrenderMarkdownCell(true);
