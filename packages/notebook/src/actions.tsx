@@ -2615,6 +2615,17 @@ namespace Private {
         });
         return;
       }
+      if (child.model.getMetadata('editable') == false) {
+        translator = translator || nullTranslator;
+        const trans = translator.load('jupyterlab');
+        // Do not permit changing cell type when the cell is readonly
+        void showDialog({
+          title: trans.__('Cell is read-only'),
+          body: trans.__('The cell is read-only, its type cannot be changed!'),
+          buttons: [Dialog.okButton()]
+        });
+        return;
+      }
       if (child.model.type !== value) {
         const raw = child.model.toJSON();
         notebookSharedModel.transact(() => {
