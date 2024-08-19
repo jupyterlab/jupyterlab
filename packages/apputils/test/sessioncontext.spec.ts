@@ -498,6 +498,16 @@ describe('@jupyterlab/apputils', () => {
         expect(kernel.name).toBe(name);
       });
 
+      it('should change the current kernel and have custom_env_vars', async () => {
+        await sessionContext.initialize();
+
+        const name = sessionContext.session?.kernel?.name;
+        const id = sessionContext.session?.kernel?.id;
+        const customEnvVars = {'TEST_ENV_NAME': 'test_env_value'}
+        const kernel = (await sessionContext.changeKernel({ name, custom_env_vars:customEnvVars  }))!;
+        expect(kernel.id).not.toBe(id);
+      });
+
       it('should still work if called before fully initialized', async () => {
         const initPromise = sessionContext.initialize(); // Start but don't finish init.
         const name = 'echo';

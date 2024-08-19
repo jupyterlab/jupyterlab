@@ -29,7 +29,7 @@ interface IEnvBlockProps {
   translator: ITranslator | undefined;
 }
 
-function EnvBlock({
+export function EnvBlock({
   handleChange,
   id,
   defaultName,
@@ -66,6 +66,7 @@ function EnvBlock({
       <label>
         <span>{`${trans.__('Name:')}`}</span>
         <input
+          className="env_name"
           type="text"
           name="env_name"
           data-name="env_name"
@@ -77,6 +78,7 @@ function EnvBlock({
       <label>
         <span>{`${trans.__('Value:')}`}</span>
         <input
+          className="env_value"
           type="text"
           name="env_value"
           data-name="env_value"
@@ -89,6 +91,7 @@ function EnvBlock({
   );
 }
 
+
 function CustomEnv({
   updateFormData,
   defaultEnvValues,
@@ -97,24 +100,10 @@ function CustomEnv({
 }: IEnvProps) {
   const [formData, setInputs] = useState<PartialJSONObject>(defaultEnvValues);
   const [isShownBlock, setShowBlock] = useState<boolean>(showBlock);
-  const [countEnvBlock, setCountEnvBlock] = useState(
-    Object.keys(formData).length
-  );
+  const [countEnvBlock, setCountEnvBlock] = useState(1);
 
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
-
-  useEffect(() => {
-    updateFormData(formData);
-  }, [formData]);
-
-  useEffect(() => {
-    let count =
-      defaultEnvValues && Object.keys(defaultEnvValues).length > 0
-        ? Object.keys(defaultEnvValues).length
-        : 1;
-    setCountEnvBlock(count);
-  }, [defaultEnvValues]);
 
   const addMoreEnvVariables = () => {
     let newCountEnvBlock = countEnvBlock + 1;
@@ -122,10 +111,12 @@ function CustomEnv({
   };
 
   const handleChange = (envVars: PartialJSONObject) => {
-    setInputs({
+    let newForm = {
       ...formData,
       ...envVars
-    });
+    };
+    setInputs(newForm);
+    updateFormData(newForm);
   };
 
   const showCustomEnvBlock = () => {
@@ -157,7 +148,7 @@ function CustomEnv({
   const classes = 'jp-Dialog-button jp-mod-accept jp-mod-styled js-custom-env';
 
   return (
-    <div>
+    <div className="jp-custom-env-vars-widget">
       {!showBlock && (
         <label className="jp-Dialog-checkbox" title={header}>
           <input
@@ -214,6 +205,7 @@ export class CustomEnvWidget extends ReactWidget {
     this.translator = translator;
     this.defaultEnvValues = defaultEnvValues;
     this.showBlock = showBlock;
+    this.addClass('jp-custom-env-widget');
   }
 
   getValue(): PartialJSONObject {
