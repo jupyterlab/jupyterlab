@@ -187,6 +187,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   names(): IterableIterator<string> {
     const layout = this.layout as ToolbarLayout;
+
+    // Handle null toolbar layouts, such as if the user is in the
+    // Settings Editor, so there is no active toolbar
     if (layout === null) {
       // An empty iterator
       return map([], i => '');
@@ -238,7 +241,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
 
-    // The layout is commonly false if something other than a widget with
+    // The layout is commonly null if something other than a widget with
     // a toolbar is active.
     // For example, if the user is in the Settings Editor, and makes a
     // change to the toolbar, there is no active toolbar layout.
