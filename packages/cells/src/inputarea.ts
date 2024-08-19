@@ -29,12 +29,6 @@ const INPUT_AREA_PROMPT_CLASS = 'jp-InputArea-prompt';
 const INPUT_AREA_PROMPT_INDICATOR_CLASS = 'jp-InputArea-prompt-indicator';
 
 /**
- * Class for an empty prompt indicator, indicating no execution count
- */
-const INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS =
-  'jp-InputArea-prompt-indicator-empty';
-
-/**
  * The class name added to the prompt area's toolbar
  */
 const INPUT_AREA_PROMPT_TOOLBAR_CLASS = 'jp-InputArea-prompt-toolbar';
@@ -411,10 +405,8 @@ export class InputPromptIndicator extends Widget {
     this._executionCount = value;
     if (value) {
       this.node.textContent = `[${value}]:`;
-      this.removeClass(INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS);
     } else {
       this.node.textContent = '[ ]:';
-      this.addClass(INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS);
     }
   }
 
