@@ -263,13 +263,13 @@ export class CellToolbarTracker implements IDisposable {
               this._helperButtons.forEach(
                 b => cell.inputArea!.prompt.promptToolbar?.addItem(b.id, b)
               );
-              // Show the toolbar, if necessary.
-              cell.inputArea.prompt.update();
             } else {
               // If no helper buttons are desired, don't show the helper button toolbar
               cell.inputArea.prompt.promptToolbarEnabled = false;
-              cell.inputArea.prompt.update();
             }
+
+            // Show or hide the prompt toolbar.
+            cell.inputArea.prompt.update();
           }
         })
         .catch(e => {
