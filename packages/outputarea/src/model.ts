@@ -326,6 +326,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     if (
       nbformat.isStream(value) &&
       value.name === this._lastStreamName &&
+      this.length > 0 &&
       this.shouldCombine({
         value,
         lastModel: this.list.get(this.length - 1)
@@ -341,11 +342,8 @@ export class OutputAreaModel implements IOutputAreaModel {
       return this.length;
     }
 
-    let newText = '';
-    if (nbformat.isStream(value)) {
-      newText =
-        typeof value.text === 'string' ? value.text : value.text.join('');
-      value.text = '';
+    if (nbformat.isStream(value) && typeof value.text !== 'string') {
+      value.text = value.text.join('');
     }
 
     // Create the new item.
@@ -357,8 +355,6 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Update the stream information.
     if (nbformat.isStream(value)) {
       this._lastStreamName = value.name;
-      const curText = item.streamText!;
-      Private.addText(curText, newText);
     } else {
       this._lastStreamName = '';
     }
@@ -541,7 +537,11 @@ namespace Private {
     let idx = 0;
     while (!done) {
       if (idx === text.length) {
-        if (idx !== curText.text.length) {
+        if (idx === curText.text.length) {
+          if (idx === 0) {
+            done = true;
+          }
+        } else {
           curText.remove(idx, curText.text.length);
           done = true;
         }
