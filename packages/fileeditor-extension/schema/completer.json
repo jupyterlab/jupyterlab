@@ -4,7 +4,7 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "completer:invoke-file",
-      "keys": ["Ctrl ArrowDown"],
+      "keys": ["Tab"],
       "selector": ".jp-FileEditor .jp-mod-completer-enabled"
     }
   ],
