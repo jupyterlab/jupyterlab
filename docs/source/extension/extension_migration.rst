@@ -21,6 +21,16 @@ anymore. The side effects for extensions are:
   prepend the class ``.jp-ThemedContainer`` to your rule; e.g.
   ``.jp-Inspector-content pre`` becomes ``.jp-ThemedContainer .jp-Inspector-content pre``
 
+The ``jp-Inspector-default-content`` class was renamed to ``jp-Inspector-placeholderContent``.
+The name of this contextual help class is now consistent with the equivalent table of contents and property inspector classes.
+
+Testing with Galata
+^^^^^^^^^^^^^^^^^^^
+
+Playwright was updated to version 1.46.1 (or higher). The changelog for version ``1.46.0`` mentions a possible
+breaking change when defining fixture values that are array of objects.
+
+See the `Playwright 1.46.0 release notes <https://github.com/microsoft/playwright/releases/tag/v1.46.0>` for more information.
 
 JupyterLab 4.1 to 4.2
 ---------------------

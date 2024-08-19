@@ -52,6 +52,12 @@
       "type": "boolean",
       "default": true
     },
+    "suppressIfTabCompleterActive": {
+      "title": "Suppress when the tab completer is active",
+      "description": "Whether to suppress the inline completer when the tab completer suggestions are shown.",
+      "type": "boolean",
+      "default": true
+    },
     "streamingAnimation": {
       "title": "Streaming animation",
       "description": "Transition effect used when streaming tokens from model.",

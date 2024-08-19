@@ -100,7 +100,10 @@ export class DebuggerHelper {
    * Waits for variables to be populated in the variables panel
    */
   async waitForVariables(): Promise<void> {
-    await this.page.locator('.jp-DebuggerVariables-body ul').waitFor();
+    await this.page
+      .locator('.jp-DebuggerVariables-body')
+      .getByRole('tree')
+      .waitFor();
   }
 
   /**
@@ -108,11 +111,9 @@ export class DebuggerHelper {
    */
   async renderVariable(name: string): Promise<void> {
     await this.page
-      .locator(`.jp-DebuggerVariables :text("${name}")`)
+      .getByRole('treeitem', { name: `${name}:` })
       .click({ button: 'right' });
-    await this.page
-      .locator('.lm-Menu-itemLabel:text("Render Variable")')
-      .click();
+    await this.page.getByRole('menuitem', { name: 'Render Variable' }).click();
     await this.page.locator('.jp-VariableRendererPanel-renderer').waitFor();
   }
 

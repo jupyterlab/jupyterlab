@@ -1414,16 +1414,36 @@ export class NotebookHelper {
   }
 
   /**
-   * Create a new notebook
+   * Creates a new notebook.
    *
-   * @param name Name of the notebook
-   * @returns Name of the created notebook or null if it failed
+   * @param name - The name of the notebook. If provided, the notebook will be renamed to this name.
+   * @param options - Parameters for creating the notebook.
+   * @param options.kernel - The kernel to use for the notebook.
+   * @returns A Promise that resolves to the name of the created notebook, or `null` if the notebook creation failed.
    */
-  async createNew(name?: string): Promise<string | null> {
+  async createNew(
+    name?: string,
+    options?: { kernel?: string | null }
+  ): Promise<string | null> {
     await this.menu.clickMenuItem('File>New>Notebook');
 
     const page = this.page;
     await page.locator('.jp-Dialog').waitFor();
+
+    if (options && options.kernel !== undefined) {
+      if (options.kernel === null) {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption('null');
+      } else {
+        await page
+          .getByRole('dialog')
+          .getByRole('combobox')
+          .selectOption(`{"name":"${options.kernel}"}`);
+      }
+    }
+
     await page.click('.jp-Dialog .jp-mod-accept');
 
     const activeTab = this.activity.getTabLocator();

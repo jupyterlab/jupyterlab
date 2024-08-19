@@ -73,3 +73,22 @@ export async function dragCellTo(
   await page.waitForCondition(options.stopCondition);
   await page.mouse.up();
 }
+
+/**
+ * Check if a given string value is valid JSON.
+ */
+export function isValidJSON(value: string): boolean {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Check if a given string value is empty (excluding spaces).
+ */
+export function isBlank(value: string): boolean {
+  return value.trim().length === 0;
+}

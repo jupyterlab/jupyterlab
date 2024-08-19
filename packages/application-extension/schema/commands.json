@@ -48,6 +48,11 @@
       "selector": "body"
     },
     {
+      "command": "application:toggle-fullscreen-mode",
+      "keys": ["F11"],
+      "selector": "body"
+    },
+    {
       "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 1"],
       "macKeys": [""],
@@ -283,6 +288,10 @@
                 },
                 {
                   "command": "application:toggle-presentation-mode",
+                  "rank": 0
+                },
+                {
+                  "command": "application:toggle-fullscreen-mode",
                   "rank": 0
                 },
                 {

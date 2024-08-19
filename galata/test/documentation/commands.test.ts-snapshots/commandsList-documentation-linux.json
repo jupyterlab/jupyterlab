@@ -70,6 +70,14 @@
     "shortcuts": []
   },
   {
+    "id": "application:toggle-fullscreen-mode",
+    "label": "Fullscreen Mode",
+    "caption": "",
+    "shortcuts": [
+      "F11"
+    ]
+  },
+  {
     "id": "application:toggle-header",
     "label": "Show Header",
     "caption": "",

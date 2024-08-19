@@ -3,7 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
+import {
+  IObservableJSON,
+  IObservableString,
+  ObservableJSON,
+  ObservableString
+} from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
   JSONExt,
@@ -34,6 +39,11 @@ export interface IOutputModel extends IRenderMime.IMimeModel {
    * The execution count of the model.
    */
   readonly executionCount: nbformat.ExecutionCount;
+
+  /**
+   * The observable text, present when the output `type` is set to `"stream"`.
+   */
+  readonly streamText?: IObservableString;
 
   /**
    * Whether the output is trusted.
@@ -80,8 +90,14 @@ export class OutputModel implements IOutputModel {
    */
   constructor(options: IOutputModel.IOptions) {
     const { data, metadata, trusted } = Private.getBundleOptions(options);
-    this._data = new ObservableJSON({ values: data as JSONObject });
     this._rawData = data;
+    if (options.value !== undefined && nbformat.isStream(options.value)) {
+      this._text = new ObservableString(
+        typeof options.value.text === 'string'
+          ? options.value.text
+          : options.value.text.join('')
+      );
+    }
     this._metadata = new ObservableJSON({ values: metadata as JSONObject });
     this._rawMetadata = metadata;
     this.trusted = trusted;
@@ -131,7 +147,7 @@ export class OutputModel implements IOutputModel {
    * Dispose of the resources used by the output model.
    */
   dispose(): void {
-    this._data.dispose();
+    this._text?.dispose();
     this._metadata.dispose();
     Signal.clearData(this);
   }
@@ -140,7 +156,11 @@ export class OutputModel implements IOutputModel {
    * The data associated with the model.
    */
   get data(): ReadonlyPartialJSONObject {
-    return this._rawData;
+    return Private.getData(this.toJSON());
+  }
+
+  get streamText(): IObservableString | undefined {
+    return this._text;
   }
 
   /**
@@ -159,7 +179,6 @@ export class OutputModel implements IOutputModel {
    */
   setData(options: IRenderMime.IMimeModel.ISetDataOptions): void {
     if (options.data) {
-      this._updateObservable(this._data, options.data);
       this._rawData = options.data;
     }
     if (options.metadata) {
@@ -177,11 +196,14 @@ export class OutputModel implements IOutputModel {
     for (const key in this._raw) {
       output[key] = Private.extract(this._raw, key);
     }
+    if (this._text !== undefined) {
+      output['text'] = this._text.text;
+    }
     switch (this.type) {
       case 'display_data':
       case 'execute_result':
       case 'update_display_data':
-        output['data'] = this.data as PartialJSONObject;
+        output['data'] = this._rawData as PartialJSONObject;
         output['metadata'] = this.metadata as PartialJSONObject;
         break;
       default:
@@ -223,7 +245,7 @@ export class OutputModel implements IOutputModel {
   private _raw: PartialJSONObject = {};
   private _rawMetadata: ReadonlyPartialJSONObject;
   private _rawData: ReadonlyPartialJSONObject;
-  private _data: IObservableJSON;
+  private _text?: IObservableString = undefined;
   private _metadata: IObservableJSON;
 }
 
