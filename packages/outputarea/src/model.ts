@@ -342,8 +342,11 @@ export class OutputAreaModel implements IOutputAreaModel {
       return this.length;
     }
 
-    if (nbformat.isStream(value) && typeof value.text !== 'string') {
-      value.text = value.text.join('');
+    if (nbformat.isStream(value)) {
+      if (typeof value.text !== 'string') {
+        value.text = value.text.join('');
+      }
+      value.text = Private.processText(value.text);
     }
 
     // Create the new item.
@@ -497,10 +500,12 @@ namespace Private {
   }
 
   /*
-   * Concatenate a string to an observable string, handling backspaces.
+   * Handle backspaces in `newText` and concatenates to `text`, if any.
    */
-  export function addText(curText: IObservableString, newText: string): void {
-    let text = curText.text;
+  export function processText(newText: string, text?: string): string {
+    if (text === undefined) {
+      text = '';
+    }
     let idx0 = text.length;
     for (let idx1 = 0; idx1 < newText.length; idx1++) {
       const newChar = newText[idx1];
@@ -532,6 +537,14 @@ namespace Private {
         idx0++;
       }
     }
+    return text;
+  }
+
+  /*
+   * Concatenate a string to an observable string, handling backspaces.
+   */
+  export function addText(curText: IObservableString, newText: string): void {
+    const text = processText(newText, curText.text);
     // Compute the difference between current text and new text.
     let done = false;
     let idx = 0;
