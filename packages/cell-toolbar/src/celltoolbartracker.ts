@@ -203,7 +203,7 @@ export class CellToolbarTracker implements IDisposable {
     const cell = this._getCell(model);
 
     if (cell && !cell.isDisposed) {
-      const toolbarWidget = (this._toolbar = new Toolbar());
+      const toolbarWidget = new Toolbar();
       // Note: CELL_MENU_CLASS is deprecated.
       toolbarWidget.addClass(CELL_MENU_CLASS);
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
@@ -238,6 +238,8 @@ export class CellToolbarTracker implements IDisposable {
 
           // Skip adding the toolbar if the toolbar shouldn't be visible.
           if (this.enabled) {
+            this._toolbar = toolbarWidget;
+
             // Hide the toolbar by default, to avoid temporary overlapping.
             cell.node.classList.add(TOOLBAR_OVERLAP_CLASS);
 
@@ -254,6 +256,11 @@ export class CellToolbarTracker implements IDisposable {
 
             // Hide the cell toolbar if it overlaps with cell contents
             this._updateCellForToolbarOverlap(cell);
+          } else {
+            // If the toolbar was just disabled, dispose of it.
+            if (this._toolbar !== null && !this._toolbar.isDisposed) {
+              this._toolbar.dispose();
+            }
           }
 
           // Add the helper buttons to the cell's input area, if desired.
