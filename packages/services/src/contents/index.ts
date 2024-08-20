@@ -415,7 +415,11 @@ export namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(path: string, options?: Partial<IModel>): Promise<IModel>;
+    save(
+      path: string,
+      options?: Partial<IModel>,
+      fetchOptions?: Partial<IFetchOptions>
+    ): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -562,7 +566,11 @@ export namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(localPath: string, options?: Partial<IModel>): Promise<IModel>;
+    save(
+      localPath: string,
+      options?: Partial<IModel>,
+      fetchOptions?: Partial<IFetchOptions>
+    ): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -891,12 +899,13 @@ export class ContentsManager implements Contents.IManager {
    */
   save(
     path: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> = {},
+    fetchOptions: Partial<Contents.IFetchOptions> = {}
   ): Promise<Contents.IModel> {
     const globalPath = this.normalize(path);
     const [drive, localPath] = this._driveForPath(path);
     return drive
-      .save(localPath, { ...options, path: localPath })
+      .save(localPath, { ...options, path: localPath }, { ...fetchOptions })
       .then(contentsModel => {
         return {
           ...contentsModel,
@@ -1310,14 +1319,19 @@ export class Drive implements Contents.IDrive {
    */
   async save(
     localPath: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> = {},
+    fetchOptions: Partial<Contents.IFetchOptions> = {}
   ): Promise<Contents.IModel> {
     const settings = this.serverSettings;
-    const url = this._getUrl(localPath);
+    let url = this._getUrl(localPath);
     const init = {
       method: 'PUT',
       body: JSON.stringify(options)
     };
+    const hash = fetchOptions != null && fetchOptions.hash ? '1' : '0';
+    const params: PartialJSONObject = { hash };
+    url += URLExt.objectToQueryString(params);
+
     const response = await ServerConnection.makeRequest(url, init, settings);
     // will return 200 for an existing file and 201 for a new file
     if (response.status !== 200 && response.status !== 201) {

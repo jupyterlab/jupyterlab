@@ -735,32 +735,20 @@ export class Context<
         }
 
         return this._manager.contents
-          .save(path, options)
+          .save(path, options, { hash: true })
           .then(async contentsModel => {
-            const model = await this._manager.contents.get(path, {
-              content: false,
-              hash: true
-            });
             return {
-              ...contentsModel,
-              hash: model.hash,
-              hash_algorithm: model.hash_algorithm
+              ...contentsModel
             } as Contents.IModel;
           });
       },
       err => {
         if (err.response && err.response.status === 404) {
           return this._manager.contents
-            .save(path, options)
+            .save(path, options, { hash: true })
             .then(async contentsModel => {
-              const model = await this._manager.contents.get(path, {
-                content: false,
-                hash: true
-              });
               return {
-                ...contentsModel,
-                hash: model.hash,
-                hash_algorithm: model.hash_algorithm
+                ...contentsModel
               } as Contents.IModel;
             });
         }
