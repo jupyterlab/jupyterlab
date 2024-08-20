@@ -49,7 +49,7 @@ export interface IModel {
    */
   readonly traceback?: string;
 
-  custom_env_vars?: undefined | PartialJSONObject;
+  env?: undefined | PartialJSONObject;
 }
 
 /**

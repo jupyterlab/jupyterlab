@@ -1957,7 +1957,7 @@ function activateNotebookHandler(
         kernel: {
           id: kernelId,
           name: kernelName,
-          custom_env_vars: customEnvVars
+          env: customEnvVars
         }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;

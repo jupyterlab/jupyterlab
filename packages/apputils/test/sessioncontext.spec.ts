@@ -503,8 +503,8 @@ describe('@jupyterlab/apputils', () => {
 
         const name = sessionContext.session?.kernel?.name;
         const id = sessionContext.session?.kernel?.id;
-        const customEnvVars = {'TEST_ENV_NAME': 'test_env_value'}
-        const kernel = (await sessionContext.changeKernel({ name, custom_env_vars:customEnvVars  }))!;
+        const env = { TEST_ENV_NAME: 'test_env_value' };
+        const kernel = (await sessionContext.changeKernel({ name, env }))!;
         expect(kernel.id).not.toBe(id);
       });
 

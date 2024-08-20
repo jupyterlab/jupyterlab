@@ -643,7 +643,7 @@ export class DocumentRegistry implements IDisposable {
     const language = modelFactory.preferredLanguage(PathExt.basename(path));
     const name = kernel && kernel.name;
     const id = kernel && kernel.id;
-    const customEnvVars = kernel && kernel.custom_env_vars;
+    const customEnvVars = kernel && kernel.env;
     return {
       id,
       name,

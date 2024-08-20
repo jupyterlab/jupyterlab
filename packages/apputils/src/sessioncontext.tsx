@@ -720,13 +720,9 @@ export class SessionContext implements ISessionContext {
         preference
       });
       if (name) {
+        options = { name };
         if (preference.customEnvVars) {
-          options = {
-            name,
-            custom_env_vars: preference.customEnvVars
-          };
-        } else {
-          options = { name };
+          options.env = preference.customEnvVars;
         }
       }
     }
@@ -785,7 +781,10 @@ export class SessionContext implements ISessionContext {
     // and start its kernel first to ensure consistent
     // ordering.
     await this._initStarted.promise;
-    return this._changeKernel(options);
+    const test = this._changeKernel(options);
+    console.log('test');
+    console.dir(test);
+    return test;
   }
 
   /**
@@ -1431,8 +1430,8 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       sessionContext.kernelPreference.customEnvVars = undefined;
     }
 
-    if (model.custom_env_vars) {
-      sessionContext.kernelPreference.customEnvVars = model.custom_env_vars;
+    if (model.env) {
+      sessionContext.kernelPreference.customEnvVars = model.env;
     }
 
     if (hasCheckbox && result.isChecked !== null) {
@@ -1884,7 +1883,7 @@ namespace Private {
             }
           }
 
-          kernelData['custom_env_vars'] = tmp;
+          kernelData['env'] = tmp;
         }
       }
       return kernelData;
