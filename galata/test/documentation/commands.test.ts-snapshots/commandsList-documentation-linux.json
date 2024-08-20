@@ -442,6 +442,12 @@
     ]
   },
   {
+    "id": "console:setup-custom-env",
+    "label": "Launch kernel with custom env vars...",
+    "caption": "Launch kernel with custom env vars...",
+    "shortcuts": []
+  },
+  {
     "id": "console:shutdown",
     "label": "Shut Down",
     "caption": "",
@@ -977,6 +983,12 @@
   {
     "id": "filebrowser:toggle-show-full-path",
     "label": "Show Full Path",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-single-click-navigation",
+    "label": "Enable Single Click Navigation",
     "caption": "",
     "shortcuts": []
   },
@@ -2032,6 +2044,12 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:setup-custom-env",
+    "label": "Launch kernel with custom env vars...",
+    "caption": "Launch kernel with custom env vars...",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:show-all-cell-code",
     "label": "Expand All Code",
     "caption": "",
@@ -2208,6 +2226,12 @@
   {
     "id": "running:kernel-shut-down",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-shut-down-unused",
+    "label": "Shut Down Unused",
     "caption": "",
     "shortcuts": []
   },
