@@ -49,6 +49,10 @@ export interface IOutputAreaModel extends IDisposable {
    */
   get(index: number): IOutputModel;
 
+  removeStreamOutput(number: number): void;
+
+  appendStreamOutput(text: string): void;
+
   /**
    * Add an output, which may be combined with previous output.
    *
@@ -243,6 +247,22 @@ export class OutputAreaModel implements IOutputAreaModel {
     Private.normalize(value);
     const item = this._createItem({ value, trusted: this._trusted });
     this.list.set(index, item);
+  }
+
+  removeStreamOutput(number: number): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.remove(length - number, length, options);
+  }
+
+  appendStreamOutput(text: string): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.insert(length, text, options);
   }
 
   /**
@@ -551,9 +571,7 @@ namespace Private {
     while (!done) {
       if (idx === text.length) {
         if (idx === curText.text.length) {
-          if (idx === 0) {
-            done = true;
-          }
+          done = true;
         } else {
           curText.remove(idx, curText.text.length);
           done = true;

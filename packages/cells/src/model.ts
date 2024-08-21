@@ -759,16 +759,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
                   sender: IObservableString,
                   textEvent: IObservableString.IChangedArgs
                 ) => {
+                  if (
+                    textEvent.options !== undefined &&
+                    (textEvent.options as { [key: string]: any })['silent']
+                  ) {
+                    return;
+                  }
                   const codeCell = this.sharedModel as YCodeCell;
                   if (textEvent.type === 'remove') {
                     codeCell.removeStreamOutput(
                       event.newIndex,
-                      textEvent.start
+                      textEvent.start,
+                      'silent-change'
                     );
                   } else {
                     codeCell.appendStreamOutput(
                       event.newIndex,
-                      textEvent.value
+                      textEvent.value,
+                      'silent-change'
                     );
                   }
                 },
@@ -816,6 +824,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     slot: ISharedCodeCell,
     change: CellChange
   ): void {
+    if (change.streamOutputChange) {
+      globalModelDBMutex(() => {
+        for (const streamOutputChange of change.streamOutputChange!) {
+          if ('delete' in streamOutputChange) {
+            this._outputs.removeStreamOutput(streamOutputChange.delete!);
+          }
+          if ('insert' in streamOutputChange) {
+            this._outputs.appendStreamOutput(
+              streamOutputChange.insert!.toString()
+            );
+          }
+        }
+      });
+    }
+
     if (change.outputsChange) {
       globalModelDBMutex(() => {
         let retain = 0;
