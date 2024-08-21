@@ -55,7 +55,7 @@ export class NotebookViewModel extends WindowedListModel {
     if (typeof height === 'number') {
       return height;
     }
-  
+
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
     if (model instanceof CodeCellModel) {
@@ -71,12 +71,12 @@ export class NotebookViewModel extends WindowedListModel {
           'application/vnd.jupyter.stdout',
           'text'
         ];
-  
+
         const preferredOutput = supportedOutputTypes.find(mt => {
           const data = output.data[mt];
           return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
         });
-  
+
         const dataToDisplay = output.data[preferredOutput ?? ''];
         if (dataToDisplay !== undefined) {
           outputsLines += (Array.isArray(dataToDisplay)
@@ -86,7 +86,7 @@ export class NotebookViewModel extends WindowedListModel {
         }
       }
     }
-  
+
     const totalLines = nLines + outputsLines;
     this.cellsEstimatedHeight.set(model.id, totalLines);
     return totalLines;
