@@ -55,24 +55,41 @@ export class NotebookViewModel extends WindowedListModel {
     if (typeof height === 'number') {
       return height;
     }
-
+  
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
     if (model instanceof CodeCellModel) {
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
-        const data = output.data['text/plain'];
-        if (typeof data === 'string') {
-          outputsLines += data.split('\n').length;
-        } else if (Array.isArray(data)) {
-          outputsLines += data.join('').split('\n').length;
+        const supportedOutputTypes = [
+          'text/html',
+          'image/svg+xml',
+          'application/pdf',
+          'text/markdown',
+          'text/plain',
+          'application/vnd.jupyter.stderr',
+          'application/vnd.jupyter.stdout',
+          'text'
+        ];
+  
+        const preferredOutput = supportedOutputTypes.find(mt => {
+          const data = output.data[mt];
+          return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
+        });
+  
+        const dataToDisplay = output.data[preferredOutput ?? ''];
+        if (dataToDisplay !== undefined) {
+          outputsLines += (Array.isArray(dataToDisplay)
+            ? dataToDisplay
+            : (dataToDisplay as string)?.split('\n')
+          )?.filter(part => part !== '').length || 0;
         }
       }
     }
-    return (
-      NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * (nLines + outputsLines) +
-      NotebookViewModel.DEFAULT_CELL_MARGIN
-    );
+  
+    const totalLines = nLines + outputsLines;
+    this.cellsEstimatedHeight.set(model.id, totalLines);
+    return totalLines;
   };
 
   /**
