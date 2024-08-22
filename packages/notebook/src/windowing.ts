@@ -58,7 +58,10 @@ export class NotebookViewModel extends WindowedListModel {
       return height;
     }
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> 42d6f486e3f10fa69a694dc7f6241a0dc7bd29c3
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
 
@@ -76,17 +79,36 @@ export class NotebookViewModel extends WindowedListModel {
 
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
+<<<<<<< HEAD
 
         // Find the preferred output type
         const preferredOutputType = supportedOutputTypes.find(mt => {
+=======
+        const supportedOutputTypes = [
+          'text/html',
+          'image/svg+xml',
+          'application/pdf',
+          'text/markdown',
+          'text/plain',
+          'application/vnd.jupyter.stderr',
+          'application/vnd.jupyter.stdout',
+          'text'
+        ];
+
+        const preferredOutput = supportedOutputTypes.find(mt => {
+>>>>>>> 42d6f486e3f10fa69a694dc7f6241a0dc7bd29c3
           const data = output.data[mt];
           return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
         });
 
+<<<<<<< HEAD
         // Get the data to display based on the preferred output type
         const dataToDisplay = output.data[preferredOutputType ?? ''];
 
         // Count the number of lines in the output data
+=======
+        const dataToDisplay = output.data[preferredOutput ?? ''];
+>>>>>>> 42d6f486e3f10fa69a694dc7f6241a0dc7bd29c3
         if (dataToDisplay !== undefined) {
           const lines = Array.isArray(dataToDisplay)
             ? dataToDisplay.join('\n').split('\n')
@@ -97,6 +119,10 @@ export class NotebookViewModel extends WindowedListModel {
         }
       }
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 42d6f486e3f10fa69a694dc7f6241a0dc7bd29c3
     const totalLines = nLines + outputsLines;
 
 
