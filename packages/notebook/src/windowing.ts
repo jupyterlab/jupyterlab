@@ -52,44 +52,58 @@ export class NotebookViewModel extends WindowedListModel {
   estimateWidgetSize = (index: number): number => {
     const model = this.cells[index].model;
     const height = this.cellsEstimatedHeight.get(model.id);
+
+    
     if (typeof height === 'number') {
       return height;
     }
-  
+
+    
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
+
     if (model instanceof CodeCellModel) {
+      const supportedOutputTypes = [
+        'text/html',
+        'image/svg+xml',
+        'application/pdf',
+        'text/markdown',
+        'text/plain',
+        'application/vnd.jupyter.stderr',
+        'application/vnd.jupyter.stdout',
+        'text'
+      ];
+
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
-        const supportedOutputTypes = [
-          'text/html',
-          'image/svg+xml',
-          'application/pdf',
-          'text/markdown',
-          'text/plain',
-          'application/vnd.jupyter.stderr',
-          'application/vnd.jupyter.stdout',
-          'text'
-        ];
-  
-        const preferredOutput = supportedOutputTypes.find(mt => {
+
+        // Find the preferred output type
+        const preferredOutputType = supportedOutputTypes.find(mt => {
           const data = output.data[mt];
           return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
         });
-  
-        const dataToDisplay = output.data[preferredOutput ?? ''];
+
+        // Get the data to display based on the preferred output type
+        const dataToDisplay = output.data[preferredOutputType ?? ''];
+
+        // Count the number of lines in the output data
         if (dataToDisplay !== undefined) {
-          outputsLines += (Array.isArray(dataToDisplay)
-            ? dataToDisplay
-            : (dataToDisplay as string)?.split('\n')
-          )?.filter(part => part !== '').length || 0;
+          const lines = Array.isArray(dataToDisplay)
+            ? dataToDisplay.join('\n').split('\n')
+            : (dataToDisplay as string).split('\n');
+
+          // Filter out empty lines and count
+          outputsLines += lines.filter(part => part.trim() !== '').length || 0;
         }
       }
     }
-  
     const totalLines = nLines + outputsLines;
-    this.cellsEstimatedHeight.set(model.id, totalLines);
-    return totalLines;
+
+
+    const lineHeight = 20;
+    const estimatedHeight = totalLines * lineHeight;
+
+    return estimatedHeight;
   };
 
   /**
