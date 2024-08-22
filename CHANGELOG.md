@@ -4,6 +4,79 @@
 
 # JupyterLab Changelog
 
+## v4.3 (beta)
+
+JupyterLab 4.3 includes a number of new features (described below), bug fixes, and enhancements.
+This release is compatible with extensions supporting JupyterLab 4.0.
+Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-2-to-4-3) which lists deprecations and changes to the public API.
+
+### Minimap
+
+The virtual scrollbar now acts as a minimap and exposes information on whether a cell:
+
+- is running/scheduled (`[*]`), idle (`[ ]`) or was already run (e.g. `[1]`)
+- was modified since it was last executed ("dirty") - orange background
+- has output contains an error (traceback) - red background
+- is markdown/code (`[ ]`/`[*]`/`[1]` for code, nothing for markdown)
+- how much text/code it contains
+
+<img alt="The minimap view" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-minimap.png" class="jp-screenshot">
+
+To enable the minimap, click on the hamburger icon (≡) which appears in the notebook's toolbar. If you do not see the hamburger icon, go to Settings → Notebook → Windowing mode and choose "full".
+
+### Fullscreen mode
+
+JupyterLab's now offers a way to toggle the full screen mode from within the application, either
+- using the `View` → `Appearance` → `Fullscreen Mode` menu entry
+- using a customizable shortcut, by default <kbd>F11</kbd> (custom shortcuts are supported in Chrome, Safari and Edge)
+
+### File browser enhancements
+
+The file browser now:
+- supports resizing the columns and remembers the column sizes after reloading JupyterLab
+- supports uploading folders by drag-and-drop
+- supports navigation with a single click (opt-in)
+- has the file filter collapsed by default (funnel icon), increasing the space available
+
+<img alt="The file browser with resize handle and filter funnel icon" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-filebrowser.png" class="jp-screenshot">
+
+### Server-side execution and collaboration
+
+The previous release enabled extensions to implement server-side execution which preserves
+outputs cells created when the browser window with JupyterLab gets closed or disconnected.
+The server-side execution builds on the same shared models API as the real-time collaboration (RTC).
+
+This release includes additional work benefiting both the server-side execution and RTC use cases:
+- the intermediary state of streaming outputs is now optimized away preventing a memory leak when using shared models with long-running computations,
+- the cell execution indicator (`[*]`) is now synchronized in the model, allowing collaborators to see that a cell is executed, and allowing server-side execution extensions to populate the state accordingly,
+- the issue of spurious "File Change" dialog on save was addressed by enabling the collaborative models extension to update the document hash.
+
+You can try these features by installing extensions:
+- [`jupyter-server-nbmodel`](https://github.com/datalayer/jupyter-server-nbmodel)\* provides server-side execution for `jupyter-server`,
+- [`jupyter-collaboration`](https://github.com/jupyterlab/jupyter-collaboration) provides the real-time collaboration features,
+- [`jupyverse`](https://github.com/jupyter-server/jupyverse) is an alternative server (a replacement for `jupyter-server`) which supports server-side execution.
+
+\* while `jupyter-server-nbmodel` is developed by maintainers of JupyterLab, as of the JupyterLab 4.3.0 release date it is not an official Project Jupyter extension.
+
+### Improved kernel and server interactions
+
+The previous release enabled connecting to external kernels, such as those spawned by a third-party application like Blender.
+In this release the kernel selector dialog was improved to also show the external kernels.
+
+The previous release improved the awareness of the kernel/kernel specification distinction by providing both tree and list view in the kernels sidebar panel, but only the tree view featured the kernel identifiers.
+In this release both the list and tree view show the kernel identifier stub.
+
+A new toolbar button was added in the kernel allowing to shut down unused kernels (kernels with no widget attached).
+
+<img alt="List view of the kernels in the sidebar, with the clear Shut Down Unused kernels button focused" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-kernels-sidebar.png" class="jp-screenshot">
+
+The following dialog windows can now be dismissed or silenced:
+- the "Server Connection Error" dialog now has an option to dismiss it for the duration of the session,
+- the "Restart Kernel?" dialog now has an option to not ask again. This preference is persisted in settings ( `skipKernelRestartDialog`),
+
+<img alt="The new options added in the server/session dialog windows" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-dialogs.png" class="jp-screenshot">
+
+
 ## v4.2
 
 ### Workspaces UI
