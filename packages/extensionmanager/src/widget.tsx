@@ -61,8 +61,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div style={{ marginRight: '8px' }}>
         {githubUser ? (
           <img
-            src={`https://github.com/${githubUser}.png?size=${BADGE_QUERY_SIZE}`}
+            // cross-origin needs to be before src, see
+            // https://github.com/facebook/react/issues/14035
             crossOrigin="anonymous"
+            src={`https://github.com/${githubUser}.png?size=${BADGE_QUERY_SIZE}`}
             style={{ width: '32px', height: '32px' }}
           />
         ) : (
