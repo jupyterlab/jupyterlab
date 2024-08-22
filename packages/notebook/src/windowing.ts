@@ -53,13 +53,13 @@ export class NotebookViewModel extends WindowedListModel {
     const model = this.cells[index].model;
     const height = this.cellsEstimatedHeight.get(model.id);
 
-    
+
     if (typeof height === 'number') {
       return height;
     }
 
 <<<<<<< HEAD
-    
+
 =======
 >>>>>>> 42d6f486e3f10fa69a694dc7f6241a0dc7bd29c3
     const nLines = model.sharedModel.getSource().split('\n').length;
