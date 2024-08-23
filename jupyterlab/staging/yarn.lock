@@ -397,9 +397,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/ydoc@npm:^3.0.0-a3":
-  version: 3.0.0-a3
-  resolution: "@jupyter/ydoc@npm:3.0.0-a3"
+"@jupyter/ydoc@npm:^3.0.0-a5":
+  version: 3.0.0-a5
+  resolution: "@jupyter/ydoc@npm:3.0.0-a5"
   dependencies:
     "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0
     "@lumino/coreutils": ^1.11.0 || ^2.0.0
@@ -407,7 +407,7 @@ __metadata:
     "@lumino/signaling": ^1.10.0 || ^2.0.0
     y-protocols: ^1.0.5
     yjs: ^13.5.40
-  checksum: 6651b7433c73312f6caf24bcd066b999a55be695ec6850a48442fbe9f739343893b181532398bf5e0b6c10f3fe874c832c075c865f1adb902d859b306cc1d333
+  checksum: 226e9ac32bf5df0b41ac36290801eecb7ec5bcdb359558c82a5708d52e6d11a5c16c30b2463d5aa04c584839b0b45c8f697a53e84179b28e19473759aa5094a8
   languageName: node
   linkType: hard
 
