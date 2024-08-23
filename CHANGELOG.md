@@ -16,7 +16,7 @@ The virtual scrollbar now acts as a minimap and exposes information on whether a
 
 - is running/scheduled (`[*]`), idle (`[ ]`) or was already run (e.g. `[1]`)
 - was modified since it was last executed ("dirty") - orange background
-- has output contains an error (traceback) - red background
+- has an output that contains an error - red background
 - is markdown/code (`[ ]`/`[*]`/`[1]` for code, nothing for markdown)
 - how much text/code it contains
 
@@ -26,7 +26,7 @@ To enable the minimap, click on the hamburger icon (≡) which appears in the no
 
 ### Fullscreen mode
 
-JupyterLab's now offers a way to toggle the full screen mode from within the application, either
+JupyterLab now offers two ways to toggle the full screen mode from within the application:
 - using the `View` → `Appearance` → `Fullscreen Mode` menu entry
 - using a customizable shortcut, by default <kbd>F11</kbd> (custom shortcuts are supported in Chrome, Safari and Edge)
 
@@ -42,11 +42,12 @@ The file browser now:
 
 ### Server-side execution and collaboration
 
-The previous release enabled extensions to implement server-side execution which preserves
-outputs cells created when the browser window with JupyterLab gets closed or disconnected.
+JupyterLab 4.2 release enabled extensions to implement server-side execution which preserves
+outputs created when the browser window with JupyterLab gets closed or disconnected.
 The server-side execution builds on the same shared models API as the real-time collaboration (RTC).
 
-This release includes additional work benefiting both the server-side execution and RTC use cases:
+This release includes additional work, improving both
+the server-side execution and real-time collaboration (RTC) use cases:
 - the intermediary state of streaming outputs is now optimized away preventing a memory leak when using shared models with long-running computations,
 - the cell execution indicator (`[*]`) is now synchronized in the model, allowing collaborators to see that a cell is executed, and allowing server-side execution extensions to populate the state accordingly,
 - the issue of spurious "File Change" dialog on save was addressed by enabling the collaborative models extension to update the document hash.
