@@ -699,6 +699,12 @@
       "type": "boolean",
       "default": false
     },
+    "showInputPlaceholder": {
+      "title": "Show input placeholder",
+      "description": "Show placeholder text for standard input fields.",
+      "type": "boolean",
+      "default": true
+    },
     "inputHistoryScope": {
       "type": "string",
       "default": "global",
