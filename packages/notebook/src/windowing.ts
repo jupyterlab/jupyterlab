@@ -58,7 +58,14 @@ export class NotebookViewModel extends WindowedListModel {
       return height;
     }
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> 42d6f486e3f10fa69a694dc7f6241a0dc7bd29c3
+>>>>>>> e33ac773e7c63aec0a6f8dfde7fee147a47fa6cc
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
 
