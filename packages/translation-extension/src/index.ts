@@ -133,8 +133,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const displayName = value.displayName;
               const nativeName = value.nativeName;
               const toggled =
-                (currentLocale === 'default' ? 'en-US' : currentLocale) ===
-                locale;
+                (currentLocale === 'default' ? 'en' : currentLocale) === locale;
               const label = toggled
                 ? `${displayName}`
                 : `${displayName} - ${nativeName}`;
