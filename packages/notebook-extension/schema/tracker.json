@@ -701,7 +701,7 @@
     },
     "showInputPlaceholder": {
       "title": "Show input placeholder",
-      "description": "Show placeholder text for standard input fields.",
+      "description": "Show placeholder text for standard input fields. (Needs reload)",
       "type": "boolean",
       "default": true
     },
