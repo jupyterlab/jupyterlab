@@ -1,14 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Button } from '@jupyter/react-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  Button,
-  closeIcon,
-  LabIcon,
-  ReactWidget,
-  Styling
-} from '@jupyterlab/ui-components';
+import { closeIcon, ReactWidget, Styling } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
@@ -273,7 +268,7 @@ export class Dialog<T> extends Widget {
     document.addEventListener('focus', this, true);
     document.addEventListener('input', this, true);
     this._first = Private.findFirstFocusable(this.node);
-    this._original = document.activeElement as HTMLElement;
+    this._original = document.activeElement as HTMLElement | null;
 
     const setFocus = () => {
       if (this._focusNodeSelector) {
@@ -315,7 +310,7 @@ export class Dialog<T> extends Widget {
     document.removeEventListener('focus', this, true);
     document.removeEventListener('mousedown', this, true);
     document.removeEventListener('input', this, true);
-    this._original.focus();
+    this._original?.focus();
   }
 
   /**
@@ -383,9 +378,9 @@ export class Dialog<T> extends Widget {
         break;
       case 37: {
         // Left arrow
-        const activeEl = document.activeElement;
+        const activeEl = document.activeElement as HTMLButtonElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (this._buttonNodes.includes(activeEl)) {
           let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
@@ -402,9 +397,9 @@ export class Dialog<T> extends Widget {
       }
       case 39: {
         // Right arrow
-        const activeEl = document.activeElement;
+        const activeEl = document.activeElement as HTMLButtonElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (this._buttonNodes.includes(activeEl)) {
           let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
@@ -436,12 +431,10 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined;
-
-        if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl);
-        }
-        this.resolve(index);
+        const index = activeEl
+          ? this._buttonNodes.indexOf(activeEl as HTMLButtonElement)
+          : -1;
+        this.resolve(index < 0 ? undefined : index);
         break;
       }
       default:
@@ -515,7 +508,7 @@ export class Dialog<T> extends Widget {
   private _buttonNodes: ReadonlyArray<HTMLButtonElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
-  private _original: HTMLElement;
+  private _original: HTMLElement | null;
   private _first: HTMLElement;
   private _primary: HTMLElement;
   private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
@@ -849,7 +842,7 @@ export namespace Dialog {
   /**
    * The default implementation of a dialog renderer.
    */
-  export class Renderer {
+  export class Renderer implements IRenderer {
     /**
      * Create the header of the dialog.
      *
@@ -888,13 +881,13 @@ export namespace Dialog {
             {title}
             {options.hasClose && (
               <Button
+                appearance="stealth"
                 className="jp-Dialog-close-button"
                 onMouseDown={handleMouseDown}
                 onKeyDown={handleKeyDown}
                 title={trans.__('Cancel')}
-                minimal
               >
-                <LabIcon.resolveReact icon={closeIcon} tag="span" />
+                <closeIcon.react tag={null} />
               </Button>
             )}
           </>
@@ -989,11 +982,19 @@ export namespace Dialog {
      * @returns A node for the button.
      */
     createButtonNode(button: IButton): HTMLButtonElement {
-      const e = document.createElement('button');
+      const e = document.createElement('jp-button');
       e.className = this.createItemClass(button);
-      e.appendChild(this.renderIcon(button));
-      e.appendChild(this.renderLabel(button));
-      return e;
+
+      if (button.iconClass || button.iconLabel) {
+        e.appendChild(this.renderIcon(button));
+      }
+      e.textContent = button.label;
+      e.title = button.caption;
+      e.ariaLabel = button.ariaLabel;
+      const appearance = this.createItemAppearance(button);
+      e.setAttribute('appearance', appearance);
+      e.setAttribute('scale', 'large');
+      return e as HTMLButtonElement;
     }
 
     /**
@@ -1050,6 +1051,24 @@ export namespace Dialog {
     }
 
     /**
+     * Set the appearance of the button.
+     *
+     * @param data Button description
+     * @returns The value for the jp-button `appearance` attribute
+     */
+    protected createItemAppearance(
+      data: IButton
+    ): 'accent' | 'error' | 'lightweight' | 'neutral' | 'outline' | 'stealth' {
+      if (data.displayType === 'warn') {
+        return 'error';
+      } else if (data.accept) {
+        return 'accent';
+      } else {
+        return 'neutral';
+      }
+    }
+
+    /**
      * Render an icon element for a dialog item.
      *
      * @param data - The data to use for rendering the icon.
@@ -1057,9 +1076,10 @@ export namespace Dialog {
      * @returns An HTML element representing the icon.
      */
     renderIcon(data: IButton): HTMLElement {
-      const e = document.createElement('div');
+      const e = document.createElement('span');
       e.className = this.createIconClass(data);
       e.appendChild(document.createTextNode(data.iconLabel));
+      e.slot = 'start';
       return e;
     }
 
@@ -1074,22 +1094,6 @@ export namespace Dialog {
       const name = 'jp-Dialog-buttonIcon';
       const extra = data.iconClass;
       return extra ? `${name} ${extra}` : name;
-    }
-
-    /**
-     * Render the label element for a button.
-     *
-     * @param data - The data to use for rendering the label.
-     *
-     * @returns An HTML element representing the item label.
-     */
-    renderLabel(data: IButton): HTMLElement {
-      const e = document.createElement('div');
-      e.className = 'jp-Dialog-buttonLabel';
-      e.title = data.caption;
-      e.ariaLabel = data.ariaLabel;
-      e.appendChild(document.createTextNode(data.label));
-      return e;
     }
   }
 
