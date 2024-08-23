@@ -42,8 +42,8 @@ The file browser now:
 
 ### Server-side execution and collaboration
 
-JupyterLab 4.2 release enabled extensions to implement server-side execution which preserves
-outputs created when the browser window with JupyterLab gets closed or disconnected.
+JupyterLab 4.2 added the option for extensions to implement server-side execution, which preserves
+outputs created when the browser window is closed or disconnected.
 The server-side execution builds on the same shared models API as the real-time collaboration (RTC).
 
 This release includes additional work, improving both
