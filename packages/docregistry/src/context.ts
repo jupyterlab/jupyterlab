@@ -413,6 +413,17 @@ export class Context<
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
+    if (change.type === 'save' && this._model.collaborative) {
+      // Update the contents model with the new values provided on save.
+      // This is needed for save operations performed on the server-side
+      // by the collaborative drive which needs to update the `hash`
+      // of the content when it changes on the backend.
+      this._updateContentsModel({
+        ...this._contentsModel,
+        ...change.newValue
+      } as Contents.IModel);
+      return;
+    }
     if (change.type !== 'rename') {
       return;
     }
