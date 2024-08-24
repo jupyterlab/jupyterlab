@@ -100,43 +100,6 @@ export class NotebookViewModel extends WindowedListModel {
     return estimatedHeight;
   };
 
-  // Add the test case below
-}
-
-// Test case for NotebookViewModel
-describe('NotebookViewModel', () => {
-  test('should calculate height based on number of lines in source and output (string output)', () => {
-    const outputObj = [
-      {
-        output_type: 'execute_result',
-        data: {
-          'text/plain': '15',
-          'text/html': ['<div>\n', ' <p>15</p>\n', '</div>']
-        },
-        execution_count: 2,
-        metadata: {}
-      }
-    ];
-
-    const sharedModel = createStandaloneCell({
-      cell_type: 'code',
-      execution_count: 1,
-      outputs: outputObj,
-      source: ['sum([1, 2, 3, 4, 5])'],
-      metadata: {}
-    }) as YCodeCell;
-
-    const model: ICodeCellModel = new CodeCellModel({ sharedModel });
-    expect(model.executionCount).toBe(1);
-
-    const notebook = new NotebookViewModel([ { model } as Cell<ICodeCellModel> ]);
-    const height = notebook.estimateWidgetSize(0);
-
-    // Validate the estimated height
-    expect(height).toBe(56); // (1 source_line + 1 output_line) * 17 (line_height) + 22 (cell_margin)
-  });
-});
-
   /**
    * Set an estimated height for a cell
    *
