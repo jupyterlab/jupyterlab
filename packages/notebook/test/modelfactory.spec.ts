@@ -187,7 +187,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(95); 
+      expect(height).toBe(95);
       // Explanation:
       // - 1 source line: sum([1, 2, 3, 4, 5])
       // - 2 output lines: '15', '30'
