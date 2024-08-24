@@ -53,20 +53,15 @@ export class NotebookViewModel extends WindowedListModel {
     const model = this.cells[index].model;
     const height = this.cellsEstimatedHeight.get(model.id);
 
-
     if (typeof height === 'number') {
       return height;
     }
-
 
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
 
     if (model instanceof CodeCellModel) {
       const supportedOutputTypes = [
-        'text/html',
-        'image/svg+xml',
-        'application/pdf',
         'text/markdown',
         'text/plain',
         'application/vnd.jupyter.stderr',
@@ -99,12 +94,48 @@ export class NotebookViewModel extends WindowedListModel {
     }
     const totalLines = nLines + outputsLines;
 
-
     const lineHeight = 20;
     const estimatedHeight = totalLines * lineHeight;
 
     return estimatedHeight;
   };
+
+  // Add the test case below
+}
+
+// Test case for NotebookViewModel
+describe('NotebookViewModel', () => {
+  test('should calculate height based on number of lines in source and output (string output)', () => { 
+    const outputObj = [ 
+      { 
+        output_type: 'execute_result', 
+        data: { 
+          'text/plain': '15', 
+          'text/html': ['<div>\n', ' <p>15</p>\n', '</div>'] 
+        }, 
+        execution_count: 2, 
+        metadata: {} 
+      } 
+    ]; 
+
+    const sharedModel = createStandaloneCell({ 
+      cell_type: 'code', 
+      execution_count: 1, 
+      outputs: outputObj, 
+      source: ['sum([1, 2, 3, 4, 5])'], 
+      metadata: {} 
+    }) as YCodeCell; 
+
+    const model: ICodeCellModel = new CodeCellModel({ sharedModel }); 
+    expect(model.executionCount).toBe(1); 
+
+    const notebook = new NotebookViewModel([ { model } as Cell<ICodeCellModel> ]);
+    const height = notebook.estimateWidgetSize(0); 
+
+    // Validate the estimated height
+    expect(height).toBe(56); // (1 source_line + 1 output_line) * 17 (line_height) + 22 (cell_margin) 
+  });
+});
 
   /**
    * Set an estimated height for a cell
