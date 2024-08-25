@@ -183,13 +183,13 @@ describe('@jupyterlab/notebook', () => {
         source: ['sum([1, 2, 3, 4, 5])'],
         metadata: {}
       }) as YCodeCell;
-    
+
       const model: ICodeCellModel = new CodeCellModel({ sharedModel });
       expect(model.executionCount).toBe(1);
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
-    
+
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(204); 
+      expect(height).toBe(204);
       // Explanation:
       // - 1 source line: sum([1, 2, 3, 4, 5])
       // - 5 output lines from 'text/markdown': '# Title\n\nParagraph\nAnother Line' (3 lines) + '## Subtitle\n\nAnother paragraph\nFinal Line' (3 lines)
