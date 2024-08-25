@@ -153,13 +153,14 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(124); // (2 source_line + 4 output_line) * 17 (line_height) + 22 (cell_margin)
     });
 
-    test('should calculate height based on number of lines in source and multiple outputs', () => {
+    test('should calculate height based on number of lines in source and multiple outputs with different types', () => {
       const outputObj = [
         {
           output_type: 'execute_result',
           data: {
             'text/plain': '15',
-            'text/html': ['<div>\n', ' <p>15</p>\n', '</div>']
+            'text/markdown': '# Title\n\nParagraph\nAnother Line',
+            'application/vnd.jupyter.stdout': ['Stdout line 1\n', 'Stdout line 2\n']
           },
           execution_count: 2,
           metadata: {}
@@ -168,7 +169,8 @@ describe('@jupyterlab/notebook', () => {
           output_type: 'execute_result',
           data: {
             'text/plain': '30',
-            'text/html': ['<div>\n', ' <p>30</p>\n', '</div>']
+            'text/markdown': '## Subtitle\n\nAnother paragraph\nFinal Line',
+            'application/vnd.jupyter.stdout': 'Stdout single line'
           },
           execution_count: 3,
           metadata: {}
@@ -181,17 +183,18 @@ describe('@jupyterlab/notebook', () => {
         source: ['sum([1, 2, 3, 4, 5])'],
         metadata: {}
       }) as YCodeCell;
-
+    
       const model: ICodeCellModel = new CodeCellModel({ sharedModel });
       expect(model.executionCount).toBe(1);
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
-
+    
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(95);
+      expect(height).toBe(204); 
       // Explanation:
       // - 1 source line: sum([1, 2, 3, 4, 5])
-      // - 2 output lines: '15', '30'
-      // Calculation: (1 source_line + 2 output_lines) * 17 (line_height) + 22 (cell_margin)
+      // - 5 output lines from 'text/markdown': '# Title\n\nParagraph\nAnother Line' (3 lines) + '## Subtitle\n\nAnother paragraph\nFinal Line' (3 lines)
+      // - 2 output lines from 'application/vnd.jupyter.stdout': 'Stdout line 1\nStdout line 2\n' (2 lines)
+      // Calculation: (1 source_line + 8 output_lines) * 20 (line_height)
     });
 });
 
