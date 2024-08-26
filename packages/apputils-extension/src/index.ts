@@ -693,12 +693,15 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
         .composite as Array<string>;
 
       const autolink = setting.get('autolink').composite as boolean;
+      const allowNamedProperties = setting.get('allowNamedProperties')
+        .composite as boolean;
 
       if (allowedSchemes) {
         sanitizer.setAllowedSchemes(allowedSchemes);
       }
 
       sanitizer.setAutolink(autolink);
+      sanitizer.setAllowNamedProperties(allowNamedProperties);
     };
 
     // Wait for the application to be restored and

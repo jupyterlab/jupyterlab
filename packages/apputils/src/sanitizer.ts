@@ -434,6 +434,9 @@ class CssProp {
  * A class to sanitize HTML strings.
  */
 export class Sanitizer implements IRenderMime.ISanitizer {
+  constructor() {
+    this._options = this._generateOptions();
+  }
   /**
    * Sanitize an HTML string.
    *
@@ -473,9 +476,18 @@ export class Sanitizer implements IRenderMime.ISanitizer {
     this._autolink = autolink;
   }
 
-  private _autolink: boolean = true;
+  /**
+   * Set the whether to allow `name` and `id` attributes.
+   */
+  setAllowNamedProperties(allowNamedProperties: boolean): void {
+    this._allowNamedProperties = allowNamedProperties;
+    this._options = this._generateOptions();
+  }
 
-  private _options: sanitize.IOptions = {
+  private _autolink: boolean = true;
+  private _allowNamedProperties: boolean = false;
+  private _options: sanitize.IOptions;
+  private _generateOptions = (): sanitize.IOptions => ({
     // HTML tags that are allowed to be used. Tags were extracted from Google Caja
     allowedTags: [
       'a',
@@ -590,7 +602,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'dir',
         'draggable',
         'hidden',
-        'id',
+        ...(this._allowNamedProperties ? ['id'] : []),
         'inert',
         'itemprop',
         'itemref',
@@ -607,7 +619,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'coords',
         'href',
         'hreflang',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'rel',
         'shape',
         'tabindex',
@@ -641,7 +653,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'data-commandlinker-args',
         'data-commandlinker-command',
         'disabled',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'tabindex',
         'type',
         'value'
@@ -672,7 +684,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'autocomplete',
         'enctype',
         'method',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'novalidate'
       ],
       h1: ['align'],
@@ -697,7 +709,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'height',
         'hspace',
         'ismap',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'src',
         'usemap',
         'vspace',
@@ -718,7 +730,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'maxlength',
         'min',
         'multiple',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'placeholder',
         'readonly',
         'required',
@@ -734,13 +746,13 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       label: ['accesskey', 'for'],
       legend: ['accesskey', 'align'],
       li: ['type', 'value'],
-      map: ['name'],
+      map: this._allowNamedProperties ? ['name'] : [],
       menu: ['compact', 'label', 'type'],
       meter: ['high', 'low', 'max', 'min', 'value'],
       ol: ['compact', 'reversed', 'start', 'type'],
       optgroup: ['disabled', 'label'],
       option: ['disabled', 'label', 'selected', 'value'],
-      output: ['for', 'name'],
+      output: ['for', ...(this._allowNamedProperties ? ['name'] : [])],
       p: ['align'],
       pre: ['width'],
       progress: ['max', 'min', 'value'],
@@ -749,7 +761,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'autocomplete',
         'disabled',
         'multiple',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'required',
         'size',
         'tabindex'
@@ -789,7 +801,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'cols',
         'disabled',
         'inputmode',
-        'name',
+        ...(this._allowNamedProperties ? ['name'] : []),
         'placeholder',
         'readonly',
         'required',
@@ -982,5 +994,5 @@ export class Sanitizer implements IRenderMime.ISanitizer {
     // Since embedded data is no longer deemed to be a threat, validation can be skipped.
     // See https://github.com/jupyterlab/jupyterlab/issues/5183
     allowedSchemesAppliedToAttributes: ['href', 'cite']
-  };
+  });
 }
