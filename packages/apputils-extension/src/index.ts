@@ -619,10 +619,14 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
       const allowedSchemes = setting.get('allowedSchemes').composite as Array<
         string
       >;
+      const allowNamedProperties = setting.get('allowNamedProperties')
+        .composite as boolean;
 
       if (allowedSchemes) {
         sanitizer.setAllowedSchemes(allowedSchemes);
       }
+
+      sanitizer.setAllowNamedProperties(allowNamedProperties);
     };
 
     // Wait for the application to be restored and
