@@ -1309,7 +1309,7 @@
     "label": "Accept Inline Completion",
     "caption": "",
     "shortcuts": [
-      "Tab", "Alt End"
+      "Tab"
     ]
   },
   {
