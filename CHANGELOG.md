@@ -20,7 +20,7 @@ The virtual scrollbar now acts as a minimap and exposes information on whether a
 - is markdown/code (`[ ]`/`[*]`/`[1]` for code, nothing for markdown)
 - how much text/code it contains
 
-<img alt="The minimap view" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-minimap.png" class="jp-screenshot">
+<img alt="The minimap view" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-minimap.png" class="jp-screenshot">
 
 To enable the minimap, click on the hamburger icon (≡) which appears in the notebook's toolbar. If you do not see the hamburger icon, go to Settings → Notebook → Windowing mode and choose "full".
 
@@ -38,7 +38,7 @@ The file browser now:
 - supports navigation with a single click (opt-in)
 - has the file filter collapsed by default (funnel icon), increasing the space available
 
-<img alt="The file browser with resize handle and filter funnel icon" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-filebrowser.png" class="jp-screenshot">
+<img alt="The file browser with resize handle and filter funnel icon" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-filebrowser.png" class="jp-screenshot">
 
 ### Server-side execution and collaboration
 
@@ -69,13 +69,13 @@ In this release both the list and tree view show the kernel identifier stub.
 
 A new toolbar button was added in the kernel allowing to shut down unused kernels (kernels with no widget attached).
 
-<img alt="List view of the kernels in the sidebar, with the clear Shut Down Unused kernels button focused" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-kernels-sidebar.png" class="jp-screenshot">
+<img alt="List view of the kernels in the sidebar, with the clear Shut Down Unused kernels button focused" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-kernels-sidebar.png" class="jp-screenshot">
 
 The following dialog windows can now be dismissed or silenced:
 - the "Server Connection Error" dialog now has an option to dismiss it for the duration of the session,
 - the "Restart Kernel?" dialog now has an option to not ask again. This preference is persisted in settings ( `skipKernelRestartDialog`),
 
-<img alt="The new options added in the server/session dialog windows" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.3/docs/source/getting_started/changelog_assets/4.3-dialogs.png" class="jp-screenshot">
+<img alt="The new options added in the server/session dialog windows" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.3-dialogs.png" class="jp-screenshot">
 
 
 ## v4.2
