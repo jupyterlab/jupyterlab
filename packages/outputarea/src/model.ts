@@ -49,6 +49,10 @@ export interface IOutputAreaModel extends IDisposable {
    */
   get(index: number): IOutputModel;
 
+  removeStreamOutput(number: number): void;
+
+  appendStreamOutput(text: string): void;
+
   /**
    * Add an output, which may be combined with previous output.
    *
@@ -245,6 +249,22 @@ export class OutputAreaModel implements IOutputAreaModel {
     this.list.set(index, item);
   }
 
+  removeStreamOutput(number: number): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.remove(length - number, length, options);
+  }
+
+  appendStreamOutput(text: string): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.insert(length, text, options);
+  }
+
   /**
    * Add an output, which may be combined with previous output.
    *
@@ -326,6 +346,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     if (
       nbformat.isStream(value) &&
       value.name === this._lastStreamName &&
+      this.length > 0 &&
       this.shouldCombine({
         value,
         lastModel: this.list.get(this.length - 1)
@@ -341,11 +362,11 @@ export class OutputAreaModel implements IOutputAreaModel {
       return this.length;
     }
 
-    let newText = '';
     if (nbformat.isStream(value)) {
-      newText =
-        typeof value.text === 'string' ? value.text : value.text.join('');
-      value.text = '';
+      if (typeof value.text !== 'string') {
+        value.text = value.text.join('');
+      }
+      value.text = Private.processText(value.text);
     }
 
     // Create the new item.
@@ -357,8 +378,6 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Update the stream information.
     if (nbformat.isStream(value)) {
       this._lastStreamName = value.name;
-      const curText = item.streamText!;
-      Private.addText(curText, newText);
     } else {
       this._lastStreamName = '';
     }
@@ -501,10 +520,12 @@ namespace Private {
   }
 
   /*
-   * Concatenate a string to an observable string, handling backspaces.
+   * Handle backspaces in `newText` and concatenates to `text`, if any.
    */
-  export function addText(curText: IObservableString, newText: string): void {
-    let text = curText.text;
+  export function processText(newText: string, text?: string): string {
+    if (text === undefined) {
+      text = '';
+    }
     let idx0 = text.length;
     for (let idx1 = 0; idx1 < newText.length; idx1++) {
       const newChar = newText[idx1];
@@ -536,12 +557,22 @@ namespace Private {
         idx0++;
       }
     }
+    return text;
+  }
+
+  /*
+   * Concatenate a string to an observable string, handling backspaces.
+   */
+  export function addText(curText: IObservableString, newText: string): void {
+    const text = processText(newText, curText.text);
     // Compute the difference between current text and new text.
     let done = false;
     let idx = 0;
     while (!done) {
       if (idx === text.length) {
-        if (idx !== curText.text.length) {
+        if (idx === curText.text.length) {
+          done = true;
+        } else {
           curText.remove(idx, curText.text.length);
           done = true;
         }
