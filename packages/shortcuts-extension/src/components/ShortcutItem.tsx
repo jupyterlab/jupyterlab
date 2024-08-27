@@ -338,10 +338,20 @@ export class ShortcutItem extends React.Component<
                   )}
                 </div>
                 <div className="jp-Shortcuts-ErrorButton">
-                  <button>{this._trans.__('Cancel')}</button>
+                  <button
+                    className="jp-Button"
+                    onClick={() => {
+                      this._clearConflict(conflict);
+                    }}
+                  >
+                    {this._trans.__('Cancel')}
+                  </button>
                   <button
                     id="no-blur"
+                    className="jp-Button"
                     onClick={() => {
+                      // Clear the conflict first to prevent user from accidentally clicking this button twice
+                      this._clearConflict(conflict);
                       conflict.overwrite();
                     }}
                   >
@@ -353,6 +363,31 @@ export class ShortcutItem extends React.Component<
           })}
         </div>
       </div>
+    );
+  }
+
+  /**
+   * Mark conflict as resolved.
+   */
+  private _clearConflict(conflictToClear: IConflicts) {
+    const conflicts = new Map();
+    const idToSkip = this._conflictId(conflictToClear);
+    for (const [binding, conflict] of this.state.conflicts.entries()) {
+      if (this._conflictId(conflict) !== idToSkip) {
+        conflicts.set(binding, conflict);
+      }
+    }
+    this.setState({ conflicts });
+  }
+
+  /**
+   * Create a unique conflict identifier.
+   */
+  private _conflictId(conflict: IConflicts): string {
+    return (
+      conflict.keys.join(' ') +
+      '_' +
+      conflict.conflictsWith.map(target => target.id).join('')
     );
   }
 
