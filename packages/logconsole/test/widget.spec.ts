@@ -89,17 +89,17 @@ describe('LogConsolePanel', () => {
       const loggerB = registry.getLogger('B');
       loggerA.log({
         type: 'html',
-        data: '<div id="A"></div>',
+        data: '<div class="A"></div>',
         level: 'warning'
       });
       loggerB.log({
         type: 'html',
-        data: '<div id="B"></div>',
+        data: '<div class="B"></div>',
         level: 'warning'
       });
       logConsole.source = 'A';
-      const nodeA = logConsole.node.querySelector('#A')!;
-      const nodeB = logConsole.node.querySelector('#B')!;
+      const nodeA = logConsole.node.querySelector('.A')!;
+      const nodeB = logConsole.node.querySelector('.B')!;
       expect(nodeA).not.toBeNull();
       expect(anyAncestor(nodeA, isHiddenLumino)).toBe(false);
       expect(nodeB).not.toBeNull();
