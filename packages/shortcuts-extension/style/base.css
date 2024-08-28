@@ -147,39 +147,21 @@
 
 .jp-Shortcuts-ErrorMessage {
   color: var(--jp-error-color1);
-  margin-top: 9px;
+  align-self: center;
+}
+
+.jp-Shortcuts-RowWithConflict {
+  height: 45px;
+  position: relative;
 }
 
 .jp-Shortcuts-ErrorButton {
-  line-height: 34px;
-  margin-left: 10px;
+  margin-left: 12px;
+  white-space: nowrap;
 }
 
-.jp-Shortcuts-ErrorButton button:nth-of-type(1) {
-  height: 25px;
-  margin-right: 5px;
-  background-color: var(--jp-border-color0);
-  color: white;
-  outline: none;
-}
-
-.jp-Shortcuts-ErrorButton button:nth-of-type(1):active,
-.jp-Shortcuts-ErrorButton button:nth-of-type(1):focus {
-  outline: none;
-  border: none;
-}
-
-.jp-Shortcuts-ErrorButton button:nth-of-type(2) {
-  height: 25px;
-  background-color: var(--jp-error-color1);
-  color: white;
-  outline: none;
-}
-
-.jp-Shortcuts-ErrorButton button:nth-of-type(2):active,
-.jp-Shortcuts-ErrorButton button:nth-of-type(2):focus {
-  outline: none;
-  border: none;
+.jp-Shortcuts-ErrorButton > button {
+  margin-right: 12px;
 }
 
 .jp-Shortcuts-ShortcutContainer {
@@ -199,9 +181,13 @@
 }
 
 .jp-Shortcuts-ConflictContainer {
-  display: table;
-  margin: 6px 12px 6px 15%;
-  width: 400%;
+  display: block;
+  padding: 6px 12px;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .jp-Shortcuts-Conflict {
