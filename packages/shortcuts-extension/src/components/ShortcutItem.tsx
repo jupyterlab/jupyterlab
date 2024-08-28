@@ -339,7 +339,7 @@ export class ShortcutItem extends React.Component<
                 </div>
                 <div className="jp-Shortcuts-ErrorButton">
                   <button
-                    className="jp-Button jp-mod-warn jp-mod-styled"
+                    className="jp-Button jp-mod-reject jp-mod-styled"
                     onClick={() => {
                       this._clearConflict(conflict);
                     }}
@@ -348,7 +348,7 @@ export class ShortcutItem extends React.Component<
                   </button>
                   <button
                     id="no-blur"
-                    className="jp-Button jp-mod-reject jp-mod-styled"
+                    className="jp-Button jp-mod-warn jp-mod-styled"
                     onClick={() => {
                       // Clear the conflict first to prevent user from accidentally clicking this button twice
                       this._clearConflict(conflict);
