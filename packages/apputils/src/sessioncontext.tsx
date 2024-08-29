@@ -1914,8 +1914,8 @@ namespace Private {
       translator
     );
 
-    const allowCustomEnvVariables =
-      PageConfig.getOption('allow_setup_custom_env_variables') === 'true'
+    const acceptKernelEnvVar =
+      PageConfig.getOption('accept_kernel_env_var') === 'true'
         ? true
         : false;
     const envVarsDiv = document.createElement('div');
@@ -1933,7 +1933,7 @@ namespace Private {
           option.selected = true;
           let val = JSON.parse(value);
           let id = val && val.id ? val.id : '';
-          if (allowCustomEnvVariables && !id) {
+          if (acceptKernelEnvVar && !id) {
             let defaultEnvValue = {};
             envVarsDiv.innerHTML = '';
             addEnvBlock(envVarsDiv, defaultEnvValue, translator);
@@ -1952,7 +1952,7 @@ namespace Private {
       let kernelData = JSON.parse(select.value) as Kernel.IModel;
       envVarsDiv.innerHTML = '';
       body.setAttribute('data-custom-env-vars', '');
-      if (allowCustomEnvVariables && !kernelData.id) {
+      if (acceptKernelEnvVar && !kernelData.id) {
         let defaultEnvValue = {};
         addEnvBlock(envVarsDiv, defaultEnvValue, translator);
       }

@@ -2131,8 +2131,8 @@ function activateNotebookHandler(
       services.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
 
-    const allowCustomEnvVariables =
-      PageConfig.getOption('allow_setup_custom_env_variables') === 'true'
+    const acceptKernelEnvVar =
+      PageConfig.getOption('accept_kernel_env_var') === 'true'
         ? true
         : false;
     if (allowCustomEnvVariables) {

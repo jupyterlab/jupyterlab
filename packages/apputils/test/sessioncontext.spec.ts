@@ -71,7 +71,7 @@ describe('@jupyterlab/apputils', () => {
           // eslint-disable-next-line camelcase
           allow_external_kernels: true,
           // eslint-disable-next-line camelcase
-          allow_setup_custom_env_variables: true,
+          accept_kernel_env_var: true,
           // eslint-disable-next-line camelcase
           external_connection_dir: external
         }

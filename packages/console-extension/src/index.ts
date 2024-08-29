@@ -446,11 +446,11 @@ async function activateConsole(
     });
   }
 
-  const allowCustomEnvVariables =
-    PageConfig.getOption('allow_setup_custom_env_variables') === 'true'
+  const acceptKernelEnvVar =
+    PageConfig.getOption('accept_kernel_env_var') === 'true'
       ? true
       : false;
-  if (allowCustomEnvVariables) {
+  if (acceptKernelEnvVar) {
     app.contextMenu.addItem({
       command: CommandIDs.setupCustomEnv,
       selector: '.jp-LauncherCard[data-category="Console"]',
