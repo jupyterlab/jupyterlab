@@ -127,23 +127,28 @@
 |----------------------------------------------------------------------------*/
 
 .jp-DirListing {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+
+  /*
+   * TODO: fix sizing
+   */
+  grid-template-columns: [checkbox] 32px [name] 1fr [resize-name-modified] 5px [modified] 100px [resize-modified-size] 5px [file-size] 60px;
   outline: 0;
 }
 
 .jp-DirListing-header {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  overflow: hidden;
+  /* Display the same columns as in the top-level grid */
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column-start: checkbox;
+  grid-column-end: file-size;
+
+  /* overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
-  user-select: none;
+  user-select: none; */
 }
 
 .jp-DirListing-headerItem {
@@ -152,36 +157,24 @@
   overflow: hidden;
   white-space: nowrap;
   box-sizing: border-box;
-  display: flex;
+  display: grid;
 }
 
 .jp-DirListing-headerItemText {
-  flex-grow: 1;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-
-.jp-DirListing-header > .jp-DirListing-headerItem:last-child {
-  flex-grow: 1;
 }
 
 .jp-DirListing-headerItem:hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-DirListing-headerItem.jp-id-name:not([style*='width']) {
-  /* default width before user resizes this column */
-  flex: 1 1 126px;
+.jp-DirListing-headerItem.jp-id-name {
+  grid-column: name;
 }
 
-.jp-DirListing-headerItem.jp-id-modified:not([style*='width']) {
-  /* default width before user resizes this column */
-  flex: 1 0 70px;
-}
-
-.jp-DirListing-headerItem.jp-id-filesize:not([style*='width']) {
-  /* default width before user resizes this column */
-  flex: 0 0 75px;
+.jp-DirListing-resizeHandle[data-column='name'] {
+  grid-column: resize-name-modified;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
@@ -189,6 +182,16 @@
   /* stylelint-disable */
   container-type: inline-size;
   /* stylelint-enable */
+  grid-column: modified;
+}
+
+.jp-DirListing-resizeHandle[data-column='last_modified'] {
+  grid-column: resize-modified-size;
+}
+
+.jp-DirListing-headerItem.jp-id-filesize {
+  grid-column: file-size;
+  text-align: right;
 }
 
 /**
@@ -223,17 +226,12 @@
   }
 }
 
-.jp-DirListing-headerItem.jp-id-filesize {
-  text-align: right;
-}
-
 .jp-DirListing-headerItem.jp-mod-selected {
   font-weight: 600;
 }
 
 /* increase specificity to override bundled default */
 .jp-DirListing-content {
-  flex: 1 1 auto;
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -259,8 +257,9 @@
 }
 
 .jp-DirListing-item {
-  display: flex;
-  align-items: center;
+  /* Display the same columns as in the top-level grid */
+  display: grid;
+  grid-template-columns: subgrid;
   padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -269,13 +268,13 @@
 }
 
 .jp-DirListing-item > :last-child {
-  flex-grow: 1;
   margin-right: 2px;
 }
 
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
+  grid-column: checkbox;
 }
 
 .jp-DirListing-header
@@ -331,7 +330,7 @@
 }
 
 .jp-DirListing-itemName {
-  display: flex;
+  grid-column: name;
 }
 
 .jp-DirListing-item[data-is-dot] {
@@ -352,7 +351,6 @@
 }
 
 .jp-DirListing-itemIcon {
-  flex: 0 0 20px;
   margin-right: 4px;
 }
 
@@ -362,10 +360,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.jp-DirListing-itemName:not([style*='width']) > .jp-DirListing-itemText {
-  flex: 1 1 106px;
 }
 
 .jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
@@ -387,14 +381,15 @@
 
 .jp-DirListing-itemModified {
   text-align: right;
+  grid-column: modified;
 }
 
 .jp-DirListing-itemFileSize {
   text-align: right;
+  grid-column: file-size;
 }
 
 .jp-DirListing-editor {
-  flex: 1 0 64px;
   outline: none;
   border: none;
   color: var(--jp-ui-font-color1);
