@@ -377,13 +377,6 @@ close the notebook without saving it.`,
         buttons: [Dialog.okButton({ label: this._trans.__('Ok') })]
       });
     }
-
-    // Ensure there is at least one cell
-    if ((copy.cells?.length ?? 0) === 0) {
-      copy['cells'] = [
-        { cell_type: 'code', source: '', metadata: { trusted: true } }
-      ];
-    }
     this.sharedModel.fromJSON(copy);
 
     this._ensureMetadata();
