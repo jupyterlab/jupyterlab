@@ -196,8 +196,9 @@ describe('@jupyterlab/notebook', () => {
       // - 2 output lines from 'application/vnd.jupyter.stdout': 'Stdout line 1\nStdout line 2\n' (2 lines)
       // Calculation: (1 source_line + 8 output_lines) * 20 (line_height)
     });
-});
+  });
 
-class NotebookViewModelTest extends NotebookViewModel {
-  public cells: Cell[] = [];
-}
+  class NotebookViewModelTest extends NotebookViewModel {
+    public cells: Cell[] = [];
+  }
+});
