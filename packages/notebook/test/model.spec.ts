@@ -318,11 +318,10 @@ describe('@jupyterlab/notebook', () => {
         expect(model.dirty).toBe(true);
       });
 
-      it('should populate empty notebook with empty trusted code cell', () => {
+      it('should not populate empty notebook with empty trusted code cell', () => {
         const model = new NotebookModel();
         model.fromJSON(utils.EMPTY_CONTENT);
-        const cell = model.cells.get(0);
-        expect(cell.trusted).toBe(true);
+        expect(model.cells.length).toBe(0);
       });
     });
 

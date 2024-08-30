@@ -163,7 +163,7 @@ describe('@jupyterlab/notebook', () => {
           panel.model!.sharedModel.deleteCell(0);
         }
         await provider.highlightNext();
-        expect(provider.currentMatchIndex).toBe(null);
+        expect(provider.currentMatchIndex).toBe(0);
         await provider.endQuery();
       });
     });
@@ -290,6 +290,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should not replace the current match in a read-only cell', async () => {
+        panel.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         panel.model!.sharedModel.insertCells(0, [
           {
             cell_type: 'markdown',
@@ -300,25 +301,25 @@ describe('@jupyterlab/notebook', () => {
         ]);
 
         await provider.startQuery(/test\d/, undefined);
-        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(2);
         let replaced = await provider.replaceCurrentMatch('bar');
-        expect(replaced).toBe(false);
+        expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test1');
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(3);
+        replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+        const source1 = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source1).toBe('test2');
 
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(1);
         replaced = await provider.replaceCurrentMatch('bar');
         expect(replaced).toBe(false);
-        const source1 = panel.model!.cells.get(1).sharedModel.getSource();
-        expect(source1).toBe('test2');
-
-        await provider.highlightNext();
-        expect(provider.currentMatchIndex).toBe(2);
-        replaced = await provider.replaceCurrentMatch('bar');
-        expect(replaced).toBe(true);
         const source2 = panel.model!.cells.get(2).sharedModel.getSource();
-        expect(source2).toBe('bar test2');
+        expect(source2).toBe('');
       });
     });
 
