@@ -183,21 +183,22 @@ describe('@jupyterlab/notebook', () => {
         source: ['sum([1, 2, 3, 4, 5])'],
         metadata: {}
       }) as YCodeCell;
-    
+
       const model: ICodeCellModel = new CodeCellModel({ sharedModel });
       expect(model.executionCount).toBe(1);
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
-    
+
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(204); 
+      expect(height).toBe(204);
       // Explanation:
       // - 1 source line: sum([1, 2, 3, 4, 5])
       // - 5 output lines from 'text/markdown': '# Title\n\nParagraph\nAnother Line' (3 lines) + '## Subtitle\n\nAnother paragraph\nFinal Line' (3 lines)
       // - 2 output lines from 'application/vnd.jupyter.stdout': 'Stdout line 1\nStdout line 2\n' (2 lines)
       // Calculation: (1 source_line + 8 output_lines) * 20 (line_height)
     });
-});
+  });
 
-class NotebookViewModelTest extends NotebookViewModel {
-  public cells: Cell[] = [];
-}
+  class NotebookViewModelTest extends NotebookViewModel {
+    public cells: Cell[] = [];
+  }
+});
