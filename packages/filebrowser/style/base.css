@@ -236,8 +236,10 @@
 }
 
 .jp-DirListing-content ul {
+  /* Use all the same columns as in the top-level grid */
   display: grid;
   grid-template-columns: subgrid;
+  grid-column: 1 / -1;
 }
 
 .jp-DirListing-content mark {
@@ -258,9 +260,10 @@
 }
 
 .jp-DirListing-item {
-  /* Display the same columns as in the top-level grid */
+  /* Display and use the same columns as in the top-level grid */
   display: grid;
   grid-template-columns: subgrid;
+  grid-column: 1 / -1;
   padding: 4px 12px;
   -webkit-user-select: none;
   -moz-user-select: none;

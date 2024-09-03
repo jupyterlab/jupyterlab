@@ -230,9 +230,8 @@ export namespace LabIconStyle {
 
     listing: {
       container: {
-        flex: '0 0 20px',
-        marginRight: '4px',
-        position: 'relative'
+        display: 'inline-block',
+        marginRight: '4px'
       },
       element: {
         height: '16px',
