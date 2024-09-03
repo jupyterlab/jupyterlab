@@ -250,11 +250,8 @@ export namespace LabIconStyle {
       },
       element: {
         height: 'auto',
-        margin: '-2px 0 0 0',
+        position: 'absolute',
         width: '20px'
-      },
-      options: {
-        elementPosition: 'center'
       }
     },
 
