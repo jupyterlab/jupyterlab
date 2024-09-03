@@ -127,28 +127,20 @@
 |----------------------------------------------------------------------------*/
 
 .jp-DirListing {
-  display: grid;
-
-  /*
-   * TODO: fix sizing
-   */
-  grid-template-columns: [checkbox] 32px [name] 1fr [resize-name-modified] 5px [modified] 100px [resize-modified-size] 5px [file-size] 60px;
   outline: 0;
 }
 
 .jp-DirListing-header {
-  /* Display the same columns as in the top-level grid */
   display: grid;
-  grid-template-columns: subgrid;
-  grid-column-start: checkbox;
-  grid-column-end: file-size;
 
-  /* overflow: hidden;
+  /* TODO: Deduplicate with content grid */
+  grid-template-columns: [checkbox] 32px [name] 1fr [resize-name-modified] 5px [modified] 100px [resize-modified-size] 5px [file-size] 60px;
+  overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
-  user-select: none; */
+  user-select: none;
 }
 
 .jp-DirListing-headerItem {
@@ -237,6 +229,15 @@
   list-style-type: none;
   overflow: auto;
   background-color: var(--jp-layout-color1);
+  display: grid;
+
+  /* TODO: Deduplicate with content grid */
+  grid-template-columns: [checkbox] 32px [name] 1fr [resize-name-modified] 5px [modified] 100px [resize-modified-size] 5px [file-size] 60px;
+}
+
+.jp-DirListing-content ul {
+  display: grid;
+  grid-template-columns: subgrid;
 }
 
 .jp-DirListing-content mark {
