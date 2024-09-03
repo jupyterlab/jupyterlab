@@ -149,7 +149,6 @@
   overflow: hidden;
   white-space: nowrap;
   box-sizing: border-box;
-  display: grid;
 }
 
 .jp-DirListing-headerItemText {
