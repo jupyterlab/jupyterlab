@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISharedDocument } from '@jupyter/ydoc';
+import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
@@ -24,6 +24,13 @@ const SERVICE_DRIVE_URL = 'api/contents';
  * The url for the file access.
  */
 const FILES_URL = 'files';
+
+/**
+ * A document factory for registering shared models
+ */
+export type SharedDocumentFactory = (
+  options: Contents.ISharedFactoryOptions
+) => YDocument<DocumentChange>;
 
 /**
  * A namespace for contents interfaces.
@@ -254,6 +261,17 @@ export namespace Contents {
      * It should return `undefined` if the factory is not able to create a `ISharedDocument`.
      */
     createNew(options: ISharedFactoryOptions): ISharedDocument | undefined;
+
+    /**
+     * Register a SharedDocumentFactory.
+     *
+     * @param type Document type
+     * @param factory Document factory
+     */
+    registerDocumentFactory(
+      type: Contents.ContentType,
+      factory: SharedDocumentFactory
+    ): void;
   }
 
   /**
@@ -478,6 +496,12 @@ export namespace Contents {
    */
   export interface IDrive extends IDisposable {
     /**
+     * The content provider registry, consisting of all the
+     * content providers that this drive can use to access files.
+     */
+    readonly contentProviderRegistry: IContentProviderRegistry;
+
+    /**
      * The name of the drive, which is used at the leading
      * component of file paths.
      */
@@ -487,12 +511,6 @@ export namespace Contents {
      * The server settings of the manager.
      */
     readonly serverSettings: ServerConnection.ISettings;
-
-    /**
-     * An optional shared model factory instance for the
-     * drive.
-     */
-    readonly sharedModelFactory?: ISharedFactory;
 
     /**
      * A signal emitted when a file operation takes place.
@@ -686,7 +704,8 @@ export class ContentsManager implements Contents.IManager {
    */
   getSharedModelFactory(path: string): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
-    return drive?.sharedModelFactory ?? null;
+    const provider = drive?.contentProviderRegistry.getProvider(path);
+    return provider?.sharedModelFactory ?? null;
   }
 
   /**
@@ -1080,6 +1099,26 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this.contentProviderRegistry.serverSettings = this.serverSettings;
+  }
+
+  static _contentProviderRegistry: IContentProviderRegistry | undefined =
+    undefined;
+
+  static getContentProviderRegistry(): IContentProviderRegistry {
+    if (Drive._contentProviderRegistry === undefined) {
+      const contentProviderRegistry = new ContentProviderRegistry();
+      const restContentProvider = new RestContentProvider();
+      contentProviderRegistry.register(restContentProvider);
+      Drive._contentProviderRegistry = contentProviderRegistry;
+    }
+    return Drive._contentProviderRegistry;
+  }
+
+  get contentProviderRegistry(): IContentProviderRegistry {
+    const contentProviderRegistry = Drive.getContentProviderRegistry();
+    contentProviderRegistry.serverSettings = this.serverSettings;
+    return contentProviderRegistry;
   }
 
   /**
@@ -1133,27 +1172,8 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    let url = this._getUrl(localPath);
-    if (options) {
-      // The notebook type cannot take an format option.
-      if (options.type === 'notebook') {
-        delete options['format'];
-      }
-      const content = options.content ? '1' : '0';
-      const hash = options.hash ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content, hash };
-      url += URLExt.objectToQueryString(params);
-    }
-
-    const settings = this.serverSettings;
-    const response = await ServerConnection.makeRequest(url, {}, settings);
-    if (response.status !== 200) {
-      const err = await ServerConnection.ResponseError.create(response);
-      throw err;
-    }
-    const data = await response.json();
-    validate.validateContentsModel(data);
-    return data;
+    const contentProvider = this.contentProviderRegistry.getProvider(localPath);
+    return contentProvider!.get(localPath, options);
   }
 
   /**
@@ -1571,3 +1591,141 @@ namespace Private {
     return extension;
   }
 }
+
+class ContentProviderRegistry implements IContentProviderRegistry {
+  constructor() {
+    this._providers = [];
+  }
+
+  set serverSettings(serverSettings: ServerConnection.ISettings) {
+    for (let provider of this._providers) {
+      provider.serverSettings = serverSettings;
+    }
+  }
+
+  register(provider: IContentProvider): void {
+    provider.serverSettings = this._serverSettings;
+    this._providers.push(provider);
+  }
+
+  getProvider(filePath: string): IContentProvider | undefined {
+    let ext = filePath.split('.').pop();
+    if (ext == null) ext = '';
+    let score: number = 0;
+    let bestProvider: IContentProvider | undefined = undefined;
+    for (let provider of this._providers) {
+      for (let extension of provider.extensions) {
+        const re = new RegExp(extension.re);
+        if (ext.match(re) !== null) {
+          if (extension.score > score) {
+            bestProvider = provider;
+            score = extension.score;
+          }
+        }
+      }
+    }
+    return bestProvider;
+  }
+
+  private _providers: IContentProvider[];
+  private _serverSettings: ServerConnection.ISettings;
+}
+
+export class RestContentProvider implements IContentProvider {
+  constructor() {
+    this._apiEndpoint = SERVICE_DRIVE_URL;
+  }
+
+  public get extensions(): ContentProviderExtensions {
+    return [{ re: '.*', score: 1 }];
+  }
+
+  async get(
+    localPath: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel> {
+    let url = this._getUrl(localPath);
+    if (options) {
+      // The notebook type cannot take a format option.
+      if (options.type === 'notebook') {
+        delete options['format'];
+      }
+      const content = options.content ? '1' : '0';
+      const hash = options.hash ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content, hash };
+      url += URLExt.objectToQueryString(params);
+    }
+
+    const response = await ServerConnection.makeRequest(
+      url,
+      {},
+      this.serverSettings
+    );
+    if (response.status !== 200) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    const data = await response.json();
+    validate.validateContentsModel(data);
+    return data;
+  }
+
+  /**
+   * Get a REST url for a file given a path.
+   */
+  private _getUrl(...args: string[]): string {
+    const parts = args.map(path => URLExt.encodeParts(path));
+    const baseUrl = this.serverSettings.baseUrl;
+    return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
+  }
+
+  private _apiEndpoint: string;
+  public serverSettings: ServerConnection.ISettings;
+}
+
+/**
+ * The content provider registry interface.
+ */
+interface IContentProviderRegistry {
+  serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Add a content provider into the registry.
+   *
+   * @param provider - The content provider to register.
+   */
+  register(provider: IContentProvider): void;
+
+  getProvider(filePath: string): IContentProvider | undefined;
+}
+
+export interface IContentProvider {
+  serverSettings: ServerConnection.ISettings;
+
+  /**
+   * An optional shared model factory instance for the content provider.
+   */
+  readonly sharedModelFactory?: Contents.ISharedFactory;
+
+  /**
+   * The extensions that this provider handles, consisting of the regural expression matching the file extension and
+   * the score indicating how good the provider is at handling this type of content.
+   */
+  readonly extensions: ContentProviderExtensions;
+
+  /**
+   * Get the file content.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @param options - The optional options for fetching the content.
+   *
+   * @returns The content model.
+   */
+  get(
+    localPath: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel>;
+}
+
+export type ContentProviderExtensions = { re: string; score: number }[];
