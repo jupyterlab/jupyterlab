@@ -134,7 +134,13 @@
   display: grid;
 
   /* TODO: Deduplicate with content grid */
-  grid-template-columns: [checkbox] 32px [name] 1fr [resize-name-modified] 5px [modified] 100px [resize-modified-size] 5px [file-size] 60px;
+  grid-template-columns:
+    [checkbox] auto
+    [name] 1fr
+    [resize-name-modified] 5px
+    [modified] auto
+    [resize-modified-size] 5px
+    [file-size] auto;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -231,7 +237,13 @@
   display: grid;
 
   /* TODO: Deduplicate with content grid */
-  grid-template-columns: [checkbox] 32px [name] 1fr [resize-name-modified] 5px [modified] 100px [resize-modified-size] 5px [file-size] 60px;
+  grid-template-columns:
+    [checkbox] auto
+    [name] 1fr
+    [resize-name-modified] 5px
+    [modified] auto
+    [resize-modified-size] 5px
+    [file-size] auto;
 }
 
 .jp-DirListing-content ul {
