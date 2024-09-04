@@ -235,6 +235,7 @@
   overflow: auto;
   background-color: var(--jp-layout-color1);
   display: grid;
+  max-height: 100%;
 
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
