@@ -41,6 +41,15 @@ describe('@jupyterlab/notebook', () => {
         const panel = new NotebookPanel({ context, content });
         expect(panel).toBeInstanceOf(NotebookPanel);
       });
+
+      it('should change notebook to edit mode if we have a single empty code cell', async () => {
+        const panel = utils.createNotebookPanel(context);
+        const model = panel.content.model;
+        expect(model).toBe(context.model);
+        await context.initialize(true);
+        await context.ready;
+        expect(panel.content.mode).toBe('edit');
+      });
     });
 
     describe('#toolbar', () => {

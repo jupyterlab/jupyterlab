@@ -259,13 +259,14 @@ describe('@jupyter/notebook', () => {
         expect(widget.widgets.length).toBe(model.cells.length);
       });
 
-      it('should not add a default cell if the notebook model is empty', () => {
+      it('should add a default cell if the notebook model is empty', () => {
         const widget = new LogStaticNotebook(options);
         const model1 = new NotebookModel();
         expect(model1.cells.length).toBe(0);
 
         widget.model = model1;
-        expect(model1.cells.length).toBe(0);
+        expect(model1.cells.length).toBe(1);
+        expect(model1.cells.get(0).type).toBe('code');
 
         widget.notebookConfig = {
           ...widget.notebookConfig,
@@ -277,7 +278,8 @@ describe('@jupyter/notebook', () => {
         expect(model2.cells.length).toBe(0);
 
         widget.model = model2;
-        expect(model2.cells.length).toBe(0);
+        expect(model2.cells.length).toBe(1);
+        expect(model2.cells.get(0).type).toBe('markdown');
       });
 
       it('should set the mime types of the cell widgets', () => {
@@ -285,7 +287,6 @@ describe('@jupyter/notebook', () => {
         const model = new NotebookModel();
         const value = { name: 'python', codemirror_mode: 'python' };
         model.setMetadata('language_info', value);
-        model.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.model = model;
         const child = widget.widgets[0];
         expect(child.model.mimeType).toBe('text/x-python');
@@ -310,7 +311,7 @@ describe('@jupyter/notebook', () => {
             { cell_type: 'code' }
           );
           await framePromise();
-          expect(widget.widgets.length).toBe(1);
+          expect(widget.widgets.length).toBe(2);
         });
 
         it('should handle a remove', () => {
@@ -381,7 +382,6 @@ describe('@jupyter/notebook', () => {
 
       it('should be settable', () => {
         const widget = createWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.widgets[0].editor!.getOption('autoClosingBrackets')).toBe(
           false
         );
@@ -419,7 +419,6 @@ describe('@jupyter/notebook', () => {
     describe('#widgets', () => {
       it('should get the child widget at a specified index', () => {
         const widget = createWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         const child = widget.widgets[0];
         expect(child).toBeInstanceOf(CodeCell);
       });
@@ -432,7 +431,7 @@ describe('@jupyter/notebook', () => {
 
       it('should get the number of child widgets', () => {
         const widget = createWidget();
-        expect(widget.widgets.length).toBe(0);
+        expect(widget.widgets.length).toBe(1);
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         expect(widget.widgets.length).toBe(utils.DEFAULT_CONTENT.cells.length);
       });
@@ -524,7 +523,6 @@ describe('@jupyter/notebook', () => {
       it('should update the cell widget mimetype', () => {
         const widget = createWidget();
         const value = { name: 'python', mimetype: 'text/x-python' };
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.model!.setMetadata('language_info', value);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onMetadataChanged'])
@@ -547,7 +545,6 @@ describe('@jupyter/notebook', () => {
     describe('#onCellRemoved()', () => {
       it('should be called when a cell is removed', () => {
         const widget = createWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.model!.sharedModel.deleteCell(0);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onCellRemoved'])
@@ -606,7 +603,6 @@ describe('@jupyter/notebook', () => {
     describe('#stateChanged', () => {
       it('should be emitted when the state of the notebook changes', () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         let called = false;
         widget.stateChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
@@ -681,14 +677,12 @@ describe('@jupyter/notebook', () => {
 
       it('should set the interactivity mode of the notebook', () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.mode = 'edit';
         expect(widget.mode).toBe('edit');
       });
 
       it('should emit the `stateChanged` signal', () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         let called = false;
         widget.stateChanged.connect((sender, args) => {
           expect(sender).toBe(widget);
@@ -713,7 +707,6 @@ describe('@jupyter/notebook', () => {
 
       it('should post an update request', async () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.mode = 'edit';
         await framePromise();
         expect(widget.methods).toEqual(
@@ -753,7 +746,6 @@ describe('@jupyter/notebook', () => {
     describe('#activeCellIndex', () => {
       it('should get the active cell index of the notebook', () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.activeCellIndex).toBe(0);
       });
 
@@ -801,7 +793,6 @@ describe('@jupyter/notebook', () => {
 
       it('should post an update request', async () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         await framePromise();
         expect(widget.methods).toEqual(
@@ -821,7 +812,6 @@ describe('@jupyter/notebook', () => {
     describe('#activeCell', () => {
       it('should get the active cell widget', () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.activeCell).toBe(widget.widgets[0]);
       });
     });
@@ -1488,7 +1478,6 @@ describe('@jupyter/notebook', () => {
 
       it('should post an update request', async () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
         await framePromise();
@@ -1642,7 +1631,6 @@ describe('@jupyter/notebook', () => {
     describe('#onCellRemoved()', () => {
       it('should post an `update-request', async () => {
         const widget = createActiveWidget();
-        widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         widget.model!.sharedModel.deleteCell(0);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onCellRemoved'])

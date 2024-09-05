@@ -37,7 +37,6 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(() => {
       widget = utils.createNotebook(sessionContext);
       const model = new NotebookModel();
-      model.sharedModel.insertCell(0, { cell_type: 'code' });
       widget.model = model;
       widget.activeCellIndex = 0;
     });

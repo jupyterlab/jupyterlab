@@ -103,6 +103,7 @@ export class NotebookModel implements INotebookModel {
   constructor(options: NotebookModel.IOptions = {}) {
     this.standaloneModel = typeof options.sharedModel === 'undefined';
 
+    this._allowEmptyNotebook = options.allowEmptyNotebook ?? false;
     if (options.sharedModel) {
       this.sharedModel = options.sharedModel;
     } else {
@@ -377,6 +378,15 @@ close the notebook without saving it.`,
         buttons: [Dialog.okButton({ label: this._trans.__('Ok') })]
       });
     }
+
+    if (!this._allowEmptyNotebook) {
+      // Ensure there is at least one cell
+      if ((copy.cells?.length ?? 0) === 0) {
+        copy['cells'] = [
+          { cell_type: 'code', source: '', metadata: { trusted: true } }
+        ];
+      }
+    }
     this.sharedModel.fromJSON(copy);
 
     this._ensureMetadata();
@@ -491,6 +501,7 @@ close the notebook without saving it.`,
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
 
+  private _allowEmptyNotebook: boolean;
   private _trans: TranslationBundle;
   private _cells: CellList;
   private _deletedCells: string[];
@@ -508,6 +519,11 @@ export namespace NotebookModel {
    */
   export interface IOptions
     extends DocumentRegistry.IModelOptions<ISharedNotebook> {
+    /**
+     * Whether not to show a cell when the notebook is empty.
+     */
+    allowEmptyNotebook?: boolean;
+
     /**
      * Default cell type.
      */
