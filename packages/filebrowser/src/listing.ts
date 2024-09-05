@@ -1121,14 +1121,14 @@ export class DirListing extends Widget {
       // restrict the minimum and maximum width
       size = Math.max(size, column.minWidth);
       if (this._width) {
-        let reservedForOtherColums = 0;
+        let reservedForOtherColumns = 0;
         for (const other of visibleColumns) {
           if (other.id === column.id) {
             continue;
           }
-          reservedForOtherColums += other.minWidth;
+          reservedForOtherColumns += other.minWidth;
         }
-        size = Math.min(size, this._width - reservedForOtherColums);
+        size = Math.min(size, this._width - reservedForOtherColumns);
       }
       this._columnSizes[column.id] = size;
       total += size;
@@ -1145,7 +1145,13 @@ export class DirListing extends Widget {
     // Write to DOM
     for (const column of visibleColumns) {
       const size = this._columnSizes[column.id];
-      column.element.style.width = size === null ? '' : size + 'px';
+      const newSize = size === null ? '' : size + 'px';
+      const varName =
+        column.className.replace(RegExp(/^jp-id-/), '--jp-filebrowser-') +
+        '-column-width';
+
+      // Set at the root.
+      document.documentElement.style.setProperty(varName, newSize);
     }
     this._updateModifiedStyleAndSize();
 

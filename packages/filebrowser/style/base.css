@@ -10,6 +10,11 @@
 :root {
   --jp-private-filebrowser-button-height: 28px;
   --jp-private-filebrowser-button-width: 48px;
+
+  /* Default widths of columns, before users resize them */
+  --jp-filebrowser-name-column-width: 126px;
+  --jp-filebrowser-modified-column-width: 83px;
+  --jp-filebrowser-filesize-column-width: 90px;
 }
 
 .jp-FileBrowser .jp-SidePanel-content {
@@ -136,11 +141,11 @@
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
     [checkbox] auto
-    [name] 1fr
+    [name] minmax(var(--jp-filebrowser-name-column-width), auto)
     [resize-name-modified] 5px
-    [modified] auto
+    [modified] minmax(var(--jp-filebrowser-modified-column-width), auto)
     [resize-modified-size] 5px
-    [file-size] auto;
+    [file-size] minmax(var(--jp-filebrowser-filesize-column-width), auto);
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -240,11 +245,11 @@
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
     [checkbox] auto
-    [name] 1fr
+    [name] minmax(var(--jp-filebrowser-name-column-width), auto)
     [resize-name-modified] 5px
-    [modified] auto
+    [modified] minmax(var(--jp-filebrowser-modified-column-width), auto)
     [resize-modified-size] 5px
-    [file-size] auto;
+    [file-size] minmax(var(--jp-filebrowser-filesize-column-width), auto);
 }
 
 .jp-DirListing-content ul {
