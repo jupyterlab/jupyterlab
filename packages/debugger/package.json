@@ -33,7 +33,6 @@
     "lib/**/*.js",
     "schema/*.json",
     "style/**/*.css",
-    "style/**/*.svg",
     "style/index.js",
     "src/**/*.{ts,tsx}"
   ],
