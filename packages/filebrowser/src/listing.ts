@@ -2901,7 +2901,7 @@ export namespace DirListing {
             small: trans.__('Modified'),
             large: trans.__('Last Modified')
           }),
-        file_size: () => this.createHeaderItemNode(trans.__('File Size')),
+        file_size: () => this.createHeaderItemNode(trans.__('Size')),
         is_selected: () =>
           this.createCheckboxWrapperNode({
             alwaysVisible: true,
