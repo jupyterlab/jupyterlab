@@ -925,12 +925,7 @@ export class DirListing extends Widget {
           // short-circuit in case if node is not yet ready
           return;
         }
-        return this.renderer.updateItemSize(
-          node,
-          item,
-          this._modifiedStyle,
-          this._columnSizes
-        );
+        return this.renderer.updateItemSize(node, item, this._modifiedStyle);
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
       this.renderer.updateItemNode(
@@ -940,8 +935,7 @@ export class DirListing extends Widget {
         this.translator,
         this._hiddenColumns,
         this.selection[item.path],
-        this._modifiedStyle,
-        this._columnSizes
+        this._modifiedStyle
       );
       if (
         this.selection[item.path] &&
@@ -2637,8 +2631,7 @@ export namespace DirListing {
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
-      modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      modifiedStyle?: Time.HumanStyle
     ): void;
 
     /**
@@ -2840,12 +2833,6 @@ export namespace DirListing {
         const isLastVisible =
           column.id === visibleColumns[visibleColumns.length - 1].id;
 
-        if (columnsSizes) {
-          const size = columnsSizes[column.id];
-          if (!isLastVisible) {
-            element.style.width = size + 'px';
-          }
-        }
         node.appendChild(element);
 
         if (Private.isResizable(column) && !isLastVisible) {
@@ -2949,11 +2936,6 @@ export namespace DirListing {
         const createElement = this.itemFactories[column.id];
         const element = createElement();
         node.appendChild(element);
-
-        if (columnsSizes) {
-          const size = columnsSizes[column.id];
-          element.style.width = size + 'px';
-        }
       }
 
       return node;
@@ -3061,8 +3043,7 @@ export namespace DirListing {
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
-      modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      modifiedStyle?: Time.HumanStyle
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3193,7 +3174,7 @@ export namespace DirListing {
         checkbox.checked = selected ?? false;
       }
 
-      this.updateItemSize(node, model, modifiedStyle, columnsSizes);
+      this.updateItemSize(node, model, modifiedStyle);
     }
 
     /**
@@ -3202,22 +3183,8 @@ export namespace DirListing {
     updateItemSize(
       node: HTMLElement,
       model: Contents.IModel,
-      modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      modifiedStyle?: Time.HumanStyle
     ): void {
-      if (columnsSizes) {
-        for (const column of columns) {
-          const element = DOMUtils.findElement(node, column.itemClassName);
-          if (!element) {
-            continue;
-          }
-          const sizeSpec = columnsSizes[column.id];
-          const newWidth = sizeSpec === null ? '' : sizeSpec + 'px';
-          if (newWidth !== element.style.width) {
-            element.style.width = newWidth;
-          }
-        }
-      }
       let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS) as
         | HTMLElement
         | undefined;
