@@ -1636,10 +1636,6 @@ export class RestContentProvider implements IContentProvider {
   }
 
   set drive(drive: Contents.IDrive) {
-    drive.fileChanged.connect((_, change) => {
-      // pass through any events from the drive
-      this._fileChanged.emit(change);
-    });
     this._drive = drive;
   }
 
@@ -1722,7 +1718,7 @@ export class RestContentProvider implements IContentProvider {
     }
     const data = await response.json();
     validate.validateContentsModel(data);
-    this._fileChanged.emit({
+    this.fileChanged.emit({
       type: 'save',
       oldValue: null,
       newValue: data
@@ -1733,8 +1729,11 @@ export class RestContentProvider implements IContentProvider {
   /**
    * A signal emitted when a file operation takes place.
    */
-  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
-    return this._fileChanged;
+  get fileChanged(): Signal<this, Contents.IChangedArgs> {
+    return this.drive.fileChanged as unknown as Signal<
+      this,
+      Contents.IChangedArgs
+    >;
   }
 
   /**
@@ -1747,7 +1746,6 @@ export class RestContentProvider implements IContentProvider {
   }
 
   private _apiEndpoint: string;
-  private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _drive: Contents.IDrive;
 }
 
