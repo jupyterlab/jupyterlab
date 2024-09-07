@@ -981,6 +981,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-single-click-navigation",
+    "label": "Enable Single Click Navigation",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-sort-notebooks-first",
     "label": "Sort Notebooks Above Files",
     "caption": "",
@@ -2208,6 +2214,12 @@
   {
     "id": "running:kernel-shut-down",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-shut-down-unused",
+    "label": "Shut Down Unused",
     "caption": "",
     "shortcuts": []
   },
