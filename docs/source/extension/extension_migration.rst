@@ -32,6 +32,19 @@ breaking change when defining fixture values that are array of objects.
 
 See the `Playwright 1.46.0 release notes <https://github.com/microsoft/playwright/releases/tag/v1.46.0>`_ for more information.
 
+
+Shared model
+~~~~~~~~~~~~
+
+The outputs set on the shared cell model are now expected to be wrapped
+in the pycrdt ``Map`` objects rather than provided as plain dictionaries.
+The use of dictionaries is deprecated and will stop working in a future version.
+For reference, see PRs:
+
+- https://github.com/jupyterlab/jupyterlab/pull/16498
+- https://github.com/jupyter-server/jupyter_ydoc/pull/241
+
+
 JupyterLab 4.1 to 4.2
 ---------------------
 
