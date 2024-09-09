@@ -854,7 +854,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           if ('insert' in outputsChange) {
             // Inserting an output always results in appending it.
             for (const output of outputsChange.insert!) {
-              this._outputs.add(output.toJSON());
+              // For compatibility with older ydoc where a dictionary,
+              // (rather than a Map instance) could be provided.
+              // In a future major release the use of Map will be required.
+              this._outputs.add('toJSON' in output ? output.toJSON() : output);
             }
           }
         }
