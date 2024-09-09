@@ -196,37 +196,6 @@
  * Use container queries (not yet supported by our version of stylelint)
  * to display either a small or large header for the last-modified column.
  */
-/* stylelint-disable */
-/* @container (max-width: 300px) { */
-  /* stylelint-enable */
-  /* .jp-DirListing-headerItem.jp-id-modified */
-    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small { */
-    /* display: inline; */
-  /* } */
-
-  /* .jp-DirListing-headerItem.jp-id-modified */
-    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large { */
-    /* display: none; */
-  /* } */
-/* } */
-
-/* stylelint-disable */
-/* @container (min-width: 300px) { */
-  /* stylelint-enable */
-  /* .jp-DirListing-headerItem.jp-id-modified */
-    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small { */
-    /* display: none; */
-  /* } */
-
-  /* .jp-DirListing-headerItem.jp-id-modified */
-    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large { */
-    /* display: inline; */
-  /* } */
-/* } */
-
-/* .jp-DirListing-headerItem.jp-id-filesize { */
-  /* text-align: right; */
-/* } */
 @container (max-width: 100px) {
 
   .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-small,
