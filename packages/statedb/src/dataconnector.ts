@@ -6,17 +6,17 @@ import { IDataConnector } from './interfaces';
 /**
  * An abstract class that adheres to the data connector interface.
  *
- * @typeparam T - The basic entity response type a service's connector.
+ * @typeParam T - The basic entity response type a service's connector.
  *
- * @typeparam U - The basic entity request type, which is conventionally the
+ * @typeParam U - The basic entity request type, which is conventionally the
  * same as the response type but may be different if a service's implementation
  * requires input data to be different from output responses. Defaults to `T`.
  *
- * @typeparam V - The basic token applied to a request, conventionally a string
+ * @typeParam V - The basic token applied to a request, conventionally a string
  * ID or filter, but may be set to a different type when an implementation
  * requires it. Defaults to `string`.
  *
- * @typeparam W - The type of the optional `query` parameter of the `list`
+ * @typeParam W - The type of the optional `query` parameter of the `list`
  * method. Defaults to `string`.
  *
  * #### Notes

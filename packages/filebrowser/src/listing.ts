@@ -2956,7 +2956,7 @@ export namespace DirListing {
      * https://developer.mozilla.org/en-US/docs/Learn/Forms/Property_compatibility_table_for_form_controls#check_boxes_and_radio_buttons
      *
      * @param [options]
-     * @params options.alwaysVisible Should the checkbox be visible even when
+     * @param options.alwaysVisible Should the checkbox be visible even when
      * not hovered?
      * @returns A new DOM node that contains a checkbox.
      */

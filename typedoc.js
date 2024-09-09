@@ -74,6 +74,8 @@ const entryPoints = packages
     return fs.existsSync(path);
   });
 
+
+/** @type {Partial<import('typedoc').TypeDocOptions>} */
 module.exports = {
   entryPoints,
   entryPointStrategy: 'packages',

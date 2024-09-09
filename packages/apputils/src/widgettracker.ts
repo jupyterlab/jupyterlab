@@ -9,7 +9,7 @@ import { FocusTracker, Widget } from '@lumino/widgets';
 /**
  * A tracker that tracks widgets.
  *
- * @typeparam T - The type of widget being tracked. Defaults to `Widget`.
+ * @typeParam T - The type of widget being tracked. Defaults to `Widget`.
  */
 export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
   /**
@@ -100,7 +100,7 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
 /**
  * A class that keeps track of widget instances on an Application shell.
  *
- * @typeparam T - The type of widget being tracked. Defaults to `Widget`.
+ * @typeParam T - The type of widget being tracked. Defaults to `Widget`.
  *
  * #### Notes
  * The API surface area of this concrete implementation is substantially larger

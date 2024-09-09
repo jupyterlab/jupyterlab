@@ -10,7 +10,7 @@ import { IObjectPool, IRestorable } from './interfaces';
 /**
  * An object pool that supports restoration.
  *
- * @typeparam T - The type of object being tracked.
+ * @typeParam T - The type of object being tracked.
  */
 export class RestorablePool<
     T extends IObservableDisposable = IObservableDisposable

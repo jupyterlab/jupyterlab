@@ -233,6 +233,8 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     output_path.write_text(template)
 
 
+exclude_patterns = ["api/media"]
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
