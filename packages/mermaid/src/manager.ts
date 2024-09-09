@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type MermaidType from 'mermaid';
+import type MermaidElkType from '@mermaid-js/layout-elk';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
@@ -251,6 +252,7 @@ export namespace MermaidManager {
 namespace Private {
   let _themes: IThemeManager | null = null;
   let _mermaid: typeof MermaidType | null = null;
+  let _mermaidElk: typeof MermaidElkType | null = null;
   let _loading: PromiseDelegate<typeof MermaidType> | null = null;
   let _nextMermaidId = 0;
   let _version: string | null = null;
@@ -277,6 +279,10 @@ namespace Private {
       return false;
     }
 
+    if (_mermaidElk) {
+      _mermaid.registerLayoutLoaders(_mermaidElk);
+    }
+
     let theme = MERMAID_DEFAULT_THEME;
 
     if (_themes) {
@@ -291,8 +297,7 @@ namespace Private {
       .getComputedStyle(document.body)
       .getPropertyValue('--jp-ui-font-family');
 
-    _mermaid.mermaidAPI.globalReset();
-    _mermaid.mermaidAPI.initialize({
+    _mermaid.initialize({
       theme,
       fontFamily,
       securityLevel: 'strict',
@@ -330,6 +335,7 @@ namespace Private {
     _loading = new PromiseDelegate();
     _version = (await import('mermaid/package.json')).version;
     _mermaid = (await import('mermaid')).default;
+    _mermaidElk = (await import('@mermaid-js/layout-elk')).default;
     initMermaid();
     _loading.resolve(_mermaid);
     return _mermaid;

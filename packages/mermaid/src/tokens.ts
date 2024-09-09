@@ -3,14 +3,15 @@
 
 import { Token } from '@lumino/coreutils';
 import type MermaidType from 'mermaid';
+import type { MermaidConfig } from 'mermaid/dist/config.type';
 
 // documented upstream constants
 export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';
 export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
 // mermaid themes
-export const MERMAID_DEFAULT_THEME = 'default';
-export const MERMAID_DARK_THEME = 'dark';
+export const MERMAID_DEFAULT_THEME: MermaidConfig['theme'] = 'default';
+export const MERMAID_DARK_THEME: MermaidConfig['theme'] = 'dark';
 
 // DOM
 export const MERMAID_CLASS = 'jp-RenderedMermaid';
