@@ -185,7 +185,8 @@
   flex: 0 0 75px;
 }
 
-.jp-DirListing-headerItem.jp-id-modified {
+.jp-DirListing-headerItem.jp-id-modified,
+.jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
   /* stylelint-disable */
   container-type: inline-size;
@@ -197,39 +198,60 @@
  * to display either a small or large header for the last-modified column.
  */
 /* stylelint-disable */
-@container (max-width: 300px) {
+/* @container (max-width: 300px) { */
   /* stylelint-enable */
-  .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
-    display: inline;
-  }
+  /* .jp-DirListing-headerItem.jp-id-modified */
+    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small { */
+    /* display: inline; */
+  /* } */
 
-  .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
-    display: none;
-  }
-}
+  /* .jp-DirListing-headerItem.jp-id-modified */
+    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large { */
+    /* display: none; */
+  /* } */
+/* } */
 
 /* stylelint-disable */
-@container (min-width: 300px) {
+/* @container (min-width: 300px) { */
   /* stylelint-enable */
-  .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+  /* .jp-DirListing-headerItem.jp-id-modified */
+    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small { */
+    /* display: none; */
+  /* } */
+
+  /* .jp-DirListing-headerItem.jp-id-modified */
+    /* > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large { */
+    /* display: inline; */
+  /* } */
+/* } */
+
+/* .jp-DirListing-headerItem.jp-id-filesize { */
+  /* text-align: right; */
+/* } */
+@container (max-width: 100px) {
+
+  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+@container (min-width: 101px) {
+
+  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-small {
     display: none;
   }
 
-  .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-large {
     display: inline;
   }
-}
-
-.jp-DirListing-headerItem.jp-id-filesize {
-  text-align: right;
-}
-
-.jp-DirListing-headerItem.jp-mod-selected {
-  font-weight: 600;
 }
 
 /* increase specificity to override bundled default */
