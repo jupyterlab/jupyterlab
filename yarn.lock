@@ -3995,9 +3995,9 @@ __metadata:
     "@lumino/coreutils": ^2.1.2
     "@types/d3": ^7.4.0
     "@types/dompurify": ^2.4.0
-    marked: ^9.1.2
-    marked-gfm-heading-id: ^3.1.0
-    marked-mangle: ^1.1.4
+    marked: ^14.1.2
+    marked-gfm-heading-id: ^4.1.0
+    marked-mangle: ^1.1.9
     rimraf: ~5.0.5
     typescript: ~5.1.6
   languageName: unknown
@@ -15327,50 +15327,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked-gfm-heading-id@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "marked-gfm-heading-id@npm:3.1.0"
+"marked-gfm-heading-id@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "marked-gfm-heading-id@npm:4.1.0"
   dependencies:
     github-slugger: ^2.0.0
   peerDependencies:
-    marked: ">=4 <10"
-  checksum: b11eb5dd45b2f2b6f3e38f03c3a17eaea4c4465951db7ff2d4451ec9026142b0f2f5fa7ae4e005047c69a28fb742cd9e2c02795ed5ae85d8479c1aa320d46b8e
+    marked: ">=13 <15"
+  checksum: 358337f79277a44d7a78fa07d8a142922fab1162d260139c4df26994171862da147f8035416dd1c805adc50c00b56ad283159a66ce02c736b1bd5faf1f7257b3
   languageName: node
   linkType: hard
 
-"marked-mangle@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "marked-mangle@npm:1.1.4"
+"marked-mangle@npm:^1.1.9":
+  version: 1.1.9
+  resolution: "marked-mangle@npm:1.1.9"
   peerDependencies:
-    marked: ">=4 <10"
-  checksum: b6f939bf927e808e9a1a03498427c46bc1f1faccbf261511898e4424e40b83cd9d33e6c3a639aa2b9a35f886fc00e64d3912a8028aa74886e1096d66134bc5d6
+    marked: ">=4 <15"
+  checksum: 745e44bea9b52bc9c52e41f5d2b146eb21072a92ddf85b4b2f210b091da93fcbf2f5447b02f849fd19e79224bdca385462a42b96882493778d1d0ff0a3da9a8c
   languageName: node
   linkType: hard
 
-"marked@npm:^13.0.2":
-  version: 13.0.3
-  resolution: "marked@npm:13.0.3"
+"marked@npm:^14.1.2":
+  version: 14.1.2
+  resolution: "marked@npm:14.1.2"
   bin:
     marked: bin/marked.js
-  checksum: 1e35459ccf26a2a4ba086d9acd5ade00736dd24bacc817b202a3ba7d219e1b252fee91fca41b07de5bc6cfe3442edebe4f0efb18975978d65043050feb116425
-  languageName: node
-  linkType: hard
-
-"marked@npm:^4.3.0":
-  version: 4.3.0
-  resolution: "marked@npm:4.3.0"
-  bin:
-    marked: bin/marked.js
-  checksum: 0db6817893952c3ec710eb9ceafb8468bf5ae38cb0f92b7b083baa13d70b19774674be04db5b817681fa7c5c6a088f61300815e4dd75a59696f4716ad69f6260
-  languageName: node
-  linkType: hard
-
-"marked@npm:^9.1.2":
-  version: 9.1.2
-  resolution: "marked@npm:9.1.2"
-  bin:
-    marked: bin/marked.js
-  checksum: 8dd1b9e268f149d770397b5299e73dc6b5ae915f867acfaa166603eb5b137cfadaa40406048f424371729036abdf3b0bb629223520571534ec32e27746a798d2
+  checksum: 47636a6c4edd2ccfa682826ff139292900a9e179812a4ed8a8007fcb34cab662659e5c27565f5250c82409ee0f8cd3c0c1c23b448bb453c5f3d71d510a75b437
   languageName: node
   linkType: hard
 

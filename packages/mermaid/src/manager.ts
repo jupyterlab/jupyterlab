@@ -334,8 +334,8 @@ namespace Private {
     }
     _loading = new PromiseDelegate();
     _version = (await import('mermaid/package.json')).version;
-    _mermaid = (await import('mermaid')).default;
     _mermaidElk = (await import('@mermaid-js/layout-elk')).default;
+    _mermaid = (await import('mermaid')).default;
     initMermaid();
     _loading.resolve(_mermaid);
     return _mermaid;

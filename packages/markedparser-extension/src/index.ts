@@ -18,9 +18,14 @@ import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
-import type { marked, Renderer } from 'marked';
-import type { MarkedExtension, MarkedOptions } from 'MarkedOptions';
-import type { Token, Tokens } from 'Tokens';
+import type {
+  marked,
+  MarkedExtension,
+  MarkedOptions,
+  Renderer,
+  Token,
+  Tokens
+} from 'marked';
 
 // highlight cache key separator
 const FENCE = '```~~~';
@@ -181,11 +186,11 @@ namespace Private {
     const renderer = new Renderer_();
     const originalCode = renderer.code;
 
-    renderer.code = (code: string, language: string) => {
+    renderer.code = ({ text, lang, escaped }) => {
       // handle block renderers
       for (const block of _blocks) {
-        if (block.languages.includes(language)) {
-          const rendered = block.render(code);
+        if (lang && block.languages.includes(lang)) {
+          const rendered = block.render(text);
           if (rendered != null) {
             return rendered;
           }
@@ -193,14 +198,14 @@ namespace Private {
       }
 
       // handle known highlighting
-      const key = `${language}${FENCE}${code}${FENCE}`;
+      const key = `${lang}${FENCE}${text}${FENCE}`;
       const highlight = _highlights.get(key);
       if (highlight != null) {
         return highlight;
       }
 
       // fall back to calling with the renderer as `this`
-      return originalCode.call(renderer, code, language);
+      return originalCode.call(renderer, { text, lang, escaped });
     };
 
     return renderer;

@@ -77,14 +77,14 @@ Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
 docs = [
-    "sphinx>=1.8,<8.1.0",
-    "sphinx-copybutton",
-    "pydata-sphinx-theme>=0.13.0",
-    "pytest",
-    "pytest-jupyter",
-    "pytest-check-links",
     "jsx-lexer",
     "myst-parser",
+    "pydata-sphinx-theme>=0.13.0",
+    "pytest-check-links",
+    "pytest-jupyter",
+    "pytest",
+    "sphinx-copybutton",
+    "sphinx>=1.8,<8.1.0",
 ]
 docs-screenshots = [
     "altair==5.3.0",
@@ -100,32 +100,32 @@ docs-screenshots = [
 ]
 test = [
     "coverage",
-    "pytest>=7.0",
     "pytest-check-links>=0.7",
     "pytest-console-scripts",
     "pytest-cov",
     "pytest-jupyter>=0.5.3",
     "pytest-timeout",
     "pytest-tornasync",
-    "requests",
+    "pytest>=7.0",
     "requests_cache",
+    "requests",
     "virtualenv",
 ]
 # Check ruff version is aligned with the one in .pre-commit-config.yaml
 dev = [
     "build",
-    "pre-commit",
-    "pytest-cov",
+    "bump2version",
     "coverage",
     "hatch",
-    "bump2version",
+    "pre-commit",
+    "pytest-cov",
     "ruff==0.5.6",
 ]
 upgrade-extension = [
-    "pyyaml-include<3.0",
     "copier>=9,<10",
     "jinja2-time<0.3",
     "pydantic<3.0",
+    "pyyaml-include<3.0",
     "tomli-w<2.0"
 ]
 

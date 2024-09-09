@@ -17,14 +17,15 @@ dependencies:
   # run
   - async-lru >=1.0.0
   - httpx >=0.25.0
-  - ipykernel
+  - ipykernel >=6.5.0
   - jinja2 >=3.0.3
   - jupyter_core
   - jupyter_server >=2.4.0,<3
   - jupyter-lsp >=2.0.0
-  - jupyterlab_server >=2.19.0,<3
+  - jupyterlab_server >=2.27.1,<3
   - notebook-shim >=0.2
   - packaging
+  - tomli
   - tornado >=6.2.0
   - traitlets >=5.10.1
   # test
