@@ -803,7 +803,7 @@ export class DirListing extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     const node = this.node;
-    this._width = this.node.getBoundingClientRect().width;
+    this._width = this._computeContentWidth();
     const content = DOMUtils.findElement(node, CONTENT_CLASS);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
@@ -855,6 +855,20 @@ export class DirListing extends Widget {
       this.sort(this.sortState);
       this.update();
     }
+  }
+
+  private _computeContentWidth(width: number | null = null) {
+    if (!width) {
+      width = this.node.getBoundingClientRect().width;
+    }
+    const paddingWidth = window
+      .getComputedStyle(this.node)
+      .getPropertyValue('--jp-dirlisting-padding-width');
+
+    const content = DOMUtils.findElement(this.node, CONTENT_CLASS);
+    const scrollbarWidth = content.offsetWidth - content.clientWidth;
+
+    return width - parseFloat(paddingWidth) * 2 - scrollbarWidth;
   }
 
   /**
@@ -933,6 +947,7 @@ export class DirListing extends Widget {
         );
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
+
       this.renderer.updateItemNode(
         node,
         item,
@@ -1071,7 +1086,7 @@ export class DirListing extends Widget {
   onResize(msg: Widget.ResizeMessage): void {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
-    this._width = width;
+    this._width = this._computeContentWidth(width);
     this._updateColumnSizes();
   }
 
@@ -1096,9 +1111,10 @@ export class DirListing extends Widget {
     this._updateColumnSizes();
   }
 
-  private _updateColumnSizes() {
+  private _updateColumnSizes(
+    doNotGrowBeforeInclusive: DirListing.IColumn['id'] | null = null
+  ) {
     // adjust column sizes so that they add up to the total width available, preserving ratios
-    // and removing width from the last column so that it fills the width available;
     const visibleColumns = this._visibleColumns.map(column => ({
       ...column,
       element: DOMUtils.findElement(this.node, column.className)
@@ -1114,24 +1130,40 @@ export class DirListing extends Widget {
       // restrict the minimum and maximum width
       size = Math.max(size, column.minWidth);
       if (this._width) {
-        let reservedForOtherColums = 0;
+        let reservedForOtherColumns = 0;
         for (const other of visibleColumns) {
           if (other.id === column.id) {
             continue;
           }
-          reservedForOtherColums += other.minWidth;
+          reservedForOtherColumns += other.minWidth;
         }
-        size = Math.min(size, this._width - reservedForOtherColums);
+        size = Math.min(size, this._width - reservedForOtherColumns);
       }
       this._columnSizes[column.id] = size;
       total += size;
     }
 
     // Ensure that total fits
-    if (this._width && total > this._width) {
-      for (const column of visibleColumns) {
-        this._columnSizes[column.id] =
-          (this._columnSizes[column.id]! / total) * this._width;
+    if (this._width) {
+      // Distribute the excess/shortfall over the columns which should stretch.
+      const excess = this._width - total;
+      let growAllowed = doNotGrowBeforeInclusive === null;
+      const growColumns = visibleColumns.filter(c => {
+        if (growAllowed) {
+          return true;
+        }
+        if (c.id === doNotGrowBeforeInclusive) {
+          growAllowed = true;
+        }
+        return false;
+      });
+      const totalWeight = growColumns
+        .map(c => c.grow)
+        .reduce((a, b) => a + b, 0);
+      for (const column of growColumns) {
+        // The value of `growBy` will be negative when the down-sizing
+        const growBy = (excess * column.grow) / totalWeight;
+        this._columnSizes[column.id] = this._columnSizes[column.id]! + growBy;
       }
     }
 
@@ -1196,7 +1228,7 @@ export class DirListing extends Widget {
       }
     }
     this._columnSizes[name] = size;
-    this._updateColumnSizes();
+    this._updateColumnSizes(name);
   }
 
   /**
@@ -2693,11 +2725,17 @@ export namespace DirListing {
      * Minimum size the column should occupy.
      */
     minWidth: number;
+    /**
+     * Unitless number representing the proportion by which the column
+     * should grow when the listing is resized.
+     */
+    grow: number;
   }
   interface IFixedColumn extends IBaseColumn {
     id: 'is_selected';
     resizable: false;
     sortable: false;
+    grow: 0;
   }
   /**
    * Sortable column.
@@ -2734,7 +2772,8 @@ export namespace DirListing {
       itemClassName: CHECKBOX_WRAPPER_CLASS,
       minWidth: 18,
       resizable: false,
-      sortable: false
+      sortable: false,
+      grow: 0
     },
     {
       id: 'name' as const,
@@ -2743,7 +2782,8 @@ export namespace DirListing {
       minWidth: 60,
       resizable: true,
       sortable: true,
-      caretSide: 'right'
+      caretSide: 'right',
+      grow: 3
     },
     {
       id: 'last_modified' as const,
@@ -2752,7 +2792,8 @@ export namespace DirListing {
       minWidth: 60,
       resizable: true,
       sortable: true,
-      caretSide: 'left'
+      caretSide: 'left',
+      grow: 1
     },
     {
       id: 'file_size' as const,
@@ -2761,7 +2802,8 @@ export namespace DirListing {
       minWidth: 60,
       resizable: true,
       sortable: true,
-      caretSide: 'left'
+      caretSide: 'left',
+      grow: 0.5
     }
   ];
 

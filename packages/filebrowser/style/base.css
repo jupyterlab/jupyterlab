@@ -131,6 +131,8 @@
   display: flex;
   flex-direction: column;
   outline: 0;
+
+  --jp-dirlisting-padding-width: 12px;
 }
 
 .jp-DirListing-header {
@@ -144,6 +146,7 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
   user-select: none;
+  padding: 0 var(--jp-dirlisting-padding-width);
 }
 
 .jp-DirListing-headerItem {
@@ -161,8 +164,12 @@
   overflow: hidden;
 }
 
+.jp-DirListing-header > .jp-DirListing-headerItem:first-child {
+  padding-left: 0;
+}
+
 .jp-DirListing-header > .jp-DirListing-headerItem:last-child {
-  flex-grow: 1;
+  padding-right: 0;
 }
 
 .jp-DirListing-headerItem:hover {
@@ -239,6 +246,7 @@
   list-style-type: none;
   overflow: auto;
   background-color: var(--jp-layout-color1);
+  overflow-x: hidden;
 }
 
 .jp-DirListing-content mark {
@@ -259,18 +267,17 @@
 }
 
 .jp-DirListing-item {
-  display: flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 4px var(--jp-dirlisting-padding-width);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.jp-DirListing-item > :last-child {
-  flex-grow: 1;
-  margin-right: 2px;
+  display: inline-grid;
+  grid-auto-columns: max-content;
+  width: 100%;
+  box-sizing: border-box;
+  grid-auto-flow: column;
 }
 
 .jp-DirListing-checkboxWrapper {
@@ -279,9 +286,15 @@
 }
 
 .jp-DirListing-header
-  .jp-DirListing-checkboxWrapper
+  > .jp-DirListing-checkboxWrapper
   + .jp-DirListing-headerItem {
-  padding-left: 4px;
+  padding-left: 0;
+}
+
+.jp-DirListing-header > .jp-DirListing-checkboxWrapper {
+  box-sizing: border-box;
+  left: -12px;
+  position: relative;
 }
 
 .jp-DirListing-content .jp-DirListing-checkboxWrapper {
