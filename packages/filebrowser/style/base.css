@@ -198,27 +198,33 @@
  * to display either a small or large header for the last-modified column.
  */
 @container (max-width: 100px) {
-
-  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-small,
-  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-small {
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
     display: inline;
   }
 
-  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-large,
-  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-large {
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
     display: none;
   }
 }
 
 @container (min-width: 101px) {
-
-  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-small,
-  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-small {
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
     display: none;
   }
 
-  .jp-DirListing-headerItem.jp-id-modified>.jp-DirListing-headerItemText-large,
-  .jp-DirListing-headerItem.jp-id-filesize>.jp-DirListing-headerItemText-large {
+  .jp-DirListing-headerItem.jp-id-modified
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
     display: inline;
   }
 }
