@@ -84,6 +84,11 @@ export class MermaidManager implements IMermaidManager {
   async renderSvg(text: string): Promise<IMermaidManager.IRenderInfo> {
     const _mermaid = await this.getMermaid();
 
+    // could trigger a false-positive for diagrams about real cervidae, but...
+    if (text.includes('elk')) {
+      await Private.ensureMermaidElk();
+    }
+
     const id = `jp-mermaid-${Private.nextMermaidId()}`;
 
     // create temporary element into which to render
@@ -254,6 +259,7 @@ namespace Private {
   let _mermaid: typeof MermaidType | null = null;
   let _mermaidElk: typeof MermaidElkType | null = null;
   let _loading: PromiseDelegate<typeof MermaidType> | null = null;
+  let _loadingElk: PromiseDelegate<typeof MermaidElkType> | null = null;
   let _nextMermaidId = 0;
   let _version: string | null = null;
 
@@ -277,10 +283,6 @@ namespace Private {
   export function initMermaid(): boolean {
     if (!_mermaid) {
       return false;
-    }
-
-    if (_mermaidElk) {
-      _mermaid.registerLayoutLoaders(_mermaidElk);
     }
 
     let theme = MERMAID_DEFAULT_THEME;
@@ -334,11 +336,33 @@ namespace Private {
     }
     _loading = new PromiseDelegate();
     _version = (await import('mermaid/package.json')).version;
-    _mermaidElk = (await import('@mermaid-js/layout-elk')).default;
-    _mermaid = (await import('mermaid')).default;
+    const tmpMermain = (_mermaid = (await import('mermaid')).default);
     initMermaid();
+    _mermaid = tmpMermain;
     _loading.resolve(_mermaid);
     return _mermaid;
+  }
+
+  /**
+   * Ensure mermaid-elk has been lazily loaded once, initialized, and cached.
+   */
+  export async function ensureMermaidElk(): Promise<typeof MermaidElkType> {
+    if (_mermaidElk != null) {
+      return _mermaidElk;
+    }
+    if (_loadingElk) {
+      return _loadingElk.promise;
+    }
+
+    _loadingElk = new PromiseDelegate();
+
+    const _mermaid = await ensureMermaid();
+
+    const tmpElk = (await import('@mermaid-js/layout-elk')).default;
+    _mermaid.registerLayoutLoaders(tmpElk);
+    _mermaidElk = tmpElk;
+    _loadingElk.resolve(_mermaidElk);
+    return _mermaidElk;
   }
 
   /**
