@@ -182,6 +182,11 @@ export class Completer extends Widget {
   }
 
   /**
+   * Whether to suppress the tab completer when inline completions are presented.
+   */
+  suppressIfInlineCompleterActive: boolean;
+
+  /**
    * Dispose of the resources held by the completer widget.
    */
   dispose(): void {

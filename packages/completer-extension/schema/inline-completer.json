@@ -19,6 +19,11 @@
     },
     {
       "command": "inline-completer:accept",
+      "keys": ["Tab"],
+      "selector": ".jp-mod-inline-completer-active"
+    },
+    {
+      "command": "inline-completer:accept",
       "keys": ["Alt End"],
       "selector": ".jp-mod-inline-completer-active"
     },
@@ -49,6 +54,12 @@
     "showShortcuts": {
       "title": "Show shortcuts in the widget",
       "description": "Whether to show shortcuts in the inline completer widget.",
+      "type": "boolean",
+      "default": true
+    },
+    "suppressIfTabCompleterActive": {
+      "title": "Suppress when the tab completer is active",
+      "description": "Whether to suppress the inline completer when the tab completer suggestions are shown.",
       "type": "boolean",
       "default": true
     },

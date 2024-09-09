@@ -241,7 +241,7 @@ async function activateTOC(
   const menuButton = new ToolbarButton({
     tooltip: trans.__('More actions…'),
     icon: ellipsesIcon,
-    actualOnClick: true,
+    noFocusOnClick: false,
     onClick: () => {
       const bbox = menuButton.node.getBoundingClientRect();
       toolbarMenu.open(bbox.x, bbox.bottom);

@@ -73,14 +73,14 @@ export class Variables extends PanelWithToolbar {
 
     const treeViewButton = new ToolbarButton({
       icon: treeViewIcon,
-      className: 'jp-TreeView',
+      className: 'jp-TreeView-Button',
       onClick: onViewChange,
       tooltip: trans.__('Tree View')
     });
 
     const tableViewButton = new ToolbarButton({
       icon: tableRowsIcon,
-      className: 'jp-TableView',
+      className: 'jp-TableView-Button',
       onClick: onViewChange,
       tooltip: trans.__('Table View')
     });

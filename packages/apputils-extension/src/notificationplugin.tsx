@@ -169,7 +169,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
             </span>
             <span className="jp-Toolbar-item jp-Toolbar-spacer"></span>
             <ToolbarButtonComponent
-              actualOnClick={true}
+              noFocusOnClick={false}
               onClick={() => {
                 manager.dismiss();
               }}
@@ -178,7 +178,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
               enabled={manager.count > 0}
             />
             <ToolbarButtonComponent
-              actualOnClick={true}
+              noFocusOnClick={false}
               onClick={onClose}
               icon={closeIcon}
               tooltip={trans.__('Hide notifications')}

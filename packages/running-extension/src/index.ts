@@ -39,6 +39,7 @@ export namespace CommandIDs {
   export const kernelNewNotebook = 'running:kernel-new-notebook';
   export const kernelOpenSession = 'running:kernel-open-session';
   export const kernelShutDown = 'running:kernel-shut-down';
+  export const kernelShutDownUnused = 'running:kernel-shut-down-unused';
   export const showPanel = 'running:show-panel';
   export const showModal = 'running:show-modal';
 }

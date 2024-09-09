@@ -288,6 +288,38 @@ describe('@jupyterlab/notebook', () => {
         expect(source).toBe('rabarbar');
         expect(provider.currentMatchIndex).toBe(null);
       });
+
+      it('should not replace the current match in a read-only cell', async () => {
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'test1',
+            metadata: { editable: false }
+          },
+          { cell_type: 'code', source: 'test2', metadata: { editable: false } }
+        ]);
+
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        let replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(false);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1');
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
+        replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(false);
+        const source1 = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source1).toBe('test2');
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(2);
+        replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+        const source2 = panel.model!.cells.get(2).sharedModel.getSource();
+        expect(source2).toBe('bar test2');
+      });
     });
 
     describe('#replaceAllMatches()', () => {
@@ -353,6 +385,34 @@ describe('@jupyterlab/notebook', () => {
         let source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test1\nbar2\nbar3\nbar4\ntest5');
         await provider.endQuery();
+      });
+
+      it('should not replace all matches in read-only cells', async () => {
+        panel.model!.sharedModel.insertCells(2, [
+          {
+            cell_type: 'markdown',
+            source: 'test1 test2',
+            metadata: { editable: false }
+          },
+          {
+            cell_type: 'code',
+            source: 'test1 test2 test3',
+            metadata: { editable: false }
+          }
+        ]);
+        await provider.startQuery(/test\d/, undefined);
+        await provider.highlightNext();
+        const replaced = await provider.replaceAllMatches('test0');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test0 test0');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('test0');
+        source = panel.model!.cells.get(2).sharedModel.getSource();
+        expect(source).toBe('test1 test2');
+        source = panel.model!.cells.get(3).sharedModel.getSource();
+        expect(source).toBe('test1 test2 test3');
+        expect(provider.currentMatchIndex).toBe(null);
       });
     });
 

@@ -1,0 +1,32 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-ThemedContainer {
+  /* Decrease default density for Jupyter toolkit components */
+  --density: -4;
+}
+
+/* Styles for tree view */
+.jp-TreeView {
+  min-width: auto;
+}
+
+.jp-TreeView.jp-mod-flat > .jp-TreeItem::part(content-region) {
+  margin-inline-start: calc(var(--design-unit) * 2px);
+}
+
+/* Styles for tree item */
+.jp-TreeItem::part(expand-collapse-button) {
+  color: var(--jp-inverse-layout-color3);
+}
+
+/* Tune hover for stealth buttons otherwise they won't stand out */
+.jp-TreeItem jp-button[appearance='stealth']:hover {
+  background: var(--tree-item-expand-collapse-hover);
+}
+
+.jp-TreeItem[selected] jp-button[appearance='stealth']:hover {
+  background: var(--tree-item-expand-collapse-selected-hover);
+}
