@@ -1614,8 +1614,8 @@ class ContentProviderRegistry implements IContentProviderRegistry {
     return bestProvider;
   }
 
-  private _providers: IContentProvider[];
-  private _drive: Contents.IDrive | undefined;
+  private _providers: IContentProvider[] = [];
+  private _drive: Contents.IDrive | undefined = undefined;
 }
 
 /**
