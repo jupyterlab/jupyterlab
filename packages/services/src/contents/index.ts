@@ -268,7 +268,7 @@ export namespace Contents {
      * @param type Document type
      * @param factory Document factory
      */
-    registerDocumentFactory(
+    registerDocumentFactory?(
       type: Contents.ContentType,
       factory: SharedDocumentFactory
     ): void;
@@ -499,7 +499,7 @@ export namespace Contents {
      * The content provider registry, consisting of all the
      * content providers that this drive can use to access files.
      */
-    readonly contentProviderRegistry: IContentProviderRegistry;
+    readonly contentProviderRegistry?: IContentProviderRegistry;
 
     /**
      * The name of the drive, which is used at the leading
@@ -704,7 +704,7 @@ export class ContentsManager implements Contents.IManager {
    */
   getSharedModelFactory(path: string): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
-    const provider = drive?.contentProviderRegistry.getProvider(path);
+    const provider = drive?.contentProviderRegistry?.getProvider(path);
     return provider?.sharedModelFactory ?? null;
   }
 
@@ -1102,8 +1102,9 @@ export class Drive implements Contents.IDrive {
     this.contentProviderRegistry.drive = this;
   }
 
-  static _contentProviderRegistry: IContentProviderRegistry | undefined =
-    undefined;
+  private static _contentProviderRegistry:
+    | IContentProviderRegistry
+    | undefined = undefined;
 
   static getContentProviderRegistry(): IContentProviderRegistry {
     if (Drive._contentProviderRegistry === undefined) {
@@ -1625,9 +1626,7 @@ export class RestContentProvider implements IContentProvider {
     this._apiEndpoint = SERVICE_DRIVE_URL;
   }
 
-  drive: Contents.IDrive;
-
-  public get extensions(): ContentProviderExtensions {
+  public get extensions(): IContentProviderExtension[] {
     // This provider can handle any type of file.
     return [{ re: '.*', score: 1 }];
   }
@@ -1734,7 +1733,7 @@ export class RestContentProvider implements IContentProvider {
   }
 
   private _apiEndpoint: string;
-  private _drive: Contents.IDrive;
+  drive: Contents.IDrive;
 }
 
 /**
@@ -1778,7 +1777,7 @@ export interface IContentProvider {
   /**
    * The file extensions that this provider handles.
    */
-  readonly extensions: ContentProviderExtensions;
+  readonly extensions: IContentProviderExtension[];
 
   /**
    * Get the file content.
@@ -1815,7 +1814,16 @@ export interface IContentProvider {
 }
 
 /**
- * The content provider extensions interface, consisting of the regural expression matching the file
- * extension and the score indicating how good the provider is at handling this type of content.
+ * The content provider extension interface.
  */
-export type ContentProviderExtensions = { re: string; score: number }[];
+export interface IContentProviderExtension {
+  /**
+   * The regular expression matching the file extension
+   */
+  re: string;
+
+  /**
+   * The score indicating how good the provider is at handling thie type of content.
+   */
+  score: number;
+}
