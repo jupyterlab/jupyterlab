@@ -146,7 +146,6 @@
   box-shadow: var(--jp-toolbar-box-shadow);
   z-index: 2;
   user-select: none;
-  padding: 0 var(--jp-dirlisting-padding-width);
 }
 
 .jp-DirListing-headerItem {
@@ -162,14 +161,6 @@
   flex-grow: 1;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-
-.jp-DirListing-header > .jp-DirListing-headerItem:first-child {
-  padding-left: 0;
-}
-
-.jp-DirListing-header > .jp-DirListing-headerItem:last-child {
-  padding-right: 0;
 }
 
 .jp-DirListing-headerItem:hover {
@@ -283,18 +274,6 @@
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
-}
-
-.jp-DirListing-header
-  > .jp-DirListing-checkboxWrapper
-  + .jp-DirListing-headerItem {
-  padding-left: 0;
-}
-
-.jp-DirListing-header > .jp-DirListing-checkboxWrapper {
-  box-sizing: border-box;
-  left: -12px;
-  position: relative;
 }
 
 .jp-DirListing-content .jp-DirListing-checkboxWrapper {
