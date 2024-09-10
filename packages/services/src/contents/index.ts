@@ -1596,8 +1596,7 @@ class ContentProviderRegistry implements IContentProviderRegistry {
   }
 
   getProvider(filePath: string): IContentProvider | undefined {
-    let ext = filePath.split('.').pop();
-    if (ext == null) ext = '';
+    const ext = filePath.split('.').pop() ?? '';
     let score: number = 0;
     let bestProvider: IContentProvider | undefined = undefined;
     for (let provider of this._providers) {
