@@ -1749,7 +1749,7 @@ export class RestContentProvider implements IContentProvider {
  */
 export interface IContentProviderRegistry {
   /**
-   * the drive of the content provider registry.
+   * The drive of the content provider registry.
    */
   drive: Contents.IDrive | undefined;
 
