@@ -1577,11 +1577,6 @@ namespace Private {
 }
 
 class ContentProviderRegistry implements IContentProviderRegistry {
-  constructor() {
-    this._providers = [];
-    this._drive = undefined;
-  }
-
   get drive(): Contents.IDrive | undefined {
     return this._drive;
   }
