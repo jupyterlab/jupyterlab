@@ -4551,6 +4551,7 @@ __metadata:
     stylelint-prettier: ^4.0.0
     typedoc: ~0.26.7
     typedoc-plugin-mdn-links: ~3.2.12
+    typedoc-plugin-redirect: ^1.0.0
   languageName: unknown
   linkType: soft
 
@@ -20119,6 +20120,15 @@ __metadata:
   peerDependencies:
     typedoc: ">= 0.23.14 || 0.24.x || 0.25.x || 0.26.x"
   checksum: dddd7d56c01d9f20513055613aa088c1e69135dc3971bf198abfb575dd5ac2969531700b3b9a48a780756f7b0330a48db3415c28e394fbf92b26743187e5d3ef
+  languageName: node
+  linkType: hard
+
+"typedoc-plugin-redirect@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "typedoc-plugin-redirect@npm:1.0.0"
+  peerDependencies:
+    typedoc: 0.26.x
+  checksum: 785bcac448579f6406c7fa2dfbcdc6054903ec9469402c20429e0b7057d11f17f69912413687ea1f056d510dec4b70bd8f1988cf4047505966657ff31b6159cf
   languageName: node
   linkType: hard
 

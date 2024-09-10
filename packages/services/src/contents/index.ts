@@ -366,7 +366,9 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @param path The path to the file.
+     *
+     * @returns A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -909,7 +911,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *

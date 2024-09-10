@@ -330,7 +330,7 @@ export class Dialog<T> extends Widget {
   /**
    * Handle the `'input'` event for dialog's children.
    *
-   * @param event - The DOM event sent to the widget
+   * @param _event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
     this._hasValidationErrors = !!this.node.querySelector(':invalid');

@@ -67,14 +67,6 @@ If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.read
 
 For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html). Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
-#### Installing with Previous Versions of Jupyter Notebook
-
-When using a version of Jupyter Notebook earlier than 5.3, the following command must be run after installing JupyterLab to enable the JupyterLab server extension:
-
-```bash
-jupyter serverextension enable --py jupyterlab --sys-prefix
-```
-
 ### Running
 
 Start up JupyterLab using:

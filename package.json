@@ -129,6 +129,7 @@
   "devDependencies": {
     "lerna": "^7.1.4",
     "typedoc": "~0.26.7",
-    "typedoc-plugin-mdn-links": "~3.2.12"
+    "typedoc-plugin-mdn-links": "~3.2.12",
+    "typedoc-plugin-redirect": "^1.0.0"
   }
 }

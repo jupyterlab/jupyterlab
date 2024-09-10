@@ -150,7 +150,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   /**
    * Create a new mime model.  This is a convenience method.
    *
-   * @options - The options used to create the model.
+   * @param options - The options used to create the model.
    *
    * @returns A new mime model.
    */
