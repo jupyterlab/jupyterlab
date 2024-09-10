@@ -1321,7 +1321,7 @@
     "label": "Accept Inline Completion",
     "caption": "",
     "shortcuts": [
-      "Alt End"
+      "Tab"
     ]
   },
   {

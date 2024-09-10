@@ -921,6 +921,10 @@ export class DirListing extends Widget {
     items.forEach((item, i) => {
       const node = nodes[i];
       if (sizeOnly && this.renderer.updateItemSize) {
+        if (!node) {
+          // short-circuit in case if node is not yet ready
+          return;
+        }
         return this.renderer.updateItemSize(
           node,
           item,
@@ -2864,7 +2868,6 @@ export namespace DirListing {
       const target = event.target as HTMLElement;
 
       const sortableColumns = DirListing.columns.filter(Private.isSortable);
-      console.log(sortableColumns);
 
       for (const column of sortableColumns) {
         const header = node.querySelector(`.${column.className}`);

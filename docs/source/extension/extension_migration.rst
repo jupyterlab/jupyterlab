@@ -30,7 +30,7 @@ Testing with Galata
 Playwright was updated to version 1.46.1 (or higher). The changelog for version ``1.46.0`` mentions a possible
 breaking change when defining fixture values that are array of objects.
 
-See the `Playwright 1.46.0 release notes <https://github.com/microsoft/playwright/releases/tag/v1.46.0>` for more information.
+See the `Playwright 1.46.0 release notes <https://github.com/microsoft/playwright/releases/tag/v1.46.0>`_ for more information.
 
 JupyterLab 4.1 to 4.2
 ---------------------
