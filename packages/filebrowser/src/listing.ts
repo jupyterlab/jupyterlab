@@ -809,6 +809,7 @@ export class DirListing extends Widget {
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
+    this._contentSizeObserver.observe(content);
     content.addEventListener('dragenter', this);
     content.addEventListener('dragover', this);
     content.addEventListener('dragleave', this);
@@ -832,6 +833,7 @@ export class DirListing extends Widget {
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
+    this._contentSizeObserver.disconnect();
     content.removeEventListener('scroll', this);
     content.removeEventListener('dragover', this);
     content.removeEventListener('dragover', this);
@@ -857,6 +859,16 @@ export class DirListing extends Widget {
     }
   }
 
+  private _onContentResize(): void {
+    const content = DOMUtils.findElement(this.node, CONTENT_CLASS);
+    const scrollbarWidth = content.offsetWidth - content.clientWidth;
+    if (scrollbarWidth != this._contentScrollbarWidth) {
+      this._contentScrollbarWidth = scrollbarWidth;
+      this._width = this._computeContentWidth();
+      this._updateColumnSizes();
+    }
+  }
+
   private _computeContentWidth(width: number | null = null) {
     if (!width) {
       width = this.node.getBoundingClientRect().width;
@@ -865,10 +877,7 @@ export class DirListing extends Widget {
       .getComputedStyle(this.node)
       .getPropertyValue('--jp-dirlisting-padding-width');
 
-    const content = DOMUtils.findElement(this.node, CONTENT_CLASS);
-    const scrollbarWidth = content.offsetWidth - content.clientWidth;
-
-    return width - parseFloat(paddingWidth) * 2 - scrollbarWidth;
+    return width - parseFloat(paddingWidth) * 2 - this._contentScrollbarWidth;
   }
 
   /**
@@ -2498,6 +2507,10 @@ export class DirListing extends Widget {
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
+  private _contentScrollbarWidth: number = 0;
+  private _contentSizeObserver = new ResizeObserver(
+    this._onContentResize.bind(this)
+  );
 }
 
 /**
