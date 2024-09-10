@@ -1625,13 +1625,7 @@ export class RestContentProvider implements IContentProvider {
     this._apiEndpoint = SERVICE_DRIVE_URL;
   }
 
-  get drive(): Contents.IDrive {
-    return this._drive;
-  }
-
-  set drive(drive: Contents.IDrive) {
-    this._drive = drive;
-  }
+  drive: Contents.IDrive;
 
   public get extensions(): ContentProviderExtensions {
     // This provider can handle any type of file.
