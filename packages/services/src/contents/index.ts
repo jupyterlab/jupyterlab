@@ -1745,7 +1745,7 @@ export class RestContentProvider implements IContentProvider {
 }
 
 /**
- * the content provider registry interface.
+ * Registry of content providers.
  */
 export interface IContentProviderRegistry {
   /**
