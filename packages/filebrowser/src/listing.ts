@@ -1123,11 +1123,18 @@ export class DirListing extends Widget {
   private _updateColumnSizes(
     doNotGrowBeforeInclusive: DirListing.IColumn['id'] | null = null
   ) {
-    // adjust column sizes so that they add up to the total width available, preserving ratios
-    const visibleColumns = this._visibleColumns.map(column => ({
-      ...column,
-      element: DOMUtils.findElement(this.node, column.className)
-    }));
+    // Adjust column sizes so that they add up to the total width available, preserving ratios
+    const visibleColumns = this._visibleColumns
+      .map(column => ({
+        ...column,
+        element: DOMUtils.findElement(this.node, column.className)
+      }))
+      .filter(column => {
+        // While all visible column will have an element, some extensions like jupyter-unfold
+        // do not render columns even if user requests them to be visible; this filter exists
+        // to ensure backward compatibility with such extensions and may be removed in the future.
+        return column.element;
+      });
 
     // read from DOM
     let total = 0;
