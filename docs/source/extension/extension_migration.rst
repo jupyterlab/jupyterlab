@@ -37,10 +37,11 @@ Shared model
 ~~~~~~~~~~~~
 
 The outputs set on the shared cell model are now expected to be wrapped
-in the pycrdt ``Map`` objects rather than provided as plain dictionaries.
-Further, the ``"text"`` entry can now be specified as an ``Array<string>``
+in the ``Y.Map`` objects rather than provided as plain objects
+(or pycrdt ``Map`` objects rather than dictionaries when set on the backend).
+Further, the ``"text"`` entry must now be specified as an ``Array<string>``
 object for outputs of ``"stream"`` type, allowing for better performance.
-The use of dictionaries is deprecated and will stop working in a future version.
+The use of plain objects is deprecated and will stop working in a future version.
 For reference, see PRs:
 
 - https://github.com/jupyterlab/jupyterlab/pull/16498
