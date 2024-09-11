@@ -1,8 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Signal } from '@lumino/signaling';
 import { expectFailure, JupyterServer } from '@jupyterlab/testing';
-import { Contents, ContentsManager, Drive, ServerConnection } from '../../src';
+import {
+  Contents,
+  ContentsManager,
+  Drive,
+  IContentProvider,
+  IContentProviderExtension,
+  ServerConnection
+} from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
@@ -1291,6 +1299,68 @@ describe('drive', () => {
       await contents.restoreCheckpoint('baz.txt', checkpoint.id);
       await contents.deleteCheckpoint('baz.txt', checkpoint.id);
       await contents.delete('baz.txt');
+    });
+  });
+
+  describe('content provider', () => {
+    it('should use a registered content provider', async () => {
+      class ContentProvider implements IContentProvider {
+        public get extensions(): IContentProviderExtension[] {
+          return [{ re: '.*', score: 2 }];
+        }
+
+        async get(
+          localPath: string,
+          options?: Contents.IFetchOptions
+        ): Promise<Contents.IModel> {
+          return {
+            name: 'bar',
+            path: '',
+            type: '',
+            writable: true,
+            created: '',
+            last_modified: '',
+            mimetype: '',
+            content: '',
+            format: null
+          };
+        }
+
+        async save(
+          localPath: string,
+          options: Partial<Contents.IModel> = {}
+        ): Promise<Contents.IModel> {
+          return {
+            name: 'baz',
+            path: '',
+            type: '',
+            writable: true,
+            created: '',
+            last_modified: '',
+            mimetype: '',
+            content: '',
+            format: null
+          };
+        }
+
+        get fileChanged(): Signal<this, Contents.IChangedArgs> {
+          return this.drive.fileChanged as unknown as Signal<
+            this,
+            Contents.IChangedArgs
+          >;
+        }
+
+        drive: Contents.IDrive;
+      }
+
+      const contentProviderRegistry = Drive.getContentProviderRegistry();
+      const contentProvider = new ContentProvider();
+      contentProviderRegistry.register(contentProvider);
+      const drive = new Drive();
+      const model1 = await drive.get('foo');
+      const model2 = await drive.save('foo');
+      expect(model1.name).toBe('bar');
+      expect(model2.name).toBe('baz');
     });
   });
 });
