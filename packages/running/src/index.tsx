@@ -38,7 +38,7 @@ import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode, useCallback } from 'react';
+import React, { isValidElement, ReactNode, useCallback, useRef } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -195,6 +195,10 @@ function Item(props: {
   collapseToggled: ISignal<Section, boolean>;
 }) {
   const { runningItem } = props;
+  // Use a ref instead of a state because the state does not have the time
+  // to update in the callbacks
+  const [collapsed, collapse] = React.useState(false);
+  const shuttingDown = useRef(false);
   const classList = [ITEM_CLASS];
   const detail = runningItem.detail?.();
   const icon = runningItem.icon();
@@ -208,21 +212,25 @@ function Item(props: {
     (typeof props.shutdownLabel === 'function'
       ? props.shutdownLabel(runningItem)
       : props.shutdownLabel) ?? trans.__('Shut Down');
-  const shutdown = (event: React.MouseEvent) => {
-    if (!event.defaultPrevented) {
+  const shutdown = useCallback(
+    (event: React.MouseEvent) => {
+      shuttingDown.current = true;
       event.preventDefault();
       runningItem.shutdown?.();
-    }
-  };
+    },
+    [runningItem, shuttingDown]
+  );
 
   // Materialise getter to avoid triggering it repeatedly
   const children = runningItem.children;
 
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
-  const [collapsed, collapse] = React.useState(false);
   const collapsible = !!children?.length;
   const onClick = useCallback(
     (event: React.MouseEvent) => {
+      if (shuttingDown.current) {
+        return;
+      }
       const item = getTreeItemElement(event.target as HTMLElement);
       if (event.currentTarget !== item) {
         return;
@@ -231,7 +239,7 @@ function Item(props: {
         collapse(!collapsed);
       }
     },
-    [collapsible, collapsed]
+    [collapsible, collapsed, shuttingDown]
   );
 
   // Listen to signal to collapse from outside
