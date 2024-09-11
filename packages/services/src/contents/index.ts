@@ -513,6 +513,12 @@ export namespace Contents {
     readonly serverSettings: ServerConnection.ISettings;
 
     /**
+     * An optional shared model factory instance for the
+     * drive.
+     */
+    readonly sharedModelFactory?: ISharedFactory;
+
+    /**
      * A signal emitted when a file operation takes place.
      */
     fileChanged: ISignal<IDrive, IChangedArgs>;
@@ -704,6 +710,9 @@ export class ContentsManager implements Contents.IManager {
    */
   getSharedModelFactory(path: string): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
+    if (drive?.sharedModelFactory) {
+      return drive!.sharedModelFactory;
+    }
     const provider = drive?.contentProviderRegistry?.getProvider(path);
     return provider?.sharedModelFactory ?? null;
   }
