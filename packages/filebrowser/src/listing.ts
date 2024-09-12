@@ -2808,10 +2808,11 @@ export namespace DirListing {
             small: trans.__('Modified'),
             large: trans.__('Last Modified')
           }),
-        file_size: () => this._createHeaderItemNodeWithSizes({
-          small: trans.__('Size'),
-          large: trans.__('File Size')
-        }),
+        file_size: () =>
+          this._createHeaderItemNodeWithSizes({
+            small: trans.__('Size'),
+            large: trans.__('File Size')
+          }),
         is_selected: () =>
           this.createCheckboxWrapperNode({
             alwaysVisible: true,
