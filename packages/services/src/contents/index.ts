@@ -1243,7 +1243,7 @@ export class Drive implements Contents.IDrive {
     }
 
     const settings = this.serverSettings;
-    const url = this._getUrl(options.path ?? '');
+    const url = this.getUrl(options.path ?? '');
     const init = {
       method: 'POST',
       body
@@ -1274,7 +1274,7 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async delete(localPath: string): Promise<void> {
-    const url = this._getUrl(localPath);
+    const url = this.getUrl(localPath);
     const settings = this.serverSettings;
     const init = { method: 'DELETE' };
     const response = await ServerConnection.makeRequest(url, init, settings);
@@ -1309,7 +1309,7 @@ export class Drive implements Contents.IDrive {
     newLocalPath: string
   ): Promise<Contents.IModel> {
     const settings = this.serverSettings;
-    const url = this._getUrl(oldLocalPath);
+    const url = this.getUrl(oldLocalPath);
     const init = {
       method: 'PATCH',
       body: JSON.stringify({ path: newLocalPath })
@@ -1369,7 +1369,7 @@ export class Drive implements Contents.IDrive {
    */
   async copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
     const settings = this.serverSettings;
-    const url = this._getUrl(toDir);
+    const url = this.getUrl(toDir);
     const init = {
       method: 'POST',
       body: JSON.stringify({ copy_from: fromFile })
@@ -1403,7 +1403,7 @@ export class Drive implements Contents.IDrive {
   async createCheckpoint(
     localPath: string
   ): Promise<Contents.ICheckpointModel> {
-    const url = this._getUrl(localPath, 'checkpoints');
+    const url = this.getUrl(localPath, 'checkpoints');
     const init = { method: 'POST' };
     const response = await ServerConnection.makeRequest(
       url,
@@ -1433,7 +1433,7 @@ export class Drive implements Contents.IDrive {
   async listCheckpoints(
     localPath: string
   ): Promise<Contents.ICheckpointModel[]> {
-    const url = this._getUrl(localPath, 'checkpoints');
+    const url = this.getUrl(localPath, 'checkpoints');
     const response = await ServerConnection.makeRequest(
       url,
       {},
@@ -1469,7 +1469,7 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     checkpointID: string
   ): Promise<void> {
-    const url = this._getUrl(localPath, 'checkpoints', checkpointID);
+    const url = this.getUrl(localPath, 'checkpoints', checkpointID);
     const init = { method: 'POST' };
     const response = await ServerConnection.makeRequest(
       url,
@@ -1498,7 +1498,7 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     checkpointID: string
   ): Promise<void> {
-    const url = this._getUrl(localPath, 'checkpoints', checkpointID);
+    const url = this.getUrl(localPath, 'checkpoints', checkpointID);
     const init = { method: 'DELETE' };
     const response = await ServerConnection.makeRequest(
       url,
@@ -1514,7 +1514,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Get a REST url for a file given a path.
    */
-  private _getUrl(...args: string[]): string {
+  getUrl(...args: string[]): string {
     const parts = args.map(path => URLExt.encodeParts(path));
     const baseUrl = this.serverSettings.baseUrl;
     return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
@@ -1636,10 +1636,6 @@ class ContentProviderRegistry implements IContentProviderRegistry {
  * A content provider using the Jupyter REST API.
  */
 export class RestContentProvider implements IContentProvider {
-  constructor() {
-    this._apiEndpoint = SERVICE_DRIVE_URL;
-  }
-
   public get extensions(): IContentProviderExtension[] {
     // This provider can handle any type of file.
     return [{ re: '.*', score: 1 }];
@@ -1660,7 +1656,7 @@ export class RestContentProvider implements IContentProvider {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    let url = this._getUrl(localPath);
+    let url = (this.drive as Drive).getUrl(localPath);
     if (options) {
       // The notebook type cannot take a format option.
       if (options.type === 'notebook') {
@@ -1672,11 +1668,8 @@ export class RestContentProvider implements IContentProvider {
       url += URLExt.objectToQueryString(params);
     }
 
-    const response = await ServerConnection.makeRequest(
-      url,
-      {},
-      this.drive.serverSettings
-    );
+    const settings = this.drive.serverSettings;
+    const response = await ServerConnection.makeRequest(url, {}, settings);
     if (response.status !== 200) {
       const err = await ServerConnection.ResponseError.create(response);
       throw err;
@@ -1706,7 +1699,7 @@ export class RestContentProvider implements IContentProvider {
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
     const settings = this.drive.serverSettings;
-    const url = this._getUrl(localPath);
+    const url = (this.drive as Drive).getUrl(localPath);
     const init = {
       method: 'PUT',
       body: JSON.stringify(options)
@@ -1737,16 +1730,6 @@ export class RestContentProvider implements IContentProvider {
     >;
   }
 
-  /**
-   * Get a REST url for a file given a path.
-   */
-  private _getUrl(...args: string[]): string {
-    const parts = args.map(path => URLExt.encodeParts(path));
-    const baseUrl = this.drive.serverSettings.baseUrl;
-    return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
-  }
-
-  private _apiEndpoint: string;
   drive: Contents.IDrive;
 }
 
