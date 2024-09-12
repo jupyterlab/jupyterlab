@@ -248,6 +248,7 @@ before-build-python = [
 after-publish-assets = "npm run after:publish:assets"
 
 [tool.ruff]
+exclude = ["*.ipynb"]
 target-version = "py38"
 line-length = 100
 lint.select = [
