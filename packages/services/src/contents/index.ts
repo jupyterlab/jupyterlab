@@ -1115,15 +1115,20 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const contentProviderRegistry = new ContentProviderRegistry();
     const restContentProvider = new RestContentProvider({
       apiEndpoint: this._apiEndpoint,
       serverSettings: this.serverSettings,
       fileChanged: this.fileChanged
     });
-    contentProviderRegistry.register(restContentProvider);
-    this.contentProviderRegistry = contentProviderRegistry;
+    this.contentProviderRegistry.register(restContentProvider);
   }
+
+  /**
+   * Content provider registry.
+   * @experimental
+   */
+  readonly contentProviderRegistry: IContentProviderRegistry =
+    new ContentProviderRegistry();
 
   /**
    * The name of the drive, which is used at the leading
@@ -1511,7 +1516,6 @@ export class Drive implements Contents.IDrive {
   private _apiEndpoint: string;
   private _isDisposed = false;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
-  contentProviderRegistry: IContentProviderRegistry;
 }
 
 /**
@@ -1729,6 +1733,7 @@ namespace RestContentProvider {
 
 /**
  * Registry of content providers.
+ * @experimental
  */
 export interface IContentProviderRegistry {
   /**
@@ -1748,6 +1753,7 @@ export interface IContentProviderRegistry {
 
 /**
  * The content provider interface.
+ * @experimental
  */
 export interface IContentProvider {
   /**
