@@ -140,12 +140,18 @@
 
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
-    [checkbox] auto
-    [name] minmax(var(--jp-filebrowser-name-column-width), auto)
-    [resize-name-modified] 5px
-    [modified] minmax(var(--jp-filebrowser-modified-column-width), auto)
-    [resize-modified-size] 5px
-    [file-size] minmax(var(--jp-filebrowser-filesize-column-width), auto);
+    [jp-filebrowser-checkbox] auto
+    [jp-filebrowser-name] minmax(var(--jp-filebrowser-name-column-width), auto)
+    [jp-filebrowser-resize-name-modified] 5px
+    [jp-filebrowser-modified] minmax(
+      var(--jp-filebrowser-modified-column-width),
+      auto
+    )
+    [jp-filebrowser-resize-modified-size] 5px
+    [jp-filebrowser-file-size] minmax(
+      var(--jp-filebrowser-filesize-column-width),
+      auto
+    );
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -172,11 +178,11 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  grid-column: name;
+  grid-column: jp-filebrowser-name;
 }
 
 .jp-DirListing-resizeHandle[data-column='name'] {
-  grid-column: resize-name-modified;
+  grid-column: jp-filebrowser-resize-name-modified;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
@@ -184,15 +190,15 @@
   /* stylelint-disable */
   container-type: inline-size;
   /* stylelint-enable */
-  grid-column: modified;
+  grid-column: jp-filebrowser-modified;
 }
 
 .jp-DirListing-resizeHandle[data-column='last_modified'] {
-  grid-column: resize-modified-size;
+  grid-column: jp-filebrowser-resize-modified-size;
 }
 
 .jp-DirListing-headerItem.jp-id-filesize {
-  grid-column: file-size;
+  grid-column: jp-filebrowser-file-size;
   text-align: right;
 }
 
@@ -244,12 +250,18 @@
 
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
-    [checkbox] auto
-    [name] minmax(var(--jp-filebrowser-name-column-width), auto)
-    [resize-name-modified] 5px
-    [modified] minmax(var(--jp-filebrowser-modified-column-width), auto)
-    [resize-modified-size] 5px
-    [file-size] minmax(var(--jp-filebrowser-filesize-column-width), auto);
+    [jp-filebrowser-checkbox] auto
+    [jp-filebrowser-name] minmax(var(--jp-filebrowser-name-column-width), auto)
+    [jp-filebrowser-resize-name-modified] 5px
+    [jp-filebrowser-modified] minmax(
+      var(--jp-filebrowser-modified-column-width),
+      auto
+    )
+    [jp-filebrowser-resize-modified-size] 5px
+    [jp-filebrowser-file-size] minmax(
+      var(--jp-filebrowser-filesize-column-width),
+      auto
+    );
 }
 
 .jp-DirListing-content mark {
@@ -288,7 +300,7 @@
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
-  grid-column: checkbox;
+  grid-column: jp-filebrowser-checkbox;
 }
 
 .jp-DirListing-header
@@ -344,7 +356,7 @@
 }
 
 .jp-DirListing-itemName {
-  grid-column: name;
+  grid-column: jp-filebrowser-name;
 }
 
 .jp-DirListing-item[data-is-dot] {
@@ -400,12 +412,12 @@
 
 .jp-DirListing-itemModified {
   text-align: right;
-  grid-column: modified;
+  grid-column: jp-filebrowser-modified;
 }
 
 .jp-DirListing-itemFileSize {
   text-align: right;
-  grid-column: file-size;
+  grid-column: jp-filebrowser-file-size;
 }
 
 .jp-DirListing-editor {
