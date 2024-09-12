@@ -195,9 +195,9 @@ function Item(props: {
   collapseToggled: ISignal<Section, boolean>;
 }) {
   const { runningItem } = props;
+  const [collapsed, setCollapsed] = React.useState(false);
   // Use a ref instead of a state because the state does not have the time
   // to update in the callbacks
-  const [collapsed, collapse] = React.useState(false);
   const shuttingDown = useRef(false);
   const classList = [ITEM_CLASS];
   const detail = runningItem.detail?.();
@@ -236,7 +236,7 @@ function Item(props: {
         return;
       }
       if (collapsible) {
-        collapse(!collapsed);
+        setCollapsed(!collapsed);
       }
     },
     [collapsible, collapsed, shuttingDown]
@@ -244,7 +244,7 @@ function Item(props: {
 
   // Listen to signal to collapse from outside
   props.collapseToggled.connect((_emitter, newCollapseState) =>
-    collapse(newCollapseState)
+    setCollapsed(newCollapseState)
   );
 
   if (runningItem.className) {
