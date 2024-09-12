@@ -1353,12 +1353,11 @@ describe('drive', () => {
         drive: Contents.IDrive;
       }
 
-      const contentProviderRegistry = Drive.getContentProviderRegistry();
+      const contents = new ContentsManager({ defaultDrive: new Drive() });
       const contentProvider = new ContentProvider();
-      contentProviderRegistry.register(contentProvider);
-      const drive = new Drive();
-      const model1 = await drive.get('foo');
-      const model2 = await drive.save('foo');
+      contents.defaultDrive.contentProviderRegistry!.register(contentProvider);
+      const model1 = await contents.defaultDrive.get('foo');
+      const model2 = await contents.defaultDrive.save('foo');
       expect(model1.name).toBe('bar');
       expect(model2.name).toBe('baz');
     });

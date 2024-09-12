@@ -496,10 +496,10 @@ export namespace Contents {
    */
   export interface IDrive extends IDisposable {
     /**
-     * The content provider registry, consisting of all the
+     * An optional content provider registry, consisting of all the
      * content providers that this drive can use to access files.
      */
-    readonly contentProviderRegistry?: IContentProviderRegistry;
+    contentProviderRegistry?: IContentProviderRegistry;
 
     /**
      * The name of the drive, which is used at the leading
@@ -663,6 +663,13 @@ export class ContentsManager implements Contents.IManager {
       options.serverSettings ?? ServerConnection.makeSettings());
     this._defaultDrive = options.defaultDrive ?? new Drive({ serverSettings });
     this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
+  }
+
+  /**
+   * The default drive associated with the manager.
+   */
+  get defaultDrive(): Contents.IDrive {
+    return this._defaultDrive;
   }
 
   /**
@@ -1108,29 +1115,26 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    this.contentProviderRegistry.drive = this;
+    const contentProviderRegistry = new ContentProviderRegistry();
+    const restContentProvider = new RestContentProvider();
+    contentProviderRegistry.register(restContentProvider);
+    this.contentProviderRegistry = contentProviderRegistry;
   }
-
-  private static _contentProviderRegistry:
-    | IContentProviderRegistry
-    | undefined = undefined;
-
-  static getContentProviderRegistry(): IContentProviderRegistry {
-    if (Drive._contentProviderRegistry === undefined) {
-      const contentProviderRegistry = new ContentProviderRegistry();
-      const restContentProvider = new RestContentProvider();
-      contentProviderRegistry.register(restContentProvider);
-      Drive._contentProviderRegistry = contentProviderRegistry;
-    }
-    return Drive._contentProviderRegistry;
-  }
-
+  /**
+   * The content provider registry associated with the drive.
+   */
   get contentProviderRegistry(): IContentProviderRegistry {
-    const contentProviderRegistry = Drive.getContentProviderRegistry();
-    if (contentProviderRegistry.drive === undefined) {
-      contentProviderRegistry.drive = this;
-    }
-    return contentProviderRegistry;
+    return this._contentProviderRegistry;
+  }
+
+  /**
+   * Set the content provider registry associated with the drive.
+   */
+  set contentProviderRegistry(
+    contentProviderRegistry: IContentProviderRegistry
+  ) {
+    this._contentProviderRegistry = contentProviderRegistry;
+    contentProviderRegistry.drive = this;
   }
 
   /**
@@ -1519,6 +1523,7 @@ export class Drive implements Contents.IDrive {
   private _apiEndpoint: string;
   private _isDisposed = false;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
+  private _contentProviderRegistry: IContentProviderRegistry;
 }
 
 /**
