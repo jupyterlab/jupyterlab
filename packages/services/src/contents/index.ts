@@ -1116,25 +1116,13 @@ export class Drive implements Contents.IDrive {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     const contentProviderRegistry = new ContentProviderRegistry();
-    const restContentProvider = new RestContentProvider();
+    const restContentProvider = new RestContentProvider({
+      apiEndpoint: this._apiEndpoint,
+      serverSettings: this.serverSettings,
+      fileChanged: this.fileChanged
+    });
     contentProviderRegistry.register(restContentProvider);
     this.contentProviderRegistry = contentProviderRegistry;
-  }
-  /**
-   * The content provider registry associated with the drive.
-   */
-  get contentProviderRegistry(): IContentProviderRegistry {
-    return this._contentProviderRegistry;
-  }
-
-  /**
-   * Set the content provider registry associated with the drive.
-   */
-  set contentProviderRegistry(
-    contentProviderRegistry: IContentProviderRegistry
-  ) {
-    this._contentProviderRegistry = contentProviderRegistry;
-    contentProviderRegistry.drive = this;
   }
 
   /**
@@ -1243,7 +1231,7 @@ export class Drive implements Contents.IDrive {
     }
 
     const settings = this.serverSettings;
-    const url = this.getUrl(options.path ?? '');
+    const url = this._getUrl(options.path ?? '');
     const init = {
       method: 'POST',
       body
@@ -1274,7 +1262,7 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async delete(localPath: string): Promise<void> {
-    const url = this.getUrl(localPath);
+    const url = this._getUrl(localPath);
     const settings = this.serverSettings;
     const init = { method: 'DELETE' };
     const response = await ServerConnection.makeRequest(url, init, settings);
@@ -1309,7 +1297,7 @@ export class Drive implements Contents.IDrive {
     newLocalPath: string
   ): Promise<Contents.IModel> {
     const settings = this.serverSettings;
-    const url = this.getUrl(oldLocalPath);
+    const url = this._getUrl(oldLocalPath);
     const init = {
       method: 'PATCH',
       body: JSON.stringify({ path: newLocalPath })
@@ -1369,7 +1357,7 @@ export class Drive implements Contents.IDrive {
    */
   async copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
     const settings = this.serverSettings;
-    const url = this.getUrl(toDir);
+    const url = this._getUrl(toDir);
     const init = {
       method: 'POST',
       body: JSON.stringify({ copy_from: fromFile })
@@ -1403,7 +1391,7 @@ export class Drive implements Contents.IDrive {
   async createCheckpoint(
     localPath: string
   ): Promise<Contents.ICheckpointModel> {
-    const url = this.getUrl(localPath, 'checkpoints');
+    const url = this._getUrl(localPath, 'checkpoints');
     const init = { method: 'POST' };
     const response = await ServerConnection.makeRequest(
       url,
@@ -1433,7 +1421,7 @@ export class Drive implements Contents.IDrive {
   async listCheckpoints(
     localPath: string
   ): Promise<Contents.ICheckpointModel[]> {
-    const url = this.getUrl(localPath, 'checkpoints');
+    const url = this._getUrl(localPath, 'checkpoints');
     const response = await ServerConnection.makeRequest(
       url,
       {},
@@ -1469,7 +1457,7 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     checkpointID: string
   ): Promise<void> {
-    const url = this.getUrl(localPath, 'checkpoints', checkpointID);
+    const url = this._getUrl(localPath, 'checkpoints', checkpointID);
     const init = { method: 'POST' };
     const response = await ServerConnection.makeRequest(
       url,
@@ -1498,7 +1486,7 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     checkpointID: string
   ): Promise<void> {
-    const url = this.getUrl(localPath, 'checkpoints', checkpointID);
+    const url = this._getUrl(localPath, 'checkpoints', checkpointID);
     const init = { method: 'DELETE' };
     const response = await ServerConnection.makeRequest(
       url,
@@ -1514,7 +1502,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Get a REST url for a file given a path.
    */
-  getUrl(...args: string[]): string {
+  private _getUrl(...args: string[]): string {
     const parts = args.map(path => URLExt.encodeParts(path));
     const baseUrl = this.serverSettings.baseUrl;
     return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
@@ -1523,7 +1511,7 @@ export class Drive implements Contents.IDrive {
   private _apiEndpoint: string;
   private _isDisposed = false;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
-  private _contentProviderRegistry: IContentProviderRegistry;
+  contentProviderRegistry: IContentProviderRegistry;
 }
 
 /**
@@ -1592,21 +1580,7 @@ namespace Private {
 }
 
 class ContentProviderRegistry implements IContentProviderRegistry {
-  get drive(): Contents.IDrive | undefined {
-    return this._drive;
-  }
-
-  set drive(drive: Contents.IDrive) {
-    this._drive = drive;
-    for (let provider of this._providers) {
-      provider.drive = drive;
-    }
-  }
-
   register(provider: IContentProvider): void {
-    if (this._drive !== undefined) {
-      provider.drive = this._drive;
-    }
     this._providers.push(provider);
   }
 
@@ -1629,13 +1603,16 @@ class ContentProviderRegistry implements IContentProviderRegistry {
   }
 
   private _providers: IContentProvider[] = [];
-  private _drive: Contents.IDrive | undefined = undefined;
 }
 
 /**
  * A content provider using the Jupyter REST API.
  */
 export class RestContentProvider implements IContentProvider {
+  constructor(options: RestContentProvider.IOptions) {
+    this._options = options;
+  }
+
   public get extensions(): IContentProviderExtension[] {
     // This provider can handle any type of file.
     return [{ re: '.*', score: 1 }];
@@ -1656,7 +1633,7 @@ export class RestContentProvider implements IContentProvider {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    let url = (this.drive as Drive).getUrl(localPath);
+    let url = this._getUrl(localPath);
     if (options) {
       // The notebook type cannot take a format option.
       if (options.type === 'notebook') {
@@ -1668,7 +1645,7 @@ export class RestContentProvider implements IContentProvider {
       url += URLExt.objectToQueryString(params);
     }
 
-    const settings = this.drive.serverSettings;
+    const settings = this._options.serverSettings;
     const response = await ServerConnection.makeRequest(url, {}, settings);
     if (response.status !== 200) {
       const err = await ServerConnection.ResponseError.create(response);
@@ -1698,8 +1675,8 @@ export class RestContentProvider implements IContentProvider {
     localPath: string,
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
-    const settings = this.drive.serverSettings;
-    const url = (this.drive as Drive).getUrl(localPath);
+    const settings = this._options.serverSettings;
+    const url = this._getUrl(localPath);
     const init = {
       method: 'PUT',
       body: JSON.stringify(options)
@@ -1724,24 +1701,36 @@ export class RestContentProvider implements IContentProvider {
    * A signal emitted when a file operation takes place.
    */
   get fileChanged(): Signal<this, Contents.IChangedArgs> {
-    return this.drive.fileChanged as unknown as Signal<
+    return this._options.fileChanged as unknown as Signal<
       this,
       Contents.IChangedArgs
     >;
   }
 
-  drive: Contents.IDrive;
+  /**
+   * Get a REST url for a file given a path.
+   */
+  private _getUrl(...args: string[]): string {
+    const parts = args.map(path => URLExt.encodeParts(path));
+    const baseUrl = this._options.serverSettings.baseUrl;
+    return URLExt.join(baseUrl, this._options.apiEndpoint, ...parts);
+  }
+
+  private _options: RestContentProvider.IOptions;
+}
+
+namespace RestContentProvider {
+  export interface IOptions {
+    apiEndpoint: string;
+    serverSettings: ServerConnection.ISettings;
+    fileChanged: ISignal<Contents.IDrive, Contents.IChangedArgs>;
+  }
 }
 
 /**
  * Registry of content providers.
  */
 export interface IContentProviderRegistry {
-  /**
-   * The drive of the content provider registry.
-   */
-  drive: Contents.IDrive | undefined;
-
   /**
    * Add a content provider into the registry.
    *
@@ -1761,11 +1750,6 @@ export interface IContentProviderRegistry {
  * The content provider interface.
  */
 export interface IContentProvider {
-  /**
-   * The drive of the content provider.
-   */
-  drive: Contents.IDrive;
-
   /**
    * An optional shared model factory instance for the content provider.
    */
