@@ -3492,7 +3492,7 @@ namespace Private {
       // Sort by size
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return (a.size ?? 0) - (b.size ?? 0);
+          return (b.size ?? 0) - (a.size ?? 0);
         })
       );
     } else {
