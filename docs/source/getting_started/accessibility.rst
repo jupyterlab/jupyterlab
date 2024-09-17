@@ -142,7 +142,7 @@ Evaluation report
 """""""""""""""""
 
 * An evaluation for JupyterLab is available at: `jupyterlab/jupyterlab/issues/9399 <https://github.com/jupyterlab/jupyterlab/issues/9399>`_.
-* User reports on JupyterLab's accessibility are available at:`the jupyterlab/jupyterlab label `tag:accessibility <https://github.com/jupyterlab/jupyterlab/labels/tag%3AAccessibility>`_.
+* User reports on JupyterLab's accessibility are available at: `the jupyterlab/jupyterlab label tag:Accessibility <https://github.com/jupyterlab/jupyterlab/labels/tag%3AAccessibility>`_.
 
 What the community is doing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
