@@ -38,7 +38,7 @@ This section includes audits from different stakeholders on Jupyter products.
 * `JupyterLab v2.2.6 WCAG 2.1 <https://github.com/jupyterlab/jupyterlab/issues/9399>`_ - conducted in 2020
 * `Jupyter Notebook WCAG 2.0 <https://github.com/jupyter/accessibility/issues/7>`_ - conducted in 2019
 
-Many of the issues identified in these audits can be tracked in this `GitHub project within the JupyterLab organization <https://github.com/orgs/jupyterlab/projects/1>`_
+Many of the issues identified in these audits can be tracked in issues with the `tag:Accessibility <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Atag%3AAccessibility>`_ label.
 
 Accessibility Statement for JupyterLab
 --------------------------------------
