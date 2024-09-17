@@ -68,19 +68,7 @@ window.addEventListener('load', async function () {
     mimeExtensions: await Promise.all(mimeExtensions)
   });
 
-  function getPlugins(extension) {
-    // Handle commonjs or es2015 modules
-    let exports;
-    if (extension.hasOwnProperty('__esModule')) {
-      exports = extension.default;
-    } else {
-      // CommonJS exports.
-      exports = extension;
-    }
-
-    return Array.isArray(exports) ? exports : [exports];
-  }
-  lab.registerPlugins((await Promise.all(extensions)).map(getPlugins).flat());
+  lab.registerPlugins(await Promise.all(extensions));
 
   /* eslint-disable no-console */
   console.log('Starting app');
