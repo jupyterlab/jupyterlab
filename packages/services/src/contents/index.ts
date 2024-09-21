@@ -1118,12 +1118,16 @@ export class Drive implements Contents.IDrive {
       options.serverSettings ?? ServerConnection.makeSettings();
     const restContentProvider = new RestContentProvider({
       apiEndpoint: this._apiEndpoint,
-      serverSettings: this.serverSettings,
-      fileChanged: this.fileChanged
+      serverSettings: this.serverSettings
     });
     this.contentProviderRegistry = new ContentProviderRegistry({
       defaultProvider: restContentProvider
     });
+    this.contentProviderRegistry.fileChanged.connect(
+      (registry, change: Contents.IChangedArgs) => {
+        this._fileChanged.emit(change);
+      }
+    );
   }
 
   /**
@@ -1344,7 +1348,13 @@ export class Drive implements Contents.IDrive {
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
     const contentProvider = this.contentProviderRegistry.getProvider(localPath);
-    return contentProvider.save(localPath, options);
+    const data = await contentProvider.save(localPath, options);
+    this._fileChanged.emit({
+      type: 'save',
+      oldValue: null,
+      newValue: data
+    });
+    return data;
   }
 
   /**
@@ -1593,9 +1603,22 @@ class ContentProviderRegistry implements IContentProviderRegistry {
 
   register(provider: IContentProvider): IDisposable {
     this._providers.push(provider);
+    const fileChangedProxy = (
+      _provider: IContentProvider,
+      change: Contents.IChangedArgs
+    ) => {
+      this._fileChanged.emit(change);
+    };
+    if (provider.fileChanged) {
+      provider.fileChanged.connect(fileChangedProxy);
+    }
 
     return new DisposableDelegate(() => {
       const i = this._providers.indexOf(provider);
+
+      if (provider.fileChanged) {
+        provider.fileChanged.disconnect(fileChangedProxy);
+      }
 
       if (i > -1) {
         this._providers.splice(i, 1);
@@ -1619,8 +1642,16 @@ class ContentProviderRegistry implements IContentProviderRegistry {
     return bestProvider ?? this._defaultProvider;
   }
 
+  get fileChanged(): ISignal<IContentProviderRegistry, Contents.IChangedArgs> {
+    return this._fileChanged;
+  }
+
   private _providers: IContentProvider[] = [];
   private _defaultProvider: IContentProvider;
+  private _fileChanged = new Signal<
+    IContentProviderRegistry,
+    Contents.IChangedArgs
+  >(this);
 }
 
 namespace ContentProviderRegistry {
@@ -1719,22 +1750,7 @@ export class RestContentProvider implements IContentProvider {
     }
     const data = await response.json();
     validate.validateContentsModel(data);
-    this.fileChanged.emit({
-      type: 'save',
-      oldValue: null,
-      newValue: data
-    });
     return data;
-  }
-
-  /**
-   * A signal emitted when a file operation takes place.
-   */
-  get fileChanged(): Signal<this, Contents.IChangedArgs> {
-    return this._options.fileChanged as unknown as Signal<
-      this,
-      Contents.IChangedArgs
-    >;
   }
 
   /**
@@ -1753,7 +1769,6 @@ namespace RestContentProvider {
   export interface IOptions {
     apiEndpoint: string;
     serverSettings: ServerConnection.ISettings;
-    fileChanged: ISignal<Contents.IDrive, Contents.IChangedArgs>;
   }
 }
 
@@ -1775,6 +1790,14 @@ export interface IContentProviderRegistry {
    * @param filePath - The file path for which to get a content provider.
    */
   getProvider(filePath: string): IContentProvider;
+
+  /**
+   * A proxy of the file changed signal for all the providers.
+   */
+  readonly fileChanged: ISignal<
+    IContentProviderRegistry,
+    Contents.IChangedArgs
+  >;
 }
 
 /**
@@ -1822,8 +1845,11 @@ export interface IContentProvider {
 
   /**
    * A signal emitted when a file operation takes place.
+   *
+   * Content providers which perform save operations initiated on the backend
+   * may emit this signal to communicate a change in the file contents.
    */
-  readonly fileChanged: ISignal<this, Contents.IChangedArgs>;
+  readonly fileChanged?: ISignal<IContentProvider, Contents.IChangedArgs>;
 }
 
 /**

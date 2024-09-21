@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Signal } from '@lumino/signaling';
-import { expectFailure, JupyterServer } from '@jupyterlab/testing';
+import {
+  expectFailure,
+  JupyterServer,
+  signalToPromise
+} from '@jupyterlab/testing';
 import {
   Contents,
   ContentsManager,
@@ -1342,14 +1346,12 @@ describe('drive', () => {
         };
       }
 
-      get fileChanged(): Signal<this, Contents.IChangedArgs> {
-        return this.drive.fileChanged as unknown as Signal<
-          this,
-          Contents.IChangedArgs
-        >;
-      }
-
       drive: Contents.IDrive;
+    }
+
+    class ChangeEmittingContentProvider extends DummyContentProvider {
+      readonly fileChanged: Signal<IContentProvider, Contents.IChangedArgs> =
+        new Signal<IContentProvider, Contents.IChangedArgs>(this);
     }
 
     it('should use the registered content provider', async () => {
@@ -1369,6 +1371,20 @@ describe('drive', () => {
       drive.contentProviderRegistry.register(contentProvider);
       const model1 = await contents.get('foo');
       expect(model1.name).toBe('bar');
+    });
+
+    it('should proxy `fileChanged` signals emitted by providers', async () => {
+      const drive = new Drive();
+      const contentProvider = new ChangeEmittingContentProvider();
+      drive.contentProviderRegistry.register(contentProvider);
+      const promise = signalToPromise(drive.fileChanged);
+      contentProvider.fileChanged.emit({
+        oldValue: null,
+        newValue: 'test',
+        type: 'save'
+      } as Contents.IChangedArgs);
+      const [_, change] = await promise;
+      expect(change.newValue).toBe('test');
     });
 
     it('should revert back to default content provider after disposal', async () => {
