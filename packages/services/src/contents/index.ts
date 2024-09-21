@@ -499,7 +499,7 @@ export namespace Contents {
      * An optional content provider registry, consisting of all the
      * content providers that this drive can use to access files.
      */
-    contentProviderRegistry?: IContentProviderRegistry;
+    readonly contentProviderRegistry?: IContentProviderRegistry;
 
     /**
      * The name of the drive, which is used at the leading
