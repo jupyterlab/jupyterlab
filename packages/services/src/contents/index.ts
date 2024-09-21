@@ -717,10 +717,10 @@ export class ContentsManager implements Contents.IManager {
    */
   getSharedModelFactory(path: string): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
-    if (drive?.sharedModelFactory) {
-      return drive!.sharedModelFactory;
+    if (drive.sharedModelFactory) {
+      return drive.sharedModelFactory;
     }
-    const provider = drive?.contentProviderRegistry?.getProvider(path);
+    const provider = drive.contentProviderRegistry?.getProvider(path);
     return provider?.sharedModelFactory ?? null;
   }
 
@@ -1120,15 +1120,16 @@ export class Drive implements Contents.IDrive {
       serverSettings: this.serverSettings,
       fileChanged: this.fileChanged
     });
-    this.contentProviderRegistry.register(restContentProvider);
+    this.contentProviderRegistry = new ContentProviderRegistry({
+      defaultProvider: restContentProvider
+    });
   }
 
   /**
    * Content provider registry.
    * @experimental
    */
-  readonly contentProviderRegistry: IContentProviderRegistry =
-    new ContentProviderRegistry();
+  readonly contentProviderRegistry: IContentProviderRegistry;
 
   /**
    * The name of the drive, which is used at the leading
@@ -1182,7 +1183,7 @@ export class Drive implements Contents.IDrive {
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
     const contentProvider = this.contentProviderRegistry.getProvider(localPath);
-    return contentProvider!.get(localPath, options);
+    return contentProvider.get(localPath, options);
   }
 
   /**
@@ -1342,7 +1343,7 @@ export class Drive implements Contents.IDrive {
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
     const contentProvider = this.contentProviderRegistry.getProvider(localPath);
-    return contentProvider!.save(localPath, options);
+    return contentProvider.save(localPath, options);
   }
 
   /**
@@ -1584,6 +1585,11 @@ namespace Private {
 }
 
 class ContentProviderRegistry implements IContentProviderRegistry {
+  constructor(options: ContentProviderRegistry.IOptions) {
+    this.register(options.defaultProvider);
+    this._defaultProvider = options.defaultProvider;
+  }
+
   register(provider: IContentProvider): IDisposable {
     this._providers.push(provider);
 
@@ -1596,7 +1602,7 @@ class ContentProviderRegistry implements IContentProviderRegistry {
     });
   }
 
-  getProvider(filePath: string): IContentProvider | undefined {
+  getProvider(filePath: string): IContentProvider {
     const ext = filePath.split('.').pop() ?? '';
     let rank: number = Infinity;
     let bestProvider: IContentProvider | undefined = undefined;
@@ -1609,10 +1615,23 @@ class ContentProviderRegistry implements IContentProviderRegistry {
         }
       }
     }
-    return bestProvider;
+    return bestProvider ?? this._defaultProvider;
   }
 
   private _providers: IContentProvider[] = [];
+  private _defaultProvider: IContentProvider;
+}
+
+namespace ContentProviderRegistry {
+  /**
+   * Initialization options for `ContentProviderRegistry`.
+   */
+  export interface IOptions {
+    /**
+     * Default provider for the registry.
+     */
+    defaultProvider: IContentProvider;
+  }
 }
 
 /**
@@ -1754,7 +1773,7 @@ export interface IContentProviderRegistry {
    *
    * @param filePath - The file path for which to get a content provider.
    */
-  getProvider(filePath: string): IContentProvider | undefined;
+  getProvider(filePath: string): IContentProvider;
 }
 
 /**
