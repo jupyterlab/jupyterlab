@@ -7,7 +7,7 @@ import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { PartialJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -1584,8 +1584,16 @@ namespace Private {
 }
 
 class ContentProviderRegistry implements IContentProviderRegistry {
-  register(provider: IContentProvider): void {
+  register(provider: IContentProvider): IDisposable {
     this._providers.push(provider);
+
+    return new DisposableDelegate(() => {
+      const i = this._providers.indexOf(provider);
+
+      if (i > -1) {
+        this._providers.splice(i, 1);
+      }
+    });
   }
 
   getProvider(filePath: string): IContentProvider | undefined {
@@ -1739,7 +1747,7 @@ export interface IContentProviderRegistry {
    *
    * @param provider - The content provider to register.
    */
-  register(provider: IContentProvider): void;
+  register(provider: IContentProvider): IDisposable;
 
   /**
    * Get a content provider for the given file path.
