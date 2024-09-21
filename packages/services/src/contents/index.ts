@@ -711,17 +711,18 @@ export class ContentsManager implements Contents.IManager {
   }
 
   /**
-   * Given a path, get a shared model factory from the
-   * relevant backend. Returns `null` if the backend
-   * does not provide one.
+   * Given a path, get a shared model factory from the relevant backend.
+   * The factory defined on content provider best matching the given path
+   * takes precedence over the factory defined on the drive as a whole.
+   * Returns `null` if the backend does not provide one.
    */
   getSharedModelFactory(path: string): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
-    if (drive.sharedModelFactory) {
-      return drive.sharedModelFactory;
-    }
     const provider = drive.contentProviderRegistry?.getProvider(path);
-    return provider?.sharedModelFactory ?? null;
+    if (provider?.sharedModelFactory) {
+      return provider.sharedModelFactory;
+    }
+    return drive.sharedModelFactory ?? null;
   }
 
   /**
