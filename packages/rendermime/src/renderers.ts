@@ -341,7 +341,7 @@ export async function renderMarkdown(
   });
 
   // Apply ids to the header nodes.
-  Private.headerAnchors(host);
+  await Private.headerAnchors(host);
 }
 
 /**
@@ -409,8 +409,34 @@ export namespace renderMarkdown {
    * @param header Header element
    * @returns Normalized id
    */
+
+  function getRandomLetters(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters[randomIndex];
+    }
+    return result;
+  }
+
+  async function hashString(header: string | null): Promise<string> {
+    // Simple hash function using SHA-1
+    const encoder = new TextEncoder();
+    const date = new Date();
+    const randomLetters = getRandomLetters(5); // Generate 5 random letters
+    const text = header + randomLetters + date.toString();
+
+    const data = encoder.encode(text);
+    const buffer = await crypto.subtle.digest('SHA-1', data);
+    return Array.from(new Uint8Array(buffer))
+      .map(b => ('00' + b.toString(16)).slice(-2))
+      .join('');
+  }
+
   export function createHeaderId(header: Element): string {
-    return (header.textContent ?? '').replace(/ /g, '-');
+    const id = `${header.textContent}-${hashString(header.textContent)}`;
+    return (id ?? '').replace(/ /g, '-');
   }
 }
 
@@ -1156,7 +1182,7 @@ namespace Private {
   /**
    * Apply ids to headers.
    */
-  export function headerAnchors(node: HTMLElement): void {
+  export async function headerAnchors(node: HTMLElement): Promise<void> {
     const headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     for (const headerType of headerNames) {
       const headers = node.getElementsByTagName(headerType);
