@@ -1590,16 +1590,14 @@ class ContentProviderRegistry implements IContentProviderRegistry {
 
   getProvider(filePath: string): IContentProvider | undefined {
     const ext = filePath.split('.').pop() ?? '';
-    let score: number = 0;
+    let rank: number = Infinity;
     let bestProvider: IContentProvider | undefined = undefined;
     for (let provider of this._providers) {
       for (let extension of provider.extensions) {
         const re = new RegExp(extension.re);
-        if (ext.match(re) !== null) {
-          if (extension.score > score) {
-            bestProvider = provider;
-            score = extension.score;
-          }
+        if (ext.match(re) !== null && extension.rank < rank) {
+          bestProvider = provider;
+          rank = extension.rank;
         }
       }
     }
@@ -1619,7 +1617,7 @@ export class RestContentProvider implements IContentProvider {
 
   public get extensions(): IContentProviderExtension[] {
     // This provider can handle any type of file.
-    return [{ re: '.*', score: 1 }];
+    return [{ re: '.*', rank: 100 }];
   }
 
   /**
@@ -1807,10 +1805,14 @@ export interface IContentProviderExtension {
   /**
    * The regular expression matching the file extension
    */
-  re: string;
+  readonly re: string;
 
   /**
-   * The score indicating how good the provider is at handling thie type of content.
+   * The rank of the content provider.
+   *
+   * A lower rank indicates a that the provider is better suited for handling
+   * this type of content than providers with higher rank.
+   * The default provider should have the rank of 100.
    */
-  score: number;
+  readonly rank: number;
 }

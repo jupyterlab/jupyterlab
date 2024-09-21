@@ -1306,7 +1306,7 @@ describe('drive', () => {
     it('should use a registered content provider', async () => {
       class ContentProvider implements IContentProvider {
         public get extensions(): IContentProviderExtension[] {
-          return [{ re: '.*', score: 2 }];
+          return [{ re: '.*', rank: 50 }];
         }
 
         async get(
