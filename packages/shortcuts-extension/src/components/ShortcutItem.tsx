@@ -6,7 +6,11 @@
 import { TranslationBundle } from '@jupyterlab/translation';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
-import { IConflicts, ShortcutInput } from './ShortcutInput';
+import {
+  CONFLICT_CONTAINER_CLASS,
+  IConflicts,
+  ShortcutInput
+} from './ShortcutInput';
 import {
   IKeybinding,
   IShortcutRegistry,
@@ -86,7 +90,9 @@ export class ShortcutItem extends React.Component<
   /** Toggle display state of input box */
   private toggleInputNew = (): void => {
     this.setState({
-      displayNewInput: !this.state.displayNewInput
+      displayNewInput: !this.state.displayNewInput,
+      // reset conflicts
+      conflicts: new Map()
     });
   };
 
@@ -178,7 +184,9 @@ export class ShortcutItem extends React.Component<
       displayReplaceInput: {
         ...this.state.displayReplaceInput,
         [location]: !previous
-      }
+      },
+      // Clear old conflicts
+      conflicts: new Map()
     });
   }
 
@@ -321,7 +329,7 @@ export class ShortcutItem extends React.Component<
     }
     return (
       <div className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
-        <div className="jp-Shortcuts-ConflictContainer">
+        <div className={CONFLICT_CONTAINER_CLASS}>
           {conflicts.map(conflict => {
             const key =
               conflict.keys.join(' ') +
@@ -342,12 +350,12 @@ export class ShortcutItem extends React.Component<
                     className="jp-Button jp-mod-reject jp-mod-styled"
                     onClick={() => {
                       this._clearConflict(conflict);
+                      conflict.cancel();
                     }}
                   >
                     {this._trans.__('Cancel')}
                   </button>
                   <button
-                    id="no-blur"
                     className="jp-Button jp-mod-warn jp-mod-styled"
                     onClick={() => {
                       // Clear the conflict first to prevent user from accidentally clicking this button twice
