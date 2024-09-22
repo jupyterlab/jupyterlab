@@ -265,8 +265,7 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
   const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
-  await filterInput.click();
-  await filterInput.pressSequentially('merge cell below');
+  await filterInput.locator('input').fill('merge cell below');
 
   const addShortcutButton = shortcutsForm.locator('.jp-Shortcuts-Plus');
   await expect(addShortcutButton).toHaveCount(1);
