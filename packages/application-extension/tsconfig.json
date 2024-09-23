@@ -19,6 +19,9 @@
       "path": "../property-inspector"
     },
     {
+      "path": "../services"
+    },
+    {
       "path": "../settingregistry"
     },
     {
