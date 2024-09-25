@@ -11,8 +11,8 @@ import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
+import { ITranslator } from '@jupyterlab/translation';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
 import { Message } from '@lumino/messaging';
@@ -253,10 +253,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
+
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
       display_name: spec?.display_name,
-      language: spec?.language
+      language: spec?.language,
     });
   }
 

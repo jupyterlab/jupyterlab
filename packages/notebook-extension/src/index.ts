@@ -5,7 +5,7 @@
  * @module notebook-extension
  */
 
-import type { FieldProps } from '@rjsf/utils';
+import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 
 import {
   ILabShell,
@@ -103,6 +103,7 @@ import {
   buildIcon,
   copyIcon,
   cutIcon,
+  DialogWidget,
   duplicateIcon,
   fastForwardIcon,
   IFormRenderer,
@@ -121,6 +122,8 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
+  PartialJSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -135,6 +138,7 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
+//import { CustomKernelSpecForm } from '@jupyterlab/services/src/kernelspec/kernelspec';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1844,6 +1848,54 @@ function activateNotebookHandler(
     }
   }
 
+  const showKernelSpecDialog = async (
+    parameters: RJSFSchema,
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
+    let kernelConfigurarion: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
+    ];
+
+    // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
+
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new DialogWidget(
+        parameters,
+        kernelConfigurarion,
+        formData => {
+          kernelConfigurarion = formData as PartialJSONObject;
+        },
+        trans
+      ),
+      buttons
+    });
+
+    const result = await dialog.launch();
+
+    if (!result.button.accept) {
+      return;
+    }
+    if (result.value) {
+      let customKernelSpecs = undefined;
+      if (kernelConfigurarion) {
+        customKernelSpecs = kernelConfigurarion;
+      }
+
+      createNew(cwd, kernelId, kernelName, customKernelSpecs);
+    }
+  };
+
   /**
    * Update the setting values.
    */
@@ -1938,7 +1990,8 @@ function activateNotebookHandler(
   const createNew = async (
     cwd: string,
     kernelId: string,
-    kernelName: string
+    kernelName: string,
+    customKernelSpecs?: undefined | PartialJSONObject
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -1948,7 +2001,11 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName }
+        kernel: {
+          id: kernelId,
+          name: kernelName,
+          custom_kernel_specs: customKernelSpecs
+        }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
@@ -1960,6 +2017,7 @@ function activateNotebookHandler(
     label: args => {
       const kernelName = (args['kernelName'] as string) || '';
       if (args['isLauncher'] && args['kernelName'] && services.kernelspecs) {
+        //
         return (
           services.kernelspecs.specs?.kernelspecs[kernelName]?.display_name ??
           ''
@@ -1975,10 +2033,27 @@ function activateNotebookHandler(
     execute: args => {
       const currentBrowser =
         filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      //if has enum then calll
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
-      return createNew(cwd, kernelId, kernelName);
+      const metadata = args['metadata'] as ReadonlyJSONObject;
+      const allowInsecureKernelspecParams = PageConfig.getOption('allow_insecure_kernelspec_params') === 'true' ? true: false;
+      if(metadata?.is_secure) {
+        if (!metadata?.parameters) {
+          return createNew(cwd, kernelId, kernelName);
+        } else {
+          let schema = metadata.parameters as RJSFSchema;
+          showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+        }
+      } else {
+        if (allowInsecureKernelspecParams) {
+            let schema = metadata.parameters as RJSFSchema;
+            showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+        } else {
+            return createNew(cwd, kernelId, kernelName);
+        }
+      }
     }
   });
 
@@ -2000,12 +2075,20 @@ function activateNotebookHandler(
         for (const name in specs.kernelspecs) {
           const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
+          console.log('spec');
+          console.dir(spec);
           const kernelIconUrl =
             spec.resources['logo-svg'] || spec.resources['logo-64x64'];
+          //if has enum then add one icon
+
           disposables.add(
             launcher.add({
               command: CommandIDs.createNew,
-              args: { isLauncher: true, kernelName: name },
+              args: {
+                isLauncher: true,
+                kernelName: name,
+                metadata: spec.metadata as ReadonlyJSONObject
+              },
               category: trans.__('Notebook'),
               rank,
               kernelIconUrl,
