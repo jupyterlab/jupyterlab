@@ -10,11 +10,6 @@
 :root {
   --jp-private-filebrowser-button-height: 28px;
   --jp-private-filebrowser-button-width: 48px;
-
-  /* Default widths of columns, before users resize them */
-  --jp-filebrowser-name-column-width: 126px;
-  --jp-filebrowser-modified-column-width: 83px;
-  --jp-filebrowser-filesize-column-width: 90px;
 }
 
 .jp-FileBrowser .jp-SidePanel-content {
@@ -140,18 +135,12 @@
 
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
-    [jp-filebrowser-checkbox] auto
-    [jp-filebrowser-name] minmax(var(--jp-filebrowser-name-column-width), auto)
+    [jp-filebrowser-checkbox] 24px
+    [jp-filebrowser-name] auto
     [jp-filebrowser-resize-name-modified] 5px
-    [jp-filebrowser-modified] minmax(
-      var(--jp-filebrowser-modified-column-width),
-      auto
-    )
+    [jp-filebrowser-modified] auto
     [jp-filebrowser-resize-modified-size] 5px
-    [jp-filebrowser-file-size] minmax(
-      var(--jp-filebrowser-filesize-column-width),
-      auto
-    );
+    [jp-filebrowser-filesize] auto;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -198,7 +187,7 @@
 }
 
 .jp-DirListing-headerItem.jp-id-filesize {
-  grid-column: jp-filebrowser-file-size;
+  grid-column: jp-filebrowser-filesize;
   text-align: right;
 }
 
@@ -250,18 +239,12 @@
 
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
-    [jp-filebrowser-checkbox] auto
-    [jp-filebrowser-name] minmax(var(--jp-filebrowser-name-column-width), auto)
+    [jp-filebrowser-checkbox] 24px
+    [jp-filebrowser-name] auto
     [jp-filebrowser-resize-name-modified] 5px
-    [jp-filebrowser-modified] minmax(
-      var(--jp-filebrowser-modified-column-width),
-      auto
-    )
+    [jp-filebrowser-modified] auto
     [jp-filebrowser-resize-modified-size] 5px
-    [jp-filebrowser-file-size] minmax(
-      var(--jp-filebrowser-filesize-column-width),
-      auto
-    );
+    [jp-filebrowser-filesize] auto;
 }
 
 .jp-DirListing-content mark {
@@ -417,7 +400,7 @@
 
 .jp-DirListing-itemFileSize {
   text-align: right;
-  grid-column: jp-filebrowser-file-size;
+  grid-column: jp-filebrowser-filesize;
 }
 
 .jp-DirListing-editor {

@@ -1136,17 +1136,42 @@ export class DirListing extends Widget {
       }
     }
 
-    // Write to DOM
+    // Compose the grid columns.
+    const columnOrder = [
+      'jp-filebrowser-checkbox',
+      'jp-filebrowser-name',
+      'jp-filebrowser-resize-name-modified',
+      'jp-filebrowser-modified',
+      'jp-filebrowser-resize-modified-size',
+      'jp-filebrowser-filesize'
+    ];
+    let columnWidths: Record<string, string> = {
+      'jp-filebrowser-checkbox': '24px',
+      'jp-filebrowser-name': 'auto',
+      'jp-filebrowser-resize-name-modified': '5px',
+      'jp-filebrowser-modified': 'auto',
+      'jp-filebrowser-resize-modified-size': '5px',
+      'jp-filebrowser-filesize': 'auto'
+    };
+
     for (const column of visibleColumns) {
       const size = this._columnSizes[column.id];
-      const newSize = size === null ? '' : size + 'px';
-      const varName =
-        column.className.replace(RegExp(/^jp-id-/), '--jp-filebrowser-') +
-        '-column-width';
-
-      // Set at the root.
-      document.documentElement.style.setProperty(varName, newSize);
+      const newSize = size === null ? 'auto' : size + 'px';
+      const colName = column.className.replace(
+        RegExp(/^jp-id-/),
+        'jp-filebrowser-'
+      );
+      columnWidths[colName] = newSize;
     }
+
+    // Update the first visible column's element's parent's grid columns.
+    visibleColumns[0].element.parentElement!.style.gridTemplateColumns =
+      columnOrder
+        .map(col => {
+          return `[${col}] ${columnWidths[col]}`;
+        })
+        .join(' ');
+
     this._updateModifiedStyleAndSize();
 
     // Refresh sizes on the per item widths
