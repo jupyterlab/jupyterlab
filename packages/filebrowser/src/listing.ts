@@ -1164,14 +1164,22 @@ export class DirListing extends Widget {
       columnWidths[colName] = newSize;
     }
 
-    // Update the first visible column's element's parent's grid columns.
-    visibleColumns[0].element.parentElement!.style.gridTemplateColumns =
-      columnOrder
-        .map(col => {
-          return `[${col}] ${columnWidths[col]}`;
-        })
-        .join(' ');
+    // Update the header's template columns.
+    const newGridTemplateColumns = columnOrder
+      .map(col => {
+        return `[${col}] ${columnWidths[col]}`;
+      })
+      .join(' ');
+    const headerElement = visibleColumns[0].element.parentElement!;
+    headerElement.style.gridTemplateColumns = newGridTemplateColumns;
 
+    // Update the body's template columns.
+    // Find the jp-DirListing-content element adjacent to the element above.
+    (
+      headerElement.parentElement?.getElementsByClassName(
+        'jp-DirListing-content'
+      )[0] as HTMLElement
+    ).style.gridTemplateColumns = newGridTemplateColumns;
     this._updateModifiedStyleAndSize();
 
     // Refresh sizes on the per item widths
