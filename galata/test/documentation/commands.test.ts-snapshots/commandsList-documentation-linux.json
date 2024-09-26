@@ -2097,8 +2097,8 @@
   },
   {
     "id": "notebook:toggle-virtual-scrollbar",
-    "label": "Show Virtual Scrollbar",
-    "caption": "Show virtual scrollbar (enabled with windowing mode: full)",
+    "label": "Show Minimap",
+    "caption": "Show Minimap (virtual scrollbar, enabled with windowing mode: full)",
     "shortcuts": []
   },
   {

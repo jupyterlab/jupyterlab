@@ -3536,9 +3536,9 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
-    label: trans.__('Show Virtual Scrollbar'),
+    label: trans.__('Show Minimap'),
     caption: trans.__(
-      'Show virtual scrollbar (enabled with windowing mode: full)'
+      'Show Minimap (virtual scrollbar, enabled with windowing mode: full)'
     ),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
