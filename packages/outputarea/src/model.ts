@@ -526,6 +526,9 @@ namespace Private {
     if (text === undefined) {
       text = '';
     }
+    if (!(newText.includes('\b') || newText.includes('\r'))) {
+      return text + newText;
+    }
     let idx0 = text.length;
     for (let idx1 = 0; idx1 < newText.length; idx1++) {
       const newChar = newText[idx1];
