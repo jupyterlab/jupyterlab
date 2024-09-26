@@ -1167,7 +1167,11 @@ export class DirListing extends Widget {
     // Update the header's template columns.
     const newGridTemplateColumns = columnOrder
       .map(col => {
-        return `[${col}] ${columnWidths[col]}`;
+        // Allow the columns containing file information to grow.
+        const newWidth = col.match(/^jp-filebrowser-(name|modified|filesize)$/)
+          ? `minmax(${columnWidths[col]}, 1fr)`
+          : columnWidths[col];
+        return `[${col}] ${newWidth}`;
       })
       .join(' ');
     const headerElement = visibleColumns[0].element.parentElement!;
