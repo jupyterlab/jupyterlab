@@ -249,6 +249,7 @@
 .jp-Shortcuts-Reset {
   color: var(--jp-brand-color2);
   padding-left: 10px;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Reset:hover {

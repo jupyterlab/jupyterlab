@@ -1097,12 +1097,19 @@ export class DirListing extends Widget {
   }
 
   private _updateColumnSizes() {
-    // adjust column sizes so that they add up to the total width available, preserving ratios
+    // Adjust column sizes so that they add up to the total width available, preserving ratios
     // and removing width from the last column so that it fills the width available;
-    const visibleColumns = this._visibleColumns.map(column => ({
-      ...column,
-      element: DOMUtils.findElement(this.node, column.className)
-    }));
+    const visibleColumns = this._visibleColumns
+      .map(column => ({
+        ...column,
+        element: DOMUtils.findElement(this.node, column.className)
+      }))
+      .filter(column => {
+        // While all visible column will have an element, some extensions like jupyter-unfold
+        // do not render columns even if user requests them to be visible; this filter exists
+        // to ensure backward compatibility with such extensions and may be removed in the future.
+        return column.element;
+      });
 
     // read from DOM
     let total = 0;
@@ -3485,7 +3492,7 @@ namespace Private {
       // Sort by size
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return (a.size ?? 0) - (b.size ?? 0);
+          return (b.size ?? 0) - (a.size ?? 0);
         })
       );
     } else {
