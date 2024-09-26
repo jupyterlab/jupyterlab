@@ -2779,7 +2779,7 @@ export namespace DirListing {
       id: 'name' as const,
       className: NAME_ID_CLASS,
       itemClassName: ITEM_NAME_COLUMN_CLASS,
-      minWidth: 60,
+      minWidth: 75,
       resizable: true,
       sortable: true,
       caretSide: 'right'
@@ -2788,7 +2788,7 @@ export namespace DirListing {
       id: 'last_modified' as const,
       className: MODIFIED_ID_CLASS,
       itemClassName: ITEM_MODIFIED_CLASS,
-      minWidth: 60,
+      minWidth: 75,
       resizable: true,
       sortable: true,
       caretSide: 'left'
@@ -2797,7 +2797,7 @@ export namespace DirListing {
       id: 'file_size' as const,
       className: FILE_SIZE_ID_CLASS,
       itemClassName: ITEM_FILE_SIZE_CLASS,
-      minWidth: 60,
+      minWidth: 75,
       resizable: true,
       sortable: true,
       caretSide: 'left'
