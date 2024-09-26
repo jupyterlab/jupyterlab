@@ -519,6 +519,14 @@ namespace Private {
     }
   }
 
+  /**
+   * Like `indexOf` but allowing to use a regular expression.
+   */
+  function indexOfAny(text: string, re: RegExp, i: number): number {
+    const index = text.slice(i).search(re);
+    return index >= 0 ? index + i : index;
+  }
+
   /*
    * Handle backspaces in `newText` and concatenates to `text`, if any.
    */
@@ -530,7 +538,27 @@ namespace Private {
       return text + newText;
     }
     let idx0 = text.length;
-    for (let idx1 = 0; idx1 < newText.length; idx1++) {
+    let idx1: number = -1;
+    let lastEnd: number = 0;
+    const regex = /[\n|\b|\r]/;
+    let completed = false;
+    while (!completed) {
+      idx1 = indexOfAny(newText, regex, lastEnd);
+
+      // Insert characters at current position.
+      const prefix = newText.slice(
+        lastEnd,
+        idx1 === -1 ? newText.length : idx1
+      );
+      text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
+      lastEnd = idx1 + 1;
+
+      if (idx1 === -1) {
+        completed = true;
+        break;
+      }
+      idx0 += prefix.length;
+
       const newChar = newText[idx1];
       if (newChar === '\b') {
         // Backspace: delete previous character if there is one and if it's not a line feed.
@@ -555,9 +583,7 @@ namespace Private {
         text = text + '\n';
         idx0 = text.length;
       } else {
-        // Insert character at current position.
-        text = text.slice(0, idx0) + newChar + text.slice(idx0 + 1);
-        idx0++;
+        throw Error(`This should not happen`);
       }
     }
     return text;
