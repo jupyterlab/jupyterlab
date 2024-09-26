@@ -363,12 +363,7 @@
   margin-right: 4px;
 }
 
-.jp-DirListing-itemName > .jp-DirListing-itemText {
-  max-width: calc(var(--jp-filebrowser-name-column-width) - 20px);
-  display: inline-block;
-}
-
-.jp-DirListing-itemText,
+.jp-DirListing-itemName,
 .jp-DirListing-itemModified,
 .jp-DirListing-itemFileSize {
   overflow: hidden;
