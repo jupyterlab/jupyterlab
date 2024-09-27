@@ -235,7 +235,9 @@
   overflow: auto;
   background-color: var(--jp-layout-color1);
   display: grid;
-  max-height: 100%;
+
+  /* Allow 30px for the headers above */
+  max-height: calc(100% - 30px);
 
   /* TODO: Deduplicate with content grid */
   grid-template-columns:
