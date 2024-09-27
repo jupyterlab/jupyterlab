@@ -4459,7 +4459,6 @@ __metadata:
     eslint-plugin-jest: ~27.6.0
     eslint-plugin-prettier: ~5.0.1
     eslint-plugin-react: ~7.33.2
-    handlebars: ^4.7.8
     lerna: ^7.1.4
     prettier: ~3.0.0
     stylelint: ^15.10.1
