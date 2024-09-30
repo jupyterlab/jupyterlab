@@ -132,15 +132,6 @@
 
 .jp-DirListing-header {
   display: grid;
-
-  /* TODO: Deduplicate with content grid */
-  grid-template-columns:
-    [jp-filebrowser-checkbox] 24px
-    [jp-filebrowser-name] auto
-    [jp-filebrowser-resize-name-modified] 5px
-    [jp-filebrowser-modified] auto
-    [jp-filebrowser-resize-modified-size] 5px
-    [jp-filebrowser-filesize] auto;
   overflow: hidden;
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
@@ -238,15 +229,6 @@
 
   /* Allow 30px for the headers above */
   max-height: calc(100% - 30px);
-
-  /* TODO: Deduplicate with content grid */
-  grid-template-columns:
-    [jp-filebrowser-checkbox] 24px
-    [jp-filebrowser-name] auto
-    [jp-filebrowser-resize-name-modified] 5px
-    [jp-filebrowser-modified] auto
-    [jp-filebrowser-resize-modified-size] 5px
-    [jp-filebrowser-filesize] auto;
 }
 
 .jp-DirListing-content mark {
