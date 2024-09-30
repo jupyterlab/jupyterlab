@@ -1105,14 +1105,14 @@ export class DirListing extends Widget {
         return column.element;
       });
 
-    // read from DOM
+    // Read from DOM
     let total = 0;
     for (const column of visibleColumns) {
       let size = this._columnSizes[column.id];
       if (size === null) {
         size = column.element.getBoundingClientRect().width;
       }
-      // restrict the minimum and maximum width
+      // Restrict the minimum and maximum width
       size = Math.max(size, column.minWidth);
       if (this._width) {
         let reservedForOtherColumns = 0;
@@ -1136,6 +1136,7 @@ export class DirListing extends Widget {
       }
     }
 
+    // Write to DOM
     // Compose the grid columns.
     const columnOrder = [
       'jp-filebrowser-checkbox',
