@@ -14,8 +14,8 @@
     "@jupyterlab/observables": "^5.3.0-beta.2",
     "@jupyterlab/theme-light-extension": "^4.3.0-beta.2",
     "@jupyterlab/ui-components": "^4.3.0-beta.2",
-    "@lumino/messaging": "^2.0.1",
-    "@lumino/widgets": "^2.3.2"
+    "@lumino/messaging": "^2.0.2",
+    "@lumino/widgets": "^2.5.0"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
