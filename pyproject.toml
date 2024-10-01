@@ -91,10 +91,10 @@ docs-screenshots = [
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.2.post2",
+    "jupyterlab-language-pack-zh-CN==4.2.post3",
     "matplotlib==3.9.2",
     "nbconvert>=7.0.0",
-    "pandas==2.2.2",
+    "pandas==2.2.3",
     "scipy==1.14.1",
     "vega_datasets==0.9.0",
 ]
@@ -119,7 +119,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.6.3",
+    "ruff==0.6.8",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
