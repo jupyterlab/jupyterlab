@@ -34,7 +34,7 @@ of widgets:
    }
 
 If you notice some inconsistencies with the styling of your extension, you may need to add this general rule back to the CSS of your extension,
-or scope it to the relevant widgets.
+or (preferably) scope it to the relevant widgets.
 
 Testing with Galata
 ^^^^^^^^^^^^^^^^^^^
