@@ -102,6 +102,7 @@ import {
   addBelowIcon,
   buildIcon,
   copyIcon,
+  CustomEnvWidget,
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
@@ -121,6 +122,7 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
+  PartialJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -135,6 +137,7 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
+import { ISpecModel } from '@jupyterlab/services/src/kernelspec/restapi';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -328,6 +331,8 @@ namespace CommandIDs {
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
+
+  export const setupCustomEnv = 'notebook:setup-custom-env';
 }
 
 /**
@@ -1938,7 +1943,8 @@ function activateNotebookHandler(
   const createNew = async (
     cwd: string,
     kernelId: string,
-    kernelName: string
+    kernelName: string,
+    customEnvVars?: undefined | PartialJSONObject
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -1948,7 +1954,11 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName }
+        kernel: {
+          id: kernelId,
+          name: kernelName,
+          env: customEnvVars
+        }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
@@ -1979,6 +1989,105 @@ function activateNotebookHandler(
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelId, kernelName);
+    }
+  });
+
+  const showCustomEnvVarsDialog = async (
+    spec: ISpecModel | undefined,
+    node: HTMLElement,
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
+    let envConfiguration: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Setup'),
+        ariaLabel: trans.__('Setup custom env variables')
+      })
+    ];
+
+    let defaultEnvValues = {};
+    const dialog = new Dialog({
+      title: '',
+      body: new CustomEnvWidget(
+        envConfiguration,
+        defaultEnvValues,
+        formData => {
+          envConfiguration = formData as PartialJSONObject;
+        },
+        true,
+        translator
+      ),
+      buttons
+    });
+
+    const result = await dialog.launch();
+
+    if (!result.button.accept) {
+      return;
+    }
+
+    if (Object.keys(envConfiguration).length > 0 && spec) {
+      let tmp = {} as PartialJSONObject;
+      for (let index in envConfiguration) {
+        let env = envConfiguration[index] as PartialJSONObject;
+        let envName: string =
+          env && typeof env.name === 'string' ? env.name : '';
+        let envValue: string =
+          env && typeof env.value === 'string' ? env.value : ('' as string);
+        if (envName && envValue) {
+          tmp[envName] = envValue;
+        }
+      }
+      return createNew(cwd, kernelId, kernelName, tmp);
+    }
+  };
+
+  const LAUNCHER_LABEL = 'jp-LauncherCard';
+  const isLauncherLabel = (node: HTMLElement) =>
+    node.classList.contains(LAUNCHER_LABEL);
+
+  // add command for context menu on Launch app icon
+  app.commands.addCommand(CommandIDs.setupCustomEnv, {
+    label: trans.__('Launch kernel with custom env vars...'),
+    caption: trans.__('Launch kernel with custom env vars...'),
+    execute: async (args?: any) => {
+      const node = app.contextMenuHitTest(isLauncherLabel);
+      if (!node) {
+        return;
+      }
+      const specs = services.kernelspecs.specs;
+      if (!specs) {
+        return;
+      }
+      let selectedSpec: ISpecModel | undefined;
+      let kernelName = '';
+
+      let defaultName = node.innerText;
+      for (const name in specs.kernelspecs) {
+        const spec = specs.kernelspecs[name];
+        if (spec && spec.display_name === defaultName) {
+          selectedSpec = spec;
+          kernelName = name;
+        }
+      }
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
+      const kernelId = (args['kernelId'] as string) || '';
+
+      return showCustomEnvVarsDialog(
+        selectedSpec,
+        node,
+        cwd,
+        kernelId,
+        kernelName
+      );
     }
   });
 
@@ -2021,6 +2130,18 @@ function activateNotebookHandler(
       onSpecsChanged();
       services.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
+
+    const acceptKernelEnvVar =
+      PageConfig.getOption('accept_kernel_env_var') === 'true'
+        ? true
+        : false;
+    if (allowCustomEnvVariables) {
+      app.contextMenu.addItem({
+        command: CommandIDs.setupCustomEnv,
+        selector: '.jp-LauncherCard[data-category="Notebook"]',
+        rank: 0
+      });
+    }
   }
 
   return tracker;

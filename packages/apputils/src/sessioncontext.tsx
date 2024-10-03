@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Kernel,
   KernelMessage,
@@ -16,12 +16,18 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PartialJSONObject,
+  PromiseDelegate,
+  UUID
+} from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { Dialog, showDialog } from './dialog';
+import { CustomEnvWidget } from '@jupyterlab/ui-components';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -301,6 +307,11 @@ export namespace ISessionContext {
      * Skip showing the kernel restart dialog if checked (default `false`).
      */
     readonly skipKernelRestartDialog?: boolean;
+
+    /**
+     * Custom kernel variables
+     */
+    customEnvVars?: undefined | PartialJSONObject;
   }
 
   export type KernelDisplayStatus =
@@ -710,6 +721,9 @@ export class SessionContext implements ISessionContext {
       });
       if (name) {
         options = { name };
+        if (preference.customEnvVars) {
+          options.env = preference.customEnvVars;
+        }
       }
     }
 
@@ -767,7 +781,10 @@ export class SessionContext implements ISessionContext {
     // and start its kernel first to ensure consistent
     // ordering.
     await this._initStarted.promise;
-    return this._changeKernel(options);
+    const test = this._changeKernel(options);
+    console.log('test');
+    console.dir(test);
+    return test;
   }
 
   /**
@@ -1407,6 +1424,16 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       return;
     }
 
+    const model = result.value as Kernel.IModel;
+
+    if (model && sessionContext.kernelPreference?.customEnvVars) {
+      sessionContext.kernelPreference.customEnvVars = undefined;
+    }
+
+    if (model.env) {
+      sessionContext.kernelPreference.customEnvVars = model.env;
+    }
+
     if (hasCheckbox && result.isChecked !== null) {
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
@@ -1414,7 +1441,6 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       };
     }
 
-    const model = result.value;
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
@@ -1812,21 +1838,55 @@ namespace Private {
   export const createKernelSelector = (
     sessionContext: ISessionContext,
     translator?: ITranslator
-  ) =>
-    new KernelSelector({
-      node: createSelectorNode(sessionContext, translator)
-    });
+  ) => new KernelSelector(sessionContext, translator);
 
   /**
    * A widget that provides a kernel selection.
    */
-  class KernelSelector extends Widget {
+  export class KernelSelector extends Widget {
+    sessionContext: ISessionContext;
+    translator: ITranslator | undefined;
+
+    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
+      super({ node: createSelectorNode(sessionContext, translator) });
+      this.sessionContext = sessionContext;
+      this.translator = translator;
+    }
     /**
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
       const selector = this.node.querySelector('select') as HTMLSelectElement;
-      return JSON.parse(selector.value) as Kernel.IModel;
+      let kernelData = JSON.parse(selector.value) as Kernel.IModel;
+      let tmp = {} as PartialJSONObject;
+      const envVarsBlock = this.node.querySelector(
+        'div.jp-custom-env-vars-block'
+      );
+
+      if (envVarsBlock) {
+        let customEnvParameters = envVarsBlock.getAttribute(
+          'data-custom-env-vars'
+        );
+        if (customEnvParameters) {
+          let envParameters = JSON.parse(
+            customEnvParameters
+          ) as PartialJSONObject;
+
+          for (let index in envParameters) {
+            let env = envParameters[index] as PartialJSONObject;
+            let envName: string =
+              env && typeof env.name === 'string' ? env.name : '';
+            let envValue: string =
+              env && typeof env.value === 'string' ? env.value : ('' as string);
+            if (envName && envValue) {
+              tmp[envName] = envValue;
+            }
+          }
+
+          kernelData['env'] = tmp;
+        }
+      }
+      return kernelData;
     }
   }
 
@@ -1853,6 +1913,15 @@ namespace Private {
       sessionContext,
       translator
     );
+
+    const acceptKernelEnvVar =
+      PageConfig.getOption('accept_kernel_env_var') === 'true'
+        ? true
+        : false;
+    const envVarsDiv = document.createElement('div');
+    envVarsDiv.setAttribute('class', 'jp-custom-env-vars-block');
+    envVarsDiv.setAttribute('data-custom-env-vars', '');
+
     if (options.disabled) select.disabled = true;
     for (const group of options.groups) {
       const { label, options } = group;
@@ -1860,7 +1929,17 @@ namespace Private {
       optgroup.label = label;
       for (const { selected, text, title, value } of options) {
         const option = document.createElement('option');
-        if (selected) option.selected = true;
+        if (selected) {
+          option.selected = true;
+          let val = JSON.parse(value);
+          let id = val && val.id ? val.id : '';
+          if (acceptKernelEnvVar && !id) {
+            let defaultEnvValue = {};
+            envVarsDiv.innerHTML = '';
+            addEnvBlock(envVarsDiv, defaultEnvValue, translator);
+          }
+        }
+
         if (title) option.title = title;
         option.text = text;
         option.value = value;
@@ -1868,8 +1947,44 @@ namespace Private {
       }
       select.appendChild(optgroup);
     }
+
+    select.onchange = () => {
+      let kernelData = JSON.parse(select.value) as Kernel.IModel;
+      envVarsDiv.innerHTML = '';
+      body.setAttribute('data-custom-env-vars', '');
+      if (acceptKernelEnvVar && !kernelData.id) {
+        let defaultEnvValue = {};
+        addEnvBlock(envVarsDiv, defaultEnvValue, translator);
+      }
+    };
     body.appendChild(select);
+    body.appendChild(envVarsDiv);
     return body;
+  }
+
+  function addEnvBlock(
+    body: HTMLDivElement,
+    defaultEnvValues: PartialJSONObject,
+    translator?: ITranslator
+  ) {
+    let envConfiguration: PartialJSONObject = {};
+    body.setAttribute('data-custom-env-vars', '');
+
+    let customEnvBlock = new CustomEnvWidget(
+      envConfiguration,
+      defaultEnvValues,
+      formData => {
+        envConfiguration = formData as PartialJSONObject;
+        body.setAttribute(
+          'data-custom-env-vars',
+          JSON.stringify(envConfiguration)
+        );
+      },
+      false,
+      translator
+    );
+
+    Widget.attach(customEnvBlock, body);
   }
 
   /**

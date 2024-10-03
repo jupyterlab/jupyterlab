@@ -90,6 +90,11 @@ button.jp-Dialog-close-button {
   min-height: unset;
 }
 
+button.jp-Dialog-button.jp-mod-styled.js-custom-env {
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
 .jp-Dialog-header {
   display: flex;
   justify-content: space-between;
@@ -150,4 +155,15 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-button.jp-mod-styled:not(:last-child) {
   margin-right: 12px;
+}
+
+.jp-Dialog-body .js-Dialog-form-custom-env span {
+  display: inline-block;
+  width: 40px;
+  margin-right: 10px;
+}
+
+.jp-Dialog-body .js-Dialog-form-custom-env input {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }

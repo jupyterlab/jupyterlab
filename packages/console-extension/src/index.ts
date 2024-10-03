@@ -42,6 +42,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
+  CustomEnvWidget,
   IFormRendererRegistry,
   redoIcon,
   undoIcon
@@ -50,6 +51,7 @@ import { find } from '@lumino/algorithm';
 import {
   JSONExt,
   JSONObject,
+  PartialJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -58,6 +60,8 @@ import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
+import { PageConfig } from '@jupyterlab/coreutils';
+import { ISpecModel } from '@jupyterlab/services/src/kernelspec/restapi';
 
 /**
  * The command IDs used by the console plugin.
@@ -102,6 +106,8 @@ namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-console';
 
   export const selectCompleter = 'completer:select-console';
+
+  export const setupCustomEnv = 'console:setup-custom-env';
 }
 
 /**
@@ -297,6 +303,108 @@ async function activateConsole(
       when: manager.ready
     });
   }
+  const showCustomEnvVarsDialog = async (
+    spec: ISpecModel | undefined,
+    basePath: string,
+    args: ReadonlyPartialJSONObject
+  ) => {
+    let envConfiguration: PartialJSONObject = {};
+    let newArgs = { ...args };
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Setup'),
+        ariaLabel: trans.__('Setup custom env variables')
+      })
+    ];
+
+    let defaultEnvValues = {};
+    const dialog = new Dialog({
+      title: '',
+      body: new CustomEnvWidget(
+        envConfiguration,
+        defaultEnvValues,
+        formData => {
+          envConfiguration = formData as PartialJSONObject;
+        },
+        true,
+        translator
+      ),
+      buttons
+    });
+
+    const result = await dialog.launch();
+
+    if (!result.button.accept) {
+      return;
+    }
+
+    if (Object.keys(envConfiguration).length > 0 && spec) {
+      let tmp = {} as PartialJSONObject;
+      for (let index in envConfiguration) {
+        let env = envConfiguration[index] as PartialJSONObject;
+        let envName: string =
+          env && typeof env.name === 'string' ? env.name : '';
+        let envValue: string =
+          env && typeof env.value === 'string' ? env.value : ('' as string);
+        if (envName && envValue) {
+          tmp[envName] = envValue;
+        }
+      }
+      // add { isLauncher: true, kernelPreference: { name } },
+      if (args.kernelPreference) {
+        let kernelPreference =
+          args.kernelPreference as ReadonlyPartialJSONObject;
+        newArgs['kernelPreference'] = {
+          ...kernelPreference,
+          customEnvVars: tmp
+        };
+      }
+
+      return createConsole({ basePath, ...newArgs });
+    }
+  };
+
+  const LAUNCHER_LABEL = 'jp-LauncherCard';
+  const isLauncherLabel = (node: HTMLElement) =>
+    node.classList.contains(LAUNCHER_LABEL);
+
+  app.commands.addCommand(CommandIDs.setupCustomEnv, {
+    label: trans.__('Launch kernel with custom env vars...'),
+    caption: trans.__('Launch kernel with custom env vars...'),
+    execute: async (args?: any) => {
+      const node = app.contextMenuHitTest(isLauncherLabel);
+      if (!node) {
+        return;
+      }
+      const specs = manager.kernelspecs.specs;
+      if (!specs) {
+        return;
+      }
+      let selectedSpec: ISpecModel | undefined;
+      let kernelName = '';
+
+      let defaultName = node.innerText;
+      for (const name in specs.kernelspecs) {
+        const spec = specs.kernelspecs[name];
+        if (spec && spec.display_name === defaultName) {
+          selectedSpec = spec;
+          kernelName = name;
+        }
+      }
+
+      const basePath =
+        ((args['basePath'] as string) ||
+          (args['cwd'] as string) ||
+          filebrowser?.model.path) ??
+        '';
+      let kernelPreference = { kernelPreference: { name: kernelName } };
+      return showCustomEnvVarsDialog(selectedSpec, basePath, kernelPreference);
+    }
+  });
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
@@ -335,6 +443,18 @@ async function activateConsole(
       };
       onSpecsChanged();
       manager.kernelspecs.specsChanged.connect(onSpecsChanged);
+    });
+  }
+
+  const acceptKernelEnvVar =
+    PageConfig.getOption('accept_kernel_env_var') === 'true'
+      ? true
+      : false;
+  if (acceptKernelEnvVar) {
+    app.contextMenu.addItem({
+      command: CommandIDs.setupCustomEnv,
+      selector: '.jp-LauncherCard[data-category="Console"]',
+      rank: 0
     });
   }
 

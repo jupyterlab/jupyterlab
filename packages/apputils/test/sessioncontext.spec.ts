@@ -71,6 +71,8 @@ describe('@jupyterlab/apputils', () => {
           // eslint-disable-next-line camelcase
           allow_external_kernels: true,
           // eslint-disable-next-line camelcase
+          accept_kernel_env_var: true,
+          // eslint-disable-next-line camelcase
           external_connection_dir: external
         }
       }
@@ -147,6 +149,25 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#kernelChanged', () => {
+      it('should be emitted when the kernel changes', async () => {
+        let called = false;
+        sessionContext.kernelChanged.connect(
+          (sender, { oldValue, newValue }) => {
+            if (oldValue !== null) {
+              return;
+            }
+            expect(sender).toBe(sessionContext);
+            expect(oldValue).toBeNull();
+            expect(newValue).toBe(sessionContext.session?.kernel || null);
+            called = true;
+          }
+        );
+        await sessionContext.initialize();
+        expect(called).toBe(true);
+      });
+    });
+
+    describe('#kernelChanged with custom env variables', () => {
       it('should be emitted when the kernel changes', async () => {
         let called = false;
         sessionContext.kernelChanged.connect(
@@ -475,6 +496,16 @@ describe('@jupyterlab/apputils', () => {
 
         expect(kernel.id).not.toBe(id);
         expect(kernel.name).toBe(name);
+      });
+
+      it('should change the current kernel and have custom_env_vars', async () => {
+        await sessionContext.initialize();
+
+        const name = sessionContext.session?.kernel?.name;
+        const id = sessionContext.session?.kernel?.id;
+        const env = { TEST_ENV_NAME: 'test_env_value' };
+        const kernel = (await sessionContext.changeKernel({ name, env }))!;
+        expect(kernel.id).not.toBe(id);
       });
 
       it('should still work if called before fully initialized', async () => {
