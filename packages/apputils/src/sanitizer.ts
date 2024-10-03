@@ -52,7 +52,7 @@ class CssProp {
   };
 
   /*
-   * Atomic (i.e. not dependant on other regular expressions) sub RegEx segments
+   * Atomic (i.e. not dependent on other regular expressions) sub RegEx segments
    */
   private static readonly A = {
     absolute_size: `xx-small|x-small|small|medium|large|x-large|xx-large`,
@@ -84,7 +84,7 @@ class CssProp {
   };
 
   /*
-   * Compound (i.e. dependant on other (sub) regular expressions) sub RegEx segments
+   * Compound (i.e. dependent on other (sub) regular expressions) sub RegEx segments
    */
   private static readonly _C = {
     alpha: `${CssProp.N.integer_zero_ff}|${CssProp.N.number_zero_one}|${CssProp.B.percentage_zero_hundred}`,
@@ -140,7 +140,7 @@ class CssProp {
   };
 
   /*
-   * Property value regular expressions not dependant on other sub expressions
+   * Property value regular expressions not dependent on other sub expressions
    */
   private static readonly AP = {
     border_collapse: `collapse|separate`,
@@ -181,7 +181,7 @@ class CssProp {
   };
 
   /*
-   * Compound propertiy value regular expressions (i.e. dependant on other sub expressions)
+   * Compound propertiy value regular expressions (i.e. dependent on other sub expressions)
    */
   private static readonly _CP = {
     background_attachment: `${CssProp.A.attachment}(,\\s*${CssProp.A.attachment})*`,

@@ -705,7 +705,7 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    tranlator: ITranslator,
+    translator: ITranslator,
     statusBar: IStatusBar | null
   ) => {
     if (!statusBar) {
@@ -713,7 +713,7 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
       return;
     }
     const { shell } = app;
-    const item = new NotebookTrustStatus(tranlator);
+    const item = new NotebookTrustStatus(translator);
 
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
