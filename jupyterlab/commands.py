@@ -2095,7 +2095,8 @@ def _yarn_config(logger):
 
     Returns
     -------
-    {"yarn config": dict, "npm config": dict} if unsuccessful the subdictionary are empty
+    {"yarn config": dict, "npm config": dict}
+    if unsuccessful, the subdictionaries are empty
     """
     configuration = {"yarn config": {}, "npm config": {}}
     try:
