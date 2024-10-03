@@ -429,7 +429,7 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ### Documentation improvements
 
 - Fix typo in the `IPropertyInspectorProvider` plugin description [#16797](https://github.com/jupyterlab/jupyterlab/pull/16797) ([@jtpio](https://github.com/jtpio))
-- Replace link to accessiblity project with a link to accessiblity issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
+- Replace link to accessibility project with a link to accessibility issues [#16787](https://github.com/jupyterlab/jupyterlab/pull/16787) ([@jtpio](https://github.com/jtpio))
 - Remove Python 2 from documentation [#16771](https://github.com/jupyterlab/jupyterlab/pull/16771) ([@JasonWeill](https://github.com/JasonWeill))
 - Fix compatibility with server-side execution extensions [#16764](https://github.com/jupyterlab/jupyterlab/pull/16764) ([@krassowski](https://github.com/krassowski))
 - Document mandatory steps before running JupyterLab in dev mode [#16761](https://github.com/jupyterlab/jupyterlab/pull/16761) ([@cmarmo](https://github.com/cmarmo))
@@ -3743,13 +3743,13 @@ For reference, below are the changed since `v4.0.0rc1`:
 
 - Build UMD module for @jupyterlab/services [#12141](https://github.com/jupyterlab/jupyterlab/pull/12141) ([@fcollonval](https://github.com/fcollonval))
 - Fix broken link in docs [#12138](https://github.com/jupyterlab/jupyterlab/pull/12138) ([@JasonWeill](https://github.com/JasonWeill))
-- Fix: Select kernal text (when open a no kernal .ipynb file) is not translated correctly (#12133) [#12135](https://github.com/jupyterlab/jupyterlab/pull/12135) ([@yangql176](https://github.com/yangql176))
+- Fix: Select kernel text (when open a no kernel .ipynb file) is not translated correctly (#12133) [#12135](https://github.com/jupyterlab/jupyterlab/pull/12135) ([@yangql176](https://github.com/yangql176))
 - Opening keyboard shortcuts UI result in "destruction" of shortcut settings [#12112](https://github.com/jupyterlab/jupyterlab/pull/12112) ([@fcollonval](https://github.com/fcollonval))
 - Fix error rendering in Advanced Settings Editor [#12107](https://github.com/jupyterlab/jupyterlab/pull/12107) ([@krassowski](https://github.com/krassowski))
 - Fix json schema for kernel status settings [#11451](https://github.com/jupyterlab/jupyterlab/pull/11451) ([@fcollonval](https://github.com/fcollonval))
 - Remove toolbar factory setting trick in the tests [#12096](https://github.com/jupyterlab/jupyterlab/pull/12096) ([@jtpio](https://github.com/jtpio))
 - Log error on open document widget. [#12080](https://github.com/jupyterlab/jupyterlab/pull/12080) ([@trungleduc](https://github.com/trungleduc))
-- update status to unkown when kernel is shutdown from running kernels tab [#12083](https://github.com/jupyterlab/jupyterlab/pull/12083) ([@akshaychitneni](https://github.com/akshaychitneni))
+- update status to unknown when kernel is shutdown from running kernels tab [#12083](https://github.com/jupyterlab/jupyterlab/pull/12083) ([@akshaychitneni](https://github.com/akshaychitneni))
 - Handle shutdown error [#12048](https://github.com/jupyterlab/jupyterlab/pull/12048) ([@Zsailer](https://github.com/Zsailer))
 - use path-like comparison in initialize_templates() [#12024](https://github.com/jupyterlab/jupyterlab/pull/12024) ([@kellyyke](https://github.com/kellyyke))
 - Fix misaligned icon and checkbox of setting editor [#11976](https://github.com/jupyterlab/jupyterlab/pull/11976) ([@trungleduc](https://github.com/trungleduc))
@@ -4502,8 +4502,8 @@ No merged PRs
   Editors are not collaborative by default; to activate it, start JupyterLab
   with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html).
 - The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
-- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/toc.html).
-- The debugger recived many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
+- Table of Contents received multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/latest/user/toc.html).
+- The debugger received many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
 - A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
   <img alt="A GIF of the visual indicator showing up after editing a cell." src="https://user-images.githubusercontent.com/21197331/120619861-ae957d80-c45c-11eb-8640-b25b8b659ad4.gif">
@@ -4827,7 +4827,7 @@ No merged PRs
 
 ### Documentation improvements
 
-- Add alt attirbutes for test docs sprint [#10670](https://github.com/jupyterlab/jupyterlab/pull/10670) ([@isabela-pf](https://github.com/isabela-pf))
+- Add alt attributes for test docs sprint [#10670](https://github.com/jupyterlab/jupyterlab/pull/10670) ([@isabela-pf](https://github.com/isabela-pf))
 - Add some upgrade notes to JupyterLab 3.1 [#10654](https://github.com/jupyterlab/jupyterlab/pull/10654) ([@fcollonval](https://github.com/fcollonval))
 - fixes doc string for toc syncCollapseState setting [#10639](https://github.com/jupyterlab/jupyterlab/pull/10639) ([@andrewfulton9](https://github.com/andrewfulton9))
 - Mention prebuilt extensions in README and docs [#10604](https://github.com/jupyterlab/jupyterlab/pull/10604) ([@krassowski](https://github.com/krassowski))
@@ -5806,7 +5806,7 @@ The JupyterLab UI now supports translation.
 
 #### Benchmarks (now a separate repository)
 
-- Move benchmarks to seperate repo
+- Move benchmarks to separate repo
   ([#8795](https://github.com/jupyterlab/jupyterlab/pull/8795))
 - Fix off by one error in benchmark samples
   ([#8785](https://github.com/jupyterlab/jupyterlab/pull/8785))
@@ -5843,7 +5843,7 @@ The JupyterLab UI now supports translation.
   ([#9131](https://github.com/jupyterlab/jupyterlab/pull/9131))
 - Add setup.py and pyproject.toml to manifest.in
   ([#9129](https://github.com/jupyterlab/jupyterlab/pull/9129))
-- Urlext.join cant handle colon in relative paths
+- Urlext.join can't handle colon in relative paths
   ([#9169](https://github.com/jupyterlab/jupyterlab/pull/9169),
   [#9159](https://github.com/jupyterlab/jupyterlab/issues/9159))
 - Remove absolute document search pane width
@@ -7513,7 +7513,7 @@ closed.
   design.
   ([#5117](https://github.com/jupyterlab/jupyterlab/pull/5117))
 
-- A new series of helper CSS classes for stying SVG-based icons at
+- A new series of helper CSS classes for styling SVG-based icons at
   different sizes has been added: `jp-Icon`, `jp-Icon-16`,
   `jp-Icon-18`, `jp-Icon-20`.
 
