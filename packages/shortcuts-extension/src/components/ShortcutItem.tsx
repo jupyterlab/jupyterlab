@@ -239,6 +239,7 @@ export class ShortcutItem extends React.Component<
     binding: IKeybinding,
     nonEmptyBindings: IKeybinding[]
   ): JSX.Element {
+    console.log("HERE!");
     return (
       <div
         className="jp-Shortcuts-ShortcutContainer"
@@ -250,7 +251,9 @@ export class ShortcutItem extends React.Component<
         {this.isLocationBeingEdited(index)
           ? this.getShortCutAsInput(binding, index)
           : this.getShortCutForDisplayOnly(binding)}
-        {this.getOrDiplayIfNeeded(index < nonEmptyBindings.length - 1)}
+        {!(index===this._nonEmptyBindings.length-1 && 
+        Object.values(this.state.displayReplaceInput).some(Boolean)) && 
+        this.getOrDiplayIfNeeded(index < nonEmptyBindings.length - 1)}
       </div>
     );
   }
@@ -301,7 +304,7 @@ export class ShortcutItem extends React.Component<
           )}
           {nonEmptyBindings.length >= 1 &&
             !this.state.displayNewInput &&
-            !this.state.displayReplaceInput[0] &&
+            !Object.values(this.state.displayReplaceInput).some(Boolean) &&
             this.getAddLink()}
           {nonEmptyBindings.length === 0 &&
             !this.state.displayNewInput &&
