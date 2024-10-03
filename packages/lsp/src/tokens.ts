@@ -273,7 +273,7 @@ export namespace ILanguageServerManager {
 
   export interface IOptions {
     /**
-     * The Jupyter server settings objec
+     * The Jupyter server settings object
      */
     settings?: ServerConnection.ISettings;
 
