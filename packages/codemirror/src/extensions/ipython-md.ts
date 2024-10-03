@@ -17,7 +17,7 @@ const BLOCK_MATH_DOLLAR = 'BlockMathDollar';
 const BLOCK_MATH_BRACKET = 'BlockMathBracket';
 
 /**
- * Lengh of the delimiter for a math expression
+ * Length of the delimiter for a math expression
  */
 const DELIMITER_LENGTH: Record<string, number> = {
   [INLINE_MATH_DOLLAR]: 1,
