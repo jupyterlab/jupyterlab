@@ -250,8 +250,8 @@ export class ShortcutItem extends React.Component<
         {this.isLocationBeingEdited(index)
           ? this.getShortCutAsInput(binding, index)
           : this.getShortCutForDisplayOnly(binding)}
-        {!(index===this._nonEmptyBindings.length-1 && 
-        Object.values(this.state.displayReplaceInput).some(Boolean)) && 
+        {!(index===this._nonEmptyBindings.length-1 &&
+        Object.values(this.state.displayReplaceInput).some(Boolean)) &&
         this.getOrDiplayIfNeeded(index < nonEmptyBindings.length - 1)}
       </div>
     );
