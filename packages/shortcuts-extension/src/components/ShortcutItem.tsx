@@ -239,7 +239,6 @@ export class ShortcutItem extends React.Component<
     binding: IKeybinding,
     nonEmptyBindings: IKeybinding[]
   ): JSX.Element {
-    console.log("HERE!");
     return (
       <div
         className="jp-Shortcuts-ShortcutContainer"
