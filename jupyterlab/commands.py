@@ -2095,7 +2095,7 @@ def _yarn_config(logger):
 
     Returns
     -------
-    {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
+    {"yarn config": dict, "npm config": dict} if unsuccessful the subdictionary are empty
     """
     configuration = {"yarn config": {}, "npm config": {}}
     try:
@@ -2485,7 +2485,7 @@ def _log_multiple_compat_errors(logger, errors_map, verbose: bool):
 
 
 def _log_single_compat_errors(logger, name, version, errors):
-    """Log compatability errors for a single extension"""
+    """Log compatibility errors for a single extension"""
 
     age = _compat_error_age(errors)
     if age > 0:
