@@ -44,10 +44,10 @@
     "@jupyterlab/services": "^7.3.0-beta.2",
     "@jupyterlab/translation": "^4.3.0-beta.2",
     "@jupyterlab/ui-components": "^4.3.0-beta.2",
-    "@lumino/coreutils": "^2.1.2",
-    "@lumino/signaling": "^2.1.2",
-    "@lumino/virtualdom": "^2.0.1",
-    "@lumino/widgets": "^2.3.2",
+    "@lumino/coreutils": "^2.2.0",
+    "@lumino/signaling": "^2.1.3",
+    "@lumino/virtualdom": "^2.0.2",
+    "@lumino/widgets": "^2.5.0",
     "react": "^18.2.0"
   },
   "devDependencies": {

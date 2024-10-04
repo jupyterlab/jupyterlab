@@ -41,9 +41,9 @@
     "@jupyterlab/services": "^7.3.0-beta.2",
     "@jupyterlab/translation": "^4.3.0-beta.2",
     "@jupyterlab/ui-components": "^4.3.0-beta.2",
-    "@lumino/messaging": "^2.0.1",
-    "@lumino/polling": "^2.1.2",
-    "@lumino/widgets": "^2.3.2",
+    "@lumino/messaging": "^2.0.2",
+    "@lumino/polling": "^2.1.3",
+    "@lumino/widgets": "^2.5.0",
     "react": "^18.2.0",
     "react-paginate": "^6.3.2",
     "semver": "^7.3.2"

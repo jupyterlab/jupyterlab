@@ -58,7 +58,7 @@
     "@jupyterlab/services": "^7.3.0-beta.2",
     "@jupyterlab/settingregistry": "^4.3.0-beta.2",
     "@jupyterlab/translation": "^4.3.0-beta.2",
-    "@lumino/commands": "^2.3.0"
+    "@lumino/commands": "^2.3.1"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.3.0-beta.2",

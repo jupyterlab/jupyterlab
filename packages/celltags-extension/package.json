@@ -44,7 +44,7 @@
     "@jupyterlab/notebook": "^4.3.0-beta.2",
     "@jupyterlab/translation": "^4.3.0-beta.2",
     "@jupyterlab/ui-components": "^4.3.0-beta.2",
-    "@lumino/algorithm": "^2.0.1",
+    "@lumino/algorithm": "^2.0.2",
     "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0"
   },
