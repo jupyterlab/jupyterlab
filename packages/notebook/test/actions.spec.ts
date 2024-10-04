@@ -1765,7 +1765,7 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         NotebookActions.hideOutput(widget);
-        expect((next as CodeCell).outputHidden).toBe(true);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
       });
 
       it('should hide and show the outputs on the selected cell', () => {
@@ -1773,14 +1773,14 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         NotebookActions.hideOutput(widget);
         NotebookActions.showOutput(widget);
-        expect((next as CodeCell).outputHidden).toBe(false);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(false);
       });
 
       it('should toggle the outputs from shown to hidden on the selected cell', () => {
         const next = widget.widgets[1];
         widget.select(next);
         NotebookActions.toggleOutput(widget);
-        expect((next as CodeCell).outputHidden).toBe(true);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
       });
 
       it('should toggle the outputs twice, from shown to hidden and back, on the selected cell', () => {
@@ -1788,7 +1788,7 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         NotebookActions.toggleOutput(widget);
         NotebookActions.toggleOutput(widget);
-        expect((next as CodeCell).outputHidden).toBe(false);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(false);
       });
     });
 
