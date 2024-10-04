@@ -3365,19 +3365,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        const notebook = current.content;
-        for (const cell of notebook.widgets) {
-          if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
-            if ((cell as CodeCell).outputHidden === false) {
-              // We found at least one visible output; hide outputs for this cell
-              return NotebookActions.hideOutput(notebook);
-            }
-          }
-        }
-
-        // We found no selected cells or no selected cells with visible output;
-        // show outputs for selected cells
-        return NotebookActions.showOutput(notebook);
+        return NotebookActions.toggleOutput(current.content);
       }
     },
     isEnabled
