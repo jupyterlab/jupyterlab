@@ -48,10 +48,10 @@
     "@jupyterlab/statedb": "^4.3.0-beta.2",
     "@jupyterlab/translation": "^4.3.0-beta.2",
     "@jupyterlab/ui-components": "^4.3.0-beta.2",
-    "@lumino/commands": "^2.3.0",
-    "@lumino/polling": "^2.1.2",
-    "@lumino/signaling": "^2.1.2",
-    "@lumino/widgets": "^2.3.2",
+    "@lumino/commands": "^2.3.1",
+    "@lumino/polling": "^2.1.3",
+    "@lumino/signaling": "^2.1.3",
+    "@lumino/widgets": "^2.5.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
