@@ -250,3 +250,41 @@ test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async
     .count();
   expect(userPanelLines).toBeLessThan(10);
 });
+
+test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
+  page
+}) => {
+  // Settings are wide, hide the sidebar to increase available space
+  await page.sidebar.close();
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('merge cell below');
+
+  const addShortcutButton = shortcutsForm.locator('.jp-Shortcuts-Plus');
+  await expect(addShortcutButton).toHaveCount(1);
+
+  const conflict = shortcutsForm.locator('.jp-Shortcuts-Conflict');
+  await expect(conflict).toHaveCount(0);
+
+  await addShortcutButton.click();
+
+  const newShortcutInput = shortcutsForm.locator('.jp-Shortcuts-InputBoxNew');
+  await newShortcutInput.press('Shift+M');
+
+  await expect(conflict).toHaveCount(1);
+
+  expect(await conflict.screenshot()).toMatchSnapshot(
+    'settings-shortcuts-conflict.png'
+  );
+  const cancelButton = conflict.locator('button >> text=Cancel');
+  await cancelButton.click();
+
+  await expect(conflict).toHaveCount(0);
+});
