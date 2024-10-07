@@ -1161,20 +1161,12 @@ export namespace SettingRegistry {
   ): ISettingRegistry.IShortcut[] {
     const memo: {
       [keys: string]: {
-        [selector: string]: {
-          shouldDisableDefaultShortcut: boolean;
-          enabledUserShortcut: ISettingRegistry.IShortcut | null;
-          enabledDefaultShortcut: ISettingRegistry.IShortcut | null;
-        };
+        [selector: string]: boolean; // If `true`, should warn if a default shortcut conflicts.
       };
     } = {};
 
     // If a user shortcut collides with another user shortcut warn and filter.
-    user = [
-      // Reorder so that disabled are first
-      ...user.filter(s => !!s.disabled),
-      ...user.filter(s => !s.disabled)
-    ].filter(shortcut => {
+    user = user.filter(shortcut => {
       const keys =
         CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
@@ -1188,33 +1180,17 @@ export namespace SettingRegistry {
         memo[keys] = {};
       }
 
-      const { disabled, selector } = shortcut;
+      const { selector } = shortcut;
       if (!(selector in memo[keys])) {
-        memo[keys][selector] = {
-          enabledUserShortcut: disabled ? null : shortcut,
-          enabledDefaultShortcut: null,
-          shouldDisableDefaultShortcut: !!disabled
-        };
-        return !disabled;
+        memo[keys][selector] = false; // Do not warn if a default shortcut conflicts.
+        return true;
       }
 
-      if (memo[keys][selector].enabledUserShortcut === null) {
-        if (disabled) {
-          memo[keys][selector].shouldDisableDefaultShortcut = true;
-          return false;
-        } else {
-          memo[keys][selector].enabledUserShortcut = shortcut;
-          return true;
-        }
-      } else {
-        console.warn(
-          'Skipping',
-          shortcut,
-          'shortcut because it collides with another enabled shortcut:',
-          memo[keys][selector].enabledUserShortcut
-        );
-        return false;
-      }
+      console.warn(
+        'Skipping this shortcut because it collides with another shortcut.',
+        shortcut
+      );
+      return false;
     });
 
     // If a default shortcut collides with another default, warn and filter,
@@ -1235,45 +1211,23 @@ export namespace SettingRegistry {
       if (!(keys in memo)) {
         memo[keys] = {};
       }
+
       const { disabled, selector } = shortcut;
-
       if (!(selector in memo[keys])) {
-        memo[keys][selector] = {
-          enabledUserShortcut: null, // we would have seen it already as we processed user shortcuts earlier
-          enabledDefaultShortcut: disabled ? null : shortcut,
-          shouldDisableDefaultShortcut: !!disabled
-        };
-        return !disabled;
+        // Warn of future conflicts if the default shortcut is not disabled.
+        memo[keys][selector] = !disabled;
+        return true;
       }
 
-      if (memo[keys][selector].enabledDefaultShortcut === null) {
-        if (disabled) {
-          memo[keys][selector].shouldDisableDefaultShortcut = true;
-          return false;
-        } else {
-          if (memo[keys][selector].shouldDisableDefaultShortcut) {
-            // Default shortcut was disabled - no warning
-            return false;
-          } else {
-            memo[keys][selector].enabledDefaultShortcut = shortcut;
-            return true;
-          }
-        }
-      } else {
-        if (memo[keys][selector].shouldDisableDefaultShortcut) {
-          // Default shortcut was disabled - no warning
-          return false;
-        } else {
-          // Default shortcut conflicts - emit warning
-          console.warn(
-            'Skipping',
-            shortcut,
-            'default shortcut because it collides with another enabled default shortcut:',
-            memo[keys][selector].enabledDefaultShortcut
-          );
-          return false;
-        }
+      // We have a conflict now. Warn the user if we need to do so.
+      if (memo[keys][selector]) {
+        console.warn(
+          'Skipping this default shortcut because it collides with another default shortcut.',
+          shortcut
+        );
       }
+
+      return false;
     });
 
     // Return all the shortcuts that should be registered

@@ -299,7 +299,13 @@ export class ShortcutUI
    * Reset keybindings for given target to defaults.
    */
   resetKeybindings = async (target: IShortcutTarget): Promise<void> => {
-    await this._setKeybinding(target, []);
+    for (const binding of target.keybindings) {
+      await this._setKeybinding(
+        target,
+        binding.isDefault ? binding.keys : [],
+        binding
+      );
+    }
   };
 
   /**
@@ -379,10 +385,8 @@ export class ShortcutUI
         }
         found = true;
       } else if (
-        shortcut.command === target.command &&
-        shortcut.selector === target.selector &&
-        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
-        !keybinding &&
+        keybinding &&
+        !JSONExt.deepEqual(keybinding.keys, shortcut.keys) &&
         keys.length === 0
       ) {
         continue;

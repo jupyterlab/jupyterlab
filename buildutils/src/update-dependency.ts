@@ -49,31 +49,24 @@ async function getSpecifier(
 
   // A tag with no sigil adopts the sigil from the current specification
   if (!suggestedSigil) {
-    // If multiple alternative specifiers are given, update the most recent one
-    const alternativeSpecifiers = currentSpecifier
-      .split('||')
-      .map(specifier => specifier.trim());
-    alternativeSpecifiers.sort((a, b) => {
-      const [, , v1] = a.match(SEMVER_RANGE) ?? [];
-      const [, , v2] = b.match(SEMVER_RANGE) ?? [];
-      return semver.compare(v1, v2);
-    });
-    currentSpecifier = alternativeSpecifiers.pop()!;
-
     const match = currentSpecifier.match(SEMVER_RANGE);
     if (match === null) {
       throw Error(
         `Current version range is not recognized: ${currentSpecifier}`
       );
     }
-    suggestedSigil = [...alternativeSpecifiers, match[1]].join(' || ');
+    suggestedSigil = match[1];
   }
   return `${suggestedSigil ?? ''}${suggestedTag}`;
 }
 
-async function getIndividualVersion(pkg: string, specifier: string) {
-  // We have a tag, with possibly a range specifier, such as ^latest
+async function getVersion(pkg: string, specifier: string) {
+  const key = JSON.stringify([pkg, specifier]);
+  if (versionCache.has(key)) {
+    return versionCache.get(key);
+  }
   if (semver.validRange(specifier) === null) {
+    // We have a tag, with possibly a range specifier, such as ^latest
     const match = specifier.match(SEMVER_RANGE);
     if (match === null) {
       throw Error(`Invalid version specifier: ${specifier}`);
@@ -88,23 +81,6 @@ async function getIndividualVersion(pkg: string, specifier: string) {
       );
     }
   }
-  return specifier;
-}
-
-async function getVersion(pkg: string, specifier: string) {
-  const key = JSON.stringify([pkg, specifier]);
-  if (versionCache.has(key)) {
-    return versionCache.get(key);
-  }
-  // The input specifier can have the form `^1.0 || ^latest`
-  specifier = (
-    await Promise.all(
-      specifier
-        .split('||')
-        .map(specifier => specifier.trim())
-        .map(async specifier => getIndividualVersion(pkg, specifier))
-    )
-  ).join(' || ');
   versionCache.set(key, specifier);
   return specifier;
 }

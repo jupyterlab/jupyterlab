@@ -266,8 +266,7 @@ def ensure_app(app_dir):
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jlpm run build:core` then `jupyter lab build` ",
-        "or use a different app directory",
+        "Please run `jupyter lab build` or use a different app directory",
     ]
     return msgs
 

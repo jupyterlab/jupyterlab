@@ -120,13 +120,8 @@ span.jp-RunningSessions-icon > svg {
   white-space: nowrap;
 }
 
-.jp-RunningSessions-itemShutdown {
+.jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
   visibility: hidden;
-}
-
-.jp-RunningSessions-item:focus-visible > .jp-RunningSessions-itemShutdown,
-.jp-RunningSessions-item:hover > .jp-RunningSessions-itemShutdown {
-  visibility: visible;
 }
 
 .jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent {

@@ -8,7 +8,7 @@
   "@jupyterlab/application:ILabStatus": "A service for interacting with the application busy/dirty\n  status. Use this if you want to set the application \"busy\" favicon, or to set\n  the application \"dirty\" status, which asks the user for confirmation before leaving the application page.",
   "@jupyterlab/application:IInfo": "A service providing metadata about the current application, including disabled extensions and whether dev mode is enabled.",
   "@jupyterlab/application:IPaths": "A service providing information about various\n  URLs and server paths for the current application. Use this service if you want to\n  assemble URLs to use the JupyterLab REST API.",
-  "@jupyterlab/property-inspector:IPropertyInspectorProvider": "A service to register new widgets in the property inspector side panel.",
+  "@jupyterlab/property-inspector:IPropertyInspectorProvider": "A service to registry new widget in the property inspector side panel.",
   "@jupyterlab/apputils:IKernelStatusModel": "A service to register kernel session provider to the kernel status indicator.",
   "@jupyterlab/apputils:ICommandPalette": "A service for the application command palette\n  in the left panel. Use this to add commands to the palette.",
   "@jupyterlab/apputils:IWindowResolver": "A service for a window resolver for the\n  application. JupyterLab workspaces are given a name, which are determined using\n  the window resolver. Require this if you want to use the name of the current workspace.",

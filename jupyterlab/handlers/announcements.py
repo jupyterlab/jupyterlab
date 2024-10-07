@@ -6,7 +6,7 @@
 import abc
 import hashlib
 import json
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Awaitable, Optional, Tuple, Union

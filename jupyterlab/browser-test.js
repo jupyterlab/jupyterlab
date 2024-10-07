@@ -11,8 +11,6 @@ const fs = require('fs');
 const URL = process.argv[2];
 const BROWSER_VAR = 'JLAB_BROWSER_TYPE';
 const BROWSER = process.env[BROWSER_VAR] || 'chromium';
-const HEADLESS_VAR = 'JLAB_BROWSER_HEADLESS';
-const HEADLESS = process.env[HEADLESS_VAR] === 'false' ? false : true;
 const OUTPUT_VAR = 'JLAB_BROWSER_CHECK_OUTPUT';
 const OUTPUT = process.env[OUTPUT_VAR];
 
@@ -34,7 +32,6 @@ async function main() {
 
   const pwBrowser = playwright[BROWSER];
   const browser = await pwBrowser.launch({
-    headless: HEADLESS,
     logger: {
       isEnabled: () => !!OUTPUT,
       log: (name, severity, message, args) => console.log(name, message)
