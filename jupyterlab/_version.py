@@ -6,7 +6,7 @@ from collections import namedtuple
 VersionInfo = namedtuple("VersionInfo", ["major", "minor", "micro", "releaselevel", "serial"])
 
 # DO NOT EDIT THIS DIRECTLY!  It is managed by bumpversion
-version_info = VersionInfo(4, 3, 0, "beta", 2)
+version_info = VersionInfo(4, 3, 0, "beta", 3)
 
 _specifier_ = {"alpha": "a", "beta": "b", "candidate": "rc", "final": ""}
 
