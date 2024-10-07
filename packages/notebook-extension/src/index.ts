@@ -290,6 +290,8 @@ namespace CommandIDs {
 
   export const showOutput = 'notebook:show-cell-outputs';
 
+  export const toggleOutput = 'notebook:toggle-cell-outputs';
+
   export const hideAllOutputs = 'notebook:hide-all-cell-outputs';
 
   export const showAllOutputs = 'notebook:show-all-cell-outputs';
@@ -3357,6 +3359,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.toggleOutput, {
+    label: trans.__('Toggle Visibility of Selected Outputs'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return NotebookActions.toggleOutput(current.content);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.hideAllOutputs, {
     label: trans.__('Collapse All Outputs'),
     execute: args => {
@@ -3673,6 +3686,7 @@ function populatePalette(
     CommandIDs.showAllCode,
     CommandIDs.hideOutput,
     CommandIDs.showOutput,
+    CommandIDs.toggleOutput,
     CommandIDs.hideAllOutputs,
     CommandIDs.showAllOutputs,
     CommandIDs.toggleRenderSideBySideCurrentNotebook,
