@@ -443,16 +443,12 @@ Then use the following steps:
    cd jupyterlab
    pip install -e ".[dev,test]"
    jlpm install
-   jlpm run build  # Build the dev mode assets (optional)
+   jlpm run build  # Build the dev mode assets
 
-Additionally, you might want to execute the following optional commands:
-
-.. code:: bash
-
-   # Build the core mode assets (optional)
+   # Build the core mode assets
    jlpm run build:core
 
-   # Build the app dir assets (optional)
+   # Build the app dir assets
    jupyter lab build
 
 Frequent issues
