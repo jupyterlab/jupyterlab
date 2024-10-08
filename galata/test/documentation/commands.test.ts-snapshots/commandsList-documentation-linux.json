@@ -2088,6 +2088,12 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:toggle-cell-outputs",
+    "label": "Toggle Visibility of Selected Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:toggle-heading-collapse",
     "label": "Toggle Collapse Notebook Heading",
     "caption": "",
