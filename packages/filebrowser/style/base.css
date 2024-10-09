@@ -134,6 +134,8 @@
   flex-direction: column;
   outline: 0;
   overflow: hidden;
+
+  --jp-dirlisting-padding-width: 12px;
 }
 
 .jp-DirListing-header {
@@ -162,10 +164,6 @@
   flex-grow: 1;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-
-.jp-DirListing-header > .jp-DirListing-headerItem:last-child {
-  flex-grow: 1;
 }
 
 .jp-DirListing-headerItem:hover {
@@ -242,6 +240,7 @@
   list-style-type: none;
   overflow: auto;
   background-color: var(--jp-layout-color1);
+  overflow-x: hidden;
 }
 
 .jp-DirListing-content mark {
@@ -262,29 +261,22 @@
 }
 
 .jp-DirListing-item {
-  display: flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 4px var(--jp-dirlisting-padding-width);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.jp-DirListing-item > :last-child {
-  flex-grow: 1;
-  margin-right: 2px;
+  display: inline-grid;
+  grid-auto-columns: max-content;
+  width: 100%;
+  box-sizing: border-box;
+  grid-auto-flow: column;
 }
 
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
-}
-
-.jp-DirListing-header
-  .jp-DirListing-checkboxWrapper
-  + .jp-DirListing-headerItem {
-  padding-left: 4px;
 }
 
 .jp-DirListing-content .jp-DirListing-checkboxWrapper {

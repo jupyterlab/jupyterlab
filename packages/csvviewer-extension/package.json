@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/csvviewer-extension",
-  "version": "4.3.0-beta.2",
+  "version": "4.3.0-beta.3",
   "description": "JupyterLab - CSV Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,15 +37,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-beta.2",
-    "@jupyterlab/apputils": "^4.4.0-beta.2",
-    "@jupyterlab/csvviewer": "^4.3.0-beta.2",
-    "@jupyterlab/docregistry": "^4.3.0-beta.2",
-    "@jupyterlab/documentsearch": "^4.3.0-beta.2",
-    "@jupyterlab/mainmenu": "^4.3.0-beta.2",
-    "@jupyterlab/observables": "^5.3.0-beta.2",
-    "@jupyterlab/settingregistry": "^4.3.0-beta.2",
-    "@jupyterlab/translation": "^4.3.0-beta.2",
+    "@jupyterlab/application": "^4.3.0-beta.3",
+    "@jupyterlab/apputils": "^4.4.0-beta.3",
+    "@jupyterlab/csvviewer": "^4.3.0-beta.3",
+    "@jupyterlab/docregistry": "^4.3.0-beta.3",
+    "@jupyterlab/documentsearch": "^4.3.0-beta.3",
+    "@jupyterlab/mainmenu": "^4.3.0-beta.3",
+    "@jupyterlab/observables": "^5.3.0-beta.3",
+    "@jupyterlab/settingregistry": "^4.3.0-beta.3",
+    "@jupyterlab/translation": "^4.3.0-beta.3",
     "@lumino/datagrid": "^2.4.1",
     "@lumino/widgets": "^2.5.0"
   },

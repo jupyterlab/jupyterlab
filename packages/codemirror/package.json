@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "4.3.0-beta.2",
+  "version": "4.3.0-beta.3",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -58,11 +58,11 @@
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.26.3",
     "@jupyter/ydoc": "^3.0.0-a8",
-    "@jupyterlab/codeeditor": "^4.3.0-beta.2",
-    "@jupyterlab/coreutils": "^6.3.0-beta.2",
-    "@jupyterlab/documentsearch": "^4.3.0-beta.2",
-    "@jupyterlab/nbformat": "^4.3.0-beta.2",
-    "@jupyterlab/translation": "^4.3.0-beta.2",
+    "@jupyterlab/codeeditor": "^4.3.0-beta.3",
+    "@jupyterlab/coreutils": "^6.3.0-beta.3",
+    "@jupyterlab/documentsearch": "^4.3.0-beta.3",
+    "@jupyterlab/nbformat": "^4.3.0-beta.3",
+    "@jupyterlab/translation": "^4.3.0-beta.3",
     "@lezer/common": "^1.2.1",
     "@lezer/generator": "^1.7.0",
     "@lezer/highlight": "^1.2.0",
@@ -73,7 +73,7 @@
     "yjs": "^13.5.40"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.3.0-beta.2",
+    "@jupyterlab/testing": "^4.3.0-beta.3",
     "@lezer/generator": "^1.7.0",
     "@lezer/lr": "^1.4.0",
     "@types/jest": "^29.2.0",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "4.3.0-beta.2",
+  "version": "4.3.0-beta.3",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -9,14 +9,14 @@
   "dependencies": {
     "@jupyter/web-components": "^0.16.6",
     "@jupyter/ydoc": "^3.0.0-a8",
-    "@jupyterlab/application": "^4.3.0-beta.2",
-    "@jupyterlab/codemirror": "^4.3.0-beta.2",
-    "@jupyterlab/console": "^4.3.0-beta.2",
-    "@jupyterlab/coreutils": "^6.3.0-beta.2",
-    "@jupyterlab/rendermime": "^4.3.0-beta.2",
-    "@jupyterlab/services": "^7.3.0-beta.2",
-    "@jupyterlab/theme-light-extension": "^4.3.0-beta.2",
-    "@jupyterlab/translation": "^4.3.0-beta.2",
+    "@jupyterlab/application": "^4.3.0-beta.3",
+    "@jupyterlab/codemirror": "^4.3.0-beta.3",
+    "@jupyterlab/console": "^4.3.0-beta.3",
+    "@jupyterlab/coreutils": "^6.3.0-beta.3",
+    "@jupyterlab/rendermime": "^4.3.0-beta.3",
+    "@jupyterlab/services": "^7.3.0-beta.3",
+    "@jupyterlab/theme-light-extension": "^4.3.0-beta.3",
+    "@jupyterlab/translation": "^4.3.0-beta.3",
     "@lumino/commands": "^2.3.1",
     "@lumino/widgets": "^2.5.0"
   },

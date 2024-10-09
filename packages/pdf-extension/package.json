@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/pdf-extension",
-  "version": "4.3.0-beta.2",
+  "version": "4.3.0-beta.3",
   "description": "JupyterLab - PDF Viewer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,7 +36,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.11.0-beta.2",
+    "@jupyterlab/rendermime-interfaces": "^3.11.0-beta.3",
     "@lumino/coreutils": "^2.2.0",
     "@lumino/disposable": "^2.1.3",
     "@lumino/widgets": "^2.5.0"
