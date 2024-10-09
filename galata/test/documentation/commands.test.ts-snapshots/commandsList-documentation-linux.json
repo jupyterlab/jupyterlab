@@ -981,6 +981,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-single-click-navigation",
+    "label": "Enable Single Click Navigation",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-sort-notebooks-first",
     "label": "Sort Notebooks Above Files",
     "caption": "",
@@ -2082,6 +2088,12 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:toggle-cell-outputs",
+    "label": "Toggle Visibility of Selected Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:toggle-heading-collapse",
     "label": "Toggle Collapse Notebook Heading",
     "caption": "",
@@ -2208,6 +2220,12 @@
   {
     "id": "running:kernel-shut-down",
     "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-shut-down-unused",
+    "label": "Shut Down Unused",
     "caption": "",
     "shortcuts": []
   },

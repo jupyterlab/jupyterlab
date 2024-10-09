@@ -20,6 +20,7 @@
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
+  overflow: hidden;
 }
 
 .lm-MenuBar:hover {

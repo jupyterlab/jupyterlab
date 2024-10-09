@@ -24,6 +24,18 @@ anymore. The side effects for extensions are:
 The ``jp-Inspector-default-content`` class was renamed to ``jp-Inspector-placeholderContent``.
 The name of this contextual help class is now consistent with the equivalent table of contents and property inspector classes.
 
+JupyterLab 4.3 updated to its dependency on ``@lumino/widget`` to the ``2.5.0`` version, which removed the following global styling
+of widgets:
+
+.. code-block:: css
+
+   .lm-Widget {
+     overflow: hidden;
+   }
+
+If you notice some inconsistencies with the styling of your extension, you may need to add this general rule back to the CSS of your extension,
+or (preferably) scope it to the relevant widgets.
+
 Testing with Galata
 ^^^^^^^^^^^^^^^^^^^
 
