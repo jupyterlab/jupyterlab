@@ -289,25 +289,31 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
   await expect(conflict).toHaveCount(0);
 });
 
-test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts', async ({ page }) => {
+test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts', async ({
+  page
+}) => {
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open', {
       query: 'Keyboard Shortcuts'
     });
   });
 
-
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
   const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
   await filterInput.locator('input').fill('merge cell below');
 
-
-  const shortcutsContainer = page.locator('.jp-Shortcuts-ShortcutListContainer');
+  const shortcutsContainer = page.locator(
+    '.jp-Shortcuts-ShortcutListContainer'
+  );
   const firstRow = shortcutsContainer.locator('.jp-Shortcuts-Row').first();
 
-  const shortcutKeysCount = await firstRow.locator('.jp-Shortcuts-ShortcutKeys').count();
+  const shortcutKeysCount = await firstRow
+    .locator('.jp-Shortcuts-ShortcutKeys')
+    .count();
   const orCount = await firstRow.locator('.jp-Shortcuts-Or').count();
-  const orForcedCount = await firstRow.locator('.jp-Shortcuts-Or-Forced').count();
+  const orForcedCount = await firstRow
+    .locator('.jp-Shortcuts-Or-Forced')
+    .count();
 
   expect(orCount).toBe(shortcutKeysCount);
   expect(orForcedCount).toBe(shortcutKeysCount - 1);
@@ -317,7 +323,9 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
 
   // After clicking, assert that 'jp-Shortcuts-Or' count equals 'jp-Shortcuts-Or-Forced'
   const updatedOrCount = await firstRow.locator('.jp-Shortcuts-Or').count();
-  const updatedOrForcedCount = await firstRow.locator('.jp-Shortcuts-Or-Forced').count();
+  const updatedOrForcedCount = await firstRow
+    .locator('.jp-Shortcuts-Or-Forced')
+    .count();
 
   expect(updatedOrCount).toBe(updatedOrForcedCount);
   expect(updatedOrCount).toBe(shortcutKeysCount - 1);
