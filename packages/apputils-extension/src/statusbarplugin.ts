@@ -176,20 +176,24 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
       return item;
     };
 
-    let disposable: IDisposable;
+    const registerItem = () => {
+      const item = createStatusItem();
+      return statusBar.registerStatusItem(runningSessionsStatus.id, {
+        item,
+        align: 'left',
+        rank: 0
+      });
+    };
+
     if (settingRegistry) {
+      let disposable: IDisposable;
       const onSettingsUpdated = (
         settings: ISettingRegistry.ISettings
       ): void => {
         const showStatusBarItem = settings.get('showStatusBarItem')
           .composite as boolean;
         if (showStatusBarItem) {
-          const item = createStatusItem();
-          disposable = statusBar.registerStatusItem(runningSessionsStatus.id, {
-            item,
-            align: 'left',
-            rank: 0
-          });
+          disposable = registerItem();
         } else {
           disposable?.dispose();
         }
@@ -200,11 +204,7 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
         settings.changed.connect(onSettingsUpdated);
       });
     } else {
-      statusBar.registerStatusItem(runningSessionsStatus.id, {
-        item: createStatusItem(),
-        align: 'left',
-        rank: 0
-      });
+      registerItem();
     }
   }
 };
