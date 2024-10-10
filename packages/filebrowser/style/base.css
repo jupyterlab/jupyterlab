@@ -197,7 +197,9 @@
  * Use container queries (not yet supported by our version of stylelint)
  * to display either a small or large header for the last-modified column.
  */
+/* stylelint-disable */
 @container (max-width: 100px) {
+  /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
@@ -213,7 +215,9 @@
   }
 }
 
+/* stylelint-disable */
 @container (min-width: 101px) {
+  /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
   .jp-DirListing-headerItem.jp-id-filesize
