@@ -229,6 +229,10 @@
   }
 }
 
+.jp-DirListing-headerItem.jp-mod-selected {
+  font-weight: 600;
+}
+
 /* increase specificity to override bundled default */
 .jp-DirListing-content {
   flex: 1 1 auto;
