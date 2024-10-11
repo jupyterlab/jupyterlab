@@ -239,6 +239,60 @@ describe('completer/reconciliator', () => {
         spy1.mockRestore();
         spy2.mockRestore();
       });
+      it('should handle timeouts and not include the provider', async () => {
+        const slowProvider = {
+          isApplicable: jest.fn(
+            () => new Promise(resolve => setTimeout(() => resolve(true), 6000))
+          )
+        };
+        const quickProvider = {
+          isApplicable: jest.fn(() => Promise.resolve(true))
+        };
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [slowProvider, quickProvider]
+        });
+        const applicableProvides = await reconciliator['applicableProviders']();
+        expect(applicableProvides).toEqual(
+          expect.arrayContaining([quickProvider])
+        );
+        expect(slowProvider.isApplicable).toHaveBeenCalledTimes(1);
+      });
+      it('should handle errors from providers', async () => {
+        const errorProvider = {
+          isApplicable: jest.fn(() =>
+            Promise.reject(new Error('Provider error'))
+          )
+        };
+        const validProvider = {
+          isApplicable: jest.fn(() => Promise.resolve(true))
+        };
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [errorProvider, validProvider]
+        });
+        const applicableProvides = await reconciliator['applicableProviders']();
+        expect(applicableProvides).toEqual(
+          expect.arrayContaining([validProvider])
+        );
+        expect(errorProvider.isApplicable).toHaveBeenCalledTimes(1);
+      });
+      it('should not include providers that return false', async () => {
+        const falseProvider = {
+          isApplicable: jest.fn(() => Promise.resolve(false))
+        };
+        const trueProvider = {
+          isApplicable: jest.fn(() => Promise.resolve(true))
+        };
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [falseProvider, trueProvider]
+        });
+        const applicableProvides = await reconciliator['applicableProviders']();
+        expect(applicableProvides).toEqual(
+          expect.arrayContaining([trueProvider])
+        );
+      });
     });
   });
 });
