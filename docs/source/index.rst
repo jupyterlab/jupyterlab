@@ -51,3 +51,24 @@ See the sections below (and the top-level links above) for more information abou
    extension/extension_dev
    developer/contributing
    privacy_policies
+
+.. .. only:: html
+
+   <div class="alert alert-warning" role="alert">
+      <strong>Note:</strong> The following section provides guidelines for menu item labeling based on Apple's Human Interface Guidelines.
+   </div>
+
+Menu Item Labeling Guidelines
+------------------------------
+
+When labeling menu items in JupyterLab, consider the following guidelines to ensure clarity and consistency for users:
+
+1. **Menu Items with Dialog Boxes:** Append an ellipsis (...) to menu items that pop up a dialog box to accept additional information. For example, "Save As..." or "Export Notebook As...".
+
+2. **Menu Items with Immediate Action:** Omit the ellipsis from menu items that take immediate action without requiring additional input. For example, "Save" or "Close".
+
+3. **Cascading Menus:** Cascading menus, such as "File > Save and Export Notebook As", should not have an ellipsis. However, submenu items within cascading menus that require additional information should have an ellipsis.
+
+Adhering to these guidelines improves the user experience by clearly indicating when additional input is needed for an action. It also maintains consistency with Apple's design principles for menu labeling.
+
+For more information on JupyterLab's interface and customization options, refer to the relevant sections in the documentation.
