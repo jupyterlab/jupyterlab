@@ -198,7 +198,7 @@
  * to display either a small or large header for the last-modified column.
  */
 /* stylelint-disable */
-@container (max-width: 100px) {
+@container (max-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
     > .jp-DirListing-headerItemText-small,
@@ -216,17 +216,41 @@
 }
 
 /* stylelint-disable */
-@container (min-width: 101px) {
+@container (min-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText-small,
-  .jp-DirListing-headerItem.jp-id-filesize
     > .jp-DirListing-headerItemText-small {
     display: none;
   }
 
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText-large,
+    > .jp-DirListing-headerItemText-large {
+    display: inline;
+  }
+}
+
+/* stylelint-disable */
+@container (max-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (min-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
   .jp-DirListing-headerItem.jp-id-filesize
     > .jp-DirListing-headerItemText-large {
     display: inline;
