@@ -705,6 +705,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       contentFactory,
       editorConfig,
       inputHistoryScope: this.notebookConfig.inputHistoryScope,
+      showInputPlaceholder: this.notebookConfig.showInputPlaceholder,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
@@ -1157,6 +1158,11 @@ export namespace StaticNotebook {
     maxNumberOutputs: number;
 
     /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder: boolean;
+
+    /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope: 'global' | 'session';
@@ -1243,7 +1249,8 @@ export namespace StaticNotebook {
     sideBySideOutputRatio: 1,
     overscanCount: 1,
     windowingMode: 'full',
-    accessKernelHistory: false
+    accessKernelHistory: false,
+    showInputPlaceholder: true
   };
 
   /**

@@ -1875,6 +1875,8 @@ function activateNotebookHandler(
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
       overscanCount: settings.get('overscanCount').composite as number,
+      showInputPlaceholder: settings.get('showInputPlaceholder')
+        .composite as boolean,
       inputHistoryScope: settings.get('inputHistoryScope').composite as
         | 'global'
         | 'session',
