@@ -86,7 +86,13 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         if (!view) {
           return;
         }
-        toggleBlockComment(view);
+        const commentTokens = view.state.languageDataAt("commentTokens", view.state.selection.main.head) as { block?: string };
+
+        if (commentTokens && commentTokens.block) {
+          toggleBlockComment(view);
+        } else {
+          toggleComment(view);
+        }
       },
       isEnabled
     });
