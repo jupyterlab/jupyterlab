@@ -204,7 +204,7 @@
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.5.3",
     "html-loader": "~1.3.0",
     "html-webpack-plugin": "^5.5.0",
     "license-webpack-plugin": "^4.0.2",
