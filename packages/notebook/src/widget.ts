@@ -936,7 +936,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // If the notebook is not fully rendered
     if (cellIdx < this.cellsArray.length) {
-      // If we are defering the cell rendering and the rendered cells do
+      // If we are deferring the cell rendering and the rendered cells do
       // not fill the viewport yet
       if (
         this.notebookConfig.windowingMode === 'defer' &&
@@ -3346,7 +3346,7 @@ namespace Private {
    */
   export interface IFragmentData {
     /**
-     * The kind of notebook element targetted by the fragment identifier.
+     * The kind of notebook element targeted by the fragment identifier.
      */
     kind: 'heading' | 'cell-id';
     /*
