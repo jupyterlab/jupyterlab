@@ -90,3 +90,17 @@
   display: flex;
   align-items: center;
 }
+
+/*
+* The pattern is used to make an element visually hidden while keeping it visible to a screen reader.
+* Documentation on pattern - https://www.tpgi.com/the-anatomy-of-visually-hidden/
+*/
+.jp-ContentPanel-ariaLive {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
