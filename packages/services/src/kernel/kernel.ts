@@ -68,6 +68,11 @@ export interface IKernelConnection extends IObservableDisposable {
   readonly clientId: string;
 
   /**
+   * The sub-shell ID, main shell has ID null.
+   */
+  shellId?: string | null;
+
+  /**
    * The current status of the kernel.
    */
   readonly status: KernelMessage.Status;
@@ -297,6 +302,25 @@ export interface IKernelConnection extends IObservableDisposable {
   ): IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
+  >;
+
+  /**
+   * Send an experimental `create_subshell_request` message.
+   *
+   * @hidden
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A kernel future.
+   */
+  requestCreateSubshell(
+    content: KernelMessage.ICreateSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.ICreateSubshellRequestMsg,
+    KernelMessage.ICreateSubshellReplyMsg
   >;
 
   /**
@@ -578,6 +602,11 @@ export namespace IKernelConnection {
      * The unique identifier for the kernel client.
      */
     clientId?: string;
+
+    /**
+     * The sub-shell ID talking to the kernel (main shell has ID null).
+     */
+    shellId?: string | null;
   }
 }
 

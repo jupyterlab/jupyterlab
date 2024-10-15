@@ -160,6 +160,8 @@ namespace CommandIDs {
 
   export const createConsole = 'notebook:create-console';
 
+  export const createSubConsole = 'notebook:create-sub-console';
+
   export const createOutputView = 'notebook:create-output-view';
 
   export const clearAllOutputs = 'notebook:clear-all-cell-outputs';
@@ -1390,7 +1392,27 @@ function activateCodeConsole(
       return Private.createConsole(
         commands,
         current,
-        args['activate'] as boolean
+        args['activate'] as boolean,
+        false
+      );
+    },
+    isEnabled
+  });
+
+  commands.addCommand(CommandIDs.createSubConsole, {
+    label: trans.__('New Sub-Console for Notebook'),
+    execute: args => {
+      const current = tracker.currentWidget;
+
+      if (!current) {
+        return;
+      }
+
+      return Private.createConsole(
+        commands,
+        current,
+        args['activate'] as boolean,
+        true
       );
     },
     isEnabled
@@ -3620,6 +3642,7 @@ function populatePalette(
     CommandIDs.changeKernel,
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
+    CommandIDs.createSubConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust,
     CommandIDs.toggleCollapseCmd,
@@ -3722,9 +3745,15 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
     isEnabled
   });
 
-  // Add a console creator the the Kernel menu
+  // Add a console creator to the Kernel menu
   mainMenu.fileMenu.consoleCreators.add({
     id: CommandIDs.createConsole,
+    isEnabled
+  });
+
+  // Add a console creator to the Kernel menu
+  mainMenu.fileMenu.consoleCreators.add({
+    id: CommandIDs.createSubConsole,
     isEnabled
   });
 
@@ -3798,12 +3827,14 @@ namespace Private {
   export function createConsole(
     commands: CommandRegistry,
     widget: NotebookPanel,
-    activate?: boolean
+    activate?: boolean,
+    subshell?: boolean,
   ): Promise<void> {
     const options = {
       path: widget.context.path,
       preferredLanguage: widget.context.model.defaultKernelLanguage,
       activate: activate,
+      subshell: subshell,
       ref: widget.id,
       insertMode: 'split-bottom',
       type: 'Linked Console'
