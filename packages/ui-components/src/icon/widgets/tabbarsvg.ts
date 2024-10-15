@@ -61,7 +61,13 @@ export namespace TabBarSvg {
 
       return hpass(
         'div',
-        { className, title },
+        {
+          className,
+          title,
+          // TODO once Lumino PR #655 is incorporated into JupyterLab, make this
+          // element a button rather than a div[role=button]
+          role: 'button'
+        },
         closeIcon
       ) as unknown as VirtualElement;
     }
