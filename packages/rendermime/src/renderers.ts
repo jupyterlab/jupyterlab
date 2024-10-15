@@ -403,14 +403,46 @@ export namespace renderMarkdown {
     translator?: ITranslator;
   }
 
+  function encodeSuffix(
+    headerText: string | null,
+    index: number,
+    parentIndex: string,
+    headerType: string
+  ): string {
+    const suffix = `${headerText} ${index} ${parentIndex} ${headerType}`;
+
+    // Use TextEncoder to convert the string to a Uint8Array
+    const encoder = new TextEncoder();
+    const data = encoder.encode(suffix);
+
+    // Convert to Base64
+    let binaryString = '';
+    for (let i = 0; i < data.length; i++) {
+      binaryString += String.fromCharCode(data[i]);
+    }
+
+    return btoa(binaryString);
+  }
+
   /**
    * Create a normalized id for a header element.
    *
    * @param header Header element
    * @returns Normalized id
    */
-  export function createHeaderId(header: Element): string {
-    return (header.textContent ?? '').replace(/ /g, '-');
+  export function createHeaderId(
+    header: Element,
+    index: number,
+    parentIndex: string,
+    headerType: string
+  ): string {
+    const suffix = encodeSuffix(
+      header.textContent,
+      index,
+      parentIndex,
+      headerType
+    );
+    return `${suffix}`.replace(/ /g, '-');
   }
 }
 
@@ -1162,7 +1194,17 @@ namespace Private {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = renderMarkdown.createHeaderId(header);
+        const parentElement = header.closest(
+          '.lm-Widget.jp-Cell.jp-MarkdownCell.jp-Notebook-cell.jp-mod-rendered'
+        );
+        const parentIndex =
+          parentElement?.getAttribute('data-windowed-list-index') ?? '0';
+        header.id = renderMarkdown.createHeaderId(
+          header,
+          i,
+          parentIndex,
+          headerType
+        );
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
