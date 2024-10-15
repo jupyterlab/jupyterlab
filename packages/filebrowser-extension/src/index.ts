@@ -219,7 +219,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
           /**
            * File browser configuration.
            */
-          const fileBrowserConfig = {
+          const defaultFileBrowserConfig = {
             navigateToCurrentDirectory: false,
             singleClickNavigation: false,
             showLastModifiedColumn: true,
@@ -233,14 +233,23 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
             filterDirectories: true
           };
 
+          // apply defaults
+          let key: keyof typeof defaultFileBrowserConfig;
+          for (key in defaultFileBrowserConfig) {
+            browser[key] = defaultFileBrowserConfig[key];
+          }
+
           function onSettingsChanged(
             settings: ISettingRegistry.ISettings
           ): void {
-            let key: keyof typeof fileBrowserConfig;
-            for (key in fileBrowserConfig) {
+            let key: keyof typeof defaultFileBrowserConfig;
+            for (key in defaultFileBrowserConfig) {
               const value = settings.get(key).composite as boolean;
-              fileBrowserConfig[key] = value;
-              browser[key] = value;
+              // only set the browser setting if the value from the settings
+              // differs from the previous value set on the file browser
+              if (browser[key] !== value) {
+                browser[key] = value;
+              }
             }
 
             const value = settings.get('filterDirectories')
