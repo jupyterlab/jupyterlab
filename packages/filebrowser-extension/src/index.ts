@@ -213,58 +213,64 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
           treePathUpdater(args.newValue);
         });
       }
-
-      if (settingRegistry) {
-        void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
-          /**
-           * File browser configuration.
-           */
-          const defaultFileBrowserConfig = {
-            navigateToCurrentDirectory: false,
-            singleClickNavigation: false,
-            showLastModifiedColumn: true,
-            showFileSizeColumn: false,
-            showHiddenFiles: false,
-            showFileCheckboxes: false,
-            sortNotebooksFirst: false,
-            showFullPath: false
-          };
-          const fileBrowserModelConfig = {
-            filterDirectories: true
-          };
-
-          // apply defaults
-          let key: keyof typeof defaultFileBrowserConfig;
-          for (key in defaultFileBrowserConfig) {
-            browser[key] = defaultFileBrowserConfig[key];
-          }
-
-          function onSettingsChanged(
-            settings: ISettingRegistry.ISettings
-          ): void {
-            let key: keyof typeof defaultFileBrowserConfig;
-            for (key in defaultFileBrowserConfig) {
-              const value = settings.get(key).composite as boolean;
-              // only set the browser setting if the value from the settings
-              // differs from the previous value set on the file browser
-              if (browser[key] !== value) {
-                browser[key] = value;
-              }
-            }
-
-            const value = settings.get('filterDirectories')
-              .composite as boolean;
-            fileBrowserModelConfig.filterDirectories = value;
-            browser.model.filterDirectories = value;
-          }
-          settings.changed.connect(onSettingsChanged);
-          onSettingsChanged(settings);
-        });
-      }
     });
     return {
       openPath: CommandIDs.openPath
     };
+  }
+};
+
+const fileBrowserSettings: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:settings',
+  requires: [IDefaultFileBrowser, ISettingRegistry],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    browser: IDefaultFileBrowser,
+    settingRegistry: ISettingRegistry
+  ) => {
+    /**
+     * File browser default configuration.
+     */
+    const defaultFileBrowserConfig = {
+      navigateToCurrentDirectory: false,
+      singleClickNavigation: false,
+      showLastModifiedColumn: true,
+      showFileSizeColumn: false,
+      showHiddenFiles: false,
+      showFileCheckboxes: false,
+      sortNotebooksFirst: false,
+      showFullPath: false
+    };
+
+    // apply defaults
+    let key: keyof typeof defaultFileBrowserConfig;
+    for (key in defaultFileBrowserConfig) {
+      browser[key] = defaultFileBrowserConfig[key];
+    }
+
+    void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
+      const fileBrowserModelConfig = {
+        filterDirectories: true
+      };
+      function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
+        let key: keyof typeof defaultFileBrowserConfig;
+        for (key in defaultFileBrowserConfig) {
+          const value = settings.get(key).composite as boolean;
+          // only set the browser setting if the value from the settings
+          // differs from the previous value set on the file browser
+          if (browser[key] !== value) {
+            browser[key] = value;
+          }
+        }
+
+        const value = settings.get('filterDirectories').composite as boolean;
+        fileBrowserModelConfig.filterDirectories = value;
+        browser.model.filterDirectories = value;
+      }
+      settings.changed.connect(onSettingsChanged);
+      onSettingsChanged(settings);
+    });
   }
 };
 
@@ -1386,6 +1392,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   defaultFileBrowser,
   browser,
+  fileBrowserSettings,
   shareFile,
   fileUploadStatus,
   downloadPlugin,
