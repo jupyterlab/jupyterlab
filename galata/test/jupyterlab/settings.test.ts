@@ -307,30 +307,11 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
   );
   const firstRow = shortcutsContainer.locator('.jp-Shortcuts-Row').first();
 
-  const shortcutKeysCount = await firstRow
-    .locator('.jp-Shortcuts-ShortcutKeys')
-    .count();
-  const orCount = await firstRow.locator('.jp-Shortcuts-Or').count();
-  const orForcedCount = await firstRow
-    .locator('.jp-Shortcuts-Or-Forced')
-    .count();
-
-  expect(orCount).toBe(shortcutKeysCount);
-  expect(orForcedCount).toBe(shortcutKeysCount - 1);
-
   const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
   await shortcutKey.click();
-
-  // After clicking, assert that 'jp-Shortcuts-Or' count equals 'jp-Shortcuts-Or-Forced'
-  const updatedOrCount = await firstRow.locator('.jp-Shortcuts-Or').count();
-  const updatedOrForcedCount = await firstRow
-    .locator('.jp-Shortcuts-Or-Forced')
-    .count();
-
-  expect(updatedOrCount).toBe(updatedOrForcedCount);
-  expect(updatedOrCount).toBe(shortcutKeysCount - 1);
-
-  // Assert that the count of 'jp-Shortcuts-Plus' is zero
-  const plusButtonCount = await firstRow.locator('.jp-Shortcuts-Plus').count();
-  expect(plusButtonCount).toBe(0);
+  await page.waitForTimeout(500);
+  await firstRow.hover();
+  expect(await firstRow.screenshot()).toMatchSnapshot(
+    'settings-shortcuts-edit.png'
+  );
 });
