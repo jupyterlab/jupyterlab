@@ -257,6 +257,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean;
+            defaultFileBrowserConfig[key] = value;
             browser[key] = value;
           }
 
