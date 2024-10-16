@@ -220,6 +220,9 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
   }
 };
 
+/**
+ * Handle the file browser settings taking into account user defined settings.
+ */
 const fileBrowserSettings: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:settings',
   requires: [IDefaultFileBrowser, ISettingRegistry],
