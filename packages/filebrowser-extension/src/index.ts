@@ -234,28 +234,22 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
     browser: IDefaultFileBrowser,
     settingRegistry: ISettingRegistry | null
   ) => {
-    /**
-     * File browser default configuration.
-     */
-    const defaultFileBrowserConfig = {
-      navigateToCurrentDirectory: false,
-      singleClickNavigation: false,
-      showLastModifiedColumn: true,
-      showFileSizeColumn: false,
-      showHiddenFiles: false,
-      showFileCheckboxes: false,
-      sortNotebooksFirst: false,
-      showFullPath: false
-    };
-
-    // apply defaults
-    let key: keyof typeof defaultFileBrowserConfig;
-    for (key in defaultFileBrowserConfig) {
-      browser[key] = defaultFileBrowserConfig[key];
-    }
-
     if (settingRegistry) {
       void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
+        /**
+         * File browser default configuration.
+         */
+        const defaultFileBrowserConfig = {
+          navigateToCurrentDirectory: false,
+          singleClickNavigation: false,
+          showLastModifiedColumn: true,
+          showFileSizeColumn: false,
+          showHiddenFiles: false,
+          showFileCheckboxes: false,
+          sortNotebooksFirst: false,
+          showFullPath: false
+        };
+
         const fileBrowserModelConfig = {
           filterDirectories: true
         };
