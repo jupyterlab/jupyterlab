@@ -160,7 +160,7 @@ const namespace = 'filebrowser';
  */
 const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
   id: FILE_BROWSER_PLUGIN_ID,
-  description: 'Set up the default file browser (commands, settings,...).',
+  description: 'Set up the default file browser commands',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
   optional: [
     ILayoutRestorer,
@@ -225,6 +225,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
  */
 const browserSettings: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:settings',
+  description: 'Set up the default file browser settings',
   requires: [IDefaultFileBrowser, ISettingRegistry],
   autoStart: true,
   activate: (
