@@ -175,8 +175,7 @@ module.exports = {
         ignoreCase: true,
         ignoreDeclarationSort: true,
         ignoreMemberSort: false,
-        memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-        allowSeparatedGroups: false
+        memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single']
       }
     ]
   },
