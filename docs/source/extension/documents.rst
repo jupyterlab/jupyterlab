@@ -71,7 +71,7 @@ Document Registry
 .. note::
 
    We recommend you to look at the `document example <https://github.com/jupyterlab/extension-examples/tree/main/documents>`__
-   to help understanding a pratical case.
+   to help understanding a practical case.
 
 `Widget Factories <../api/classes/docregistry.DocumentRegistry-1.html#addWidgetFactory>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

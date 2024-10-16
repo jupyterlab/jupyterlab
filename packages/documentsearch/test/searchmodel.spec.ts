@@ -97,7 +97,7 @@ describe('documentsearch/searchmodel', () => {
     });
 
     describe('#suggestedInitialQuery', () => {
-      it('should return inital query from provider', () => {
+      it('should return initial query from provider', () => {
         expect(model.suggestedInitialQuery).toEqual('unset');
         provider.initialQuery = 'provider-set-query';
         expect(model.suggestedInitialQuery).toEqual('provider-set-query');
@@ -105,7 +105,7 @@ describe('documentsearch/searchmodel', () => {
     });
 
     describe('#initialQuery', () => {
-      it('should set/get inital non-empty query', () => {
+      it('should set/get initial non-empty query', () => {
         model.initialQuery = 'externally-set-query';
         expect(model.initialQuery).toEqual('externally-set-query');
       });

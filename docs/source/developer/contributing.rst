@@ -686,7 +686,7 @@ Main reasons for UI test failures are:
    to do that, you can post a comment on your PR with the following content:
 
    - ``please update galata snapshots``: A bot will push a new commit to your PR updating galata
-     test snaphsots.
+     test snapshots.
    - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
