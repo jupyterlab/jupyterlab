@@ -309,7 +309,7 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
 
   const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
   await shortcutKey.click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(300);
   await firstRow.hover();
   expect(await firstRow.screenshot()).toMatchSnapshot(
     'settings-shortcuts-edit.png'
