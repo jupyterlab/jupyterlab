@@ -100,7 +100,7 @@ describe('@jupyterlab/lsp', () => {
         expect(manager.disconnectDocumentSignals).toHaveBeenCalled();
       });
     });
-    describe('#onUninitializedLSPConnectionDisposed', () => {
+    describe('#dispose()', () => {
       it('should dispose of an uninitialized connection without errors', () => {
         const connection = new LSPConnection();
         connection.dispose();
