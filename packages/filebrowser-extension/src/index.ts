@@ -226,12 +226,13 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
 const browserSettings: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:settings',
   description: 'Set up the default file browser settings',
-  requires: [IDefaultFileBrowser, ISettingRegistry],
+  requires: [IDefaultFileBrowser],
+  optional: [ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     browser: IDefaultFileBrowser,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry | null
   ) => {
     /**
      * File browser default configuration.
@@ -253,28 +254,30 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
       browser[key] = defaultFileBrowserConfig[key];
     }
 
-    void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
-      const fileBrowserModelConfig = {
-        filterDirectories: true
-      };
-      function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
-        let key: keyof typeof defaultFileBrowserConfig;
-        for (key in defaultFileBrowserConfig) {
-          const value = settings.get(key).composite as boolean;
-          // only set the browser setting if the value from the settings
-          // differs from the previous value set on the file browser
-          if (browser[key] !== value) {
-            browser[key] = value;
+    if (settingRegistry) {
+      void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
+        const fileBrowserModelConfig = {
+          filterDirectories: true
+        };
+        function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
+          let key: keyof typeof defaultFileBrowserConfig;
+          for (key in defaultFileBrowserConfig) {
+            const value = settings.get(key).composite as boolean;
+            // only set the browser setting if the value from the settings
+            // differs from the previous value set on the file browser
+            if (browser[key] !== value) {
+              browser[key] = value;
+            }
           }
-        }
 
-        const value = settings.get('filterDirectories').composite as boolean;
-        fileBrowserModelConfig.filterDirectories = value;
-        browser.model.filterDirectories = value;
-      }
-      settings.changed.connect(onSettingsChanged);
-      onSettingsChanged(settings);
-    });
+          const value = settings.get('filterDirectories').composite as boolean;
+          fileBrowserModelConfig.filterDirectories = value;
+          browser.model.filterDirectories = value;
+        }
+        settings.changed.connect(onSettingsChanged);
+        onSettingsChanged(settings);
+      });
+    }
   }
 };
 
