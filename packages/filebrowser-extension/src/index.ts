@@ -263,11 +263,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean;
-            // only set the browser setting if the value from the settings
-            // differs from the previous value set on the file browser
-            if (browser[key] !== value) {
-              browser[key] = value;
-            }
+            browser[key] = value;
           }
 
           const value = settings.get('filterDirectories').composite as boolean;
