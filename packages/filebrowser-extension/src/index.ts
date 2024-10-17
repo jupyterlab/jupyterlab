@@ -250,19 +250,14 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showFullPath: false
         };
 
-        const fileBrowserModelConfig = {
-          filterDirectories: true
-        };
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean;
-            defaultFileBrowserConfig[key] = value;
             browser[key] = value;
           }
 
           const value = settings.get('filterDirectories').composite as boolean;
-          fileBrowserModelConfig.filterDirectories = value;
           browser.model.filterDirectories = value;
         }
         settings.changed.connect(onSettingsChanged);
