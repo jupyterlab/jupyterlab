@@ -288,3 +288,30 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
 
   await expect(conflict).toHaveCount(0);
 });
+
+test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('merge cell below');
+
+  const shortcutsContainer = page.locator(
+    '.jp-Shortcuts-ShortcutListContainer'
+  );
+  const firstRow = shortcutsContainer.locator('.jp-Shortcuts-Row').first();
+
+  const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
+  await shortcutKey.click();
+  await page.waitForTimeout(300);
+  await firstRow.hover();
+  expect(await firstRow.screenshot()).toMatchSnapshot(
+    'settings-shortcuts-edit.png'
+  );
+});

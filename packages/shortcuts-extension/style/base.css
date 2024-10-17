@@ -31,7 +31,7 @@
 }
 
 .jp-Shortcuts-Input {
-  animation-duration: 0.5s;
+  animation-duration: 0.3s;
   animation-timing-function: ease-out;
   animation-name: slide-animation;
   border-width: var(--jp-border-width);
