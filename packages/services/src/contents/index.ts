@@ -274,7 +274,7 @@ export namespace Contents {
      */
     contentType: ContentType;
     /**
-     * Wether the document is collaborative or not.
+     * Whether the document is collaborative or not.
      *
      * The default value is `true`.
      */

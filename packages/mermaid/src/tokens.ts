@@ -42,7 +42,7 @@ export interface IMermaidManager {
   getMermaidVersion(): string | null;
 
   /**
-   * Render mermaid source to an SVG string with extraced metadata.
+   * Render mermaid source to an SVG string with extracted metadata.
    */
   renderSvg(text: string): Promise<IMermaidManager.IRenderInfo>;
 
