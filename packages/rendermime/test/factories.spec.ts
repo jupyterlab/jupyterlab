@@ -438,7 +438,7 @@ describe('rendermime/factories', () => {
     it('should sanitize html', async () => {
       const model = createModel(
         'text/html',
-        '<h1>foo <script>window.x=1></scrip></h1>'
+        '<h1>foo <script>window.x=1></script></h1>'
       );
       const f = htmlRendererFactory;
       const mimeType = 'text/html';

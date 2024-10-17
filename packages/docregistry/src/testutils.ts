@@ -123,7 +123,7 @@ export function emitIopubMessage(
 }
 
 /**
- * Forceably change the status of a session context.
+ * Forcibly change the status of a session context.
  * An iopub message is emitted for the change.
  *
  * @param sessionContext The session context of interest.

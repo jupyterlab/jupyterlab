@@ -301,7 +301,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       change.type === 'remove'
     ) {
       // in contrast to the file editor document which can be only changed by the modification of the editor content,
-      // the notebook document cna also get modified by a change in the number or arrangement of editors themselves;
+      // the notebook document can also get modified by a change in the number or arrangement of editors themselves;
       // for this reason each change has to trigger documents update (so that LSP mirror is in sync).
       await this.updateDocuments();
     }
