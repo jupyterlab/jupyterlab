@@ -23,7 +23,7 @@ import React, { KeyboardEvent } from 'react';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 
 /**
- * Half spacing between subitems in a status item.
+ * Half spacing between subitems in a status item, in pixels.
  */
 const HALF_SPACING = 4;
 
@@ -43,14 +43,15 @@ function RunningSessionsComponent(
       spacing={HALF_SPACING}
       onClick={props.handleClick}
       onKeyDown={props.handleKeyDown}
+      style={{ cursor: 'pointer' }}
     >
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <terminalIcon.react left={'1px'} top={'3px'} stylesheet={'statusBar'} />
+        <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.sessions} />
-        <kernelIcon.react top={'2px'} stylesheet={'statusBar'} />
+        <kernelIcon.react verticalAlign="middle" stylesheet="statusBar" />
       </GroupItem>
     </GroupItem>
   );
