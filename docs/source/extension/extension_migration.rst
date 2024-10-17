@@ -6,6 +6,43 @@
 Extension Migration Guide
 =========================
 
+JupyterLab 4.3 to 4.4
+---------------------
+
+Icons
+^^^^^
+
+The ``@jupyterlab/debugger`` icons were moved to ``@jupyterlab/ui-components``.
+The **icons in use** are in the ``ui-components/style/icons/debugger`` folder, while the **unused icons** in the ``@jupyterlab/debugger`` package are in the ``ui-components/style/unused/`` folder.
+
+.. list-table:: Updated imports
+   :header-rows: 1
+
+   * - Before
+     - After
+   * - ``import { closeAllIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { closeAllIcon } from '@jupyterlab/ui-components';``
+   * - ``import { continueIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { runIcon } from '@jupyterlab/ui-components';`` or ``import { runIcon as continueIcon } from '@jupyterlab/ui-components';``
+   * - ``import { exceptionIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { exceptionsIcon } from '@jupyterlab/ui-components';`` or ``import { exceptionsIcon as exceptionIcon } from '@jupyterlab/ui-components';``
+   * - ``import { openKernelSourceIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { openKernelSourceIcon } from '@jupyterlab/ui-components';``
+   * - ``import { pauseIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { pauseIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stepIntoIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stepIntoIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stepOutIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stepOutIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stepOverIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stepOverIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stopIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stopIcon } from '@jupyterlab/ui-components';`` or ``import { stopIcon as terminateIcon } from '@jupyterlab/ui-components';``
+   * - ``import { variableIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { variableIcon } from '@jupyterlab/ui-components';``
+   * - ``import { viewBreakpointIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { viewBreakpointIcon } from '@jupyterlab/ui-components';``
+
 JupyterLab 4.2 to 4.3
 ---------------------
 

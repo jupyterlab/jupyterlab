@@ -3,9 +3,12 @@
 
 import React from 'react';
 
-import { openKernelSourceIcon } from '../../icons';
-
-import { classes, LabIcon, ReactWidget } from '@jupyterlab/ui-components';
+import {
+  classes,
+  LabIcon,
+  openKernelSourceIcon,
+  ReactWidget
+} from '@jupyterlab/ui-components';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 

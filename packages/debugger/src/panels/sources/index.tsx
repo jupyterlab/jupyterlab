@@ -5,13 +5,16 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
-import { viewBreakpointIcon } from '../../icons';
-import { IDebugger } from '../../tokens';
-import { SourcePathComponent } from './sourcepath';
-import { SourcesBody } from './body';
-import { ReactWidget } from '@jupyterlab/ui-components';
+import {
+  PanelWithToolbar,
+  ReactWidget,
+  ToolbarButton,
+  viewBreakpointIcon
+} from '@jupyterlab/ui-components';
 import React from 'react';
+import { IDebugger } from '../../tokens';
+import { SourcesBody } from './body';
+import { SourcePathComponent } from './sourcepath';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
