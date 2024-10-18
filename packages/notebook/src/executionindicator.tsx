@@ -81,7 +81,7 @@ export function ExecutionIndicatorComponent(
           }
         }
       }
-    }     
+    }
     />
   );
   const titleFactory = (translatedStatus: string) =>
