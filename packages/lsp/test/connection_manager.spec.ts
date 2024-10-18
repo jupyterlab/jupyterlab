@@ -103,7 +103,7 @@ describe('@jupyterlab/lsp', () => {
     describe('#dispose()', () => {
       it('should dispose of an uninitialized connection without errors', () => {
         const connection = new LSPConnection({
-          capabilities: [],
+          capabilities: {},
           languageId: '',
           rootUri: '',
           serverUri: ''
