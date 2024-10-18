@@ -26,6 +26,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Widget } from '@lumino/widgets';
 import { JSONObject } from '@lumino/coreutils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -69,6 +70,18 @@ export function ExecutionIndicatorComponent(
       width={16}
       height={24}
       label={trans.__('Kernel status')}
+      onClick={async () => {
+        if (props.nb && state.executionStatus === 'busy') {
+          for (let i = 0; i < props.nb.widgets.length; i++) {
+            const cell = props.nb.widgets[i];
+            if (isCodeCellModel(cell.model) && cell.model.executionState === 'running') {
+              await props.nb.scrollToCell(cell);
+              break;
+            }
+          }
+        }
+      }
+    }     
     />
   );
   const titleFactory = (translatedStatus: string) =>
@@ -178,6 +191,10 @@ namespace ExecutionIndicatorComponent {
      * The application language translator.
      */
     translator?: ITranslator;
+    /**
+     * The current notebook.
+     */
+    nb?: Notebook;
   }
 }
 
@@ -209,15 +226,16 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
             displayOption={this.model.displayOption}
             state={undefined}
             translator={this.translator}
+            nb={undefined}
           />
         );
       }
-
       return (
         <ExecutionIndicatorComponent
           displayOption={this.model.displayOption}
           state={this.model.executionState(nb)}
           translator={this.translator}
+          nb={nb}
         />
       );
     }
