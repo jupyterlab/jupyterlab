@@ -74,14 +74,16 @@ export function ExecutionIndicatorComponent(
         if (props.nb && state.executionStatus === 'busy') {
           for (let i = 0; i < props.nb.widgets.length; i++) {
             const cell = props.nb.widgets[i];
-            if (isCodeCellModel(cell.model) && cell.model.executionState === 'running') {
+            if (
+              isCodeCellModel(cell.model) &&
+              cell.model.executionState === 'running'
+            ) {
               await props.nb.scrollToCell(cell);
               break;
             }
           }
         }
-      }
-    }     
+      }}
     />
   );
   const titleFactory = (translatedStatus: string) =>
