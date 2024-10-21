@@ -152,9 +152,53 @@ describe('@jupyterlab/notebook', () => {
       const height = notebook.estimateWidgetSize(0);
       expect(height).toBe(124); // (2 source_line + 4 output_line) * 17 (line_height) + 22 (cell_margin)
     });
-  });
-});
 
-class NotebookViewModelTest extends NotebookViewModel {
-  public cells: Cell[] = [];
-}
+    test('should calculate height based on number of lines in source and multiple outputs with different types', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': '15',
+            'text/markdown': '# Title\n\nParagraph\nAnother Line',
+            'application/vnd.jupyter.stdout': ['Stdout line 1\n', 'Stdout line 2\n']
+          },
+          execution_count: 2,
+          metadata: {}
+        },
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': '30',
+            'text/markdown': '## Subtitle\n\nAnother paragraph\nFinal Line',
+            'application/vnd.jupyter.stdout': 'Stdout single line'
+          },
+          execution_count: 3,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['sum([1, 2, 3, 4, 5])'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      expect(model.executionCount).toBe(1);
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      expect(height).toBe(204);
+      // Explanation:
+      // - 1 source line: sum([1, 2, 3, 4, 5])
+      // - 5 output lines from 'text/markdown': '# Title\n\nParagraph\nAnother Line' (3 lines) + '## Subtitle\n\nAnother paragraph\nFinal Line' (3 lines)
+      // - 2 output lines from 'application/vnd.jupyter.stdout': 'Stdout line 1\nStdout line 2\n' (2 lines)
+      // Calculation: (1 source_line + 8 output_lines) * 20 (line_height)
+    });
+  });
+
+  class NotebookViewModelTest extends NotebookViewModel {
+    public cells: Cell[] = [];
+  }
+});
