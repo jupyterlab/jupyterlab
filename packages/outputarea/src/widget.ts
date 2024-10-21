@@ -109,6 +109,7 @@ export class OutputArea extends Widget {
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
+    this._showInputPlaceholder = options.showInputPlaceholder ?? true;
 
     const model = (this.model = options.model);
     for (
@@ -482,7 +483,8 @@ export class OutputArea extends Widget {
       password,
       future,
       translator: this._translator,
-      inputHistoryScope: this._inputHistoryScope
+      inputHistoryScope: this._inputHistoryScope,
+      showInputPlaceholder: this._showInputPlaceholder
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -809,6 +811,7 @@ export class OutputArea extends Widget {
   private _translator: ITranslator;
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
+  private _showInputPlaceholder: boolean = true;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -883,6 +886,11 @@ export namespace OutputArea {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Whether to show placeholder text in standard input
+     */
+    showInputPlaceholder?: boolean;
   }
 
   /**
@@ -1137,7 +1145,7 @@ export class Stdin extends Widget implements IStdin {
 
     this._input = this.node.getElementsByTagName('input')[0];
     // make users aware of the line history feature
-    if (!this._password) {
+    if (options.showInputPlaceholder && !this._password) {
       this._input.placeholder = this._trans.__(
         '↑↓ for history. Search history with c-↑/c-↓'
       );
@@ -1346,6 +1354,11 @@ export namespace Stdin {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Show placeholder text
+     */
+    showInputPlaceholder?: boolean;
   }
 }
 

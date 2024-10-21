@@ -809,6 +809,11 @@ export namespace Cell {
     maxNumberOutputs?: number;
 
     /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder?: boolean;
+
+    /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
@@ -1094,7 +1099,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
       promptOverlay: true,
-      inputHistoryScope: options.inputHistoryScope
+      inputHistoryScope: options.inputHistoryScope,
+      showInputPlaceholder: options.showInputPlaceholder
     }));
     output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
 
