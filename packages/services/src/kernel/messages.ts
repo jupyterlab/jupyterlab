@@ -13,6 +13,7 @@ export interface IOptions<T extends Message> {
   metadata?: JSONObject;
   msgId?: string;
   username?: string;
+  subshellId?: string | null;
   parentHeader?: T['parent_header'];
 }
 export function createMessage<T extends IClearOutputMsg>(
@@ -131,6 +132,19 @@ export function createMessage<T extends IDebugEventMsg>(
   options: IOptions<T>
 ): T;
 
+export function createMessage<T extends ICreateSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends ICreateSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IDeleteSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IDeleteSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
+
 export function createMessage<T extends Message>(options: IOptions<T>): T {
   return {
     buffers: options.buffers ?? [],
@@ -142,6 +156,7 @@ export function createMessage<T extends Message>(options: IOptions<T>): T {
       msg_type: options.msgType,
       session: options.session,
       username: options.username ?? '',
+      subshell_id: options.subshellId ?? null,
       version: '5.2'
     },
     metadata: options.metadata ?? {},
@@ -183,7 +198,13 @@ export type ShellMessageType =
  * kernel message specification. As such, debug message types are *NOT*
  * considered part of the public API, and may change without notice.
  */
-export type ControlMessageType = 'debug_request' | 'debug_reply';
+export type ControlMessageType =
+  | 'debug_request'
+  | 'debug_reply'
+  | 'create_subshell_request'
+  | 'create_subshell_reply'
+  | 'delete_subshell_request'
+  | 'delete_subshell_reply';
 
 /**
  * IOPub message types.
@@ -259,6 +280,11 @@ export interface IHeader<T extends MessageType = MessageType> {
    * The user sending the message
    */
   username: string;
+
+  /**
+   * Subshell id identifying a subshell if not in main shell
+   */
+  subshell_id?: string;
 
   /**
    * The message protocol version, should be 5.1, 5.2, 5.3, etc.
@@ -385,7 +411,11 @@ export type Message =
   | IUpdateDisplayDataMsg
   | IDebugRequestMsg
   | IDebugReplyMsg
-  | IDebugEventMsg;
+  | IDebugEventMsg
+  | ICreateSubshellRequestMsg
+  | ICreateSubshellReplyMsg
+  | IDeleteSubshellRequestMsg
+  | IDeleteSubshellReplyMsg;
 
 // ////////////////////////////////////////////////
 // IOPub Messages
@@ -763,6 +793,7 @@ export interface IInfoReply extends IReplyOkContent {
   language_info: ILanguageInfo;
   banner: string;
   help_links: { text: string; url: string }[];
+  supported_features?: string[]; // https://github.com/jupyter/enhancement-proposals/pull/92
 }
 
 /**
@@ -1198,6 +1229,50 @@ export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
  */
 export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
   return msg.header.msg_type === 'debug_reply';
+}
+
+/**
+ * A `'create_subshell_request'` message on the `'control'` channel.
+ *
+ * @hidden
+ */
+export interface ICreateSubshellRequestMsg
+  extends IControlMessage<'create_subshell_request'> {
+  content: {};
+}
+
+/**
+ * A `'create_subshell_reply'` message on the `'control'` channel.
+ *
+ * @hidden
+ */
+export interface ICreateSubshellReplyMsg
+  extends IControlMessage<'create_subshell_reply'> {
+  content: {
+    subshell_id: string;
+  };
+}
+
+/**
+ * A `'delete_subshell_request'` message on the `'control'` channel.
+ *
+ * @hidden
+ */
+export interface IDeleteSubshellRequestMsg
+  extends IControlMessage<'delete_subshell_request'> {
+  content: {
+    subshell_id: string;
+  };
+}
+
+/**
+ * A `'delete_subshell_reply'` message on the `'control'` channel.
+ *
+ * @hidden
+ */
+export interface IDeleteSubshellReplyMsg
+  extends IControlMessage<'delete_subshell_reply'> {
+  content: {};
 }
 
 // ////////////////////////////////////////////////

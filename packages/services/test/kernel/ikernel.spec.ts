@@ -1578,4 +1578,29 @@ describe('Kernel.IKernel', () => {
       tester.dispose();
     });
   });
+
+  describe('should not support subshells by default', () => {
+    it('#supportsSubshells() should return false', () => {
+      expect(defaultKernel.supportsSubshells()).toBeFalsy();
+    });
+
+    it('#subshellId should be null in main shell', () => {
+      expect(defaultKernel.subshellId).toBeNull();
+    });
+
+    it('#requestCreateSubshell should raise exception', () => {
+      expect(() => defaultKernel.requestCreateSubshell({})).toThrow(
+        /not supported/
+      );
+    });
+
+    it('#requestDeleteSubshell should raise exception', () => {
+      const options: KernelMessage.IDeleteSubshellRequestMsg['content'] = {
+        subshell_id: 'some string'
+      };
+      expect(() => defaultKernel.requestDeleteSubshell(options)).toThrow(
+        /not supported/
+      );
+    });
+  });
 });

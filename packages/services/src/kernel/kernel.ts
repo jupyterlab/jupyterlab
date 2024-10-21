@@ -324,6 +324,44 @@ export interface IKernelConnection extends IObservableDisposable {
   >;
 
   /**
+   * Send a `create_subshell_request` message.
+   *
+   * @hidden
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A promise that resolves with the response message.
+   */
+  requestCreateSubshell(
+    content: KernelMessage.ICreateSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.ICreateSubshellRequestMsg,
+    KernelMessage.ICreateSubshellReplyMsg
+  >;
+
+  /**
+   * Send a `delete_subshell_request` message.
+   *
+   * @hidden
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A promise that resolves with the response message.
+   */
+  requestDeleteSubshell(
+    content: KernelMessage.IDeleteSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.IDeleteSubshellRequestMsg,
+    KernelMessage.IDeleteSubshellReplyMsg
+  >;
+
+  /**
    * Send an `is_complete_request` message.
    *
    * @param content - The content of the request.
@@ -537,6 +575,13 @@ export interface IKernelConnection extends IObservableDisposable {
       'clientId' | 'username' | 'handleComms'
     >
   ): IKernelConnection;
+
+  supportsSubshells(): boolean;
+
+  /**
+   * The subshell ID, main shell has null.
+   */
+  subshellId: string | null;
 }
 
 /**
@@ -578,6 +623,8 @@ export namespace IKernelConnection {
      * The unique identifier for the kernel client.
      */
     clientId?: string;
+
+    subshellId?: string;
   }
 }
 
