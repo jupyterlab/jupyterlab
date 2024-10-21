@@ -290,8 +290,6 @@ export class CompletionHandler implements IDisposable {
 
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
-    console.log('line: ', line);
-
     const { start, end } = editor.getSelection();
 
     // If there is a text selection, return.
@@ -302,6 +300,10 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
+    // If no line or cursor has not characters before
+    // it besides whitespace, add line beggining class
+    // so that completer can stay enabled, but tab
+    // in codemirror can still be triggered.
     if (!line || end.column === 0) {
       host.classList.add(COMPLETER_LINE_BEGINNING_CLASS);
     } else if (line && line.slice(0, position.column).match(/^\s*$/)) {
@@ -315,9 +317,6 @@ export class CompletionHandler implements IDisposable {
       this._enabled = true;
       host.classList.add(COMPLETER_ENABLED_CLASS);
     }
-    /* if ([COMPLETER_LINE_BEGINNING_CLASS, "jp-mod-in-leading-whitespace"].some(i => host.classList.contains(i))) {
-      return
-    } */
     // Dispatch the cursor change.
     model.handleCursorChange(this.getState(editor, editor.getCursorPosition()));
   }

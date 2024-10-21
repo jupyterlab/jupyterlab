@@ -53,8 +53,9 @@ export namespace StateCommands {
     dispatch: (transaction: Transaction) => void;
   }): boolean {
     let classList = target.dom.parentElement?.classList;
+    let completerEnabled = classList?.contains(COMPLETER_ENABLED_CLASS);
     let lineBeggining = classList?.contains(COMPLETER_LINE_BEGINNING_CLASS);
-    if (classList?.contains(COMPLETER_ENABLED_CLASS) && !lineBeggining) {
+    if (completerEnabled && !lineBeggining) {
       return false;
     }
 

@@ -148,7 +148,15 @@ test.describe('Inline Completer', () => {
       // Widget shows up
       const completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
+      expect(false).toBeTruthy();
     });
+
+    /* test('Doesn\'t show up on Tab', async({ page }) => {
+      await page.keyboard.press("Enter")
+
+      await page.keyboard.press("Tab")
+
+    }); */
   });
 
   test.describe('Accept on Tab', () => {
