@@ -290,14 +290,9 @@ export class CompletionHandler implements IDisposable {
 
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
-    console.log("line: ", line)
-
-    
+    console.log('line: ', line);
 
     const { start, end } = editor.getSelection();
-    console.log("start: ", start, "end: ", end)
-
-    
 
     // If there is a text selection, return.
     if (start.column !== end.column || start.line !== end.line) {
@@ -308,18 +303,11 @@ export class CompletionHandler implements IDisposable {
     }
 
     if (!line || end.column === 0) {
-      host.classList.add(COMPLETER_LINE_BEGINNING_CLASS)
+      host.classList.add(COMPLETER_LINE_BEGINNING_CLASS);
+    } else if (line && line.slice(0, position.column).match(/^\s*$/)) {
+      host.classList.add(COMPLETER_LINE_BEGINNING_CLASS);
     } else {
-      host.classList.remove(COMPLETER_LINE_BEGINNING_CLASS)
-    }
-
-    // If the part of the line before the cursor is white space, return.
-    if (line && line.slice(0, position.column).match(/^\s*$/)) {
-      host.classList.add("jp-mod-in-leading-whitespace")
-      /* this._enabled = false;
-      model.reset(true);
-      host.classList.remove(COMPLETER_ENABLED_CLASS);
-      return; */
+      host.classList.remove(COMPLETER_LINE_BEGINNING_CLASS);
     }
 
     // Enable completion.
