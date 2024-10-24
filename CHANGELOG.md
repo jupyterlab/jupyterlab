@@ -393,6 +393,42 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.0rc1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.0rc0...a036d6b10084d35436682bbb086324a1ea71eaac))
+
+### Enhancements made
+
+- Standardize the button role and label for single, dismissal buttons in dialogs [#16622](https://github.com/jupyterlab/jupyterlab/pull/16622) ([@joaopalmeiro](https://github.com/joaopalmeiro))
+
+### Bugs fixed
+
+- Fix the handling of the file browser configuration [#16870](https://github.com/jupyterlab/jupyterlab/pull/16870) ([@jtpio](https://github.com/jtpio))
+- Fix bracket highlighting for Python string literal concatenation [#16866](https://github.com/jupyterlab/jupyterlab/pull/16866) ([@Nagidrop](https://github.com/Nagidrop))
+- Fix incorrect access to uninitialised `serverRequests` [#16834](https://github.com/jupyterlab/jupyterlab/pull/16834) ([@kaushalaaditya99](https://github.com/kaushalaaditya99))
+- Conditional rendering of 'Add' and 'or' buttons during shortcut editing [#16831](https://github.com/jupyterlab/jupyterlab/pull/16831) ([@Darshan808](https://github.com/Darshan808))
+
+### Maintenance and upkeep improvements
+
+- Ignore `https://code.visualstudio.com` in `check-links` [#16878](https://github.com/jupyterlab/jupyterlab/pull/16878) ([@jtpio](https://github.com/jtpio))
+- Fix job updating snapshots when triggered by comment on first-time contributor PR [#16872](https://github.com/jupyterlab/jupyterlab/pull/16872) ([@krassowski](https://github.com/krassowski))
+- Bump markdown-to-jsx from 7.3.2 to 7.5.0 [#16868](https://github.com/jupyterlab/jupyterlab/pull/16868) ([@dependabot](https://github.com/dependabot))
+- Update to Playwright 1.48.0 [#16854](https://github.com/jupyterlab/jupyterlab/pull/16854) ([@jtpio](https://github.com/jtpio))
+- Require newer handlebars version (^4.7.7) to silence false positive CVE notifications [#16740](https://github.com/jupyterlab/jupyterlab/pull/16740) ([@mjpsyapse](https://github.com/mjpsyapse))
+
+### Documentation improvements
+
+- Add `4.3.0rc0` to the release postmortems [#16858](https://github.com/jupyterlab/jupyterlab/pull/16858) ([@jtpio](https://github.com/jtpio))
+- Standardize the button role and label for single, dismissal buttons in dialogs [#16622](https://github.com/jupyterlab/jupyterlab/pull/16622) ([@joaopalmeiro](https://github.com/joaopalmeiro))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-10-14&to=2024-10-24&type=c))
+
+[@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2024-10-14..2024-10-24&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-10-14..2024-10-24&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-10-14..2024-10-24&type=Issues) | [@joaopalmeiro](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajoaopalmeiro+updated%3A2024-10-14..2024-10-24&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-10-14..2024-10-24&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-10-14..2024-10-24&type=Issues) | [@kaushalaaditya99](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akaushalaaditya99+updated%3A2024-10-14..2024-10-24&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-10-14..2024-10-24&type=Issues) | [@mjpsyapse](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amjpsyapse+updated%3A2024-10-14..2024-10-24&type=Issues) | [@Nagidrop](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ANagidrop+updated%3A2024-10-14..2024-10-24&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.3.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.0b3...838b42c2d05f94ccd48796564ccf44b76202534b))
@@ -419,8 +455,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-10-07&to=2024-10-14&type=c))
 
 [@algonell](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aalgonell+updated%3A2024-10-07..2024-10-14&type=Issues) | [@ChairBorn](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AChairBorn+updated%3A2024-10-07..2024-10-14&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-10-07..2024-10-14&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2024-10-07..2024-10-14&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-10-07..2024-10-14&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-10-07..2024-10-14&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-10-07..2024-10-14&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-10-07..2024-10-14&type=Issues) | [@nekomeowww](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Anekomeowww+updated%3A2024-10-07..2024-10-14&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2024-10-07..2024-10-14&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.3.0b3
 
