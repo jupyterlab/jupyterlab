@@ -42,10 +42,20 @@ export class ProviderReconciliator implements IProviderReconciliator {
    */
   protected async applicableProviders(): Promise<Array<ICompletionProvider>> {
     const isApplicablePromises = this._providers.map(p =>
-      p.isApplicable(this._context)
+      Promise.race([
+        p.isApplicable(this._context),
+        new Promise((_, reject) => setTimeout(() => reject('Timeout'), 5000))
+      ]).catch(error => {
+        console.error(`Error in provider: ${p.constructor.name}`, error);
+        return false;
+      })
     );
-    const applicableProviders = await Promise.all(isApplicablePromises);
-    return this._providers.filter((_, idx) => applicableProviders[idx]);
+    const applicableProvidersResults =
+      await Promise.allSettled(isApplicablePromises);
+    return this._providers.filter((_, idx: number) => {
+      const result = applicableProvidersResults[idx];
+      return result.status === 'fulfilled' && result.value === true;
+    });
   }
 
   fetchInline(
