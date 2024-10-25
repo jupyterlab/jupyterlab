@@ -262,7 +262,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
         | null;
-      docManager.autosaveInterval = autosaveInterval || 120;
+      docManager.autosaveInterval = autosaveInterval || 5;
 
       // Handle last modified timestamp check margin
       const lastModifiedCheckMargin = settings.get('lastModifiedCheckMargin')

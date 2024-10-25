@@ -128,7 +128,7 @@ export class DocumentManager implements IDocumentManager {
         if (!handler) {
           return;
         }
-        handler.saveInterval = value || 120;
+        handler.saveInterval = value || 5;
       });
       this._stateChanged.emit({
         name: 'autosaveInterval',
@@ -713,7 +713,7 @@ export class DocumentManager implements IDocumentManager {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
-  private _autosaveInterval = 120;
+  private _autosaveInterval = 5;
   private _lastModifiedCheckMargin = 500;
   private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
