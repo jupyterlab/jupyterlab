@@ -54,7 +54,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
-
+import { DEFAULT_AUTOSAVE_INTERVAL } from '../../../notebook/constants';
 /**
  * The command IDs used by the document manager plugin.
  */
@@ -97,11 +97,6 @@ namespace CommandIDs {
  */
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
-/**
- * 
- * Default Autosave Interval
- */
-const DEFAULT_AUTOSAVE_INTERVAL = 5;
 
 /**
  * A plugin to open documents in the main area.

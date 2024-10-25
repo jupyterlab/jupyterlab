@@ -23,6 +23,7 @@ import {
   IRecentsManager
 } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
+import { DEFAULT_AUTOSAVE_INTERVAL } from '../../../notebook/constants';
 
 /**
  * The document manager.
@@ -128,7 +129,7 @@ export class DocumentManager implements IDocumentManager {
         if (!handler) {
           return;
         }
-        handler.saveInterval = value || 5;
+        handler.saveInterval = value || DEFAULT_AUTOSAVE_INTERVAL;
       });
       this._stateChanged.emit({
         name: 'autosaveInterval',
@@ -713,7 +714,7 @@ export class DocumentManager implements IDocumentManager {
   private _widgetManager: DocumentWidgetManager;
   private _isDisposed = false;
   private _autosave = true;
-  private _autosaveInterval = 5;
+  private _autosaveInterval = DEFAULT_AUTOSAVE_INTERVAL;
   private _lastModifiedCheckMargin = 500;
   private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
