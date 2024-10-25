@@ -98,7 +98,7 @@ namespace CommandIDs {
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
 /**
- * 
+ *
  * Default Autosave Interval
  */
 const DEFAULT_AUTOSAVE_INTERVAL = 5;
