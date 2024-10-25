@@ -98,6 +98,12 @@ namespace CommandIDs {
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
 
 /**
+ * 
+ * Default Autosave Interval
+ */
+const DEFAULT_AUTOSAVE_INTERVAL = 5;
+
+/**
  * A plugin to open documents in the main area.
  *
  */
@@ -262,7 +268,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
         | null;
-      docManager.autosaveInterval = autosaveInterval || 5;
+      docManager.autosaveInterval = autosaveInterval || DEFAULT_AUTOSAVE_INTERVAL;
 
       // Handle last modified timestamp check margin
       const lastModifiedCheckMargin = settings.get('lastModifiedCheckMargin')
