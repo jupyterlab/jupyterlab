@@ -315,3 +315,17 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
     'settings-shortcuts-edit.png'
   );
 });
+
+test('Settings Export: Clicking the export button triggers a download', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open');
+  });
+  const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
+
+  await page.getByText('Export Settings').click();
+  const download = await downloadPromise;
+
+  expect(download).toBeDefined();
+});
