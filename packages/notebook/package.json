@@ -40,7 +40,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^3.0.0-a8",
+    "@jupyter/ydoc": "^3.0.0",
     "@jupyterlab/apputils": "^4.4.0-rc.1",
     "@jupyterlab/cells": "^4.3.0-rc.1",
     "@jupyterlab/codeeditor": "^4.3.0-rc.1",
