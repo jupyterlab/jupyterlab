@@ -596,6 +596,11 @@ export class Context<
 
     try {
       await this._manager.ready;
+      if (!this.canSave) {
+        // File cannot be saved.
+        return Promise.reject();
+      }
+
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
@@ -792,7 +797,7 @@ export class Context<
   }
 
   /**
-   * Add a checkpoint the file is writable.
+   * Add a checkpoint if the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
     let promise = Promise.resolve(void 0);
