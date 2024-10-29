@@ -2074,9 +2074,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/ydoc@npm:^3.0.0-a8":
-  version: 3.0.0-a8
-  resolution: "@jupyter/ydoc@npm:3.0.0-a8"
+"@jupyter/ydoc@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@jupyter/ydoc@npm:3.0.0"
   dependencies:
     "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0
     "@lumino/coreutils": ^1.11.0 || ^2.0.0
@@ -2084,7 +2084,7 @@ __metadata:
     "@lumino/signaling": ^1.10.0 || ^2.0.0
     y-protocols: ^1.0.5
     yjs: ^13.5.40
-  checksum: def37030b73d78a195b41da8d457960598745f2c6c261c3aedabd3bc985835226f022c31e9d340c99449956c3767c4bda3a7f02d0b51d22893a0718c50b31310
+  checksum: e9419a461f33d2685db346b19806865fe37f61b2ca33eb39c4ea905d765794a928442adf1bbffda67b665bdeba3be9a082189a57eaab5367aeaf6b57caeda822
   languageName: node
   linkType: hard
 
@@ -2408,7 +2408,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/cell-toolbar@workspace:packages/cell-toolbar"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/cells": ^4.3.0-rc.1
     "@jupyterlab/docregistry": ^4.3.0-rc.1
@@ -2434,7 +2434,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.3
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/attachments": ^4.3.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
@@ -2490,7 +2490,7 @@ __metadata:
   resolution: "@jupyterlab/codeeditor@workspace:packages/codeeditor"
   dependencies:
     "@codemirror/state": ^6.4.1
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/coreutils": ^6.3.0-rc.1
     "@jupyterlab/nbformat": ^4.3.0-rc.1
@@ -2523,7 +2523,7 @@ __metadata:
     "@codemirror/legacy-modes": ^6.4.0
     "@codemirror/search": ^6.5.6
     "@codemirror/view": ^6.26.3
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.3.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
     "@jupyterlab/codemirror": ^4.3.0-rc.1
@@ -2566,7 +2566,7 @@ __metadata:
     "@codemirror/search": ^6.5.6
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.3
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
     "@jupyterlab/coreutils": ^6.3.0-rc.1
     "@jupyterlab/documentsearch": ^4.3.0-rc.1
@@ -2614,7 +2614,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.3
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
     "@jupyterlab/codemirror": ^4.3.0-rc.1
@@ -2670,7 +2670,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/console@workspace:packages/console"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/cells": ^4.3.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
@@ -2799,7 +2799,7 @@ __metadata:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.3
     "@jupyter/react-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.3.0-rc.1
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/cells": ^4.3.0-rc.1
@@ -2895,7 +2895,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docregistry@workspace:packages/docregistry"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
     "@jupyterlab/coreutils": ^6.3.0-rc.1
@@ -3016,7 +3016,7 @@ __metadata:
   resolution: "@jupyterlab/example-cell@workspace:examples/cell"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.3.0-rc.1
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/cells": ^4.3.0-rc.1
@@ -3045,7 +3045,7 @@ __metadata:
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.3.0-rc.1
     "@jupyterlab/codemirror": ^4.3.0-rc.1
     "@jupyterlab/console": ^4.3.0-rc.1
@@ -3191,7 +3191,7 @@ __metadata:
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.3.0-rc.1
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/codemirror": ^4.3.0-rc.1
@@ -3432,7 +3432,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor@workspace:packages/fileeditor"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
     "@jupyterlab/codemirror": ^4.3.0-rc.1
@@ -4200,7 +4200,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook-extension@workspace:packages/notebook-extension"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.3.0-rc.1
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/cells": ^4.3.0-rc.1
@@ -4248,7 +4248,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.4.0-rc.1
     "@jupyterlab/cells": ^4.3.0-rc.1
     "@jupyterlab/codeeditor": ^4.3.0-rc.1
@@ -4522,7 +4522,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/services@workspace:packages/services"
   dependencies:
-    "@jupyter/ydoc": ^3.0.0-a8
+    "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/coreutils": ^6.3.0-rc.1
     "@jupyterlab/nbformat": ^4.3.0-rc.1
     "@jupyterlab/settingregistry": ^4.3.0-rc.1
