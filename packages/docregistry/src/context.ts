@@ -597,8 +597,9 @@ export class Context<
     try {
       await this._manager.ready;
       if (!this.canSave) {
-        // File cannot be saved.
-        return Promise.reject();
+        // File cannot be saved. The "save" command is disabled in the UI,
+        // but if the user tries to save anyway, act as though it succeeded.
+        return Promise.resolve();
       }
 
       const value = await this._maybeSave(options);
