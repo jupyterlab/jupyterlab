@@ -39,7 +39,7 @@ import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
+import { saveIcon, settingsIcon, undoIcon, downloadIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 
 /**
@@ -149,7 +149,7 @@ function activate(
       new CommandToolbarButton({
         commands,
         id: CommandIDs.exportSettings,
-        icon: saveIcon,
+        icon: downloadIcon,
         label: trans.__('Export Settings')
       })
     );
@@ -376,7 +376,7 @@ function activateJSON(
       downloadSettings(jsonContent, 'overrides.json');
     },
     label: trans.__('Export Settings'),
-    icon: saveIcon
+    icon: downloadIcon
   });
 
   /**
