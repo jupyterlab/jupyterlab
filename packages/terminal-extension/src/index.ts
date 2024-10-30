@@ -360,7 +360,7 @@ function addCommands(
 
       let session;
       if (name) {
-        const models = await TerminalAPI.listRunning();
+        const models = await TerminalAPI.listRunning(serviceManager.serverSettings);
         if (models.map(d => d.name).includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
