@@ -3,6 +3,8 @@
 
 import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -316,16 +318,37 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
   );
 });
 
-test('Settings Export: Clicking the export button triggers a download', async ({
+test('Settings Export: Clicking the export button triggers a download and matches content', async ({
   page
 }) => {
   await page.evaluate(async () => {
-    await window.jupyterapp.commands.execute('settingeditor:open');
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
   });
-  const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
+  await page
+    .locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_adaptive-theme'
+    )
+    .click();
+  // Wait for the settings to be loaded
+  await page.waitForTimeout(500);
 
+  const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
   await page.getByText('Export Settings').click();
   const download = await downloadPromise;
+  // path where the file will be saved
+  const downloadDir = 'galata/test/downloads';
+  const downloadPath = path.join(downloadDir, download.suggestedFilename());
 
-  expect(download).toBeDefined();
+  // Ensure the download directory exists
+  if (!fs.existsSync(downloadDir)) {
+    fs.mkdirSync(downloadDir, { recursive: true });
+  }
+  await download.saveAs(downloadPath);
+
+  const fileContent = fs.readFileSync(downloadPath, 'utf-8');
+  const expectedContent = `"adaptive-theme": true,`;
+  expect(fileContent).toContain(expectedContent);
+  fs.unlinkSync(downloadPath);
 });
