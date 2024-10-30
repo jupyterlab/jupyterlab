@@ -39,7 +39,12 @@ import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { saveIcon, settingsIcon, undoIcon, downloadIcon } from '@jupyterlab/ui-components';
+import {
+  downloadIcon,
+  saveIcon,
+  settingsIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 
 /**
