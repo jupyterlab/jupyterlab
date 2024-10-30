@@ -4,7 +4,7 @@
 
 # JupyterLab Changelog
 
-## v4.3 (beta)
+## v4.3
 
 JupyterLab 4.3 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
