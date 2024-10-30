@@ -50,6 +50,12 @@
       },
       "type": "array",
       "default": []
+    },
+    "auto-save": {
+      "type": "boolean",
+      "title": "Auto-save Documents",
+      "description": "Whether to save documents automatically after running a cell",
+      "default": true
     }
   },
   "additionalProperties": false,
