@@ -135,13 +135,13 @@ export class SettingsFormEditor extends React.Component<
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.settings !== this.props.settings) {
-      this.setState({
+      this.setState(previousState => ({
         formContext: {
-          ...this.state.formContext,
+          ...previousState.formContext,
           settings: this.props.settings,
           defaultFormData: this.props.settings.default()
         }
-      });
+      }));
     }
   }
 
@@ -291,13 +291,13 @@ export class SettingsFormEditor extends React.Component<
           }
         }
       }
-      this.setState({
+      this.setState(previousState => ({
         filteredSchema,
         formContext: {
-          ...this.state.formContext,
+          ...previousState.formContext,
           schema: JSONExt.deepCopy(this.props.settings.schema)
         }
-      });
+      }));
     }
   }
 
