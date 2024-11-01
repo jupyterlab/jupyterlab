@@ -599,6 +599,7 @@ export class Context<
       if (!this.canSave) {
         // File cannot be saved. The "save" command is disabled in the UI,
         // but if the user tries to save anyway, act as though it succeeded.
+        this._saveState.emit('completed');
         return Promise.resolve();
       }
 
