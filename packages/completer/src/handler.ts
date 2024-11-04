@@ -301,7 +301,7 @@ export class CompletionHandler implements IDisposable {
     }
 
     // If no line or cursor has not characters before
-    // it besides whitespace, add line beggining class
+    // it besides whitespace, add line beginning class
     // so that completer can stay enabled, but tab
     // in codemirror can still be triggered.
     if (!line || end.column === 0) {
@@ -470,7 +470,9 @@ export class CompletionHandler implements IDisposable {
         position.column < line.length ||
         line.slice(0, position.column).match(/^\s*$/))
     ) {
-      // only auto-trigger on end of line and not begginning of line
+      // In Automatic mode we only auto-trigger on the end of line (and not on the beginning).
+      // Increase the counter to avoid out-of date replies when pressing Backspace quickly.
+      this._fetchingInline += 1;
       return;
     }
 
