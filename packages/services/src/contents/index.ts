@@ -228,12 +228,12 @@ export namespace Contents {
     type: 'new' | 'delete' | 'rename' | 'save';
 
     /**
-     * The new contents.
+     * The old contents.
      */
     oldValue: Partial<IModel> | null;
 
     /**
-     * The old contents.
+     * The new contents.
      */
     newValue: Partial<IModel> | null;
   }
