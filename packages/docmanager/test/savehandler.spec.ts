@@ -49,25 +49,6 @@ describe('docregistry/savehandler', () => {
       });
     });
 
-    describe('#setTimer()', () => {
-      it('should reset autosave timer when disconnected', async () => {
-        jest.useFakeTimers();
-
-        jest
-          .spyOn(handler as any, '_isConnectedCallback')
-          .mockReturnValue(false);
-        jest.spyOn(handler as any, '_setTimer');
-        jest.spyOn(handler as any, '_save');
-
-        handler.saveInterval = 120;
-        handler.start();
-        jest.advanceTimersByTime(120000); // in ms
-        expect((handler as any)._setTimer).toHaveBeenCalledTimes(2);
-
-        jest.useRealTimers();
-      });
-    });
-
     describe('#saveInterval()', () => {
       it('should be the save interval of the handler', () => {
         expect(handler.saveInterval).toBe(120);
@@ -143,6 +124,29 @@ describe('docregistry/savehandler', () => {
         handler.saveInterval = 0.1;
         handler.start();
         return promise;
+      });
+
+      it('should continue to save after being disconnected', async () => {
+        jest.useFakeTimers();
+        handler.saveInterval = 120;
+        handler.start();
+
+        context.model.fromString('foo');
+        jest.advanceTimersByTime(120000); // in ms
+        await signalToPromise(context.fileChanged);
+
+        jest
+          .spyOn(handler as any, '_isConnectedCallback')
+          .mockReturnValue(false);
+        context.model.fromString('bar');
+        jest.advanceTimersByTime(240000);
+        jest
+          .spyOn(handler as any, '_isConnectedCallback')
+          .mockReturnValue(true);
+
+        jest.advanceTimersByTime(120000);
+        jest.useRealTimers();
+        return signalToPromise(context.fileChanged);
       });
 
       it('should overwrite the file on disk', async () => {
