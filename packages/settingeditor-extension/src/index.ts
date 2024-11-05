@@ -39,7 +39,12 @@ import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
+import {
+  downloadIcon,
+  saveIcon,
+  settingsIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 
 /**
@@ -53,6 +58,8 @@ namespace CommandIDs {
   export const revert = 'settingeditor:revert';
 
   export const save = 'settingeditor:save';
+
+  export const exportSettings = 'settingeditor:export';
 }
 
 type SettingEditorType = 'ui' | 'json';
@@ -141,6 +148,16 @@ function activate(
         query: args.query as string
       })
     });
+
+    editor.toolbar.addItem(
+      'export-settings',
+      new CommandToolbarButton({
+        commands,
+        id: CommandIDs.exportSettings,
+        icon: downloadIcon,
+        label: trans.__('Export Settings')
+      })
+    );
 
     editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
     if (pluginManager) {
@@ -356,6 +373,67 @@ function activateJSON(
     label: trans.__('Save User Settings'),
     isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
   });
+
+  commands.addCommand(CommandIDs.exportSettings, {
+    execute: () => {
+      const userSettings = collectUserSettings(registry);
+      const jsonContent = JSON.stringify(userSettings, null, 2);
+      downloadSettings(jsonContent, 'overrides.json');
+    },
+    label: trans.__('Export Settings'),
+    icon: downloadIcon
+  });
+
+  /**
+   * Collect user settings from the registry.
+   */
+  function collectUserSettings(
+    registry: ISettingRegistry
+  ): Record<string, any> {
+    const userSettings: Record<string, any> = {};
+    for (const [pluginId, plugin] of Object.entries(registry.plugins)) {
+      if (plugin) {
+        try {
+          if (plugin.raw) {
+            const withoutSingleLineComments = plugin.raw.replace(
+              /\/\/.*$/gm,
+              ''
+            );
+            const withoutComments = withoutSingleLineComments.replace(
+              /\/\*[\s\S]*?\*\//g,
+              ''
+            );
+            const preferredSettings = JSON.parse(withoutComments);
+            if (Object.keys(preferredSettings).length > 0) {
+              userSettings[pluginId] = preferredSettings;
+            }
+          }
+        } catch (error) {
+          console.error(
+            `Error loading settings for plugin ${pluginId}:`,
+            error
+          );
+        }
+      }
+    }
+    return userSettings;
+  }
+
+  /**
+   * Trigger a download of the settings as a JSON file.
+   */
+  function downloadSettings(jsonContent: string, filename: string): void {
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   return tracker;
 }
