@@ -300,7 +300,7 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
-    // If no line or cursor has not characters before
+    // If line is empty or the cursor doesn't have any characters before
     // it besides whitespace, add line beginning class
     // so that completer can stay enabled, but tab
     // in codemirror can still be triggered.
