@@ -20,7 +20,8 @@ export const COMPLETER_ACTIVE_CLASS: string = 'jp-mod-completer-active';
 /**
  * A class added to editors that have a cursor at the beginning of the line.
  */
-export const COMPLETER_LINE_BEGINNING_CLASS: string = 'jp-mod-at-line-beginning'
+export const COMPLETER_LINE_BEGINNING_CLASS: string =
+  'jp-mod-at-line-beginning';
 
 /**
  * Code editor services token.
