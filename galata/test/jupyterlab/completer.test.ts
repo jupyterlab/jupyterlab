@@ -45,11 +45,11 @@ test.describe('Completer', () => {
       // Completer shouldn't show up, but Completer should be enabled
       await page.keyboard.press('Enter');
       await page.keyboard.press('Tab');
-      let locator = await page.locator(
+      let locator = page.locator(
         '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
       );
-      expect(locator).toHaveCount(1);
-      expect(locator).toHaveClass(/jp-mod-completer-enabled/);
+      await expect(locator).toHaveCount(1);
+      await expect(locator).toHaveClass(/jp-mod-completer-enabled/);
       completer = page.locator(COMPLETER_SELECTOR);
 
       await expect(completer).toBeHidden();
