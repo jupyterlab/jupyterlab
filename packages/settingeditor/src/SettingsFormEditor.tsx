@@ -117,7 +117,8 @@ export class SettingsFormEditor extends React.Component<
       filteredSchema: this.props.settings.schema,
       formContext: {
         defaultFormData: this.props.settings.default(),
-        settings: this.props.settings
+        settings: this.props.settings,
+        schema: JSONExt.deepCopy(this.props.settings.schema)
       }
     };
     this.handleChange = this.handleChange.bind(this);
@@ -134,12 +135,13 @@ export class SettingsFormEditor extends React.Component<
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.settings !== this.props.settings) {
-      this.setState({
+      this.setState(previousState => ({
         formContext: {
+          ...previousState.formContext,
           settings: this.props.settings,
           defaultFormData: this.props.settings.default()
         }
-      });
+      }));
     }
   }
 
@@ -265,9 +267,14 @@ export class SettingsFormEditor extends React.Component<
   }
 
   private _setFilteredSchema(prevFilteredValues?: string[] | null) {
+    // Update the filtered value if the filter or the schema has changed.
     if (
       prevFilteredValues === undefined ||
-      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues)
+      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues) ||
+      !JSONExt.deepEqual(
+        this.state.formContext.schema,
+        this.props.settings.schema
+      )
     ) {
       /**
        * Only show fields that match search value.
@@ -284,8 +291,13 @@ export class SettingsFormEditor extends React.Component<
           }
         }
       }
-
-      this.setState({ filteredSchema });
+      this.setState(previousState => ({
+        filteredSchema,
+        formContext: {
+          ...previousState.formContext,
+          schema: JSONExt.deepCopy(this.props.settings.schema)
+        }
+      }));
     }
   }
 
