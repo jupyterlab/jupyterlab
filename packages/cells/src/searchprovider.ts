@@ -256,11 +256,14 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     if (this.model.getMetadata('editable') === false)
       return Promise.resolve(false);
 
-    const result = await super.replaceAllMatches(newText);
+    const result = await super.replaceAllMatches(newText, options);
     return result;
   }
 
