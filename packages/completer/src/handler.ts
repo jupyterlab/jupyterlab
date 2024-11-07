@@ -4,7 +4,8 @@
 import {
   CodeEditor,
   COMPLETER_ACTIVE_CLASS,
-  COMPLETER_ENABLED_CLASS
+  COMPLETER_ENABLED_CLASS,
+  COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
 import {
@@ -289,13 +290,6 @@ export class CompletionHandler implements IDisposable {
 
     const position = editor.getCursorPosition();
     const line = editor.getLine(position.line);
-    if (!line) {
-      this._enabled = false;
-      model.reset(true);
-      host.classList.remove(COMPLETER_ENABLED_CLASS);
-      return;
-    }
-
     const { start, end } = editor.getSelection();
 
     // If there is a text selection, return.
@@ -306,12 +300,16 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
-    // If the part of the line before the cursor is white space, return.
-    if (line.slice(0, position.column).match(/^\s*$/)) {
-      this._enabled = false;
-      model.reset(true);
-      host.classList.remove(COMPLETER_ENABLED_CLASS);
-      return;
+    // If line is empty or the cursor doesn't have any characters before
+    // it besides whitespace, add line beginning class
+    // so that completer can stay enabled, but tab
+    // in codemirror can still be triggered.
+    if (!line || end.column === 0) {
+      host.classList.add(COMPLETER_LINE_BEGINNING_CLASS);
+    } else if (line && line.slice(0, position.column).match(/^\s*$/)) {
+      host.classList.add(COMPLETER_LINE_BEGINNING_CLASS);
+    } else {
+      host.classList.remove(COMPLETER_LINE_BEGINNING_CLASS);
     }
 
     // Enable completion.
@@ -384,6 +382,7 @@ export class CompletionHandler implements IDisposable {
   protected onVisibilityChanged(completer: Completer): void {
     // Completer is not active.
     if (completer.isDisposed || completer.isHidden) {
+      this._tabCompleterActive = false;
       if (this._editor) {
         this._editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
         this._editor.focus();
@@ -392,9 +391,8 @@ export class CompletionHandler implements IDisposable {
     }
 
     // Completer is active.
-    if (this._editor) {
-      this._editor.host.classList.add(COMPLETER_ACTIVE_CLASS);
-    }
+    this._tabCompleterActive = true;
+    this._editor?.host.classList.add(COMPLETER_ACTIVE_CLASS);
   }
 
   /**
@@ -436,6 +434,13 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
+        if (
+          this.completer.suppressIfInlineCompleterActive &&
+          this.inlineCompleter?.isActive
+        ) {
+          return;
+        }
+
         if (model.setCompletionItems) {
           model.setCompletionItems(reply.items);
         }
@@ -461,9 +466,13 @@ export class CompletionHandler implements IDisposable {
     const line = editor.getLine(position.line);
     if (
       trigger === InlineCompletionTriggerKind.Automatic &&
-      (typeof line === 'undefined' || position.column < line.length)
+      (typeof line === 'undefined' ||
+        position.column < line.length ||
+        line.slice(0, position.column).match(/^\s*$/))
     ) {
-      // only auto-trigger on end of line
+      // In Automatic mode we only auto-trigger on the end of line (and not on the beginning).
+      // Increase the counter to avoid out-of date replies when pressing Backspace quickly.
+      this._fetchingInline += 1;
       return;
     }
 
@@ -477,6 +486,7 @@ export class CompletionHandler implements IDisposable {
 
     const current = ++this._fetchingInline;
     const promises = this._reconciliator.fetchInline(request, trigger);
+    let cancelled = false;
 
     const completed = new Set<
       Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>
@@ -484,7 +494,7 @@ export class CompletionHandler implements IDisposable {
     for (const promise of promises) {
       promise
         .then(result => {
-          if (!result || !result.items) {
+          if (cancelled || !result || !result.items) {
             return;
           }
           if (current !== this._fetchingInline) {
@@ -492,6 +502,13 @@ export class CompletionHandler implements IDisposable {
           }
           completed.add(promise);
           if (completed.size === 1) {
+            if (
+              this.inlineCompleter?.suppressIfTabCompleterActive &&
+              this._tabCompleterActive
+            ) {
+              cancelled = true;
+              return;
+            }
             model.setCompletions(result);
           } else {
             model.appendCompletions(result);
@@ -556,6 +573,7 @@ export class CompletionHandler implements IDisposable {
   private _isDisposed = false;
   private _autoCompletion = false;
   private _continuousInline = true;
+  private _tabCompleterActive = false;
 }
 
 /**

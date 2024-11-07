@@ -936,7 +936,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // If the notebook is not fully rendered
     if (cellIdx < this.cellsArray.length) {
-      // If we are defering the cell rendering and the rendered cells do
+      // If we are deferring the cell rendering and the rendered cells do
       // not fill the viewport yet
       if (
         this.notebookConfig.windowingMode === 'defer' &&
@@ -2691,6 +2691,13 @@ export class Notebook extends StaticNotebook {
         }
         // Enter selecting mode
         this._mouseMode = 'select';
+
+        // We don't want to block the shift-click mouse up handler
+        // when the current cell is (and remains) the active cell.
+        this._selectData = {
+          startedOnActiveCell: index == this.activeCellIndex,
+          startingCellIndex: this.activeCellIndex
+        };
         document.addEventListener('mouseup', this, true);
         document.addEventListener('mousemove', this, true);
       } else if (button === 0 && !shiftKey) {
@@ -2736,8 +2743,21 @@ export class Notebook extends StaticNotebook {
    * Handle the `'mouseup'` event on the document.
    */
   private _evtDocumentMouseup(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
+    const [, index] = this._findEventTargetAndCell(event);
+
+    let shouldPreventDefault = true;
+    if (this._mouseMode === 'select' && this._selectData) {
+      // User did not move the mouse over to a difference cell, so there was no selection
+      const { startedOnActiveCell, startingCellIndex } = this._selectData;
+      if (startedOnActiveCell && index === startingCellIndex) {
+        shouldPreventDefault = false;
+      }
+      this._selectData = null;
+    }
+    if (shouldPreventDefault) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     // Remove the event listeners we put on the document
     document.removeEventListener('mousemove', this, true);
@@ -2745,8 +2765,6 @@ export class Notebook extends StaticNotebook {
 
     if (this._mouseMode === 'couldDrag') {
       // We didn't end up dragging if we are here, so treat it as a click event.
-
-      const [, index] = this._findEventTargetAndCell(event);
 
       this.deselectAll();
       this.activeCellIndex = index;
@@ -3159,6 +3177,10 @@ export class Notebook extends StaticNotebook {
     pressY: number;
     index: number;
   } | null = null;
+  private _selectData: {
+    startedOnActiveCell: boolean;
+    startingCellIndex: number;
+  } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -3324,7 +3346,7 @@ namespace Private {
    */
   export interface IFragmentData {
     /**
-     * The kind of notebook element targetted by the fragment identifier.
+     * The kind of notebook element targeted by the fragment identifier.
      */
     kind: 'heading' | 'cell-id';
     /*

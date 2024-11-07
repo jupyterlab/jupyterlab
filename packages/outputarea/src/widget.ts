@@ -3,6 +3,7 @@
 
 import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
+import { IObservableString } from '@jupyterlab/observables';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -283,7 +284,19 @@ export class OutputArea extends Widget {
   ): void {
     switch (args.type) {
       case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
+        const output = args.newValues[0];
+        this._insertOutput(args.newIndex, output);
+        if (output.type === 'stream') {
+          // A stream output has been added, follow changes to the text.
+          output.streamText!.changed.connect(
+            (
+              sender: IObservableString,
+              event: IObservableString.IChangedArgs
+            ) => {
+              this._setOutput(args.newIndex, output);
+            }
+          );
+        }
         break;
       case 'remove':
         if (this.widgets.length) {

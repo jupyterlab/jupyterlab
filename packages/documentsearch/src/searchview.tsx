@@ -455,7 +455,7 @@ interface ISearchOverlayProps {
    */
   replaceEntryVisible: boolean;
   /**
-   * Whther the filters grid is visible.
+   * Whether the filters grid is visible.
    */
   filtersVisible: boolean;
   /**

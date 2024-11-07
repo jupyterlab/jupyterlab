@@ -267,6 +267,30 @@ describe('@jupyterlab/shortcut-extension', () => {
         await shortcutUI.deleteKeybinding(target, keybinding);
         expect(data.user.shortcuts).toHaveLength(0);
       });
+
+      it('should keep other keybinding', async () => {
+        const keybinding = {
+          keys: ['Ctrl A'],
+          isDefault: false
+        };
+        const otherKeybinding = {
+          keys: ['Ctrl B'],
+          isDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding, otherKeybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        registerKeybinding(target, otherKeybinding);
+        await shortcutUI.deleteKeybinding(target, keybinding);
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0].keys[0]).toBe('Ctrl B');
+      });
     });
 
     describe('#resetKeybindings()', () => {

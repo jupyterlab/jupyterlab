@@ -19,8 +19,10 @@ import {
 } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
+const PLUGIN_ID = '@jupyterlab/cell-toolbar-extension:plugin';
+
 const cellToolbar: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/cell-toolbar-extension:plugin',
+  id: PLUGIN_ID,
   description: 'Add the cells toolbar.',
   autoStart: true,
   activate: async (
@@ -29,6 +31,21 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     toolbarRegistry: IToolbarWidgetRegistry | null,
     translator: ITranslator | null
   ) => {
+    /**
+     * Load the settings for this extension
+     *
+     * @param setting Extension settings
+     */
+    function loadSetting(setting: ISettingRegistry.ISettings | null): void {
+      // Read the setting and convert to the correct type
+      const showCellToolbar: boolean | null =
+        setting === null
+          ? true
+          : (setting.get('showToolbar').composite as boolean);
+
+      extension.enabled = showCellToolbar;
+    }
+
     const toolbarItems =
       settingRegistry && toolbarRegistry
         ? createToolbarFactory(
@@ -40,10 +57,23 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           )
         : undefined;
 
-    app.docRegistry.addWidgetExtension(
-      'Notebook',
-      new CellBarExtension(app.commands, toolbarItems)
-    );
+    const extension = new CellBarExtension(app.commands, toolbarItems);
+
+    // Wait for the application to be restored and
+    // for the settings for this plugin to be loaded
+    if (settingRegistry !== null) {
+      void Promise.all([app.restored, settingRegistry.load(PLUGIN_ID)]).then(
+        ([, setting]) => {
+          // Read the settings
+          loadSetting(setting);
+
+          // Listen for your plugin setting changes using Signal
+          setting.changed.connect(loadSetting);
+        }
+      );
+    }
+
+    app.docRegistry.addWidgetExtension('Notebook', extension);
   },
   optional: [ISettingRegistry, IToolbarWidgetRegistry, ITranslator]
 };

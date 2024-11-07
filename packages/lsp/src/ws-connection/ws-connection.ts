@@ -309,7 +309,7 @@ export class LspWsConnection implements ILspConnection {
   }
 
   /**
-   * URI of the LSP handler enpoint.
+   * URI of the LSP handler endpoint.
    */
   private _rootUri: string;
 

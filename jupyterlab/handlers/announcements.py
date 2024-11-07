@@ -6,7 +6,7 @@
 import abc
 import hashlib
 import json
-import xml.etree.ElementTree as ET  # noqa
+import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Awaitable, Optional, Tuple, Union
@@ -110,7 +110,7 @@ class CheckForUpdate(CheckForUpdateABC):
                 trans = translator.load("jupyterlab")
                 return (
                     trans.__(f"A newer version ({last_version}) of JupyterLab is available."),
-                    (trans.__("Open changelog"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
+                    (trans.__("Read more…"), f"{JUPYTERLAB_RELEASE_URL}{last_version}"),
                 )
             else:
                 return None

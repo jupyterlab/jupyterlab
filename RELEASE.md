@@ -479,3 +479,4 @@ new issues show up in the future:
 - Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431
 - Wrong URLs break publishing to npm with provenance: https://github.com/jupyterlab/jupyterlab/pull/15462
 - Release team missing privileges on packages removed in 4.0: https://github.com/jupyterlab/jupyterlab/issues/15677
+- Issue publishing `4.3.0rc0`: Project size too large on PyPI: https://github.com/jupyterlab/jupyterlab/issues/16857

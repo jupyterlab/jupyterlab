@@ -145,6 +145,8 @@ namespace CommandIDs {
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
+  export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
+
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 }
 
@@ -158,7 +160,7 @@ const namespace = 'filebrowser';
  */
 const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
   id: FILE_BROWSER_PLUGIN_ID,
-  description: 'Set up the default file browser (commands, settings,...).',
+  description: 'Set up the default file browser commands and state restoration',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
   optional: [
     ILayoutRestorer,
@@ -211,48 +213,57 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
           treePathUpdater(args.newValue);
         });
       }
-
-      if (settingRegistry) {
-        void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
-          /**
-           * File browser configuration.
-           */
-          const fileBrowserConfig = {
-            navigateToCurrentDirectory: false,
-            showLastModifiedColumn: true,
-            showFileSizeColumn: false,
-            showHiddenFiles: false,
-            showFileCheckboxes: false,
-            sortNotebooksFirst: false,
-            showFullPath: false
-          };
-          const fileBrowserModelConfig = {
-            filterDirectories: true
-          };
-
-          function onSettingsChanged(
-            settings: ISettingRegistry.ISettings
-          ): void {
-            let key: keyof typeof fileBrowserConfig;
-            for (key in fileBrowserConfig) {
-              const value = settings.get(key).composite as boolean;
-              fileBrowserConfig[key] = value;
-              browser[key] = value;
-            }
-
-            const value = settings.get('filterDirectories')
-              .composite as boolean;
-            fileBrowserModelConfig.filterDirectories = value;
-            browser.model.filterDirectories = value;
-          }
-          settings.changed.connect(onSettingsChanged);
-          onSettingsChanged(settings);
-        });
-      }
     });
     return {
       openPath: CommandIDs.openPath
     };
+  }
+};
+
+/**
+ * Handle the file browser settings taking into account user defined settings.
+ */
+const browserSettings: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:settings',
+  description: 'Set up the default file browser settings',
+  requires: [IDefaultFileBrowser],
+  optional: [ISettingRegistry],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    browser: IDefaultFileBrowser,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    if (settingRegistry) {
+      void settingRegistry.load(FILE_BROWSER_PLUGIN_ID).then(settings => {
+        /**
+         * File browser default configuration.
+         */
+        const defaultFileBrowserConfig = {
+          navigateToCurrentDirectory: false,
+          singleClickNavigation: false,
+          showLastModifiedColumn: true,
+          showFileSizeColumn: false,
+          showHiddenFiles: false,
+          showFileCheckboxes: false,
+          sortNotebooksFirst: false,
+          showFullPath: false
+        };
+
+        function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
+          let key: keyof typeof defaultFileBrowserConfig;
+          for (key in defaultFileBrowserConfig) {
+            const value = settings.get(key).composite as boolean;
+            browser[key] = value;
+          }
+
+          const value = settings.get('filterDirectories').composite as boolean;
+          browser.model.filterDirectories = value;
+        }
+        settings.changed.connect(onSettingsChanged);
+        onSettingsChanged(settings);
+      });
+    }
   }
 };
 
@@ -269,7 +280,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
     translator: ITranslator,
-    state: IStateDB | null,
+    stateDB: IStateDB | null,
     info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
@@ -277,6 +288,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
       id: string,
       options: IFileBrowserFactory.IOptions = {}
     ) => {
+      const state =
+        options.state === null
+          ? undefined
+          : options.state || stateDB || undefined;
       const model = new FilterFileBrowserModel({
         translator: translator,
         auto: options.auto ?? true,
@@ -289,13 +304,10 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
           }
           return 'when-hidden';
         },
-        state:
-          options.state === null
-            ? undefined
-            : options.state || state || undefined
+        state
       });
       const restore = options.restore;
-      const widget = new FileBrowser({ id, model, restore, translator });
+      const widget = new FileBrowser({ id, model, restore, translator, state });
 
       // Track the newly created file browser.
       void tracker.add(widget);
@@ -339,7 +351,6 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       'aria-label',
       trans.__('File Browser Section')
     );
-    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
     defaultBrowser.title.icon = folderIcon;
 
     // Show the current file browser shortcut in its title.
@@ -1311,6 +1322,23 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleSingleClick, {
+    label: trans.__('Enable Single Click Navigation'),
+    isToggled: () => browser.singleClickNavigation,
+    execute: () => {
+      const value = !browser.singleClickNavigation;
+      const key = 'singleClickNavigation';
+
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set singleClickNavigation setting`);
+          });
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.toggleHiddenFiles, {
     label: trans.__('Show Hidden Files'),
     isToggled: () => browser.showHiddenFiles,
@@ -1357,6 +1385,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   factory,
   defaultFileBrowser,
   browser,
+  browserSettings,
   shareFile,
   fileUploadStatus,
   downloadPlugin,

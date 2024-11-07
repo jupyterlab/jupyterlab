@@ -135,7 +135,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© 2015-2023 Project Jupyter Contributors')}
+            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2024)}
           </span>
         );
         const body = (
@@ -149,9 +149,8 @@ const about: JupyterFrontEndPlugin<void> = {
           title,
           body,
           buttons: [
-            Dialog.createButton({
-              label: trans.__('Dismiss'),
-              className: 'jp-About-button jp-mod-reject jp-mod-styled'
+            Dialog.cancelButton({
+              label: trans.__('Close')
             })
           ]
         });
@@ -422,9 +421,8 @@ const resources: JupyterFrontEndPlugin<void> = {
                 title,
                 body,
                 buttons: [
-                  Dialog.createButton({
-                    label: trans.__('Dismiss'),
-                    className: 'jp-About-button jp-mod-reject jp-mod-styled'
+                  Dialog.cancelButton({
+                    label: trans.__('Close')
                   })
                 ]
               });

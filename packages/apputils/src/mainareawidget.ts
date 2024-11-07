@@ -45,7 +45,8 @@ export class MainAreaWidget<T extends Widget = Widget>
     const content = (this._content = options.content);
     content.node.setAttribute('role', 'region');
     content.node.setAttribute('aria-label', trans.__('notebook content'));
-    const toolbar = (this._toolbar = options.toolbar || new ReactiveToolbar());
+    const toolbar = (this._toolbar =
+      options.toolbar || new ReactiveToolbar({ noFocusOnClick: true }));
     toolbar.node.setAttribute('role', 'toolbar');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
     const contentHeader = (this._contentHeader =

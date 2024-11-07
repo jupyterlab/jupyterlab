@@ -443,16 +443,12 @@ Then use the following steps:
    cd jupyterlab
    pip install -e ".[dev,test]"
    jlpm install
-   jlpm run build  # Build the dev mode assets (optional)
+   jlpm run build  # Build the dev mode assets
 
-Additionally, you might want to execute the following optional commands:
-
-.. code:: bash
-
-   # Build the core mode assets (optional)
+   # Build the core mode assets
    jlpm run build:core
 
-   # Build the app dir assets (optional)
+   # Build the app dir assets
    jupyter lab build
 
 Frequent issues
@@ -690,7 +686,7 @@ Main reasons for UI test failures are:
    to do that, you can post a comment on your PR with the following content:
 
    - ``please update galata snapshots``: A bot will push a new commit to your PR updating galata
-     test snaphsots.
+     test snapshots.
    - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.

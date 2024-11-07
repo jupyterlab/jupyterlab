@@ -422,3 +422,19 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-switch-color: var(--md-grey-400, #bdbdbd);
   --jp-switch-true-position-color: var(--md-orange-900, #e65100);
 }
+
+/* Completer specific styles */
+
+.jp-Completer {
+  --jp-completer-type-background0: transparent;
+  --jp-completer-type-background1: #1f77b4;
+  --jp-completer-type-background2: #ff7f0e;
+  --jp-completer-type-background3: #2ca02c;
+  --jp-completer-type-background4: #d62728;
+  --jp-completer-type-background5: #9467bd;
+  --jp-completer-type-background6: #8c564b;
+  --jp-completer-type-background7: #e377c2;
+  --jp-completer-type-background8: #7f7f7f;
+  --jp-completer-type-background9: #bcbd22;
+  --jp-completer-type-background10: #17becf;
+}

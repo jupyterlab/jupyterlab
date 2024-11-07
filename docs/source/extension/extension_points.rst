@@ -153,13 +153,14 @@ menu using the settings.
 
     {
       "jupyter.lab.menus": {
-      "context": [
-        {
-          "command": "my-command",
-          "selector": ".jp-Notebook",
-          "rank": 500
-        }
-      ]
+        "context": [
+          {
+            "command": "my-command",
+            "selector": ".jp-Notebook",
+            "rank": 500
+          }
+        ]
+      }
     }
 
 In this example, the command with id ``my-command`` is shown whenever the user
@@ -342,15 +343,15 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
       "command": "apputils:run-all-enabled",
       "keys": ["Accel T"],
       "args": {
-          "commands": [
-              "my-command-1",
-              "my-command-2"
-          ],
-          "args": [
-              {},
-              {}
-            ]
-        },
+        "commands": [
+          "my-command-1",
+          "my-command-2"
+        ],
+        "args": [
+          {},
+          {}
+        ]
+      },
       "selector": "body"
     }
 
@@ -469,19 +470,20 @@ To add a new menu with your extension command:
 
     {
       "jupyter.lab.menus": {
-      "main": [
-        {
-          "id": "jp-mainmenu-myextension",
-          "label": "My Menu",
-          "items": [
-            {
-              "command": "my-command",
-              "rank": 500
-            }
-          ],
-          "rank": 100
-        }
-      ]
+        "main": [
+          {
+            "id": "jp-mainmenu-myextension",
+            "label": "My Menu",
+            "items": [
+              {
+                "command": "my-command",
+                "rank": 500
+              }
+            ],
+            "rank": 100
+          }
+        ]
+      }
     }
 
 The menu item label will be set with the command label. For menus (and
@@ -497,17 +499,18 @@ To add a new entry in an existing menu:
 
     {
       "jupyter.lab.menus": {
-      "main": [
-        {
-          "id": "jp-mainmenu-file",
-          "items": [
-            {
-              "command": "my-command",
-              "rank": 500
-            }
-          ]
-        }
-      ]
+        "main": [
+          {
+            "id": "jp-mainmenu-file",
+            "items": [
+              {
+                "command": "my-command",
+                "rank": 500
+              }
+            ]
+          }
+        ]
+      }
     }
 
 Here is the list of default menu ids:
