@@ -111,12 +111,12 @@ describe('docregistry/savehandler', () => {
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
         const promise = testEmission(context.fileChanged, {
-          test: () => {
-            if (called === 0) {
+          find: () => {
+            called++;
+            if (called === 1) {
               context.model.fromString('bar');
-              called++;
             }
-            return called === 1;
+            return called === 2;
           }
         });
         context.model.fromString('foo');
