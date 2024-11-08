@@ -2274,6 +2274,12 @@
     ]
   },
   {
+    "id": "settingeditor:export",
+    "label": "Export User Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "settingsmenu:open",
     "label": "Open Settings Menu",
     "caption": "",

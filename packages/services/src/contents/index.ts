@@ -140,7 +140,12 @@ export namespace Contents {
   export type ContentType = string;
 
   /**
-   * A contents file format.
+   * A contents file format. Always `json` for `notebook` and
+   * `directory` types. It should be set to either `text` or
+   * `base64` for `file` type.
+   * See the
+   * [jupyter server data model for filesystem entities](https://jupyter-server.readthedocs.io/en/latest/developers/contents.html#filesystem-entities)
+   * for more details.
    */
   export type FileFormat = 'json' | 'text' | 'base64' | null;
 
@@ -228,12 +233,12 @@ export namespace Contents {
     type: 'new' | 'delete' | 'rename' | 'save';
 
     /**
-     * The new contents.
+     * The old contents.
      */
     oldValue: Partial<IModel> | null;
 
     /**
-     * The old contents.
+     * The new contents.
      */
     newValue: Partial<IModel> | null;
   }

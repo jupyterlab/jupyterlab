@@ -189,6 +189,36 @@ test.describe('Inline Completer', () => {
     });
   });
 
+  test.describe('Invoke on Alt+\\ on empty line', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          showWidget: 'always',
+          ...SHARED_SETTINGS
+        },
+        [SHORTCUTS_ID]: {
+          shortcuts: [
+            {
+              command: 'inline-completer:invoke',
+              keys: ['Tab'],
+              selector: '.jp-mod-completer-enabled'
+            }
+          ]
+        }
+      }
+    });
+
+    test('Shows up on Alt+\\ on an empty line', async ({ page }) => {
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Alt+\\');
+
+      // Widget shows up
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+    });
+  });
+
   test.describe('Ghost text', () => {
     test.use({
       mockSettings: {

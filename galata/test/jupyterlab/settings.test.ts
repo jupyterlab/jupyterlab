@@ -3,6 +3,8 @@
 
 import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -287,4 +289,66 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
   await cancelButton.click();
 
   await expect(conflict).toHaveCount(0);
+});
+
+test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('merge cell below');
+
+  const shortcutsContainer = page.locator(
+    '.jp-Shortcuts-ShortcutListContainer'
+  );
+  const firstRow = shortcutsContainer.locator('.jp-Shortcuts-Row').first();
+
+  const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
+  await shortcutKey.click();
+  await page.waitForTimeout(300);
+  await firstRow.hover();
+  expect(await firstRow.screenshot()).toMatchSnapshot(
+    'settings-shortcuts-edit.png'
+  );
+});
+
+test('Settings Export: Clicking the export button triggers a download and matches content', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
+  });
+  await page
+    .locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_adaptive-theme'
+    )
+    .click();
+  // Wait for the settings to be loaded
+  await page.waitForTimeout(500);
+
+  const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
+  await page.getByText('Export Settings').click();
+  const download = await downloadPromise;
+  // path where the file will be saved
+  const downloadDir = 'galata/test/downloads';
+  const downloadPath = path.join(downloadDir, download.suggestedFilename());
+
+  // Ensure the download directory exists
+  if (!fs.existsSync(downloadDir)) {
+    fs.mkdirSync(downloadDir, { recursive: true });
+  }
+  await download.saveAs(downloadPath);
+
+  const fileContent = fs.readFileSync(downloadPath, 'utf-8');
+  const expectedContent = `"adaptive-theme": true,`;
+  expect(fileContent).toContain(expectedContent);
+  fs.unlinkSync(downloadPath);
 });
