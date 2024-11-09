@@ -1948,7 +1948,8 @@ export abstract class AttachmentsCell<
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    if (event.clipboardData) {
+    const isEditable = this.model.getMetadata('editable');
+    if (event.clipboardData && isEditable) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         if (items[i].type === 'text/plain') {
