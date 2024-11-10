@@ -29,6 +29,13 @@
 
 .lm-MenuBar-menu.jp-ThemedContainer {
   top: calc(-2 * var(--jp-border-width));
+  overflow: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lm-MenuBar-menu.jp-ThemedContainer::-webkit-scrollbar {
+  display: none;
 }
 
 .lm-MenuBar-item {
