@@ -92,6 +92,8 @@ export class SaveHandler implements IDisposable {
     this._autosaveTimer = window.setTimeout(() => {
       if (this._isConnectedCallback()) {
         this._save();
+      } else {
+        this._setTimer();
       }
     }, this._interval);
   }
