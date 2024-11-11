@@ -126,6 +126,29 @@ describe('docregistry/savehandler', () => {
         return promise;
       });
 
+      it('should continue to save after being disconnected', async () => {
+        jest.useFakeTimers();
+        handler.saveInterval = 120;
+        handler.start();
+
+        context.model.fromString('foo');
+        jest.advanceTimersByTime(120000); // in ms
+        await signalToPromise(context.fileChanged);
+
+        jest
+          .spyOn(handler as any, '_isConnectedCallback')
+          .mockReturnValue(false);
+        context.model.fromString('bar');
+        jest.advanceTimersByTime(240000);
+        jest
+          .spyOn(handler as any, '_isConnectedCallback')
+          .mockReturnValue(true);
+
+        jest.advanceTimersByTime(120000);
+        jest.useRealTimers();
+        return signalToPromise(context.fileChanged);
+      });
+
       it('should overwrite the file on disk', async () => {
         const delegate = new PromiseDelegate();
 
