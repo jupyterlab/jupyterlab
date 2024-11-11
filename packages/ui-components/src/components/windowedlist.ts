@@ -481,10 +481,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns The viewport top position and its height
    */
   getSpan(startIndex: number, stopIndex: number): [number, number] {
-    const startSize = this._getItemMetadata(startIndex);
-    const top = startSize.offset;
+    const startSizer = this._getItemMetadata(startIndex);
+    const top = startSizer.offset;
     const stopSize = this._getItemMetadata(stopIndex);
-    const height = stopSize.offset - startSize.offset + stopSize.size;
+    const height = stopSize.offset - startSizer.offset + stopSize.size;
     return [top, height];
   }
 
@@ -514,24 +514,76 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns Whether some sizes changed or not
    */
   setWidgetSize(sizes: { index: number; size: number }[]): boolean {
-    if (this._currentWindow[0] >= 0) {
+    if (this._windowingActive || this._currentWindow[0] >= 0) {
       let minIndex = Infinity;
-      for (const item of sizes) {
-        const key = item.index;
-        const size = item.size;
+      let measuredAllItemsUntil = -1;
+      let offsetDelta = 0;
+      let allPreviousMeasured = true;
+      const sizesMap = new Map(sizes.map(i => [i.index, i.size]));
 
-        if (this._widgetSizers[key].size != size) {
-          this._widgetSizers[key].size = size;
-          minIndex = Math.min(minIndex, key);
+      const highestIndex = Math.max(...sizesMap.keys());
+
+      // add sizers at the end if needed
+      const entries: [number, WindowedList.ItemMetadata | null][] = [
+        ...this._widgetSizers.entries()
+      ];
+      for (let i = this._widgetSizers.length; i <= highestIndex; i++) {
+        entries.push([i, null]);
+      }
+
+      for (let [index, sizer] of entries) {
+        const measuredSize = sizesMap.get(index);
+        let itemDelta = 0;
+        const hadSizer = !!sizer;
+
+        if (!sizer) {
+          const previous: WindowedList.ItemMetadata | undefined =
+            this._widgetSizers[index - 1];
+          const newSizer = {
+            offset: previous ? previous.offset + previous.size : 0,
+            size:
+              measuredSize !== undefined
+                ? measuredSize
+                : this.estimateWidgetSize(index),
+            measured: measuredSize !== undefined
+          };
+          this._widgetSizers[index] = newSizer;
+          sizer = newSizer;
         }
-        // Always set the flag in case the size estimator provides perfect result
-        this._widgetSizers[key].measured = true;
+        if (measuredSize !== undefined) {
+          // If the we learned about the size, update it and compute atomic offset for following item (`itemDelta`)
+          if (sizer.size != measuredSize) {
+            itemDelta = measuredSize - sizer.size;
+            sizer.size = measuredSize;
+            minIndex = Math.min(minIndex, index);
+          }
+          // Always set the flag in case the size estimator provides perfect result
+          sizer.measured = true;
+        }
+        // If all items so far have actual size measurements...
+        if (allPreviousMeasured) {
+          if (sizer.measured) {
+            // and this item has a size measurement, we the can say that
+            // all items until now have measurements:
+            measuredAllItemsUntil = index;
+          } else {
+            allPreviousMeasured = false;
+          }
+        }
+        if (hadSizer && offsetDelta != 0) {
+          // Adjust offsets for all items where it is needed
+          sizer.offset += offsetDelta;
+        }
+        // Keep track of the overall change in offset that will need to be applied to following items
+        offsetDelta += itemDelta;
+      }
+
+      if (measuredAllItemsUntil !== -1) {
+        this._lastMeasuredIndex = measuredAllItemsUntil;
       }
 
       // If some sizes changed
-      if (minIndex != Infinity) {
-        // Invalid follow-up index
-        this._lastMeasuredIndex = Math.min(this._lastMeasuredIndex, minIndex);
+      if (minIndex !== Infinity) {
         return true;
       }
     }
