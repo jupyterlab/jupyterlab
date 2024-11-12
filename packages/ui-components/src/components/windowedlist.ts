@@ -233,7 +233,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       this._windowingActive = newValue;
 
       this._currentWindow = [-1, -1, -1, -1];
-      this._lastMeasuredIndex = -1;
+      this._measuredAllUntilIndex = -1;
       this._widgetSizers = [];
 
       this._stateChanged.emit({ name: 'windowingActive', newValue, oldValue });
@@ -277,23 +277,28 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns Total estimated size
    */
   getEstimatedTotalSize(): number {
-    let totalSizeOfMeasuredItems = 0;
+    let totalSizeOfInitialItems = 0;
 
-    if (this._lastMeasuredIndex >= this.widgetCount) {
-      this._lastMeasuredIndex = this.widgetCount - 1;
+    if (this._measuredAllUntilIndex >= this.widgetCount) {
+      this._measuredAllUntilIndex = this.widgetCount - 1;
     }
 
-    if (this._lastMeasuredIndex >= 0) {
-      const itemMetadata = this._widgetSizers[this._lastMeasuredIndex];
-      totalSizeOfMeasuredItems = itemMetadata.offset + itemMetadata.size;
+    // These items are all measured already
+    if (this._measuredAllUntilIndex >= 0) {
+      const itemMetadata = this._widgetSizers[this._measuredAllUntilIndex];
+      totalSizeOfInitialItems = itemMetadata.offset + itemMetadata.size;
     }
 
-    let totalSizeOfUnmeasuredItems = 0;
-    for (let i = this._lastMeasuredIndex + 1; i < this.widgetCount; i++) {
-      totalSizeOfUnmeasuredItems += this.estimateWidgetSize(i);
+    // These items might have measurements, but some will be missing
+    let totalSizeOfRemainingItems = 0;
+    for (let i = this._measuredAllUntilIndex + 1; i < this.widgetCount; i++) {
+      const sizer = this._widgetSizers[i];
+      totalSizeOfRemainingItems += sizer?.measured
+        ? sizer.size
+        : this.estimateWidgetSize(i);
     }
 
-    return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
+    return totalSizeOfInitialItems + totalSizeOfRemainingItems;
   }
 
   /**
@@ -454,7 +459,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       Math.max(this.widgetCount - 1, -1)
     ];
 
-    const previousLastMeasuredIndex = this._lastMeasuredIndex;
+    const previousLastMeasuredIndex = this._measuredAllUntilIndex;
     if (this.windowingActive) {
       newWindowIndex = this._getRangeToRender();
     }
@@ -497,9 +502,17 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @param index
    */
   resetAfterIndex(index: number): void {
-    const oldValue = this._lastMeasuredIndex;
-    this._lastMeasuredIndex = Math.min(index, this._lastMeasuredIndex);
-    if (this._lastMeasuredIndex !== oldValue) {
+    const oldValue = this._measuredAllUntilIndex;
+    this._measuredAllUntilIndex = Math.min(index, this._measuredAllUntilIndex);
+    // heal the offsets
+    for (const [i, sizer] of this._widgetSizers.entries()) {
+      if (i === 0) {
+        continue;
+      }
+      const previous = this._widgetSizers[i - 1];
+      sizer.offset = previous.offset + previous.size;
+    }
+    if (this._measuredAllUntilIndex !== oldValue) {
       this._stateChanged.emit({ name: 'index', newValue: index, oldValue });
     }
   }
@@ -579,7 +592,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       }
 
       if (measuredAllItemsUntil !== -1) {
-        this._lastMeasuredIndex = measuredAllItemsUntil;
+        this._measuredAllUntilIndex = measuredAllItemsUntil;
       }
 
       // If some sizes changed
@@ -606,7 +619,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         this._widgetSizers.splice(
           changes.newIndex,
           0,
-          ...new Array(changes.newValues.length).map((_, i) => {
+          ...new Array(changes.newValues.length).fill(undefined).map((_, i) => {
             return { offset: 0, size: this.estimateWidgetSize(i) };
           })
         );
@@ -627,14 +640,14 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   }
 
   private _getItemMetadata(index: number): WindowedList.ItemMetadata {
-    if (index > this._lastMeasuredIndex) {
+    if (index > this._measuredAllUntilIndex) {
       let offset = 0;
-      if (this._lastMeasuredIndex >= 0) {
-        const itemMetadata = this._widgetSizers[this._lastMeasuredIndex];
+      if (this._measuredAllUntilIndex >= 0) {
+        const itemMetadata = this._widgetSizers[this._measuredAllUntilIndex];
         offset = itemMetadata.offset + itemMetadata.size;
       }
 
-      for (let i = this._lastMeasuredIndex + 1; i <= index; i++) {
+      for (let i = this._measuredAllUntilIndex + 1; i <= index; i++) {
         let size = this._widgetSizers[i]?.measured
           ? this._widgetSizers[i].size
           : this.estimateWidgetSize(i);
@@ -648,10 +661,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         offset += size;
       }
 
-      this._lastMeasuredIndex = index;
+      this._measuredAllUntilIndex = index;
     }
 
-    for (let i = 0; i <= this._lastMeasuredIndex; i++) {
+    for (let i = 0; i <= this._measuredAllUntilIndex; i++) {
       const sizer = this._widgetSizers[i];
       if (i === 0) {
         if (sizer.offset !== 0) {
@@ -669,15 +682,15 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   }
 
   private _findNearestItem(offset: number): number {
-    const lastMeasuredItemOffset =
-      this._lastMeasuredIndex > 0
-        ? this._widgetSizers[this._lastMeasuredIndex].offset
+    const lastContinouslyMeasuredItemOffset =
+      this._measuredAllUntilIndex > 0
+        ? this._widgetSizers[this._measuredAllUntilIndex].offset
         : 0;
 
-    if (lastMeasuredItemOffset >= offset) {
+    if (lastContinouslyMeasuredItemOffset >= offset) {
       // If we've already measured items within this range just use a binary search as it's faster.
       return this._findNearestItemBinarySearch(
-        this._lastMeasuredIndex,
+        this._measuredAllUntilIndex,
         0,
         offset
       );
@@ -686,7 +699,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       // The exponential search avoids pre-computing sizes for the full set of items as a binary search would.
       // The overall complexity for this approach is O(log n).
       return this._findNearestItemExponentialSearch(
-        Math.max(0, this._lastMeasuredIndex),
+        Math.max(0, this._measuredAllUntilIndex),
         offset
       );
     }
@@ -810,7 +823,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   private _height: number = 0;
   private _isDisposed = false;
   private _itemsList: ISimpleObservableList | null = null;
-  private _lastMeasuredIndex: number = -1;
+  private _measuredAllUntilIndex: number = -1;
   private _overscanCount = 1;
   private _scrollOffset: number = 0;
   private _widgetCount = 0;
