@@ -29,9 +29,40 @@
 
 .lm-MenuBar-menu.jp-ThemedContainer {
   top: calc(-2 * var(--jp-border-width));
-  overflow: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  overflow: auto;
+  background:
+    linear-gradient(var(--jp-layout-color0) 30%, rgba(0, 0, 0, 0)) center top,
+    linear-gradient(rgba(0, 0, 0, 0), var(--jp-layout-color0) 70%) center bottom,
+    radial-gradient(
+        farthest-side at 50% 0,
+        color-mix(
+          in hsl,
+          var(--jp-layout-color0) 30%,
+          var(--jp-inverse-layout-color1) 50%
+        ),
+        rgba(0, 0, 0, 0)
+      )
+      center top,
+    radial-gradient(
+        farthest-side at 50% 100%,
+        color-mix(
+          in hsl,
+          var(--jp-layout-color0) 30%,
+          var(--jp-inverse-layout-color1) 50%
+        ),
+        rgba(0, 0, 0, 0)
+      )
+      center bottom;
+  background-color: var(--jp-layout-color0);
+  background-repeat: no-repeat;
+  background-size:
+    100% 40px,
+    100% 40px,
+    100% 14px,
+    100% 14px;
+  background-attachment: local, local, scroll, scroll;
 }
 
 .lm-MenuBar-menu.jp-ThemedContainer::-webkit-scrollbar {
