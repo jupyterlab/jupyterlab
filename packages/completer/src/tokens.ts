@@ -216,7 +216,11 @@ export interface IInlineCompletionError {
  * @alpha
  */
 export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
+  /**
+   * Token passed to identify the completion when streaming updates.
+   */
   token?: string;
+
   /**
    * Whether generation of `insertText` is still ongoing. If your provider supports streaming,
    * you can set this to true, which will result in the provider's `stream()` method being called
