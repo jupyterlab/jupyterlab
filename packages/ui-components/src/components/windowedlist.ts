@@ -504,7 +504,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   resetAfterIndex(index: number): void {
     const oldValue = this._measuredAllUntilIndex;
     this._measuredAllUntilIndex = Math.min(index, this._measuredAllUntilIndex);
-    // heal the offsets
+    // Heal the offsets
     for (const [i, sizer] of this._widgetSizers.entries()) {
       if (i === 0) {
         continue;
@@ -576,7 +576,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         // If all items so far have actual size measurements...
         if (allPreviousMeasured) {
           if (sizer.measured) {
-            // and this item has a size measurement, we the can say that
+            // and this item has a size measurement, we can say that
             // all items until now have measurements:
             measuredAllItemsUntil = index;
           } else {

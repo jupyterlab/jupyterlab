@@ -9,7 +9,7 @@ const FIXED_ESTIMATED_SIZE = 100;
 
 class TestModel extends WindowedListModel {
   estimateWidgetSize = (_index: number): number => {
-    return 100;
+    return FIXED_ESTIMATED_SIZE;
   };
   widgetRenderer = (_index: number): Widget => {
     return new Widget();
