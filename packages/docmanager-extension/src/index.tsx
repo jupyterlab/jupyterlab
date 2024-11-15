@@ -54,7 +54,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
-import { DEFAULT_AUTOSAVE_INTERVAL } from '../../../notebook/constants';
+import { DEFAULT_AUTOSAVE_INTERVAL } from '@jupyterlab/notebook/src/constants';
 /**
  * The command IDs used by the document manager plugin.
  */

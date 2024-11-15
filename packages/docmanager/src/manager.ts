@@ -23,7 +23,7 @@ import {
   IRecentsManager
 } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
-import { DEFAULT_AUTOSAVE_INTERVAL } from '../../../notebook/constants';
+import { DEFAULT_AUTOSAVE_INTERVAL } from '@jupyterlab/notebook/src/constants';
 
 /**
  * The document manager.
