@@ -504,7 +504,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   resetAfterIndex(index: number): void {
     const oldValue = this._measuredAllUntilIndex;
     this._measuredAllUntilIndex = Math.min(index, this._measuredAllUntilIndex);
-    // Heal the offsets
+    // Because `resetAfterIndex` is always called after an operation modifying
+    // the list of widget sizers, we need to ensure that offsets are correct;
+    // e.g. removing a cell would make the offsets of all following cells too high.
+    // The simplest way to "heal" the offsets is to recompute them all.
     for (const [i, sizer] of this._widgetSizers.entries()) {
       if (i === 0) {
         continue;
@@ -583,7 +586,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
             allPreviousMeasured = false;
           }
         }
-        if (hadSizer && offsetDelta != 0) {
+        if (hadSizer && offsetDelta !== 0) {
           // Adjust offsets for all items where it is needed
           sizer.offset += offsetDelta;
         }
