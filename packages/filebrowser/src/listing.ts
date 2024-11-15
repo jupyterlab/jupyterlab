@@ -3358,9 +3358,23 @@ export namespace DirListing {
       fileType?: DocumentRegistry.IFileType
     ): HTMLElement {
       const dragImage = node.cloneNode(true) as HTMLElement;
-      const modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
       const icon = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
-      dragImage.removeChild(modified as HTMLElement);
+
+      // Hide additional columns from the drag image to keep it unobtrusive.
+      const extraColumns = DirListing.columns.filter(
+        column => column.id !== 'name'
+      );
+      for (const extraColumn of extraColumns) {
+        const columnElement = DOMUtils.findElement(
+          dragImage,
+          extraColumn.itemClassName
+        );
+        if (!columnElement) {
+          // We can only remove columns which are rendered.
+          continue;
+        }
+        dragImage.removeChild(columnElement);
+      }
 
       if (!fileType) {
         icon.textContent = '';
