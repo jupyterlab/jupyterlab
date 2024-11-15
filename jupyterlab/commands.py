@@ -612,11 +612,10 @@ def get_latest_compatible_package_versions(names, app_options=None):
 
 def read_package(target):
     """Read the package data in a given target tarball."""
-    tar = tarfile.open(target, "r")
-    f = tar.extractfile("package/package.json")
-    data = json.loads(f.read().decode("utf8"))
-    data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
-    tar.close()
+    with tarfile.open(target, "r") as tar:
+        with tar.extractfile("package/package.json") as f:
+            data = json.loads(f.read().decode("utf8"))
+        data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
     return data
 
 
@@ -2233,18 +2232,20 @@ def _tarsum(input_file):
     """
     Compute the recursive sha sum of a tar file.
     """
-    tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
     h = hashlib.new("sha1")  # noqa: S324
 
-    for member in tar:
-        if not member.isfile():
-            continue
-        f = tar.extractfile(member)
-        data = f.read(chunk_size)
-        while data:
-            h.update(data)
-            data = f.read(chunk_size)
+    with tarfile.open(input_file, "r") as tar:
+        for member in tar:
+            if not member.isfile():
+                continue
+            with tar.extractfile(member) as f:
+                if f:  # Check if f is not None (safety check)
+                    data = f.read(chunk_size)
+                    while data:
+                        h.update(data)
+                        data = f.read(chunk_size)
+
     return h.hexdigest()
 
 
