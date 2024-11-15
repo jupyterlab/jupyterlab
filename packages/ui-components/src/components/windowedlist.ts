@@ -488,8 +488,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   getSpan(startIndex: number, stopIndex: number): [number, number] {
     const startSizer = this._getItemMetadata(startIndex);
     const top = startSizer.offset;
-    const stopSize = this._getItemMetadata(stopIndex);
-    const height = stopSize.offset - startSizer.offset + stopSize.size;
+    const stopSizer = this._getItemMetadata(stopIndex);
+    const height = stopSizer.offset - startSizer.offset + stopSizer.size;
     return [top, height];
   }
 
