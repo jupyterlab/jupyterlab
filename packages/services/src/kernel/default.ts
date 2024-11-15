@@ -814,7 +814,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Send a `create_subshell_request` message.
    *
-   * @hidden
+   * https://github.com/jupyter/enhancement-proposals/pull/91
    */
   requestCreateSubshell(
     content: KernelMessage.ICreateSubshellRequestMsg['content'],
@@ -847,7 +847,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Send a `delete_subshell_request` message.
    *
-   * @hidden
+   * https://github.com/jupyter/enhancement-proposals/pull/91
    */
   requestDeleteSubshell(
     content: KernelMessage.IDeleteSubshellRequestMsg['content'],
