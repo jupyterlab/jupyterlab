@@ -37,7 +37,7 @@ type CoreData = Map<string, any>;
 const URL_CONFIG = {
   source: 'main',
   target: '4.2.x',
-  rtdVersion: 'stable'
+  rtdVersion: '4.2.x'
 };
 
 // Data to ignore.
