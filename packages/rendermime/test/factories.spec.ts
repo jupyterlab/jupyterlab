@@ -570,6 +570,162 @@ describe('rendermime/factories', () => {
         );
       });
 
+      it.each([
+        // Note: timeouts are set to 3.5 times more the local performance to allow for slower runs on CI
+        //
+        // Local benchmarks:
+        // - without linkify cache: 12.5s
+        // - with cache: 1.1s
+        [
+          'when new content arrives line by line',
+          '\n' + 'X'.repeat(5000),
+          1100 * 3.5
+        ],
+        // Local benchmarks:
+        // - without cache: 3.8s
+        // - with cache: 0.8s
+        [
+          'when new content is added to the same line',
+          'test.com ' + 'X'.repeat(2500) + ' www.',
+          800 * 3.5
+        ]
+      ])('should be fast %s', async (_, newContent, timeout) => {
+        let source = '';
+        const mimeType = 'application/vnd.jupyter.stderr';
+
+        const model = createModel(mimeType, source);
+        const w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+        const start = performance.now();
+        for (let i = 0; i < 25; i++) {
+          source += newContent;
+          model.setData({
+            data: {
+              [mimeType]: source
+            }
+          });
+          await w.renderModel(model);
+        }
+        const end = performance.now();
+
+        expect(end - start).toBeLessThan(timeout);
+      });
+
+      it.each([
+        ['arrives in a new line', 'www.example.com', '\n a new line of text'],
+        ['arrives after a new line', 'www.example.com\n', 'a new line of text'],
+        ['arrives after a text node', 'www.example.com next line', ' of text'],
+        ['arrives after a text node', 'www.example.com\nnext line', ' of text']
+      ])(
+        'should use cached links if new content %s',
+        async (_, oldSource, addition) => {
+          const mimeType = 'application/vnd.jupyter.stderr';
+          let source = oldSource;
+          const model = createModel(mimeType, source);
+          const w = errorRendererFactory.createRenderer({
+            mimeType,
+            ...defaultOptions
+          });
+          // Perform an initial render to populate the cache.
+          await w.renderModel(model);
+          const before = w.node.innerHTML;
+          const cachedLink = w.node.querySelector('a');
+          expect(cachedLink).toBe(w.node.childNodes[0].childNodes[0]);
+
+          // Update the source.
+          source += addition;
+          model.setData({
+            data: {
+              [mimeType]: source
+            }
+          });
+
+          // Perform a second render which should use the cache.
+          await w.renderModel(model);
+          const after = w.node.innerHTML;
+          const linkAfter = w.node.querySelector('a');
+
+          // The contents of the node should be updated with the new line.
+          expect(before).not.toEqual(after);
+          expect(after).toContain('line of text');
+
+          // If cached links were used, the anchor nodes will be reused.
+          expect(cachedLink).not.toBe(null);
+          expect(cachedLink).toBe(w.node.childNodes[0].childNodes[0]);
+          expect(cachedLink).toBe(linkAfter);
+        }
+      );
+
+      it('should not use cached links if the new content appends to the link', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+        let source = 'www.example.co';
+        const model = createModel(mimeType, source);
+        const w = errorRendererFactory.createRenderer({
+          mimeType,
+          ...defaultOptions
+        });
+        // Perform an initial render to populate the cache.
+        await w.renderModel(model);
+        const before = w.node.innerHTML;
+        const cachedLink = w.node.querySelector('a');
+
+        // Update the source.
+        source += 'm';
+        model.setData({
+          data: {
+            [mimeType]: source
+          }
+        });
+
+        // Perform a second render.
+        await w.renderModel(model);
+        const after = w.node.innerHTML;
+        const linkAfter = w.node.querySelector('a');
+
+        // The contents of the node should be updated with the new line.
+        expect(before).not.toEqual(after);
+
+        // If cached links were used, the anchor nodes will be reused.
+        expect(cachedLink).not.toBe(null);
+        expect(cachedLink).not.toBe(linkAfter);
+      });
+
+      it('should use partial cache if a link is created by addition of a new fragment', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+        let source = 'aaa www.one.com bbb www.';
+        const model = createModel(mimeType, source);
+        const w = errorRendererFactory.createRenderer({
+          mimeType,
+          ...defaultOptions
+        });
+        // Perform an initial render to populate the cache.
+        await w.renderModel(model);
+        const cachedTextNode = w.node.childNodes[0].childNodes[0];
+        const linksBefore = w.node.querySelectorAll('a');
+        expect(linksBefore).toHaveLength(1);
+
+        // Update the source.
+        source += 'two.com';
+        model.setData({
+          data: {
+            [mimeType]: source
+          }
+        });
+
+        // Perform a second render.
+        await w.renderModel(model);
+        const textNodeAfter = w.node.childNodes[0].childNodes[0];
+        const linksAfter = w.node.querySelectorAll('a');
+
+        // It should not use the second text node (`bbb www.`) from cache and instead
+        // it should fragment properly linkify the second link
+        expect(linksAfter).toHaveLength(2);
+
+        // If cached nodes were used, the text nodes will be reused.
+        expect(cachedTextNode).toBeInstanceOf(Text);
+        expect(cachedTextNode).toBe(textNodeAfter);
+      });
+
       it('should autolink a single known file path', async () => {
         const f = errorRendererFactory;
         const urls = [
@@ -642,10 +798,10 @@ describe('rendermime/factories', () => {
         const source = 'www.example.com';
         const expected =
           '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>';
-        const f = textRendererFactory;
+        const f = errorRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
         const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...options });
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(expected);
       });
