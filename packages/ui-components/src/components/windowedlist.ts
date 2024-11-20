@@ -1315,6 +1315,7 @@ export class WindowedList<
   private _applyNoWindowingStyles() {
     this._viewport.style.position = 'relative';
     this._viewport.style.top = '0px';
+    this._viewport.style.minHeight = '';
     this._innerElement.style.height = '';
   }
   /**
