@@ -419,7 +419,7 @@ describe('@jupyterlab/notebook', () => {
       it('should replace all matches using regex', async () => {
         panel.model!.sharedModel.insertCells(0, [
           {
-            cell_type: 'code',
+            cell_type: 'markdown',
             source: 'a=123',
             metadata: { editable: true }
           },
