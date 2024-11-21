@@ -1602,5 +1602,11 @@ describe('Kernel.IKernel', () => {
         /not supported/
       );
     });
+
+    it('#requestListSubshell should raise exception', () => {
+      expect(() => defaultKernel.requestListSubshell({})).toThrow(
+        /not supported/
+      );
+    });
   });
 });

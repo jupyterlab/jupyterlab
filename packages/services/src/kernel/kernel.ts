@@ -326,7 +326,7 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Send a `create_subshell_request` message.
    *
-   * @hidden
+   * https://github.com/jupyter/enhancement-proposals/pull/91
    *
    * @param content - The content of the request.
    *
@@ -345,7 +345,7 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Send a `delete_subshell_request` message.
    *
-   * @hidden
+   * https://github.com/jupyter/enhancement-proposals/pull/91
    *
    * @param content - The content of the request.
    *

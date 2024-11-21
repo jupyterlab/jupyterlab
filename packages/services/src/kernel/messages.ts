@@ -144,6 +144,12 @@ export function createMessage<T extends IDeleteSubshellRequestMsg>(
 export function createMessage<T extends IDeleteSubshellReplyMsg>(
   options: IOptions<T>
 ): T;
+export function createMessage<T extends IListSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IListSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
 
 export function createMessage<T extends Message>(options: IOptions<T>): T {
   return {
@@ -204,7 +210,9 @@ export type ControlMessageType =
   | 'create_subshell_request'
   | 'create_subshell_reply'
   | 'delete_subshell_request'
-  | 'delete_subshell_reply';
+  | 'delete_subshell_reply'
+  | 'list_subshell_request'
+  | 'list_subshell_reply';
 
 /**
  * IOPub message types.
@@ -415,7 +423,9 @@ export type Message =
   | ICreateSubshellRequestMsg
   | ICreateSubshellReplyMsg
   | IDeleteSubshellRequestMsg
-  | IDeleteSubshellReplyMsg;
+  | IDeleteSubshellReplyMsg
+  | IListSubshellRequestMsg
+  | IListSubshellReplyMsg;
 
 // ////////////////////////////////////////////////
 // IOPub Messages
@@ -1233,8 +1243,6 @@ export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
 
 /**
  * A `'create_subshell_request'` message on the `'control'` channel.
- *
- * @hidden
  */
 export interface ICreateSubshellRequestMsg
   extends IControlMessage<'create_subshell_request'> {
@@ -1243,8 +1251,6 @@ export interface ICreateSubshellRequestMsg
 
 /**
  * A `'create_subshell_reply'` message on the `'control'` channel.
- *
- * @hidden
  */
 export interface ICreateSubshellReplyMsg
   extends IControlMessage<'create_subshell_reply'> {
@@ -1255,8 +1261,6 @@ export interface ICreateSubshellReplyMsg
 
 /**
  * A `'delete_subshell_request'` message on the `'control'` channel.
- *
- * @hidden
  */
 export interface IDeleteSubshellRequestMsg
   extends IControlMessage<'delete_subshell_request'> {
@@ -1267,12 +1271,28 @@ export interface IDeleteSubshellRequestMsg
 
 /**
  * A `'delete_subshell_reply'` message on the `'control'` channel.
- *
- * @hidden
  */
 export interface IDeleteSubshellReplyMsg
   extends IControlMessage<'delete_subshell_reply'> {
   content: {};
+}
+
+/**
+ * A `'list_subshell_request'` message on the `'control'` channel.
+ */
+export interface IListSubshellRequestMsg
+  extends IControlMessage<'list_subshell_request'> {
+  content: {};
+}
+
+/**
+ * A `'list_subshell_reply'` message on the `'control'` channel.
+ */
+export interface IListSubshellReplyMsg
+  extends IControlMessage<'list_subshell_reply'> {
+  content: {
+    subshell_id: string[];
+  };
 }
 
 // ////////////////////////////////////////////////

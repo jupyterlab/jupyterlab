@@ -878,6 +878,39 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * Send a `list_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   */
+  requestListSubshell(
+    content: KernelMessage.IListSubshellRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IListSubshellRequestMsg,
+    KernelMessage.IListSubshellReplyMsg
+  > {
+    if (!this.supportsSubshells) {
+      throw new Error('Kernel subshells are not supported');
+    }
+
+    const msg = KernelMessage.createMessage({
+      msgType: 'list_subshell_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IListSubshellRequestMsg,
+      KernelMessage.IListSubshellReplyMsg
+    >;
+  }
+
+  /**
    * Send an `is_complete_request` message.
    *
    * #### Notes
