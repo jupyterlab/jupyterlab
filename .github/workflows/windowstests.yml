@@ -34,5 +34,7 @@ jobs:
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
-        run: .\scripts\ci_script
+        run: |
+          python --version
+          .\scripts\ci_script
         shell: pwsh
