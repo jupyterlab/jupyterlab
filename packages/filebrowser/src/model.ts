@@ -606,7 +606,7 @@ export class FileBrowserModel implements IDisposable {
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
-    const path = this._model.path;
+    const path = this._model.path.slice(this.driveName.length + 1);
     const { sessions } = this.manager.services;
     const { oldValue, newValue } = change;
     const value =
