@@ -606,16 +606,18 @@ export class FileBrowserModel implements IDisposable {
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
-    let path = this._model.path;
-    if (this.driveName.length > 0) {
-      path = path.slice(this.driveName.length + 1);
-    }
+    const path = this._model.path;
     const { sessions } = this.manager.services;
     const { oldValue, newValue } = change;
+    const prefix = this.driveName.length > 0 ? this.driveName + ':' : '';
     const value =
-      oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
+      oldValue &&
+      oldValue.path &&
+      prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
-        : newValue && newValue.path && PathExt.dirname(newValue.path) === path
+        : newValue &&
+          newValue.path &&
+          prefix + PathExt.dirname(newValue.path) === path
         ? newValue
         : undefined;
 
