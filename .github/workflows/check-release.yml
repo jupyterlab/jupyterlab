@@ -18,9 +18,11 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_version: "3.11.x"
 
       - name: Check Release
-        uses: krassowski/jupyter_releaser/.github/actions/check-release@pin-pypiserver
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
