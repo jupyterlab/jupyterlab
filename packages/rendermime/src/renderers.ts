@@ -868,7 +868,7 @@ function renderTextual(
         // Clone the nodes before storing them in the cache in case if another component
         // attempts to modify (e.g. dispose of) them - which is the case for search highlights!
         linkedNodes: linkedNodes.map(
-          node => node.cloneNode() as HTMLAnchorElement | Text
+          node => node.cloneNode(true) as HTMLAnchorElement | Text
         )
       });
     } else {
