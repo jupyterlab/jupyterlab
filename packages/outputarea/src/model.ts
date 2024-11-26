@@ -366,7 +366,10 @@ export class OutputAreaModel implements IOutputAreaModel {
       if (typeof value.text !== 'string') {
         value.text = value.text.join('');
       }
-      const {text, index} = Private.processText(this._streamIndex, value.text);
+      const { text, index } = Private.processText(
+        this._streamIndex,
+        value.text
+      );
       this._streamIndex = index;
       value.text = text;
     }
@@ -533,13 +536,18 @@ namespace Private {
   /*
    * Handle backspaces in `newText` and concatenates to `text`, if any.
    */
-  export function processText(index: number, newText: string, text?: string): {text: string, index: number} {
+  export function processText(
+    index: number,
+    newText: string,
+    text?: string
+  ): { text: string; index: number } {
     if (text === undefined) {
       text = '';
     }
     if (!(newText.includes('\b') || newText.includes('\r'))) {
-      text = text.slice(0, index) + newText + text.slice(index + newText.length);
-      return {text, index: index + newText.length};
+      text =
+        text.slice(0, index) + newText + text.slice(index + newText.length);
+      return { text, index: index + newText.length };
     }
     let idx0 = index;
     let idx1: number = -1;
@@ -591,14 +599,18 @@ namespace Private {
         throw Error(`This should not happen`);
       }
     }
-    return {text, index: idx0};
+    return { text, index: idx0 };
   }
 
   /*
    * Concatenate a string to an observable string, handling backspaces.
    */
-  export function addText(prevIndex: number, curText: IObservableString, newText: string): number {
-    const {text, index} = processText(prevIndex, newText, curText.text);
+  export function addText(
+    prevIndex: number,
+    curText: IObservableString,
+    newText: string
+  ): number {
+    const { text, index } = processText(prevIndex, newText, curText.text);
     // Compute the difference between current text and new text.
     let done = false;
     let idx = 0;
