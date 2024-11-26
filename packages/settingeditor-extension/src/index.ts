@@ -159,7 +159,8 @@ function activate(
         commands,
         id: CommandIDs.exportSettings,
         icon: downloadIcon,
-        label: trans.__('Export Settings')
+        label: trans.__('Export'),
+        caption: trans.__('Export settings to a JSON file')
       })
     );
 
@@ -169,7 +170,8 @@ function activate(
         commands,
         id: CommandIDs.importSettings,
         icon: fileUploadIcon,
-        label: trans.__('Import Settings')
+        label: trans.__('Import'),
+        caption: trans.__('Import settings from a JSON file')
       })
     );
 
@@ -452,13 +454,13 @@ function activateJSON(
           };
 
           const settingsKeys = Object.keys(importedSettings);
-          const content = new ImportSettingsWidget(
-            settingsKeys,
-            applySettings,
-            translator
-          );
+          const content = new ImportSettingsWidget({
+            importedSettings: settingsKeys,
+            handleImport: applySettings,
+            translator: translator
+          });
           const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
-          widget.title.label = trans.__('Imported Settings');
+          widget.title.label = trans.__('Import Settings');
           widget.title.icon = fileUploadIcon;
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);

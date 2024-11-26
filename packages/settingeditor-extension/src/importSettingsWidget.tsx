@@ -1,14 +1,25 @@
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useState } from 'react';
 
-const Settings = (props: {
-  settings: string[];
-  handleImport: (settings: string[]) => void;
-  trans: TranslationBundle;
-}): JSX.Element => {
+/**
+ * A namespace for ImportSettings.
+ */
+namespace ImportSettings {
+  /**
+   * The props for the ImportSettings component.
+   */
+  export interface IOptions {
+    importedSettings: string[];
+    handleImport: (settings: string[]) => void;
+    translator: ITranslator;
+  }
+}
+
+const SettingsImport = (props: ImportSettings.IOptions): JSX.Element => {
+  const trans = props.translator.load('jupyterlab');
   const [checkedStates, setCheckedStates] = useState<Record<string, boolean>>(
-    props.settings.reduce(
+    props.importedSettings.reduce(
       (acc, key) => {
         acc[key] = true;
         return acc;
@@ -26,7 +37,7 @@ const Settings = (props: {
     <div className="jp-SettingsImport-container">
       <div className="jp-SettingsImport-header">
         <span className="jp-SettingsImport-title">
-          {props.trans.__('The following settings will be affected')}
+          {trans.__('Select settings sections to import')}
         </span>
         <button
           className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
@@ -36,11 +47,11 @@ const Settings = (props: {
             );
           }}
         >
-          {props.trans.__('Import')}
+          {trans.__('Import')}
         </button>
       </div>
       <div className="jp-SettingsImport-list">
-        {props.settings.map(key => (
+        {props.importedSettings.map(key => (
           <div key={key} className="jp-SettingsImport-item">
             <span className="jp-SettingsImport-itemKey">{key}</span>
             <input
@@ -66,29 +77,26 @@ export class ImportSettingsWidget extends ReactWidget {
    * @param importedSettings - The settings to display.
    * @param handleImport - A callback for handling imports.
    */
-  constructor(
-    importedSettings: string[],
-    handleImport: (settings: string[]) => void,
-    translator: ITranslator
-  ) {
+  constructor(options: ImportSettings.IOptions) {
+    const { importedSettings, handleImport, translator } = options;
     super();
     this.importedSettings = importedSettings;
     this.handleImport = handleImport;
     this.addClass('jp-SettingsImport-widget');
-    this.trans = translator.load('jupyterlab');
+    this.translator = translator;
   }
 
   render(): JSX.Element {
     return (
-      <Settings
-        settings={this.importedSettings}
+      <SettingsImport
+        importedSettings={this.importedSettings}
         handleImport={this.handleImport}
-        trans={this.trans}
+        translator={this.translator}
       />
     );
   }
 
   private importedSettings: string[];
   private handleImport: (settings: string[]) => void;
-  private trans: TranslationBundle;
+  private translator: ITranslator;
 }
