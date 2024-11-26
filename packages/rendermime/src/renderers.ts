@@ -865,7 +865,11 @@ function renderTextual(
       }
       cacheStore.set(host, {
         preTextContent,
-        linkedNodes
+        // Clone the nodes before storing them in the cache in case if another component
+        // attempts to modify (e.g. dispose of) them - which is the case for search highlights!
+        linkedNodes: linkedNodes.map(
+          node => node.cloneNode() as HTMLAnchorElement | Text
+        )
       });
     } else {
       linkedNodes = [document.createTextNode(content)];
