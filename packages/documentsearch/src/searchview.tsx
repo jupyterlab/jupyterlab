@@ -77,7 +77,6 @@ export interface ISearchKeyBindings {
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
-
   const updateDimensions = useCallback(
     (event?: React.SyntheticEvent<HTMLTextAreaElement>) => {
       const element = event
@@ -97,12 +96,6 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
   );
 
   useEffect(() => {
-    // For large part, `focusSearchInput()` is responsible for focusing and
-    // selecting the search input, however when `initialValue` changes, this
-    // triggers React re-render to update `defaultValue` (implemented via `key`)
-    // which means that `focusSearchInput` is no longer effective as it has
-    // already fired before the re-render, hence we use this conditional effect.
-    props.inputRef?.current;
     // After any change to initial value we also want to update rows in case if
     // multi-line text was selected.
     updateDimensions();
@@ -122,9 +115,6 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
         rows={rows}
         placeholder={props.placeholder}
         className={INPUT_CLASS}
-        // Setting a key ensures that `defaultValue` will become updated
-        // when the initial value changes.
-        key={props.autoUpdate ? props.initialValue : null}
         tabIndex={0}
         ref={props.inputRef}
         title={props.title}
