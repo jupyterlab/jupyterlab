@@ -23,6 +23,8 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_version: "3.11"
 
       - name: Set up browser cache
         uses: actions/cache@v4
