@@ -98,7 +98,9 @@ gettext_compact = False
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = [
+    "api/media/*.md",
+]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -135,9 +137,10 @@ def build_api_docs(out_dir: Path):
         <meta http-equiv="Refresh" content="0; URL=../modules/{}.html" />
     """.strip()
     for html in dest_dir.glob("modules/*.html"):
-        stem = html.stem
+        stem = html.stem.replace("_", "-")
         mod_dir = dest_dir / stem
-        if "." not in stem and not mod_dir.exists():
+        pkg_json = root / "packages" / stem / "package.json"
+        if pkg_json.exists() and not mod_dir.exists():
             out_html = mod_dir / "index.html"
             mod_dir.mkdir()
             out_html.write_text(redirect_html.format(stem), encoding="utf-8")

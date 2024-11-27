@@ -5,6 +5,10 @@ build:
   tools:
     python: "3.10"
     nodejs: "20"
+  jobs:
+    post_install:
+      # avoid the lengthy `typedoc` build inside `sphinx` for cleaner logs
+      - jlpm build:docs
 
 sphinx:
   configuration: docs/source/conf.py
