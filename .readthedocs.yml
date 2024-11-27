@@ -8,6 +8,8 @@ build:
   jobs:
     post_install:
       # avoid the lengthy `typedoc` build inside `sphinx` for cleaner logs
+      - jlpm
+      - jlpm build:packages
       - jlpm build:docs
 
 sphinx:
