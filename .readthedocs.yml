@@ -10,7 +10,7 @@ build:
       # avoid the lengthy `typedoc` build inside `sphinx` for cleaner logs
       - jlpm
       - jlpm build:packages
-      - jlpm build:docs
+      - jlpm docs
 
 sphinx:
   configuration: docs/source/conf.py
