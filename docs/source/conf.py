@@ -136,7 +136,7 @@ def build_api_docs(out_dir: Path):
     """.strip()
     for html in dest_dir.glob("modules/*.html"):
         stem = html.stem
-        mod_dir = (dest_dir / stem)
+        mod_dir = dest_dir / stem
         if "." not in stem and not mod_dir.exists():
             out_html = mod_dir / "index.html"
             mod_dir.mkdir()
