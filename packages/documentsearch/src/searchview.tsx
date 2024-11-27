@@ -102,7 +102,7 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
     // triggers React re-render to update `defaultValue` (implemented via `key`)
     // which means that `focusSearchInput` is no longer effective as it has
     // already fired before the re-render, hence we use this conditional effect.
-    props.inputRef?.current?.select();
+    props.inputRef?.current;
     // After any change to initial value we also want to update rows in case if
     // multi-line text was selected.
     updateDimensions();
