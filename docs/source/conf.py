@@ -127,7 +127,20 @@ def build_api_docs(out_dir: Path):
     dest_dir = out_dir / "api"
     if dest_dir.exists():
         shutil.rmtree(str(dest_dir))
+
     shutil.copytree(str(docs_api), str(dest_dir))
+
+    # create missing cross-package redirects from README.md
+    redirect_html = """
+        <meta http-equiv="Refresh" content="0; URL=../modules/{}.html" />
+    """.strip()
+    for html in dest_dir.glob("modules/*.html"):
+        stem = html.stem
+        mod_dir = (dest_dir / stem)
+        if "." not in stem and not mod_dir.exists():
+            out_html = mod_dir / "index.html"
+            mod_dir.mkdir()
+            out_html.write_text(redirect_html.format(stem), encoding="utf-8")
 
 
 # Copy frontend files for snippet inclusion
