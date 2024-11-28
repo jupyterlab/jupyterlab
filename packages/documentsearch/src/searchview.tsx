@@ -77,6 +77,7 @@ export interface ISearchKeyBindings {
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
+
   const updateDimensions = useCallback(
     (event?: React.SyntheticEvent<HTMLTextAreaElement>) => {
       const element = event
