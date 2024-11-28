@@ -804,7 +804,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 function renderTextual(
   options: renderText.IRenderOptions,
   autoLinkOptions: IAutoLinkOptions
-) {
+): void {
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
@@ -819,7 +819,7 @@ function renderTextual(
 
   const preTextContent = pre.textContent;
 
-  let cacheStoreOptions = [];
+  const cacheStoreOptions = [];
   if (autoLinkOptions.checkWeb) {
     cacheStoreOptions.push('web');
   }
@@ -843,8 +843,7 @@ function renderTextual(
         preTextContent
       );
       if (cache) {
-        const { cachedNodes, addedText } = cache;
-        const fromCache = cachedNodes;
+        const { cachedNodes: fromCache, addedText } = cache;
         const newAdditions = autolink(addedText, autoLinkOptions);
         const lastInCache = fromCache[fromCache.length - 1];
         const firstNewNode = newAdditions[0];
@@ -951,16 +950,17 @@ function getApplicableLinkCache(
     cachedResult.preTextContent.endsWith('\n') ||
     addedText.startsWith('\n')
   ) {
-    // continue
+    // Second or third condition is met, we can use the cached nodes
+    // (this is a no-op, we just continue execution).
   } else if (lastCachedNode instanceof Text) {
-    // Remove the Text node to re-analyse this text.
+    // The first condition is met, we can use the cached nodes,
+    // but first we remove the Text node to re-analyse its text.
     // This is required when we cached `aaa www.one.com bbb www.`
     // and the incoming addition is `two.com`. We can still
     // use text node `aaa ` and anchor node `www.one.com`, but
     // we need to pass `bbb www.` + `two.com` through linkify again.
     cachedNodes = cachedNodes.slice(0, -1);
     addedText = lastCachedNode.textContent + addedText;
-    // continue
   } else {
     return null;
   }
