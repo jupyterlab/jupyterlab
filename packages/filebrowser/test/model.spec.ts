@@ -152,6 +152,28 @@ describe('filebrowser/model', () => {
         expect(called).toBe(true);
       });
 
+      it('should be emitted when a file is created in a drive with a name', async () => {
+        await state.clear();
+        const driveName = 'RTC';
+        const modelWithName = new FileBrowserModel({
+          manager,
+          state,
+          driveName
+        });
+
+        let called = false;
+        modelWithName.fileChanged.connect((sender, args) => {
+          expect(sender).toBe(modelWithName);
+          expect(args.type).toBe('new');
+          expect(args.oldValue).toBeNull();
+          expect(args.newValue!.type).toBe('file');
+          called = true;
+        });
+        await manager.newUntitled({ type: 'file' });
+        expect(called).toBe(true);
+        modelWithName.dispose();
+      });
+
       it('should be emitted when a file is renamed', async () => {
         let called = false;
         model.fileChanged.connect((sender, args) => {
