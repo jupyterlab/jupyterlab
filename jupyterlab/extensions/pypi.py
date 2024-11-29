@@ -61,8 +61,8 @@ if http_proxy_url:
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
     proxies = {
-        "http://": http_proxy_url,
-        "https://": https_proxy_url,
+        "http://": httpx.HTTPTransport(proxy=http_proxy_url),
+        "https://": httpx.HTTPTransport(proxy=https_proxy_url),
     }
 
     xmlrpc_transport_override = ProxiedTransport()
@@ -127,7 +127,7 @@ class PyPIExtensionManager(ExtensionManager):
         parent: Optional[config.Configurable] = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = httpx.AsyncClient(proxies=proxies)
+        self._httpx_client = httpx.AsyncClient(mounts=proxies)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
