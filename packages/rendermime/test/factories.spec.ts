@@ -538,6 +538,25 @@ describe('rendermime/factories', () => {
     };
 
     describe('#createRenderer()', () => {
+      // Mock creation of DOM nodes to distinguish cached
+      /// (cloned) nodes from nodes created from scratch.
+      beforeEach(() => {
+        const originalCloneNode = Node.prototype.cloneNode;
+
+        Node.prototype.cloneNode = function (...args: any) {
+          const clonedNode = originalCloneNode.apply(this, args);
+
+          // Annotate as a node created by cloning.
+          clonedNode.wasCloned = true;
+
+          return clonedNode;
+        };
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
       it('should output the correct HTML', async () => {
         const f = errorRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
@@ -649,10 +668,13 @@ describe('rendermime/factories', () => {
           expect(before).not.toEqual(after);
           expect(after).toContain('line of text');
 
-          // If cached links were used, the anchor nodes will be reused.
           expect(cachedLink).not.toBe(null);
-          expect(cachedLink).toBe(w.node.childNodes[0].childNodes[0]);
-          expect(cachedLink).toBe(linkAfter);
+          expect(cachedLink).not.toHaveProperty('wasCloned');
+
+          // If cached links were reused those would be cloned
+          expect(linkAfter).not.toBe(null);
+          expect(linkAfter).toEqual(cachedLink);
+          expect(linkAfter).toHaveProperty('wasCloned', true);
         }
       );
 
@@ -685,9 +707,14 @@ describe('rendermime/factories', () => {
         // The contents of the node should be updated with the new line.
         expect(before).not.toEqual(after);
 
-        // If cached links were used, the anchor nodes will be reused.
         expect(cachedLink).not.toBe(null);
-        expect(cachedLink).not.toBe(linkAfter);
+        expect(cachedLink!.textContent).toEqual('www.example.co');
+        expect(cachedLink).not.toHaveProperty('wasCloned');
+
+        // If cached links were reused those would be cloned
+        expect(linkAfter).not.toBe(null);
+        expect(linkAfter!.textContent).toEqual('www.example.com');
+        expect(linkAfter).not.toHaveProperty('wasCloned');
       });
 
       it('should use partial cache if a link is created by addition of a new fragment', async () => {
@@ -721,9 +748,12 @@ describe('rendermime/factories', () => {
         // it should fragment properly linkify the second link
         expect(linksAfter).toHaveLength(2);
 
-        // If cached nodes were used, the text nodes will be reused.
         expect(cachedTextNode).toBeInstanceOf(Text);
-        expect(cachedTextNode).toBe(textNodeAfter);
+        expect(cachedTextNode).not.toHaveProperty('wasCloned');
+
+        // If cached nodes were reused those would be cloned
+        expect(textNodeAfter).toEqual(cachedTextNode);
+        expect(textNodeAfter).toHaveProperty('wasCloned', true);
       });
 
       it('should autolink a single known file path', async () => {
