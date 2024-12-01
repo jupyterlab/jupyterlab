@@ -31,10 +31,7 @@ import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
 } from '@jupyterlab/settingeditor/lib/tokens';
-import type {
-  JsonSettingEditor,
-  SettingsEditor
-} from '@jupyterlab/settingeditor';
+import { JsonSettingEditor, SettingsEditor } from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -433,18 +430,7 @@ function activateJSON(
                 typeof pluginSettings === 'object' &&
                 !Array.isArray(pluginSettings)
               ) {
-                for (const [key, value] of Object.entries(pluginSettings!)) {
-                  if (!settings.includes(key)) {
-                    try {
-                      await registry.set(pluginId, key, value);
-                    } catch (error) {
-                      console.error(
-                        `Failed to apply setting '${key}' for plugin ${pluginId}:`,
-                        error
-                      );
-                    }
-                  }
-                }
+                registry.upload(pluginId, JSON.stringify(pluginSettings));
               } else {
                 console.warn(
                   `Invalid settings for plugin ${pluginId}. Skipping.`
