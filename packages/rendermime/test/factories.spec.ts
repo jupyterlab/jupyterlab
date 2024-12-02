@@ -679,7 +679,7 @@ describe('rendermime/factories', () => {
         // Local timings:
         // - fastPathTime: 1105
         // - slowPathTime: 1480
-        expect(fastPathTime).toBeLessThan(slowPathTime);
+        expect(fastPathTime * 1.1).toBeLessThan(slowPathTime);
       });
 
       it.each([
