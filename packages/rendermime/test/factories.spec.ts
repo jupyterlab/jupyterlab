@@ -630,6 +630,58 @@ describe('rendermime/factories', () => {
         expect(end - start).toBeLessThan(timeout);
       });
 
+      it('should use a fast path when no ANSI codes are present', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+
+        const ansiEscape = '\x1b';
+        expect(ansiEscape).toHaveLength(1);
+
+        const size = 1000;
+        const testSource = '<script>window.x = 1</script>';
+
+        // Initialize slow path scenario
+        let source =
+          ansiEscape.repeat(testSource.length) + testSource.repeat(size);
+        let model = createModel(mimeType, source);
+        let w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+        // Benchmark the slow path
+        const startSlow = performance.now();
+        for (let i = 0; i < 3; i++) {
+          await w.renderModel(model);
+        }
+        const endSlow = performance.now();
+
+        const escapedSlow = w.node.querySelector('pre')!.innerHTML;
+        const slowPathTime = endSlow - startSlow;
+
+        // Initialize fast path scenario.
+        source = 'x'.repeat(testSource.length) + testSource.repeat(size);
+        model = createModel(mimeType, source);
+        w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+        // Benchmark the fast path.
+        const startFast = performance.now();
+        for (let i = 0; i < 3; i++) {
+          await w.renderModel(model);
+        }
+        const endFast = performance.now();
+
+        const escapedFast = w.node.querySelector('pre')!.innerHTML;
+        const fastPathTime = endFast - startFast;
+        console.log({ fastPathTime, slowPathTime });
+
+        // Disregarding the prefix the escaped code should be the same.
+        expect(escapedFast.slice(testSource.length)).toEqual(
+          escapedSlow.slice(testSource.length)
+        );
+
+        // Local timings:
+        // - fastPathTime: 1105
+        // - slowPathTime: 1480
+        expect(fastPathTime).toBeLessThan(slowPathTime);
+      });
+
       it.each([
         ['arrives in a new line', 'www.example.com', '\n a new line of text'],
         ['arrives after a new line', 'www.example.com\n', 'a new line of text'],
