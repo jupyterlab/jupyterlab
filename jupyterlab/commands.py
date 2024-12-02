@@ -2348,14 +2348,10 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
 
         # Check for overlap.
         if (
-            gte(x1, y1, True)
-            and ly(x1, y2, True)
-            or gy(x2, y1, True)
-            and ly(x2, y2, True)
-            or gte(y1, x1, True)
-            and lx(y1, x2, True)
-            or gx(y2, x1, True)
-            and lx(y2, x2, True)
+            (gte(x1, y1, True) and ly(x1, y2, True))
+            or (gy(x2, y1, True) and ly(x2, y2, True))
+            or (gte(y1, x1, True) and lx(y1, x2, True))
+            or (gx(y2, x1, True) and lx(y2, x2, True))
         ):
             # if we ever find an overlap, we can return immediately
             return 0
