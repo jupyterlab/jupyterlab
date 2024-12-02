@@ -406,12 +406,12 @@ test('should display cells below on scrolling after inserting a cell on top', as
   // https://github.com/jupyterlab/jupyterlab/issues/16978
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  const h = await page.notebook.getNotebookInPanelLocator();
-  const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="1"]');
-  const lastCell = h!.locator('.jp-Cell[data-windowed-list-index="18"]');
+  const notebook = await page.notebook.getNotebookInPanelLocator()!;
+  const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
   await firstCell.waitFor();
 
-  const bbox = await h!.boundingBox();
+  const bbox = await notebook.boundingBox();
   await page.mouse.move(bbox!.x, bbox!.y);
 
   // Needs to be two separate mouse wheel events.
