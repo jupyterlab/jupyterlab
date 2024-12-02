@@ -633,53 +633,43 @@ describe('rendermime/factories', () => {
       it('should use a fast path when no ANSI codes are present', async () => {
         const mimeType = 'application/vnd.jupyter.stderr';
 
-        const ansiEscape = '\x1b';
-        expect(ansiEscape).toHaveLength(1);
+        const ansiEscape = '\x1b[01;41;32mtext\x1b[00m';
+        const notAnsiEscape = '\x1a[01;41;32mtext\x1a[00m';
 
-        const size = 1000;
+        // We cannot just compare times here because:
+        // a) tests are run in jsdom thus "native" sanitizer is not much faster
+        // b) `Private.ansiSpan` has much higher cost when ANSI escapes are present
+
         const testSource = '<script>window.x = 1</script>';
+        const spy = jest.spyOn(sanitizer, 'sanitize');
 
         // Initialize slow path scenario
-        let source =
-          ansiEscape.repeat(testSource.length) + testSource.repeat(size);
-        let model = createModel(mimeType, source);
+        let model = createModel(mimeType, testSource + ansiEscape);
         let w = errorRendererFactory.createRenderer({ mimeType, ...options });
+        expect(spy).toHaveBeenCalledTimes(0);
 
-        // Benchmark the slow path
-        const startSlow = performance.now();
-        for (let i = 0; i < 3; i++) {
-          await w.renderModel(model);
-        }
-        const endSlow = performance.now();
+        // Test slow path
+        await w.renderModel(model);
+        // Sanitizer.sanitize should have been called
+        expect(spy).toHaveBeenCalledTimes(1);
 
         const escapedSlow = w.node.querySelector('pre')!.innerHTML;
-        const slowPathTime = endSlow - startSlow;
 
         // Initialize fast path scenario.
-        source = 'x'.repeat(testSource.length) + testSource.repeat(size);
-        model = createModel(mimeType, source);
+        model = createModel(mimeType, testSource + notAnsiEscape);
         w = errorRendererFactory.createRenderer({ mimeType, ...options });
 
-        // Benchmark the fast path.
-        const startFast = performance.now();
-        for (let i = 0; i < 3; i++) {
-          await w.renderModel(model);
-        }
-        const endFast = performance.now();
+        // Test fast path
+        await w.renderModel(model);
+        // Sanitizer.sanitize should not have been called
+        expect(spy).toHaveBeenCalledTimes(1);
 
         const escapedFast = w.node.querySelector('pre')!.innerHTML;
-        const fastPathTime = endFast - startFast;
-        console.log({ fastPathTime, slowPathTime });
 
-        // Disregarding the prefix the escaped code should be the same.
-        expect(escapedFast.slice(testSource.length)).toEqual(
-          escapedSlow.slice(testSource.length)
+        // Disregarding the suffix the escaped code should be the same.
+        expect(escapedFast.slice(0, testSource.length)).toEqual(
+          escapedSlow.slice(0, testSource.length)
         );
-
-        // Local timings:
-        // - fastPathTime: 1105
-        // - slowPathTime: 1480
-        expect(fastPathTime * 1.1).toBeLessThan(slowPathTime);
       });
 
       it.each([
