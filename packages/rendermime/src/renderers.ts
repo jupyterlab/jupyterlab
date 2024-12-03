@@ -797,6 +797,19 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 }
 
 /**
+ * Sanitize HTML out using native browser sanitizer.
+ *
+ * Compared to the `ISanitizer.sanitize` this does not allow to selectively
+ * allow to keep certain tags but escapes everything; on the other hand
+ * it is much faster as it uses platform-optimized code.
+ */
+function nativeSanitize(source: string): string {
+  const el = document.createElement('span');
+  el.textContent = source;
+  return el.innerHTML;
+}
+
+/**
  * Render the textual representation into a host node.
  *
  * Implements the shared logic for `renderText` and `renderError`.
@@ -808,10 +821,16 @@ function renderTextual(
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
-  // Create the HTML content.
-  const content = sanitizer.sanitize(Private.ansiSpan(source), {
-    allowedTags: ['span']
-  });
+  const ansiPrefixRe = /\x1b/; // eslint-disable-line no-control-regex
+  const hasAnsiPrefix = ansiPrefixRe.test(source);
+
+  // Create the HTML content:
+  // If no ANSI codes are present use a fast path for escaping.
+  const content = hasAnsiPrefix
+    ? sanitizer.sanitize(Private.ansiSpan(source), {
+        allowedTags: ['span']
+      })
+    : nativeSanitize(source);
 
   // Set the sanitized content for the host node.
   const pre = document.createElement('pre');
