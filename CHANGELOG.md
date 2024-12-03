@@ -393,6 +393,41 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.1...a8c4b61ee0340cd1ea3a8bfa6db966440caac703))
+
+### Bugs fixed
+
+- Improve performance of rendering stdout/stderr [#17022](https://github.com/jupyterlab/jupyterlab/pull/17022) ([@krassowski](https://github.com/krassowski))
+- Fixing missed first keystroke on Ctrl+F [#17005](https://github.com/jupyterlab/jupyterlab/pull/17005) ([@itsmevichu](https://github.com/itsmevichu))
+- Fix disappearing cells (heal offsets after updating estimated sizes) [#17000](https://github.com/jupyterlab/jupyterlab/pull/17000) ([@krassowski](https://github.com/krassowski))
+- Fix regression in standard error rendering performance [#16975](https://github.com/jupyterlab/jupyterlab/pull/16975) ([@krassowski](https://github.com/krassowski))
+- Fix handling of carriage return in output streams [#16999](https://github.com/jupyterlab/jupyterlab/pull/16999) ([@davidbrochart](https://github.com/davidbrochart))
+- Fix emission of `FileBrowserModel.onFileChanged` for drives (including `RTC:`) [#16988](https://github.com/jupyterlab/jupyterlab/pull/16988) ([@davidbrochart](https://github.com/davidbrochart))
+- Drag image prompt styling [#16972](https://github.com/jupyterlab/jupyterlab/pull/16972) ([@JasonWeill](https://github.com/JasonWeill))
+- Restore viewport `min-height` when not windowing [#16979](https://github.com/jupyterlab/jupyterlab/pull/16979) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Bump required setuptools to `40.8.0` [#17032](https://github.com/jupyterlab/jupyterlab/pull/17032) ([@krassowski](https://github.com/krassowski))
+- Fix extension manager failure with new `httpx` versions, bump `httpx` to `v0.28.0` [#17013](https://github.com/jupyterlab/jupyterlab/pull/17013) ([@davidbrochart](https://github.com/davidbrochart))
+- Pin Python version for visual regression testing to 3.11 [#16989](https://github.com/jupyterlab/jupyterlab/pull/16989) ([@krassowski](https://github.com/krassowski))
+- Reconfigure 4.3.x branch [#16970](https://github.com/jupyterlab/jupyterlab/pull/16970) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Add forgotten bracket in code sample [#16998](https://github.com/jupyterlab/jupyterlab/pull/16998) ([@cmarmo](https://github.com/cmarmo))
+- Reconfigure 4.3.x branch [#16970](https://github.com/jupyterlab/jupyterlab/pull/16970) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-11-16&to=2024-12-03&type=c))
+
+[@claytonparnell](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aclaytonparnell+updated%3A2024-11-16..2024-12-03&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2024-11-16..2024-12-03&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-11-16..2024-12-03&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-11-16..2024-12-03&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-11-16..2024-12-03&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-11-16..2024-12-03&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-11-16..2024-12-03&type=Issues) | [@RRosio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2024-11-16..2024-12-03&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.3.1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.0...6d8e2f0c1db3fd776498c72d95f56e3c49218fa2))
@@ -421,8 +456,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-10-30&to=2024-11-16&type=c))
 
 [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2024-10-30..2024-11-16&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-10-30..2024-11-16&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-10-30..2024-11-16&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-10-30..2024-11-16&type=Issues) | [@kellyrowland](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akellyrowland+updated%3A2024-10-30..2024-11-16&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-10-30..2024-11-16&type=Issues) | [@kuraga](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akuraga+updated%3A2024-10-30..2024-11-16&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-10-30..2024-11-16&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.3.0
 
