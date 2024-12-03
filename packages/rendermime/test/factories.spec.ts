@@ -630,6 +630,48 @@ describe('rendermime/factories', () => {
         expect(end - start).toBeLessThan(timeout);
       });
 
+      it('should use a fast path when no ANSI codes are present', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+
+        const ansiEscape = '\x1b[01;41;32mtext\x1b[00m';
+        const notAnsiEscape = '\x1a[01;41;32mtext\x1a[00m';
+
+        // We cannot just compare times here because:
+        // a) tests are run in jsdom thus "native" sanitizer is not much faster
+        // b) `Private.ansiSpan` has much higher cost when ANSI escapes are present
+
+        const testSource = '<script>window.x = 1</script>';
+        const spy = jest.spyOn(sanitizer, 'sanitize');
+
+        // Initialize slow path scenario
+        let model = createModel(mimeType, testSource + ansiEscape);
+        let w = errorRendererFactory.createRenderer({ mimeType, ...options });
+        expect(spy).toHaveBeenCalledTimes(0);
+
+        // Test slow path
+        await w.renderModel(model);
+        // Sanitizer.sanitize should have been called
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        const escapedSlow = w.node.querySelector('pre')!.innerHTML;
+
+        // Initialize fast path scenario.
+        model = createModel(mimeType, testSource + notAnsiEscape);
+        w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+        // Test fast path
+        await w.renderModel(model);
+        // Sanitizer.sanitize should not have been called
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        const escapedFast = w.node.querySelector('pre')!.innerHTML;
+
+        // Disregarding the suffix the escaped code should be the same.
+        expect(escapedFast.slice(0, testSource.length)).toEqual(
+          escapedSlow.slice(0, testSource.length)
+        );
+      });
+
       it.each([
         ['arrives in a new line', 'www.example.com', '\n a new line of text'],
         ['arrives after a new line', 'www.example.com\n', 'a new line of text'],
