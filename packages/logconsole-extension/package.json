@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole-extension",
-  "version": "4.3.0-beta.0",
+  "version": "4.4.0-alpha.0",
   "description": "JupyterLab - Log Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,18 +34,18 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-beta.0",
-    "@jupyterlab/apputils": "^4.4.0-beta.0",
-    "@jupyterlab/coreutils": "^6.3.0-beta.0",
-    "@jupyterlab/logconsole": "^4.3.0-beta.0",
-    "@jupyterlab/rendermime": "^4.3.0-beta.0",
-    "@jupyterlab/settingregistry": "^4.3.0-beta.0",
-    "@jupyterlab/statusbar": "^4.3.0-beta.0",
-    "@jupyterlab/translation": "^4.3.0-beta.0",
-    "@jupyterlab/ui-components": "^4.3.0-beta.0",
-    "@lumino/coreutils": "^2.1.2",
-    "@lumino/signaling": "^2.1.2",
-    "@lumino/widgets": "^2.3.2",
+    "@jupyterlab/application": "^4.4.0-alpha.0",
+    "@jupyterlab/apputils": "^4.5.0-alpha.0",
+    "@jupyterlab/coreutils": "^6.4.0-alpha.0",
+    "@jupyterlab/logconsole": "^4.4.0-alpha.0",
+    "@jupyterlab/rendermime": "^4.4.0-alpha.0",
+    "@jupyterlab/settingregistry": "^4.4.0-alpha.0",
+    "@jupyterlab/statusbar": "^4.4.0-alpha.0",
+    "@jupyterlab/translation": "^4.4.0-alpha.0",
+    "@jupyterlab/ui-components": "^4.4.0-alpha.0",
+    "@lumino/coreutils": "^2.2.0",
+    "@lumino/signaling": "^2.1.3",
+    "@lumino/widgets": "^2.5.0",
     "react": "^18.2.0"
   },
   "devDependencies": {

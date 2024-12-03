@@ -398,6 +398,55 @@ test('should remove all cells including hidden outputs artifacts', async ({
   expect(found).toEqual(false);
 });
 
+test('should display cells below on scrolling after inserting a cell on top', async ({
+  page,
+  tmpPath
+}) => {
+  // Regression test against "disappearing cells" issue:
+  // https://github.com/jupyterlab/jupyterlab/issues/16978
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  const notebook = await page.notebook.getNotebookInPanelLocator()!;
+  const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
+  await firstCell.waitFor();
+
+  const bbox = await notebook.boundingBox();
+  await page.mouse.move(bbox!.x, bbox!.y);
+
+  // Needs to be two separate mouse wheel events.
+  await page.mouse.wheel(0, 3000);
+  await page.mouse.wheel(0, 3000);
+
+  // Scroll down to reveal last cell to ensure these all items have been measured...
+  await Promise.all([
+    firstCell.waitFor({ state: 'hidden' }),
+    lastCell.waitFor()
+  ]);
+
+  await page.mouse.wheel(0, -3000);
+  await page.mouse.wheel(0, -3000);
+
+  // ...then scroll back up and select first cell.
+  await Promise.all([
+    lastCell.waitFor({ state: 'hidden' }),
+    firstCell.waitFor()
+  ]);
+  await page.notebook.selectCells(0);
+
+  // Insert cell below.
+  await page.keyboard.press('b');
+  await page.mouse.wheel(0, 3000);
+  await page.mouse.wheel(0, 3000);
+
+  // Scroll down again.
+  await Promise.all([
+    firstCell.waitFor({ state: 'hidden' }),
+    lastCell.waitFor()
+  ]);
+  await expect(lastCell).toBeVisible();
+});
+
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
   tmpPath

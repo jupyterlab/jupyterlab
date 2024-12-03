@@ -14,7 +14,8 @@ import {
 import { EditorState, Transaction } from '@codemirror/state';
 import {
   COMPLETER_ACTIVE_CLASS,
-  COMPLETER_ENABLED_CLASS
+  COMPLETER_ENABLED_CLASS,
+  COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
 
 /**
@@ -51,7 +52,10 @@ export namespace StateCommands {
     state: EditorState;
     dispatch: (transaction: Transaction) => void;
   }): boolean {
-    if (target.dom.parentElement?.classList.contains(COMPLETER_ENABLED_CLASS)) {
+    let classList = target.dom.parentElement?.classList;
+    let completerEnabled = classList?.contains(COMPLETER_ENABLED_CLASS);
+    let lineBeggining = classList?.contains(COMPLETER_LINE_BEGINNING_CLASS);
+    if (completerEnabled && !lineBeggining) {
       return false;
     }
 

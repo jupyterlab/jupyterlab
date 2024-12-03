@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher-extension",
-  "version": "4.3.0-beta.0",
+  "version": "4.4.0-alpha.0",
   "description": "JupyterLab - Launcher Page Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,15 +37,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-beta.0",
-    "@jupyterlab/apputils": "^4.4.0-beta.0",
-    "@jupyterlab/filebrowser": "^4.3.0-beta.0",
-    "@jupyterlab/launcher": "^4.3.0-beta.0",
-    "@jupyterlab/translation": "^4.3.0-beta.0",
-    "@jupyterlab/ui-components": "^4.3.0-beta.0",
-    "@lumino/algorithm": "^2.0.1",
-    "@lumino/coreutils": "^2.1.2",
-    "@lumino/widgets": "^2.3.2"
+    "@jupyterlab/application": "^4.4.0-alpha.0",
+    "@jupyterlab/apputils": "^4.5.0-alpha.0",
+    "@jupyterlab/filebrowser": "^4.4.0-alpha.0",
+    "@jupyterlab/launcher": "^4.4.0-alpha.0",
+    "@jupyterlab/translation": "^4.4.0-alpha.0",
+    "@jupyterlab/ui-components": "^4.4.0-alpha.0",
+    "@lumino/algorithm": "^2.0.2",
+    "@lumino/coreutils": "^2.2.0",
+    "@lumino/widgets": "^2.5.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

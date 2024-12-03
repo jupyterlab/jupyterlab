@@ -220,13 +220,16 @@ export class ProviderReconciliator implements IProviderReconciliator {
       if (!line) {
         return replies;
       }
+      const lineOffset = editor.getOffsetAt({ line: cursor.line, column: 0 });
 
       return replies.map(reply => {
+        const prefixStart = Math.max(reply.start - lineOffset, 0);
+        const prefixEnd = Math.max(maxStart - lineOffset, 0);
         // No prefix to strip, return as-is.
-        if (reply.start == maxStart) {
+        if (prefixStart == prefixEnd) {
           return reply;
         }
-        let prefix = line.substring(reply.start, maxStart);
+        const prefix = line.substring(prefixStart, prefixEnd);
         return {
           ...reply,
           items: reply.items.map(item => {

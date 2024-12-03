@@ -318,6 +318,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarOverlapsContents(activeCell: Cell<ICellModel>): boolean {
+    // Fail safe when the active cell is not ready yet
+    if (!activeCell.model) {
+      return false;
+    }
+
     const cellType = activeCell.model.type;
 
     // If the toolbar is too large for the current cell, hide it.
@@ -549,7 +554,9 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
    * Sets whether the cell toolbar is displayed, if there is enough room for it
    */
   set enabled(value: boolean) {
-    this._tracker.enabled = value;
+    if (this._tracker) {
+      this._tracker.enabled = value;
+    }
   }
 
   private _commands: CommandRegistry;
