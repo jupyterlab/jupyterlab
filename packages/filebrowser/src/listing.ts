@@ -3603,7 +3603,7 @@ namespace Private {
       // Sort by name
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return b.name.localeCompare(a.name);
+          return b.name.localeCompare(a.name, navigator.language || navigator.userLanguage, {numeric: true, sensitivity: 'base'});
         })
       );
     }
