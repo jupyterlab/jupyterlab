@@ -87,6 +87,14 @@ The right sidebar contains:
    :class: jp-screenshot
    :alt: The right JupyterLab sidebar showing the property inspector.
 
+In the property inspector, you can find two tools: the common tools and the advanced tools.
+
+In the common tools, you can modify some of the properties of a given cell of the notebook when it is selected. For example, custom tags can be defined and applied.
+These tags can be used to filter some of the cells of the notebook. This is possible through a dialog that opens when clicking on the `Filters cells` button.
+The expected behavior is to hide the cells that don't have the selected type/tags by collapsing them.
+
+
+
 The column that allows to switch between tabs is called Activity Bar in JupyterLab.
 
 .. _left-sidebar-toggle:
