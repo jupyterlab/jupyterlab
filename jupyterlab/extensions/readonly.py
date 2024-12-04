@@ -4,7 +4,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import sys
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 from jupyterlab_server.translation_utils import translator
 
@@ -31,7 +31,7 @@ class ReadOnlyExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
         Args:
