@@ -19,7 +19,7 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
@@ -239,7 +239,7 @@ class PyPIExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
         Note:
@@ -307,7 +307,7 @@ class PyPIExtensionManager(ExtensionManager):
 
         return extensions, math.ceil((counter + 1) / per_page)
 
-    async def __get_all_extensions(self) -> List[Tuple[str, str]]:
+    async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
             tz=timezone.utc
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
@@ -336,9 +336,10 @@ class PyPIExtensionManager(ExtensionManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
-        with tempfile.TemporaryDirectory() as ve_dir, tempfile.NamedTemporaryFile(
-            mode="w+", dir=ve_dir, delete=False
-        ) as fconstraint:
+        with (
+            tempfile.TemporaryDirectory() as ve_dir,
+            tempfile.NamedTemporaryFile(mode="w+", dir=ve_dir, delete=False) as fconstraint,
+        ):
             fconstraint.write(f"jupyterlab=={__version__}")
             fconstraint.flush()
 
