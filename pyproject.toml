@@ -249,7 +249,7 @@ after-publish-assets = "npm run after:publish:assets"
 
 [tool.ruff]
 exclude = ["*.ipynb"]
-target-version = "py38"
+target-version = "py39"
 line-length = 100
 lint.select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
