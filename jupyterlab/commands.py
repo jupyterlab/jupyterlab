@@ -23,7 +23,7 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import FrozenSet, Optional
+from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
@@ -2399,7 +2399,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[FrozenSet[str]] = None
+    locked_plugins: Optional[frozenset[str]] = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:
