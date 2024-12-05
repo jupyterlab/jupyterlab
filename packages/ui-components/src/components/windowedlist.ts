@@ -663,8 +663,13 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
         offset += size;
       }
-
-      this._measuredAllUntilIndex = index;
+      // Because the loop above updates estimated sizes,
+      // we need to fix (heal) offsets of the remaining items.
+      for (let i = index + 1; i < this._widgetSizers.length; i++) {
+        const sizer = this._widgetSizers[i];
+        const previous = this._widgetSizers[i - 1];
+        sizer.offset = previous.offset + previous.size;
+      }
     }
 
     for (let i = 0; i <= this._measuredAllUntilIndex; i++) {
@@ -1315,6 +1320,7 @@ export class WindowedList<
   private _applyNoWindowingStyles() {
     this._viewport.style.position = 'relative';
     this._viewport.style.top = '0px';
+    this._viewport.style.minHeight = '';
     this._innerElement.style.height = '';
   }
   /**
