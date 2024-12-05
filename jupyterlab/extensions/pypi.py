@@ -71,7 +71,7 @@ if http_proxy_url:
 
     proxies = {
         "http://": httpx.HTTPTransport(proxy=http_proxy_url),
-        "https://": httpx.HTTPTransport(proxy=http_proxy_url),
+        "https://": httpx.HTTPTransport(proxy=https_proxy_url),
     }
 
     _httpx_client_args = {
