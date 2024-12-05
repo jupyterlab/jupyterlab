@@ -596,9 +596,10 @@ export class Context<
 
     try {
       await this._manager.ready;
-      if (!this.canSave) {
-        // File cannot be saved. The "save" command is disabled in the UI,
-        // but if the user tries to save anyway, act as though it succeeded.
+      if (this._model.collaborative) {
+        // Files cannot be saved in collaborative mode. The "save" command
+        // is disabled in the UI, but if the user tries to save anyway, act
+        // as though it succeeded.
         this._saveState.emit('completed');
         return Promise.resolve();
       }
