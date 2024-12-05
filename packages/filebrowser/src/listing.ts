@@ -3533,10 +3533,16 @@ namespace Private {
   export function sort(
     items: Iterable<Contents.IModel>,
     state: DirListing.ISortState,
-    sortNotebooksFirst: boolean = false
+    sortNotebooksFirst: boolean = false,
+    translator?: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
+    // Determine language code from the translator or fallback to navigator.language
+    translator = translator || nullTranslator;
+    const languageCode = translator
+      ? translator.languageCode
+      : navigator.language;
 
     /**
      * Compares two items and returns whether they should have a fixed priority.
@@ -3578,7 +3584,10 @@ namespace Private {
         }
 
         // Default sorting is alphabetical ascending
-        return a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name, languageCode, {
+          numeric: true,
+          sensitivity: 'base'
+        });
       };
     }
 
@@ -3603,7 +3612,10 @@ namespace Private {
       // Sort by name
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return b.name.localeCompare(a.name, navigator.language || navigator.userLanguage, {numeric: true, sensitivity: 'base'});
+          return b.name.localeCompare(a.name, languageCode, {
+            numeric: true,
+            sensitivity: 'base'
+          });
         })
       );
     }
