@@ -61,6 +61,18 @@ anymore. The side effects for extensions are:
 The ``jp-Inspector-default-content`` class was renamed to ``jp-Inspector-placeholderContent``.
 The name of this contextual help class is now consistent with the equivalent table of contents and property inspector classes.
 
+JupyterLab 4.3 updated to its dependency on ``@lumino/widget`` to the ``2.5.0`` version, which removed the following global styling
+of widgets:
+
+.. code-block:: css
+
+   .lm-Widget {
+     overflow: hidden;
+   }
+
+If you notice some inconsistencies with the styling of your extension, you may need to add this general rule back to the CSS of your extension,
+or (preferably) scope it to the relevant widgets.
+
 Testing with Galata
 ^^^^^^^^^^^^^^^^^^^
 
@@ -68,6 +80,22 @@ Playwright was updated to version 1.46.1 (or higher). The changelog for version 
 breaking change when defining fixture values that are array of objects.
 
 See the `Playwright 1.46.0 release notes <https://github.com/microsoft/playwright/releases/tag/v1.46.0>`_ for more information.
+
+
+Shared model
+~~~~~~~~~~~~
+
+The outputs set on the shared cell model are now expected to be wrapped
+in the ``Y.Map`` objects rather than provided as plain objects
+(or pycrdt ``Map`` objects rather than dictionaries when set on the backend).
+Further, the ``"text"`` entry must now be specified as an ``Array<string>``
+object for outputs of ``"stream"`` type, allowing for better performance.
+The use of plain objects is deprecated and will stop working in a future version.
+For reference, see PRs:
+
+- https://github.com/jupyterlab/jupyterlab/pull/16498
+- https://github.com/jupyter-server/jupyter_ydoc/pull/241
+
 
 JupyterLab 4.1 to 4.2
 ---------------------

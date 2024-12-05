@@ -68,7 +68,7 @@ export interface IEditorHandlerOptions {
   /**
    * The configuration options for the editor.
    *
-   * They take precendence over the base configuration.
+   * They take precedence over the base configuration.
    */
   config?: Record<string, any>;
   /**

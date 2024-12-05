@@ -155,7 +155,7 @@ It contains a sequence of cells widgets.
    In the case of nbconvert, code cells are rendered using the Pygments Python
    library, which produces static HTML with syntax highlighting. The
    `jupyterlab_pygments <https://github.com/jupyterlab/jupyterlab_pygments.git>`_
-   Pygments theme mimicks the default CodeMirror theme of JupyterLab.
+   Pygments theme mimics the default CodeMirror theme of JupyterLab.
 
 .. note::
    The SVG figures presenting the DOM structures of the different cell types
