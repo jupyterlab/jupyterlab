@@ -366,10 +366,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       if (typeof value.text !== 'string') {
         value.text = value.text.join('');
       }
-      const { text, index } = Private.processText(
-        this._streamIndex,
-        value.text
-      );
+      const { text, index } = Private.processText(0, value.text);
       this._streamIndex = index;
       value.text = text;
     }
@@ -544,7 +541,13 @@ namespace Private {
     if (text === undefined) {
       text = '';
     }
-    if (!(newText.includes('\b') || newText.includes('\r'))) {
+    if (
+      !(
+        newText.includes('\b') ||
+        newText.includes('\r') ||
+        newText.includes('\n')
+      )
+    ) {
       text =
         text.slice(0, index) + newText + text.slice(index + newText.length);
       return { text, index: index + newText.length };
