@@ -9,6 +9,7 @@ import io
 import json
 import math
 import re
+import ssl
 import sys
 import tempfile
 import xmlrpc.client
@@ -38,16 +39,19 @@ from jupyterlab.extensions.manager import (
 )
 
 
-class ProxiedTransport(xmlrpc.client.Transport):
+class ProxiedSafeTransport(xmlrpc.client.SafeTransport):
     def set_proxy(self, host, port=None, headers=None):
         self.proxy = host, port
         self.proxy_headers = headers
 
     def make_connection(self, host):
-        connection = http.client.HTTPConnection(*self.proxy)
-        connection.set_tunnel(host, headers=self.proxy_headers)
-        self._connection = host, connection
-        return connection
+        _, self._extra_headers, x509 = self.get_host_info(host)
+        self._connection = (
+            host,
+            http.client.HTTPSConnection(*self.proxy, context=self.context, **(x509 or {})),
+        )
+        self._connection[1].set_tunnel(host, headers=self.proxy_headers)
+        return self._connection[1]
 
 
 xmlrpc_transport_override = None
@@ -67,7 +71,7 @@ if http_proxy_url:
 
     tornado_proxy = {"proxy_host": proxy_host, "proxy_port": int(proxy_port)}
 
-    xmlrpc_transport_override = ProxiedTransport()
+    xmlrpc_transport_override = ProxiedSafeTransport()
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
@@ -143,8 +147,9 @@ class PyPIExtensionManager(ExtensionManager):
         self._fetch_package_metadata = partial(_fetch_package_metadata, self._tornado_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
+        context = ssl.SSLContext()
         self._rpc_client = xmlrpc.client.ServerProxy(
-            self.base_url, transport=xmlrpc_transport_override
+            self.base_url, transport=xmlrpc_transport_override, context=context
         )
         self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
             seconds=self.cache_timeout * 1.01
