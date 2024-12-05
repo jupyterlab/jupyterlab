@@ -21,12 +21,12 @@ from subprocess import CalledProcessError, run
 from tarfile import TarFile
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
-from packaging.version import Version
 from zipfile import ZipFile
 
 import httpx
 import tornado
 from async_lru import alru_cache
+from packaging.version import Version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab._version import __version__
