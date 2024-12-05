@@ -36,7 +36,6 @@ classifiers = [
 ]
 dependencies = [
     "async_lru>=1.0.0",
-    "httpx~=0.28.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel>=6.5.0",
@@ -97,6 +96,9 @@ docs-screenshots = [
     "pandas==2.2.3",
     "scipy==1.14.1",
     "vega_datasets==0.9.0",
+]
+proxy = [
+    "pycurl>=7.18.2"
 ]
 test = [
     "coverage",

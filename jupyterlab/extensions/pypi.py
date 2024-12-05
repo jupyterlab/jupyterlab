@@ -14,6 +14,7 @@ import tempfile
 import xmlrpc.client
 from datetime import datetime, timedelta, timezone
 from functools import partial
+from importlib.util import find_spec
 from itertools import groupby
 from os import environ
 from pathlib import Path
@@ -23,8 +24,8 @@ from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
-import httpx
 import tornado
+import tornado.httpclient
 from async_lru import alru_cache
 from traitlets import CFloat, CInt, Unicode, config, observe
 
@@ -58,33 +59,30 @@ http_proxy_url = environ.get("http_proxy") or environ.get("HTTP_PROXY") or all_p
 https_proxy_url = (
     environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
 )
-proxies = None
+tornado_proxy = None
 
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
-    proxies = {
-        "http://": httpx.HTTPTransport(proxy=http_proxy_url),
-        "https://": httpx.HTTPTransport(proxy=https_proxy_url),
-    }
+    tornado_proxy = {"proxy_host": proxy_host, "proxy_port": int(proxy_port)}
 
     xmlrpc_transport_override = ProxiedTransport()
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
 async def _fetch_package_metadata(
-    client: httpx.AsyncClient,
+    client: tornado.httpclient.AsyncHTTPClient,
     name: str,
     latest_version: str,
     base_url: str,
 ) -> dict:
-    response = await client.get(
+    response = await client.fetch(
         base_url + f"/{name}/{latest_version}/json",
         headers={"Content-Type": "application/json"},
     )
-    if response.status_code < 400:  # noqa PLR2004
-        data = json.loads(response.text).get("info")
+    if response.code < 400:  # noqa PLR2004
+        data = json.loads(response.body).get("info")
 
         # Keep minimal information to limit cache size
         return {
@@ -131,9 +129,18 @@ class PyPIExtensionManager(ExtensionManager):
         parent: Optional[config.Configurable] = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = httpx.AsyncClient(mounts=proxies)
+        if tornado_proxy:
+            if find_spec("pycurl") is not None:
+                tornado.httpclient.AsyncHTTPClient.configure(
+                    "tornado.curl_httpclient.CurlAsyncHTTPClient", defaults=tornado_proxy
+                )
+            else:
+                self.log.error(
+                    'pycurl is required for proxied HTTP connections. This is provided by the "proxy" extra for jupyterlab.'
+                )
+        self._tornado_client = tornado.httpclient.AsyncHTTPClient()
         # Set configurable cache size to fetch function
-        self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
+        self._fetch_package_metadata = partial(_fetch_package_metadata, self._tornado_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._rpc_client = xmlrpc.client.ServerProxy(
@@ -164,12 +171,12 @@ class PyPIExtensionManager(ExtensionManager):
             The latest available version
         """
         try:
-            response = await self._httpx_client.get(
+            response = await self._tornado_client.fetch(
                 self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
             )
 
-            if response.status_code < 400:  # noqa PLR2004
-                data = json.loads(response.content).get("info", {})
+            if response.code < 400:  # noqa PLR2004
+                data = json.loads(response.body).get("info", {})
             else:
                 self.log.debug(f"Failed to get package information on PyPI; {response!s}")
                 return None
@@ -234,7 +241,7 @@ class PyPIExtensionManager(ExtensionManager):
     @observe("package_metadata_cache_size")
     def _observe_package_metadata_cache_size(self, change):
         self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
-            partial(_fetch_package_metadata, self._httpx_client)
+            partial(_fetch_package_metadata, self._tornado_client)
         )
 
     async def list_packages(
@@ -400,10 +407,10 @@ class PyPIExtensionManager(ExtensionManager):
                 try:
                     download_url: str = pkg_action.get("download_info", {}).get("url")
                     if download_url is not None:
-                        response = await self._httpx_client.get(download_url)
-                        if response.status_code < 400:  # noqa PLR2004
+                        response = await self._tornado_client.fetch(download_url)
+                        if response.code < 400:  # noqa PLR2004
                             if download_url.endswith(".whl"):
-                                with ZipFile(io.BytesIO(response.content)) as wheel:
+                                with ZipFile(io.BytesIO(response.body)) as wheel:
                                     for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         wheel.namelist(),
@@ -413,7 +420,7 @@ class PyPIExtensionManager(ExtensionManager):
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
-                                with TarFile(io.BytesIO(response.content)) as sdist:
+                                with TarFile(io.BytesIO(response.body)) as sdist:
                                     for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
