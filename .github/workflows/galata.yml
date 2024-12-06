@@ -39,7 +39,7 @@ jobs:
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
         run: |
-          pip install --upgrade --pre ipykernel==7.0.0a0
+          pip install --upgrade --pre ipykernel>=7
 
       - name: Launch JupyterLab
         run: |
