@@ -595,6 +595,9 @@ export interface IKernelConnection extends IObservableDisposable {
     >
   ): IKernelConnection;
 
+  /**
+   * Check if this kernel supports JEP 91 kernel subshells.
+   */
   supportsSubshells(): boolean;
 
   /**
@@ -643,6 +646,9 @@ export namespace IKernelConnection {
      */
     clientId?: string;
 
+    /**
+     * The subshell ID.
+     */
     subshellId?: string;
   }
 }

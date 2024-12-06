@@ -240,6 +240,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     return this._specPromise;
   }
 
+  /**
+   * Check if this kernel supports JEP 91 kernel subshells.
+   */
   supportsSubshells(): boolean {
     return this._supportsSubshells;
   }
