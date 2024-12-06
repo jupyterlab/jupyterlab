@@ -362,6 +362,25 @@ export interface IKernelConnection extends IObservableDisposable {
   >;
 
   /**
+   * Send a `list_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   *
+   * @param content - The content of the request.
+   *
+   * @param disposeOnDone - Whether to dispose of the future when done.
+   *
+   * @returns A promise that resolves with the response message.
+   */
+  requestListSubshell(
+    content: KernelMessage.IListSubshellRequestMsg['content'],
+    disposeOnDone?: boolean
+  ): IControlFuture<
+    KernelMessage.IListSubshellRequestMsg,
+    KernelMessage.IListSubshellReplyMsg
+  >;
+
+  /**
    * Send an `is_complete_request` message.
    *
    * @param content - The content of the request.
