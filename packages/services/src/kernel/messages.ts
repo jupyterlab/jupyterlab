@@ -1246,7 +1246,7 @@ export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
  */
 export interface ICreateSubshellRequestMsg
   extends IControlMessage<'create_subshell_request'> {
-  content: {};
+  content: Record<string, unknown>;
 }
 
 /**
@@ -1274,7 +1274,7 @@ export interface IDeleteSubshellRequestMsg
  */
 export interface IDeleteSubshellReplyMsg
   extends IControlMessage<'delete_subshell_reply'> {
-  content: {};
+  content: Record<string, unknown>;
 }
 
 /**
@@ -1282,7 +1282,7 @@ export interface IDeleteSubshellReplyMsg
  */
 export interface IListSubshellRequestMsg
   extends IControlMessage<'list_subshell_request'> {
-  content: {};
+  content: Record<string, unknown>;
 }
 
 /**
