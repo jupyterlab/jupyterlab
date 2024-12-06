@@ -411,16 +411,22 @@ async function activateConsole(
       void tracker.save(panel);
     });
 
-    panel.sessionContext.ready.then(async () => {
-      if (options.subshell) {
-        const future =
-          panel.sessionContext.session!.kernel!.requestCreateSubshell({});
-        future.onReply = (msg: KernelMessage.ICreateSubshellReplyMsg): void => {
-          const subshellId = msg.content.subshell_id;
-          panel.sessionContext.session!.kernel!.subshellId = subshellId;
-        };
-      }
-    });
+    panel.sessionContext.ready
+      .then(async () => {
+        if (options.subshell) {
+          const future =
+            panel.sessionContext.session!.kernel!.requestCreateSubshell({});
+          future.onReply = (
+            msg: KernelMessage.ICreateSubshellReplyMsg
+          ): void => {
+            const subshellId = msg.content.subshell_id;
+            panel.sessionContext.session!.kernel!.subshellId = subshellId;
+          };
+        }
+      })
+      .catch(reason => {
+        console.error('Failed to initialize SessionContext.', reason);
+      });
 
     shell.add(panel, 'main', {
       ref: options.ref,
