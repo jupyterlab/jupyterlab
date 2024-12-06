@@ -596,6 +596,14 @@ export class Context<
 
     try {
       await this._manager.ready;
+      if (this._model.collaborative) {
+        // Files cannot be saved in collaborative mode. The "save" command
+        // is disabled in the UI, but if the user tries to save anyway, act
+        // as though it succeeded.
+        this._saveState.emit('completed');
+        return Promise.resolve();
+      }
+
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
@@ -792,7 +800,7 @@ export class Context<
   }
 
   /**
-   * Add a checkpoint the file is writable.
+   * Add a checkpoint if the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
     let promise = Promise.resolve(void 0);
