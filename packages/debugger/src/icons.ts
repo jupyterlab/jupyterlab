@@ -1,64 +1,60 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { LabIcon } from '@jupyterlab/ui-components';
-
-import closeAllSvgStr from '../style/icons/close-all.svg';
-import stepIntoSvgStr from '../style/icons/step-into.svg';
-import stepOutSvgStr from '../style/icons/step-out.svg';
-import stepOverSvgStr from '../style/icons/step-over.svg';
-import variableSvgStr from '../style/icons/variable.svg';
-import pauseSvgStr from '../style/icons/pause.svg';
-import viewBreakpointSvgStr from '../style/icons/view-breakpoint.svg';
-import openKernelSourceSvgStr from '../style/icons/open-kernel-source.svg';
-import exceptionSvgStr from '../style/icons/exceptions.svg';
-
 export {
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { closeAllIcon } from '@jupyterlab/ui-components';
+   */
+  closeAllIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { runIcon } from '@jupyterlab/ui-components';
+   */
   runIcon as continueIcon,
-  stopIcon as terminateIcon
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { exceptionsIcon } from '@jupyterlab/ui-components';
+   */
+  exceptionsIcon as exceptionIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { openKernelSourceIcon } from '@jupyterlab/ui-components';
+   */
+  openKernelSourceIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { pauseIcon } from '@jupyterlab/ui-components';
+   */
+  pauseIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { stepIntoIcon } from '@jupyterlab/ui-components';
+   */
+  stepIntoIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { stepOutIcon } from '@jupyterlab/ui-components';
+   */
+  stepOutIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { stepOverIcon } from '@jupyterlab/ui-components';
+   */
+  stepOverIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { stopIcon } from '@jupyterlab/ui-components';
+   */
+  stopIcon as terminateIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { variableIcon } from '@jupyterlab/ui-components';
+   */
+  variableIcon,
+  /**
+   * @deprecated Debugger icons are now in the ui-components package. Import from '@jupyterlab/ui-components' instead.
+   * Use: import { viewBreakpointIcon } from '@jupyterlab/ui-components';
+   */
+  viewBreakpointIcon
 } from '@jupyterlab/ui-components';
-
-export const closeAllIcon = new LabIcon({
-  name: 'debugger:close-all',
-  svgstr: closeAllSvgStr
-});
-
-export const exceptionIcon = new LabIcon({
-  name: 'debugger:pause-on-exception',
-  svgstr: exceptionSvgStr
-});
-
-export const pauseIcon = new LabIcon({
-  name: 'debugger:pause',
-  svgstr: pauseSvgStr
-});
-
-export const stepIntoIcon = new LabIcon({
-  name: 'debugger:step-into',
-  svgstr: stepIntoSvgStr
-});
-
-export const stepOverIcon = new LabIcon({
-  name: 'debugger:step-over',
-  svgstr: stepOverSvgStr
-});
-
-export const stepOutIcon = new LabIcon({
-  name: 'debugger:step-out',
-  svgstr: stepOutSvgStr
-});
-
-export const variableIcon = new LabIcon({
-  name: 'debugger:variable',
-  svgstr: variableSvgStr
-});
-
-export const viewBreakpointIcon = new LabIcon({
-  name: 'debugger:view-breakpoint',
-  svgstr: viewBreakpointSvgStr
-});
-
-export const openKernelSourceIcon = new LabIcon({
-  name: 'debugger:open-kernel-source',
-  svgstr: openKernelSourceSvgStr
-});
