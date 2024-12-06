@@ -1477,6 +1477,7 @@ export class DirListing extends Widget {
     // Remove the resize listeners if necessary.
     if (this._resizeData) {
       this._resizeData.overrides.dispose();
+      this._resizeData = null;
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
       return;

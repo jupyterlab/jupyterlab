@@ -74,6 +74,7 @@ Here is a sample block of code that adds a command to the application (given by 
       execute: () => {
         console.log(`Executed ${commandID}`);
         toggled = !toggled;
+      }
     });
 
 This example adds a new command, which, when triggered, calls the ``execute`` function.
