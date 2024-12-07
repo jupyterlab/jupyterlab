@@ -342,7 +342,8 @@ export class DirListing extends Widget {
     this._sortedItems = Private.sort(
       this.model.items(),
       state,
-      this._sortNotebooksFirst
+      this._sortNotebooksFirst,
+      this.translator
     );
     this._sortState = state;
     this.update();
@@ -3534,7 +3535,8 @@ namespace Private {
   export function sort(
     items: Iterable<Contents.IModel>,
     state: DirListing.ISortState,
-    sortNotebooksFirst: boolean = false
+    sortNotebooksFirst: boolean = false,
+    translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
@@ -3563,6 +3565,29 @@ namespace Private {
       return 0;
     }
 
+    /**
+     * Compare two items by their name using `translator.languageCode`, with fallback to `navigator.language`.
+     */
+    function compareByName(a: Contents.IModel, b: Contents.IModel) {
+      const languageCode = (
+        translator.languageCode ?? navigator.language
+      ).replace('_', '-');
+      try {
+        return a.name.localeCompare(b.name, languageCode, {
+          numeric: true,
+          sensitivity: 'base'
+        });
+      } catch (e) {
+        console.warn(
+          `localeCompare failed to compare ${a.name} and ${b.name} under languageCode: ${languageCode}`
+        );
+        return a.name.localeCompare(b.name, navigator.language, {
+          numeric: true,
+          sensitivity: 'base'
+        });
+      }
+    }
+
     function compare(
       compare: (a: Contents.IModel, b: Contents.IModel) => number
     ) {
@@ -3579,7 +3604,7 @@ namespace Private {
         }
 
         // Default sorting is alphabetical ascending
-        return a.name.localeCompare(b.name);
+        return compareByName(a, b);
       };
     }
 
@@ -3604,7 +3629,7 @@ namespace Private {
       // Sort by name
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return b.name.localeCompare(a.name);
+          return compareByName(b, a);
         })
       );
     }
