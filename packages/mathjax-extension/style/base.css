@@ -4,8 +4,3 @@
 |----------------------------------------------------------------------------*/
 
 @import './fonts.css';
-
-.jp-OutputArea-output.jp-RenderedLatex .MJX-DISPLAY {
-  margin: 0;
-  text-align: left;
-}
