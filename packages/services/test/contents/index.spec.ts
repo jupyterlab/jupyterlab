@@ -1,8 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testing';
-import { Contents, ContentsManager, Drive, ServerConnection } from '../../src';
+import { Signal } from '@lumino/signaling';
+import {
+  expectFailure,
+  JupyterServer,
+  signalToPromise
+} from '@jupyterlab/testing';
+import {
+  Contents,
+  ContentsManager,
+  Drive,
+  IContentProvider,
+  IContentProviderExtension,
+  ServerConnection
+} from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
@@ -1291,6 +1303,110 @@ describe('drive', () => {
       await contents.restoreCheckpoint('baz.txt', checkpoint.id);
       await contents.deleteCheckpoint('baz.txt', checkpoint.id);
       await contents.delete('baz.txt');
+    });
+  });
+
+  describe('#contentProviderRegistry', () => {
+    class DummyContentProvider implements IContentProvider {
+      public get extensions(): IContentProviderExtension[] {
+        return [{ re: '.*', rank: 50 }];
+      }
+
+      async get(
+        localPath: string,
+        options?: Contents.IFetchOptions
+      ): Promise<Contents.IModel> {
+        return {
+          name: 'bar',
+          path: '',
+          type: '',
+          writable: true,
+          created: '',
+          last_modified: '',
+          mimetype: '',
+          content: '',
+          format: null
+        };
+      }
+
+      async save(
+        localPath: string,
+        options: Partial<Contents.IModel> = {}
+      ): Promise<Contents.IModel> {
+        return {
+          name: 'baz',
+          path: '',
+          type: '',
+          writable: true,
+          created: '',
+          last_modified: '',
+          mimetype: '',
+          content: '',
+          format: null
+        };
+      }
+
+      drive: Contents.IDrive;
+    }
+
+    class ChangeEmittingContentProvider extends DummyContentProvider {
+      readonly fileChanged: Signal<IContentProvider, Contents.IChangedArgs> =
+        new Signal<IContentProvider, Contents.IChangedArgs>(this);
+    }
+
+    it('should use the registered content provider', async () => {
+      const drive = new Drive();
+      const contentProvider = new DummyContentProvider();
+      drive.contentProviderRegistry.register(contentProvider);
+      const model1 = await drive.get('foo');
+      const model2 = await drive.save('foo');
+      expect(model1.name).toBe('bar');
+      expect(model2.name).toBe('baz');
+    });
+
+    it('integration test with ContentsManager', async () => {
+      const drive = new Drive();
+      const contents = new ContentsManager({ defaultDrive: drive });
+      const contentProvider = new DummyContentProvider();
+      drive.contentProviderRegistry.register(contentProvider);
+      const model1 = await contents.get('foo');
+      expect(model1.name).toBe('bar');
+    });
+
+    it('should proxy `fileChanged` signals emitted by providers', async () => {
+      const drive = new Drive();
+      const contentProvider = new ChangeEmittingContentProvider();
+      drive.contentProviderRegistry.register(contentProvider);
+      const promise = signalToPromise(drive.fileChanged);
+      contentProvider.fileChanged.emit({
+        oldValue: null,
+        newValue: 'test',
+        type: 'save'
+      } as Contents.IChangedArgs);
+      const [_, change] = await promise;
+      expect(change.newValue).toBe('test');
+    });
+
+    it('should revert back to default content provider after disposal', async () => {
+      const drive = new Drive();
+      const options: Contents.IFetchOptions = { type: 'file' };
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const beforeRegistration = await drive.get('foo', options);
+      expect(beforeRegistration.name).toBe('test');
+
+      const contentProvider = new DummyContentProvider();
+      const disposable =
+        drive.contentProviderRegistry.register(contentProvider);
+
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const whenRegistered = await drive.get('foo');
+      expect(whenRegistered.name).toBe('bar');
+
+      disposable.dispose();
+
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const afterDisposal = await drive.get('foo', options);
+      expect(afterDisposal.name).toBe('test');
     });
   });
 });
