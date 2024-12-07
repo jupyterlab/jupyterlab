@@ -430,7 +430,7 @@ function activateJSON(
                 typeof pluginSettings === 'object' &&
                 !Array.isArray(pluginSettings)
               ) {
-                registry.upload(pluginId, JSON.stringify(pluginSettings));
+                await registry.upload(pluginId, JSON.stringify(pluginSettings));
               } else {
                 console.warn(
                   `Invalid settings for plugin ${pluginId}. Skipping.`
