@@ -1585,7 +1585,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.26.3":
+"@codemirror/state@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@codemirror/state@npm:6.5.0"
+  dependencies:
+    "@marijn/find-cluster-break": ^1.0.0
+  checksum: f7fbed072cc67bf250f7d231668a00b988748cacaaa2ce3ea74ff13c7c392db76000e7d517933521cc6ad9dc3651c7b6d33accab3e3d4b9816cd3c5714661a84
+  languageName: node
+  linkType: hard
+
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0":
   version: 6.26.3
   resolution: "@codemirror/view@npm:6.26.3"
   dependencies:
@@ -1593,6 +1602,17 @@ __metadata:
     style-mod: ^4.1.0
     w3c-keyname: ^2.2.4
   checksum: fdee35fb5e0bbba7b6f1a9b43a865880911bbfafd30360da5dda21b35f81ba2d080ff66b6c3d94dbe946b6b7ec98a76208786360b8f030ef10bcb054b816de05
+  languageName: node
+  linkType: hard
+
+"@codemirror/view@npm:^6.35.3":
+  version: 6.35.3
+  resolution: "@codemirror/view@npm:6.35.3"
+  dependencies:
+    "@codemirror/state": ^6.5.0
+    style-mod: ^4.1.0
+    w3c-keyname: ^2.2.4
+  checksum: 09c2685c9345b23ea69d28f323f29d6e73a269e9ffa29ffbf6443c139b2c97fd1a87eced1c59553a3416a08aed3246e30dd5eb70d516159ac352ae422ff4394d
   languageName: node
   linkType: hard
 
@@ -2433,7 +2453,7 @@ __metadata:
   resolution: "@jupyterlab/cells@workspace:packages/cells"
   dependencies:
     "@codemirror/state": ^6.4.1
-    "@codemirror/view": ^6.26.3
+    "@codemirror/view": ^6.35.3
     "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.5.0-alpha.0
     "@jupyterlab/attachments": ^4.4.0-alpha.0
@@ -2522,7 +2542,7 @@ __metadata:
     "@codemirror/language": ^6.10.1
     "@codemirror/legacy-modes": ^6.4.0
     "@codemirror/search": ^6.5.6
-    "@codemirror/view": ^6.26.3
+    "@codemirror/view": ^6.35.3
     "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.4.0-alpha.0
     "@jupyterlab/codeeditor": ^4.4.0-alpha.0
@@ -2565,7 +2585,7 @@ __metadata:
     "@codemirror/legacy-modes": ^6.4.0
     "@codemirror/search": ^6.5.6
     "@codemirror/state": ^6.4.1
-    "@codemirror/view": ^6.26.3
+    "@codemirror/view": ^6.35.3
     "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/codeeditor": ^4.4.0-alpha.0
     "@jupyterlab/coreutils": ^6.4.0-alpha.0
@@ -2613,7 +2633,7 @@ __metadata:
   resolution: "@jupyterlab/completer@workspace:packages/completer"
   dependencies:
     "@codemirror/state": ^6.4.1
-    "@codemirror/view": ^6.26.3
+    "@codemirror/view": ^6.35.3
     "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/apputils": ^4.5.0-alpha.0
     "@jupyterlab/codeeditor": ^4.4.0-alpha.0
@@ -2797,7 +2817,7 @@ __metadata:
   resolution: "@jupyterlab/debugger@workspace:packages/debugger"
   dependencies:
     "@codemirror/state": ^6.4.1
-    "@codemirror/view": ^6.26.3
+    "@codemirror/view": ^6.35.3
     "@jupyter/react-components": ^0.16.6
     "@jupyter/ydoc": ^3.0.0
     "@jupyterlab/application": ^4.4.0-alpha.0
@@ -5395,6 +5415,13 @@ __metadata:
     "@lumino/signaling": ^2.1.3
     "@lumino/virtualdom": ^2.0.2
   checksum: c5055e42b0b7d5d9a0c29d14c7053478cbdef057525e262ccd59c987971364d5462ed1a59d5008b889cf5ecc6810e90c681364239500b9c8ee0ae4624d60df84
+  languageName: node
+  linkType: hard
+
+"@marijn/find-cluster-break@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@marijn/find-cluster-break@npm:1.0.1"
+  checksum: 53378ceffe011a68621832e9a3e49e5338e21cb61d9f996beb60b16d2feaa2752823b3d03ba7c6bedeecf62caeb2365b3d08e059d19b49a5250c9f4a0ccc4ae3
   languageName: node
   linkType: hard
 
