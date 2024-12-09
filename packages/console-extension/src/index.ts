@@ -411,9 +411,11 @@ async function activateConsole(
       void tracker.save(panel);
     });
 
-    panel.sessionContext.ready
-      .then(async () => {
-        if (options.subshell) {
+    if (options.subshell) {
+      panel.sessionContext.ready
+        .then(async () => {
+          // Ensure kernel has received kernel_info.
+          await panel.sessionContext.session!.kernel!.info;
           const future =
             panel.sessionContext.session!.kernel!.requestCreateSubshell({});
           future.onReply = (
@@ -422,11 +424,12 @@ async function activateConsole(
             const subshellId = msg.content.subshell_id;
             panel.sessionContext.session!.kernel!.subshellId = subshellId;
           };
-        }
-      })
-      .catch(reason => {
-        console.error('Failed to initialize SessionContext.', reason);
-      });
+          await future.done;
+        })
+        .catch(reason => {
+          console.error('Failed to initialize SessionContext.', reason);
+        });
+    }
 
     shell.add(panel, 'main', {
       ref: options.ref,

@@ -165,6 +165,7 @@ test.describe('Kernel', () => {
       const text2 = (await output2.innerText()).split('\n');
       expect(text2[0]).toMatch(/^subshell id:/);
       const subshellId = text2[0].split(':')[1].trim();
+      expect(subshellId).not.toEqual('None');
       expect(text2[5]).toEqual(`subshell list: ['${subshellId}']`);
 
       // Rerun %subshell in notebook now that subshell exists
