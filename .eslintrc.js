@@ -152,6 +152,7 @@ module.exports = {
           'shutdown_reply',
           'stop_on_error',
           'store_history',
+          'subshell_id',
           'target_name',
           'target_module',
           'UNSAFE_componentWillUpdate',
