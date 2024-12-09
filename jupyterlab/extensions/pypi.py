@@ -70,8 +70,8 @@ if http_proxy_url:
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
     proxies = {
-        "http://": httpx.HTTPTransport(proxy=http_proxy_url),
-        "https://": httpx.HTTPTransport(proxy=https_proxy_url),
+        "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
+        "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
     }
 
     _httpx_client_args = {
