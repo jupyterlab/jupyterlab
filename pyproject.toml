@@ -10,7 +10,7 @@ name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -28,15 +28,15 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "async_lru>=1.0.0",
-    "httpx~=0.28.0",
+    "httpx>=0.25.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel>=6.5.0",
@@ -249,7 +249,7 @@ after-publish-assets = "npm run after:publish:assets"
 
 [tool.ruff]
 exclude = ["*.ipynb"]
-target-version = "py38"
+target-version = "py39"
 line-length = 100
 lint.select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",

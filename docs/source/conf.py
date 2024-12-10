@@ -31,7 +31,6 @@ from collections import ChainMap
 from functools import partial
 from pathlib import Path
 from subprocess import check_call
-from typing import List
 
 HERE = Path(__file__).parent.resolve()
 
@@ -181,7 +180,7 @@ IMAGES_FOLDER = "images"
 AUTOMATED_SCREENSHOTS_FOLDER = "galata/test/documentation"
 
 
-def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
+def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
     """Copy PlayWright automated screenshots in documentation folder.
 
     Args:

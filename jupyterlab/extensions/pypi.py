@@ -19,13 +19,14 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import httpx
 import tornado
 from async_lru import alru_cache
+from packaging.version import Version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab._version import __version__
@@ -49,8 +50,6 @@ class ProxiedTransport(xmlrpc.client.Transport):
         return connection
 
 
-xmlrpc_transport_override = None
-
 all_proxy_url = environ.get("ALL_PROXY")
 # For historical reasons, we also support the lowercase environment variables.
 # Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
@@ -58,15 +57,25 @@ http_proxy_url = environ.get("http_proxy") or environ.get("HTTP_PROXY") or all_p
 https_proxy_url = (
     environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
 )
+
+# sniff ``httpx`` version for version-sensitive API
+_httpx_version = Version(httpx.__version__)
+_httpx_client_args = {}
+
 proxies = None
+xmlrpc_transport_override = None
 
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
     proxies = {
-        "http://": httpx.HTTPTransport(proxy=http_proxy_url),
-        "https://": httpx.HTTPTransport(proxy=https_proxy_url),
+        "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
+        "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
+    }
+
+    _httpx_client_args = {
+        ("mounts" if _httpx_version >= Version("0.28.0") else "proxies"): proxies,
     }
 
     xmlrpc_transport_override = ProxiedTransport()
@@ -131,7 +140,7 @@ class PyPIExtensionManager(ExtensionManager):
         parent: Optional[config.Configurable] = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = httpx.AsyncClient(mounts=proxies)
+        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
@@ -239,7 +248,7 @@ class PyPIExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
         Note:
@@ -307,7 +316,7 @@ class PyPIExtensionManager(ExtensionManager):
 
         return extensions, math.ceil((counter + 1) / per_page)
 
-    async def __get_all_extensions(self) -> List[Tuple[str, str]]:
+    async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
             tz=timezone.utc
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
@@ -336,9 +345,10 @@ class PyPIExtensionManager(ExtensionManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
-        with tempfile.TemporaryDirectory() as ve_dir, tempfile.NamedTemporaryFile(
-            mode="w+", dir=ve_dir, delete=False
-        ) as fconstraint:
+        with (
+            tempfile.TemporaryDirectory() as ve_dir,
+            tempfile.NamedTemporaryFile(mode="w+", dir=ve_dir, delete=False) as fconstraint,
+        ):
             fconstraint.write(f"jupyterlab=={__version__}")
             fconstraint.flush()
 
