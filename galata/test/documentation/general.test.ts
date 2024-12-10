@@ -180,7 +180,7 @@ test.describe('General', () => {
     await page.keyboard.type('test-tag');
     await page.keyboard.press('Enter');
     await expect(
-      page.locator('.jp-CellTags .jp-CellTags-Holder span').first()
+      page.locator('.jp-CellTags .jp-CellTags-Holder').first()
     ).toHaveText('test-tag');
 
     const newCellMetadata = (
