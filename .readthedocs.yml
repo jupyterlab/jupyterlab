@@ -5,6 +5,14 @@ build:
   tools:
     python: "3.10"
     nodejs: "20"
+  jobs:
+    post_install:
+      # this should have already run, but show some errors/warnings more cleanly
+      - jlpm
+      # again ensure all packages are built
+      - jlpm build:packages
+      # avoid the lengthy `typedoc` build inside `sphinx` for cleaner logs
+      - jlpm docs
 
 sphinx:
   configuration: docs/source/conf.py
