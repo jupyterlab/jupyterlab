@@ -5402,9 +5402,9 @@ __metadata:
   linkType: hard
 
 "@marijn/find-cluster-break@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "@marijn/find-cluster-break@npm:1.0.1"
-  checksum: 53378ceffe011a68621832e9a3e49e5338e21cb61d9f996beb60b16d2feaa2752823b3d03ba7c6bedeecf62caeb2365b3d08e059d19b49a5250c9f4a0ccc4ae3
+  version: 1.0.2
+  resolution: "@marijn/find-cluster-break@npm:1.0.2"
+  checksum: 0d836de25e04d58325813401ef3c2d34caf040da985a5935fcbc9d84e7b47a21bdb15f57d70c2bf0960bd29ed3dbbb1afd00cdd0fc4fafbee7fd0ffe7d508ae1
   languageName: node
   linkType: hard
 
