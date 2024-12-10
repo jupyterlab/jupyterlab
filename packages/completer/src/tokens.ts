@@ -495,6 +495,7 @@ export interface IInlineCompleterSettings {
   providers: {
     [providerId: string]: {
       enabled: boolean;
+      fillInMiddle: boolean;
       debouncerDelay: number;
       timeout: number;
       [property: string]: JSONValue;
@@ -524,7 +525,8 @@ export interface IProviderReconciliator {
    */
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger?: InlineCompletionTriggerKind
+    trigger?: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[];
 
   /**
