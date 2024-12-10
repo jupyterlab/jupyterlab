@@ -319,9 +319,9 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
                     type: 'boolean'
                   },
                   autoFillInMiddle: {
-                    title: trans.__('Fill in middle'),
+                    title: trans.__('Fill in middle on typing'),
                     description: trans.__(
-                      'Whether to show completions in the middle of the code line from %1 provider.',
+                      'Whether to show completions in the middle of the code line from %1 provider on typing.',
                       provider.name
                     ),
                     type: 'boolean'

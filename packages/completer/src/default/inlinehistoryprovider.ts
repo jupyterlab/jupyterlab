@@ -72,6 +72,11 @@ export class HistoryInlineCompletionProvider
 
     const multiLinePrefix = request.text.slice(0, request.offset);
     const linePrefix = multiLinePrefix.split('\n').slice(-1)[0];
+    const multiLineSuffix = request.text.slice(
+      request.offset,
+      request.text.length
+    );
+    const suffix = multiLineSuffix.split(' ')[0];
 
     let historyRequest: KernelMessage.IHistoryRequestMsg['content'];
 
@@ -117,7 +122,7 @@ export class HistoryInlineCompletionProvider
         output: false,
         raw: true,
         hist_access_type: 'search',
-        pattern: linePrefix + '*',
+        pattern: linePrefix + '*' + suffix + '*',
         unique: true,
         n: this._maxSuggestions
       };

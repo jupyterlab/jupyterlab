@@ -231,7 +231,7 @@ test.describe('Inline Completer', () => {
     });
 
     test('Ghost text updates on typing', async ({ page }) => {
-      const cellEditor = await page.notebook.getCellInputLocator(2);
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
       await page.keyboard.press('u');
 
       // Ghost text shows up
@@ -249,6 +249,47 @@ test.describe('Inline Completer', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(ghostText).toBeHidden();
+    });
+
+    test('Ghost text shows on middle of line when FIM is enabled', async ({
+      page
+    }) => {
+      //Enabling FIM
+      await page.evaluate(async () => {
+        await window.jupyterapp.commands.execute('settingeditor:open', {
+          query: 'Inline Completer'
+        });
+      });
+      await page
+        .locator(
+          '#jp-SettingsEditor-\\@jupyterlab\\/completer-extension\\:inline-completer_providers_\\@jupyterlab\\/inline-completer\\:history_autoFillInMiddle'
+        )
+        .click();
+      await page.sidebar.close();
+
+      await page.locator('#tab-key-2-1').click();
+
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      await cellEditor.click();
+      await page.keyboard.press('u');
+
+      // Ghost text shows up
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      await page.keyboard.type('n');
+      expect(ghostText).toBeHidden(); //Hidden on sun|
+      await page.keyboard.press('ArrowLeft');
+      await page.keyboard.type('g');
+      await expect(ghostText).toHaveText(/gestion.*/); //sug(gestion)n
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('ArrowRight');
+      await page.keyboard.press('Backspace');
+      await page.keyboard.type('q'); //sugq|
+      await page.keyboard.press('ArrowLeft');
+      await page.keyboard.press('Backspace');
+      await page.keyboard.type('g');
+      expect(ghostText).toBeHidden(); //Hidden on sug|q
     });
 
     test('Empty space is retained to avoid jitter', async ({ page }) => {
