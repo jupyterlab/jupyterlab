@@ -259,7 +259,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
             // By default all providers are opt-out, but
             // any provider can configure itself to be opt-in.
             enabled: true,
-            fillInMiddle: true,
+            fillInMiddle: false,
             timeout: 5000,
             debouncerDelay: 0,
             ...((provider.schema?.default as object) ?? {})
