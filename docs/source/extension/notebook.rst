@@ -82,7 +82,7 @@ a new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
 -  a
-   `Toolbar <../api/classes/ui-components.Toolbar-1.html>`__
+   `Toolbar <../api/classes/ui_components.Toolbar-1.html>`__
 -  a `Notebook
    widget <../api/classes/notebook.Notebook-1.html>`__.
 
