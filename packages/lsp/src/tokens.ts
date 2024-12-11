@@ -273,7 +273,7 @@ export namespace ILanguageServerManager {
 
   export interface IOptions {
     /**
-     * The Jupyter server settings objec
+     * The Jupyter server settings object
      */
     settings?: ServerConnection.ISettings;
 
@@ -584,7 +584,7 @@ export interface IShell {
 /**
  * A tracker that tracks WidgetLSPAdapters.
  *
- * @typeParam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
+ * @typeparam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
  */
 export interface IWidgetLSPAdapterTracker<
   T extends WidgetLSPAdapter = WidgetLSPAdapter

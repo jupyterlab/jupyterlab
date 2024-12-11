@@ -206,6 +206,8 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Send a `kernel_info_request` message.
    *
+   * @param content - The content of the request.
+   *
    * @returns A promise that resolves with the response message.
    *
    * #### Notes
@@ -373,7 +375,7 @@ export interface IKernelConnection extends IObservableDisposable {
    *
    * @param targetName - The name of the comm target.
    *
-   * @param commId - The comm id.
+   * @param id - The comm id.
    *
    * @returns A comm instance.
    */
@@ -429,7 +431,7 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Register an IOPub message hook.
    *
-   * @param msgId - The parent_header message id in messages the hook should
+   * @param msg_id - The parent_header message id in messages the hook should
    * intercept.
    *
    * @param hook - The callback invoked for the message.
@@ -454,7 +456,7 @@ export interface IKernelConnection extends IObservableDisposable {
   /**
    * Remove an IOPub message hook.
    *
-   * @param msgId - The parent_header message id the hook intercepted.
+   * @param msg_id - The parent_header message id the hook intercepted.
    *
    * @param hook - The callback invoked for the message.
    *

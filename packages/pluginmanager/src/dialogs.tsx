@@ -20,7 +20,7 @@ export function PluginRequiredMessage(props: {
           <li key={'dependantsDialog-' + plugin.id}>{plugin.id}</li>
         ))}
       </ul>
-      {props.trans.__('Please disable the dependant plugins first.')}
+      {props.trans.__('Please disable the dependent plugins first.')}
     </>
   );
 }

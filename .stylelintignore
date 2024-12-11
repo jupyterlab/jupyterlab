@@ -1,6 +1,5 @@
 packages/nbconvert-css/style/index.css
 
 docs/_build
-docs/api
 docs/build
-docs/source/api
+docs/api

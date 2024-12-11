@@ -13,12 +13,12 @@ export class LoggerRegistry implements ILoggerRegistry {
   /**
    * Construct a LoggerRegistry.
    *
-   * @param options.defaultRendermime - Default rendermime to render outputs
+   * @param defaultRendermime - Default rendermime to render outputs
    * with when logger is not supplied with one.
    */
-  constructor({ defaultRendermime, maxLength }: LoggerRegistry.IOptions) {
-    this._defaultRendermime = defaultRendermime;
-    this._maxLength = maxLength;
+  constructor(options: LoggerRegistry.IOptions) {
+    this._defaultRendermime = options.defaultRendermime;
+    this._maxLength = options.maxLength;
   }
 
   /**

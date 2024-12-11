@@ -79,7 +79,7 @@ export interface IRenderMimeRegistry {
   /**
    * Create a new mime model.  This is a convenience method.
    *
-   * @param options - The options used to create the model.
+   * @options - The options used to create the model.
    *
    * @returns A new mime model.
    */

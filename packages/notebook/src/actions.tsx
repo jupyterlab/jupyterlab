@@ -1641,6 +1641,32 @@ export namespace NotebookActions {
   }
 
   /**
+   * Toggle output visibility on selected code cells.
+   * If at least one output is visible, all outputs are hidden.
+   * If no outputs are visible, all outputs are made visible.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function toggleOutput(notebook: Notebook): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    for (const cell of notebook.widgets) {
+      if (notebook.isSelectedOrActive(cell) && cell.model.type === 'code') {
+        if ((cell as CodeCell).outputHidden === false) {
+          // We found at least one visible output; hide outputs for this cell
+          return hideOutput(notebook);
+        }
+      }
+    }
+
+    // We found no selected cells or no selected cells with visible output;
+    // show outputs for selected cells
+    return showOutput(notebook);
+  }
+
+  /**
    * Hide the output on all code cells.
    *
    * @param notebook - The target notebook widget.

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markedparser-extension",
-  "version": "4.3.0-beta.1",
+  "version": "4.4.0-alpha.0",
   "description": "JupyterLab - Markdown parser provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,15 +35,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-beta.1",
-    "@jupyterlab/codemirror": "^4.3.0-beta.1",
-    "@jupyterlab/coreutils": "^6.3.0-beta.1",
-    "@jupyterlab/mermaid": "^4.3.0-beta.1",
-    "@jupyterlab/rendermime": "^4.3.0-beta.1",
-    "@lumino/coreutils": "^2.1.2",
-    "marked": "^14.1.2",
-    "marked-gfm-heading-id": "^4.1.0",
-    "marked-mangle": "^1.1.9"
+    "@jupyterlab/application": "^4.4.0-alpha.0",
+    "@jupyterlab/codemirror": "^4.4.0-alpha.0",
+    "@jupyterlab/coreutils": "^6.4.0-alpha.0",
+    "@jupyterlab/mermaid": "^4.4.0-alpha.0",
+    "@jupyterlab/rendermime": "^4.4.0-alpha.0",
+    "@lumino/coreutils": "^2.2.0",
+    "marked": "^15.0.3",
+    "marked-gfm-heading-id": "^4.1.1",
+    "marked-mangle": "^1.1.10"
   },
   "devDependencies": {
     "@types/d3": "^7.4.0",

@@ -79,7 +79,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.toggleBlockComment, {
       label: trans.__('Toggle Block Comment'),
       caption: trans.__(
-        'Toggles block commends in languages which support it (e.g. C, JavaScript)'
+        'Toggles block comments in languages which support it (e.g. C, JavaScript)'
       ),
       execute: () => {
         const view = findEditorView();

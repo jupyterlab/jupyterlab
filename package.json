@@ -105,9 +105,8 @@
   },
   "resolutions": {
     "@types/react": "^18.0.26",
-    "marked": "^14.1.2",
+    "marked": "^15.0.3",
     "react": "^18.2.0",
-    "type-fest": "^4.26.1",
     "yjs": "^13.5.40"
   },
   "dependencies": {
@@ -128,8 +127,7 @@
   },
   "devDependencies": {
     "lerna": "^7.1.4",
-    "typedoc": "~0.26.7",
-    "typedoc-plugin-mdn-links": "~3.2.12",
-    "typedoc-plugin-redirect": "^1.0.0"
+    "typedoc": "~0.26.11",
+    "typedoc-plugin-mdn-links": "^3.1.20"
   }
 }

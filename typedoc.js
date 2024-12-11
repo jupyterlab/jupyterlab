@@ -74,40 +74,10 @@ const entryPoints = packages
     return fs.existsSync(path);
   });
 
-/** @type {Partial<import('typedoc').TypeDocOptions>} */
 module.exports = {
   entryPoints,
   entryPointStrategy: 'packages',
   includeVersion: false,
-  githubPages: false,
-  navigationLinks: {
-    GitHub: 'https://github.com/jupyterlab/jupyterlab',
-    Jupyter: 'https://jupyter.org'
-  },
-  name: '@jupyterlab',
-  plugin: ['typedoc-plugin-mdn-links', 'typedoc-plugin-redirect'],
-  redirects: packages.reduce((redirects, p) => {
-    redirects[`${p}/`] = `modules/${p}.html`;
-    return redirects;
-  }, {}),
-  out: 'docs/source/api',
-  readme: 'README.md',
-  theme: 'default',
-  titleLink: 'https://jupyterlab.readthedocs.io/en/latest',
-  highlightLanguages: [
-    'bash',
-    'console',
-    'css',
-    'html',
-    'javascript',
-    'json',
-    'json5',
-    'jsonc',
-    'jsx',
-    'python',
-    'tsx',
-    'typescript'
-  ],
   externalSymbolLinkMappings: {
     '@codemirror/language': {
       LanguageSupport:
@@ -253,5 +223,16 @@ module.exports = {
       Text: 'https://docs.yjs.dev/api/shared-types/y.text',
       YText: 'https://docs.yjs.dev/api/shared-types/y.text'
     }
-  }
+  },
+  githubPages: false,
+  navigationLinks: {
+    GitHub: 'https://github.com/jupyterlab/jupyterlab',
+    Jupyter: 'https://jupyter.org'
+  },
+  name: '@jupyterlab',
+  plugin: ['typedoc-plugin-mdn-links'],
+  out: 'docs/source/api',
+  readme: 'README.md',
+  theme: 'default',
+  titleLink: 'https://jupyterlab.readthedocs.io/en/latest'
 };

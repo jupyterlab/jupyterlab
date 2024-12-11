@@ -17,7 +17,6 @@ dev_mode/workspaces
 docs/_build
 docs/api
 docs/build
-docs/source/api/
 examples/example.spec.ts
 examples/federated/core_package/index.template.js
 examples/federated/core_package/index.js

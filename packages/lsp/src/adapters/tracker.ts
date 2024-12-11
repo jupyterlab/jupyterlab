@@ -11,7 +11,7 @@ import { IShell, IWidgetLSPAdapterTracker } from '../tokens';
 /**
  * A class that keeps track of widget adapter instances.
  *
- * @typeParam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
+ * @typeparam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
  */
 export class WidgetLSPAdapterTracker<
   T extends WidgetLSPAdapter = WidgetLSPAdapter

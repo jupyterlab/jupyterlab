@@ -122,6 +122,7 @@ export interface IDebugger {
    * Request to set a variable in the global scope.
    *
    * @param name The name of the variable.
+   * @param value The value of the variable.
    */
   copyToGlobals(name: string): Promise<void>;
 
@@ -1117,7 +1118,7 @@ export const IDebuggerHandler = new Token<IDebugger.IHandler>(
 );
 
 /**
- * The source viwer token.
+ * The source viewer token.
  */
 export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
   '@jupyterlab/debugger:IDebuggerSourceViewer',

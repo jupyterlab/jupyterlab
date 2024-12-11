@@ -42,7 +42,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * Resolve an icon name or a \{name, svgstr\} pair into an
    * actual LabIcon.
    *
-   * @param options.icon - either a string with the name of an existing icon
+   * @param options - icon: either a string with the name of an existing icon
    * or an object with \{name: string, svgstr: string\} fields.
    *
    * @returns a LabIcon instance
@@ -85,13 +85,13 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * If both icon and iconClass are undefined, this function will return
    * an empty div.
    *
-   * @param options.icon - optional, either a string with the name of an existing icon
+   * @param icon - optional, either a string with the name of an existing icon
    * or an object with \{name: string, svgstr: string\} fields
    *
-   * @param options.iconClass - optional, if the icon arg is not set, the iconClass arg
+   * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
    *
-   * @param options.fallback - DEPRECATED, optional, a LabIcon instance that will
+   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
    * be used if neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the element method
@@ -127,13 +127,13 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * If both icon and iconClass are undefined, the returned component
    * will simply render an empty div.
    *
-   * @param options.icon - optional, either a string with the name of an existing icon
+   * @param icon - optional, either a string with the name of an existing icon
    * or an object with \{name: string, svgstr: string\} fields
    *
-   * @param options.iconClass - optional, if the icon arg is not set, the iconClass arg
+   * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
    *
-   * @param options.fallback - DEPRECATED, optional, a LabIcon instance that will
+   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
    * be used if neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the React component

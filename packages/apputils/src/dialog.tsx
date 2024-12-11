@@ -44,7 +44,7 @@ export function showErrorMessage(
   buttons?: ReadonlyArray<Dialog.IButton>
 ): Promise<void> {
   const trans = Dialog.translator.load('jupyterlab');
-  buttons = buttons ?? [Dialog.okButton({ label: trans.__('Dismiss') })];
+  buttons = buttons ?? [Dialog.cancelButton({ label: trans.__('Close') })];
   console.warn('Showing error:', error);
 
   // Cache promises to prevent multiple copies of identical dialogs showing
@@ -330,7 +330,7 @@ export class Dialog<T> extends Widget {
   /**
    * Handle the `'input'` event for dialog's children.
    *
-   * @param _event - The DOM event sent to the widget
+   * @param event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
     this._hasValidationErrors = !!this.node.querySelector(':invalid');

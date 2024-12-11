@@ -140,7 +140,12 @@ export namespace Contents {
   export type ContentType = string;
 
   /**
-   * A contents file format.
+   * A contents file format. Always `json` for `notebook` and
+   * `directory` types. It should be set to either `text` or
+   * `base64` for `file` type.
+   * See the
+   * [jupyter server data model for filesystem entities](https://jupyter-server.readthedocs.io/en/latest/developers/contents.html#filesystem-entities)
+   * for more details.
    */
   export type FileFormat = 'json' | 'text' | 'base64' | null;
 
@@ -228,12 +233,12 @@ export namespace Contents {
     type: 'new' | 'delete' | 'rename' | 'save';
 
     /**
-     * The new contents.
+     * The old contents.
      */
     oldValue: Partial<IModel> | null;
 
     /**
-     * The old contents.
+     * The new contents.
      */
     newValue: Partial<IModel> | null;
   }
@@ -274,7 +279,7 @@ export namespace Contents {
      */
     contentType: ContentType;
     /**
-     * Wether the document is collaborative or not.
+     * Whether the document is collaborative or not.
      *
      * The default value is `true`.
      */
@@ -366,9 +371,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param path The path to the file.
-     *
-     * @returns A promise which resolves with the absolute POSIX
+     * @param A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -911,7 +914,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param fromFile - The original file path.
+   * @param path - The original file path.
    *
    * @param toDir - The destination directory path.
    *
