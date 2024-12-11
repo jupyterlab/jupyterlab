@@ -38,6 +38,7 @@ import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { KernelMessage } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -370,6 +371,11 @@ async function activateConsole(
      * Its typical value is: a factory name or the widget id (if singleton)
      */
     type?: string;
+
+    /**
+     * Whether to create a subshell or main shell for this console
+     */
+    subshell?: boolean;
   }
 
   /**
@@ -404,6 +410,26 @@ async function activateConsole(
     panel.sessionContext.propertyChanged.connect(() => {
       void tracker.save(panel);
     });
+
+    if (options.subshell) {
+      panel.sessionContext.ready
+        .then(async () => {
+          // Ensure kernel has received kernel_info.
+          await panel.sessionContext.session!.kernel!.info;
+          const future =
+            panel.sessionContext.session!.kernel!.requestCreateSubshell({});
+          future.onReply = (
+            msg: KernelMessage.ICreateSubshellReplyMsg
+          ): void => {
+            const subshellId = msg.content.subshell_id;
+            panel.sessionContext.session!.kernel!.subshellId = subshellId;
+          };
+          await future.done;
+        })
+        .catch(reason => {
+          console.error('Failed to initialize SessionContext.', reason);
+        });
+    }
 
     shell.add(panel, 'main', {
       ref: options.ref,
