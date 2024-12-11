@@ -35,7 +35,8 @@ const EXPECTED_MERMAID_ORDER = [
   'timeline',
   'sankey',
   'xy',
-  'block'
+  'block',
+  'kanban',
 ];
 
 /**
