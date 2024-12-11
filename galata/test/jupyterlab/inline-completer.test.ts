@@ -265,7 +265,7 @@ test.describe('Inline Completer', () => {
       await page.keyboard.type('n'); //sun|
       await page.keyboard.press('ArrowLeft'); //su|n
       await page.keyboard.type('g'); //sug|n
-      await expect(ghostText).toHaveText(/gestion.*/); //sug|(gestion)n
+      await expect(ghostText).toHaveText('gestio'); //sug|(gestio)n
       await page.keyboard.press('ArrowRight'); //sugn|
       await page.keyboard.press('Backspace'); //sug|
       await page.keyboard.type('q'); //sugq|
