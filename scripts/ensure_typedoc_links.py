@@ -13,7 +13,7 @@ UTF8 = {"encoding": "utf-8"}
 DOCS_API = ROOT / "docs/source/api"
 
 MODULE_INDEXES = sorted(DOCS_API.glob("modules/*.html"))
-DASH_HTML = sorted(DOCS_API.rglob("*_*.*.html"))
+DASH_HTML = sorted(DOCS_API.rglob("*.html"))
 
 
 def add_package_indexes():
