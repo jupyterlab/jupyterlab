@@ -107,6 +107,7 @@
     "@types/react": "^18.0.26",
     "marked": "^15.0.3",
     "react": "^18.2.0",
+    "type-fest": "^4.30.0",
     "yjs": "^13.5.40"
   },
   "dependencies": {
