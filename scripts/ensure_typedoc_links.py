@@ -28,7 +28,7 @@ def add_package_indexes():
             mod_dir.mkdir()
             out_html.write_text(REDIRECT.format(f"../modules/{stem}.html"), **UTF8)
             created += 1
-    print(f"... {created} docs/api/source/<package-name>.html")
+    sys.stdout.write(f"... {created} docs/api/source/<package-name>.html")
 
 
 def add_underscore_redirects():
@@ -48,11 +48,11 @@ def add_underscore_redirects():
         if pkg_json.exists() and not out_html.exists():
             out_html.write_text(REDIRECT.format(html.name), **UTF8)
             created += 1
-    print(f"... {created} pkg_name.rest.html -> pkg-name.rest.html")
+    sys.stdout.write(f"... {created} pkg_name.rest.html -> pkg-name.rest.html")
 
 
 def main() -> int:
-    print("fixing TypeDoc URLs:")
+    sys.stdout.write("fixing TypeDoc URLs:")
     add_package_indexes()
     add_underscore_redirects()
 
