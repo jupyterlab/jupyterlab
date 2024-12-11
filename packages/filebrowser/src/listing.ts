@@ -194,6 +194,11 @@ const DESCENDING_CLASS = 'jp-mod-descending';
 const PREFIX_APPEND_DURATION = 1000;
 
 /**
+ * The default width of the resize handle.
+ */
+const DEFAULT_HANDLE_WIDTH = 5;
+
+/**
  * The threshold in pixels to start a drag event.
  */
 const DRAG_THRESHOLD = 5;
@@ -337,7 +342,8 @@ export class DirListing extends Widget {
     this._sortedItems = Private.sort(
       this.model.items(),
       state,
-      this._sortNotebooksFirst
+      this._sortNotebooksFirst,
+      this.translator
     );
     this._sortState = state;
     this.update();
@@ -803,12 +809,13 @@ export class DirListing extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     const node = this.node;
-    this._width = this.node.getBoundingClientRect().width;
+    this._width = this._computeContentWidth();
     const content = DOMUtils.findElement(node, CONTENT_CLASS);
     node.addEventListener('mousedown', this);
     node.addEventListener('keydown', this);
     node.addEventListener('click', this);
     node.addEventListener('dblclick', this);
+    this._contentSizeObserver.observe(content);
     content.addEventListener('dragenter', this);
     content.addEventListener('dragover', this);
     content.addEventListener('dragleave', this);
@@ -832,6 +839,7 @@ export class DirListing extends Widget {
     node.removeEventListener('keydown', this);
     node.removeEventListener('click', this);
     node.removeEventListener('dblclick', this);
+    this._contentSizeObserver.disconnect();
     content.removeEventListener('scroll', this);
     content.removeEventListener('dragover', this);
     content.removeEventListener('dragover', this);
@@ -855,6 +863,35 @@ export class DirListing extends Widget {
       this.sort(this.sortState);
       this.update();
     }
+  }
+
+  private _onContentResize(): void {
+    const content = DOMUtils.findElement(this.node, CONTENT_CLASS);
+    const scrollbarWidth = content.offsetWidth - content.clientWidth;
+    if (scrollbarWidth != this._contentScrollbarWidth) {
+      this._contentScrollbarWidth = scrollbarWidth;
+      this._width = this._computeContentWidth();
+      this._updateColumnSizes();
+    }
+  }
+
+  private _computeContentWidth(width: number | null = null) {
+    if (!width) {
+      width = this.node.getBoundingClientRect().width;
+    }
+
+    this._paddingWidth = parseFloat(
+      window
+        .getComputedStyle(this.node)
+        .getPropertyValue('--jp-dirlisting-padding-width')
+    );
+
+    const handle = this.node.querySelector(`.${RESIZE_HANDLE_CLASS}`);
+
+    this._handleWidth = handle
+      ? handle.getBoundingClientRect().width
+      : DEFAULT_HANDLE_WIDTH;
+    return width - this._paddingWidth * 2 - this._contentScrollbarWidth;
   }
 
   /**
@@ -933,6 +970,7 @@ export class DirListing extends Widget {
         );
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
+
       this.renderer.updateItemNode(
         node,
         item,
@@ -1071,7 +1109,7 @@ export class DirListing extends Widget {
   onResize(msg: Widget.ResizeMessage): void {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
-    this._width = width;
+    this._width = this._computeContentWidth(width);
     this._updateColumnSizes();
   }
 
@@ -1096,13 +1134,21 @@ export class DirListing extends Widget {
     this._updateColumnSizes();
   }
 
-  private _updateColumnSizes() {
-    // adjust column sizes so that they add up to the total width available, preserving ratios
-    // and removing width from the last column so that it fills the width available;
-    const visibleColumns = this._visibleColumns.map(column => ({
-      ...column,
-      element: DOMUtils.findElement(this.node, column.className)
-    }));
+  private _updateColumnSizes(
+    doNotGrowBeforeInclusive: DirListing.IColumn['id'] | null = null
+  ) {
+    // Adjust column sizes so that they add up to the total width available, preserving ratios
+    const visibleColumns = this._visibleColumns
+      .map(column => ({
+        ...column,
+        element: DOMUtils.findElement(this.node, column.className)
+      }))
+      .filter(column => {
+        // While all visible column will have an element, some extensions like jupyter-unfold
+        // do not render columns even if user requests them to be visible; this filter exists
+        // to ensure backward compatibility with such extensions and may be removed in the future.
+        return column.element;
+      });
 
     // read from DOM
     let total = 0;
@@ -1114,30 +1160,62 @@ export class DirListing extends Widget {
       // restrict the minimum and maximum width
       size = Math.max(size, column.minWidth);
       if (this._width) {
-        let reservedForOtherColums = 0;
+        let reservedForOtherColumns = 0;
         for (const other of visibleColumns) {
           if (other.id === column.id) {
             continue;
           }
-          reservedForOtherColums += other.minWidth;
+          reservedForOtherColumns += other.minWidth;
         }
-        size = Math.min(size, this._width - reservedForOtherColums);
+        size = Math.min(size, this._width - reservedForOtherColumns);
       }
       this._columnSizes[column.id] = size;
       total += size;
     }
 
     // Ensure that total fits
-    if (this._width && total > this._width) {
-      for (const column of visibleColumns) {
-        this._columnSizes[column.id] =
-          (this._columnSizes[column.id]! / total) * this._width;
+    if (this._width) {
+      // Distribute the excess/shortfall over the columns which should stretch.
+      const excess = this._width - total;
+      let growAllowed = doNotGrowBeforeInclusive === null;
+      const growColumns = visibleColumns.filter(c => {
+        if (growAllowed) {
+          return true;
+        }
+        if (c.id === doNotGrowBeforeInclusive) {
+          growAllowed = true;
+        }
+        return false;
+      });
+      const totalWeight = growColumns
+        .map(c => c.grow)
+        .reduce((a, b) => a + b, 0);
+      for (const column of growColumns) {
+        // The value of `growBy` will be negative when the down-sizing
+        const growBy = (excess * column.grow) / totalWeight;
+        this._columnSizes[column.id] = this._columnSizes[column.id]! + growBy;
       }
     }
 
+    const resizeHandles = this.node.getElementsByClassName(RESIZE_HANDLE_CLASS);
+    const resizableColumns = visibleColumns.map(column =>
+      Private.isResizable(column)
+    );
+
     // Write to DOM
+    let i = 0;
     for (const column of visibleColumns) {
-      const size = this._columnSizes[column.id];
+      let size = this._columnSizes[column.id];
+
+      if (Private.isResizable(column) && size) {
+        size -=
+          (this._handleWidth * resizeHandles.length) / resizableColumns.length;
+        // if this is first resizable or last resizable column
+        if (i === 0 || i === resizableColumns.length - 1) {
+          size += this._paddingWidth;
+        }
+        i += 1;
+      }
       column.element.style.width = size === null ? '' : size + 'px';
     }
     this._updateModifiedStyleAndSize();
@@ -1196,7 +1274,7 @@ export class DirListing extends Widget {
       }
     }
     this._columnSizes[name] = size;
-    this._updateColumnSizes();
+    this._updateColumnSizes(name);
   }
 
   /**
@@ -1400,6 +1478,7 @@ export class DirListing extends Widget {
     // Remove the resize listeners if necessary.
     if (this._resizeData) {
       this._resizeData.overrides.dispose();
+      this._resizeData = null;
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
       return;
@@ -2466,6 +2545,12 @@ export class DirListing extends Widget {
   private _allUploaded = new Signal<DirListing, void>(this);
   private _width: number | null = null;
   private _state: IStateDB | null = null;
+  private _contentScrollbarWidth: number = 0;
+  private _contentSizeObserver = new ResizeObserver(
+    this._onContentResize.bind(this)
+  );
+  private _paddingWidth: number = 0;
+  private _handleWidth: number = DEFAULT_HANDLE_WIDTH;
 }
 
 /**
@@ -2693,11 +2778,17 @@ export namespace DirListing {
      * Minimum size the column should occupy.
      */
     minWidth: number;
+    /**
+     * Unitless number representing the proportion by which the column
+     * should grow when the listing is resized.
+     */
+    grow: number;
   }
   interface IFixedColumn extends IBaseColumn {
     id: 'is_selected';
     resizable: false;
     sortable: false;
+    grow: 0;
   }
   /**
    * Sortable column.
@@ -2734,7 +2825,8 @@ export namespace DirListing {
       itemClassName: CHECKBOX_WRAPPER_CLASS,
       minWidth: 18,
       resizable: false,
-      sortable: false
+      sortable: false,
+      grow: 0
     },
     {
       id: 'name' as const,
@@ -2743,7 +2835,8 @@ export namespace DirListing {
       minWidth: 60,
       resizable: true,
       sortable: true,
-      caretSide: 'right'
+      caretSide: 'right',
+      grow: 3
     },
     {
       id: 'last_modified' as const,
@@ -2752,7 +2845,8 @@ export namespace DirListing {
       minWidth: 60,
       resizable: true,
       sortable: true,
-      caretSide: 'left'
+      caretSide: 'left',
+      grow: 1
     },
     {
       id: 'file_size' as const,
@@ -2761,7 +2855,8 @@ export namespace DirListing {
       minWidth: 60,
       resizable: true,
       sortable: true,
-      caretSide: 'left'
+      caretSide: 'left',
+      grow: 0.5
     }
   ];
 
@@ -2808,7 +2903,11 @@ export namespace DirListing {
             small: trans.__('Modified'),
             large: trans.__('Last Modified')
           }),
-        file_size: () => this.createHeaderItemNode(trans.__('File Size')),
+        file_size: () =>
+          this._createHeaderItemNodeWithSizes({
+            small: trans.__('Size'),
+            large: trans.__('File Size')
+          }),
         is_selected: () =>
           this.createCheckboxWrapperNode({
             alwaysVisible: true,
@@ -3261,9 +3360,23 @@ export namespace DirListing {
       fileType?: DocumentRegistry.IFileType
     ): HTMLElement {
       const dragImage = node.cloneNode(true) as HTMLElement;
-      const modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
       const icon = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
-      dragImage.removeChild(modified as HTMLElement);
+
+      // Hide additional columns from the drag image to keep it unobtrusive.
+      const extraColumns = DirListing.columns.filter(
+        column => column.id !== 'name'
+      );
+      for (const extraColumn of extraColumns) {
+        const columnElement = DOMUtils.findElement(
+          dragImage,
+          extraColumn.itemClassName
+        );
+        if (!columnElement) {
+          // We can only remove columns which are rendered.
+          continue;
+        }
+        dragImage.removeChild(columnElement);
+      }
 
       if (!fileType) {
         icon.textContent = '';
@@ -3422,7 +3535,8 @@ namespace Private {
   export function sort(
     items: Iterable<Contents.IModel>,
     state: DirListing.ISortState,
-    sortNotebooksFirst: boolean = false
+    sortNotebooksFirst: boolean = false,
+    translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
@@ -3451,6 +3565,29 @@ namespace Private {
       return 0;
     }
 
+    /**
+     * Compare two items by their name using `translator.languageCode`, with fallback to `navigator.language`.
+     */
+    function compareByName(a: Contents.IModel, b: Contents.IModel) {
+      const languageCode = (
+        translator.languageCode ?? navigator.language
+      ).replace('_', '-');
+      try {
+        return a.name.localeCompare(b.name, languageCode, {
+          numeric: true,
+          sensitivity: 'base'
+        });
+      } catch (e) {
+        console.warn(
+          `localeCompare failed to compare ${a.name} and ${b.name} under languageCode: ${languageCode}`
+        );
+        return a.name.localeCompare(b.name, navigator.language, {
+          numeric: true,
+          sensitivity: 'base'
+        });
+      }
+    }
+
     function compare(
       compare: (a: Contents.IModel, b: Contents.IModel) => number
     ) {
@@ -3467,7 +3604,7 @@ namespace Private {
         }
 
         // Default sorting is alphabetical ascending
-        return a.name.localeCompare(b.name);
+        return compareByName(a, b);
       };
     }
 
@@ -3485,14 +3622,14 @@ namespace Private {
       // Sort by size
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return (a.size ?? 0) - (b.size ?? 0);
+          return (b.size ?? 0) - (a.size ?? 0);
         })
       );
     } else {
       // Sort by name
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return b.name.localeCompare(a.name);
+          return compareByName(b, a);
         })
       );
     }

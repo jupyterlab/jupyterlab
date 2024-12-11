@@ -124,7 +124,7 @@ export namespace PageConfig {
   /**
    * Get the tree url for shareable links.
    * Usually the same as treeUrl,
-   * but overrideable e.g. when sharing with JupyterHub.
+   * but overridable e.g. when sharing with JupyterHub.
    */
   export function getTreeShareUrl(): string {
     return URLExt.normalize(URLExt.join(getShareUrl(), getOption('treeUrl')));

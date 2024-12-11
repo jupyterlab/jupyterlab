@@ -6,6 +6,43 @@
 Extension Migration Guide
 =========================
 
+JupyterLab 4.3 to 4.4
+---------------------
+
+Icons
+^^^^^
+
+The ``@jupyterlab/debugger`` icons were moved to ``@jupyterlab/ui-components``.
+The **icons in use** are in the ``ui-components/style/icons/debugger`` folder, while the **unused icons** in the ``@jupyterlab/debugger`` package are in the ``ui-components/style/unused/`` folder.
+
+.. list-table:: Updated imports
+   :header-rows: 1
+
+   * - Before
+     - After
+   * - ``import { closeAllIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { closeAllIcon } from '@jupyterlab/ui-components';``
+   * - ``import { continueIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { runIcon } from '@jupyterlab/ui-components';`` or ``import { runIcon as continueIcon } from '@jupyterlab/ui-components';``
+   * - ``import { exceptionIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { exceptionsIcon } from '@jupyterlab/ui-components';`` or ``import { exceptionsIcon as exceptionIcon } from '@jupyterlab/ui-components';``
+   * - ``import { openKernelSourceIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { openKernelSourceIcon } from '@jupyterlab/ui-components';``
+   * - ``import { pauseIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { pauseIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stepIntoIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stepIntoIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stepOutIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stepOutIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stepOverIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stepOverIcon } from '@jupyterlab/ui-components';``
+   * - ``import { stopIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { stopIcon } from '@jupyterlab/ui-components';`` or ``import { stopIcon as terminateIcon } from '@jupyterlab/ui-components';``
+   * - ``import { variableIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { variableIcon } from '@jupyterlab/ui-components';``
+   * - ``import { viewBreakpointIcon } from '@jupyterlab/debugger/lib/icons';``
+     - ``import { viewBreakpointIcon } from '@jupyterlab/ui-components';``
+
 JupyterLab 4.2 to 4.3
 ---------------------
 
@@ -24,6 +61,18 @@ anymore. The side effects for extensions are:
 The ``jp-Inspector-default-content`` class was renamed to ``jp-Inspector-placeholderContent``.
 The name of this contextual help class is now consistent with the equivalent table of contents and property inspector classes.
 
+JupyterLab 4.3 updated to its dependency on ``@lumino/widget`` to the ``2.5.0`` version, which removed the following global styling
+of widgets:
+
+.. code-block:: css
+
+   .lm-Widget {
+     overflow: hidden;
+   }
+
+If you notice some inconsistencies with the styling of your extension, you may need to add this general rule back to the CSS of your extension,
+or (preferably) scope it to the relevant widgets.
+
 Testing with Galata
 ^^^^^^^^^^^^^^^^^^^
 
@@ -31,6 +80,22 @@ Playwright was updated to version 1.46.1 (or higher). The changelog for version 
 breaking change when defining fixture values that are array of objects.
 
 See the `Playwright 1.46.0 release notes <https://github.com/microsoft/playwright/releases/tag/v1.46.0>`_ for more information.
+
+
+Shared model
+~~~~~~~~~~~~
+
+The outputs set on the shared cell model are now expected to be wrapped
+in the ``Y.Map`` objects rather than provided as plain objects
+(or pycrdt ``Map`` objects rather than dictionaries when set on the backend).
+Further, the ``"text"`` entry must now be specified as an ``Array<string>``
+object for outputs of ``"stream"`` type, allowing for better performance.
+The use of plain objects is deprecated and will stop working in a future version.
+For reference, see PRs:
+
+- https://github.com/jupyterlab/jupyterlab/pull/16498
+- https://github.com/jupyter-server/jupyter_ydoc/pull/241
+
 
 JupyterLab 4.1 to 4.2
 ---------------------

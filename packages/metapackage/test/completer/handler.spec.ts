@@ -377,6 +377,8 @@ describe('@jupyterlab/completer', () => {
 
         handler.editor!.model.sharedModel.setSource('foo.');
         anchor.node.focus();
+        await new Promise(process.nextTick);
+        expect(provider.triggers.length).toEqual(1);
         anchor.editor.setCursorPosition({ line: 0, column: 4 });
         handler.invoke();
         // Need to wait for next tick to finish applicable providers check
@@ -388,11 +390,11 @@ describe('@jupyterlab/completer', () => {
 
       it('should use TriggerCharacter for typed text', async () => {
         // this test depends on the previous one ('should use Invoked for invoke()').
-        expect(provider.triggers.length).toEqual(1);
+        expect(provider.triggers.length).toEqual(2);
 
         handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
         await new Promise(process.nextTick);
-        expect(provider.triggers.length).toEqual(2);
+        expect(provider.triggers.length).toEqual(3);
         expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
         );
