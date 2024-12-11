@@ -1,4 +1,5 @@
 """Provide consistent URL destinations for TypeDoc."""
+
 import sys
 from pathlib import Path
 
