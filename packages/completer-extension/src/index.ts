@@ -259,6 +259,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
             // By default all providers are opt-out, but
             // any provider can configure itself to be opt-in.
             enabled: true,
+            autoFillInMiddle: false,
             timeout: 5000,
             debouncerDelay: 0,
             ...((provider.schema?.default as object) ?? {})
@@ -313,6 +314,14 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
                     title: trans.__('Enabled'),
                     description: trans.__(
                       'Whether to fetch completions %1 provider.',
+                      provider.name
+                    ),
+                    type: 'boolean'
+                  },
+                  autoFillInMiddle: {
+                    title: trans.__('Fill in middle on typing'),
+                    description: trans.__(
+                      'Whether to show completions in the middle of the code line from %1 provider on typing.',
                       provider.name
                     ),
                     type: 'boolean'

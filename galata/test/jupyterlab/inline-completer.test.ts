@@ -13,7 +13,8 @@ const SHORTCUTS_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 const SHARED_SETTINGS = {
   providers: {
     '@jupyterlab/inline-completer:history': {
-      enabled: true
+      enabled: true,
+      autoFillInMiddle: true
     }
   }
 };
@@ -231,7 +232,7 @@ test.describe('Inline Completer', () => {
     });
 
     test('Ghost text updates on typing', async ({ page }) => {
-      const cellEditor = await page.notebook.getCellInputLocator(2);
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
       await page.keyboard.press('u');
 
       // Ghost text shows up
@@ -249,6 +250,29 @@ test.describe('Inline Completer', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(ghostText).toBeHidden();
+    });
+
+    test('Ghost text shows on middle of line when FIM is enabled', async ({
+      page
+    }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      await page.keyboard.press('u');
+
+      // Ghost text shows up
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      await page.keyboard.type('n'); //sun|
+      await page.keyboard.press('ArrowLeft'); //su|n
+      await page.keyboard.type('g'); //sug|n
+      await expect(ghostText).toHaveText('gestio'); //sug|(gestio)n
+      await page.keyboard.press('ArrowRight'); //sugn|
+      await page.keyboard.press('Backspace'); //sug|
+      await page.keyboard.type('q'); //sugq|
+      await page.keyboard.press('ArrowLeft'); //sug|q
+      await page.keyboard.press('Backspace'); //su|q
+      await page.keyboard.type('g'); //sug|q
+      await expect(ghostText).toBeHidden(); //Hidden on sug|q
     });
 
     test('Empty space is retained to avoid jitter', async ({ page }) => {
