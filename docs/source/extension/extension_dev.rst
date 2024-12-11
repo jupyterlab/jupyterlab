@@ -235,8 +235,8 @@ They too can be provided by third-party extensions via the following tokens:
 * ``IConnectionStatus``: The connection status service.
 * ``IContentsManager``: The contents manager service, responsible for managing files and directories.
 * ``IDefaultDrive``: The default drive service, responsible for providing the default drive in which the contents manager operates.
-* ``IServerSettings``: The server settings service, definiting a set of default server settings.
-* ``IEventManager``: The event manager service, for managing Jupyter Server events.
+* ``IServerSettings``: The server settings service, defining a set of default server settings.
+* ``IEventManager``: The event manager service for emitting events that are broadcast by an event bus managed by Jupyter Server.
 * ``IKernelManager``: The kernel manager service.
 * ``IKernelSpecManager``: The kernel spec manager service.
 * ``INbConvertManager``: The nbconvert manager service, used for exports in various formats.
