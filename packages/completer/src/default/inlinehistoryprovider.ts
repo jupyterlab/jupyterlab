@@ -72,12 +72,7 @@ export class HistoryInlineCompletionProvider
 
     const multiLinePrefix = request.text.slice(0, request.offset);
     const linePrefix = multiLinePrefix.split('\n').slice(-1)[0];
-    const multiLineSuffix = request.text.slice(
-      request.offset,
-      request.text.length
-    );
-    const suffix = multiLineSuffix.split(' ')[0];
-
+    const suffix = request.text.slice(request.offset).split('\n')[0];
     let historyRequest: KernelMessage.IHistoryRequestMsg['content'];
 
     const items = [];
@@ -122,7 +117,7 @@ export class HistoryInlineCompletionProvider
         output: false,
         raw: true,
         hist_access_type: 'search',
-        pattern: linePrefix + '*' + suffix + '*',
+        pattern: linePrefix + '*' + (suffix ? suffix + '*' : ''),
         unique: true,
         n: this._maxSuggestions
       };
@@ -134,10 +129,16 @@ export class HistoryInlineCompletionProvider
           for (let i = 0; i < sourceLines.length; i++) {
             const line = sourceLines[i];
             if (line.startsWith(linePrefix)) {
-              const followingLines =
-                line.slice(linePrefix.length, line.length) +
-                '\n' +
-                sourceLines.slice(i + 1).join('\n');
+              let followingLines = line.slice(linePrefix.length);
+              if (i + 1 < sourceLines.length) {
+                followingLines += '\n' + sourceLines.slice(i + 1).join('\n');
+              }
+              if (suffix) {
+                followingLines = followingLines.slice(
+                  0,
+                  followingLines.indexOf(suffix)
+                );
+              }
               items.push({
                 insertText: followingLines
               });
