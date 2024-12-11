@@ -335,7 +335,7 @@ test('Settings Export: Clicking the export button triggers a download and matche
   await page.waitForTimeout(500);
 
   const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
-  await page.getByText('Export Settings').click();
+  await page.locator('.jp-ArrayOperationsButton:has-text("Export")').click();
   const download = await downloadPromise;
   // path where the file will be saved
   const downloadDir = 'galata/test/downloads';
