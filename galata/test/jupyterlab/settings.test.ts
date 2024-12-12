@@ -335,10 +335,10 @@ test('Settings Export: Clicking the export button triggers a download and matche
   await page.waitForTimeout(500);
 
   const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
-  await page.locator('.jp-ArrayOperationsButton:has-text("Export")').click();
+  await page.locator('.jp-ToolbarButtonComponent:has-text("Export")').click();
   const download = await downloadPromise;
   // path where the file will be saved
-  const downloadDir = 'galata/test/downloads';
+  const downloadDir = 'temporary/downloads';
   const downloadPath = path.join(downloadDir, download.suggestedFilename());
 
   // Ensure the download directory exists
@@ -361,7 +361,7 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
       theme: 'JupyterLab Dark'
     }
   };
-  const importDirectory = 'galata/test/imports';
+  const importDirectory = 'temporary/imports';
   const importFilePath = path.join(
     importDirectory,
     'overrides_settings_test.json'
@@ -382,7 +382,6 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
     page.waitForEvent('filechooser'),
     page.locator('.jp-ToolbarButtonComponent:has-text("Import")').click()
   ]);
-
   await fileChooser.setFiles(importFilePath);
   await page.locator('.jp-ArrayOperationsButton:has-text("Import")').click();
 
