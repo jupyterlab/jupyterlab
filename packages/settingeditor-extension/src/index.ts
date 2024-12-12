@@ -441,7 +441,7 @@ function activateJSON(
             }
             app.shell.currentWidget?.close();
             if (settingsEntries.length) {
-              showDialog({
+              await showDialog({
                 title: 'Settings Imported',
                 body: `${settingsEntries.length} settings successfully imported.`,
                 buttons: [Dialog.okButton()]
@@ -461,7 +461,7 @@ function activateJSON(
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);
         } catch (error) {
-          showErrorMessage('Failed to import settings', error);
+          await showErrorMessage('Failed to import settings', error);
         }
       });
 
