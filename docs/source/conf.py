@@ -131,19 +131,6 @@ def build_api_docs(out_dir: Path):
 
     shutil.copytree(str(docs_api), str(dest_dir))
 
-    # create missing cross-package redirects from README.md
-    redirect_html = """
-        <meta http-equiv="Refresh" content="0; URL=../modules/{}.html" />
-    """.strip()
-    for html in dest_dir.glob("modules/*.html"):
-        stem = html.stem.replace("_", "-")
-        mod_dir = dest_dir / stem
-        pkg_json = root / "packages" / stem / "package.json"
-        if pkg_json.exists() and not mod_dir.exists():
-            out_html = mod_dir / "index.html"
-            mod_dir.mkdir()
-            out_html.write_text(redirect_html.format(stem), encoding="utf-8")
-
 
 # Copy frontend files for snippet inclusion
 FILES_LIST = [  # File paths should be relative to jupyterlab root folder
