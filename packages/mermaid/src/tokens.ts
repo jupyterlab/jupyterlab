@@ -10,7 +10,8 @@ export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';
 export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
 // layout sniffing
-export const RE_RENDERER_ELK = /(defaultRenderer["']?\s*:\s*["']?elk)/;
+export const RE_DEFAULT_RENDERER =
+  /defaultRenderer["']?\s*:\s*["']?([^"'\s]+)(['"]|$)/gm;
 
 // mermaid themes
 export const MERMAID_DEFAULT_THEME: MermaidConfig['theme'] = 'default';

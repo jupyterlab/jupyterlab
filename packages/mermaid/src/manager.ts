@@ -17,7 +17,7 @@ import {
   MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,
   MERMAID_DEFAULT_THEME,
-  RE_RENDERER_ELK,
+  RE_DEFAULT_RENDERER,
   SUMMARY_CLASS,
   WARNING_CLASS
 } from './tokens';
@@ -84,10 +84,7 @@ export class MermaidManager implements IMermaidManager {
    */
   async renderSvg(text: string): Promise<IMermaidManager.IRenderInfo> {
     const _mermaid = await this.getMermaid();
-
-    if (text.match(RE_RENDERER_ELK)) {
-      await Private.ensureMermaidElk();
-    }
+    await Private.ensureRenderer(text);
 
     const id = `jp-mermaid-${Private.nextMermaidId()}`;
 
@@ -341,6 +338,18 @@ namespace Private {
     _mermaid = tmpMermain;
     _loading.resolve(_mermaid);
     return _mermaid;
+  }
+
+  /** Detect and load a renderer configured via `%init` or YAML front matter. */
+  export async function ensureRenderer(text: string): Promise<void> {
+    const match = RE_DEFAULT_RENDERER.exec(text);
+    const renderer = (match && match[1]) || null;
+
+    switch (renderer) {
+      case 'elk':
+        await Private.ensureMermaidElk();
+        break;
+    }
   }
 
   /**
