@@ -443,7 +443,7 @@ function activateJSON(
             if (settingsEntries.length) {
               await showDialog({
                 title: 'Settings Imported',
-                body: `${settingsEntries.length} settings successfully imported.`,
+                body: `imported settings across ${settingsEntries.length} categories successfully."`,
                 buttons: [Dialog.okButton()]
               });
             }
