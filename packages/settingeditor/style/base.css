@@ -303,10 +303,6 @@
   padding: 10px 15px;
 }
 
-.jp-SettingsImport-importButton:hover {
-  background-color: var(--jp-brand-color2);
-}
-
 .jp-SettingsImport-list {
   margin-top: 30px;
   max-height: 400px; /* Limit height for scrollable list */
@@ -320,6 +316,7 @@
   margin-bottom: 10px;
   border-bottom: 1px solid var(--jp-border-color2);
   padding: 10px 15px;
+  cursor: pointer;
 }
 
 .jp-SettingsImport-itemKey {

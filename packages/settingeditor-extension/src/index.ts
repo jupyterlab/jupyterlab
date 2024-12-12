@@ -14,8 +14,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  Dialog,
   ICommandPalette,
   MainAreaWidget,
+  showDialog,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -423,9 +426,8 @@ function activateJSON(
 
           const applySettings = async (settings: string[]) => {
             // Apply settings to the registry
-            for (const [pluginId, pluginSettings] of Object.entries(
-              importedSettings
-            )) {
+            const settingsEntries = Object.entries(importedSettings);
+            for (const [pluginId, pluginSettings] of settingsEntries) {
               if (
                 typeof pluginSettings === 'object' &&
                 !Array.isArray(pluginSettings)
@@ -436,6 +438,14 @@ function activateJSON(
                   `Invalid settings for plugin ${pluginId}. Skipping.`
                 );
               }
+            }
+            app.shell.currentWidget?.close();
+            if (settingsEntries.length) {
+              showDialog({
+                title: 'Settings Imported',
+                body: `${settingsEntries.length} settings successfully imported.`,
+                buttons: [Dialog.okButton()]
+              });
             }
           };
 
@@ -451,12 +461,7 @@ function activateJSON(
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);
         } catch (error) {
-          console.error('Failed to import settings:', error);
-          alert(
-            trans.__(
-              'Error importing settings. Please ensure the file is valid.'
-            )
-          );
+          showErrorMessage('Failed to import settings', error);
         }
       });
 

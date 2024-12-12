@@ -45,7 +45,7 @@ const SettingsImport = (props: ImportSettings.IOptions): JSX.Element => {
           {trans.__('Select settings sections to import')}
         </span>
         <button
-          className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+          className="jp-Button jp-mod-styled jp-mod-accept"
           onClick={() => {
             props.handleImport(
               Object.keys(checkedStates).filter(key => !checkedStates[key])
@@ -57,7 +57,7 @@ const SettingsImport = (props: ImportSettings.IOptions): JSX.Element => {
       </div>
       <div className="jp-SettingsImport-list">
         {props.importedSettings.map(key => (
-          <div key={key} className="jp-SettingsImport-item">
+          <label key={key} className="jp-SettingsImport-item">
             <span className="jp-SettingsImport-itemKey">{key}</span>
             <input
               type="checkbox"
@@ -65,7 +65,7 @@ const SettingsImport = (props: ImportSettings.IOptions): JSX.Element => {
               onChange={e => handleCheckboxChange(key, e.target.checked)}
               className="jp-SettingsImport-checkbox"
             />
-          </div>
+          </label>
         ))}
       </div>
     </div>

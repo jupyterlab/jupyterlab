@@ -383,7 +383,7 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
     page.locator('.jp-ToolbarButtonComponent:has-text("Import")').click()
   ]);
   await fileChooser.setFiles(importFilePath);
-  await page.locator('.jp-ArrayOperationsButton:has-text("Import")').click();
+  await page.locator('.jp-Button:has-text("Import")').click();
 
   // Fetch and verify the applied settings
   const appliedSettings = await page.evaluate(() => {
