@@ -31,21 +31,20 @@ import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
 } from '@jupyterlab/settingeditor/lib/tokens';
-import type {
-  JsonSettingEditor,
-  SettingsEditor
-} from '@jupyterlab/settingeditor';
+import { JsonSettingEditor, SettingsEditor } from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   downloadIcon,
+  fileUploadIcon,
   saveIcon,
   settingsIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
+import { ImportSettingsWidget } from './importSettingsWidget';
 
 /**
  * The command IDs used by the setting editor.
@@ -60,6 +59,8 @@ namespace CommandIDs {
   export const save = 'settingeditor:save';
 
   export const exportSettings = 'settingeditor:export';
+
+  export const importSettings = 'settingeditor:import';
 }
 
 type SettingEditorType = 'ui' | 'json';
@@ -155,7 +156,19 @@ function activate(
         commands,
         id: CommandIDs.exportSettings,
         icon: downloadIcon,
-        label: trans.__('Export Settings')
+        label: trans.__('Export'),
+        caption: trans.__('Export settings to a JSON file')
+      })
+    );
+
+    editor.toolbar.addItem(
+      'import-settings',
+      new CommandToolbarButton({
+        commands,
+        id: CommandIDs.importSettings,
+        icon: fileUploadIcon,
+        label: trans.__('Import'),
+        caption: trans.__('Import settings from a JSON file')
       })
     );
 
@@ -382,6 +395,76 @@ function activateJSON(
     },
     label: trans.__('Export Settings'),
     icon: downloadIcon
+  });
+
+  commands.addCommand(CommandIDs.importSettings, {
+    execute: () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json'; // Accept only JSON files
+
+      fileInput.addEventListener('change', async event => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) {
+          return;
+        }
+
+        try {
+          const fileContent = await file.text();
+          const importedSettings = JSON.parse(fileContent);
+
+          // Validate the JSON structure
+          if (
+            typeof importedSettings !== 'object' ||
+            Array.isArray(importedSettings)
+          ) {
+            throw new Error('Invalid settings file format');
+          }
+
+          const applySettings = async (settings: string[]) => {
+            // Apply settings to the registry
+            for (const [pluginId, pluginSettings] of Object.entries(
+              importedSettings
+            )) {
+              if (
+                typeof pluginSettings === 'object' &&
+                !Array.isArray(pluginSettings)
+              ) {
+                await registry.upload(pluginId, JSON.stringify(pluginSettings));
+              } else {
+                console.warn(
+                  `Invalid settings for plugin ${pluginId}. Skipping.`
+                );
+              }
+            }
+          };
+
+          const settingsKeys = Object.keys(importedSettings);
+          const content = new ImportSettingsWidget({
+            importedSettings: settingsKeys,
+            handleImport: applySettings,
+            translator: translator
+          });
+          const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
+          widget.title.label = trans.__('Import Settings');
+          widget.title.icon = fileUploadIcon;
+          app.shell.add(widget, 'main');
+          app.shell.activateById(widget.id);
+        } catch (error) {
+          console.error('Failed to import settings:', error);
+          alert(
+            trans.__(
+              'Error importing settings. Please ensure the file is valid.'
+            )
+          );
+        }
+      });
+
+      // Trigger the file input
+      fileInput.click();
+    },
+    label: trans.__('Import Settings'),
+    icon: fileUploadIcon
   });
 
   /**
