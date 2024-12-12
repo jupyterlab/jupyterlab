@@ -21,6 +21,7 @@ test.use({
 
 const EXPECTED_MERMAID_ORDER = [
   'flowchart',
+  'flowchart-elk',
   'sequence',
   'class',
   'state',

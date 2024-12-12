@@ -9,6 +9,9 @@ import type { MermaidConfig } from 'mermaid/dist/config.type';
 export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';
 export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
+// layout sniffing
+export const RE_RENDERER_ELK = /(defaultRenderer["']?\s*:\s*["']?elk)/;
+
 // mermaid themes
 export const MERMAID_DEFAULT_THEME: MermaidConfig['theme'] = 'default';
 export const MERMAID_DARK_THEME: MermaidConfig['theme'] = 'dark';

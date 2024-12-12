@@ -17,6 +17,7 @@ import {
   MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,
   MERMAID_DEFAULT_THEME,
+  RE_RENDERER_ELK,
   SUMMARY_CLASS,
   WARNING_CLASS
 } from './tokens';
@@ -84,8 +85,7 @@ export class MermaidManager implements IMermaidManager {
   async renderSvg(text: string): Promise<IMermaidManager.IRenderInfo> {
     const _mermaid = await this.getMermaid();
 
-    // could trigger a false-positive for diagrams about real cervidae, but...
-    if (text.includes('elk')) {
+    if (text.match(RE_RENDERER_ELK)) {
       await Private.ensureMermaidElk();
     }
 
