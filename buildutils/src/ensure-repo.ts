@@ -52,7 +52,6 @@ const MISSING: Dict<string[]> = {
   ],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
-  '@jupyterlab/markedparser-extension': ['Tokens', 'MarkedOptions'],
   '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
