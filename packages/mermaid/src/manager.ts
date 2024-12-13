@@ -343,7 +343,7 @@ namespace Private {
   /** Detect and load a renderer configured via `%init` or YAML front matter. */
   export async function ensureRenderer(text: string): Promise<void> {
     const match = RE_DEFAULT_RENDERER.exec(text);
-    const renderer = (match && match[1]) || null;
+    const renderer = (match && match[2]) || null;
 
     switch (renderer) {
       case 'elk':
