@@ -135,24 +135,11 @@ const ImportSettingsDialogBody = (
 };
 
 export class ImportSettingsDialogBodyWidget extends ReactWidget {
-  constructor(props: ImportSettings.IDialogBodyBodyOptions) {
+  constructor(private _props: ImportSettings.IDialogBodyBodyOptions) {
     super();
-    this.successMessage = props.successMessage;
-    this.failureMessage = props.failureMessage;
-    this.failedSettings = props.failedSettings;
   }
 
   render(): JSX.Element {
-    return (
-      <ImportSettingsDialogBody
-        successMessage={this.successMessage}
-        failureMessage={this.failureMessage}
-        failedSettings={this.failedSettings}
-      />
-    );
+    return <ImportSettingsDialogBody {...this._props} />;
   }
-
-  private successMessage: string;
-  private failureMessage?: string;
-  private failedSettings?: string[];
 }
