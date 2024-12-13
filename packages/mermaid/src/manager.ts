@@ -84,7 +84,7 @@ export class MermaidManager implements IMermaidManager {
    */
   async renderSvg(text: string): Promise<IMermaidManager.IRenderInfo> {
     const _mermaid = await this.getMermaid();
-    await Private.ensureRenderer(text);
+    await Private.ensureRenderers(text);
 
     const id = `jp-mermaid-${Private.nextMermaidId()}`;
 
@@ -277,8 +277,12 @@ namespace Private {
   /**
    * (Re-)initialize mermaid with lab-specific theme information
    */
-  export function initMermaid(): boolean {
-    if (!_mermaid) {
+  export function initMermaid(
+    mermaid: typeof MermaidType | null = null
+  ): boolean {
+    mermaid = _mermaid;
+
+    if (!mermaid) {
       return false;
     }
 
@@ -296,7 +300,7 @@ namespace Private {
       .getComputedStyle(document.body)
       .getPropertyValue('--jp-ui-font-family');
 
-    _mermaid.initialize({
+    mermaid.initialize({
       theme,
       fontFamily,
       securityLevel: 'strict',
@@ -333,22 +337,30 @@ namespace Private {
     }
     _loading = new PromiseDelegate();
     _version = (await import('mermaid/package.json')).version;
-    const tmpMermain = (_mermaid = (await import('mermaid')).default);
-    initMermaid();
-    _mermaid = tmpMermain;
+    const tmpMermaid = (_mermaid = (await import('mermaid')).default);
+    initMermaid(tmpMermaid);
+    _mermaid = tmpMermaid;
     _loading.resolve(_mermaid);
     return _mermaid;
   }
 
-  /** Detect and load a renderer configured via `%init` or YAML front matter. */
-  export async function ensureRenderer(text: string): Promise<void> {
-    const match = RE_DEFAULT_RENDERER.exec(text);
-    const renderer = (match && match[2]) || null;
+  /** Detect and load any renderers configured via `%init` or YAML front matter.
+   *
+   * The current upstream behavior appears to be last-in wins, but check all.
+   */
+  export async function ensureRenderers(text: string): Promise<void> {
+    let promises: Promise<any>[] = [];
 
-    switch (renderer) {
-      case 'elk':
-        await Private.ensureMermaidElk();
-        break;
+    for (const match of [...text.matchAll(RE_DEFAULT_RENDERER)]) {
+      switch ((match && match[2]) || null) {
+        case 'elk':
+          promises.push(Private.ensureMermaidElk());
+          break;
+      }
+    }
+
+    if (promises.length) {
+      await Promise.all(promises);
     }
   }
 
