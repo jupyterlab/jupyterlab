@@ -1190,9 +1190,9 @@ export namespace StaticNotebook {
     renderingLayout: RenderingLayout;
 
     /**
-     * Render markdown cells when the cursor exits them
+     * Render markdown when the cursor leaves a markdown cell
      */
-    renderMarkdownOnExit: boolean;
+    renderMarkdownOnCursorLeave: boolean;
 
     /**
      * Enable scrolling past the last cell
@@ -1248,7 +1248,7 @@ export namespace StaticNotebook {
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
     disableDocumentWideUndoRedo: true,
-    renderMarkdownOnExit: false,
+    renderMarkdownOnCursorLeave: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
@@ -1729,7 +1729,7 @@ export class Notebook extends StaticNotebook {
         cell.rendered = false;
       }
       if (
-        this.notebookConfig.renderMarkdownOnExit &&
+        this.notebookConfig.renderMarkdownOnCursorLeave &&
         cellChanged &&
         oldCell instanceof MarkdownCell
       ) {

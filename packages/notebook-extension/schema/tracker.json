@@ -727,8 +727,8 @@
         "matchBrackets": false
       }
     },
-    "renderMarkdownOnExit": {
-      "title": "Render markdown cells upon exit",
+    "renderMarkdownOnCursorLeave": {
+      "title": "Render markdown when cursor leaves markdown cells",
       "description": "Whether to render markdown cells when the cursor moves out of them.",
       "type": "boolean",
       "default": false

@@ -808,7 +808,7 @@ describe('@jupyter/notebook', () => {
         expect(widget.activeCell).toBe(widget.widgets[1]);
       });
 
-      it('should render a markdown cell when moving active cells if renderMarkdownOnExit is true', () => {
+      it('should render a markdown cell when moving active cells if renderMarkdownOnCursorLeave is true', () => {
         const widget = createActiveWidget();
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
@@ -825,7 +825,7 @@ describe('@jupyter/notebook', () => {
         // Turn on rendering of markdown cells when exiting
         widget.notebookConfig = {
           ...widget.notebookConfig,
-          renderMarkdownOnExit: true
+          renderMarkdownOnCursorLeave: true
         };
 
         // Exiting should trigger rendering of the old cell
