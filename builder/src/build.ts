@@ -215,7 +215,7 @@ export namespace Build {
               }
             },
             {
-              test: /\.(cur|png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+              test: /\.(cur|png|jpg|gif|ttf|woff|woff2|eot)(\?v=\d\.\d\.\d)?$/,
               type: 'asset'
             }
           ]

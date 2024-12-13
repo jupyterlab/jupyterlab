@@ -38,7 +38,7 @@ module.exports = {
         type: 'asset/source'
       },
       {
-        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=\d\.\d\.\d)?$/,
         type: 'asset'
       }
     ]

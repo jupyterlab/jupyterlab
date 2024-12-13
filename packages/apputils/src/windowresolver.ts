@@ -134,7 +134,7 @@ namespace Private {
         return;
       }
 
-      const reported = newValue.replace(/\-\d+$/, '');
+      const reported = newValue.replace(/-\d+$/, '');
 
       // Store the reported window name.
       known[reported] = null;

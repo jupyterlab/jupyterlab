@@ -250,7 +250,7 @@ interface IHeader {
  */
 function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
-  let match = line.match(/^([#]{1,6}) (.*)/);
+  let match = line.match(/^(#{1,6}) (.*)/);
   if (match) {
     return {
       text: cleanTitle(match[2]),
@@ -261,7 +261,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   }
   // Case: Markdown heading (alternative style)
   if (nextLine) {
-    match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
+    match = nextLine.match(/^ {0,3}([=]{2,}|-{2,})\s*$/);
     if (match) {
       return {
         text: cleanTitle(line),
