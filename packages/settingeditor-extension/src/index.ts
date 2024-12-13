@@ -47,7 +47,10 @@ import {
   undoIcon
 } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
-import { ImportSettingsWidget } from './importSettingsWidget';
+import {
+  ImportSettingsDialogBodyWidget,
+  ImportSettingsWidget
+} from './importSettingsWidget';
 
 /**
  * The command IDs used by the setting editor.
@@ -423,27 +426,60 @@ function activateJSON(
           ) {
             throw new Error('Invalid settings file format');
           }
-
+          const errorUploading: string[] = [];
           const applySettings = async (settings: string[]) => {
-            // Apply settings to the registry
             const settingsEntries = Object.entries(importedSettings);
             for (const [pluginId, pluginSettings] of settingsEntries) {
               if (
                 typeof pluginSettings === 'object' &&
                 !Array.isArray(pluginSettings)
               ) {
-                await registry.upload(pluginId, JSON.stringify(pluginSettings));
+                try {
+                  await registry.upload(
+                    pluginId,
+                    JSON.stringify(pluginSettings)
+                  );
+                } catch (error) {
+                  console.warn(
+                    `Failed to save settings for ${pluginId}:`,
+                    error
+                  );
+                  errorUploading.push(pluginId);
+                }
               } else {
                 console.warn(
                   `Invalid settings for plugin ${pluginId}. Skipping.`
                 );
               }
             }
+
             app.shell.currentWidget?.close();
+
             if (settingsEntries.length) {
+              const successCount =
+                settingsEntries.length - errorUploading.length;
+              const successMessage = trans.__(
+                `Imported settings across ${successCount} ${
+                  successCount === 1 ? 'category' : 'categories'
+                } successfully.`
+              );
+              const failureMessage = errorUploading.length
+                ? trans.__(
+                    `Failed to upload settings for the following ${
+                      errorUploading.length
+                    } ${errorUploading.length === 1 ? 'plugin' : 'plugins'}`
+                  )
+                : '';
+
+              const body = new ImportSettingsDialogBodyWidget({
+                successMessage,
+                failureMessage,
+                failedSettings: errorUploading
+              });
+
               await showDialog({
-                title: 'Settings Imported',
-                body: `imported settings across ${settingsEntries.length} categories successfully."`,
+                title: trans.__('Settings Imported'),
+                body,
                 buttons: [Dialog.okButton()]
               });
             }

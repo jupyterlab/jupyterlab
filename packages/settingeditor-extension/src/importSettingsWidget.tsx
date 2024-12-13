@@ -19,6 +19,14 @@ namespace ImportSettings {
     handleImport: (settings: string[]) => void;
     translator: ITranslator;
   }
+  /**
+   * The props for the ImportSettings DialogBox body.
+   */
+  export interface IDialogBodyBodyOptions {
+    successMessage: string;
+    failureMessage?: string;
+    failedSettings?: string[];
+  }
 }
 
 const SettingsImport = (props: ImportSettings.IOptions): JSX.Element => {
@@ -104,4 +112,47 @@ export class ImportSettingsWidget extends ReactWidget {
   private importedSettings: string[];
   private handleImport: (settings: string[]) => void;
   private translator: ITranslator;
+}
+
+const ImportSettingsDialogBody = (
+  props: ImportSettings.IDialogBodyBodyOptions
+): JSX.Element => {
+  return (
+    <div>
+      <div>{props.successMessage}</div>
+      {props.failureMessage && (
+        <div>
+          <br />
+          <div>{props.failureMessage}</div>
+          {props.failedSettings &&
+            props.failedSettings.map((setting, index) => (
+              <div key={index}>{setting}</div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export class ImportSettingsDialogBodyWidget extends ReactWidget {
+  constructor(props: ImportSettings.IDialogBodyBodyOptions) {
+    super();
+    this.successMessage = props.successMessage;
+    this.failureMessage = props.failureMessage;
+    this.failedSettings = props.failedSettings;
+  }
+
+  render(): JSX.Element {
+    return (
+      <ImportSettingsDialogBody
+        successMessage={this.successMessage}
+        failureMessage={this.failureMessage}
+        failedSettings={this.failedSettings}
+      />
+    );
+  }
+
+  private successMessage: string;
+  private failureMessage?: string;
+  private failedSettings?: string[];
 }
