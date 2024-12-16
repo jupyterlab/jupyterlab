@@ -392,7 +392,7 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
     );
   });
 
-  expect(appliedSettings.raw).toContain('"theme":"JupyterLab Dark"');
+  expect(appliedSettings.raw).toContain('"theme": "JupyterLab Dark"');
 
   fs.unlinkSync(importFilePath);
 });
