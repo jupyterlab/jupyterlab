@@ -12,7 +12,6 @@ import {
   ContentsManager,
   Drive,
   IContentProvider,
-  IContentProviderExtension,
   ServerConnection
 } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
@@ -1308,10 +1307,6 @@ describe('drive', () => {
 
   describe('#contentProviderRegistry', () => {
     class DummyContentProvider implements IContentProvider {
-      public get extensions(): IContentProviderExtension[] {
-        return [{ re: '.*', rank: 50 }];
-      }
-
       async get(
         localPath: string,
         options?: Contents.IFetchOptions
@@ -1357,9 +1352,9 @@ describe('drive', () => {
     it('should use the registered content provider', async () => {
       const drive = new Drive();
       const contentProvider = new DummyContentProvider();
-      drive.contentProviderRegistry.register(contentProvider);
-      const model1 = await drive.get('foo');
-      const model2 = await drive.save('foo');
+      drive.contentProviderRegistry.register('dummy', contentProvider);
+      const model1 = await drive.get('foo', { contentProviderId: 'dummy' });
+      const model2 = await drive.save('foo', { contentProviderId: 'dummy' });
       expect(model1.name).toBe('bar');
       expect(model2.name).toBe('baz');
     });
@@ -1368,15 +1363,15 @@ describe('drive', () => {
       const drive = new Drive();
       const contents = new ContentsManager({ defaultDrive: drive });
       const contentProvider = new DummyContentProvider();
-      drive.contentProviderRegistry.register(contentProvider);
-      const model1 = await contents.get('foo');
+      drive.contentProviderRegistry.register('dummy', contentProvider);
+      const model1 = await contents.get('foo', { contentProviderId: 'dummy' });
       expect(model1.name).toBe('bar');
     });
 
     it('should proxy `fileChanged` signals emitted by providers', async () => {
       const drive = new Drive();
       const contentProvider = new ChangeEmittingContentProvider();
-      drive.contentProviderRegistry.register(contentProvider);
+      drive.contentProviderRegistry.register('dummy', contentProvider);
       const promise = signalToPromise(drive.fileChanged);
       contentProvider.fileChanged.emit({
         oldValue: null,
@@ -1387,26 +1382,29 @@ describe('drive', () => {
       expect(change.newValue).toBe('test');
     });
 
-    it('should revert back to default content provider after disposal', async () => {
+    it('should throw when usage is attempted before registration or after disposal', async () => {
       const drive = new Drive();
-      const options: Contents.IFetchOptions = { type: 'file' };
+      const options: Contents.IFetchOptions = {
+        type: 'file',
+        contentProviderId: 'dummy'
+      };
       handleRequest(drive, 200, DEFAULT_FILE);
-      const beforeRegistration = await drive.get('foo', options);
-      expect(beforeRegistration.name).toBe('test');
+      await expect(drive.get('foo', options)).rejects.toThrow();
 
       const contentProvider = new DummyContentProvider();
-      const disposable =
-        drive.contentProviderRegistry.register(contentProvider);
+      const disposable = drive.contentProviderRegistry.register(
+        'dummy',
+        contentProvider
+      );
 
       handleRequest(drive, 200, DEFAULT_FILE);
-      const whenRegistered = await drive.get('foo');
+      const whenRegistered = await drive.get('foo', options);
       expect(whenRegistered.name).toBe('bar');
 
       disposable.dispose();
 
       handleRequest(drive, 200, DEFAULT_FILE);
-      const afterDisposal = await drive.get('foo', options);
-      expect(afterDisposal.name).toBe('test');
+      await expect(drive.get('foo', options)).rejects.toThrow();
     });
   });
 });

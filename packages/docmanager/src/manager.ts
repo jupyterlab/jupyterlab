@@ -578,7 +578,7 @@ export class DocumentManager implements IDocumentManager {
       sessionDialogs: this._dialogs,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator,
-      contentProviderId: contentProviderId
+      contentProviderId
     });
     const handler = new SaveHandler({
       context,
