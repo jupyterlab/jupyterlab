@@ -42,6 +42,7 @@ import {
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
+  IEditorWidgetFactory,
   LaTeXTableOfContentsFactory,
   MarkdownTableOfContentsFactory,
   PythonTableOfContentsFactory,
@@ -81,6 +82,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   id: '@jupyterlab/fileeditor-extension:plugin',
   description: 'Provides the file editor widget tracker.',
   requires: [
+    IEditorWidgetFactory,
     IEditorServices,
     IEditorExtensionRegistry,
     IEditorLanguageRegistry,
@@ -96,12 +98,64 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILayoutRestorer,
     ISessionContextDialogs,
     ITableOfContentsRegistry,
-    IToolbarWidgetRegistry,
     ITranslator,
     IFormRendererRegistry
   ],
   provides: IEditorTracker,
   autoStart: true
+};
+
+/**
+ * The editor tracker extension.
+ */
+const widgetFactory: JupyterFrontEndPlugin<FileEditorFactory.IFactory> = {
+  id: '@jupyterlab/fileeditor-extension:widget-factory',
+  description: 'Provides the factory for creating file editors.',
+  autoStart: true,
+  requires: [IEditorServices, ISettingRegistry],
+  optional: [ITranslator],
+  provides: IEditorWidgetFactory,
+  activate: (
+    app: JupyterFrontEnd,
+    editorServices: IEditorServices,
+    settingRegistry: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry | null,
+    translator_: ITranslator | null
+  ) => {
+    const id = plugin.id;
+    const translator = translator_ ?? nullTranslator;
+    const trans = translator.load('jupyterlab');
+
+    let toolbarFactory:
+      | ((
+          widget: IDocumentWidget<FileEditor>
+        ) => IObservableList<DocumentRegistry.IToolbarItem>)
+      | undefined;
+
+    if (toolbarRegistry) {
+      toolbarFactory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FACTORY,
+        id,
+        translator
+      );
+    }
+    const factory = new FileEditorFactory({
+      editorServices,
+      factoryOptions: {
+        name: FACTORY,
+        label: trans.__('Editor'),
+        fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
+        defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
+        toolbarFactory,
+        translator
+      }
+    });
+    app.docRegistry.addWidgetFactory(factory);
+
+    return factory;
+  }
 };
 
 /**
@@ -248,6 +302,7 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  widgetFactory,
   plugin,
   lineColStatus,
   completerPlugin,
@@ -263,6 +318,7 @@ export default plugins;
  */
 function activate(
   app: JupyterFrontEnd,
+  factory: FileEditorFactory.IFactory,
   editorServices: IEditorServices,
   extensions: IEditorExtensionRegistry,
   languages: IEditorLanguageRegistry,
@@ -276,7 +332,6 @@ function activate(
   restorer: ILayoutRestorer | null,
   sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
-  toolbarRegistry: IToolbarWidgetRegistry | null,
   translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): IEditorTracker {
@@ -286,33 +341,7 @@ function activate(
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
-  let toolbarFactory:
-    | ((
-        widget: IDocumentWidget<FileEditor>
-      ) => IObservableList<DocumentRegistry.IToolbarItem>)
-    | undefined;
 
-  if (toolbarRegistry) {
-    toolbarFactory = createToolbarFactory(
-      toolbarRegistry,
-      settingRegistry,
-      FACTORY,
-      id,
-      translator
-    );
-  }
-
-  const factory = new FileEditorFactory({
-    editorServices,
-    factoryOptions: {
-      name: FACTORY,
-      label: trans.__('Editor'),
-      fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
-      defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
-      toolbarFactory,
-      translator
-    }
-  });
   const { commands, restored, shell } = app;
   const tracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
     namespace
@@ -475,7 +504,6 @@ function activate(
     void tracker.add(widget);
     Commands.updateWidget(widget.content);
   });
-  app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
