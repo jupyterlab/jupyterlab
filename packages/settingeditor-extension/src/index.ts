@@ -408,6 +408,7 @@ function activateJSON(
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.accept = '.json'; // Accept only JSON files
+      const JSON_INDENTATION = 4; // Indentation for the JSON file to be uploaded
 
       fileInput.addEventListener('change', async event => {
         const file = (event.target as HTMLInputElement).files?.[0];
@@ -437,7 +438,7 @@ function activateJSON(
                 try {
                   await registry.upload(
                     pluginId,
-                    JSON.stringify(pluginSettings)
+                    JSON.stringify(pluginSettings, undefined, JSON_INDENTATION)
                   );
                 } catch (error) {
                   console.warn(
