@@ -43,7 +43,6 @@ export class Context<
    * Construct a new document context.
    */
   constructor(options: Context.IOptions<T>) {
-    console.log('aa');
     const manager = (this._manager = options.manager);
     this.translator = options.translator || nullTranslator;
     this._contentProviderId = options.contentProviderId;
