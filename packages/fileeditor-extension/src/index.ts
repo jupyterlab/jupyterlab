@@ -113,7 +113,7 @@ const widgetFactory: JupyterFrontEndPlugin<FileEditorFactory.IFactory> = {
   description: 'Provides the factory for creating file editors.',
   autoStart: true,
   requires: [IEditorServices, ISettingRegistry],
-  optional: [ITranslator],
+  optional: [IToolbarWidgetRegistry, ITranslator],
   provides: IEditorWidgetFactory,
   activate: (
     app: JupyterFrontEnd,
