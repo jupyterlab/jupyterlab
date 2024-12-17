@@ -360,7 +360,7 @@ test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
     });
   });
   await page.menu.clickMenuItem('Settings>Theme>Theme Scrollbars');
-  expect(
+  await expect(
     page.locator(
       '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme-scrollbars'
     )
