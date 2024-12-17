@@ -335,10 +335,10 @@ test('Settings Export: Clicking the export button triggers a download and matche
   await page.waitForTimeout(500);
 
   const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
-  await page.getByText('Export Settings').click();
+  await page.locator('.jp-ToolbarButtonComponent:has-text("Export")').click();
   const download = await downloadPromise;
   // path where the file will be saved
-  const downloadDir = 'galata/test/downloads';
+  const downloadDir = 'temporary/downloads';
   const downloadPath = path.join(downloadDir, download.suggestedFilename());
 
   // Ensure the download directory exists
@@ -351,4 +351,48 @@ test('Settings Export: Clicking the export button triggers a download and matche
   const expectedContent = `"adaptive-theme": true,`;
   expect(fileContent).toContain(expectedContent);
   fs.unlinkSync(downloadPath);
+});
+
+test('Settings Import: Importing a JSON file applies the correct settings', async ({
+  page
+}) => {
+  const settingsToImport = {
+    '@jupyterlab/apputils-extension:themes': {
+      theme: 'JupyterLab Dark'
+    }
+  };
+  const importDirectory = 'temporary/imports';
+  const importFilePath = path.join(
+    importDirectory,
+    'overrides_settings_test.json'
+  );
+
+  // Create directory and write the JSON file
+  fs.mkdirSync(importDirectory, { recursive: true });
+  fs.writeFileSync(importFilePath, JSON.stringify(settingsToImport, null, 2));
+
+  await page.sidebar.close();
+
+  await page.evaluate(() => {
+    return window.jupyterapp.commands.execute('settingeditor:open');
+  });
+
+  // Set up the file chooser listener
+  const [fileChooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.locator('.jp-ToolbarButtonComponent:has-text("Import")').click()
+  ]);
+  await fileChooser.setFiles(importFilePath);
+  await page.locator('.jp-Button:has-text("Import")').click();
+
+  // Fetch and verify the applied settings
+  const appliedSettings = await page.evaluate(() => {
+    return window.jupyterapp.serviceManager.settings.fetch(
+      '@jupyterlab/apputils-extension:themes'
+    );
+  });
+
+  expect(appliedSettings.raw).toContain('"theme": "JupyterLab Dark"');
+
+  fs.unlinkSync(importFilePath);
 });

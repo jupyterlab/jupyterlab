@@ -36,7 +36,7 @@ classifiers = [
 ]
 dependencies = [
     "async_lru>=1.0.0",
-    "httpx~=0.28.0",
+    "httpx>=0.25.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel>=6.5.0",
@@ -87,12 +87,12 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.4.1",
+    "altair==5.5.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.2.post3",
-    "matplotlib==3.9.2",
+    "jupyterlab-language-pack-zh-CN==4.3.post0",
+    "matplotlib==3.9.3",
     "nbconvert>=7.0.0",
     "pandas==2.2.3",
     "scipy==1.14.1",
@@ -119,7 +119,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.7.2",
+    "ruff==0.8.3",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
