@@ -369,7 +369,7 @@ test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
   console.log(value);
   expect(value).toEqual('0');
 });
-     
+
 test('Settings Import: Importing a JSON file applies the correct settings', async ({
   page
 }) => {
