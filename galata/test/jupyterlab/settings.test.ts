@@ -352,3 +352,20 @@ test('Settings Export: Clicking the export button triggers a download and matche
   expect(fileContent).toContain(expectedContent);
   fs.unlinkSync(downloadPath);
 });
+
+test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
+  });
+  await page.waitForTimeout(500);
+  await page.theme.setDarkTheme();
+  const value = await page
+    .locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme'
+    )
+    .inputValue();
+  console.log(value);
+  expect(value).toEqual('0');
+});

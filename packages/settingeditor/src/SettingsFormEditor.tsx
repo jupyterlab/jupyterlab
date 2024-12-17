@@ -192,7 +192,9 @@ export class SettingsFormEditor extends React.Component<
 
   private _syncFormDataWithSettings = (sender: any) => {
     this._formData = this.props.settings.composite as ReadonlyJSONObject;
-    this.setState({ isModified: this.props.settings.isModified });
+    this.setState((prevState, props) => {
+      props.settings.isModified;
+    });
   };
 
   render(): JSX.Element {
