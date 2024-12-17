@@ -33,7 +33,6 @@
     "lib/**/*.js",
     "schema/*.json",
     "style/**/*.css",
-    "style/**/*.svg",
     "style/index.js",
     "src/**/*.{ts,tsx}"
   ],
@@ -48,8 +47,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/state": "^6.4.1",
-    "@codemirror/view": "^6.26.3",
+    "@codemirror/state": "^6.5.0",
+    "@codemirror/view": "^6.35.3",
     "@jupyter/react-components": "^0.16.6",
     "@jupyter/ydoc": "^3.0.0",
     "@jupyterlab/application": "^4.4.0-alpha.0",

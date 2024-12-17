@@ -97,7 +97,9 @@ gettext_compact = False
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = [
+    "api/media/*.md",
+]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -126,6 +128,7 @@ def build_api_docs(out_dir: Path):
     dest_dir = out_dir / "api"
     if dest_dir.exists():
         shutil.rmtree(str(dest_dir))
+
     shutil.copytree(str(docs_api), str(dest_dir))
 
 

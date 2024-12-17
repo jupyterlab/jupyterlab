@@ -467,13 +467,18 @@ export class CompletionHandler implements IDisposable {
     if (
       trigger === InlineCompletionTriggerKind.Automatic &&
       (typeof line === 'undefined' ||
-        position.column < line.length ||
         line.slice(0, position.column).match(/^\s*$/))
     ) {
       // In Automatic mode we only auto-trigger on the end of line (and not on the beginning).
       // Increase the counter to avoid out-of date replies when pressing Backspace quickly.
       this._fetchingInline += 1;
       return;
+    }
+
+    let isMiddleOfLine = false;
+
+    if (typeof line !== 'undefined' && position.column < line.length) {
+      isMiddleOfLine = true;
     }
 
     const request = this._composeRequest(editor, position);
@@ -485,7 +490,11 @@ export class CompletionHandler implements IDisposable {
     model.cursor = position;
 
     const current = ++this._fetchingInline;
-    const promises = this._reconciliator.fetchInline(request, trigger);
+    const promises = this._reconciliator.fetchInline(
+      request,
+      trigger,
+      isMiddleOfLine
+    );
     let cancelled = false;
 
     const completed = new Set<
