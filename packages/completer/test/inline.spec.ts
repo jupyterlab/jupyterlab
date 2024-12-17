@@ -5,9 +5,9 @@ import {
   IInlineCompletionProvider,
   InlineCompleter
 } from '@jupyterlab/completer';
-import { type CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { nullTranslator } from '@jupyterlab/translation';
-import { framePromise, simulate } from '@jupyterlab/testing';
+import { framePromise, signalToPromise, simulate } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
@@ -97,7 +97,13 @@ describe('completer/inline', () => {
         model.setCompletions({
           items: suggestionsAbc
         });
-        let editorPosition: CodeEditor.IPosition = { line: 0, column: 0 };
+        let editorPosition = editorWidget.editor.getCursorPosition();
+
+        expect(editorPosition).toEqual({
+          line: 0,
+          column: 0
+        });
+
         const onContentChange = (
           str: ISharedText,
           changed: SourceChange | CellChange | FileChange
@@ -118,6 +124,19 @@ describe('completer/inline', () => {
           line: 0,
           column: 12
         });
+      });
+
+      it('should be undoable in one step', async () => {
+        model.setCompletions({
+          items: suggestionsAbc
+        });
+        completer.accept();
+        const waitForChange = signalToPromise(
+          editorWidget.editor.model.sharedModel.changed
+        );
+        editorWidget.editor.undo();
+        await waitForChange;
+        expect(editorWidget.editor.model.sharedModel.source).toBe('');
       });
     });
 
