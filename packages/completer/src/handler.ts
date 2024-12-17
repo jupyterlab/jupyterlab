@@ -2,13 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  CodeEditor,
-  COMPLETER_ACTIVE_CLASS,
-  COMPLETER_ENABLED_CLASS,
-  COMPLETER_LINE_BEGINNING_CLASS
-} from '@jupyterlab/codeeditor';
-import { Text } from '@jupyterlab/coreutils';
-import {
   CellChange,
   FileChange,
   ISharedBaseCell,
@@ -16,12 +9,22 @@ import {
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
+import {
+  CodeEditor,
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS,
+  COMPLETER_LINE_BEGINNING_CLASS
+} from '@jupyterlab/codeeditor';
+import { Text } from '@jupyterlab/coreutils';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
+import type { TransactionSpec } from '@codemirror/state';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { InlineCompleter } from './inline';
 import {
   CompletionTriggerKind,
   IInlineCompletionItem,
@@ -31,7 +34,6 @@ import {
   IProviderReconciliator
 } from './tokens';
 import { Completer } from './widget';
-import { InlineCompleter } from './inline';
 
 /**
  * A completion handler for editors.
@@ -204,11 +206,16 @@ export class CompletionHandler implements IDisposable {
 
     const { start, end, value } = patch;
     const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
-    // we need to update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(start, end, value);
+    // Update the document and the cursor position in the same transaction
+    // to ensure consistency in listeners to document changes.
+    // Note: it also ensures a single change is stored by the undo manager.
+    const transactions: TransactionSpec = {
+      changes: { from: start, to: end, insert: value }
+    };
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
-      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+      transactions.selection = { anchor: start + value.length };
     }
+    (editor as CodeMirrorEditor).editor.dispatch(transactions);
   }
 
   /**
