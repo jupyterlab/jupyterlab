@@ -359,15 +359,12 @@ test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
       query: 'Theme'
     });
   });
-  await page.waitForTimeout(500);
-  await page.theme.setDarkTheme();
-  const value = await page
-    .locator(
-      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme'
+  await page.menu.clickMenuItem('Settings>Theme>Theme Scrollbars');
+  expect(
+    page.locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme-scrollbars'
     )
-    .inputValue();
-  console.log(value);
-  expect(value).toEqual('0');
+  ).toBeChecked();
 });
 
 test('Settings Import: Importing a JSON file applies the correct settings', async ({
