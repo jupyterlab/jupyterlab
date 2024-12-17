@@ -1580,8 +1580,8 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('should not support subshells by default', () => {
-    it('#supportsSubshells() should return false', () => {
-      expect(defaultKernel.supportsSubshells()).toBeFalsy();
+    it('#supportsSubshells should return false', () => {
+      expect(defaultKernel.supportsSubshells).toBeFalsy();
     });
 
     it('#subshellId should be null in main shell', () => {

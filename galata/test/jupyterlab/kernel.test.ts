@@ -105,7 +105,7 @@ test.describe('Kernel', () => {
       );
     });
 
-    test('Should support opening subshell in separate code console ', async ({
+    test('Should support opening subshell in separate code console', async ({
       page
     }) => {
       // Open new notebook
@@ -118,25 +118,15 @@ test.describe('Kernel', () => {
       // Run %subshell in notebook
       const notebook = page.locator('.jp-Notebook');
       await notebook.waitFor();
-      await notebook
-        .getByLabel('Code Cell Content')
-        .getByRole('textbox')
-        .click();
-      await notebook
-        .getByLabel('Code Cell Content')
-        .getByRole('textbox')
-        .fill('%subshell');
-      await page.menu.clickMenuItem('Run>Run Selected Cell');
+      await page.notebook.setCell(0, 'code', '%subshell');
+      await page.notebook.runCell(0);
 
       const output1 = notebook.locator('.jp-OutputArea-output').locator('pre');
       const text1 = (await output1.innerText()).split('\n');
 
-      test.skip(
-        text1[0] === 'UsageError: Line magic function `%subshell` not found.',
-        'Test skipped as subshells not supported by kernel'
-      );
-
-      // Subshells supported:
+      // Confirm that subshells are supported by %subshell printing something useful.
+      // Subshell ID for this main shell is None, and no subshells have been created
+      // yet so the subshell list is empty.
       expect(text1[0]).toEqual('subshell id: None');
       expect(text1[5]).toEqual('subshell list: []');
 
@@ -149,16 +139,13 @@ test.describe('Kernel', () => {
       // Run %subshell in console
       const subshellConsole = page.locator('.jp-CodeConsole');
       await subshellConsole.waitFor();
-      await subshellConsole
-        .getByLabel('Code Cell Content')
-        .getByRole('textbox')
-        .click();
-      await subshellConsole
-        .getByLabel('Code Cell Content')
-        .getByRole('textbox')
-        .fill('%subshell');
-      await page.menu.clickMenuItem('Run>Run Cell (forced)');
+      await page.notebook.setCell(0, 'code', '%subshell');
+      await page.notebook.runCell(0);
 
+      // Confirm that this is a subshell using "subshell id" printed by %subshell magic
+      // which will be something other than None (None means main shell not subshell).
+      // The subshell ID should also be the one and only entry in the "subshell list",
+      // and wrapped in quotes as it is a string.
       const output2 = subshellConsole
         .locator('.jp-OutputArea-output')
         .locator('pre');
@@ -168,7 +155,7 @@ test.describe('Kernel', () => {
       expect(subshellId).not.toEqual('None');
       expect(text2[5]).toEqual(`subshell list: ['${subshellId}']`);
 
-      // Rerun %subshell in notebook now that subshell exists
+      // Rerun %subshell in notebook now that subshell exists.
       await notebook
         .getByLabel('Code Cell Content')
         .getByRole('textbox')
@@ -176,6 +163,8 @@ test.describe('Kernel', () => {
         .click();
       await page.menu.clickMenuItem('Run>Run Selected Cell');
 
+      // Confirm that the parent shell is still a parent shell (subshell ID is None),
+      // and that the new subshell appears in the "subshell list".
       const output3 = notebook.locator('.jp-OutputArea-output').locator('pre');
       const text3 = (await output3.innerText()).split('\n');
       expect(text3[0]).toEqual('subshell id: None');

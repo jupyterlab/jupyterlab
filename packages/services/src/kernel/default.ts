@@ -243,7 +243,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Check if this kernel supports JEP 91 kernel subshells.
    */
-  supportsSubshells(): boolean {
+  get supportsSubshells(): boolean {
     return this._supportsSubshells;
   }
 
@@ -826,7 +826,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     KernelMessage.ICreateSubshellRequestMsg,
     KernelMessage.ICreateSubshellReplyMsg
   > {
-    if (!this.supportsSubshells()) {
+    if (!this.supportsSubshells) {
       throw new Error('Kernel subshells are not supported');
     }
 
@@ -859,7 +859,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     KernelMessage.IDeleteSubshellRequestMsg,
     KernelMessage.IDeleteSubshellReplyMsg
   > {
-    if (!this.supportsSubshells()) {
+    if (!this.supportsSubshells) {
       throw new Error('Kernel subshells are not supported');
     }
 
@@ -892,7 +892,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     KernelMessage.IListSubshellRequestMsg,
     KernelMessage.IListSubshellReplyMsg
   > {
-    if (!this.supportsSubshells()) {
+    if (!this.supportsSubshells) {
       throw new Error('Kernel subshells are not supported');
     }
 

@@ -427,7 +427,10 @@ async function activateConsole(
           await future.done;
         })
         .catch(reason => {
-          console.error('Failed to initialize SessionContext.', reason);
+          console.error(
+            'Failed to initialize SessionContext or create new subshell.',
+            reason
+          );
         });
     }
 
