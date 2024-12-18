@@ -1151,7 +1151,7 @@ the intended use cases, and the way these are exposed in the user interface are 
 
 * Drive:
 
-  * Use case: provision of additional content, not available on the default drive,
+  * Use case: provision of additional content, not available on the default drive.
 
   * UI: paths of files and directories from the drive are prefixed with the drive name and colon.
 
@@ -1244,9 +1244,9 @@ To use a content provider, first register it on a drive (or multiple drives):
         return;
       }
       const customContentProvider = new CustomContentProvider({
-        // These options are only reqired if extending the `RestContentProvider`.
+        // These options are only required if extending the `RestContentProvider`.
         apiEndpoint: '/api/contents',
-        serverSettings: defaultDrive.serverSettings,
+        serverSettings: app.serviceManager.serverSettings,
       });
       registry.register('my-custom-provider', customContentProvider);
     }

@@ -1808,7 +1808,7 @@ export namespace RestContentProvider {
  */
 export interface IContentProviderRegistry {
   /**
-   * Add a content provider into the registry.
+   * Add a content provider to the registry.
    *
    * @param identifier - The identifier of the provider; it can be reused between drives.
    * @param provider - The content provider to register.
@@ -1818,7 +1818,7 @@ export interface IContentProviderRegistry {
   /**
    * Get a content provider matching provided identifier.
    *
-   * If not identifier is provided, return the default provider.
+   * If no identifier is provided, return the default provider.
    * Throws an error if a provider with given identifier is not found.
    *
    * @param identifier - identifier of the content provider.
