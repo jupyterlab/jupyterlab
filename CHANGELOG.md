@@ -393,6 +393,30 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.4
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.3...541b913d80679e1315a4d0843e1dfb6ac32ab16f))
+
+### Bugs fixed
+
+- Sync Settings Editor with Updated Settings [#17091](https://github.com/jupyterlab/jupyterlab/pull/17091) ([@Darshan808](https://github.com/Darshan808))
+- Focus terminal after copy and paste operations [#17097](https://github.com/jupyterlab/jupyterlab/pull/17097) ([@krassowski](https://github.com/krassowski))
+- Fix background of the popup toolbar [#17098](https://github.com/jupyterlab/jupyterlab/pull/17098) ([@krassowski](https://github.com/krassowski))
+- Fix consecutive invocations of inline completion [#17082](https://github.com/jupyterlab/jupyterlab/pull/17082) ([@fcollonval](https://github.com/fcollonval))
+- Fix contrast for unselected search matches in Dark High Contrast theme [#17065](https://github.com/jupyterlab/jupyterlab/pull/17065) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Workaround the Chromium bug with `navigator.language` [#17094](https://github.com/jupyterlab/jupyterlab/pull/17094) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-12-10&to=2024-12-18&type=c))
+
+[@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-12-10..2024-12-18&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2024-12-10..2024-12-18&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-12-10..2024-12-18&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-12-10..2024-12-18&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-12-10..2024-12-18&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-12-10..2024-12-18&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-12-10..2024-12-18&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.3.3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.2...613396a4837586e67e7420155c6cad1d9c8903f1))
@@ -417,8 +441,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-12-03&to=2024-12-10&type=c))
 
 [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-12-03..2024-12-10&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-12-03..2024-12-10&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-12-03..2024-12-10&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-12-03..2024-12-10&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-12-03..2024-12-10&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.3.2
 
