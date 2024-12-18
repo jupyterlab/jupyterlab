@@ -353,6 +353,20 @@ test('Settings Export: Clicking the export button triggers a download and matche
   fs.unlinkSync(downloadPath);
 });
 
+test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
+  });
+  await page.menu.clickMenuItem('Settings>Theme>Theme Scrollbars');
+  await expect(
+    page.locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme-scrollbars'
+    )
+  ).toBeChecked();
+});
+
 test('Settings Import: Importing a JSON file applies the correct settings', async ({
   page
 }) => {
