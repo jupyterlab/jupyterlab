@@ -183,6 +183,11 @@ const RENDER_TIMEOUT = 1000;
  */
 const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
+/**
+ * The data attribute set on cells for tags
+ */
+const TAGS_DATA_ATTRIBUTE = 'jpTags';
+
 /** ****************************************************************************
  * Cell
  ******************************************************************************/
@@ -212,6 +217,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._inViewport = null;
     this.placeholder = options.placeholder ?? true;
 
+    this._setTagsAttribute();
     model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
@@ -711,8 +717,21 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           this.loadEditableState();
         }
         break;
+      case 'tags':
+        this._setTagsAttribute();
+        break;
       default:
         break;
+    }
+  }
+
+  private _setTagsAttribute() {
+    const tags: string[] = this.model.getMetadata('tags') ?? [];
+    if (tags.length) {
+      this.node.dataset[TAGS_DATA_ATTRIBUTE] =
+        ',' + tags.sort().join(',') + ',';
+    } else {
+      delete this.node.dataset[TAGS_DATA_ATTRIBUTE];
     }
   }
 

@@ -15,7 +15,7 @@ export function PluginRequiredMessage(props: {
         'The plugin "%1" cannot be disabled as it is required by other plugins:',
         props.plugin.id
       )}
-      <ul>
+      <ul className="jp-mod-scrollable">
         {props.dependants.map(plugin => (
           <li key={'dependantsDialog-' + plugin.id}>{plugin.id}</li>
         ))}
@@ -36,7 +36,7 @@ export function PluginInUseMessage(props: {
         'While the plugin "%1" is not required by other enabled plugins, some plugins provide optional features depending on it. These plugins are:',
         props.plugin.id
       )}
-      <ul>
+      <ul className="jp-mod-scrollable">
         {props.optionalDependants.map(plugin => (
           <li key={'optionalDependantsDialog-' + plugin.id}>{plugin.id}</li>
         ))}

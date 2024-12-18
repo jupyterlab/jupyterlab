@@ -156,6 +156,7 @@
   "@jupyterlab/notebook-extension:update-raw-mimetype": "Adds metadata form editor for raw cell mimetype.",
   "@jupyterlab/notebook-extension:metadata-editor": "Adds metadata form for full metadata editor.",
   "@jupyterlab/notebook-extension:active-cell-tool": "Adds active cell field in the metadata editor tab.",
+  "@jupyterlab/notebook-extension:cell-filters": "Filter cells.",
   "@jupyterlab/pluginmanager-extension:plugin": "Enable or disable individual plugins.",
   "@jupyterlab/rendermime-extension:plugin": "Provides the render mime registry.",
   "@jupyterlab/running-extension:plugin": "Provides the running session managers.",
