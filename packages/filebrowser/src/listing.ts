@@ -3569,8 +3569,11 @@ namespace Private {
      * Compare two items by their name using `translator.languageCode`, with fallback to `navigator.language`.
      */
     function compareByName(a: Contents.IModel, b: Contents.IModel) {
+      // Wokaround for Chromium invalid language code on CI, see
+      // https://github.com/jupyterlab/jupyterlab/issues/17079
+      const navigatorLanguage = navigator.language.split('@')[0];
       const languageCode = (
-        translator.languageCode ?? navigator.language
+        translator.languageCode ?? navigatorLanguage
       ).replace('_', '-');
       try {
         return a.name.localeCompare(b.name, languageCode, {
@@ -3581,7 +3584,7 @@ namespace Private {
         console.warn(
           `localeCompare failed to compare ${a.name} and ${b.name} under languageCode: ${languageCode}`
         );
-        return a.name.localeCompare(b.name, navigator.language, {
+        return a.name.localeCompare(b.name, navigatorLanguage, {
           numeric: true,
           sensitivity: 'base'
         });
