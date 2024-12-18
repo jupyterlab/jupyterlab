@@ -1869,7 +1869,7 @@ function activateNotebookHandler(
     factory.notebookConfig = {
       enableKernelInitNotification: settings.get('enableKernelInitNotification')
         .composite as boolean,
-      renderMarkdownOnCursorLeave: settings.get('renderMarkdownOnCursorLeave')
+      autoRenderMarkdownCells: settings.get('autoRenderMarkdownCells')
         .composite as boolean,
       showHiddenCellsButton: settings.get('showHiddenCellsButton')
         .composite as boolean,
