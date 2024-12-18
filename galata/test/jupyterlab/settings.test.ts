@@ -315,3 +315,17 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
     'settings-shortcuts-edit.png'
   );
 });
+
+test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
+  });
+  await page.menu.clickMenuItem('Settings>Theme>Theme Scrollbars');
+  await expect(
+    page.locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme-scrollbars'
+    )
+  ).toBeChecked();
+});
