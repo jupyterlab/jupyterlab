@@ -1626,12 +1626,26 @@ namespace Private {
   }
 }
 
+/**
+ * The default registry of content providers.
+ */
 class ContentProviderRegistry implements IContentProviderRegistry {
+  /**
+   * Construct a new content provider registry.
+   *
+   * @param options - The options used to initialize the registry.
+   */
   constructor(options: ContentProviderRegistry.IOptions) {
     this.register('default', options.defaultProvider);
     this._defaultProvider = options.defaultProvider;
   }
 
+  /**
+   * Add a content provider to the registry.
+   *
+   * @param identifier - The identifier of the provider; it can be reused between drives.
+   * @param provider - The content provider to register.
+   */
   register(identifier: string, provider: IContentProvider): IDisposable {
     if (this._providers.has(identifier)) {
       throw Error(
@@ -1661,6 +1675,14 @@ class ContentProviderRegistry implements IContentProviderRegistry {
     });
   }
 
+  /**
+   * Get a content provider matching provided identifier.
+   *
+   * If no identifier is provided, return the default provider.
+   * Throws an error if a provider with given identifier is not found.
+   *
+   * @param identifier - identifier of the content provider.
+   */
   getProvider(identifier?: string): IContentProvider {
     if (!identifier) {
       return this._defaultProvider;
@@ -1672,6 +1694,9 @@ class ContentProviderRegistry implements IContentProviderRegistry {
     return provider;
   }
 
+  /**
+   * A proxy of the file changed signal for all the providers.
+   */
   get fileChanged(): ISignal<IContentProviderRegistry, Contents.IChangedArgs> {
     return this._fileChanged;
   }
