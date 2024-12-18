@@ -807,6 +807,31 @@ describe('@jupyter/notebook', () => {
         widget.activeCellIndex = 1;
         expect(widget.activeCell).toBe(widget.widgets[1]);
       });
+
+      it('should render a markdown cell when moving active cells if autoRenderMarkdownCells is true', () => {
+        const widget = createActiveWidget();
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '# Hello'
+        }); // Should be rendered with content.
+        const child = widget.widgets[0] as MarkdownCell;
+        expect(child.rendered).toBe(true);
+        widget.activeCellIndex = 0;
+        widget.mode = 'edit';
+        expect(child.rendered).toBe(false);
+
+        // Turn on rendering of markdown cells when exiting
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          autoRenderMarkdownCells: true
+        };
+
+        // Exiting should trigger rendering of the old cell
+        widget.activeCellIndex = 1;
+        expect(child.rendered).toBe(true);
+      });
     });
 
     describe('#activeCell', () => {
