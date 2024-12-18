@@ -1268,12 +1268,14 @@ and then create and register a widget factory which will understand how to make 
     }
 
     get contentProviderId(): string {
+      // Instructs the document registry to use the custom provider
+      // for context of widgets created with `ExampleWidgetFactory`.
       return 'my-custom-provider';
     }
   }
 
-  const customContentProviderPlugin: JupyterFrontEndPlugin<void> = {
-    id: 'my-extension:custom-content-provider',
+  const widgetFactoryPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-widget-factory',
     autoStart: true,
     activate: (app: JupyterFrontEnd) => {
 

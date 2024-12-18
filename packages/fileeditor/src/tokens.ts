@@ -23,7 +23,7 @@ export const IEditorTracker = new Token<IEditorTracker>(
 );
 
 /**
- * The notebook widget factory token.
+ * The editor widget factory token.
  */
 export const IEditorWidgetFactory = new Token<FileEditorFactory.IFactory>(
   '@jupyterlab/fileeditor:IEditorWidgetFactory',

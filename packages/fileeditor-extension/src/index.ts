@@ -106,7 +106,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
 };
 
 /**
- * The editor tracker extension.
+ * The widget factory extension.
  */
 const widgetFactory: JupyterFrontEndPlugin<FileEditorFactory.IFactory> = {
   id: '@jupyterlab/fileeditor-extension:widget-factory',
