@@ -264,9 +264,9 @@ html_theme_options = {
             "icon": "fab fa-discourse",
         },
         {
-            "name": "Gitter",
-            "url": "https://gitter.im/jupyterlab/jupyterlab",
-            "icon": "fab fa-gitter",
+            "name": "Zulip",
+            "url": "https://jupyter.zulipchat.com/channel/469762-jupyterlab",
+            "icon": "fab fa-zulip",
         },
     ],
     "logo": {
