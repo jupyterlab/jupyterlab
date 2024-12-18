@@ -1700,8 +1700,6 @@ namespace ContentProviderRegistry {
  * A content provider using the Jupyter REST API.
  */
 export class RestContentProvider implements IContentProvider {
-  identifier: 'rest';
-
   constructor(options: RestContentProvider.IOptions) {
     this._options = options;
   }
