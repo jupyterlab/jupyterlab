@@ -452,6 +452,8 @@ function addCommands(
 
       if (text) {
         Clipboard.copyToSystem(text);
+        // Focus the widget to ensure user can continue typing
+        widget.activate();
       }
     },
     isEnabled: () => {
@@ -490,6 +492,8 @@ function addCommands(
       if (clipboardData) {
         // Paste data to the terminal
         widget.paste(clipboardData);
+        // Focus the widget to ensure user can continue typing
+        widget.activate();
       }
     },
     isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
