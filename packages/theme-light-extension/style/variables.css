@@ -385,12 +385,10 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-search-toggle-off-opacity: 0.5;
   --jp-search-toggle-hover-opacity: 0.8;
   --jp-search-toggle-on-opacity: 1;
-  --jp-search-selected-match-background-color: rgb(245, 200, 0);
-  --jp-search-selected-match-color: black;
-  --jp-search-unselected-match-background-color: var(
-    --jp-inverse-layout-color0
-  );
-  --jp-search-unselected-match-color: var(--jp-ui-inverse-font-color0);
+  --jp-search-selected-match-background-color: #0f5ae6;
+  --jp-search-selected-match-color: #ffffff;
+  --jp-search-unselected-match-background-color: #2c84d6;
+  --jp-search-unselected-match-color: #ffffff;
 
   /* Icon colors that work well with light or dark backgrounds */
   --jp-icon-contrast-color0: var(--md-purple-600, #8e24aa);
