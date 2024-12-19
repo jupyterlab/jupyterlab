@@ -51,6 +51,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     this._clientId = options.clientId ?? UUID.uuid4();
+    this._shellId = options.shellId ?? null;
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
 
@@ -176,6 +177,20 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   get clientId(): string {
     return this._clientId;
+  }
+
+  /**
+   * The sub-shell ID.
+   */
+  get shellId(): string | null {
+    return this._shellId;
+  }
+
+  /**
+   * The sub-shell ID.
+   */
+  set shellId(value: string | null) {
+    this._shellId = value;
   }
 
   /**
@@ -722,6 +737,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      shellId: this._shellId,
       content: { ...defaults, ...content },
       metadata
     });
@@ -732,6 +748,35 @@ export class KernelConnection implements Kernel.IKernelConnection {
     ) as Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
+    >;
+  }
+
+  /**
+   * Send an experimental `create_subshell_request` message.
+   *
+   * @hidden
+   */
+  requestCreateSubshell(
+    content: KernelMessage.ICreateSubshellRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.ICreateSubshellRequestMsg,
+    KernelMessage.ICreateSubshellReplyMsg
+  > {
+    const msg = KernelMessage.createMessage({
+      msgType: 'create_subshell_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.ICreateSubshellRequestMsg,
+      KernelMessage.ICreateSubshellReplyMsg
     >;
   }
 
@@ -1631,6 +1676,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
   private _clientId: string;
+  private _shellId: string | null;
   private _isDisposed = false;
   /**
    * Websocket to communicate with kernel.
