@@ -1137,8 +1137,8 @@ Occasionally, LSP extensions include a CodeMirror extension to modify the code e
   };
 
 
-File System
------------
+Content Provisioning
+--------------------
 
 The file system interactions can be customized by adding:
 
