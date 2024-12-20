@@ -33,6 +33,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     this._editorToCell = new Map();
     this.editor = editorWidget.content;
     this._cellToEditor = new WeakMap();
+    this.isReady = this.isReady.bind(this);
     Promise.all([
       this.widget.context.sessionContext.ready,
       this.connectionManager.ready
