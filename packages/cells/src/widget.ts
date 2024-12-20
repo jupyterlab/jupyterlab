@@ -1314,7 +1314,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
         if (htmlType) {
           let htmlData = m.data[htmlType] as string | string[];
           if (typeof htmlData !== 'string') {
-            htmlData = htmlData.join('');
+            htmlData = htmlData.join('\n');
           }
           headings.push(
             ...TableOfContentsUtils.getHTMLHeadings(
