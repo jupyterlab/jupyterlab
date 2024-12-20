@@ -38,6 +38,28 @@ function createFactory(): WidgetFactory {
 
 describe('docregistry/default', () => {
   describe('ABCWidgetFactory', () => {
+    describe('#contentProviderId', () => {
+      it('should be the value passed in', () => {
+        const factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text'],
+          contentProviderId: 'rtc'
+        });
+        expect(factory.contentProviderId).toEqual('rtc');
+      });
+      it('should allow to set value once', () => {
+        const factory = new WidgetFactory({
+          name: 'test',
+          fileTypes: ['text']
+        });
+        factory.contentProviderId = 'rtc';
+        expect(factory.contentProviderId).toEqual('rtc');
+        expect(() => {
+          factory.contentProviderId = 'test';
+        }).toThrow(Error);
+      });
+    });
+
     describe('#fileTypes', () => {
       it('should be the value passed in', () => {
         const factory = new WidgetFactory({

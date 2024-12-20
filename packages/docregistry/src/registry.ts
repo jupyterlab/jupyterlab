@@ -1054,6 +1054,12 @@ export namespace DocumentRegistry {
     readonly autoStartDefault?: boolean;
 
     /**
+     * Identifier of the content provider required for the widget (if any).
+     * @experimental
+     */
+    readonly contentProviderId?: string;
+
+    /**
      * Whether the widget factory is read only.
      */
     readonly readOnly?: boolean;
@@ -1145,6 +1151,12 @@ export namespace DocumentRegistry {
      * It should emit the [widgetCreated] signal with the new widget.
      */
     createNew(context: IContext<U>, source?: T): T;
+
+    /**
+     * Identifier of the content provider required for the widget (if any).
+     * @experimental
+     */
+    contentProviderId?: string;
   }
 
   /**

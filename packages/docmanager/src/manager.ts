@@ -549,7 +549,8 @@ export class DocumentManager implements IDocumentManager {
   private _createContext(
     path: string,
     factory: DocumentRegistry.ModelFactory,
-    kernelPreference?: ISessionContext.IKernelPreference
+    kernelPreference?: ISessionContext.IKernelPreference,
+    contentProviderId?: string
   ): Private.IContext {
     // TODO: Make it impossible to open two different contexts for the same
     // path. Or at least prompt the closing of all widgets associated with the
@@ -576,7 +577,8 @@ export class DocumentManager implements IDocumentManager {
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
-      translator: this.translator
+      translator: this.translator,
+      contentProviderId
     });
     const handler = new SaveHandler({
       context,
@@ -659,13 +661,23 @@ export class DocumentManager implements IDocumentManager {
       // Use an existing context if available.
       context = this._findContext(path, factory.name) || null;
       if (!context) {
-        context = this._createContext(path, factory, preference);
+        context = this._createContext(
+          path,
+          factory,
+          preference,
+          widgetFactory.contentProviderId
+        );
         // Populate the model, either from disk or a
         // model backend.
         ready = this._when.then(() => context!.initialize(false));
       }
     } else if (which === 'create') {
-      context = this._createContext(path, factory, preference);
+      context = this._createContext(
+        path,
+        factory,
+        preference,
+        widgetFactory.contentProviderId
+      );
       // Immediately save the contents to disk.
       ready = this._when.then(() => context!.initialize(true));
     } else {
