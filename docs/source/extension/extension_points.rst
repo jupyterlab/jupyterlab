@@ -1266,12 +1266,6 @@ and then create and register a widget factory which will understand how to make 
         content: new ExamplePanel(context)
       });
     }
-
-    get contentProviderId(): string {
-      // Instructs the document registry to use the custom provider
-      // for context of widgets created with `ExampleWidgetFactory`.
-      return 'my-custom-provider';
-    }
   }
 
   const widgetFactoryPlugin: JupyterFrontEndPlugin<void> = {
@@ -1284,6 +1278,9 @@ and then create and register a widget factory which will understand how to make 
         modelName: 'example-model',
         fileTypes: ['example'],
         defaultFor: ['example'],
+        // Instructs the document registry to use the custom provider
+        // for context of widgets created with `ExampleWidgetFactory`.
+        contentProviderId: 'my-custom-provider'
       });
       app.docRegistry.addWidgetFactory(widgetFactory);
     }

@@ -1054,6 +1054,12 @@ export namespace DocumentRegistry {
     readonly autoStartDefault?: boolean;
 
     /**
+     * Identifier of the content provider required for the widget (if any).
+     * @experimental
+     */
+    readonly contentProviderId?: string;
+
+    /**
      * Whether the widget factory is read only.
      */
     readonly readOnly?: boolean;
