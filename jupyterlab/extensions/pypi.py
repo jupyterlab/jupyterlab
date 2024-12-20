@@ -62,21 +62,26 @@ https_proxy_url = (
 _httpx_version = Version(httpx.__version__)
 _httpx_client_args = {}
 
-proxies = None
 xmlrpc_transport_override = None
 
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
-    proxies = {
-        "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
-        "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
-    }
-
-    _httpx_client_args = {
-        ("mounts" if _httpx_version >= Version("0.28.0") else "proxies"): proxies,
-    }
+    if _httpx_version >= Version("0.28.0"):
+        _httpx_client_args = {
+            "mounts": {
+                "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
+                "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
+            }
+        }
+    else:
+        _httpx_client_args = {
+            "proxies": {
+                "http://": http_proxy_url,
+                "https://": https_proxy_url,
+            }
+        }
 
     xmlrpc_transport_override = ProxiedTransport()
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
