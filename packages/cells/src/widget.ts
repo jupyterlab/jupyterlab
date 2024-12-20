@@ -1312,9 +1312,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
         // Parse HTML output
         if (htmlType) {
+          let htmlData = m.data[htmlType] as string | string[];
+          if (typeof htmlData !== 'string') {
+            htmlData = htmlData.join('');
+          }
           headings.push(
             ...TableOfContentsUtils.getHTMLHeadings(
-              this._rendermime.sanitizer.sanitize(m.data[htmlType] as string)
+              this._rendermime.sanitizer.sanitize(htmlData)
             ).map(heading => {
               return {
                 ...heading,
