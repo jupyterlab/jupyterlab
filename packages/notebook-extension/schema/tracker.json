@@ -727,6 +727,12 @@
         "matchBrackets": false
       }
     },
+    "autoRenderMarkdownCells": {
+      "title": "Automatically render markdown when cursor leaves markdown cells",
+      "description": "Whether to render markdown cells when the cursor moves out of them.",
+      "type": "boolean",
+      "default": false
+    },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells; it will override the CodeMirror default configuration.",

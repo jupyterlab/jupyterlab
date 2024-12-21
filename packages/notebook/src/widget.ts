@@ -1190,6 +1190,11 @@ export namespace StaticNotebook {
     renderingLayout: RenderingLayout;
 
     /**
+     * Automatically render markdown when the cursor leaves a markdown cell
+     */
+    autoRenderMarkdownCells: boolean;
+
+    /**
      * Enable scrolling past the last cell
      */
     scrollPastEnd: boolean;
@@ -1243,6 +1248,7 @@ export namespace StaticNotebook {
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
     disableDocumentWideUndoRedo: true,
+    autoRenderMarkdownCells: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
@@ -1704,6 +1710,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._activeCellIndex = newValue;
+    const oldCell = this.widgets[oldValue] ?? null;
     const cell = this.widgets[newValue] ?? null;
     (this.layout as NotebookWindowedLayout).activeCell = cell;
     const cellChanged = cell !== this._activeCell;
@@ -1717,9 +1724,19 @@ export class Notebook extends StaticNotebook {
       this._activeCellChanged.emit(cell);
     }
 
-    if (this.mode === 'edit' && cell instanceof MarkdownCell) {
-      cell.rendered = false;
+    if (this.mode === 'edit') {
+      if (cell instanceof MarkdownCell) {
+        cell.rendered = false;
+      }
+      if (
+        this.notebookConfig.autoRenderMarkdownCells &&
+        cellChanged &&
+        oldCell instanceof MarkdownCell
+      ) {
+        oldCell.rendered = true;
+      }
     }
+
     this._ensureFocus();
     if (newValue === oldValue) {
       return;
