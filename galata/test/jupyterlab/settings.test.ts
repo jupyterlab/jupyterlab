@@ -5,6 +5,7 @@ import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { LogConsoleHelper } from '../../lib/helpers';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -34,6 +35,15 @@ test('Open the settings editor with a specific search query', async ({
   expect(await settingsPanel.screenshot()).toMatchSnapshot(
     'settings-panel.png'
   );
+  
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'CodeMirror'
+    });
+  });
+
+  await expect(page.locator('.jp-SettingsForm')).toHaveCount(2);
+
 });
 
 test.describe('change font-size', () => {

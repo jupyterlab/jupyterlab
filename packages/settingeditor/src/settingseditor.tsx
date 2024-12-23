@@ -11,7 +11,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFormRendererRegistry,
   ReactWidget,
-  UseSignal
+  UseSignal,
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -38,6 +38,7 @@ export class SettingsEditor extends SplitPanel {
       registry: options.registry,
       // Filters out a couple of plugins that take too long to load in the new settings editor.
       toSkip: options.toSkip
+
     });
     this._list = new PluginList({
       registry: options.registry,
@@ -106,6 +107,12 @@ export class SettingsEditor extends SplitPanel {
       this.title.className = this.title.className.replace('jp-mod-dirty', '');
     }
     this._saveStateChange.emit(dirty ? 'started' : 'completed');
+  }
+
+  updateQuery(query: string): void {
+    console.log("setting query")
+    this._list.setQuery(query);
+    console.log("finished updating query")
   }
 
   /**
