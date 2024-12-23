@@ -109,6 +109,11 @@ export class SettingsEditor extends SplitPanel {
     this._saveStateChange.emit(dirty ? 'started' : 'completed');
   }
 
+  /**
+   * Updates the filter of the plugin list.
+   *
+   * @param query The query to filter the plugin list
+   */
   updateQuery(query: string): void {
     this._list.setFilter(
       query ? updateFilterFunction(query, false, false) : null,
