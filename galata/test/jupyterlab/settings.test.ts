@@ -42,7 +42,7 @@ test('Open the settings editor with a specific search query', async ({
     });
   });
 
-  await expect(page.locator('.jp-SettingsForm')).toHaveCount(2);
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
 
 });
 

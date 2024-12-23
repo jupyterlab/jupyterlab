@@ -12,6 +12,7 @@ import {
   IFormRendererRegistry,
   ReactWidget,
   UseSignal,
+  updateFilterFunction
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -110,9 +111,7 @@ export class SettingsEditor extends SplitPanel {
   }
 
   updateQuery(query: string): void {
-    console.log("setting query")
-    this._list.setQuery(query);
-    console.log("finished updating query")
+    this._list.setFilter(query ? updateFilterFunction(query, false, false) : null, query);
   }
 
   /**
