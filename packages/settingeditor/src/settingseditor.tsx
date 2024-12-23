@@ -11,8 +11,8 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFormRendererRegistry,
   ReactWidget,
-  UseSignal,
-  updateFilterFunction
+  updateFilterFunction,
+  UseSignal
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -39,7 +39,6 @@ export class SettingsEditor extends SplitPanel {
       registry: options.registry,
       // Filters out a couple of plugins that take too long to load in the new settings editor.
       toSkip: options.toSkip
-
     });
     this._list = new PluginList({
       registry: options.registry,
@@ -111,7 +110,10 @@ export class SettingsEditor extends SplitPanel {
   }
 
   updateQuery(query: string): void {
-    this._list.setFilter(query ? updateFilterFunction(query, false, false) : null, query);
+    this._list.setFilter(
+      query ? updateFilterFunction(query, false, false) : null,
+      query
+    );
   }
 
   /**

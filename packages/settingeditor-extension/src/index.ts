@@ -27,7 +27,7 @@ import {
   IFormRendererRegistry,
   launchIcon,
   Toolbar,
-  ToolbarButton,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
@@ -131,7 +131,7 @@ function activate(
       if (!tracker.currentWidget.isAttached) {
         shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
-      console.log("attach to settings")
+      console.log('attach to settings');
       shell.activateById(tracker.currentWidget.id);
       const settingsWidget = tracker.currentWidget.content as SettingsEditor;
       settingsWidget.updateQuery(args.query ?? '');

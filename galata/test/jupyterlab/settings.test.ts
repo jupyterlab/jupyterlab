@@ -34,7 +34,7 @@ test('Open the settings editor with a specific search query', async ({
   expect(await settingsPanel.screenshot()).toMatchSnapshot(
     'settings-panel.png'
   );
-  
+
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open', {
       query: 'CodeMirror'
@@ -42,7 +42,6 @@ test('Open the settings editor with a specific search query', async ({
   });
 
   await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
-
 });
 
 test.describe('change font-size', () => {
