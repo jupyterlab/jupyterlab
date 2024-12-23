@@ -131,7 +131,6 @@ function activate(
       if (!tracker.currentWidget.isAttached) {
         shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
-      console.log('attach to settings');
       shell.activateById(tracker.currentWidget.id);
       const settingsWidget = tracker.currentWidget.content as SettingsEditor;
       settingsWidget.updateQuery(args.query ?? '');
