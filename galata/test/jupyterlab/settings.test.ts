@@ -5,7 +5,6 @@ import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
-import { LogConsoleHelper } from '../../lib/helpers';
 
 test('Open the settings editor with a specific search query', async ({
   page
