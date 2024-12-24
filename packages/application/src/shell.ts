@@ -2397,11 +2397,19 @@ namespace Private {
   }
 
   export class RestorableSplitPanel extends SplitPanel {
-    updated: Signal<RestorableSplitPanel, void>;
-
+    /**
+     * Construct a new RestorableSplitPanel.
+     */
     constructor(options: SplitPanel.IOptions = {}) {
       super(options);
-      this.updated = new Signal(this);
+      this._updated = new Signal(this);
+    }
+
+    /**
+     * A signal emitted when the split panel is updated.
+     */
+    get updated(): ISignal<RestorableSplitPanel, void> {
+      return this._updated;
     }
 
     /**
@@ -2409,7 +2417,9 @@ namespace Private {
      */
     protected onUpdateRequest(msg: Message): void {
       super.onUpdateRequest(msg);
-      this.updated.emit();
+      this._updated.emit();
     }
+
+    private _updated: Signal<RestorableSplitPanel, void>;
   }
 }
