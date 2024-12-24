@@ -2191,6 +2191,7 @@ __metadata:
     "@jupyterlab/apputils": ^4.5.0-alpha.1
     "@jupyterlab/coreutils": ^6.4.0-alpha.1
     "@jupyterlab/property-inspector": ^4.4.0-alpha.1
+    "@jupyterlab/services": ^7.4.0-alpha.1
     "@jupyterlab/settingregistry": ^4.4.0-alpha.1
     "@jupyterlab/statedb": ^4.4.0-alpha.1
     "@jupyterlab/statusbar": ^4.4.0-alpha.1
