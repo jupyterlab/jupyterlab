@@ -126,12 +126,14 @@ function activate(
     });
   }
 
-  const openUi = async (args: { query: string }) => {
+  const openUi = async (args: { query?: string }) => {
     if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
       if (!tracker.currentWidget.isAttached) {
         shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
       shell.activateById(tracker.currentWidget.id);
+      const settingsWidget = tracker.currentWidget.content as SettingsEditor;
+      settingsWidget.updateQuery(args.query ?? '');
       return;
     }
 
