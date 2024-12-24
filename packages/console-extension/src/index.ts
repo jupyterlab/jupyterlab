@@ -30,6 +30,7 @@ import {
 } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import {
+  CodeConsole,
   ConsolePanel,
   IConsoleCellExecutor,
   IConsoleTracker
@@ -370,6 +371,11 @@ async function activateConsole(
      * Its typical value is: a factory name or the widget id (if singleton)
      */
     type?: string;
+
+    /**
+     * Where to place the prompt cell
+     */
+    promptCellPosition?: CodeConsole.promptCellPosition;
   }
 
   /**
@@ -417,6 +423,7 @@ async function activateConsole(
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
+  let promptCellPosition: CodeConsole.promptCellPosition;
 
   /**
    * Update settings for one console or all consoles.
@@ -428,6 +435,9 @@ async function activateConsole(
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
       .composite as JSONObject;
+    promptCellPosition = (
+      await settingRegistry.get(pluginId, 'promptCellPosition')
+    ).composite as CodeConsole.promptCellPosition;
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
@@ -517,7 +527,7 @@ async function activateConsole(
             return item.path === path;
           });
           if (model) {
-            return createConsole(args);
+            return createConsole({ ...args, promptCellPosition });
           }
           return Promise.reject(`No running kernel session for path: ${path}`);
         });
@@ -548,7 +558,7 @@ async function activateConsole(
           (args['cwd'] as string) ||
           filebrowser?.model.path) ??
         '';
-      return createConsole({ basePath, ...args });
+      return createConsole({ basePath, promptCellPosition, ...args });
     }
   });
 

@@ -125,6 +125,13 @@
         "codeFolding": false,
         "lineNumbers": false
       }
+    },
+    "promptCellPosition": {
+      "title": "Prompt Cell Position",
+      "description": "Where to place the prompt cell of the console.",
+      "type": "string",
+      "enum": ["bottom", "top", "left", "right"],
+      "default": "bottom"
     }
   },
   "additionalProperties": false,
