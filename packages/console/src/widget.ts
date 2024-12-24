@@ -226,11 +226,7 @@ export class CodeConsole extends Widget {
    */
   addCell(cell: CodeCell, msgId?: string): void {
     cell.addClass(CONSOLE_CELL_CLASS);
-    if (this._promptCellPosition === 'bottom') {
-      this._content.addWidget(cell);
-    } else {
-      this._content.insertWidget(0, cell);
-    }
+    this._content.addWidget(cell);
     this._cells.push(cell);
     if (msgId) {
       this._msgIds.set(msgId, cell);
@@ -281,11 +277,7 @@ export class CodeConsole extends Widget {
     })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
-    if (this._promptCellPosition === 'bottom') {
-      this._content.addWidget(banner);
-    } else {
-      this._content.insertWidget(0, banner);
-    }
+    this._content.addWidget(banner);
   }
 
   /**
