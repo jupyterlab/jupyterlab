@@ -25,7 +25,7 @@ import { JSONObject, MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import { Panel, PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
 import { runCell } from './cellexecutor';
 import { ConsoleHistory, IConsoleHistory } from './history';
 import type { IConsoleCellExecutor } from './tokens';
@@ -119,26 +119,39 @@ export class CodeConsole extends Widget {
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
     this._input = new Panel();
+    this._promptCellPosition = options.promptCellPosition ?? 'bottom';
+    this._splitPanel = new SplitPanel({
+      spacing: 0,
+      orientation: ['left', 'right'].includes(this._promptCellPosition)
+        ? 'horizontal'
+        : 'vertical'
+    });
+    this._splitPanel.addClass('jp-CodeConsole-split');
 
     this.contentFactory = options.contentFactory;
     this.modelFactory = options.modelFactory ?? CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
     this.sessionContext = options.sessionContext;
     this._mimeTypeService = options.mimeTypeService;
-    this._promptCellPosition = options.promptCellPosition ?? 'bottom';
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
     // Insert the content and input panes into the widget.
-    if (this._promptCellPosition === 'bottom') {
-      layout.addWidget(this._content);
-      layout.addWidget(this._input);
+    SplitPanel.setStretch(this._content, 1);
+    SplitPanel.setStretch(this._input, 1);
+    if (
+      this._promptCellPosition === 'bottom' ||
+      this._promptCellPosition === 'right'
+    ) {
+      this._splitPanel.addWidget(this._content);
+      this._splitPanel.addWidget(this._input);
     } else {
-      layout.addWidget(this._input);
-      layout.addWidget(this._content);
+      this._splitPanel.addWidget(this._input);
+      this._splitPanel.addWidget(this._content);
     }
+    layout.addWidget(this._splitPanel);
 
     this._history = new ConsoleHistory({
       sessionContext: this.sessionContext
@@ -566,11 +579,14 @@ export class CodeConsole extends Widget {
       case 'mousedown':
         this._evtMouseDown(event as MouseEvent);
         break;
+      case 'mouseup':
+        this._evtMouseUp(event as MouseEvent);
+        break;
       case 'mousemove':
         this._evtMouseMove(event as MouseEvent);
         break;
-      case 'mouseup':
-        this._evtMouseUp(event as MouseEvent);
+      case 'resize':
+        this._splitPanel.fit();
         break;
       case 'focusin':
         this._evtFocusIn(event as MouseEvent);
@@ -911,13 +927,14 @@ export class CodeConsole extends Widget {
   private _drag: Drag | null = null;
   private _focusedCell: Cell | null = null;
   private _translator: ITranslator;
+  private _splitPanel: SplitPanel;
 }
 
 /**
  * A namespace for CodeConsole statics.
  */
 export namespace CodeConsole {
-  export type promptCellPosition = 'bottom' | 'top';
+  export type promptCellPosition = 'top' | 'bottom' | 'left' | 'right';
 
   /**
    * The initialization options for a console widget.
