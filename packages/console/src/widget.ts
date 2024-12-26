@@ -119,13 +119,7 @@ export class CodeConsole extends Widget {
     this._cells = new ObservableList<Cell>();
     this._content = new Panel();
     this._input = new Panel();
-    this._promptCellPosition = options.promptCellPosition ?? 'bottom';
-    this._splitPanel = new SplitPanel({
-      spacing: 0,
-      orientation: ['left', 'right'].includes(this._promptCellPosition)
-        ? 'horizontal'
-        : 'vertical'
-    });
+    this._splitPanel = new SplitPanel({ spacing: 0 });
     this._splitPanel.addClass('jp-CodeConsole-split');
 
     this.contentFactory = options.contentFactory;
@@ -138,20 +132,9 @@ export class CodeConsole extends Widget {
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
-    // Insert the content and input panes into the widget.
-    SplitPanel.setStretch(this._content, 1);
-    SplitPanel.setStretch(this._input, 1);
-    if (
-      this._promptCellPosition === 'bottom' ||
-      this._promptCellPosition === 'right'
-    ) {
-      this._splitPanel.addWidget(this._content);
-      this._splitPanel.addWidget(this._input);
-    } else {
-      this._splitPanel.addWidget(this._input);
-      this._splitPanel.addWidget(this._content);
-    }
     layout.addWidget(this._splitPanel);
+    // initialize the layout of the console
+    this._updateLayout();
 
     this._history = new ConsoleHistory({
       sessionContext: this.sessionContext
@@ -422,6 +405,15 @@ export class CodeConsole extends Widget {
       return;
     }
     promptCell.editor!.replaceSelection?.(text);
+  }
+
+  /**
+   * Set configuration options for the console.
+   * TODO: improve how options are managed?
+   */
+  setConfig(config: CodeConsole.IConfig): void {
+    this._config = config;
+    this._updateLayout();
   }
 
   /**
@@ -906,13 +898,38 @@ export class CodeConsole extends Widget {
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
+  /**
+   * Update the layout of console.
+   */
+  private _updateLayout(): void {
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    this._splitPanel.orientation = ['left', 'right'].includes(
+      promptCellPosition
+    )
+      ? 'horizontal'
+      : 'vertical';
+
+    // Insert the content and input panes into the widget.
+    SplitPanel.setStretch(this._content, 1);
+    SplitPanel.setStretch(this._input, 1);
+
+    if (promptCellPosition === 'bottom' || promptCellPosition === 'right') {
+      this._splitPanel.insertWidget(0, this._content);
+      this._splitPanel.insertWidget(1, this._input);
+    } else {
+      this._splitPanel.insertWidget(0, this._input);
+      this._splitPanel.insertWidget(1, this._content);
+    }
+  }
+
   private _banner: RawCell | null = null;
   private _cells: IObservableList<Cell>;
   private _content: Panel;
   private _executor: IConsoleCellExecutor;
   private _executed = new Signal<this, Date>(this);
   private _history: IConsoleHistory;
-  private _promptCellPosition = 'bottom';
+  private _config: CodeConsole.IConfig = {};
   private _input: Panel;
   private _mimetype = 'text/x-ipython';
   private _mimeTypeService: IEditorMimeTypeService;
@@ -934,7 +951,20 @@ export class CodeConsole extends Widget {
  * A namespace for CodeConsole statics.
  */
 export namespace CodeConsole {
-  export type promptCellPosition = 'top' | 'bottom' | 'left' | 'right';
+  /**
+   * Where the prompt cell is located.
+   */
+  export type PromptCellPosition = 'top' | 'bottom' | 'left' | 'right';
+
+  /**
+   * The configuration options for a console widget.
+   */
+  export interface IConfig {
+    clearCellsOnExecute?: boolean;
+    clearCodeContentOnExecute?: boolean;
+    promptCellPosition?: PromptCellPosition;
+    showBanner?: boolean;
+  }
 
   /**
    * The initialization options for a console widget.
@@ -978,7 +1008,7 @@ export namespace CodeConsole {
     /**
      * The position of the input cell for the console widget
      */
-    promptCellPosition?: promptCellPosition;
+    promptCellPosition?: PromptCellPosition;
   }
 
   /**

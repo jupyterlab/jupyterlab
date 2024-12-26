@@ -104,6 +104,18 @@
     }
   ],
   "properties": {
+    "clearCellsOnExecute": {
+      "title": "Clear Cells on Execute",
+      "description": "Whether to clear the console when code is executed.",
+      "type": "boolean",
+      "default": false
+    },
+    "clearCodeContentOnExecute": {
+      "title": "Clear Code Content on Execute",
+      "description": "Whether to clear the code content of the console when code is executed.",
+      "type": "boolean",
+      "default": false
+    },
     "interactionMode": {
       "title": "Interaction mode",
       "description": "Whether the console interaction mimics the notebook\nor terminal keyboard shortcuts.",
@@ -132,6 +144,12 @@
       "type": "string",
       "enum": ["bottom", "top", "left", "right"],
       "default": "bottom"
+    },
+    "showBanner": {
+      "title": "Show Banner",
+      "description": "Whether to show the kernel banner.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

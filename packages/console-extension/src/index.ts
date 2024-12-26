@@ -371,11 +371,6 @@ async function activateConsole(
      * Its typical value is: a factory name or the widget id (if singleton)
      */
     type?: string;
-
-    /**
-     * Where to place the prompt cell
-     */
-    promptCellPosition?: CodeConsole.promptCellPosition;
   }
 
   /**
@@ -421,9 +416,12 @@ async function activateConsole(
   }
 
   const pluginId = '@jupyterlab/console-extension:tracker';
+  let clearCellsOnExecute: boolean;
+  let clearCodeContentOnExecute: boolean;
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
-  let promptCellPosition: CodeConsole.promptCellPosition;
+  let promptCellPosition: CodeConsole.PromptCellPosition;
+  let showBanner: boolean;
 
   /**
    * Update settings for one console or all consoles.
@@ -431,13 +429,21 @@ async function activateConsole(
    * @param panel Optional - single console to update.
    */
   async function updateSettings(panel?: ConsolePanel) {
+    clearCellsOnExecute = (
+      await settingRegistry.get(pluginId, 'clearCellsOnExecute')
+    ).composite as boolean;
+    clearCodeContentOnExecute = (
+      await settingRegistry.get(pluginId, 'clearCodeCellContentOnExecute')
+    ).composite as boolean;
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
       .composite as JSONObject;
     promptCellPosition = (
       await settingRegistry.get(pluginId, 'promptCellPosition')
-    ).composite as CodeConsole.promptCellPosition;
+    ).composite as CodeConsole.PromptCellPosition;
+    showBanner = (await settingRegistry.get(pluginId, 'showBanner'))
+      .composite as boolean;
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
@@ -445,6 +451,14 @@ async function activateConsole(
       widget.console.editorConfig = promptCellConfig;
       // Update promptCell already on screen
       widget.console.promptCell?.editor?.setOptions(promptCellConfig);
+      // set other config options
+      // TODO: set options individually like the file browser?
+      widget.console.setConfig({
+        clearCellsOnExecute,
+        clearCodeContentOnExecute,
+        promptCellPosition,
+        showBanner
+      });
     };
 
     if (panel) {

@@ -257,7 +257,7 @@ export namespace ConsolePanel {
     /**
      * The position of the input cell for the console widget
      */
-    promptCellPosition?: CodeConsole.promptCellPosition;
+    promptCellPosition?: CodeConsole.PromptCellPosition;
   }
 
   /**
