@@ -46,7 +46,12 @@ import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  caretDownIcon,
+  caretLeftIcon,
+  caretRightIcon,
+  caretUpIcon,
   consoleIcon,
+  dockIcon,
   IFormRendererRegistry,
   redoIcon,
   refreshIcon,
@@ -62,7 +67,7 @@ import {
   UUID
 } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout, Widget } from '@lumino/widgets';
+import { DockLayout, Menu, MenuBar, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 
@@ -318,6 +323,24 @@ async function activateConsole(
       const indicator = Toolbar.createKernelStatusItem(sessionContext);
       return indicator;
     });
+
+    const dockMenu = new Menu({ commands });
+    ['top', 'left', 'right', 'bottom'].forEach(position => {
+      dockMenu.addItem({ command: `console:prompt-to-${position}` });
+    });
+    dockMenu.title.icon = dockIcon;
+    const overflowOptions = {
+      overflowMenuOptions: { isVisible: false }
+    };
+    toolbarRegistry.addFactory<ConsolePanel>(
+      factory,
+      'promptPosition',
+      panel => {
+        const menubar = new MenuBar(overflowOptions);
+        menubar.addMenu(dockMenu);
+        return menubar;
+      }
+    );
   }
 
   // Create a widget tracker for all console panels.
@@ -669,6 +692,35 @@ async function activateConsole(
     }
     return widget ?? null;
   }
+
+  /**
+   * Commands to change the position of the prompt cell.
+   */
+  const iconMap = {
+    top: caretUpIcon,
+    bottom: caretDownIcon,
+    right: caretRightIcon,
+    left: caretLeftIcon
+  };
+  ['top', 'bottom', 'right', 'left'].forEach(
+    (position: CodeConsole.PromptCellPosition) => {
+      const command = `console:prompt-to-${position}`;
+      commands.addCommand(command, {
+        execute: args => {
+          const current = getCurrent(args);
+
+          if (!current) {
+            return;
+          }
+
+          current.console.setConfig({ promptCellPosition: position });
+        },
+        isEnabled: isEnabled,
+        label: trans.__(`Prompt to ${position}`),
+        icon: iconMap[position]
+      });
+    }
+  );
 
   /**
    * Add undo command

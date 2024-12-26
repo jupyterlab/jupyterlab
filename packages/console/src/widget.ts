@@ -415,7 +415,7 @@ export class CodeConsole extends Widget {
    * TODO: improve how options are managed?
    */
   setConfig(config: CodeConsole.IConfig): void {
-    this._config = config;
+    this._config = { ...this._config, ...config };
     this._updateLayout();
   }
 
