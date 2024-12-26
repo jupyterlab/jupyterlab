@@ -48,8 +48,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       manager,
       modelFactory,
       sessionContext,
-      translator,
-      promptCellPosition
+      translator
     } = options;
     this.translator = translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
@@ -86,8 +85,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       mimeTypeService,
       contentFactory,
       modelFactory,
-      translator,
-      promptCellPosition
+      translator
     });
     this.content.addWidget(this.console);
 
@@ -253,11 +251,6 @@ export namespace ConsolePanel {
      * A function to call when the kernel is busy.
      */
     setBusy?: () => IDisposable;
-
-    /**
-     * The position of the input cell for the console widget
-     */
-    promptCellPosition?: CodeConsole.PromptCellPosition;
   }
 
   /**
