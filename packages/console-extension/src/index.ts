@@ -466,6 +466,7 @@ async function activateConsole(
    * @param panel Optional - single console to update.
    */
   async function updateSettings(panel?: ConsolePanel) {
+    // TODO: rename to clearPreviousCells?
     clearCellsOnExecute = (
       await settingRegistry.get(pluginId, 'clearCellsOnExecute')
     ).composite as boolean;

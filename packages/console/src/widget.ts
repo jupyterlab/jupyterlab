@@ -221,6 +221,9 @@ export class CodeConsole extends Widget {
    * the execution message id).
    */
   addCell(cell: CodeCell, msgId?: string): void {
+    if (this._config.clearCellsOnExecute) {
+      this.clear();
+    }
     cell.addClass(CONSOLE_CELL_CLASS);
     this._content.addWidget(cell);
     this._cells.push(cell);
@@ -639,6 +642,8 @@ export class CodeConsole extends Widget {
     let promptCell = this.promptCell;
     const input = this._input;
 
+    const previousContent = promptCell?.model.sharedModel.getSource() ?? '';
+
     // Make the last prompt read-only, clear its signals, and move to content.
     if (promptCell) {
       promptCell.readOnly = true;
@@ -671,6 +676,9 @@ export class CodeConsole extends Widget {
     this._input.addWidget(promptCell);
 
     this._history.editor = promptCell.editor;
+    if (!this._config.clearCodeContentOnExecute) {
+      promptCell.model.sharedModel.setSource(previousContent);
+    }
     this._promptCellCreated.emit(promptCell);
   }
 
@@ -872,7 +880,9 @@ export class CodeConsole extends Widget {
       this._banner.dispose();
       this._banner = null;
     }
-    this.addBanner();
+    if (this._config.showBanner) {
+      this.addBanner();
+    }
     if (this.sessionContext.session?.kernel) {
       this._handleInfo(await this.sessionContext.session.kernel.info);
     }
@@ -884,7 +894,9 @@ export class CodeConsole extends Widget {
   private async _onKernelStatusChanged(): Promise<void> {
     const kernel = this.sessionContext.session?.kernel;
     if (kernel?.status === 'restarting') {
-      this.addBanner();
+      if (this._config.showBanner) {
+        this.addBanner();
+      }
       this._handleInfo(await kernel?.info);
     }
   }
