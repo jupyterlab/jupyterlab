@@ -933,6 +933,15 @@ export class CodeConsole extends Widget {
       this._splitPanel.insertWidget(0, this._input);
       this._splitPanel.insertWidget(1, this._content);
     }
+
+    // Default relative sizes
+    let sizes = [1, 1];
+    if (promptCellPosition === 'top') {
+      sizes = [1, 4];
+    } else if (promptCellPosition === 'bottom') {
+      sizes = [4, 1];
+    }
+    this._splitPanel.setRelativeSizes(sizes);
   }
 
   private _banner: RawCell | null = null;
