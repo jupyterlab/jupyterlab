@@ -12,14 +12,17 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
   ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   Sanitizer,
   SessionContextDialogs,
+  setToolbar,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -45,6 +48,8 @@ import {
   consoleIcon,
   IFormRendererRegistry,
   redoIcon,
+  refreshIcon,
+  runIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
@@ -128,7 +133,8 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ILabStatus,
     ISessionContextDialogs,
     IFormRendererRegistry,
-    ITranslator
+    ITranslator,
+    IToolbarWidgetRegistry
   ],
   activate: activateConsole,
   autoStart: true
@@ -267,7 +273,8 @@ async function activateConsole(
   status: ILabStatus | null,
   sessionDialogs_: ISessionContextDialogs | null,
   formRegistry: IFormRendererRegistry | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): Promise<IConsoleTracker> {
   const translator = translator_ ?? nullTranslator;
   const trans = translator.load('jupyterlab');
@@ -276,6 +283,21 @@ async function activateConsole(
   const category = trans.__('Console');
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
+
+  const pluginId = '@jupyterlab/console-extension:tracker';
+
+  // Instantiate the toolbar factory for console panel at plugin activation time
+  // since the plugin defines toolbar items and "jupyter.lab.toolbars" is set to true.
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
+  if (toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      'ConsolePanel',
+      pluginId,
+      translator
+    );
+  }
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
@@ -401,6 +423,10 @@ async function activateConsole(
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
+    if (toolbarFactory) {
+      setToolbar(panel, toolbarFactory);
+    }
+
     const interactionMode: string = (
       await settingRegistry.get(
         '@jupyterlab/console-extension:tracker',
@@ -452,7 +478,6 @@ async function activateConsole(
     return panel;
   }
 
-  const pluginId = '@jupyterlab/console-extension:tracker';
   let clearCellsOnExecute: boolean;
   let clearCodeContentOnExecute: boolean;
   let interactionMode: string;
@@ -706,6 +731,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.runUnforced, {
     label: trans.__('Run Cell (unforced)'),
+    icon: args => (args.toolbar ? runIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -718,6 +744,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.runForced, {
     label: trans.__('Run Cell (forced)'),
+    icon: args => (args.toolbar ? runIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -770,6 +797,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
+    icon: args => (args.toolbar ? refreshIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
