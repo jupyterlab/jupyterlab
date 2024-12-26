@@ -24,6 +24,7 @@ import {
   SessionContextDialogs,
   setToolbar,
   showDialog,
+  Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -134,6 +135,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ISessionContextDialogs,
     IFormRendererRegistry,
     ITranslator,
+    ISessionContextDialogs,
     IToolbarWidgetRegistry
   ],
   activate: activateConsole,
@@ -274,6 +276,7 @@ async function activateConsole(
   sessionDialogs_: ISessionContextDialogs | null,
   formRegistry: IFormRendererRegistry | null,
   translator_: ITranslator | null,
+  sessionContextDialogs: ISessionContextDialogs | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
 ): Promise<IConsoleTracker> {
   const translator = translator_ ?? nullTranslator;
@@ -290,13 +293,24 @@ async function activateConsole(
   // since the plugin defines toolbar items and "jupyter.lab.toolbars" is set to true.
   let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
   if (toolbarRegistry) {
+    const factory = 'ConsolePanel';
     toolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,
-      'ConsolePanel',
+      factory,
       pluginId,
       translator
     );
+
+    if (sessionContextDialogs) {
+      toolbarRegistry.addFactory<ConsolePanel>(factory, 'kernelName', panel =>
+        Toolbar.createKernelNameItem(
+          panel.sessionContext,
+          sessionContextDialogs,
+          translator
+        )
+      );
+    }
   }
 
   // Create a widget tracker for all console panels.

@@ -1025,11 +1025,6 @@ export namespace CodeConsole {
      * The application language translator.
      */
     translator?: ITranslator;
-
-    /**
-     * The position of the input cell for the console widget
-     */
-    promptCellPosition?: PromptCellPosition;
   }
 
   /**

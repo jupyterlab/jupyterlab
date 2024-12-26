@@ -111,7 +111,8 @@
         "rank": 0
       },
       { "name": "restart", "command": "console:restart-kernel", "rank": 10 },
-      { "name": "spacer", "type": "spacer", "rank": 100 }
+      { "name": "spacer", "type": "spacer", "rank": 100 },
+      { "name": "kernelName", "rank": 1000 }
     ]
   },
   "jupyter.lab.transform": true,
