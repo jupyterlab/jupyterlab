@@ -43,6 +43,7 @@
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-delete: url('icons/toolbar/delete.svg');
+  --jp-icon-dock: url('icons/toolbar/dock.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
@@ -252,6 +253,10 @@
 
 .jp-DeleteIcon {
   background-image: var(--jp-icon-delete);
+}
+
+.jp-DockIcon {
+  background-image: var(--jp-icon-dock);
 }
 
 .jp-DownloadIcon {
