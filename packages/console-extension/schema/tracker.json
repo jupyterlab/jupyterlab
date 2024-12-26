@@ -114,7 +114,7 @@
       "title": "Clear Code Content on Execute",
       "description": "Whether to clear the code content of the console when code is executed.",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "interactionMode": {
       "title": "Interaction mode",
