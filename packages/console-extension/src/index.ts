@@ -311,6 +311,13 @@ async function activateConsole(
         )
       );
     }
+
+    toolbarRegistry.addFactory<ConsolePanel>(factory, 'kernelStatus', panel => {
+      const sessionContext = panel.sessionContext;
+      // TODO: update use of deprecated APIs, without having to depend on @jupyterlab/notebook
+      const indicator = Toolbar.createKernelStatusItem(sessionContext);
+      return indicator;
+    });
   }
 
   // Create a widget tracker for all console panels.
