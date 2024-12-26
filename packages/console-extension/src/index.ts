@@ -604,7 +604,7 @@ async function activateConsole(
             return item.path === path;
           });
           if (model) {
-            return createConsole({ ...args, promptCellPosition });
+            return createConsole(args);
           }
           return Promise.reject(`No running kernel session for path: ${path}`);
         });
@@ -635,7 +635,7 @@ async function activateConsole(
           (args['cwd'] as string) ||
           filebrowser?.model.path) ??
         '';
-      return createConsole({ basePath, promptCellPosition, ...args });
+      return createConsole({ basePath, ...args });
     }
   });
 
