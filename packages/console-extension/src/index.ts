@@ -536,6 +536,7 @@ async function activateConsole(
 
   let clearCellsOnExecute: boolean;
   let clearCodeContentOnExecute: boolean;
+  let hideCodeInput: boolean;
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
   let promptCellPosition: CodeConsole.PromptCellPosition;
@@ -553,6 +554,8 @@ async function activateConsole(
     clearCodeContentOnExecute = (
       await settingRegistry.get(pluginId, 'clearCodeContentOnExecute')
     ).composite as boolean;
+    hideCodeInput = (await settingRegistry.get(pluginId, 'hideCodeInput'))
+      .composite as boolean;
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
@@ -574,6 +577,7 @@ async function activateConsole(
       widget.console.setConfig({
         clearCellsOnExecute,
         clearCodeContentOnExecute,
+        hideCodeInput,
         promptCellPosition,
         showBanner
       });

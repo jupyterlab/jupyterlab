@@ -30,7 +30,7 @@
 .jp-CodeConsole-content {
   background: var(--jp-layout-color0);
   overflow: auto;
-  padding: var(--jp-console-padding);
+  padding: 0 var(--jp-console-padding);
   min-width: calc(10 * var(--jp-ui-font-size1));
   min-height: calc(5 * var(--jp-ui-font-size1));
 }
