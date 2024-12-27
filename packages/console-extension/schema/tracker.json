@@ -131,6 +131,12 @@
       "type": "boolean",
       "default": true
     },
+    "hideCodeInput": {
+      "title": "Hide Code Input",
+      "description": "Whether to hide the code input after a cell is executed.",
+      "type": "boolean",
+      "default": false
+    },
     "interactionMode": {
       "title": "Interaction mode",
       "description": "Whether the console interaction mimics the notebook\nor terminal keyboard shortcuts.",

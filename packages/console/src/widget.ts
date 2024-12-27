@@ -418,12 +418,14 @@ export class CodeConsole extends Widget {
     const {
       clearCellsOnExecute,
       clearCodeContentOnExecute,
+      hideCodeInput,
       promptCellPosition,
       showBanner
     } = config;
     // set defaults
     this._config.clearCellsOnExecute = clearCellsOnExecute ?? true;
     this._config.clearCodeContentOnExecute = clearCodeContentOnExecute ?? false;
+    this._config.hideCodeInput = hideCodeInput ?? false;
     this._config.promptCellPosition = promptCellPosition ?? 'bottom';
     this._config.showBanner = showBanner ?? true;
     this._updateLayout();
@@ -673,6 +675,9 @@ export class CodeConsole extends Widget {
       promptCell.editor?.blur();
       const child = input.widgets[0];
       child.parent = null;
+      if (this._config.hideCodeInput) {
+        promptCell.inputArea?.setHidden(true);
+      }
       this.addCell(promptCell);
     }
 
@@ -1002,9 +1007,14 @@ export namespace CodeConsole {
     clearCellsOnExecute?: boolean;
 
     /**
-     * Whether to clear the code content of the prompt cell on execute
+     * Whether to clear the code content of the prompt cell on execute.
      */
     clearCodeContentOnExecute?: boolean;
+
+    /**
+     * Whether to hide the code input after a cell is executed.
+     */
+    hideCodeInput?: boolean;
 
     /**
      * Where the prompt cell should be located.
