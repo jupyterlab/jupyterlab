@@ -326,7 +326,7 @@ async function activateConsole(
     });
 
     const promptMenu = new Menu({ commands });
-    promptMenu.addClass('jp-ConsolePromptMenu');
+    promptMenu.addClass('jp-CodeConsolePromptMenu');
     ['top', 'left', 'right', 'bottom'].forEach(position => {
       promptMenu.addItem({ command: `console:prompt-to-${position}` });
     });

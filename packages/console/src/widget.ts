@@ -937,9 +937,9 @@ export class CodeConsole extends Widget {
     // Default relative sizes
     let sizes = [1, 1];
     if (promptCellPosition === 'top') {
-      sizes = [1, 4];
+      sizes = [1, 10];
     } else if (promptCellPosition === 'bottom') {
-      sizes = [4, 1];
+      sizes = [10, 1];
     }
     this._splitPanel.setRelativeSizes(sizes);
   }
