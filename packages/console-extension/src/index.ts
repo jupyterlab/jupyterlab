@@ -294,6 +294,12 @@ async function activateConsole(
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
   const pluginId = '@jupyterlab/console-extension:tracker';
+  const promptCellPositions: CodeConsole.PromptCellPosition[] = [
+    'top',
+    'bottom',
+    'left',
+    'right'
+  ];
 
   // Instantiate the toolbar factory for console panel at plugin activation time
   // since the plugin defines toolbar items and "jupyter.lab.toolbars" is set to true.
@@ -327,7 +333,7 @@ async function activateConsole(
 
     const promptMenu = new Menu({ commands });
     promptMenu.addClass('jp-CodeConsolePromptMenu');
-    ['top', 'left', 'right', 'bottom'].forEach(position => {
+    promptCellPositions.forEach(position => {
       promptMenu.addItem({ command: `console:prompt-to-${position}` });
     });
 
@@ -336,6 +342,7 @@ async function activateConsole(
       'promptPosition',
       panel => {
         const button = new ToolbarButton({
+          tooltip: trans.__('Change Console Prompt Position'),
           icon: dockIcon,
           onClick: () => {
             const left = button.node.getBoundingClientRect().left;
@@ -540,7 +547,6 @@ async function activateConsole(
    * @param panel Optional - single console to update.
    */
   async function updateSettings(panel?: ConsolePanel) {
-    // TODO: rename to clearPreviousCells?
     clearCellsOnExecute = (
       await settingRegistry.get(pluginId, 'clearCellsOnExecute')
     ).composite as boolean;
@@ -699,7 +705,7 @@ async function activateConsole(
   }
 
   /**
-   * Commands to change the position of the prompt cell.
+   * Create commands to change the position of the prompt cell.
    */
   const iconMap = {
     top: caretUpIcon,
@@ -707,25 +713,23 @@ async function activateConsole(
     right: caretRightIcon,
     left: caretLeftIcon
   };
-  ['top', 'bottom', 'right', 'left'].forEach(
-    (position: CodeConsole.PromptCellPosition) => {
-      const command = `console:prompt-to-${position}`;
-      commands.addCommand(command, {
-        execute: args => {
-          const current = getCurrent(args);
+  promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
+    const command = `console:prompt-to-${position}`;
+    commands.addCommand(command, {
+      execute: args => {
+        const current = getCurrent(args);
 
-          if (!current) {
-            return;
-          }
+        if (!current) {
+          return;
+        }
 
-          current.console.setConfig({ promptCellPosition: position });
-        },
-        isEnabled: isEnabled,
-        label: trans.__(`Prompt to ${position}`),
-        icon: iconMap[position]
-      });
-    }
-  );
+        current.console.setConfig({ promptCellPosition: position });
+      },
+      isEnabled: isEnabled,
+      label: trans.__(`Prompt to ${position}`),
+      icon: iconMap[position]
+    });
+  });
 
   /**
    * Add undo command
