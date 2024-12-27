@@ -133,8 +133,9 @@ export class CodeConsole extends Widget {
     this._input.addClass(INPUT_CLASS);
 
     layout.addWidget(this._splitPanel);
-    // initialize the layout of the console
-    this._updateLayout();
+
+    // initialize the console
+    this.setConfig({});
 
     this._history = new ConsoleHistory({
       sessionContext: this.sessionContext
@@ -925,7 +926,7 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Update the layout of console.
+   * Update the layout of the code console.
    */
   private _updateLayout(): void {
     const { promptCellPosition = 'bottom' } = this._config;
