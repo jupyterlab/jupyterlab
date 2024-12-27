@@ -70,9 +70,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-CodeConsole-input {
-  /* max-height: 80%; */
   overflow: auto;
-  border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   padding: var(--jp-cell-padding) var(--jp-console-padding);
 
   /* This matches the box shadow on the notebook toolbar, eventually we should create
@@ -107,7 +105,7 @@
 }
 
 /*-----------------------------------------------------------------------------
-| Split Panel
+| Split Panel Container
 |----------------------------------------------------------------------------*/
 .jp-CodeConsole-split {
   display: flex;
@@ -116,6 +114,8 @@
   overflow: hidden;
 }
 
-.jp-CodeConsole-split .lm-SplitPanel-handle::after {
+.jp-CodeConsole-split.lm-SplitPanel .lm-SplitPanel-handle::after {
   background-color: var(--jp-border-color2);
+  min-height: var(--jp-border-width);
+  min-width: var(--jp-border-width);
 }

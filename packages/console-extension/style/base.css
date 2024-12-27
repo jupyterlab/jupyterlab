@@ -3,13 +3,25 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-ConsolePromptMenu {
+/* Toolbar menu to select the prompt cell position */
+.jp-CodeConsolePromptMenu {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.jp-ConsolePromptMenu .lm-Menu-itemIcon svg {
+.jp-CodeConsolePromptMenu .lm-Menu-itemIcon svg {
   vertical-align: sub;
+}
+
+/* Set min width and height for the split panel */
+.jp-CodeConsole-input {
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  min-height: calc(5 * var(--jp-ui-font-size1));
+}
+
+.jp-CodeConsole-content {
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  min-height: calc(5 * var(--jp-ui-font-size1));
 }
