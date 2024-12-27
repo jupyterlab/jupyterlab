@@ -412,10 +412,19 @@ export class CodeConsole extends Widget {
 
   /**
    * Set configuration options for the console.
-   * TODO: improve how options are managed?
    */
   setConfig(config: CodeConsole.IConfig): void {
-    this._config = { ...this._config, ...config };
+    const {
+      clearCellsOnExecute,
+      clearCodeContentOnExecute,
+      promptCellPosition,
+      showBanner
+    } = config;
+    // set defaults
+    this._config.clearCellsOnExecute = clearCellsOnExecute ?? true;
+    this._config.clearCodeContentOnExecute = clearCodeContentOnExecute ?? false;
+    this._config.promptCellPosition = promptCellPosition ?? 'bottom';
+    this._config.showBanner = showBanner ?? true;
     this._updateLayout();
   }
 
@@ -678,9 +687,7 @@ export class CodeConsole extends Widget {
 
     this._history.editor = promptCell.editor;
 
-    const clearCodeContentOnExecute =
-      this._config.clearCodeContentOnExecute ?? true;
-    if (!clearCodeContentOnExecute) {
+    if (!this._config.clearCodeContentOnExecute) {
       promptCell.model.sharedModel.setSource(previousContent);
       if (previousCursorPosition) {
         promptCell.editor?.setCursorPosition(previousCursorPosition);
