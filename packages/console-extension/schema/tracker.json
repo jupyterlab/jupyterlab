@@ -111,10 +111,10 @@
         "rank": 0
       },
       { "name": "restart", "command": "console:restart-kernel", "rank": 10 },
-      { "name": "promptPosition", "rank": 20 },
       { "name": "spacer", "type": "spacer", "rank": 100 },
       { "name": "kernelName", "rank": 1000 },
-      { "name": "kernelStatus", "rank": 1010 }
+      { "name": "kernelStatus", "rank": 1010 },
+      { "name": "promptPosition", "rank": 1020 }
     ]
   },
   "jupyter.lab.transform": true,
