@@ -546,6 +546,27 @@ describe('cells/widget', () => {
       });
     });
 
+    describe('#headings', () => {
+      it('get headings with string[]', () => {
+        const modelheadings = new CodeCellModel();
+        const widget = new CodeCell({
+          contentFactory: NBTestUtils.createCodeCellFactory(),
+          model: modelheadings,
+          rendermime
+        });
+        widget.initializeState();
+        widget.model.outputs.add({
+          output_type: 'display_data',
+          data: {
+            'text/html': ['Some ', ' thing']
+          },
+          metadata: {}
+        });
+        // try if headings got a problem with multi line html
+        expect(widget.headings).toEqual([]);
+      });
+    });
+
     describe('#outputArea', () => {
       it('should be the output area used by the cell', () => {
         const widget = new CodeCell({
