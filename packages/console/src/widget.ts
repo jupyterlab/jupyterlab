@@ -643,6 +643,7 @@ export class CodeConsole extends Widget {
     const input = this._input;
 
     const previousContent = promptCell?.model.sharedModel.getSource() ?? '';
+    const previousCursorPosition = promptCell?.editor?.getCursorPosition();
 
     // Make the last prompt read-only, clear its signals, and move to content.
     if (promptCell) {
@@ -676,8 +677,12 @@ export class CodeConsole extends Widget {
     this._input.addWidget(promptCell);
 
     this._history.editor = promptCell.editor;
+
     if (!this._config.clearCodeContentOnExecute) {
       promptCell.model.sharedModel.setSource(previousContent);
+      if (previousCursorPosition) {
+        promptCell.editor?.setCursorPosition(previousCursorPosition);
+      }
     }
     this._promptCellCreated.emit(promptCell);
   }
