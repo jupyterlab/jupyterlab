@@ -76,7 +76,7 @@
   /* This matches the box shadow on the notebook toolbar, eventually we should create
    * CSS variables for this */
   box-shadow: 0 0.4px 6px 0 rgba(0, 0, 0, 0.1);
-  background: transparent;
+  background: var(--jp-layout-color0);
 }
 
 .jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
