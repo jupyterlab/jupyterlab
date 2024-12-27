@@ -14,14 +14,3 @@
 .jp-CodeConsolePromptMenu .lm-Menu-itemIcon svg {
   vertical-align: sub;
 }
-
-/* Set min width and height for the split panel */
-.jp-CodeConsole-input {
-  min-width: calc(10 * var(--jp-ui-font-size1));
-  min-height: calc(5 * var(--jp-ui-font-size1));
-}
-
-.jp-CodeConsole-content {
-  min-width: calc(10 * var(--jp-ui-font-size1));
-  min-height: calc(5 * var(--jp-ui-font-size1));
-}
