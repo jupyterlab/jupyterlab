@@ -56,6 +56,7 @@ import {
   redoIcon,
   refreshIcon,
   runIcon,
+  ToolbarButton,
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
@@ -67,7 +68,7 @@ import {
   UUID
 } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout, Menu, MenuBar, Widget } from '@lumino/widgets';
+import { DockLayout, Menu, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 
@@ -324,21 +325,25 @@ async function activateConsole(
       return indicator;
     });
 
-    const dockMenu = new Menu({ commands });
+    const promptMenu = new Menu({ commands });
+    promptMenu.addClass('jp-ConsolePromptMenu');
     ['top', 'left', 'right', 'bottom'].forEach(position => {
-      dockMenu.addItem({ command: `console:prompt-to-${position}` });
+      promptMenu.addItem({ command: `console:prompt-to-${position}` });
     });
-    dockMenu.title.icon = dockIcon;
-    const overflowOptions = {
-      overflowMenuOptions: { isVisible: false }
-    };
+
     toolbarRegistry.addFactory<ConsolePanel>(
       factory,
       'promptPosition',
       panel => {
-        const menubar = new MenuBar(overflowOptions);
-        menubar.addMenu(dockMenu);
-        return menubar;
+        const button = new ToolbarButton({
+          icon: dockIcon,
+          onClick: () => {
+            const left = button.node.getBoundingClientRect().left;
+            const bottom = button.node.getBoundingClientRect().bottom;
+            promptMenu.open(left, bottom);
+          }
+        });
+        return button;
       }
     );
   }
