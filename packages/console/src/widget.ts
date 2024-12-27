@@ -988,9 +988,24 @@ export namespace CodeConsole {
    * The configuration options for a console widget.
    */
   export interface IConfig {
+    /**
+     * Whether to clear the previous cells on execute.
+     */
     clearCellsOnExecute?: boolean;
+
+    /**
+     * Whether to clear the code content of the prompt cell on execute
+     */
     clearCodeContentOnExecute?: boolean;
+
+    /**
+     * Where the prompt cell should be located.
+     */
     promptCellPosition?: PromptCellPosition;
+
+    /**
+     * Whether to show the kernel banner.
+     */
     showBanner?: boolean;
   }
 
