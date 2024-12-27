@@ -545,7 +545,7 @@ async function activateConsole(
       await settingRegistry.get(pluginId, 'clearCellsOnExecute')
     ).composite as boolean;
     clearCodeContentOnExecute = (
-      await settingRegistry.get(pluginId, 'clearCodeCellContentOnExecute')
+      await settingRegistry.get(pluginId, 'clearCodeContentOnExecute')
     ).composite as boolean;
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;

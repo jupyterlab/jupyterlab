@@ -678,7 +678,9 @@ export class CodeConsole extends Widget {
 
     this._history.editor = promptCell.editor;
 
-    if (!this._config.clearCodeContentOnExecute) {
+    const clearCodeContentOnExecute =
+      this._config.clearCodeContentOnExecute ?? true;
+    if (!clearCodeContentOnExecute) {
       promptCell.model.sharedModel.setSource(previousContent);
       if (previousCursorPosition) {
         promptCell.editor?.setCursorPosition(previousCursorPosition);
