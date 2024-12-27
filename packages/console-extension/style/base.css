@@ -1,0 +1,15 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-ConsolePromptMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-ConsolePromptMenu .lm-Menu-itemIcon svg {
+  vertical-align: sub;
+}
