@@ -530,6 +530,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns Whether some sizes changed or not
    */
   setWidgetSize(sizes: { index: number; size: number }[]): boolean {
+    const measuredAt = Date.now();
     if (this._windowingActive || this._currentWindow[0] >= 0) {
       let minIndex = Infinity;
       let measuredAllItemsUntil = -1;
@@ -561,7 +562,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
               measuredSize !== undefined
                 ? measuredSize
                 : this.estimateWidgetSize(index),
-            measured: measuredSize !== undefined
+            measured: measuredSize !== undefined,
+            measuredAt: measuredSize !== undefined ? measuredAt : undefined
           };
           this._widgetSizers[index] = newSizer;
           sizer = newSizer;
@@ -572,9 +574,14 @@ export abstract class WindowedListModel implements WindowedList.IModel {
             itemDelta = measuredSize - sizer.size;
             sizer.size = measuredSize;
             minIndex = Math.min(minIndex, index);
+            sizer.measuredAt = measuredAt;
           }
-          // Always set the flag in case the size estimator provides perfect result
-          sizer.measured = true;
+          if (!sizer.measured) {
+            // Always set the flag in case the size estimator provides perfect result
+            sizer.measured = true;
+            // Do not update `measuredAt` if size did not change and it was previously marked as measured
+            sizer.measuredAt = measuredAt;
+          }
         }
         // If all items so far have actual size measurements...
         if (allPreviousMeasured) {
@@ -605,6 +612,11 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     }
 
     return false;
+  }
+
+  get widgetSizes() {
+    // TODO: deep copy?
+    return this._widgetSizers;
   }
 
   /**
@@ -658,7 +670,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         this._widgetSizers[i] = {
           offset,
           size,
-          measured: this._widgetSizers[i]?.measured
+          measured: this._widgetSizers[i]?.measured,
+          measuredAt: this._widgetSizers[i]?.measuredAt
         };
 
         offset += size;
@@ -2148,6 +2161,10 @@ export namespace WindowedList {
      * Whether the size is an estimation or a measurement.
      */
     measured?: boolean;
+    /**
+     * If the size is measurement, a timestamp when was it was first taken.
+     */
+    measuredAt?: number;
   };
 
   /**

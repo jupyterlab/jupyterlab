@@ -1867,6 +1867,10 @@ function activateNotebookHandler(
 
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
+      assumeHeightStabilityAfter: settings.get('assumeHeightStabilityAfter')
+        .composite as number,
+      cellHeightStabilization: settings.get('cellHeightStabilization')
+        .composite as number,
       enableKernelInitNotification: settings.get('enableKernelInitNotification')
         .composite as boolean,
       autoRenderMarkdownCells: settings.get('autoRenderMarkdownCells')
