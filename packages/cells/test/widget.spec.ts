@@ -547,7 +547,7 @@ describe('cells/widget', () => {
     });
 
     describe('#headings', () => {
-      it('get headings with string[]', () => {
+      it('should not throw when outputs contain an array of strings', () => {
         const modelheadings = new CodeCellModel();
         const widget = new CodeCell({
           contentFactory: NBTestUtils.createCodeCellFactory(),
