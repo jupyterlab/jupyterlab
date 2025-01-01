@@ -989,8 +989,6 @@ export class WindowedList<
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'pointerdown':
-        event.preventDefault();
-        event.stopPropagation();
         this._evtPointerDown(event as PointerEvent);
         break;
       case 'scroll':
