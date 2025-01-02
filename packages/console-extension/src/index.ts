@@ -414,17 +414,23 @@ async function activateConsole(
     if (options.subshell) {
       panel.sessionContext.ready
         .then(async () => {
-          // Ensure kernel has received kernel_info.
-          await panel.sessionContext.session!.kernel!.info;
-          const future =
-            panel.sessionContext.session!.kernel!.requestCreateSubshell({});
-          future.onReply = (
-            msg: KernelMessage.ICreateSubshellReplyMsg
-          ): void => {
-            const subshellId = msg.content.subshell_id;
-            panel.sessionContext.session!.kernel!.subshellId = subshellId;
-          };
-          await future.done;
+          if (panel.sessionContext.session === null) {
+            console.error('Cannot create subshell without session');
+          } else if (panel.sessionContext.session.kernel === null) {
+            console.error('Cannot create subshell without kernel');
+          } else {
+            const { kernel } = panel.sessionContext.session;
+            // Ensure kernel has received kernel_info.
+            await kernel.info;
+            const future = kernel.requestCreateSubshell({});
+            future.onReply = (
+              msg: KernelMessage.ICreateSubshellReplyMsg
+            ): void => {
+              const subshellId = msg.content.subshell_id;
+              kernel.subshellId = subshellId;
+            };
+            await future.done;
+          }
         })
         .catch(reason => {
           console.error(
