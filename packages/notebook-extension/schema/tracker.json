@@ -755,7 +755,7 @@
       "default": false
     },
     "overscanCount": {
-      "title": "Number of cells to render outside de the viewport",
+      "title": "Number of cells to render outside the viewport",
       "description": "In 'full' windowing mode, this is the number of cells above and below the viewport.",
       "type": "number",
       "default": 1,
