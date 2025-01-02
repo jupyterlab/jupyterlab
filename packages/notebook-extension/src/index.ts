@@ -1418,7 +1418,10 @@ function activateCodeConsole(
     isVisible: () => {
       const kernel =
         tracker.currentWidget?.context.sessionContext.session?.kernel;
-      return kernel?.supportsSubshells ?? false;
+      return (
+        (kernel?.supportsSubshells ?? false) &&
+        PageConfig.getOption('subshellConsole').toLowerCase() === 'true'
+      );
     }
   });
 

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
@@ -650,8 +650,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     const supportedFeatures = reply.content.supported_features;
     this._supportsSubshells =
       supportedFeatures !== undefined &&
-      supportedFeatures.includes('kernel subshells') &&
-      PageConfig.getOption('kernelSubshells').toLowerCase() === 'true';
+      supportedFeatures.includes('kernel subshells');
 
     return reply;
   }
