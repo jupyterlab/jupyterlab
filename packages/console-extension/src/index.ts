@@ -412,32 +412,36 @@ async function activateConsole(
     });
 
     if (options.subshell) {
-      panel.sessionContext.ready
-        .then(async () => {
-          if (panel.sessionContext.session === null) {
-            console.error('Cannot create subshell without session');
-          } else if (panel.sessionContext.session.kernel === null) {
-            console.error('Cannot create subshell without kernel');
-          } else {
-            const { kernel } = panel.sessionContext.session;
-            // Ensure kernel has received kernel_info.
-            await kernel.info;
-            const future = kernel.requestCreateSubshell({});
-            future.onReply = (
-              msg: KernelMessage.ICreateSubshellReplyMsg
-            ): void => {
-              const subshellId = msg.content.subshell_id;
-              kernel.subshellId = subshellId;
-            };
-            await future.done;
-          }
-        })
-        .catch(reason => {
-          console.error(
-            'Failed to initialize SessionContext or create new subshell.',
-            reason
-          );
-        });
+      panel.sessionContext.kernelChanged.connect(async () => {
+        if (!panel.sessionContext.isDisposed) {
+          panel.sessionContext.ready
+            .then(async () => {
+              if (panel.sessionContext.session === null) {
+                console.error('Cannot create subshell without session');
+              } else if (panel.sessionContext.session.kernel === null) {
+                console.error('Cannot create subshell without kernel');
+              } else {
+                const { kernel } = panel.sessionContext.session;
+                // Ensure kernel has received kernel_info.
+                await kernel.info;
+                const future = kernel.requestCreateSubshell({});
+                future.onReply = (
+                  msg: KernelMessage.ICreateSubshellReplyMsg
+                ): void => {
+                  const subshellId = msg.content.subshell_id;
+                  kernel.subshellId = subshellId;
+                };
+                await future.done;
+              }
+            })
+            .catch(reason => {
+              console.error(
+                'Failed to initialize SessionContext or create new subshell.',
+                reason
+              );
+            });
+        }
+      });
     }
 
     shell.add(panel, 'main', {
