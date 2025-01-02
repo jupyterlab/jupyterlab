@@ -43,13 +43,11 @@ test('Open the settings editor with a specific search query', async ({
     });
   });
   // wait for command to be executed
-  await page.waitForTimeout(1000);
-  const listEntry = await page
+  const fistListEntry = page
     .locator('.jp-PluginList-entry-label-text')
     .first();
-  const textContent = await listEntry.textContent();
 
-  expect(textContent).toBe('CodeMirror');
+  await expect(fistListEntry).toHaveText('CodeMirror');
 });
 
 test.describe('change font-size', () => {
