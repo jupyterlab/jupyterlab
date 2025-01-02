@@ -139,8 +139,15 @@ test.describe('Kernel', () => {
       // Run %subshell in console
       const subshellConsole = page.locator('.jp-CodeConsole');
       await subshellConsole.waitFor();
-      await page.notebook.setCell(0, 'code', '%subshell');
-      await page.notebook.runCell(0);
+      await subshellConsole
+        .getByLabel('Code Cell Content')
+        .getByRole('textbox')
+        .click();
+      await subshellConsole
+        .getByLabel('Code Cell Content')
+        .getByRole('textbox')
+        .fill('%subshell');
+      await page.menu.clickMenuItem('Run>Run Cell (forced)');
 
       // Confirm that this is a subshell using "subshell id" printed by %subshell magic
       // which will be something other than None (None means main shell not subshell).
