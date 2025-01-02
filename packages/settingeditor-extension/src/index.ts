@@ -132,7 +132,7 @@ function activate(
         shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
       shell.activateById(tracker.currentWidget.id);
-      const settingsWidget = tracker.currentWidget.content as SettingsEditor;
+      const settingsWidget = tracker.currentWidget.content;
       settingsWidget.updateQuery(args.query ?? '');
       return;
     }

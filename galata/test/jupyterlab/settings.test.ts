@@ -31,9 +31,11 @@ test('Open the settings editor with a specific search query', async ({
 
   const settingsPanel = page.locator('.jp-SettingsPanel');
 
-  expect(await settingsPanel.screenshot()).toMatchSnapshot(
+  expect.soft(await settingsPanel.screenshot()).toMatchSnapshot(
     'settings-panel.png'
   );
+  // Test that new query takes effect
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(0);
 
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open', {
