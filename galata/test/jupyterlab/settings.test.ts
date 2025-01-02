@@ -35,15 +35,21 @@ test('Open the settings editor with a specific search query', async ({
     .soft(await settingsPanel.screenshot())
     .toMatchSnapshot('settings-panel.png');
   // Test that new query takes effect
-  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(0);
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
 
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open', {
       query: 'CodeMirror'
     });
   });
+  // wait for command to be executed
+  await page.waitForTimeout(1000);
+  const listEntry = await page
+    .locator('.jp-PluginList-entry-label-text')
+    .first();
+  const textContent = await listEntry.textContent();
 
-  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
+  expect(textContent).toBe('CodeMirror');
 });
 
 test.describe('change font-size', () => {

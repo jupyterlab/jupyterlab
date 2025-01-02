@@ -132,8 +132,9 @@ function activate(
         shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
       shell.activateById(tracker.currentWidget.id);
-      const settingsWidget = tracker.currentWidget.content;
-      settingsWidget.updateQuery(args.query ?? '');
+      if (args.query) {
+        tracker.currentWidget.content.updateQuery(args.query);
+      }
       return;
     }
 
