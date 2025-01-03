@@ -25,9 +25,9 @@ test('Open the settings editor with a specific search query', async ({
 
   const pluginList = page.locator('.jp-PluginList');
 
-  expect(await pluginList.screenshot()).toMatchSnapshot(
-    'settings-plugin-list.png'
-  );
+  expect
+    .soft(await pluginList.screenshot())
+    .toMatchSnapshot('settings-plugin-list.png');
 
   const settingsPanel = page.locator('.jp-SettingsPanel');
 
@@ -43,9 +43,7 @@ test('Open the settings editor with a specific search query', async ({
     });
   });
   // wait for command to be executed
-  const fistListEntry = page
-    .locator('.jp-PluginList-entry-label-text')
-    .first();
+  const fistListEntry = page.locator('.jp-PluginList-entry-label-text').first();
 
   await expect(fistListEntry).toHaveText('CodeMirror');
 });
