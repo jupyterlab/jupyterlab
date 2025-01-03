@@ -93,7 +93,7 @@ export abstract class RenderedCommon
     // TODO compare model against old model for early bail?
 
     // Empty any existing content in the node from previous renders
-    if (!keepExisting) {
+    if (!keepExisting && !this.keepExisting) {
       while (this.node.firstChild) {
         this.node.removeChild(this.node.firstChild);
       }
@@ -120,6 +120,8 @@ export abstract class RenderedCommon
    * @returns A promise which resolves when rendering is complete.
    */
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+
+  keepExisting?: boolean = false;
 
   /**
    * Set the URI fragment identifier.
@@ -426,6 +428,7 @@ export class RenderedText extends RenderedCommon {
     super(options);
     this.addClass('jp-RenderedText');
   }
+  keepExisting = true;
 
   /**
    * Render a mime model.
@@ -449,6 +452,7 @@ export class RenderedError extends RenderedCommon {
     super(options);
     this.addClass('jp-RenderedText');
   }
+  keepExisting = true;
 
   render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderError({
