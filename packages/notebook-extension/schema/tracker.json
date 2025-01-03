@@ -831,6 +831,20 @@
       "enum": ["defer", "full", "none"],
       "default": "full"
     },
+    "cellHeightStabilization": {
+      "title": "Cell height stabilization",
+      "description": "Whether to pin height of the cells when scrolling to stabilize viewport (prevent jitter), and for how long since the last scroll event (in milliseconds).",
+      "type": "number",
+      "default": 750,
+      "minimum": 0
+    },
+    "assumeHeightStabilityAfter": {
+      "title": "Height stabilization sensitivity",
+      "description": "If cell height stabilization is enabled, how many milliseconds should pass since the last height measurement for the stabilization algorithm to be allowed to pin the cell height.",
+      "type": "number",
+      "default": 1000,
+      "minimum": 0
+    },
     "accessKernelHistory": {
       "title": "Kernel history access",
       "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",

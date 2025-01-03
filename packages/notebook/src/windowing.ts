@@ -90,7 +90,7 @@ export class NotebookViewModel extends WindowedListModel {
       this.cellsEstimatedHeight.set(cellId, size);
       this._emitEstimatedHeightChanged.invoke().catch(error => {
         console.error(
-          'Fail to trigger an update following a estimated height update.',
+          'Failed to trigger an update following an estimated height update.',
           error
         );
       });
@@ -140,11 +140,53 @@ export class NotebookViewModel extends WindowedListModel {
 }
 
 /**
+ * The namespace for the `NotebookWindowedLayout` class statics.
+ */
+export namespace NotebookWindowedLayout {
+  /**
+   * An options object for initializing notebook windowed layout.
+   */
+  export interface IOptions {
+    /**
+     * Notebook view model.
+     */
+    model: NotebookViewModel;
+    /**
+     * If cell height stabilization is enabled, how many milliseconds should pass since the
+     * last height measurement for the stabilization algorithm to be allowed to pin the cell height.
+     */
+    assumeHeightStabilityAfter?: number;
+    /**
+     * Whether to pin height of the cells when scrolling to stabilize viewport (prevent jitter),
+     * and for how long since the last scroll event (in milliseconds).
+     */
+    cellHeightStabilization?: number;
+  }
+}
+
+/**
  * Windowed list layout for the notebook.
  */
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
   private _footer: Widget | null = null;
+  private _model: NotebookViewModel;
+
+  constructor(options: NotebookWindowedLayout.IOptions) {
+    super();
+    this._model = options.model;
+    this._assumeHeightStabilityAfter = options.assumeHeightStabilityAfter ?? 0;
+    this._cellHeightStabilization = options.cellHeightStabilization ?? 0;
+
+    this._clearHeightPins = new Debouncer(() => {
+      for (const widget of this._pinnedHeightWidgets) {
+        widget.node.style.transition = 'height 0.1s linear';
+        widget.node.style.height = 'auto';
+        widget.node.style.overflow = '';
+      }
+      this._pinnedHeightWidgets.clear();
+    }, this._cellHeightStabilization);
+  }
 
   /**
    * Notebook's header
@@ -258,6 +300,8 @@ export class NotebookWindowedLayout extends WindowedLayout {
       // Restore visibility for active, or previously active cell
       this._toggleSoftVisibility(widget, true);
     }
+    const cellIndex = this._getCellIndex(widget);
+    // note: index refers to index of rendered widgets not all widgets.
     if (
       !wasPlaceholder &&
       widget instanceof CodeCell &&
@@ -265,6 +309,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
     ) {
       // We don't remove code cells to preserve outputs internal state
       widget.node.style.display = '';
+
+      // Prevent scrollbar jumping if cell or outputs get resized when revealed
+      this._stablizeHeight(cellIndex, widget);
 
       // Reset cache
       this._topHiddenCodeCells = -1;
@@ -276,6 +323,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
         parseInt(widget.dataset.windowedListIndex!, 10) + 1
       );
       let ref = this.parent!.viewportNode.children[siblingIndex];
+
+      // Prevent scrollbar jumping if cell or outputs get resized when revealed
+      this._stablizeHeight(cellIndex, widget);
 
       // Insert the widget's node before the sibling.
       this.parent!.viewportNode.insertBefore(widget.node, ref);
@@ -291,6 +341,49 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
 
     (widget as Cell).inViewport = true;
+  }
+
+  private _getCellIndex(widget: Widget) {
+    // TODO model has `.cells`, can we use the model to find the cell instead?
+    // maybe this could also prevent exposing `.widgetSizes`?
+    const model = this._model;
+    let index: number = -1;
+    const itemsList = model.itemsList;
+    if (!itemsList) {
+      throw Error('Empty items list when stabilizing height');
+    }
+    for (let i = 0; i < itemsList.length; i++) {
+      const item = itemsList.get!(i);
+      if ((widget as Cell).model === item) {
+        index = i;
+        break;
+      }
+    }
+    if (index === -1) {
+      throw Error('Item model not found');
+    }
+    return index;
+  }
+
+  /**
+   * Prevent cell resizing for a short time to stabilize scrolling.
+   *
+   * Stabilization is only applied to cells with measured and stable height.
+   */
+  private _stablizeHeight(cellIndex: number, widget: Widget) {
+    if (this._cellHeightStabilization === 0) {
+      return;
+    }
+    const sizer = this._model.widgetSizes[cellIndex];
+    if (
+      sizer &&
+      sizer.measured &&
+      sizer.measuredAt &&
+      Date.now() - sizer.measuredAt > this._assumeHeightStabilityAfter
+    ) {
+      const height = sizer.size;
+      this._pinHeight(widget, height);
+    }
   }
 
   /**
@@ -505,6 +598,21 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
   }
 
+  private _pinHeight(widget: Widget, height: number) {
+    widget.node.style.height = height + 'px';
+    widget.node.style.transition = '';
+    // @ts-ignore
+    widget.node.style.interpolateSize = 'allow-keywords';
+    widget.node.style.overflow = 'hidden';
+
+    this._pinnedHeightWidgets.add(widget);
+    this._clearHeightPins.invoke();
+  }
+
+  private _assumeHeightStabilityAfter: number;
+  private _cellHeightStabilization: number;
+  private _clearHeightPins: Debouncer;
   private _willBeRemoved: Widget | null = null;
+  private _pinnedHeightWidgets = new Set<Widget>();
   private _topHiddenCodeCells: number = -1;
 }
