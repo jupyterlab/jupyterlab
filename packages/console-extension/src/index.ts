@@ -38,7 +38,6 @@ import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { KernelMessage } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -424,14 +423,8 @@ async function activateConsole(
                 const { kernel } = panel.sessionContext.session;
                 // Ensure kernel has received kernel_info.
                 await kernel.info;
-                const future = kernel.requestCreateSubshell({});
-                future.onReply = (
-                  msg: KernelMessage.ICreateSubshellReplyMsg
-                ): void => {
-                  const subshellId = msg.content.subshell_id;
-                  kernel.subshellId = subshellId;
-                };
-                await future.done;
+                const replyMsg = await kernel.requestCreateSubshell({}).done;
+                kernel.subshellId = replyMsg.content.subshell_id;
               }
             })
             .catch(reason => {
