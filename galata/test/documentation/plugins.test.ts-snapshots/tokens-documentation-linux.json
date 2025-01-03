@@ -1,5 +1,4 @@
 {
-  "@jupyterlab/application:IMimeDocumentTracker": "A widget tracker for documents rendered using a mime renderer extension. Use this if you want to list and interact with documents rendered by such extensions.",
   "@jupyterlab/application:ITreePathUpdater": "A service to update the tree path.",
   "@jupyterlab/application:ILayoutRestorer": "A service providing application layout restoration functionality. Use this to have your activities restored across page loads.",
   "@jupyterlab/application:IRouter": "The URL router used by the application. Use this to add custom URL-routing for your extension (e.g., to invoke a command if the user navigates to a sub-path).",
@@ -9,6 +8,19 @@
   "@jupyterlab/application:IInfo": "A service providing metadata about the current application, including disabled extensions and whether dev mode is enabled.",
   "@jupyterlab/application:IPaths": "A service providing information about various\n  URLs and server paths for the current application. Use this service if you want to\n  assemble URLs to use the JupyterLab REST API.",
   "@jupyterlab/property-inspector:IPropertyInspectorProvider": "A service to register new widgets in the property inspector side panel.",
+  "@jupyterlab/services:IContentsManager": "The contents manager token.",
+  "@jupyterlab/services:IDefaultDrive": "The default drive for the contents manager.",
+  "@jupyterlab/services:IEventManager": "The event manager token.",
+  "@jupyterlab/services:IKernelManager": "The kernel manager token.",
+  "@jupyterlab/services:IKernelSpecManager": "The kernel spec manager token.",
+  "@jupyterlab/services:INbConvertManager": "The nbconvert manager token.",
+  "@jupyterlab/services:ISessionManager": "The session manager token.",
+  "@jupyterlab/services:ISettingManager": "The setting manager token.",
+  "@jupyterlab/services:IServerSettings": "The server settings for the application.",
+  "@jupyterlab/services:IServiceManager": "The service manager for the application.",
+  "@jupyterlab/services:ITerminalManager": "The terminal manager token.",
+  "@jupyterlab/services:IUserManager": "The user manager token.",
+  "@jupyterlab/services:IWorkspaceManager": "The workspace manager token.",
   "@jupyterlab/apputils:IKernelStatusModel": "A service to register kernel session provider to the kernel status indicator.",
   "@jupyterlab/apputils:ICommandPalette": "A service for the application command palette\n  in the left panel. Use this to add commands to the palette.",
   "@jupyterlab/apputils:IWindowResolver": "A service for a window resolver for the\n  application. JupyterLab workspaces are given a name, which are determined using\n  the window resolver. Require this if you want to use the name of the current workspace.",
@@ -80,5 +92,6 @@
   "@jupyterlab/ui-components:ILabIconManager": "A service to register and request icons.",
   "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration.",
   "@jupyterlab/workspaces:IWorkspacesModel": "Provides a model for available workspaces.",
-  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands."
+  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands.",
+  "@jupyterlab/application:IMimeDocumentTracker": "A widget tracker for documents rendered using a mime renderer extension. Use this if you want to list and interact with documents rendered by such extensions."
 }
