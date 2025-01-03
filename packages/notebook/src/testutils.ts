@@ -107,7 +107,10 @@ export namespace NBTestUtils {
       name: 'binding',
       factory: ({ model }) =>
         EditorExtensionRegistry.createImmutableExtension(
-          ybinding({ ytext: (model.sharedModel as any).ysource })
+          ybinding({
+            ytext: (model.sharedModel as any).ysource,
+            undoManager: (model.sharedModel as any).undoManager ?? undefined
+          })
         )
     });
     const factoryService = new CodeMirrorEditorFactory({

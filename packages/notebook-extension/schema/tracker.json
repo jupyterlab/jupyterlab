@@ -732,6 +732,12 @@
         "matchBrackets": false
       }
     },
+    "autoRenderMarkdownCells": {
+      "title": "Automatically render markdown when cursor leaves markdown cells",
+      "description": "Whether to render markdown cells when the cursor moves out of them.",
+      "type": "boolean",
+      "default": false
+    },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells; it will override the CodeMirror default configuration.",
@@ -754,7 +760,7 @@
       "default": false
     },
     "overscanCount": {
-      "title": "Number of cells to render outside de the viewport",
+      "title": "Number of cells to render outside the viewport",
       "description": "In 'full' windowing mode, this is the number of cells above and below the viewport.",
       "type": "number",
       "default": 1,

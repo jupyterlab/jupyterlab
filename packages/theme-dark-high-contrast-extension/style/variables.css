@@ -393,7 +393,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-search-unselected-match-background-color: var(
     --jp-inverse-layout-color0
   );
-  --jp-search-unselected-match-color: var(--jp-ui-inverse-font-color0);
+  --jp-search-unselected-match-color: black;
 
   /* scrollbar related styles. Supports every browser except Edge. */
 

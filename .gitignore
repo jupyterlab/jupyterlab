@@ -154,3 +154,6 @@ Untitled*.ipynb
 untitled*.md
 untitled*.py
 untitled*.txt
+
+# pixi environments
+.pixi

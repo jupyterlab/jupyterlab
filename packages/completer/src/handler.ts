@@ -2,13 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  CodeEditor,
-  COMPLETER_ACTIVE_CLASS,
-  COMPLETER_ENABLED_CLASS,
-  COMPLETER_LINE_BEGINNING_CLASS
-} from '@jupyterlab/codeeditor';
-import { Text } from '@jupyterlab/coreutils';
-import {
   CellChange,
   FileChange,
   ISharedBaseCell,
@@ -16,12 +9,22 @@ import {
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
+import {
+  CodeEditor,
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS,
+  COMPLETER_LINE_BEGINNING_CLASS
+} from '@jupyterlab/codeeditor';
+import { Text } from '@jupyterlab/coreutils';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
+import type { TransactionSpec } from '@codemirror/state';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { InlineCompleter } from './inline';
 import {
   CompletionTriggerKind,
   IInlineCompletionItem,
@@ -31,7 +34,6 @@ import {
   IProviderReconciliator
 } from './tokens';
 import { Completer } from './widget';
-import { InlineCompleter } from './inline';
 
 /**
  * A completion handler for editors.
@@ -204,11 +206,16 @@ export class CompletionHandler implements IDisposable {
 
     const { start, end, value } = patch;
     const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
-    // we need to update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(start, end, value);
+    // Update the document and the cursor position in the same transaction
+    // to ensure consistency in listeners to document changes.
+    // Note: it also ensures a single change is stored by the undo manager.
+    const transactions: TransactionSpec = {
+      changes: { from: start, to: end, insert: value }
+    };
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
-      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+      transactions.selection = { anchor: start + value.length };
     }
+    (editor as CodeMirrorEditor).editor.dispatch(transactions);
   }
 
   /**
@@ -467,13 +474,18 @@ export class CompletionHandler implements IDisposable {
     if (
       trigger === InlineCompletionTriggerKind.Automatic &&
       (typeof line === 'undefined' ||
-        position.column < line.length ||
         line.slice(0, position.column).match(/^\s*$/))
     ) {
       // In Automatic mode we only auto-trigger on the end of line (and not on the beginning).
       // Increase the counter to avoid out-of date replies when pressing Backspace quickly.
       this._fetchingInline += 1;
       return;
+    }
+
+    let isMiddleOfLine = false;
+
+    if (typeof line !== 'undefined' && position.column < line.length) {
+      isMiddleOfLine = true;
     }
 
     const request = this._composeRequest(editor, position);
@@ -485,7 +497,11 @@ export class CompletionHandler implements IDisposable {
     model.cursor = position;
 
     const current = ++this._fetchingInline;
-    const promises = this._reconciliator.fetchInline(request, trigger);
+    const promises = this._reconciliator.fetchInline(
+      request,
+      trigger,
+      isMiddleOfLine
+    );
     let cancelled = false;
 
     const completed = new Set<

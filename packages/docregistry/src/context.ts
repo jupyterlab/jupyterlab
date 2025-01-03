@@ -45,6 +45,7 @@ export class Context<
   constructor(options: Context.IOptions<T>) {
     const manager = (this._manager = options.manager);
     this.translator = options.translator || nullTranslator;
+    this._contentProviderId = options.contentProviderId;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
     this._dialogs =
@@ -57,7 +58,8 @@ export class Context<
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     const sharedFactory = this._manager.contents.getSharedModelFactory(
-      this._path
+      this._path,
+      { contentProviderId: options.contentProviderId }
     );
     const sharedModel = sharedFactory?.createNew({
       path: localPath,
@@ -295,7 +297,9 @@ export class Context<
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
-      await this._manager.contents.get(newPath);
+      await this._manager.contents.get(newPath, {
+        contentProviderId: this._contentProviderId
+      });
       await this._maybeOverWrite(newPath);
     } catch (err) {
       if (!err.response || err.response.status !== 404) {
@@ -596,6 +600,14 @@ export class Context<
 
     try {
       await this._manager.ready;
+      if (this._model.collaborative) {
+        // Files cannot be saved in collaborative mode. The "save" command
+        // is disabled in the UI, but if the user tries to save anyway, act
+        // as though it succeeded.
+        this._saveState.emit('completed');
+        return Promise.resolve();
+      }
+
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
@@ -645,7 +657,8 @@ export class Context<
       hash: this._factory.fileFormat !== null,
       ...(this._factory.fileFormat !== null
         ? { format: this._factory.fileFormat }
-        : {})
+        : {}),
+      contentProviderId: this._contentProviderId
     };
     const path = this._path;
     const model = this._model;
@@ -704,7 +717,8 @@ export class Context<
     // Make sure the file has not changed on disk.
     const promise = this._manager.contents.get(path, {
       content: false,
-      hash: true
+      hash: true,
+      contentProviderId: this._contentProviderId
     });
     return promise.then(
       model => {
@@ -750,7 +764,8 @@ export class Context<
           .then(async contentsModel => {
             const model = await this._manager.contents.get(path, {
               content: false,
-              hash: true
+              hash: true,
+              contentProviderId: this._contentProviderId
             });
             return {
               ...contentsModel,
@@ -766,7 +781,8 @@ export class Context<
             .then(async contentsModel => {
               const model = await this._manager.contents.get(path, {
                 content: false,
-                hash: true
+                hash: true,
+                contentProviderId: this._contentProviderId
               });
               return {
                 ...contentsModel,
@@ -792,7 +808,7 @@ export class Context<
   }
 
   /**
-   * Add a checkpoint the file is writable.
+   * Add a checkpoint if the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
     let promise = Promise.resolve(void 0);
@@ -852,7 +868,10 @@ or load the version on disk (revert)?`,
         return Promise.reject(new Error('Disposed'));
       }
       if (result.button.actions.includes('overwrite')) {
-        return this._manager.contents.save(this._path, options);
+        return this._manager.contents.save(this._path, {
+          ...options,
+          contentProviderId: this._contentProviderId
+        });
       }
       if (result.button.actions.includes('revert')) {
         return this.revert().then(() => {
@@ -956,6 +975,7 @@ or load the version on disk (revert)?`,
   private _isDisposed = false;
   private _isPopulated = false;
   private _trans: TranslationBundle;
+  private _contentProviderId?: string;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
@@ -1033,6 +1053,12 @@ export namespace Context {
      * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
      */
     lastModifiedCheckMargin?: number;
+
+    /**
+     * Identifier of the content provider used for file operations.
+     * @experimental
+     */
+    contentProviderId?: string;
   }
 }
 

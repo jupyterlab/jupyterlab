@@ -19,6 +19,7 @@ test.use({
   }
 });
 
+// prefer appending to this list, as the index ends up being relevant
 const EXPECTED_MERMAID_ORDER = [
   'flowchart',
   'sequence',
@@ -34,7 +35,10 @@ const EXPECTED_MERMAID_ORDER = [
   'mindmap',
   'timeline',
   'sankey',
-  'xy'
+  'xy',
+  'block',
+  'kanban',
+  'flowchart-elk'
 ];
 
 /**

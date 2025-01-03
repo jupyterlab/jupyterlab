@@ -23,7 +23,7 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import FrozenSet, Optional
+from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
@@ -2348,14 +2348,10 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
 
         # Check for overlap.
         if (
-            gte(x1, y1, True)
-            and ly(x1, y2, True)
-            or gy(x2, y1, True)
-            and ly(x2, y2, True)
-            or gte(y1, x1, True)
-            and lx(y1, x2, True)
-            or gx(y2, x1, True)
-            and lx(y2, x2, True)
+            (gte(x1, y1, True) and ly(x1, y2, True))
+            or (gy(x2, y1, True) and ly(x2, y2, True))
+            or (gte(y1, x1, True) and lx(y1, x2, True))
+            or (gx(y2, x1, True) and lx(y2, x2, True))
         ):
             # if we ever find an overlap, we can return immediately
             return 0
@@ -2403,7 +2399,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[FrozenSet[str]] = None
+    locked_plugins: Optional[frozenset[str]] = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:

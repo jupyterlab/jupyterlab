@@ -50,7 +50,8 @@ export class ProviderReconciliator implements IProviderReconciliator {
 
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger: InlineCompletionTriggerKind
+    trigger: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<InlineResult>[] {
     let promises: Promise<
       IInlineCompletionList<CompletionHandler.IInlineItem>
@@ -58,7 +59,14 @@ export class ProviderReconciliator implements IProviderReconciliator {
     const current = ++this._inlineFetching;
     for (const provider of this._inlineProviders) {
       const settings = this._inlineProvidersSettings[provider.identifier];
-
+      if (
+        trigger !== InlineCompletionTriggerKind.Invoke &&
+        isMiddleOfLine &&
+        !settings.autoFillInMiddle
+      ) {
+        // Skip if FIM is disabled
+        continue;
+      }
       let delay = 0;
       if (trigger === InlineCompletionTriggerKind.Automatic) {
         delay = settings.debouncerDelay;

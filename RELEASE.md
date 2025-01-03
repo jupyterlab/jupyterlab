@@ -62,11 +62,11 @@ The full process is documented in https://jupyter-releaser.readthedocs.io/en/lat
 
 Here is a quick summary of the different steps.
 
-#### Communicate on Gitter
+#### Communicate on Zulip
 
 It is good practice to let other maintainers and users know when starting a new release.
 
-For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
+For this we usually leave a small message in the "Release Coordination" topic of the `jupyterlab` channel on Zulip: https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination.
 Once the release is done, we also post a message with a link to the release notes, which include the changelog.
 
 #### 1. Prep Release

@@ -7,7 +7,14 @@
     "esModuleInterop": true,
     "incremental": true,
     "jsx": "react",
-    "lib": ["DOM", "DOM.Iterable", "ES2018", "ES2020.Intl"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2018",
+      "ES2020.BigInt",
+      "ES2020.Intl",
+      "ES2020.String"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,

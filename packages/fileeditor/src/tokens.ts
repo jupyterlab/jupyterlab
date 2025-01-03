@@ -4,7 +4,7 @@
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Token } from '@lumino/coreutils';
-import { FileEditor } from './widget';
+import { FileEditor, FileEditorFactory } from './widget';
 
 /**
  * A class that tracks editor widgets.
@@ -20,4 +20,12 @@ export const IEditorTracker = new Token<IEditorTracker>(
   `A widget tracker for file editors.
   Use this if you want to be able to iterate over and interact with file editors
   created by the application.`
+);
+
+/**
+ * The editor widget factory token.
+ */
+export const IEditorWidgetFactory = new Token<FileEditorFactory.IFactory>(
+  '@jupyterlab/fileeditor:IEditorWidgetFactory',
+  'A factory for creating file editors.'
 );
