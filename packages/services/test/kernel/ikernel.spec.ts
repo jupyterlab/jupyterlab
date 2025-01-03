@@ -1579,34 +1579,36 @@ describe('Kernel.IKernel', () => {
     });
   });
 
-  describe('should not support subshells by default', () => {
-    it('#supportsSubshells should return false', () => {
-      expect(defaultKernel.supportsSubshells).toBeFalsy();
+  describe('should support subshells', () => {
+    it('#supportsSubshells should return true', () => {
+      expect(defaultKernel.supportsSubshells).toBeTruthy();
     });
 
     it('#subshellId should be null in main shell', () => {
       expect(defaultKernel.subshellId).toBeNull();
     });
 
-    it('#requestCreateSubshell should raise exception', () => {
-      expect(() => defaultKernel.requestCreateSubshell({})).toThrow(
-        /not supported/
-      );
-    });
+    it('should create and delete a subshell', async () => {
+      // Start with no subshells
+      const listReply0 = await defaultKernel.requestListSubshell({}).done;
+      expect(listReply0.content.subshell_id).toEqual([]);
 
-    it('#requestDeleteSubshell should raise exception', () => {
-      const options: KernelMessage.IDeleteSubshellRequestMsg['content'] = {
-        subshell_id: 'some string'
-      };
-      expect(() => defaultKernel.requestDeleteSubshell(options)).toThrow(
-        /not supported/
-      );
-    });
+      // Create new subshell
+      const createReply = await defaultKernel.requestCreateSubshell({}).done;
+      const subshellId = createReply.content.subshell_id;
+      expect(subshellId).not.toBeNull();
 
-    it('#requestListSubshell should raise exception', () => {
-      expect(() => defaultKernel.requestListSubshell({})).toThrow(
-        /not supported/
-      );
+      // Check one subshell exists
+      const listReply1 = await defaultKernel.requestListSubshell({}).done;
+      expect(listReply1.content.subshell_id).toEqual([`${subshellId}`]);
+
+      // Delete subshell
+      await defaultKernel.requestDeleteSubshell({ subshell_id: subshellId })
+        .done;
+
+      // Finish with no subshells
+      const listReply2 = await defaultKernel.requestListSubshell({}).done;
+      expect(listReply2.content.subshell_id).toEqual([]);
     });
   });
 });
