@@ -53,6 +53,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
+    this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
   }
@@ -179,6 +180,20 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * The subshell ID.
+   */
+  get subshellId(): string | null {
+    return this._subshellId;
+  }
+
+  /**
+   * Set the subshell ID.
+   */
+  set subshellId(value: string | null) {
+    this._subshellId = value;
+  }
+
+  /**
    * The current status of the kernel.
    */
   get status(): KernelMessage.Status {
@@ -226,6 +241,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * Check if this kernel supports JEP 91 kernel subshells.
+   */
+  get supportsSubshells(): boolean {
+    return this._supportsSubshells;
+  }
+
+  /**
    * Clone the current kernel with a new clientId.
    */
   clone(
@@ -251,16 +273,32 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
-    this._disposed.emit();
 
-    this._updateConnectionStatus('disconnected');
-    this._clearKernelState();
-    this._pendingMessages = [];
-    this._clearSocket();
+    const cleanup = () => {
+      this._isDisposed = true;
+      this._disposed.emit();
 
-    // Clear Lumino signals
-    Signal.clearData(this);
+      this._updateConnectionStatus('disconnected');
+      this._clearKernelState();
+      this._pendingMessages = [];
+      this._clearSocket();
+
+      // Clear Lumino signals
+      Signal.clearData(this);
+    };
+
+    if (this._subshellId !== null) {
+      const future = this.requestDeleteSubshell(
+        { subshell_id: this._subshellId },
+        true
+      );
+      future.onReply = (msg: KernelMessage.IDeleteSubshellReplyMsg): void => {
+        // Ignore the response and clean up.
+        cleanup();
+      };
+    } else {
+      cleanup();
+    }
   }
 
   /**
@@ -572,6 +610,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content: {}
     });
     let reply: KernelMessage.IInfoReplyMsg | undefined;
@@ -609,6 +648,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     this._kernelSession = reply.header.session;
 
+    const supportedFeatures = reply.content.supported_features;
+    this._supportsSubshells =
+      supportedFeatures !== undefined &&
+      supportedFeatures.includes('kernel subshells');
+
     return reply;
   }
 
@@ -629,6 +673,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content
     });
     return Private.handleShellMessage(
@@ -654,6 +699,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content: content
     });
     return Private.handleShellMessage(
@@ -679,6 +725,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content
     });
     return Private.handleShellMessage(
@@ -722,6 +769,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content: { ...defaults, ...content },
       metadata
     });
@@ -770,6 +818,105 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * Send a `create_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   */
+  requestCreateSubshell(
+    content: KernelMessage.ICreateSubshellRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.ICreateSubshellRequestMsg,
+    KernelMessage.ICreateSubshellReplyMsg
+  > {
+    if (!this.supportsSubshells) {
+      throw new Error('Kernel subshells are not supported');
+    }
+
+    const msg = KernelMessage.createMessage({
+      msgType: 'create_subshell_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.ICreateSubshellRequestMsg,
+      KernelMessage.ICreateSubshellReplyMsg
+    >;
+  }
+
+  /**
+   * Send a `delete_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   */
+  requestDeleteSubshell(
+    content: KernelMessage.IDeleteSubshellRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IDeleteSubshellRequestMsg,
+    KernelMessage.IDeleteSubshellReplyMsg
+  > {
+    if (!this.supportsSubshells) {
+      throw new Error('Kernel subshells are not supported');
+    }
+
+    const msg = KernelMessage.createMessage({
+      msgType: 'delete_subshell_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IDeleteSubshellRequestMsg,
+      KernelMessage.IDeleteSubshellReplyMsg
+    >;
+  }
+
+  /**
+   * Send a `list_subshell_request` message.
+   *
+   * https://github.com/jupyter/enhancement-proposals/pull/91
+   */
+  requestListSubshell(
+    content: KernelMessage.IListSubshellRequestMsg['content'],
+    disposeOnDone: boolean = true
+  ): Kernel.IControlFuture<
+    KernelMessage.IListSubshellRequestMsg,
+    KernelMessage.IListSubshellReplyMsg
+  > {
+    if (!this.supportsSubshells) {
+      throw new Error('Kernel subshells are not supported');
+    }
+
+    const msg = KernelMessage.createMessage({
+      msgType: 'list_subshell_request',
+      channel: 'control',
+      username: this._username,
+      session: this._clientId,
+      content
+    });
+    return this.sendControlMessage(
+      msg,
+      true,
+      disposeOnDone
+    ) as Kernel.IControlFuture<
+      KernelMessage.IListSubshellRequestMsg,
+      KernelMessage.IListSubshellReplyMsg
+    >;
+  }
+
+  /**
    * Send an `is_complete_request` message.
    *
    * #### Notes
@@ -786,6 +933,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content
     });
     return Private.handleShellMessage(
@@ -809,6 +957,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       channel: 'shell',
       username: this._username,
       session: this._clientId,
+      subshellId: this._subshellId,
       content
     });
     return Private.handleShellMessage(
@@ -1679,6 +1828,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _noOp = () => {
     /* no-op */
   };
+
+  private _supportsSubshells = false;
+  private _subshellId: string | null;
 }
 
 /**

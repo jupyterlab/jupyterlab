@@ -112,6 +112,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId,
+      subshellId: this._kernel.subshellId,
       content: {
         comm_id: this._id,
         target_name: this._target,
@@ -145,6 +146,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId,
+      subshellId: this._kernel.subshellId,
       content: {
         comm_id: this._id,
         data: data
@@ -179,6 +181,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId,
+      subshellId: this._kernel.subshellId,
       content: {
         comm_id: this._id,
         data: data ?? {}
