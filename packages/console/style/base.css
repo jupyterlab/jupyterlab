@@ -29,9 +29,10 @@
 
 .jp-CodeConsole-content {
   background: var(--jp-layout-color0);
-  flex: 1 1 auto;
   overflow: auto;
-  padding: var(--jp-console-padding);
+  padding: 0 var(--jp-console-padding);
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  min-height: calc(5 * var(--jp-ui-font-size1));
 }
 
 .jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
@@ -71,16 +72,15 @@
 |----------------------------------------------------------------------------*/
 
 .jp-CodeConsole-input {
-  max-height: 80%;
-  flex: 0 0 auto;
   overflow: auto;
-  border-top: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   padding: var(--jp-cell-padding) var(--jp-console-padding);
 
   /* This matches the box shadow on the notebook toolbar, eventually we should create
    * CSS variables for this */
   box-shadow: 0 0.4px 6px 0 rgba(0, 0, 0, 0.1);
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color0);
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  min-height: calc(5 * var(--jp-ui-font-size1));
 }
 
 .jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
@@ -106,4 +106,20 @@
 .jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-InputPrompt,
 .jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-OutputPrompt {
   flex: 0 0 110px;
+}
+
+/*-----------------------------------------------------------------------------
+| Split Panel Container
+|----------------------------------------------------------------------------*/
+.jp-CodeConsole-split {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.jp-CodeConsole-split.lm-SplitPanel .lm-SplitPanel-handle::after {
+  background-color: var(--jp-border-color2);
+  min-height: var(--jp-border-width);
+  min-width: var(--jp-border-width);
 }
