@@ -586,11 +586,11 @@ export class CodeConsole extends Widget {
       case 'mousedown':
         this._evtMouseDown(event as MouseEvent);
         break;
-      case 'mouseup':
-        this._evtMouseUp(event as MouseEvent);
-        break;
       case 'mousemove':
         this._evtMouseMove(event as MouseEvent);
+        break;
+      case 'mouseup':
+        this._evtMouseUp(event as MouseEvent);
         break;
       case 'resize':
         this._splitPanel.fit();
@@ -957,9 +957,9 @@ export class CodeConsole extends Widget {
     // Default relative sizes
     let sizes = [1, 1];
     if (promptCellPosition === 'top') {
-      sizes = [1, 10];
+      sizes = [1, 100];
     } else if (promptCellPosition === 'bottom') {
-      sizes = [10, 1];
+      sizes = [100, 1];
     }
     this._splitPanel.setRelativeSizes(sizes);
   }
