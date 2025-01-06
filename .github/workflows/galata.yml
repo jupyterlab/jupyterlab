@@ -37,6 +37,10 @@ jobs:
           # Build dev-mode
           jlpm run build
 
+      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
+        run: |
+          pip install --upgrade --pre ipykernel>=7
+
       - name: Launch JupyterLab
         run: |
           cd galata

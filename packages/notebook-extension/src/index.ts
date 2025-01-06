@@ -160,6 +160,8 @@ namespace CommandIDs {
 
   export const createConsole = 'notebook:create-console';
 
+  export const createSubshellConsole = 'notebook:create-subshell-console';
+
   export const createOutputView = 'notebook:create-output-view';
 
   export const clearAllOutputs = 'notebook:clear-all-cell-outputs';
@@ -1394,6 +1396,33 @@ function activateCodeConsole(
       );
     },
     isEnabled
+  });
+
+  commands.addCommand(CommandIDs.createSubshellConsole, {
+    label: trans.__('New Subshell Console for Notebook'),
+    execute: args => {
+      const current = tracker.currentWidget;
+
+      if (!current) {
+        return;
+      }
+
+      return Private.createConsole(
+        commands,
+        current,
+        args['activate'] as boolean,
+        true
+      );
+    },
+    isEnabled,
+    isVisible: () => {
+      const kernel =
+        tracker.currentWidget?.context.sessionContext.session?.kernel;
+      return (
+        (kernel?.supportsSubshells ?? false) &&
+        PageConfig.getOption('subshellConsole').toLowerCase() === 'true'
+      );
+    }
   });
 
   commands.addCommand(CommandIDs.runInConsole, {
@@ -3624,6 +3653,7 @@ function populatePalette(
     CommandIDs.changeKernel,
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
+    CommandIDs.createSubshellConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust,
     CommandIDs.toggleCollapseCmd,
@@ -3798,16 +3828,19 @@ namespace Private {
    * @param commands Commands registry
    * @param widget Notebook panel
    * @param activate Should the console be activated
+   * @param subshell Should the console contain a subshell or the main shell
    */
   export function createConsole(
     commands: CommandRegistry,
     widget: NotebookPanel,
-    activate?: boolean
+    activate?: boolean,
+    subshell?: boolean
   ): Promise<void> {
     const options = {
       path: widget.context.path,
       preferredLanguage: widget.context.model.defaultKernelLanguage,
       activate: activate,
+      subshell: subshell,
       ref: widget.id,
       insertMode: 'split-bottom',
       type: 'Linked Console'
