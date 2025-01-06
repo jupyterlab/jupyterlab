@@ -178,6 +178,53 @@ describe('@jupyterlab/apputils', () => {
           expect((await prompt).button.accept).toBe(true);
         });
 
+        it('should not accept on enter key within textarea', async () => {
+          class CustomDialogBody
+            extends ReactWidget
+            implements Dialog.IBodyWidget<ReactWidget>
+          {
+            constructor() {
+              super();
+              this.addClass('jp-Dialog-body');
+            }
+
+            render(): JSX.Element {
+              return (
+                <div>
+                  <textarea data-testid="dialog-textarea" />
+                </div>
+              );
+            }
+
+            getValue(): ReactWidget {
+              return this;
+            }
+          }
+
+          const body = new CustomDialogBody();
+          const dialog = new Dialog({ body });
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+
+          const textarea = dialog.node.querySelector(
+            '[data-testid="dialog-textarea"]'
+          );
+          expect(textarea).not.toBeNull();
+
+          if (textarea) {
+            (textarea as HTMLTextAreaElement).focus();
+            simulate(textarea, 'keydown', { key: 'Enter', keyCode: 13 });
+          }
+
+          expect(dialog.isVisible).toBe(true);
+
+          simulate(dialog.node, 'keydown', { key: 'Enter', keyCode: 13 });
+
+          const result = await prompt;
+          expect(result.button.accept).toBe(true);
+        });
+
         it('should resolve with currently focused button', async () => {
           const dialog = new TestDialog({
             buttons: [
