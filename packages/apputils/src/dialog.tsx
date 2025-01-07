@@ -436,10 +436,9 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl);
+          const index = this._buttonNodes.indexOf(activeEl);
           this.resolve(index);
         }
         break;
