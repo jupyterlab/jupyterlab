@@ -498,7 +498,7 @@ export abstract class ABCWidgetFactory<
   get contentProviderId(): string | undefined {
     return this._contentProviderId;
   }
-  set contentProviderId(value: string) {
+  set contentProviderId(value: string | undefined) {
     if (this._contentProviderId && value !== this._contentProviderId) {
       throw Error(
         `Cannot change content provider on factory with an existing provider: ${this._contentProviderId}`
