@@ -440,8 +440,8 @@ export class Dialog<T> extends Widget {
 
         if (activeEl instanceof HTMLButtonElement) {
           index = this._buttonNodes.indexOf(activeEl);
+          this.resolve(index);
         }
-        this.resolve(index);
         break;
       }
       default:

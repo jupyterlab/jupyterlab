@@ -203,7 +203,7 @@ describe('@jupyterlab/apputils', () => {
 
           const body = new CustomDialogBody();
           const dialog = new Dialog({ body });
-          const prompt = dialog.launch();
+          dialog.launch();
 
           await waitForDialog();
 
@@ -218,11 +218,7 @@ describe('@jupyterlab/apputils', () => {
           }
 
           expect(dialog.isVisible).toBe(true);
-
-          simulate(dialog.node, 'keydown', { key: 'Enter', keyCode: 13 });
-
-          const result = await prompt;
-          expect(result.button.accept).toBe(true);
+          dialog.dispose();
         });
 
         it('should resolve with currently focused button', async () => {
