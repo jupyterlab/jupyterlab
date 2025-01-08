@@ -5,7 +5,7 @@ Frequently Asked Questions (FAQ)
 ================================
 
 Below are some frequently asked questions. Click on a question to be directed to
-relevant information in our documentation or our GitHub repo.
+relevant information in our documentation or our GitHub repository.
 
 General
 -------
