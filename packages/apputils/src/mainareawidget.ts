@@ -46,12 +46,12 @@ export class MainAreaWidget<T extends Widget = Widget>
     content.node.setAttribute('role', 'region');
     // Set aria-label dynamically based on widget and translation
     content.node.setAttribute('aria-label', this._widget ? this._widget.getAriaLabel('content') : trans.__('main area content'));
-    
+
     const toolbar = (this._toolbar = options.toolbar || new ReactiveToolbar());
     toolbar.node.setAttribute('role', 'navigation');
     // Set toolbar aria-label dynamically based on widget and translation
     toolbar.node.setAttribute('aria-label', this._widget ? this._widget.getAriaLabel('actions') : trans.__('main area toolbar'));
-    
+
     const contentHeader = (this._contentHeader =
       options.contentHeader ||
       new BoxPanel({
