@@ -235,12 +235,15 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
+
           // press right arrow twice (focusing on "third")
           simulate(dialog.node, 'keydown', { keyCode: 39 });
           simulate(dialog.node, 'keydown', { keyCode: 39 });
+
           // press enter
           simulate(dialog.node, 'keydown', { keyCode: 13 });
-          expect((await prompt).button.label).toBe('third');
+          const promptResult = await prompt;
+          expect(promptResult.button.label).toBe('third');
           dialog.dispose();
         });
 
