@@ -316,6 +316,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
+  line-height: 1.2;
 }
 
 .jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
