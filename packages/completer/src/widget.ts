@@ -1001,7 +1001,7 @@ export namespace Completer {
     /**
      * The event which caused the query to change, one of:
      * - `editorUpdate`: as a result of editor change, e.g. user typing code,
-     * - `setter`: programatically, e.g. by the logic in the widget,
+     * - `setter`: programmatically, e.g. by the logic in the widget,
      * - `reset`: due to completer model being reset.
      */
     origin: 'setter' | 'editorUpdate' | 'reset';

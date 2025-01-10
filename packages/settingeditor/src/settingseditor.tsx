@@ -11,6 +11,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFormRendererRegistry,
   ReactWidget,
+  updateFilterFunction,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -106,6 +107,18 @@ export class SettingsEditor extends SplitPanel {
       this.title.className = this.title.className.replace('jp-mod-dirty', '');
     }
     this._saveStateChange.emit(dirty ? 'started' : 'completed');
+  }
+
+  /**
+   * Updates the filter of the plugin list.
+   *
+   * @param query The query to filter the plugin list
+   */
+  updateQuery(query: string): void {
+    this._list.setFilter(
+      query ? updateFilterFunction(query, false, false) : null,
+      query
+    );
   }
 
   /**
