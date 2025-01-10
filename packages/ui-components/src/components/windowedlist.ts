@@ -990,6 +990,10 @@ export class WindowedList<
     switch (event.type) {
       case 'pointerdown':
         this._evtPointerDown(event as PointerEvent);
+        // Stop propagation of this event; a `mousedown` event will still
+        // be automatically dispatched and handled by the parent notebook
+        // (which will close any open context menu, etc.)
+        event.stopPropagation();
         break;
       case 'scroll':
         this.onScroll(event);
