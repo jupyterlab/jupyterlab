@@ -25,15 +25,19 @@ See the sections below for more detailed information, or browse the rest of this
 
    extension_points
    ui_components
+   components
    documents
    notebook
    virtualdom
    ui_helpers
    internationalization
    identity
+   patterns
+   css
    extension_tutorial
    extension_multiple_ui
    extension_migration
+   api
 
 Other resources
 ---------------

@@ -5,7 +5,7 @@ ci:
   skip: [prettier, eslint, stylelint]
 
 default_language_version:
-  node: system
+  node: '16'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
