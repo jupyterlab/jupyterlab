@@ -45,7 +45,6 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    :hidden:
 
    repo
-   components
    patterns
    Accessibility <accessibility>
    internationalization
