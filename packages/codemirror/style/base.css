@@ -67,15 +67,14 @@
   margin-right: -5px;
 }
 
-.cm-searching,
+.cm-editor .cm-searching,
 .cm-searching span {
-  /* `.cm-searching span`: we need to override syntax highlighting */
   background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
 
 .cm-searching::selection,
-.cm-searching span::selection {
+.cm-editor .cm-searching span::selection {
   background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
