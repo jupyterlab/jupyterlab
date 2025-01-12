@@ -43,37 +43,55 @@ export class NotebookViewModel extends WindowedListModel {
     this._estimatedWidgetSize = NotebookViewModel.DEFAULT_CELL_SIZE;
   }
 
-  /**
-   * Cell size estimator
-   *
-   * @param index Cell index
-   * @returns Cell height in pixels
-   */
-  estimateWidgetSize = (index: number): number => {
-    const model = this.cells[index].model;
-    const height = this.cellsEstimatedHeight.get(model.id);
-    if (typeof height === 'number') {
-      return height;
-    }
+ /**
+ * Cell size estimator
+ *
+ * @param index Cell index
+ * @returns Cell height in pixels
+ */
+estimateWidgetSize = (index: number): number => {
+  const model = this.cells[index].model;
+  const height = this.cellsEstimatedHeight.get(model.id);
+  if (typeof height === 'number') {
+    return height;
+  }
 
-    const nLines = model.sharedModel.getSource().split('\n').length;
-    let outputsLines = 0;
-    if (model instanceof CodeCellModel && !model.isDisposed) {
-      for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
-        const output = model.outputs.get(outputIdx);
-        const data = output.data['text/plain'];
-        if (typeof data === 'string') {
-          outputsLines += data.split('\n').length;
-        } else if (Array.isArray(data)) {
-          outputsLines += data.join('').split('\n').length;
-        }
+  const nLines = model.sharedModel.getSource().split('\n').length;
+  let outputsLines = 0;
+
+  if (model instanceof CodeCellModel) {
+    const supportedOutputTypes = [
+      'text/html',
+      'image/svg+xml',
+      'application/pdf',
+      'text/markdown',
+      'text/plain',
+      'application/vnd.jupyter.stderr',
+      'application/vnd.jupyter.stdout',
+      'text',
+    ];
+
+    for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
+      const output = model.outputs.get(outputIdx);
+
+      // Find the preferred output type
+      const preferredOutputType = supportedOutputTypes.find((type) => type in output.data);
+      const dataToDisplay = preferredOutputType ? output.data[preferredOutputType] : undefined;
+
+      if (dataToDisplay !== undefined) {
+        const outputText =
+          Array.isArray(dataToDisplay) ? dataToDisplay.join('') : (dataToDisplay as string);
+
+        outputsLines += outputText.split('\n').length;
       }
     }
-    return (
-      NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * (nLines + outputsLines) +
-      NotebookViewModel.DEFAULT_CELL_MARGIN
-    );
-  };
+  }
+
+  return (
+    NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * (nLines + outputsLines) +
+    NotebookViewModel.DEFAULT_CELL_MARGIN
+  );
+};
 
   /**
    * Set an estimated height for a cell
@@ -96,7 +114,7 @@ export class NotebookViewModel extends WindowedListModel {
       });
     }
   }
-
+    
   /**
    * Render the cell at index.
    *
