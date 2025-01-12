@@ -114,7 +114,7 @@ estimateWidgetSize = (index: number): number => {
       });
     }
   }
-    
+
   /**
    * Render the cell at index.
    *
