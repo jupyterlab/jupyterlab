@@ -239,7 +239,7 @@
 }
 
 .jp-Shortcuts-Plus:hover {
-background: var(--jp-shortcuts-button-hover-background);
+  background: var(--jp-shortcuts-button-hover-background);
 }
 
 .jp-Shortcuts-Plus:active {
