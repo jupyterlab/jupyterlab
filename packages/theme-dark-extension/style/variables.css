@@ -88,6 +88,14 @@ all of MD as it is not optimized for dense, information rich UIs.
    * The following variables, specify the visual styling of borders in JupyterLab.
    */
 
+    /* shortcut buttons
+   *
+   * The following css variables are used to specify the visual
+   * styling of the keyboard shortcut buttons
+   */
+  --jp-shortcuts-button-background: var(--jp-brand-color2);
+  --jp-shortcuts-button-hover-background: var(--jp-brand-color1);
+
   --jp-border-width: 1px;
   --jp-border-color0: var(--md-grey-700, #616161);
   --jp-border-color1: var(--md-grey-700, #616161);
