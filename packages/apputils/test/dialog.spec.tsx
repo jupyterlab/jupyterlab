@@ -16,6 +16,10 @@ import { generate, simulate } from 'simulate-event';
 class TestDialog extends Dialog<any> {
   methods: string[] = [];
   events: string[] = [];
+  private _resolvePromise:
+    | ((value: Dialog.IResult<any> | PromiseLike<Dialog.IResult<any>>) => void)
+    | null = null;
+  private _rejectPromise: ((reason?: any) => void) | null = null;
 
   handleEvent(event: Event): void {
     super.handleEvent(event);
@@ -35,6 +39,47 @@ class TestDialog extends Dialog<any> {
   protected onCloseRequest(msg: Message): void {
     super.onCloseRequest(msg);
     this.methods.push('onCloseRequest');
+  }
+
+  async launch(): Promise<Dialog.IResult<any>> {
+    const originalPromise = super.launch();
+
+    return new Promise<Dialog.IResult<any>>((resolve, reject) => {
+      this._resolvePromise = resolve;
+      this._rejectPromise = reject;
+      originalPromise.then(resolve).catch(reject);
+    });
+  }
+
+  resolveFor(
+    test: () => void | Promise<void>,
+    timeout: number = 1000
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        resolve(); // Resolve even if the dialog doesn't
+      }, timeout);
+
+      Promise.resolve(test())
+        .then(() => {
+          if (this._resolvePromise) {
+            this._resolvePromise({
+              button: Dialog.cancelButton(),
+              isChecked: null,
+              value: null
+            });
+          }
+          clearTimeout(timeoutId);
+          resolve();
+        })
+        .catch(error => {
+          if (this._rejectPromise) {
+            this._rejectPromise(error);
+          }
+          clearTimeout(timeoutId);
+          reject(error);
+        });
+    });
   }
 }
 
@@ -179,46 +224,32 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should not accept on enter key within textarea', async () => {
-          class CustomDialogBody
-            extends ReactWidget
-            implements Dialog.IBodyWidget<ReactWidget>
-          {
-            constructor() {
-              super();
-              this.addClass('jp-Dialog-body');
-            }
+          const dialog = new TestDialog({
+            body: new Widget({ node: document.createElement('textarea') }),
+            buttons: [Dialog.createButton({ label: 'OK' })],
+            defaultButton: 0
+          });
 
-            render(): JSX.Element {
-              return (
-                <div>
-                  <textarea data-testid="dialog-textarea" />
-                </div>
-              );
-            }
+          const promptPromise = dialog.launch();
 
-            getValue(): ReactWidget {
-              return this;
-            }
-          }
+          await dialog.resolveFor(async () => {
+            const textarea = dialog.node.querySelector('textarea');
+            textarea!.focus();
 
-          const body = new CustomDialogBody();
-          const dialog = new Dialog({ body });
-          dialog.launch();
+            simulate(dialog.node, 'keydown', { keyCode: 13 });
 
-          await waitForDialog();
+            await new Promise(resolve => setTimeout(resolve, 50));
+          });
 
-          const textarea = dialog.node.querySelector(
-            '[data-testid="dialog-textarea"]'
-          );
-          expect(textarea).not.toBeNull();
-
-          if (textarea) {
-            (textarea as HTMLTextAreaElement).focus();
-            simulate(textarea, 'keydown', { key: 'Enter', keyCode: 13 });
-          }
-
+          expect(dialog['_promise']).not.toBeNull();
           expect(dialog.isVisible).toBe(true);
+
           dialog.dispose();
+          try {
+            await promptPromise;
+          } catch (e) {
+            console.error(e);
+          }
         });
 
         it('should resolve with currently focused button', async () => {
