@@ -32,12 +32,12 @@ See the sections below for more detailed information, or browse the rest of this
    ui_helpers
    internationalization
    identity
-   patterns
-   css
+   ../developer/patterns
+   ../developer/css
    extension_tutorial
    extension_multiple_ui
    extension_migration
-   api
+   ../developer/api
 
 Other resources
 ---------------
