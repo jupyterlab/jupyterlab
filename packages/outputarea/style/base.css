@@ -122,14 +122,18 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 /* pre */
 
 .jp-OutputArea-output pre {
+  width: var(--jp-widgets-inline-width);
+  display: flex;
   border: none;
-  margin: 0;
-  padding: 0;
+  margin-left: 3.7em;
+  padding: 1em;
   overflow-x: auto;
   overflow-y: auto;
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre-wrap;
+  opacity: .8;
+  align-items: center;  
 }
 
 /* tables */
@@ -222,18 +226,20 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 .jp-Stdin-input {
   font-family: var(--jp-code-font-family);
-  font-size: inherit;
-  color: inherit;
+  font-size: var(--jp-widgets-font-size);
+  color: var(--jp-widgets-input-color);
   background-color: inherit;
-  width: 42%;
+  width: var(--jp-widgets-inline-width);
   min-width: 200px;
+  padding: var(--jp-widgets-input-padding);
+  margin: var(--jp-widgets-margin);
+  margin-left: 1em;
+  border: var(--jp-widgets-input-border-width) solid var(--jp-widgets-input-border-color);
+  height: 20px;
 
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
 
-  /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0 0.25em;
-  margin: 0 0.25em;
   flex: 0 0 70%;
 }
 
