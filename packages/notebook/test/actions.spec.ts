@@ -1111,6 +1111,24 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[2])).toBe(true);
       });
+
+      it('should run the selected cells', async () => {
+        let emitted = 0;
+        const next = widget.widgets[2];
+        NotebookActions.selectionExecuted.connect(async (_, args) => {
+          const { notebook, lastCell } = args;
+          expect(notebook).not.toBe(null);
+          expect(lastCell).not.toBe(null);
+          emitted += 1;
+        });
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[1], widget.widgets[2]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(emitted).toBe(2);
+      });
     });
 
     describe('#runAll()', () => {
