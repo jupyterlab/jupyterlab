@@ -99,12 +99,8 @@ all of MD as it is not optimized for dense, information rich UIs.
    * The following css variables are used to specify the visual
    * styling of the keyboard shortcut buttons
    */
-  --jp-shortcuts-button-background: var(
-    --jp-brand-color3
-  ); /* High contrast for light theme */
-  --jp-shortcuts-button-hover-background: var(
-    --jp-brand-color2
-  ); /* Slightly darker on hover */
+  --jp-shortcuts-button-background: var(--jp-brand-color3);
+  --jp-shortcuts-button-hover-background: var(--jp-brand-color2);
 
   /* UI Fonts
    *
