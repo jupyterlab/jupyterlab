@@ -69,6 +69,7 @@
 
 .cm-editor .cm-searching,
 .cm-searching span {
+  /* `.cm-searching span`: we need to override syntax highlighting */
   background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
