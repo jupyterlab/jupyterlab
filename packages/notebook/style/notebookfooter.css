@@ -37,3 +37,17 @@
     opacity: 1;
   }
 }
+
+@media (max-width: 760px) {
+  .jp-Notebook-footer {
+    margin-left: 28px;
+    width: calc(
+      100% -
+        (
+          var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) + 2 *
+            var(--jp-cell-padding) + 2 * var(--jp-notebook-padding) - 57.38px
+        )
+    );
+  }
+}
+
