@@ -221,6 +221,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Set a base config options for the editor.
+   */
+  setBaseOptions(options: Record<string, any>): void {
+    this._configurator.setBaseOptions(options);
+  }
+
+  /**
    * Inject an extension into the editor
    *
    * @alpha

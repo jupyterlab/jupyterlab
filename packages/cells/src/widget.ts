@@ -567,7 +567,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
-      this.editor.setOptions(this._editorConfig);
+      this.editor.setBaseOptions(this._editorConfig);
     }
   }
 

@@ -185,6 +185,7 @@ export class ExtensionsHandler
    * to `IExtensionsHandler.configChanged`.
    */
   setBaseOptions(options: Record<string, any>): void {
+    console.log("In setBase Options!");
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
       this._baseConfig = options;
@@ -215,21 +216,7 @@ export class ExtensionsHandler
   setOptions(options: Record<string, any>): void {
     const changed = this._getChangedOptions(options, this._config);
     if (changed.length > 0) {
-      // Filter keys that are undefined in options and have been customized from the base configuration
-      const customizedKeys = changed.filter(
-        key =>
-          options[key] === undefined &&
-          this._config[key] !== this._baseConfig[key]
-      );
-      const customizedOptions = customizedKeys.reduce<Record<string, any>>(
-        (aggregated, key) => {
-          aggregated[key] = this._config[key];
-          return aggregated;
-        },
-        {}
-      );
-
-      this._config = { ...options, ...customizedOptions };
+      this._config = { ...options };
       this._configChanged.emit(
         changed.reduce<Record<string, any>>((agg, key) => {
           agg[key] = this._config[key] ?? this._baseConfig[key];
