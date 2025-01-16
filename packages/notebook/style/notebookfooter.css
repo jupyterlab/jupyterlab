@@ -38,7 +38,7 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (width <= 760px) {
   .jp-Notebook-footer {
     margin-left: 28px;
     width: calc(
