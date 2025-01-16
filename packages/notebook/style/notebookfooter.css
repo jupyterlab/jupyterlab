@@ -2,6 +2,16 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+:root {
+  --jp-private-notebook-footer-width-spacer: calc(
+    100% -
+      (
+        var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) + 2 *
+          var(--jp-cell-padding) + 2 * var(--jp-notebook-padding)
+      )
+  );
+  --dynamic-extra-width: clamp(58px, 4vw, 59.9px);
+}
 
 .jp-Notebook-footer {
   height: 27px;
@@ -9,13 +19,7 @@
     var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
       var(--jp-cell-padding) + var(--jp-notebook-padding)
   );
-  width: calc(
-    100% -
-      (
-        var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) + 2 *
-          var(--jp-cell-padding) + 2 * var(--jp-notebook-padding)
-      )
-  );
+  width: var(--jp-private-notebook-footer-width-spacer);
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   color: var(--jp-ui-font-color3);
   background: none;
@@ -40,13 +44,8 @@
 
 @media (width <= 760px) {
   .jp-Notebook-footer {
+    background-color: red;
     margin-left: 28px;
-    width: calc(
-      100% -
-        (
-          var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) + 2 *
-            var(--jp-cell-padding) + 2 * var(--jp-notebook-padding) - 57.9px
-        )
-    );
+    width: calc(var(--jp-private-notebook-footer-width-spacer) + var(--dynamic-extra-width));
   }
 }
