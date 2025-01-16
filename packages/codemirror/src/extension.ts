@@ -185,7 +185,6 @@ export class ExtensionsHandler
    * to `IExtensionsHandler.configChanged`.
    */
   setBaseOptions(options: Record<string, any>): void {
-    console.log("In setBase Options!");
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
       this._baseConfig = options;
@@ -810,7 +809,7 @@ export namespace EditorExtensionRegistry {
         default: [],
         factory: () =>
           createConfigurableExtension((value: number[]) =>
-            value.length > 0 ? rulers(value) : []
+            value?.length > 0 ? rulers(value) : []
           ),
         schema: {
           type: 'array',
