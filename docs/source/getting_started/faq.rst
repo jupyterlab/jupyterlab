@@ -43,7 +43,7 @@ My notebook injects customized CSS that results in unexpected scrolling issues (
 Attributes Sanitization
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Why are `id` and `name` attributes removed from Markdown?
+Why are ``id`` and ``name`` attributes removed from Markdown?
 
     JupyterLab sanitizes these attributes to prevent security risks like DOM clobbering attacks. For more details, see the [DOM Clobbering Prevention](https://cheatsheetseries.owasp.org/cheatsheets/DOM_Clobbering_Prevention_Cheat_Sheet.html) guide. Additionally, see the related security advisory [CVE-2024-43805](https://github.com/jupyterlab/jupyterlab/security/advisories/GHSA-9q39-rmj3-p4r2).
 
