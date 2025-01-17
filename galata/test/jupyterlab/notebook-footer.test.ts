@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { test, expect } from '@playwright/test';
 
 const breakpoints = [759, 600, 500, 400];
