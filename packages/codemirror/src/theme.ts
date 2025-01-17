@@ -82,7 +82,6 @@ export const jupyterEditorTheme = EditorView.theme({
   '.cm-tooltip': {
     backgroundColor: 'var(--jp-layout-color1)'
   }
-
 });
 
 // The list of available tags for syntax highlighting is available at
