@@ -83,6 +83,15 @@ all of MD as it is not optimized for dense, information rich UIs.
     0 24px 38px 3px var(--jp-shadow-penumbra-color),
     0 9px 46px 8px var(--jp-shadow-ambient-color);
 
+  /* shortcut buttons
+   *
+   * The following css variables are used to specify the visual
+   * styling of the keyboard shortcut buttons
+   */
+
+  --jp-shortcuts-button-background: var(--jp-brand-color1);
+  --jp-shortcuts-button-hover-background: var(--jp-brand-color0);
+
   /* Borders
    *
    * The following variables, specify the visual styling of borders in JupyterLab.
