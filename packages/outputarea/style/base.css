@@ -240,7 +240,6 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
-
   flex: 0 0 70%;
 }
 
