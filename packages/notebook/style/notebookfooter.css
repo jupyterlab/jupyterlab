@@ -10,7 +10,7 @@
           var(--jp-cell-padding) + 2 * var(--jp-notebook-padding)
       )
   );
-  --dynamic-extra-width: clamp(58px, 4vw, 59.9px);
+  --dynamic-extra-width: clamp(58px, 7.87vw, 59.9px);
 }
 
 .jp-Notebook-footer {
@@ -44,8 +44,10 @@
 
 @media (width <= 760px) {
   .jp-Notebook-footer {
-    background-color: red;
     margin-left: 28px;
-    width: calc(var(--jp-private-notebook-footer-width-spacer) + var(--dynamic-extra-width));
+    width: calc(
+      var(--jp-private-notebook-footer-width-spacer) +
+        var(--dynamic-extra-width)
+    );
   }
 }
