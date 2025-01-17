@@ -40,6 +40,17 @@ My notebook injects customized CSS that results in unexpected scrolling issues (
     If you can not avoid changing the margins, you can set the settings *Notebook* => *Windowing mode* to ``defer`` or ``none``.
     It will negatively impact the performance of JupyterLab when opening long notebooks and/or lots of files.
 
+Attributes Sanitization
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Why are ``id`` and ``name`` attributes removed from Markdown?
+
+    JupyterLab sanitizes these attributes to prevent security risks like DOM clobbering attacks. For more details, see the `DOM Clobbering Prevention <https://cheatsheetseries.owasp.org/cheatsheets/DOM_Clobbering_Prevention_Cheat_Sheet.html>`_ guide. Additionally, see the related security advisory `CVE-2024-43805 <https://github.com/jupyterlab/jupyterlab/security/advisories/GHSA-9q39-rmj3-p4r2>`_.
+
+    Workarounds:
+    - Use headings in Markdown cells to create anchor points safely.
+    - Optionally, enable the "Allow named properties" setting in **Settings** -> **Settings Editor** -> **Sanitizer** (not recommended for untrusted sources).
+
 Tips and Tricks
 ---------------
 
