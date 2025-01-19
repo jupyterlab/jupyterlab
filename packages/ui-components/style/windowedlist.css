@@ -23,6 +23,7 @@
 .jp-WindowedPanel-scrollbar {
   display: none;
   position: relative;
+  user-select: none;
 }
 
 .jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-scrollbar {

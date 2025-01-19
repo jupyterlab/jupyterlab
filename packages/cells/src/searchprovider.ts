@@ -12,6 +12,7 @@ import {
   GenericSearchProvider,
   IBaseSearchProvider,
   IFilters,
+  IReplaceOptions,
   ISearchMatch
 } from '@jupyterlab/documentsearch';
 import { OutputArea } from '@jupyterlab/outputarea';
@@ -249,6 +250,42 @@ class CodeCellSearchProvider extends CellSearchProvider {
     }
   }
 
+  /**
+   * Replace all matches in the cell source with the provided text
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceAllMatches(newText, options);
+    return result;
+  }
+
+  /**
+   * Replace the currently selected match with the provided text.
+   * If no match is selected, it won't do anything.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceCurrentMatch(newText, loop, options);
+    return result;
+  }
+
   private async _onOutputsChanged(
     outputArea: OutputArea,
     changes: number
@@ -392,13 +429,37 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    const result = await super.replaceAllMatches(newText);
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceAllMatches(newText, options);
     // if the cell is rendered force update
     if ((this.cell as MarkdownCell).rendered) {
       this.cell.update();
     }
+    return result;
+  }
 
+  /**
+   * Replace the currently selected match with the provided text.
+   * If no match is selected, it won't do anything.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.model.getMetadata('editable') === false)
+      return Promise.resolve(false);
+
+    const result = await super.replaceCurrentMatch(newText, loop, options);
     return result;
   }
 

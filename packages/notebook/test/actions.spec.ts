@@ -698,6 +698,22 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'raw');
         expect(widget.activeCell).toBeInstanceOf(RawCell);
       });
+
+      it('should not change cell type when the cell is not editable', async () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        let cell = widget.activeCell as MarkdownCell;
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+        cell.model.setMetadata('editable', false);
+
+        // Try to change cell type
+        NotebookActions.changeCellType(widget, 'raw');
+        // Cell type should stay unchanged.
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
+
+        // Should show a dialog informing user why cell type could not be changed
+        await waitForDialog();
+        await acceptDialog();
+      });
     });
 
     describe('#run()', () => {
@@ -1741,6 +1757,38 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         NotebookActions.clearAllOutputs(widget);
         expect(widget.activeCellIndex).toBe(-1);
+      });
+    });
+
+    describe('#showOutput()', () => {
+      it('should hide the outputs on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.hideOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
+      });
+
+      it('should hide and show the outputs on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.hideOutput(widget);
+        NotebookActions.showOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(false);
+      });
+
+      it('should toggle the outputs from shown to hidden on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.toggleOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
+      });
+
+      it('should toggle the outputs twice, from shown to hidden and back, on the selected cell', () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.toggleOutput(widget);
+        NotebookActions.toggleOutput(widget);
+        expect((widget.activeCell as CodeCell).outputHidden).toBe(false);
       });
     });
 

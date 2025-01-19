@@ -70,7 +70,12 @@ describe('CodeMirrorEditor', () => {
       model,
       languages,
       // Binding between the editor and the Yjs model
-      extensions: [ybinding({ ytext: sharedModel.ysource })]
+      extensions: [
+        ybinding({
+          ytext: sharedModel.ysource,
+          undoManager: sharedModel.undoManager ?? undefined
+        })
+      ]
     });
   });
 
@@ -464,7 +469,7 @@ describe('CodeMirrorEditor', () => {
         value: 'bar'
       });
     });
-    it('should return preceeding token when it is the last token', async () => {
+    it('should return preceding token when it is the last token', async () => {
       model.mimeType = 'text/x-python';
       model.sharedModel.setSource('import');
       // Needed to have the sharedModel content transferred to the editor document

@@ -104,13 +104,8 @@ export class SearchDocumentModel
     return this._initialQuery;
   }
   set initialQuery(v: string) {
-    if (v) {
-      // Usually the value comes from user selection (set by search provider).
-      this._initialQuery = v;
-    } else {
-      // If user selection is empty, we fall back to most recent value (if any).
-      this._initialQuery = this._searchExpression;
-    }
+    // The value comes from user selection (set by search provider).
+    this._initialQuery = v;
   }
 
   /**

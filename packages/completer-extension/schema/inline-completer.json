@@ -19,6 +19,11 @@
     },
     {
       "command": "inline-completer:accept",
+      "keys": ["Tab"],
+      "selector": ".jp-mod-inline-completer-active"
+    },
+    {
+      "command": "inline-completer:accept",
       "keys": ["Alt End"],
       "selector": ".jp-mod-inline-completer-active"
     },

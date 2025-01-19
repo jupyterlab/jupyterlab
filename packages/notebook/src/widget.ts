@@ -705,6 +705,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       contentFactory,
       editorConfig,
       inputHistoryScope: this.notebookConfig.inputHistoryScope,
+      showInputPlaceholder: this.notebookConfig.showInputPlaceholder,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
@@ -936,7 +937,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // If the notebook is not fully rendered
     if (cellIdx < this.cellsArray.length) {
-      // If we are defering the cell rendering and the rendered cells do
+      // If we are deferring the cell rendering and the rendered cells do
       // not fill the viewport yet
       if (
         this.notebookConfig.windowingMode === 'defer' &&
@@ -1157,6 +1158,11 @@ export namespace StaticNotebook {
     maxNumberOutputs: number;
 
     /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder: boolean;
+
+    /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope: 'global' | 'session';
@@ -1182,6 +1188,11 @@ export namespace StaticNotebook {
      * Defines the rendering layout to use.
      */
     renderingLayout: RenderingLayout;
+
+    /**
+     * Automatically render markdown when the cursor leaves a markdown cell
+     */
+    autoRenderMarkdownCells: boolean;
 
     /**
      * Enable scrolling past the last cell
@@ -1237,13 +1248,15 @@ export namespace StaticNotebook {
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
     disableDocumentWideUndoRedo: true,
+    autoRenderMarkdownCells: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
     windowingMode: 'full',
-    accessKernelHistory: false
+    accessKernelHistory: false,
+    showInputPlaceholder: true
   };
 
   /**
@@ -1697,6 +1710,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._activeCellIndex = newValue;
+    const oldCell = this.widgets[oldValue] ?? null;
     const cell = this.widgets[newValue] ?? null;
     (this.layout as NotebookWindowedLayout).activeCell = cell;
     const cellChanged = cell !== this._activeCell;
@@ -1710,9 +1724,19 @@ export class Notebook extends StaticNotebook {
       this._activeCellChanged.emit(cell);
     }
 
-    if (this.mode === 'edit' && cell instanceof MarkdownCell) {
-      cell.rendered = false;
+    if (this.mode === 'edit') {
+      if (cell instanceof MarkdownCell) {
+        cell.rendered = false;
+      }
+      if (
+        this.notebookConfig.autoRenderMarkdownCells &&
+        cellChanged &&
+        oldCell instanceof MarkdownCell
+      ) {
+        oldCell.rendered = true;
+      }
     }
+
     this._ensureFocus();
     if (newValue === oldValue) {
       return;
@@ -3346,7 +3370,7 @@ namespace Private {
    */
   export interface IFragmentData {
     /**
-     * The kind of notebook element targetted by the fragment identifier.
+     * The kind of notebook element targeted by the fragment identifier.
      */
     kind: 'heading' | 'cell-id';
     /*

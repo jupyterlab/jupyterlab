@@ -759,16 +759,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
                   sender: IObservableString,
                   textEvent: IObservableString.IChangedArgs
                 ) => {
+                  if (
+                    textEvent.options !== undefined &&
+                    (textEvent.options as { [key: string]: any })['silent']
+                  ) {
+                    return;
+                  }
                   const codeCell = this.sharedModel as YCodeCell;
                   if (textEvent.type === 'remove') {
                     codeCell.removeStreamOutput(
                       event.newIndex,
-                      textEvent.start
+                      textEvent.start,
+                      'silent-change'
                     );
                   } else {
                     codeCell.appendStreamOutput(
                       event.newIndex,
-                      textEvent.value
+                      textEvent.value,
+                      'silent-change'
                     );
                   }
                 },
@@ -816,6 +824,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     slot: ISharedCodeCell,
     change: CellChange
   ): void {
+    if (change.streamOutputChange) {
+      globalModelDBMutex(() => {
+        for (const streamOutputChange of change.streamOutputChange!) {
+          if ('delete' in streamOutputChange) {
+            this._outputs.removeStreamOutput(streamOutputChange.delete!);
+          }
+          if ('insert' in streamOutputChange) {
+            this._outputs.appendStreamOutput(
+              streamOutputChange.insert!.toString()
+            );
+          }
+        }
+      });
+    }
+
     if (change.outputsChange) {
       globalModelDBMutex(() => {
         let retain = 0;
@@ -831,7 +854,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           if ('insert' in outputsChange) {
             // Inserting an output always results in appending it.
             for (const output of outputsChange.insert!) {
-              this._outputs.add(output.toJSON());
+              // For compatibility with older ydoc where a plain object,
+              // (rather than a Map instance) could be provided.
+              // In a future major release the use of Map will be required.
+              this._outputs.add('toJSON' in output ? output.toJSON() : output);
             }
           }
         }

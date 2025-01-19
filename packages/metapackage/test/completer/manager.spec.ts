@@ -313,7 +313,8 @@ describe('completer/manager', () => {
 
           const sharedConfig = {
             debouncerDelay: 0,
-            timeout: 10000
+            timeout: 10000,
+            autoFillInMiddle: false
           };
           inline.configure({
             providers: {
