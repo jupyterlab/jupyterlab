@@ -70,6 +70,14 @@
     "shortcuts": []
   },
   {
+    "id": "application:toggle-fullscreen-mode",
+    "label": "Fullscreen Mode",
+    "caption": "",
+    "shortcuts": [
+      "F11"
+    ]
+  },
+  {
     "id": "application:toggle-header",
     "label": "Show Header",
     "caption": "",
@@ -276,7 +284,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block commends in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
     "shortcuts": [
       "Alt A"
     ]
@@ -973,6 +981,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-single-click-navigation",
+    "label": "Enable Single Click Navigation",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-sort-notebooks-first",
     "label": "Sort Notebooks Above Files",
     "caption": "",
@@ -1301,7 +1315,7 @@
     "label": "Accept Inline Completion",
     "caption": "",
     "shortcuts": [
-      "Alt End"
+      "Tab"
     ]
   },
   {
@@ -2074,6 +2088,12 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:toggle-cell-outputs",
+    "label": "Toggle Visibility of Selected Outputs",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:toggle-heading-collapse",
     "label": "Toggle Collapse Notebook Heading",
     "caption": "",
@@ -2089,8 +2109,8 @@
   },
   {
     "id": "notebook:toggle-virtual-scrollbar",
-    "label": "Show Virtual Scrollbar",
-    "caption": "Show virtual scrollbar (enabled with windowing mode: full)",
+    "label": "Show Minimap",
+    "caption": "Show Minimap (virtual scrollbar, enabled with windowing mode: full)",
     "shortcuts": []
   },
   {
@@ -2204,6 +2224,12 @@
     "shortcuts": []
   },
   {
+    "id": "running:kernel-shut-down-unused",
+    "label": "Shut Down Unused",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "running:show-modal",
     "label": "Search Tabs and Running Sessions",
     "caption": "",
@@ -2246,6 +2272,12 @@
     "shortcuts": [
       "Ctrl S"
     ]
+  },
+  {
+    "id": "settingeditor:export",
+    "label": "Export User Settings",
+    "caption": "",
+    "shortcuts": []
   },
   {
     "id": "settingsmenu:open",

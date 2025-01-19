@@ -21,6 +21,7 @@ import {
   CellChange,
   createMutex,
   createStandaloneCell,
+  IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
   ISharedCell,
@@ -156,7 +157,7 @@ export interface ICodeCellModel extends ICellModel {
   /**
    * The code cell's state.
    */
-  executionState: 'running' | 'idle';
+  executionState: IExecutionState;
 
   /**
    * The cell outputs.
@@ -649,19 +650,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * The execution state of the cell.
    */
-  get executionState(): 'idle' | 'running' {
-    return this._executionState;
+  get executionState(): IExecutionState {
+    return this.sharedModel.executionState;
   }
-  set executionState(newValue: 'idle' | 'running') {
-    const oldValue = this._executionState;
-    if (oldValue != newValue) {
-      this._executionState = newValue;
-      this.stateChanged.emit({
-        name: 'executionState',
-        oldValue,
-        newValue
-      });
-    }
+  set executionState(newValue: IExecutionState) {
+    this.sharedModel.executionState = newValue;
   }
 
   /**
@@ -766,16 +759,24 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
                   sender: IObservableString,
                   textEvent: IObservableString.IChangedArgs
                 ) => {
+                  if (
+                    textEvent.options !== undefined &&
+                    (textEvent.options as { [key: string]: any })['silent']
+                  ) {
+                    return;
+                  }
                   const codeCell = this.sharedModel as YCodeCell;
                   if (textEvent.type === 'remove') {
                     codeCell.removeStreamOutput(
                       event.newIndex,
-                      textEvent.start
+                      textEvent.start,
+                      'silent-change'
                     );
                   } else {
                     codeCell.appendStreamOutput(
                       event.newIndex,
-                      textEvent.value
+                      textEvent.value,
+                      'silent-change'
                     );
                   }
                 },
@@ -823,6 +824,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     slot: ISharedCodeCell,
     change: CellChange
   ): void {
+    if (change.streamOutputChange) {
+      globalModelDBMutex(() => {
+        for (const streamOutputChange of change.streamOutputChange!) {
+          if ('delete' in streamOutputChange) {
+            this._outputs.removeStreamOutput(streamOutputChange.delete!);
+          }
+          if ('insert' in streamOutputChange) {
+            this._outputs.appendStreamOutput(
+              streamOutputChange.insert!.toString()
+            );
+          }
+        }
+      });
+    }
+
     if (change.outputsChange) {
       globalModelDBMutex(() => {
         let retain = 0;
@@ -838,7 +854,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           if ('insert' in outputsChange) {
             // Inserting an output always results in appending it.
             for (const output of outputsChange.insert!) {
-              this._outputs.add(output.toJSON());
+              // For compatibility with older ydoc where a plain object,
+              // (rather than a Map instance) could be provided.
+              // In a future major release the use of Map will be required.
+              this._outputs.add('toJSON' in output ? output.toJSON() : output);
             }
           }
         }
@@ -856,6 +875,14 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         name: 'executionCount',
         oldValue: change.executionCountChange.oldValue,
         newValue: change.executionCountChange.newValue
+      });
+    }
+
+    if (change.executionStateChange) {
+      this.stateChanged.emit({
+        name: 'executionState',
+        oldValue: change.executionStateChange.oldValue,
+        newValue: change.executionStateChange.newValue
       });
     }
 
@@ -883,7 +910,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
-  private _executionState: 'idle' | 'running' = 'idle';
   private _executedCode = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;

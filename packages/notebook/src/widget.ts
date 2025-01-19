@@ -705,6 +705,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       contentFactory,
       editorConfig,
       inputHistoryScope: this.notebookConfig.inputHistoryScope,
+      showInputPlaceholder: this.notebookConfig.showInputPlaceholder,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
@@ -936,7 +937,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // If the notebook is not fully rendered
     if (cellIdx < this.cellsArray.length) {
-      // If we are defering the cell rendering and the rendered cells do
+      // If we are deferring the cell rendering and the rendered cells do
       // not fill the viewport yet
       if (
         this.notebookConfig.windowingMode === 'defer' &&
@@ -1157,6 +1158,11 @@ export namespace StaticNotebook {
     maxNumberOutputs: number;
 
     /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder: boolean;
+
+    /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope: 'global' | 'session';
@@ -1182,6 +1188,11 @@ export namespace StaticNotebook {
      * Defines the rendering layout to use.
      */
     renderingLayout: RenderingLayout;
+
+    /**
+     * Automatically render markdown when the cursor leaves a markdown cell
+     */
+    autoRenderMarkdownCells: boolean;
 
     /**
      * Enable scrolling past the last cell
@@ -1237,13 +1248,15 @@ export namespace StaticNotebook {
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
     disableDocumentWideUndoRedo: true,
+    autoRenderMarkdownCells: false,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
     windowingMode: 'full',
-    accessKernelHistory: false
+    accessKernelHistory: false,
+    showInputPlaceholder: true
   };
 
   /**
@@ -1697,6 +1710,7 @@ export class Notebook extends StaticNotebook {
     }
 
     this._activeCellIndex = newValue;
+    const oldCell = this.widgets[oldValue] ?? null;
     const cell = this.widgets[newValue] ?? null;
     (this.layout as NotebookWindowedLayout).activeCell = cell;
     const cellChanged = cell !== this._activeCell;
@@ -1710,9 +1724,19 @@ export class Notebook extends StaticNotebook {
       this._activeCellChanged.emit(cell);
     }
 
-    if (this.mode === 'edit' && cell instanceof MarkdownCell) {
-      cell.rendered = false;
+    if (this.mode === 'edit') {
+      if (cell instanceof MarkdownCell) {
+        cell.rendered = false;
+      }
+      if (
+        this.notebookConfig.autoRenderMarkdownCells &&
+        cellChanged &&
+        oldCell instanceof MarkdownCell
+      ) {
+        oldCell.rendered = true;
+      }
     }
+
     this._ensureFocus();
     if (newValue === oldValue) {
       return;
@@ -2691,6 +2715,13 @@ export class Notebook extends StaticNotebook {
         }
         // Enter selecting mode
         this._mouseMode = 'select';
+
+        // We don't want to block the shift-click mouse up handler
+        // when the current cell is (and remains) the active cell.
+        this._selectData = {
+          startedOnActiveCell: index == this.activeCellIndex,
+          startingCellIndex: this.activeCellIndex
+        };
         document.addEventListener('mouseup', this, true);
         document.addEventListener('mousemove', this, true);
       } else if (button === 0 && !shiftKey) {
@@ -2736,8 +2767,21 @@ export class Notebook extends StaticNotebook {
    * Handle the `'mouseup'` event on the document.
    */
   private _evtDocumentMouseup(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
+    const [, index] = this._findEventTargetAndCell(event);
+
+    let shouldPreventDefault = true;
+    if (this._mouseMode === 'select' && this._selectData) {
+      // User did not move the mouse over to a difference cell, so there was no selection
+      const { startedOnActiveCell, startingCellIndex } = this._selectData;
+      if (startedOnActiveCell && index === startingCellIndex) {
+        shouldPreventDefault = false;
+      }
+      this._selectData = null;
+    }
+    if (shouldPreventDefault) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     // Remove the event listeners we put on the document
     document.removeEventListener('mousemove', this, true);
@@ -2745,8 +2789,6 @@ export class Notebook extends StaticNotebook {
 
     if (this._mouseMode === 'couldDrag') {
       // We didn't end up dragging if we are here, so treat it as a click event.
-
-      const [, index] = this._findEventTargetAndCell(event);
 
       this.deselectAll();
       this.activeCellIndex = index;
@@ -3159,6 +3201,10 @@ export class Notebook extends StaticNotebook {
     pressY: number;
     index: number;
   } | null = null;
+  private _selectData: {
+    startedOnActiveCell: boolean;
+    startingCellIndex: number;
+  } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -3324,7 +3370,7 @@ namespace Private {
    */
   export interface IFragmentData {
     /**
-     * The kind of notebook element targetted by the fragment identifier.
+     * The kind of notebook element targeted by the fragment identifier.
      */
     kind: 'heading' | 'cell-id';
     /*

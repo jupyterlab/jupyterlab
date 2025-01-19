@@ -56,7 +56,7 @@ export interface IJsonDataMessages {
 }
 
 /**
- * Translatable string messages incluing metadata.
+ * Translatable string messages including metadata.
  */
 export interface IJsonData extends IJsonDataMessages {
   /**

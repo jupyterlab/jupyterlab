@@ -23,7 +23,7 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import FrozenSet, Optional
+from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
@@ -266,7 +266,8 @@ def ensure_app(app_dir):
 
     msgs = [
         f'JupyterLab application assets not found in "{app_dir}"',
-        "Please run `jupyter lab build` or use a different app directory",
+        "Please run `jlpm run build:core` then `jupyter lab build` ",
+        "or use a different app directory",
     ]
     return msgs
 
@@ -611,11 +612,10 @@ def get_latest_compatible_package_versions(names, app_options=None):
 
 def read_package(target):
     """Read the package data in a given target tarball."""
-    tar = tarfile.open(target, "r")
-    f = tar.extractfile("package/package.json")
-    data = json.loads(f.read().decode("utf8"))
-    data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
-    tar.close()
+    with tarfile.open(target, "r") as tar:
+        with tar.extractfile("package/package.json") as f:
+            data = json.loads(f.read().decode("utf8"))
+        data["jupyterlab_extracted_files"] = [f.path[len("package/") :] for f in tar.getmembers()]
     return data
 
 
@@ -2094,7 +2094,8 @@ def _yarn_config(logger):
 
     Returns
     -------
-    {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
+    {"yarn config": dict, "npm config": dict}
+    if unsuccessful, the subdictionaries are empty
     """
     configuration = {"yarn config": {}, "npm config": {}}
     try:
@@ -2231,18 +2232,20 @@ def _tarsum(input_file):
     """
     Compute the recursive sha sum of a tar file.
     """
-    tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
     h = hashlib.new("sha1")  # noqa: S324
 
-    for member in tar:
-        if not member.isfile():
-            continue
-        f = tar.extractfile(member)
-        data = f.read(chunk_size)
-        while data:
-            h.update(data)
-            data = f.read(chunk_size)
+    with tarfile.open(input_file, "r") as tar:
+        for member in tar:
+            if not member.isfile():
+                continue
+            with tar.extractfile(member) as f:
+                if f:  # Check if f is not None (safety check)
+                    data = f.read(chunk_size)
+                    while data:
+                        h.update(data)
+                        data = f.read(chunk_size)
+
     return h.hexdigest()
 
 
@@ -2345,14 +2348,10 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
 
         # Check for overlap.
         if (
-            gte(x1, y1, True)
-            and ly(x1, y2, True)
-            or gy(x2, y1, True)
-            and ly(x2, y2, True)
-            or gte(y1, x1, True)
-            and lx(y1, x2, True)
-            or gx(y2, x1, True)
-            and lx(y2, x2, True)
+            (gte(x1, y1, True) and ly(x1, y2, True))
+            or (gy(x2, y1, True) and ly(x2, y2, True))
+            or (gte(y1, x1, True) and lx(y1, x2, True))
+            or (gx(y2, x1, True) and lx(y2, x2, True))
         ):
             # if we ever find an overlap, we can return immediately
             return 0
@@ -2400,7 +2399,7 @@ def _is_disabled(name, disabled=None):
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[FrozenSet[str]] = None
+    locked_plugins: Optional[frozenset[str]] = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:
@@ -2484,7 +2483,7 @@ def _log_multiple_compat_errors(logger, errors_map, verbose: bool):
 
 
 def _log_single_compat_errors(logger, name, version, errors):
-    """Log compatability errors for a single extension"""
+    """Log compatibility errors for a single extension"""
 
     age = _compat_error_age(errors)
     if age > 0:

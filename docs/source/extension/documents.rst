@@ -71,12 +71,22 @@ Document Registry
 .. note::
 
    We recommend you to look at the `document example <https://github.com/jupyterlab/extension-examples/tree/main/documents>`__
-   to help understanding a pratical case.
+   to help understanding a practical case.
 
 `Widget Factories <../api/classes/docregistry.DocumentRegistry-1.html#addWidgetFactory>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a widget for a given file.
+
+If multiple widget factories are associated with the same file type,
+the user will be able to choose one of them using "Open with" list
+in the context menu of the file browser.
+
+.. versionadded:: 4.4
+   Widget factories now can accept a ``contentProviderId`` parameter allowing
+   the widgets to modify the way the content is provisioned. For example,
+   using a custom provider enables fetching the document content in chunks
+   rather than all at once.
 
 *Example*
 

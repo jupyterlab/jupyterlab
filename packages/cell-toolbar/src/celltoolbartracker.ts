@@ -68,6 +68,7 @@ export class CellToolbarTracker implements IDisposable {
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
+    this._enabled = true; // If this has been set to false, it will be modified after settings are available
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -152,6 +153,21 @@ export class CellToolbarTracker implements IDisposable {
     return this._isDisposed;
   }
 
+  /**
+   * Whether the cell toolbar is shown, if there is enough room
+   */
+  get enabled(): boolean {
+    return this._enabled;
+  }
+
+  /**
+   * Sets whether the cell toolbar is shown, if there is enough room
+   */
+  set enabled(value: boolean) {
+    this._enabled = value;
+    this._onToolbarChanged();
+  }
+
   dispose(): void {
     if (this.isDisposed) {
       return;
@@ -167,6 +183,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _addToolbar(model: ICellModel): void {
+    // Do nothing if the toolbar shouldn't be visible.
+    if (!this.enabled) {
+      return;
+    }
+
     const cell = this._getCell(model);
 
     if (cell && !cell.isDisposed) {
@@ -297,6 +318,11 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarOverlapsContents(activeCell: Cell<ICellModel>): boolean {
+    // Fail safe when the active cell is not ready yet
+    if (!activeCell.model) {
+      return false;
+    }
+
     const cellType = activeCell.model.type;
 
     // If the toolbar is too large for the current cell, hide it.
@@ -438,6 +464,7 @@ export class CellToolbarTracker implements IDisposable {
     return this._cellToolbarRect(activeCell)?.left || null;
   }
 
+  private _enabled: boolean;
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
@@ -509,11 +536,32 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, undefined, this._toolbarFactory);
+    return (this._tracker = new CellToolbarTracker(
+      panel,
+      undefined,
+      this._toolbarFactory
+    ));
+  }
+
+  /**
+   * Whether the cell toolbar is displayed, if there is enough room for it
+   */
+  get enabled(): boolean {
+    return this._tracker.enabled;
+  }
+
+  /**
+   * Sets whether the cell toolbar is displayed, if there is enough room for it
+   */
+  set enabled(value: boolean) {
+    if (this._tracker) {
+      this._tracker.enabled = value;
+    }
   }
 
   private _commands: CommandRegistry;
   private _toolbarFactory: (
     widget: Widget
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
+  private _tracker: CellToolbarTracker;
 }

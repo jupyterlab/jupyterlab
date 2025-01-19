@@ -809,6 +809,11 @@ export namespace Cell {
     maxNumberOutputs?: number;
 
     /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder?: boolean;
+
+    /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
@@ -1094,7 +1099,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
       promptOverlay: true,
-      inputHistoryScope: options.inputHistoryScope
+      inputHistoryScope: options.inputHistoryScope,
+      showInputPlaceholder: options.showInputPlaceholder
     }));
     output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
 
@@ -1306,9 +1312,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
         // Parse HTML output
         if (htmlType) {
+          let htmlData = m.data[htmlType] as string | string[];
+          if (typeof htmlData !== 'string') {
+            htmlData = htmlData.join('\n');
+          }
           headings.push(
             ...TableOfContentsUtils.getHTMLHeadings(
-              this._rendermime.sanitizer.sanitize(m.data[htmlType] as string)
+              this._rendermime.sanitizer.sanitize(htmlData)
             ).map(heading => {
               return {
                 ...heading,
@@ -1948,7 +1958,8 @@ export abstract class AttachmentsCell<
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    if (event.clipboardData) {
+    const isEditable = this.model.getMetadata('editable') ?? true;
+    if (event.clipboardData && isEditable) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         if (items[i].type === 'text/plain') {

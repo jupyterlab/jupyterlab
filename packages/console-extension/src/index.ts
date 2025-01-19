@@ -370,6 +370,11 @@ async function activateConsole(
      * Its typical value is: a factory name or the widget id (if singleton)
      */
     type?: string;
+
+    /**
+     * Whether to create a subshell or main shell for this console
+     */
+    subshell?: boolean;
   }
 
   /**
@@ -404,6 +409,33 @@ async function activateConsole(
     panel.sessionContext.propertyChanged.connect(() => {
       void tracker.save(panel);
     });
+
+    if (options.subshell) {
+      panel.sessionContext.kernelChanged.connect(async () => {
+        if (!panel.sessionContext.isDisposed) {
+          panel.sessionContext.ready
+            .then(async () => {
+              if (panel.sessionContext.session === null) {
+                console.error('Cannot create subshell without session');
+              } else if (panel.sessionContext.session.kernel === null) {
+                console.error('Cannot create subshell without kernel');
+              } else {
+                const { kernel } = panel.sessionContext.session;
+                // Ensure kernel has received kernel_info.
+                await kernel.info;
+                const replyMsg = await kernel.requestCreateSubshell({}).done;
+                kernel.subshellId = replyMsg.content.subshell_id;
+              }
+            })
+            .catch(reason => {
+              console.error(
+                'Failed to initialize SessionContext or create new subshell.',
+                reason
+              );
+            });
+        }
+      });
+    }
 
     shell.add(panel, 'main', {
       ref: options.ref,

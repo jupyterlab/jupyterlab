@@ -360,7 +360,9 @@ function addCommands(
 
       let session;
       if (name) {
-        const models = await TerminalAPI.listRunning();
+        const models = await TerminalAPI.listRunning(
+          serviceManager.serverSettings
+        );
         if (models.map(d => d.name).includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
@@ -450,6 +452,8 @@ function addCommands(
 
       if (text) {
         Clipboard.copyToSystem(text);
+        // Focus the widget to ensure user can continue typing
+        widget.activate();
       }
     },
     isEnabled: () => {
@@ -488,6 +492,8 @@ function addCommands(
       if (clipboardData) {
         // Paste data to the terminal
         widget.paste(clipboardData);
+        // Focus the widget to ensure user can continue typing
+        widget.activate();
       }
     },
     isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),

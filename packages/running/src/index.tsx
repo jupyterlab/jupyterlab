@@ -16,6 +16,7 @@ import {
 import {
   closeIcon,
   collapseAllIcon,
+  CommandToolbarButton,
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
@@ -37,7 +38,7 @@ import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode, useCallback } from 'react';
+import React, { isValidElement, ReactNode, useCallback, useRef } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -194,6 +195,10 @@ function Item(props: {
   collapseToggled: ISignal<Section, boolean>;
 }) {
   const { runningItem } = props;
+  const [collapsed, setCollapsed] = React.useState(false);
+  // Use a ref instead of a state because the state does not have the time
+  // to update in the callbacks
+  const shuttingDown = useRef(false);
   const classList = [ITEM_CLASS];
   const detail = runningItem.detail?.();
   const icon = runningItem.icon();
@@ -207,35 +212,39 @@ function Item(props: {
     (typeof props.shutdownLabel === 'function'
       ? props.shutdownLabel(runningItem)
       : props.shutdownLabel) ?? trans.__('Shut Down');
-  const shutdown = (event: React.MouseEvent) => {
-    if (!event.defaultPrevented) {
+  const shutdown = useCallback(
+    (event: React.MouseEvent) => {
+      shuttingDown.current = true;
       event.preventDefault();
       runningItem.shutdown?.();
-    }
-  };
+    },
+    [runningItem, shuttingDown]
+  );
 
   // Materialise getter to avoid triggering it repeatedly
   const children = runningItem.children;
 
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
-  const [collapsed, collapse] = React.useState(false);
   const collapsible = !!children?.length;
   const onClick = useCallback(
     (event: React.MouseEvent) => {
+      if (shuttingDown.current) {
+        return;
+      }
       const item = getTreeItemElement(event.target as HTMLElement);
       if (event.currentTarget !== item) {
         return;
       }
       if (collapsible) {
-        collapse(!collapsed);
+        setCollapsed(!collapsed);
       }
     },
-    [collapsible, collapsed]
+    [collapsible, collapsed, shuttingDown]
   );
 
   // Listen to signal to collapse from outside
   props.collapseToggled.connect((_emitter, newCollapseState) =>
-    collapse(newCollapseState)
+    setCollapsed(newCollapseState)
   );
 
   if (runningItem.className) {
@@ -662,6 +671,16 @@ class Section extends PanelWithToolbar {
     // Update buttons once defined and before adding to DOM
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
+
+    // Add manager-specific buttons
+    if (this._manager.toolbarButtons) {
+      this._manager.toolbarButtons.forEach(button =>
+        this.toolbar.addItem(
+          button instanceof CommandToolbarButton ? button.commandId : button.id,
+          button
+        )
+      );
+    }
 
     for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
       this.toolbar.addItem(
@@ -1198,6 +1217,11 @@ export namespace IRunningSessions {
      * The icon to show for shutting down an individual item in this section.
      */
     shutdownItemIcon?: LabIcon;
+
+    /**
+     * Used to add arbitrary buttons to this section
+     */
+    toolbarButtons?: (ToolbarButton | CommandToolbarButton)[];
 
     /**
      * Whether the manager supports tree view for its items

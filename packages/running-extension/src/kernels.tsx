@@ -2,13 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
+import { Kernel, KernelAPI, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import {
+  cleaningIcon,
   closeIcon,
+  CommandToolbarButton,
   consoleIcon,
   IDisposableMenuItem,
   jupyterIcon,
@@ -20,8 +23,8 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
-import { CommandIDs } from '.';
 import React, { ReactNode } from 'react';
+import { CommandIDs } from '.';
 
 const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
 const KERNELSPEC_ITEM_CLASS = 'jp-mod-kernelspec';
@@ -41,13 +44,82 @@ export async function addKernelRunningSessionManager(
   const { runningChanged, RunningKernel } = Private;
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
   const trans = translator.load('jupyterlab');
+  const shutdownUnusedLabel = trans.__('Shut Down Unused');
+  let shutdownUnusedEnabled = false;
+  const shutdownUnusedThrottler = new Throttler(
+    checkShutdownUnusedEnabled,
+    10000
+  );
 
   // Throttle signal emissions from the kernel and session managers.
-  kernels.runningChanged.connect(() => void throttler.invoke());
+  kernels.runningChanged.connect(() => {
+    void throttler.invoke();
+    void shutdownUnusedThrottler.invoke();
+  });
   sessions.runningChanged.connect(() => void throttler.invoke());
 
   // Wait until the relevant services are ready.
   await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
+
+  function getUnusedKernels() {
+    // Identifies unused kernels
+    return Array.from(kernels.running()).filter(
+      kernel => (kernel.connections ?? 1) < 1
+    );
+  }
+
+  async function checkShutdownUnusedEnabled() {
+    const wasEnabled = shutdownUnusedEnabled;
+    shutdownUnusedEnabled = getUnusedKernels().length > 0;
+    if (wasEnabled !== shutdownUnusedEnabled) {
+      commands.notifyCommandChanged(CommandIDs.kernelShutDownUnused);
+    }
+  }
+
+  commands.addCommand(CommandIDs.kernelShutDownUnused, {
+    label: args => (args.toolbar ? '' : shutdownUnusedLabel),
+    icon: args => (args.toolbar ? cleaningIcon : undefined),
+    execute: async () => {
+      const unusedKernels = getUnusedKernels();
+
+      if (unusedKernels.length === 0) {
+        return;
+      }
+
+      const confirmed = await showDialog({
+        title: shutdownUnusedLabel,
+        body: (
+          <>
+            {trans.__(
+              'Are you sure you want to shut down the following unused kernels?'
+            )}
+            <ul>
+              {unusedKernels.map(kernel => (
+                <li key={kernel.id}>
+                  {trans.__('%1 (%2)', kernel.name, kernel.id.slice(0, 8))}
+                </li>
+              ))}
+            </ul>
+          </>
+        ),
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: shutdownUnusedLabel })
+        ]
+      });
+
+      if (confirmed.button.accept) {
+        await Promise.allSettled(
+          unusedKernels.map(kernel => KernelAPI.shutdownKernel(kernel.id))
+        );
+        await Promise.all([
+          kernels.refreshRunning(),
+          sessions.refreshRunning()
+        ]);
+      }
+    },
+    isEnabled: () => shutdownUnusedEnabled
+  });
 
   // Add the kernels pane to the running sidebar.
   managers.add({
@@ -65,7 +137,8 @@ export async function addKernelRunningSessionManager(
             kernel,
             kernels,
             sessions,
-            trans
+            trans,
+            mode: options.mode
           })
         );
       }
@@ -96,7 +169,15 @@ export async function addKernelRunningSessionManager(
         'Are you sure you want to permanently shut down the running kernel?',
         'Are you sure you want to permanently shut down the %1 running kernels?',
         kernels.runningCount
-      )
+      ),
+    toolbarButtons: [
+      new CommandToolbarButton({
+        commands,
+        id: CommandIDs.kernelShutDownUnused,
+        caption: shutdownUnusedLabel,
+        args: { toolbar: true }
+      })
+    ]
   });
 
   // Add running kernels commands to the registry.
@@ -230,7 +311,6 @@ namespace Private {
       const { _name, spec } = this;
       return spec?.display_name || _name;
     }
-
     get children(): IRunningSessions.IRunningItem[] {
       return this._kernels;
     }
@@ -248,7 +328,7 @@ namespace Private {
   type DocumentWidgetWithKernelItem = Omit<
     IRunningSessions.IRunningItem,
     'label'
-  > & { label(): string };
+  > & { label(): ReactNode; name(): string };
 
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
@@ -259,6 +339,7 @@ namespace Private {
       this.kernels = options.kernels;
       this.sessions = options.sessions;
       this.trans = options.trans;
+      this._mode = options.mode;
     }
 
     readonly className: string;
@@ -292,8 +373,20 @@ namespace Private {
                 : type === 'notebook'
                 ? notebookIcon
                 : jupyterIcon,
-            label: () => name,
-            labelTitle: () => path
+            label: () => {
+              if (this._mode === 'tree') {
+                return name;
+              }
+              const kernelIdPrefix = this.kernel.id.split('-')[0];
+              return (
+                <>
+                  {name}{' '}
+                  <span className={KERNEL_LABEL_ID}>({kernelIdPrefix})</span>
+                </>
+              );
+            },
+            labelTitle: () => path,
+            name: () => name
           });
         }
       }
@@ -337,15 +430,17 @@ namespace Private {
       if (children.length === 0) {
         return this.trans.__('No sessions connected');
       } else if (children.length == 1) {
-        return children[0].label();
+        return children[0].name();
       } else {
         return this.trans.__(
           '%1 and %2 more',
-          children[0].label(),
+          children[0].name(),
           children.length - 1
         );
       }
     }
+
+    private _mode: 'list' | 'tree';
   }
 
   export namespace RunningKernel {
@@ -356,6 +451,7 @@ namespace Private {
       sessions: Session.IManager;
       spec?: KernelSpec.ISpecModel;
       trans: IRenderMime.TranslationBundle;
+      mode: 'list' | 'tree';
     }
   }
 

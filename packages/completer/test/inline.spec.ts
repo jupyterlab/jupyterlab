@@ -7,12 +7,18 @@ import {
 } from '@jupyterlab/completer';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { nullTranslator } from '@jupyterlab/translation';
-import { framePromise, simulate } from '@jupyterlab/testing';
+import { framePromise, signalToPromise, simulate } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { MessageLoop } from '@lumino/messaging';
 import { Doc, Text } from 'yjs';
+import type {
+  CellChange,
+  FileChange,
+  ISharedText,
+  SourceChange
+} from '@jupyter/ydoc';
 
 const GHOST_TEXT_CLASS = 'jp-GhostText';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
@@ -85,6 +91,52 @@ describe('completer/inline', () => {
         expect(editorWidget.editor.model.sharedModel.source).toBe(
           'suggestion a'
         );
+      });
+
+      it('should set the cursor position at the same time as the completion suggestion', () => {
+        model.setCompletions({
+          items: suggestionsAbc
+        });
+        let editorPosition = editorWidget.editor.getCursorPosition();
+
+        expect(editorPosition).toEqual({
+          line: 0,
+          column: 0
+        });
+
+        const onContentChange = (
+          str: ISharedText,
+          changed: SourceChange | CellChange | FileChange
+        ) => {
+          if (changed.sourceChange) {
+            editorPosition = editorWidget.editor.getCursorPosition();
+          }
+        };
+        editorWidget.editor.model.sharedModel.changed.connect(onContentChange);
+        try {
+          completer.accept();
+        } finally {
+          editorWidget.editor.model.sharedModel.changed.disconnect(
+            onContentChange
+          );
+        }
+        expect(editorPosition).toEqual({
+          line: 0,
+          column: 12
+        });
+      });
+
+      it('should be undoable in one step', async () => {
+        model.setCompletions({
+          items: suggestionsAbc
+        });
+        completer.accept();
+        const waitForChange = signalToPromise(
+          editorWidget.editor.model.sharedModel.changed
+        );
+        editorWidget.editor.undo();
+        await waitForChange;
+        expect(editorWidget.editor.model.sharedModel.source).toBe('');
       });
     });
 
