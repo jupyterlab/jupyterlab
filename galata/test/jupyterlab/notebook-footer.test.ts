@@ -9,7 +9,7 @@ test.describe('Notebook footer responsiveness', () => {
       await page.setViewportSize({ width, height: 800 });
 
        await page.goto('http://localhost:8888/lab')
-      
+
 
       // Wait for the footer element to be available
       const footer = page.locator('.jp-Notebook-footer');
