@@ -423,7 +423,7 @@ export class CodeConsole extends Widget {
       showBanner
     } = config;
     // set defaults
-    this._config.clearCellsOnExecute = clearCellsOnExecute ?? true;
+    this._config.clearCellsOnExecute = clearCellsOnExecute ?? false;
     this._config.clearCodeContentOnExecute = clearCodeContentOnExecute ?? false;
     this._config.hideCodeInput = hideCodeInput ?? false;
     this._config.promptCellPosition = promptCellPosition ?? 'bottom';
