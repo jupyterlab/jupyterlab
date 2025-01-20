@@ -1604,7 +1604,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
-        this.model.executionState = 'idle';
+        if (args.newValue !== null) {
+          // Mark execution state if execution count was set.
+          this.model.executionState = 'idle';
+        }
         this._updatePrompt();
         break;
       case 'executionState':
