@@ -424,7 +424,7 @@ export class CodeConsole extends Widget {
     } = config;
     // set defaults
     this._config.clearCellsOnExecute = clearCellsOnExecute ?? false;
-    this._config.clearCodeContentOnExecute = clearCodeContentOnExecute ?? false;
+    this._config.clearCodeContentOnExecute = clearCodeContentOnExecute ?? true;
     this._config.hideCodeInput = hideCodeInput ?? false;
     this._config.promptCellPosition = promptCellPosition ?? 'bottom';
     this._config.showBanner = showBanner ?? true;
