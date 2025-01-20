@@ -43,6 +43,10 @@
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-delete: url('icons/toolbar/delete.svg');
+  --jp-icon-dock-bottom: url('icons/toolbar/dock-bottom.svg');
+  --jp-icon-dock-left: url('icons/toolbar/dock-left.svg');
+  --jp-icon-dock-right: url('icons/toolbar/dock-right.svg');
+  --jp-icon-dock-top: url('icons/toolbar/dock-top.svg');
   --jp-icon-dock: url('icons/toolbar/dock.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
@@ -255,8 +259,24 @@
   background-image: var(--jp-icon-delete);
 }
 
+.jp-DockBottomIcon {
+  background-image: var(--jp-icon-dock-bottom);
+}
+
 .jp-DockIcon {
   background-image: var(--jp-icon-dock);
+}
+
+.jp-DockLeftIcon {
+  background-image: var(--jp-icon-dock-left);
+}
+
+.jp-DockRightIcon {
+  background-image: var(--jp-icon-dock-right);
+}
+
+.jp-DockTopIcon {
+  background-image: var(--jp-icon-dock-top);
 }
 
 .jp-DownloadIcon {

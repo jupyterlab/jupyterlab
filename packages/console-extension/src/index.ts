@@ -46,12 +46,12 @@ import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  caretDownIcon,
-  caretLeftIcon,
-  caretRightIcon,
-  caretUpIcon,
   consoleIcon,
+  dockBottomIcon,
   dockIcon,
+  dockLeftIcon,
+  dockRightIcon,
+  dockTopIcon,
   IFormRendererRegistry,
   redoIcon,
   refreshIcon,
@@ -712,10 +712,10 @@ async function activateConsole(
    * Create commands to change the position of the prompt cell.
    */
   const iconMap = {
-    top: caretUpIcon,
-    bottom: caretDownIcon,
-    right: caretRightIcon,
-    left: caretLeftIcon
+    top: dockTopIcon,
+    bottom: dockBottomIcon,
+    right: dockRightIcon,
+    left: dockLeftIcon
   };
   promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
     const command = `console:prompt-to-${position}`;
