@@ -61,12 +61,6 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
 
   private _onSourceChanged() {
     if (this.editor.source) {
-      const metadataKeys = Object.keys(
-        this._tracker.activeCell?.model.sharedModel.metadata ?? {}
-      );
-      for (const key of metadataKeys) {
-        this._tracker.activeCell?.model.sharedModel.deleteMetadata(key);
-      }
       this._tracker.activeCell?.model.sharedModel.setMetadata(
         this.editor.source.toJSON()
       );
