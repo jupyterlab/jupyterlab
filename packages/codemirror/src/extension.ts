@@ -185,7 +185,7 @@ export class ExtensionsHandler
    * to `IExtensionsHandler.configChanged`.
    */
   setBaseOptions(options: Record<string, any>): void {
-    //Change values of baseConfig
+    // Change values of baseConfig
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
       this._baseConfig = options;
@@ -200,7 +200,7 @@ export class ExtensionsHandler
         );
       }
     }
-    //Chang values of config keys if present in options
+    // Change values of config keys if present in options
     for (const key of Object.keys(options)) {
       if (key in this._config && this._config[key] != options[key]) {
         this.setOption(key, options[key]);
@@ -816,7 +816,7 @@ export namespace EditorExtensionRegistry {
         default: [],
         factory: () =>
           createConfigurableExtension((value: number[]) =>
-            value?.length > 0 ? rulers(value) : []
+            value.length > 0 ? rulers(value) : []
           ),
         schema: {
           type: 'array',
