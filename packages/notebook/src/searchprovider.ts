@@ -236,7 +236,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         disabledDescription: trans.__(
           'Search in the cell outputs (not available when replace options are shown).'
         ),
-        default: false,
+        default: true,
         supportReplace: false
       },
       selection: {
