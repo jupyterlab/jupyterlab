@@ -572,8 +572,7 @@ async function activateConsole(
       widget.console.editorConfig = promptCellConfig;
       // Update promptCell already on screen
       widget.console.promptCell?.editor?.setOptions(promptCellConfig);
-      // set other config options
-      // TODO: set options individually like the file browser?
+      // Set other config options
       widget.console.setConfig({
         clearCellsOnExecute,
         clearCodeContentOnExecute,
@@ -722,11 +721,9 @@ async function activateConsole(
     commands.addCommand(command, {
       execute: args => {
         const current = getCurrent(args);
-
         if (!current) {
           return;
         }
-
         current.console.setConfig({ promptCellPosition: position });
       },
       isEnabled: isEnabled,

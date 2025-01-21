@@ -134,8 +134,14 @@ export class CodeConsole extends Widget {
 
     layout.addWidget(this._splitPanel);
 
-    // initialize the console
-    this.setConfig({});
+    // initialize the console with defaults
+    this.setConfig({
+      clearCellsOnExecute: false,
+      clearCodeContentOnExecute: true,
+      hideCodeInput: false,
+      promptCellPosition: 'bottom',
+      showBanner: true
+    });
 
     this._history = new ConsoleHistory({
       sessionContext: this.sessionContext
@@ -422,12 +428,15 @@ export class CodeConsole extends Widget {
       promptCellPosition,
       showBanner
     } = config;
-    // set defaults
-    this._config.clearCellsOnExecute = clearCellsOnExecute ?? false;
-    this._config.clearCodeContentOnExecute = clearCodeContentOnExecute ?? true;
-    this._config.hideCodeInput = hideCodeInput ?? false;
-    this._config.promptCellPosition = promptCellPosition ?? 'bottom';
-    this._config.showBanner = showBanner ?? true;
+    this._config = {
+      clearCellsOnExecute:
+        clearCellsOnExecute ?? this._config.clearCellsOnExecute,
+      clearCodeContentOnExecute:
+        clearCodeContentOnExecute ?? this._config.clearCodeContentOnExecute,
+      hideCodeInput: hideCodeInput ?? this._config.hideCodeInput,
+      promptCellPosition: promptCellPosition ?? this._config.promptCellPosition,
+      showBanner: showBanner ?? this._config.showBanner
+    };
     this._updateLayout();
   }
 
