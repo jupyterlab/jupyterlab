@@ -1118,7 +1118,8 @@ describe('@jupyterlab/notebook', () => {
         let notebook: Notebook | null = null;
         let lastCell: Cell | null = null;
         NotebookActions.selectionExecuted.connect(async (_, args) => {
-          notebook, (lastCell = args);
+          notebook = args[0];
+          lastCell = args[1];
           emitted += 1;
         });
         const result = await NotebookActions.runCells(
