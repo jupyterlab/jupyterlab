@@ -3238,6 +3238,9 @@ export namespace DirListing {
                 }
               })
               .catch(error => {
+                if (fileSize) {
+                  fileSize.textContent = '-';
+                }
                 console.error('Error getting directory contents:', error);
               });
           }
