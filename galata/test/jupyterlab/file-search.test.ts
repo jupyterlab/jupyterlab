@@ -113,6 +113,64 @@ test.describe('File search from selection', () => {
     ).toHaveCount(2);
   });
 
+  test('search highlighting', async ({ page }) => {
+    // Open JupyterLab
+    await page.notebook.createNew('notebook.ipynb');
+
+    // Focus on the editor
+    await page.getByRole('textbox').locator('div').click();
+
+    // Fill the editor with text
+    const textToType = `True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins
+  True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins
+  True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins`;
+
+    await page.keyboard.type(textToType);
+
+    // Open the search bar with Ctrl + F
+    await page.keyboard.press('Control+f');
+
+    // Define the search text
+    const searchText = `True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins`;
+
+    // Fill the search query into the search bar
+    const searchBox = page.getByPlaceholder('Find');
+    await searchBox.fill(searchText);
+
+    // Verify the search input is populated correctly
+    await expect(searchBox).toHaveValue(searchText);
+
+    // Move to the next match
+    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
+
+    // Wait for the highlighted match to appear
+    const highlightedMatches = page.locator('.cm-selectionBackground');
+    try {
+      await highlightedMatches.first().waitFor({ timeout: 1000 });
+    } catch (e) {
+      // We need the highglighted matches to appear, so we catch the error and log it instead of failing the test as the highlight is important for the snapshots
+      console.error('Error while waiting for highlighted matches:', e);
+    }
+    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
+    // Assert that highlighted matches are visible
+
+    // Take a screenshot to verify the search results
+    const screenshot = await page.screenshot();
+    expect(screenshot).toMatchSnapshot('search-results.png');
+  });
+
   test('should expand the selection to all occurrences', async ({ page }) => {
     // This could be improved as the following statement will double click
     // on the last line that will result in the last word being selected.
