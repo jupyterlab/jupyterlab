@@ -120,3 +120,12 @@
   min-height: var(--jp-border-width);
   min-width: var(--jp-border-width);
 }
+
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (width <= 760px) {
+  .jp-CodeConsole-input {
+    min-height: calc(6 * var(--jp-ui-font-size1));
+  }
+}
