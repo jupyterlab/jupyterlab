@@ -454,11 +454,6 @@ async function activateConsole(
      * Whether to create a subshell or main shell for this console
      */
     subshell?: boolean;
-
-    /**
-     * Where to place the prompt cell
-     */
-    promptCellPosition?: CodeConsole.PromptCellPosition;
   }
 
   /**
