@@ -320,10 +320,10 @@ export interface ITopArea extends ILabShell.ITopArea {}
  */
 export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _cachedLayout:
-  DockLayout.ILayoutConfig | null = 
+  DockLayout.ILayoutConfig | null =
   null;
   private _userLayout:
-  ILabShell.IUserLayout | null = 
+  ILabShell.IUserLayout | null =
   null;
   /**
    * Construct a new application shell.
@@ -2444,7 +2444,7 @@ namespace Private {
 
     private _updated: Signal<RestorableSplitPanel, void>;
   }
-} 
+}
 
 //here some changes that i want to make in code
 
@@ -2694,4 +2694,3 @@ export class RestorableSplitPanel extends SplitPanel {
 
   private _updated: Signal<RestorableSplitPanel, void>;
 }
-
