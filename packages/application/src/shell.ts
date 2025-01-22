@@ -319,6 +319,12 @@ export interface ITopArea extends ILabShell.ITopArea {}
  * The application shell for JupyterLab.
  */
 export class LabShell extends Widget implements JupyterFrontEnd.IShell {
+  private _cachedLayout:
+  DockLayout.ILayoutConfig | null = 
+  null;
+  private _userLayout:
+  ILabShell.IUserLayout | null = 
+  null;
   /**
    * Construct a new application shell.
    */
@@ -326,9 +332,25 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     super();
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
+    // Initialize layout based on option
     if (options?.waitForRestore === false) {
-      this._userLayout = { 'multiple-document': {}, 'single-document': {} };
-    }
+      this._userLayout = options?.waitForRestore === false ? { 'multiple-document': {}, 'single-document': {} }
+      null;
+    //Initialize panels
+    this._initPanels();
+
+    //connect signal listeners for layout and state changes
+    this._connectSignalListeners();
+  }
+   /**
+    * initialize the main layout panel and sidebars.
+   **/
+  private _initPanels(): void {
+    //Header panel, menu handler, and dock panels,
+  }
+
+
+
 
     // Skip Links
     const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
@@ -2422,4 +2444,254 @@ namespace Private {
 
     private _updated: Signal<RestorableSplitPanel, void>;
   }
+} 
+
+//here some changes that i want to make in code
+
+import {
+  Widget,
+  Message
+} from '@lumino/widgets';
+
+import {
+  TabBar,
+  StackedPanel,
+  SplitPanel,
+  Signal,
+  ISignal
+} from '@lumino/widgets';
+
+import {
+  ArrayExt
+} from '@lumino/algorithm';
+
+import {
+  ILabShell
+} from '@jupyterlab/application';
+
+namespace Private {
+  export interface IRankItem {
+    title: string;
+    widget: Widget;
+  }
 }
+
+export class SideBarHandler {
+  private _isHiddenByUser = false;
+  private _items = new Array<Private.IRankItem>();
+  private _sideBar: TabBar<Widget>;
+  private _stackedPanel: StackedPanel;
+  private _lastCurrent: Widget | null = null;
+  private _updated: Signal<SideBarHandler, void> = new Signal(this);
+
+  constructor(sideBar: TabBar<Widget>, stackedPanel: StackedPanel) {
+    this._sideBar = sideBar;
+    this._stackedPanel = stackedPanel;
+    this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+    this._sideBar.tabActivateRequested.connect(this._onTabActivateRequested, this);
+    this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+  }
+
+  private _onCurrentChanged(
+    sender: TabBar<Widget>,
+    args: TabBar.ICurrentChangedArgs<Widget>
+  ): void {
+    const oldWidget = args.previousTitle
+      ? this._findWidgetByTitle(args.previousTitle)
+      : null;
+    const newWidget = args.currentTitle
+      ? this._findWidgetByTitle(args.currentTitle)
+      : null;
+
+    if (oldWidget) {
+      oldWidget.hide();
+    }
+    if (newWidget) {
+      newWidget.show();
+    }
+
+    this._lastCurrent = newWidget || oldWidget;
+    this._refreshVisibility();
+  }
+
+  private _onTabActivateRequested(
+    sender: TabBar<Widget>,
+    args: TabBar.ITabActivateRequestedArgs<Widget>
+  ): void {
+    args.title.owner.activate();
+  }
+
+  private _onWidgetRemoved(sender: StackedPanel, widget: Widget): void {
+    if (widget === this._lastCurrent) {
+      this._lastCurrent = null;
+    }
+    ArrayExt.removeAt(this._items, this._findWidgetIndex(widget));
+    this._sideBar.removeTab(widget.title);
+    this._refreshVisibility();
+  }
+
+  private _findWidgetByTitle(title: string): Widget | null {
+    const item = this._items.find(item => item.title === title);
+    return item ? item.widget : null;
+  }
+
+  private _findWidgetIndex(widget: Widget): number {
+    return this._items.findIndex(item => item.widget === widget);
+  }
+
+  private _refreshVisibility() {
+    if (this._isHiddenByUser) {
+      this._sideBar.hide();
+    } else {
+      this._sideBar.show();
+    }
+  }
+}
+
+export class SkipLinkWidget extends Widget {
+  constructor(shell: ILabShell) {
+    super();
+    this.addClass('jp-skiplink');
+    this.id = 'jp-skiplink';
+    this._shell = shell;
+    this._createSkipLink('Skip to main panel', 'main');
+  }
+
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'click':
+        if (event.target instanceof HTMLElement) {
+          this._shell.activateArea(
+            event.target?.dataset?.targetarea as ILabShell.Area
+          );
+        }
+        break;
+    }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.node.addEventListener('click', this);
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    this.node.removeEventListener('click', this);
+    super.onBeforeDetach(msg);
+  }
+
+  private _shell: ILabShell;
+
+  private _createSkipLink(skipLinkText: string, area: ILabShell.Area): void {
+    const skipLink = document.createElement('a');
+    skipLink.href = '#';
+    skipLink.tabIndex = 0;
+    skipLink.text = skipLinkText;
+    skipLink.className = 'skip-link';
+    skipLink.dataset['targetarea'] = area;
+    this.node.appendChild(skipLink);
+  }
+}
+
+export class TitleHandler extends Widget {
+  constructor(shell: ILabShell) {
+    super();
+    const inputElement = document.createElement('input');
+    inputElement.type = 'text';
+    this.node.appendChild(inputElement);
+    this._shell = shell;
+    this.id = 'jp-title-panel-title';
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.inputElement.addEventListener('keyup', this);
+    this.inputElement.addEventListener('click', this);
+    this.inputElement.addEventListener('blur', this);
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    this.inputElement.removeEventListener('keyup', this);
+    this.inputElement.removeEventListener('click', this);
+    this.inputElement.removeEventListener('blur', this);
+  }
+
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'keyup':
+        void this._evtKeyUp(event as KeyboardEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'blur':
+        this._selected = false;
+        break;
+    }
+  }
+
+  private async _evtKeyUp(event: KeyboardEvent): Promise<void> {
+    if (event.key == 'Enter') {
+      const widget = this._shell.currentWidget;
+      if (widget == null) {
+        return;
+      }
+      const oldName = widget.title.label;
+      const inputElement = this.inputElement;
+      const newName = inputElement.value;
+      inputElement.blur();
+
+      if (newName !== oldName) {
+        widget.title.label = newName;
+      } else {
+        inputElement.value = oldName;
+      }
+    }
+  }
+
+  private _evtClick(event: MouseEvent): void {
+    if (event.button !== 0 || this._selected) {
+      return;
+    }
+
+    const inputElement = this.inputElement;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    this._selected = true;
+
+    const selectEnd = inputElement.value.indexOf('.');
+    if (selectEnd === -1) {
+      inputElement.select();
+    } else {
+      inputElement.setSelectionRange(0, selectEnd);
+    }
+  }
+
+  get inputElement(): HTMLInputElement {
+    return this.node.children[0] as HTMLInputElement;
+  }
+
+  private _shell: ILabShell;
+  private _selected: boolean = false;
+}
+
+export class RestorableSplitPanel extends SplitPanel {
+  constructor(options: SplitPanel.IOptions = {}) {
+    super(options);
+    this._updated = new Signal(this);
+  }
+
+  get updated(): ISignal<RestorableSplitPanel, void> {
+    return this._updated;
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this._updated.emit();
+  }
+
+  private _updated: Signal<RestorableSplitPanel, void>;
+}
+
