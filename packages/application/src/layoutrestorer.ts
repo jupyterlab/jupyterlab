@@ -333,10 +333,7 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     const dehydrated: Private.ILayout = {};
 
-    // Save the cached main area layout if restoration is deferred.
-    dehydrated.main = this.isDeferred
-      ? this._deferredMainArea
-      : this._dehydrateMainArea(layout.mainArea);
+    dehydrated.main = this._dehydrateMainArea(layout.mainArea);
     dehydrated.down = this._dehydrateDownArea(layout.downArea);
     dehydrated.left = this._dehydrateSideArea(layout.leftArea);
     dehydrated.right = this._dehydrateSideArea(layout.rightArea);
