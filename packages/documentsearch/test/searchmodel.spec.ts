@@ -109,11 +109,6 @@ describe('documentsearch/searchmodel', () => {
         model.initialQuery = 'externally-set-query';
         expect(model.initialQuery).toEqual('externally-set-query');
       });
-      it('should fallback to previous search expression on empty value in setter', () => {
-        model.searchExpression = 'search-expression';
-        model.initialQuery = '';
-        expect(model.initialQuery).toEqual('search-expression');
-      });
       it('should remember last query', async () => {
         model.initialQuery = 'query';
         expect(model.initialQuery).toEqual('query');

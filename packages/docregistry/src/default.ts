@@ -345,6 +345,7 @@ export abstract class ABCWidgetFactory<
     this._shutdownOnClose = !!options.shutdownOnClose;
     this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
+    this._contentProviderId = options.contentProviderId;
   }
 
   /**
@@ -488,6 +489,25 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Identifier of the content provider required for the widget (if any).
+   *
+   * Throws Error if the content provider was already set.
+   *
+   * @experimental
+   */
+  get contentProviderId(): string | undefined {
+    return this._contentProviderId;
+  }
+  set contentProviderId(value: string | undefined) {
+    if (this._contentProviderId && value !== this._contentProviderId) {
+      throw Error(
+        `Cannot change content provider on factory with an existing provider: ${this._contentProviderId}`
+      );
+    }
+    this._contentProviderId = value;
+  }
+
+  /**
    * Create a widget for a context.
    */
   protected abstract createNewWidget(
@@ -502,6 +522,7 @@ export abstract class ABCWidgetFactory<
     return [];
   }
 
+  private _contentProviderId?: string;
   private _toolbarFactory:
     | ((
         widget: T
