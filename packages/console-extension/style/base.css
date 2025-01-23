@@ -11,6 +11,6 @@
   justify-content: center;
 }
 
-.jp-CodeConsolePromptMenu .lm-Menu-itemIcon svg {
+.jp-CodeConsolePromptMenu .lm-Menu-itemIcon > svg {
   vertical-align: sub;
 }
