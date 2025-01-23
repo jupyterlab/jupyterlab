@@ -114,13 +114,6 @@ test.describe('File search from selection', () => {
   });
 
   test('search highlighting', async ({ page }) => {
-    // Open JupyterLab
-    await page.notebook.createNew('notebook.ipynb');
-
-    // Focus on the editor
-    await page.getByRole('textbox').locator('div').click();
-
-    // Fill the editor with text
     const textToType = `True, False, def, assert # keywords
   1, 0.1, 0x21 # numbers
   'a', "b", "f", "c" # strings
@@ -134,7 +127,9 @@ test.describe('File search from selection', () => {
   'a', "b", "f", "c" # strings
   bool, int, open, help # builtins`;
 
-    await page.keyboard.type(textToType);
+    await page.locator('[role="main"] .cm-content').selectText();
+    await page.keyboard.press('Backspace');
+    await page.locator('[role="main"] .cm-content').fill(textToType);
 
     // Open the search bar with Ctrl + F
     await page.keyboard.press('Control+f');
@@ -167,7 +162,7 @@ test.describe('File search from selection', () => {
     // Assert that highlighted matches are visible
 
     // Take a screenshot to verify the search results
-    const screenshot = await page.screenshot();
+    const screenshot = await page.getByLabel('untitled.txt').screenshot();
     expect(screenshot).toMatchSnapshot('search-results.png');
   });
 
