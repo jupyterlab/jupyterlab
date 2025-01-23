@@ -46,6 +46,7 @@ import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  clearIcon,
   consoleIcon,
   dockBottomIcon,
   dockLeftIcon,
@@ -797,6 +798,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
+    icon: args => (args.toolbar ? clearIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
