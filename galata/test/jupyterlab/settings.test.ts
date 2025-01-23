@@ -422,3 +422,57 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
 
   fs.unlinkSync(importFilePath);
 });
+
+test('Ensure that fuzzy filter works properly', async ({ page }) => {
+  // Helper function to rename a notebook
+  const renameNotebook = async (oldName: string, newName: string) => {
+    await page
+      .locator(`.jp-DirListing-itemName:has-text("${oldName}")`)
+      .click();
+    await page.keyboard.press('F2');
+    await page.keyboard.type(newName);
+    await page.keyboard.press('Enter');
+  };
+
+  // Create and rename the first notebook
+  await page.menu.clickMenuItem('File>New>Notebook');
+  await page.locator('.jp-Dialog-checkbox').click();
+  await page.locator('.jp-Dialog-button:has-text("Select")').click();
+  await renameNotebook('untitled.ipynb', 'test');
+
+  // Create and rename the second notebook
+  await page.menu.clickMenuItem('File>New>Notebook');
+  await renameNotebook('untitled.ipynb', 'tst');
+
+  // Enable file filter and apply a filter for "tst"
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('filebrowser:toggle-file-filter')
+  );
+  await page.locator('input[placeholder="Filter files by name"]').click();
+  await page.keyboard.type('tst');
+
+  // Both files should be visible
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(2);
+
+  // Change fuzzy filter setting
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'File Browser'
+    })
+  );
+  await page
+    .locator('label:has-text("Filter on file name with a fuzzy search")')
+    .click();
+
+  // Clear the filter input and apply a new filter for "test"
+  const searchBox = page.locator('input[placeholder="Filter files by name"]');
+  await searchBox.click();
+  const currentValue = await searchBox.inputValue();
+  for (let i = 0; i < currentValue.length; i++) {
+    await page.keyboard.press('Backspace');
+  }
+  await page.keyboard.type('test');
+
+  // Only one file should be visible
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
+});
