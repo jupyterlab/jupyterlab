@@ -164,7 +164,12 @@
       "title": "Prompt Cell Position",
       "description": "Where to place the prompt cell of the console.",
       "type": "string",
-      "enum": ["bottom", "top", "left", "right"],
+      "oneOf": [
+        { "const": "bottom", "title": "Bottom" },
+        { "const": "top", "title": "Top" },
+        { "const": "left", "title": "Left" },
+        { "const": "right", "title": "Right" }
+      ],
       "default": "bottom"
     },
     "showBanner": {
