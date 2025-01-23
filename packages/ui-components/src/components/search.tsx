@@ -56,7 +56,7 @@ export interface IFilterBoxProps {
   /**
    * Whether to use the fuzzy filter.
    */
-  useFuzzyFilter: boolean;
+  useFuzzyFilter?: boolean;
 }
 
 /**
@@ -125,7 +125,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
 
 export const updateFilterFunction = (
   value: string,
-  useFuzzyFilter: boolean,
+  useFuzzyFilter?: boolean,
   caseSensitive?: boolean
 ) => {
   return (item: string): Partial<IScore> | null => {
@@ -215,6 +215,26 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
-export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(<FilterBox {...props} />);
-};
+export class FilenameSearcher extends ReactWidget {
+  private filterBoxProps: IFilterBoxProps;
+
+  constructor(props: IFilterBoxProps) {
+    super();
+    this.filterBoxProps = { ...props };
+  }
+
+  /**
+   * Update a specific prop.
+   */
+  updateProp<K extends keyof IFilterBoxProps>(
+    key: K,
+    value: IFilterBoxProps[K]
+  ): void {
+    this.filterBoxProps[key] = value;
+    this.update();
+  }
+
+  render(): JSX.Element {
+    return <FilterBox {...this.filterBoxProps} />;
+  }
+}
