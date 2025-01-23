@@ -48,10 +48,10 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
   dockBottomIcon,
-  dockIcon,
   dockLeftIcon,
   dockRightIcon,
   dockTopIcon,
+  dotsIcon,
   IFormRendererRegistry,
   redoIcon,
   refreshIcon,
@@ -343,7 +343,7 @@ async function activateConsole(
       panel => {
         const button = new ToolbarButton({
           tooltip: trans.__('Change Console Prompt Position'),
-          icon: dockIcon,
+          icon: dotsIcon,
           onClick: () => {
             const left = button.node.getBoundingClientRect().left;
             const bottom = button.node.getBoundingClientRect().bottom;

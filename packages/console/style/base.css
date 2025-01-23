@@ -117,8 +117,8 @@
 
 .jp-CodeConsole-split.lm-SplitPanel .lm-SplitPanel-handle::after {
   background-color: var(--jp-border-color2);
-  min-height: var(--jp-border-width);
-  min-width: var(--jp-border-width);
+  min-height: calc(2 * var(--jp-border-width));
+  min-width: calc(2 * var(--jp-border-width));
 }
 
 /*-----------------------------------------------------------------------------

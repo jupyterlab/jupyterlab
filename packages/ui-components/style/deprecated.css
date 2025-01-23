@@ -47,7 +47,7 @@
   --jp-icon-dock-left: url('icons/toolbar/dock-left.svg');
   --jp-icon-dock-right: url('icons/toolbar/dock-right.svg');
   --jp-icon-dock-top: url('icons/toolbar/dock-top.svg');
-  --jp-icon-dock: url('icons/toolbar/dock.svg');
+  --jp-icon-dots: url('icons/toolbar/dots.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
@@ -263,10 +263,6 @@
   background-image: var(--jp-icon-dock-bottom);
 }
 
-.jp-DockIcon {
-  background-image: var(--jp-icon-dock);
-}
-
 .jp-DockLeftIcon {
   background-image: var(--jp-icon-dock-left);
 }
@@ -277,6 +273,10 @@
 
 .jp-DockTopIcon {
   background-image: var(--jp-icon-dock-top);
+}
+
+.jp-DotsIcon {
+  background-image: var(--jp-icon-dots);
 }
 
 .jp-DownloadIcon {
