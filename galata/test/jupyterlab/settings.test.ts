@@ -422,3 +422,29 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
 
   fs.unlinkSync(importFilePath);
 });
+
+test('Read-only cells should remain read-only after changing settings', async ({
+  page
+}) => {
+  await page.notebook.createNew();
+  await page.sidebar.close();
+  await page.notebook.setCell(0, 'code', '"test"');
+
+  // Set the cell to read-only using the Property Inspector
+  await page.menu.clickMenuItem('View>Property Inspector');
+  await page.locator('.jp-Collapse:has-text("Common Tools")').click();
+  await page
+    .locator('select:has-text("Editable")')
+    .selectOption({ label: 'Read-Only' });
+
+  // Change a notebook setting (kernel preference)
+  await page.notebook
+    .getToolbarItemLocator('kernelName')
+    .then(item => item?.click());
+  await page.locator('.jp-Dialog-checkbox').click();
+  await page.locator('.jp-Dialog-button:has-text("Select")').click();
+
+  // Assert the first cell is still read-only
+  const cell = page.locator('.jp-Notebook-cell').nth(0);
+  await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
+});
