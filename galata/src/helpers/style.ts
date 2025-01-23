@@ -49,7 +49,7 @@ export class StyleHelper {
   /**
    * Find unused CSS rules.
    *
-   * @param options spcify which rules to include/exclude.
+   * @param options specify which rules to include/exclude.
    * @returns List of rules with no matching elements on the page.
    */
   async findUnusedStyleRules(

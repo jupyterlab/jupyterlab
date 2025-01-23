@@ -72,35 +72,77 @@ export class HistoryInlineCompletionProvider
 
     const multiLinePrefix = request.text.slice(0, request.offset);
     const linePrefix = multiLinePrefix.split('\n').slice(-1)[0];
-
-    const historyRequest: KernelMessage.IHistoryRequestMsg['content'] = {
-      output: false,
-      raw: true,
-      hist_access_type: 'search',
-      pattern: linePrefix + '*',
-      unique: true,
-      n: this._maxSuggestions
-    };
-
-    const reply = await kernel.requestHistory(historyRequest);
+    const suffix = request.text.slice(request.offset).split('\n')[0];
+    let historyRequest: KernelMessage.IHistoryRequestMsg['content'];
 
     const items = [];
     if (linePrefix === '') {
-      return { items: [] };
-    }
-    if (reply.content.status === 'ok') {
-      for (const entry of reply.content.history) {
-        const sourceLines = (entry[2] as string).split('\n');
-        for (let i = 0; i < sourceLines.length; i++) {
-          const line = sourceLines[i];
-          if (line.startsWith(linePrefix)) {
-            const followingLines =
-              line.slice(linePrefix.length, line.length) +
-              '\n' +
-              sourceLines.slice(i + 1).join('\n');
-            items.push({
-              insertText: followingLines
-            });
+      historyRequest = {
+        output: false,
+        raw: true,
+        hist_access_type: 'tail',
+        n: this._maxSuggestions
+      };
+      const reply = await kernel.requestHistory(historyRequest);
+      if (reply.content.status === 'ok') {
+        let history = reply.content.history;
+
+        const historyFrequencyMap = new Map();
+        // Count the frequency of each element
+        for (const entry of history.reverse()) {
+          const sourceLines = entry[2] as string;
+          historyFrequencyMap.set(
+            sourceLines,
+            (historyFrequencyMap.get(sourceLines) || 0) + 1
+          );
+        }
+        const frequencyHistory = Array.from(historyFrequencyMap.entries());
+        const sortedFrequencyHistory = frequencyHistory.sort((a, b) => {
+          if (a[1] > b[1]) {
+            return -1;
+          } else if (a[1] < b[1]) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+        for (const entry of sortedFrequencyHistory) {
+          items.push({
+            insertText: entry[0]
+          });
+        }
+      }
+    } else {
+      historyRequest = {
+        output: false,
+        raw: true,
+        hist_access_type: 'search',
+        pattern: linePrefix + '*' + (suffix ? suffix + '*' : ''),
+        unique: true,
+        n: this._maxSuggestions
+      };
+
+      const reply = await kernel.requestHistory(historyRequest);
+      if (reply.content.status === 'ok') {
+        for (const entry of reply.content.history) {
+          const sourceLines = (entry[2] as string).split('\n');
+          for (let i = 0; i < sourceLines.length; i++) {
+            const line = sourceLines[i];
+            if (line.startsWith(linePrefix)) {
+              let followingLines = line.slice(linePrefix.length);
+              if (i + 1 < sourceLines.length) {
+                followingLines += '\n' + sourceLines.slice(i + 1).join('\n');
+              }
+              if (suffix) {
+                followingLines = followingLines.slice(
+                  0,
+                  followingLines.indexOf(suffix)
+                );
+              }
+              items.push({
+                insertText: followingLines
+              });
+            }
           }
         }
       }

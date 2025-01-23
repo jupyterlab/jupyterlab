@@ -149,9 +149,8 @@ const about: JupyterFrontEndPlugin<void> = {
           title,
           body,
           buttons: [
-            Dialog.createButton({
-              label: trans.__('Dismiss'),
-              className: 'jp-About-button jp-mod-reject jp-mod-styled'
+            Dialog.cancelButton({
+              label: trans.__('Close')
             })
           ]
         });
@@ -422,9 +421,8 @@ const resources: JupyterFrontEndPlugin<void> = {
                 title,
                 body,
                 buttons: [
-                  Dialog.createButton({
-                    label: trans.__('Dismiss'),
-                    className: 'jp-About-button jp-mod-reject jp-mod-styled'
+                  Dialog.cancelButton({
+                    label: trans.__('Close')
                   })
                 ]
               });

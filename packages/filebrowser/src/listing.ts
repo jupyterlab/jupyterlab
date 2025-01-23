@@ -342,7 +342,8 @@ export class DirListing extends Widget {
     this._sortedItems = Private.sort(
       this.model.items(),
       state,
-      this._sortNotebooksFirst
+      this._sortNotebooksFirst,
+      this.translator
     );
     this._sortState = state;
     this.update();
@@ -1477,6 +1478,7 @@ export class DirListing extends Widget {
     // Remove the resize listeners if necessary.
     if (this._resizeData) {
       this._resizeData.overrides.dispose();
+      this._resizeData = null;
       document.removeEventListener('mousemove', this, true);
       document.removeEventListener('mouseup', this, true);
       return;
@@ -2901,7 +2903,11 @@ export namespace DirListing {
             small: trans.__('Modified'),
             large: trans.__('Last Modified')
           }),
-        file_size: () => this.createHeaderItemNode(trans.__('File Size')),
+        file_size: () =>
+          this._createHeaderItemNodeWithSizes({
+            small: trans.__('Size'),
+            large: trans.__('File Size')
+          }),
         is_selected: () =>
           this.createCheckboxWrapperNode({
             alwaysVisible: true,
@@ -3354,9 +3360,23 @@ export namespace DirListing {
       fileType?: DocumentRegistry.IFileType
     ): HTMLElement {
       const dragImage = node.cloneNode(true) as HTMLElement;
-      const modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
       const icon = DOMUtils.findElement(dragImage, ITEM_ICON_CLASS);
-      dragImage.removeChild(modified as HTMLElement);
+
+      // Hide additional columns from the drag image to keep it unobtrusive.
+      const extraColumns = DirListing.columns.filter(
+        column => column.id !== 'name'
+      );
+      for (const extraColumn of extraColumns) {
+        const columnElement = DOMUtils.findElement(
+          dragImage,
+          extraColumn.itemClassName
+        );
+        if (!columnElement) {
+          // We can only remove columns which are rendered.
+          continue;
+        }
+        dragImage.removeChild(columnElement);
+      }
 
       if (!fileType) {
         icon.textContent = '';
@@ -3515,7 +3535,8 @@ namespace Private {
   export function sort(
     items: Iterable<Contents.IModel>,
     state: DirListing.ISortState,
-    sortNotebooksFirst: boolean = false
+    sortNotebooksFirst: boolean = false,
+    translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
@@ -3544,6 +3565,32 @@ namespace Private {
       return 0;
     }
 
+    /**
+     * Compare two items by their name using `translator.languageCode`, with fallback to `navigator.language`.
+     */
+    function compareByName(a: Contents.IModel, b: Contents.IModel) {
+      // Wokaround for Chromium invalid language code on CI, see
+      // https://github.com/jupyterlab/jupyterlab/issues/17079
+      const navigatorLanguage = navigator.language.split('@')[0];
+      const languageCode = (
+        translator.languageCode ?? navigatorLanguage
+      ).replace('_', '-');
+      try {
+        return a.name.localeCompare(b.name, languageCode, {
+          numeric: true,
+          sensitivity: 'base'
+        });
+      } catch (e) {
+        console.warn(
+          `localeCompare failed to compare ${a.name} and ${b.name} under languageCode: ${languageCode}`
+        );
+        return a.name.localeCompare(b.name, navigatorLanguage, {
+          numeric: true,
+          sensitivity: 'base'
+        });
+      }
+    }
+
     function compare(
       compare: (a: Contents.IModel, b: Contents.IModel) => number
     ) {
@@ -3560,7 +3607,7 @@ namespace Private {
         }
 
         // Default sorting is alphabetical ascending
-        return a.name.localeCompare(b.name);
+        return compareByName(a, b);
       };
     }
 
@@ -3585,7 +3632,7 @@ namespace Private {
       // Sort by name
       copy.sort(
         compare((a: Contents.IModel, b: Contents.IModel) => {
-          return b.name.localeCompare(a.name);
+          return compareByName(b, a);
         })
       );
     }

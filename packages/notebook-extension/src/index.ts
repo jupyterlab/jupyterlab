@@ -160,6 +160,8 @@ namespace CommandIDs {
 
   export const createConsole = 'notebook:create-console';
 
+  export const createSubshellConsole = 'notebook:create-subshell-console';
+
   export const createOutputView = 'notebook:create-output-view';
 
   export const clearAllOutputs = 'notebook:clear-all-cell-outputs';
@@ -707,7 +709,7 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    tranlator: ITranslator,
+    translator: ITranslator,
     statusBar: IStatusBar | null
   ) => {
     if (!statusBar) {
@@ -715,7 +717,7 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
       return;
     }
     const { shell } = app;
-    const item = new NotebookTrustStatus(tranlator);
+    const item = new NotebookTrustStatus(translator);
 
     // Keep the status item up-to-date with the current notebook.
     tracker.currentChanged.connect(() => {
@@ -1396,6 +1398,30 @@ function activateCodeConsole(
     isEnabled
   });
 
+  commands.addCommand(CommandIDs.createSubshellConsole, {
+    label: trans.__('New Subshell Console for Notebook'),
+    execute: args => {
+      const current = tracker.currentWidget;
+
+      if (!current) {
+        return;
+      }
+
+      return Private.createConsole(
+        commands,
+        current,
+        args['activate'] as boolean,
+        true
+      );
+    },
+    isEnabled,
+    isVisible: () => {
+      const kernel =
+        tracker.currentWidget?.context.sessionContext.session?.kernel;
+      return kernel?.supportsSubshells ?? false;
+    }
+  });
+
   commands.addCommand(CommandIDs.runInConsole, {
     label: trans.__('Run Selected Text or Current Line in Console'),
     execute: async args => {
@@ -1869,12 +1895,16 @@ function activateNotebookHandler(
     factory.notebookConfig = {
       enableKernelInitNotification: settings.get('enableKernelInitNotification')
         .composite as boolean,
+      autoRenderMarkdownCells: settings.get('autoRenderMarkdownCells')
+        .composite as boolean,
       showHiddenCellsButton: settings.get('showHiddenCellsButton')
         .composite as boolean,
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
       overscanCount: settings.get('overscanCount').composite as number,
+      showInputPlaceholder: settings.get('showInputPlaceholder')
+        .composite as boolean,
       inputHistoryScope: settings.get('inputHistoryScope').composite as
         | 'global'
         | 'session',
@@ -3620,6 +3650,7 @@ function populatePalette(
     CommandIDs.changeKernel,
     CommandIDs.reconnectToKernel,
     CommandIDs.createConsole,
+    CommandIDs.createSubshellConsole,
     CommandIDs.closeAndShutdown,
     CommandIDs.trust,
     CommandIDs.toggleCollapseCmd,
@@ -3794,16 +3825,19 @@ namespace Private {
    * @param commands Commands registry
    * @param widget Notebook panel
    * @param activate Should the console be activated
+   * @param subshell Should the console contain a subshell or the main shell
    */
   export function createConsole(
     commands: CommandRegistry,
     widget: NotebookPanel,
-    activate?: boolean
+    activate?: boolean,
+    subshell?: boolean
   ): Promise<void> {
     const options = {
       path: widget.context.path,
       preferredLanguage: widget.context.model.defaultKernelLanguage,
       activate: activate,
+      subshell: subshell,
       ref: widget.id,
       insertMode: 'split-bottom',
       type: 'Linked Console'

@@ -31,7 +31,7 @@
 }
 
 .jp-Shortcuts-Input {
-  animation-duration: 0.5s;
+  animation-duration: 0.3s;
   animation-timing-function: ease-out;
   animation-name: slide-animation;
   border-width: var(--jp-border-width);
@@ -68,7 +68,7 @@
 }
 
 .jp-mod-selected-InputText {
-  background-color: var(--jp-brand-color3);
+  background-color: var(--jp-shortcuts-button-background);
   overflow: hidden;
 }
 
@@ -228,7 +228,7 @@
 
 .jp-Shortcuts-Plus {
   opacity: 0;
-  background: var(--jp-brand-color3);
+  background: var(--jp-shortcuts-button-background);
   border-color: var(--jp-layout-color0);
   border-radius: var(--jp-border-radius);
   border-width: var(--jp-border-width);
@@ -239,7 +239,7 @@
 }
 
 .jp-Shortcuts-Plus:hover {
-  background-color: var(--jp-brand-color2);
+  background: var(--jp-shortcuts-button-hover-background);
 }
 
 .jp-Shortcuts-Plus:active {

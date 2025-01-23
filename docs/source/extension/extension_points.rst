@@ -74,6 +74,7 @@ Here is a sample block of code that adds a command to the application (given by 
       execute: () => {
         console.log(`Executed ${commandID}`);
         toggled = !toggled;
+      }
     });
 
 This example adds a new command, which, when triggered, calls the ``execute`` function.
@@ -153,13 +154,14 @@ menu using the settings.
 
     {
       "jupyter.lab.menus": {
-      "context": [
-        {
-          "command": "my-command",
-          "selector": ".jp-Notebook",
-          "rank": 500
-        }
-      ]
+        "context": [
+          {
+            "command": "my-command",
+            "selector": ".jp-Notebook",
+            "rank": 500
+          }
+        ]
+      }
     }
 
 In this example, the command with id ``my-command`` is shown whenever the user
@@ -342,15 +344,15 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
       "command": "apputils:run-all-enabled",
       "keys": ["Accel T"],
       "args": {
-          "commands": [
-              "my-command-1",
-              "my-command-2"
-          ],
-          "args": [
-              {},
-              {}
-            ]
-        },
+        "commands": [
+          "my-command-1",
+          "my-command-2"
+        ],
+        "args": [
+          {},
+          {}
+        ]
+      },
       "selector": "body"
     }
 
@@ -469,19 +471,20 @@ To add a new menu with your extension command:
 
     {
       "jupyter.lab.menus": {
-      "main": [
-        {
-          "id": "jp-mainmenu-myextension",
-          "label": "My Menu",
-          "items": [
-            {
-              "command": "my-command",
-              "rank": 500
-            }
-          ],
-          "rank": 100
-        }
-      ]
+        "main": [
+          {
+            "id": "jp-mainmenu-myextension",
+            "label": "My Menu",
+            "items": [
+              {
+                "command": "my-command",
+                "rank": 500
+              }
+            ],
+            "rank": 100
+          }
+        ]
+      }
     }
 
 The menu item label will be set with the command label. For menus (and
@@ -497,17 +500,18 @@ To add a new entry in an existing menu:
 
     {
       "jupyter.lab.menus": {
-      "main": [
-        {
-          "id": "jp-mainmenu-file",
-          "items": [
-            {
-              "command": "my-command",
-              "rank": 500
-            }
-          ]
-        }
-      ]
+        "main": [
+          {
+            "id": "jp-mainmenu-file",
+            "items": [
+              {
+                "command": "my-command",
+                "rank": 500
+              }
+            ]
+          }
+        ]
+      }
     }
 
 Here is the list of default menu ids:
@@ -1131,3 +1135,181 @@ Occasionally, LSP extensions include a CodeMirror extension to modify the code e
       });
     }
   };
+
+
+Content Provisioning
+--------------------
+
+The file system interactions can be customized by adding:
+
+* a content provider, selectively replacing the way in which content is fetched and synchronized
+* a drive, adding a new source of content, analogous to a physical hard drive
+
+While both the content provider and drive are meant to provide custom implementations of
+the Contents API methods such as ``get()`` and ``save()``, and optionally a custom ``sharedModelFactory``,
+the intended use cases, and the way these are exposed in the user interface are different:
+
+* Drive:
+
+  * Use case: provision of additional content, not available on the default drive.
+
+  * UI: paths of files and directories from the drive are prefixed with the drive name and colon.
+
+* Content Provider:
+
+  * Use case: modification of the protocol used for data retrieval
+    (e.g., streaming of the content, real-time collaboration),
+    by extending the Contents API methods for files which already
+    exist on one of the drives.
+
+  * UI: users will choose a widget factory with an associated content provider
+    when selecting how to open a file using the "Open with" dropdown.
+
+To register a custom drive, use the contents manager's ``addDrive`` method.
+The drive needs to follow the ``IDrive`` interface. For drives that use
+a jupyter-server compliant REST API you may wish to extend or re-use
+the built-in ``Drive`` class, as demonstrated below:
+
+.. code:: typescript
+
+  import { Drive, ServerConnection } from '@jupyterlab/services';
+
+  const customDrivePlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-drive',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+      const myDrive = new Drive({
+        apiEndpoint: 'api/contents',
+        name: 'MyNetworkDrive',
+        serverSettings: {
+          baseUrl: 'https://your-jupyter-server.com',
+          // ...
+        } as ServerConnection.ISettings,
+      });
+      app.serviceManager.contents.addDrive(myDrive);
+    }
+  };
+
+To use a content provider, first register it on a drive (or multiple drives):
+
+.. code:: typescript
+
+  import { Contents, ContentsManager, RestContentProvider } from '@jupyterlab/services';
+
+  interface IMyContentChunk {
+    /** URL allowing to fetch the content chunk */
+    url: string;
+  }
+
+  interface CustomContentsModel extends Contents.IModel {
+    /**
+     * Specializes the content (which in `Contents.IModel` is just `any`).
+     */
+    content: IMyContentChunk[];
+  }
+
+  class CustomContentProvider extends RestContentProvider {
+    async get(
+      localPath: string,
+      options?: Contents.IFetchOptions,
+    ): Promise<CustomContentsModel> {
+      // Customize the behaviour of the `get` action to fetch a list of
+      // content chunks from a custom API endpoint instead of the `get`
+
+      try {
+        return getChunks();    // this method needs to be implemented
+      }
+      catch {
+        // fall back to the REST API on errors:
+        const model = await super.get(localPath, options);
+        return {
+          ...model,
+          content: []
+        };
+      }
+    }
+
+    // ...
+  }
+
+  const customContentProviderPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-content-provider',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+      const drive = (app.serviceManager.contents as ContentsManager).defaultDrive;
+      const registry = drive?.contentProviderRegistry;
+      if (!registry) {
+        // If content provider is a non-essential feature and support for JupyterLab <4.4 is desired:
+        console.error('Cannot initialize content provider: no content provider registry.');
+        return;
+      }
+      const customContentProvider = new CustomContentProvider({
+        // These options are only required if extending the `RestContentProvider`.
+        apiEndpoint: '/api/contents',
+        serverSettings: app.serviceManager.serverSettings,
+      });
+      registry.register('my-custom-provider', customContentProvider);
+    }
+  };
+
+and then create and register a widget factory which will understand how to make use of your custom content provider:
+
+.. code:: typescript
+
+  class ExampleWidgetFactory extends ABCWidgetFactory<ExampleDocWidget, ExampleDocModel> {
+    protected createNewWidget(
+      context: DocumentRegistry.IContext<ExampleDocModel>
+    ): ExampleDocWidget {
+
+      return new ExampleDocWidget({
+        context,
+        content: new ExamplePanel(context)
+      });
+    }
+  }
+
+  const widgetFactoryPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-widget-factory',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+
+      const widgetFactory = new ExampleWidgetFactory({
+        name: FACTORY,
+        modelName: 'example-model',
+        fileTypes: ['example'],
+        defaultFor: ['example'],
+        // Instructs the document registry to use the custom provider
+        // for context of widgets created with `ExampleWidgetFactory`.
+        contentProviderId: 'my-custom-provider'
+      });
+      app.docRegistry.addWidgetFactory(widgetFactory);
+    }
+  };
+
+
+Where ``ExampleDocModel`` can now expect the ``CustomContentsModel`` rather than ``Contents.IModel``:
+
+.. code:: typescript
+
+  class ExampleDocModel implements DocumentRegistry.IModel {
+    // ...
+
+    fromJSON(chunks: IMyContentChunk[]): void {
+      this.sharedModel.transact(() => {
+        let i = 0;
+        for (const chunk of chunks) {
+          const chunk = fetch(chunk.url);
+          this.sharedModel.set(`chunk-${i}`, chunk);
+          i += 1;
+        }
+      });
+    }
+
+    fromString(data: string): void {
+      const chunks = JSON.parse(data) as IMyContentChunk[];
+      return this.fromJSON(chunks);
+    }
+  }
+
+
+For a complete example of a widget factory (although not using a content provider), see the `documents extension example <https://github.com/jupyterlab/extension-examples/tree/main/documents>`__.

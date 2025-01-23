@@ -108,7 +108,7 @@ You can install ``jupyverse`` with ``pip``:
 
 .. code:: bash
 
-    pip install jupyverse[auth, jupyterlab]
+    pip install "jupyverse[auth,jupyterlab]"
 
 or with ``conda``:
 

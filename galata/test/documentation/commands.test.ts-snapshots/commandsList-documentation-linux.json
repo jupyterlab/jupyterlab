@@ -284,7 +284,7 @@
   {
     "id": "codemirror:toggle-block-comment",
     "label": "Toggle Block Comment",
-    "caption": "Toggles block commends in languages which support it (e.g. C, JavaScript)",
+    "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
     "shortcuts": [
       "Alt A"
     ]
@@ -2272,6 +2272,12 @@
     "shortcuts": [
       "Ctrl S"
     ]
+  },
+  {
+    "id": "settingeditor:export",
+    "label": "Export User Settings",
+    "caption": "",
+    "shortcuts": []
   },
   {
     "id": "settingsmenu:open",
