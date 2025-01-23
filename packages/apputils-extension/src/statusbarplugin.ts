@@ -192,10 +192,10 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
       ): void => {
         const showStatusBarItem = settings.get('showStatusBarItem')
           .composite as boolean;
+
+        disposable?.dispose();
         if (showStatusBarItem) {
           disposable = registerItem();
-        } else {
-          disposable?.dispose();
         }
       };
 
