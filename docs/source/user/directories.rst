@@ -226,19 +226,28 @@ example, if the :ref:`application_directory` is
 ``<sys.prefix>/local/share/jupyter/lab``, create this file at
 ``<sys.prefix>/local/share/jupyter/lab/settings/overrides.json``).
 
-.. code:: json
+.. note::
+
+   Starting from JupyterLab 4.4, you can easily export and import settings through the
+   Settings Editor interface:
+
+   - Click the **Export** button (download icon) in the Settings Editor toolbar to
+     download an ``overrides.json`` file containing your current customized settings
+   - Use the **Import** button to apply settings from an existing ``overrides.json`` file
+   - This feature makes it easier to:
+     - Back up your JupyterLab configuration
+     - Share settings across different installations
+     - Deploy consistent settings in multi-user environments
+
+Example ``overrides.json`` content:
+
+.. code-block:: json
 
   {
     "@jupyterlab/apputils-extension:themes": {
       "theme": "JupyterLab Dark"
     }
   }
-
-JupyterLab also allows you to **export** and **import** an ``overrides.json`` file
-directly through the interface. You can generate an ``overrides.json`` file based
-on your current customized settings by clicking the **Export** button in the **Settings Editor**
-Similarly, you can use the **Import** button to apply an existing ``overrides.json`` file.
-This makes it easier to back up, share, or reuse your configuration.
 
 .. _build_configjson:
 
