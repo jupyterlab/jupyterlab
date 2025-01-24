@@ -110,7 +110,7 @@ export class FileBrowser extends SidePanel {
       showIcon: false,
       inputRef: this._fileFilterRef
     });
-    this.model.filterFileBrowserSettingsChanged.connect((value, args) => {
+    this.model.filterSettingsChanged.connect((value, args) => {
       for (const key in args) {
         searcher.updateProp(
           key as keyof IFilterBoxProps,

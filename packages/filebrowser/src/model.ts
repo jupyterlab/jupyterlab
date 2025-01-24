@@ -794,18 +794,21 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
     return this._useFuzzyFilter;
   }
   set useFuzzyFilter(value: boolean) {
+    if (this._useFuzzyFilter === value) {
+      return;
+    }
     this._useFuzzyFilter = value;
-    this._filterFileBrowserSettingsChanged.emit({ useFuzzyFilter: value });
+    this._filterSettingsChanged.emit({ useFuzzyFilter: value });
   }
 
   /**
    * Signal for settings changed
    */
-  get filterFileBrowserSettingsChanged(): ISignal<
+  get filterSettingsChanged(): ISignal<
     FileBrowserModel,
     { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
   > {
-    return this._filterFileBrowserSettingsChanged;
+    return this._filterSettingsChanged;
   }
 
   /**
@@ -833,7 +836,7 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   private _filter: (value: Contents.IModel) => Partial<IScore> | null;
   private _filterDirectories: boolean;
   private _useFuzzyFilter: boolean;
-  private _filterFileBrowserSettingsChanged = new Signal<
+  private _filterSettingsChanged = new Signal<
     FileBrowserModel,
     { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
   >(this);

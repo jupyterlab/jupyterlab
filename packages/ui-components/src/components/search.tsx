@@ -216,11 +216,9 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
  * A widget which hosts a input textbox to filter on file names.
  */
 export class FilenameSearcher extends ReactWidget {
-  private filterBoxProps: IFilterBoxProps;
-
   constructor(props: IFilterBoxProps) {
     super();
-    this.filterBoxProps = { ...props };
+    this._filterBoxProps = { ...props };
   }
 
   /**
@@ -230,11 +228,13 @@ export class FilenameSearcher extends ReactWidget {
     key: K,
     value: IFilterBoxProps[K]
   ): void {
-    this.filterBoxProps[key] = value;
+    this._filterBoxProps[key] = value;
     this.update();
   }
 
   render(): JSX.Element {
-    return <FilterBox {...this.filterBoxProps} />;
+    return <FilterBox {...this._filterBoxProps} />;
   }
+
+  private _filterBoxProps: IFilterBoxProps;
 }
