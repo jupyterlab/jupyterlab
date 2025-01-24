@@ -916,12 +916,13 @@ function addCommands(
           ) {
             const result = await InputDialog.getText({
               title: trans.__('Rename file'),
-              okLabel: trans.__('Rename'),
+              okLabel: trans.__('Rename and Save'),
               placeholder: trans.__('File name'),
+              cancelLabel: trans.__(`Save as ${oldName}`),
               text: oldName,
               selectionRange: oldName.length - PathExt.extname(oldName).length,
               checkbox: {
-                label: trans.__('Do not ask me again.'),
+                label: trans.__('Do not ask for rename on first save.'),
                 caption: trans.__(
                   'If checked, you will not be asked to rename future untitled files when saving them.'
                 )
