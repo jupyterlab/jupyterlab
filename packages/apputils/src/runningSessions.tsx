@@ -45,10 +45,14 @@ function RunningSessionsComponent(
       onKeyDown={props.handleKeyDown}
       style={{ cursor: 'pointer' }}
     >
-      <GroupItem spacing={HALF_SPACING}>
-        <TextItem source={props.terminals} />
-        <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
-      </GroupItem>
+      {props.terminals > 0 ? (
+        <GroupItem spacing={HALF_SPACING}>
+          <TextItem source={props.terminals} />
+          <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
+        </GroupItem>
+      ) : (
+        <div></div>
+      )}
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.sessions} />
         <kernelIcon.react verticalAlign="middle" stylesheet="statusBar" />

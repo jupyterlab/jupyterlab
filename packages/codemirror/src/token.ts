@@ -92,6 +92,14 @@ export interface IExtensionsHandler extends IDisposable {
   setOptions(options: Record<string, any>): void;
 
   /**
+   * Set a base config options for the editor.
+   *
+   * You will need to reconfigure the editor extensions by listening
+   * to `IExtensionsHandler.configChanged`.
+   */
+  setBaseOptions(options: Record<string, any>): void;
+
+  /**
    * Returns the list of initial extensions of an editor.
    *
    * @returns The initial editor extensions
