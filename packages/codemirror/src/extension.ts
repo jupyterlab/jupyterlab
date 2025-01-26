@@ -185,6 +185,7 @@ export class ExtensionsHandler
    * to `IExtensionsHandler.configChanged`.
    */
   setBaseOptions(options: Record<string, any>): void {
+    // Change values of baseConfig
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
       this._baseConfig = options;
@@ -197,6 +198,12 @@ export class ExtensionsHandler
             return agg;
           }, {})
         );
+      }
+    }
+    // Change values of config keys if present in options
+    for (const key of Object.keys(options)) {
+      if (key in this._config && this._config[key] != options[key]) {
+        this.setOption(key, options[key]);
       }
     }
   }
@@ -216,7 +223,6 @@ export class ExtensionsHandler
     const changed = this._getChangedOptions(options, this._config);
     if (changed.length > 0) {
       this._config = { ...options };
-
       this._configChanged.emit(
         changed.reduce<Record<string, any>>((agg, key) => {
           agg[key] = this._config[key] ?? this._baseConfig[key];
