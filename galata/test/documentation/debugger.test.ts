@@ -160,6 +160,8 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
+    // Wait for the red debug indicator box to appear
+    await page.waitForTimeout(50);
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
@@ -182,6 +184,8 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
+    // Wait for the red debug indicator box to appear
+    await page.waitForTimeout(50);
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
