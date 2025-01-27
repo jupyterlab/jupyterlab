@@ -161,7 +161,11 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
     // Wait for the red debug indicator box to appear
-    await page.waitForTimeout(50);
+    const firstCell = (await page.notebook.getCellLocator(0))!;
+    await firstCell.locator('.jp-DebuggerEditor-highlight').waitFor({
+      state: 'visible',
+      timeout: 1000
+    });
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
@@ -185,14 +189,21 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
     // Wait for the red debug indicator box to appear
-    await page.waitForTimeout(50);
+    await firstCell.locator('.jp-DebuggerEditor-highlight').waitFor({
+      state: 'visible',
+      timeout: 1000
+    });
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
       })
     ).toMatchSnapshot('debugger_stop_on_raised_exception.png');
     await page.click('jp-button[title^=Continue]');
+    await page.debugger.waitForCallStack();
     await page.click('jp-button[title^=Continue]');
+    await page.debugger.waitForCallStack();
+    await page.click('jp-button[title^=Continue]');
+    await page.notebook.waitForRun(0);
   });
 
   test('Debugger sidebar', async ({ page, tmpPath }) => {
