@@ -121,10 +121,6 @@ test.describe('File search from selection', () => {
   True, False, def, assert # keywords
   1, 0.1, 0x21 # numbers
   'a', "b", "f", "c" # strings
-  bool, int, open, help # builtins
-  True, False, def, assert # keywords
-  1, 0.1, 0x21 # numbers
-  'a', "b", "f", "c" # strings
   bool, int, open, help # builtins`;
 
     await page.locator('[role="main"] .cm-content').selectText();
