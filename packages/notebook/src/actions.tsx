@@ -2396,7 +2396,7 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    const lastCell = cells[-1];
+    const lastCell = cells[cells.length - 1];
     notebook.mode = 'command';
 
     let initializingDialogShown = false;
