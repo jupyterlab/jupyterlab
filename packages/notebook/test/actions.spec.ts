@@ -1128,7 +1128,7 @@ describe('@jupyterlab/notebook', () => {
           sessionContext
         );
         expect(result).toBe(true);
-        expect(emitted).toBe(2);
+        expect(emitted).toBe(1);
         expect(notebook).not.toBe(null);
         expect(lastCell).not.toBe(null);
       });
