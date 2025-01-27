@@ -76,7 +76,8 @@ export function addOpenTabsSessionManager(
       });
     },
     shutdownAll: () => {
-      for (const widget of labShell.widgets('main')) {
+      const widgets = Array.from(labShell.widgets('main'));
+      for (const widget of widgets) {
         widget.close();
       }
     },
