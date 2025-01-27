@@ -1129,8 +1129,8 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).toBe(true);
         expect(emitted).toBe(1);
-        expect(notebook).not.toBe(null);
-        expect(lastCell).not.toBe(null);
+        expect(notebook).toBeInstanceOf(Notebook);
+        expect(lastCell).toBeInstanceOf(Cell);
       });
     });
 
