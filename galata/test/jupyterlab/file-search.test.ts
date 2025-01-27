@@ -155,7 +155,6 @@ test.describe('File search from selection', () => {
       console.error('Error while waiting for highlighted matches:', e);
     }
     await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
-    // Assert that highlighted matches are visible
 
     // Take a screenshot to verify the search results
     const screenshot = await page.getByLabel('untitled.txt').screenshot();
