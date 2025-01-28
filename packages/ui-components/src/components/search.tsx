@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
 import { ISignal } from '@lumino/signaling';
@@ -168,10 +168,13 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       });
     }, []);
   }
+  const firstRender = useRef(true);
+  const inputRef = props.inputRef ?? useRef<HTMLInputElement>();
 
   useEffect(() => {
     // If there is an initial search value, pass the parent the initial filter function for that value.
-    if (props.initialQuery !== undefined) {
+    if (firstRender.current && props.initialQuery !== undefined) {
+      firstRender.current = false;
       props.updateFilter(
         updateFilterFunction(
           props.initialQuery,
@@ -180,8 +183,17 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
         ),
         props.initialQuery
       );
+    } else if (inputRef.current) {
+      props.updateFilter(
+        updateFilterFunction(
+          inputRef.current.value,
+          props.useFuzzyFilter,
+          props.caseSensitive
+        ),
+        inputRef.current.value
+      );
     }
-  }, []);
+  }, [props.useFuzzyFilter, props.caseSensitive]);
 
   /**
    * Handler for search input changes.
