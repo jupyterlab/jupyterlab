@@ -183,7 +183,8 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
         ),
         props.initialQuery
       );
-    } else if (inputRef.current) {
+    } else if (!firstRender.current && inputRef.current) {
+      // If filter settings changed, update the filter
       props.updateFilter(
         updateFilterFunction(
           inputRef.current.value,
@@ -193,7 +194,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
         inputRef.current.value
       );
     }
-  }, [props.useFuzzyFilter, props.caseSensitive]);
+  }, [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]);
 
   /**
    * Handler for search input changes.
