@@ -9,7 +9,6 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
-  IFilterBoxProps,
   IScore,
   SidePanel,
   Toolbar
@@ -95,7 +94,7 @@ export class FileBrowser extends SidePanel {
     this.crumbs.addClass(CRUMBS_CLASS);
 
     // The filter toolbar appears immediately below the breadcrumbs and above the directory listing.
-    const searcher = new FilenameSearcher({
+    const searcher = FilenameSearcher({
       updateFilter: (
         filterFn: (item: string) => Partial<IScore> | null,
         query?: string
@@ -108,16 +107,9 @@ export class FileBrowser extends SidePanel {
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: false,
       showIcon: false,
-      inputRef: this._fileFilterRef
+      inputRef: this._fileFilterRef,
+      filterSettingsChanged: this.model.filterSettingsChanged
     });
-    this.model.filterSettingsChanged.connect((value, args) => {
-      for (const key in args) {
-        searcher.updateProp(
-          key as keyof IFilterBoxProps,
-          args[key as keyof IFilterBoxProps]
-        );
-      }
-    }, this);
     searcher.addClass(FILTERBOX_CLASS);
 
     this.filterToolbar = new Toolbar();

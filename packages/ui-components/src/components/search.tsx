@@ -5,6 +5,7 @@ import { StringExt } from '@lumino/algorithm';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -57,6 +58,14 @@ export interface IFilterBoxProps {
    * Whether to use the fuzzy filter.
    */
   useFuzzyFilter?: boolean;
+
+  /**
+   * Signal emitted when filter settings change
+   */
+  filterSettingsChanged?: ISignal<
+    unknown,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >;
 }
 
 /**
@@ -140,11 +149,11 @@ export const updateFilterFunction = (
       value = value.toLocaleLowerCase();
     }
     const i = item.indexOf(value);
-    if (i === -1) {
+    if (i != 0) {
       return null;
     }
     return {
-      indices: [...Array(item.length).keys()].map(x => x + 1)
+      indices: [...Array(value.length).keys()]
     };
   };
 };
@@ -215,16 +224,28 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
-export class FilenameSearcher extends ReactWidget {
+class FilenameSearcherWidget extends ReactWidget {
   constructor(props: IFilterBoxProps) {
     super();
+    props?.filterSettingsChanged?.connect((_, args) => {
+      for (const key in args) {
+        this._updateProp(
+          key as keyof IFilterBoxProps,
+          args[key as keyof IFilterBoxProps]
+        );
+      }
+    }, this);
     this._filterBoxProps = { ...props };
+  }
+
+  render(): JSX.Element {
+    return <FilterBox {...this._filterBoxProps} />;
   }
 
   /**
    * Update a specific prop.
    */
-  updateProp<K extends keyof IFilterBoxProps>(
+  private _updateProp<K extends keyof IFilterBoxProps>(
     key: K,
     value: IFilterBoxProps[K]
   ): void {
@@ -232,9 +253,14 @@ export class FilenameSearcher extends ReactWidget {
     this.update();
   }
 
-  render(): JSX.Element {
-    return <FilterBox {...this._filterBoxProps} />;
-  }
-
   private _filterBoxProps: IFilterBoxProps;
 }
+
+/**
+ * Function which returns a widget that hosts an input textbox to filter on file names.
+ */
+export const FilenameSearcher = (
+  props: IFilterBoxProps
+): FilenameSearcherWidget => {
+  return new FilenameSearcherWidget(props);
+};

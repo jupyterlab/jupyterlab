@@ -425,7 +425,7 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
 
 test('Ensure that fuzzy filter works properly', async ({ page }) => {
   // Helper function to rename a notebook
-  const renameNotebook = async (oldName: string, newName: string) => {
+  const renameFile = async (oldName: string, newName: string) => {
     await page
       .locator(`.jp-DirListing-itemName:has-text("${oldName}")`)
       .click();
@@ -436,11 +436,11 @@ test('Ensure that fuzzy filter works properly', async ({ page }) => {
 
   // Create and rename the first file
   await page.menu.clickMenuItem('File>New>Text File');
-  await renameNotebook('untitled.txt', 'test');
+  await renameFile('untitled.txt', 'test');
 
   // Create and rename the second file
   await page.menu.clickMenuItem('File>New>Text File');
-  await renameNotebook('untitled.txt', 'tst');
+  await renameFile('untitled.txt', 'tst');
 
   // Enable file filter and apply a filter for "tst"
   await page.evaluate(() =>
