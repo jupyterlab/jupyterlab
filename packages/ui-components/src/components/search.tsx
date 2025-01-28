@@ -173,26 +173,30 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 
   useEffect(() => {
     // If there is an initial search value, pass the parent the initial filter function for that value.
-    if (firstRender.current && props.initialQuery !== undefined) {
+    if (firstRender.current) {
       firstRender.current = false;
-      props.updateFilter(
-        updateFilterFunction(
-          props.initialQuery,
-          props.useFuzzyFilter,
-          props.caseSensitive
-        ),
-        props.initialQuery
-      );
-    } else if (!firstRender.current && inputRef.current) {
-      // If filter settings changed, update the filter
-      props.updateFilter(
-        updateFilterFunction(
-          inputRef.current.value,
-          props.useFuzzyFilter,
-          props.caseSensitive
-        ),
-        inputRef.current.value
-      );
+      if (props.initialQuery !== undefined) {
+        props.updateFilter(
+          updateFilterFunction(
+            props.initialQuery,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          props.initialQuery
+        );
+      }
+    } else {
+      if (inputRef.current) {
+        // If filter settings changed, update the filter
+        props.updateFilter(
+          updateFilterFunction(
+            inputRef.current.value,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          inputRef.current.value
+        );
+      }
     }
   }, [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]);
 
