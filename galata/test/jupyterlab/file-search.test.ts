@@ -143,18 +143,8 @@ test.describe('File search from selection', () => {
     // Verify the search input is populated correctly
     await expect(searchBox).toHaveValue(searchText);
 
-    // Move to the next match
-    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
-
-    // Wait for the highlighted match to appear
-    const highlightedMatches = page.locator('.cm-selectionBackground');
-    try {
-      await highlightedMatches.first().waitFor({ timeout: 1000 });
-    } catch (e) {
-      // We need the highglighted matches to appear, so we catch the error and log it instead of failing the test as the highlight is important for the snapshots
-      console.error('Error while waiting for highlighted matches:', e);
-    }
-    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
+    // Wait for search to complete
+    await page.locator('text=1/2').waitFor();
 
     // Take a screenshot to verify the search results
     const screenshot = await page.getByLabel('untitled.txt').screenshot();
