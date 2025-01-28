@@ -149,11 +149,11 @@ export const updateFilterFunction = (
       value = value.toLocaleLowerCase();
     }
     const i = item.indexOf(value);
-    if (i != 0) {
+    if (i === -1) {
       return null;
     }
     return {
-      indices: [...Array(value.length).keys()]
+      indices: [...Array(value.length).keys()].map(x => x + i)
     };
   };
 };
@@ -227,15 +227,10 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 class FilenameSearcherWidget extends ReactWidget {
   constructor(props: IFilterBoxProps) {
     super();
-    props?.filterSettingsChanged?.connect((_, args) => {
-      for (const key in args) {
-        this._updateProp(
-          key as keyof IFilterBoxProps,
-          args[key as keyof IFilterBoxProps]
-        );
-      }
-    }, this);
     this._filterBoxProps = { ...props };
+    props?.filterSettingsChanged?.connect((_, args) => {
+      this._updateProps(args);
+    }, this);
   }
 
   render(): JSX.Element {
@@ -245,11 +240,8 @@ class FilenameSearcherWidget extends ReactWidget {
   /**
    * Update a specific prop.
    */
-  private _updateProp<K extends keyof IFilterBoxProps>(
-    key: K,
-    value: IFilterBoxProps[K]
-  ): void {
-    this._filterBoxProps[key] = value;
+  private _updateProps(props: Partial<IFilterBoxProps>): void {
+    Object.assign(this._filterBoxProps, props);
     this.update();
   }
 
