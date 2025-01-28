@@ -198,11 +198,11 @@ test.describe('Debugger', () => {
         clip: { y: 110, x: 300, width: 300, height: 80 }
       })
     ).toMatchSnapshot('debugger_stop_on_raised_exception.png');
-    await page.click('jp-button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]'); // Pauses as the error is raised (try block)
     await page.debugger.waitForCallStack();
-    await page.click('jp-button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]'); // Pauses as the error is raised (catch block)
     await page.debugger.waitForCallStack();
-    await page.click('jp-button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]'); // Pauses again as the error is unhandled
     await page.notebook.waitForRun(0);
   });
 
