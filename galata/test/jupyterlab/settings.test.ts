@@ -461,11 +461,6 @@ test('Ensure that fuzzy filter works properly', async ({ page }) => {
     .locator('label:has-text("Filter on file name with a fuzzy search")')
     .click();
 
-  // Clear the filter input and apply a new filter for "test"
-  await page.locator('input[placeholder="Filter files by name"]').selectText();
-  await page.keyboard.press('Backspace');
-  await page.locator('input[placeholder="Filter files by name"]').fill('test');
-
   // Only one file should be visible
   await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
 });
