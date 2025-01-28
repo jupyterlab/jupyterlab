@@ -251,8 +251,6 @@ class FilenameSearcherWidget extends ReactWidget {
 /**
  * Function which returns a widget that hosts an input textbox to filter on file names.
  */
-export const FilenameSearcher = (
-  props: IFilterBoxProps
-): FilenameSearcherWidget => {
+export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
   return new FilenameSearcherWidget(props);
 };
