@@ -103,11 +103,12 @@ export class FileBrowser extends SidePanel {
           return filterFn(value.name.toLowerCase());
         });
       },
-      useFuzzyFilter: true,
+      useFuzzyFilter: this.model.useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: false,
       showIcon: false,
-      inputRef: this._fileFilterRef
+      inputRef: this._fileFilterRef,
+      filterSettingsChanged: this.model.filterSettingsChanged
     });
     searcher.addClass(FILTERBOX_CLASS);
 
