@@ -3151,6 +3151,9 @@ export namespace DirListing {
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<DirListing.IColumn['id'], number | null>
     ): void {
+      if (selected) {
+        node.classList.add(SELECTED_CLASS);
+      }
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
@@ -3165,14 +3168,18 @@ export namespace DirListing {
         fileSize: model.size
       });
 
+      const checkboxWrapper = DOMUtils.findElement(
+        node,
+        CHECKBOX_WRAPPER_CLASS
+      );
+      const checkbox = checkboxWrapper?.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement | undefined;
+
+      if (checkbox) checkbox.checked = selected ?? false;
+
       if (prevState === newState) return;
       this.lastRenderedState.set(node, newState);
-
-      if (selected) {
-        node.classList.add(SELECTED_CLASS);
-      } else {
-        node.classList.remove(SELECTED_CLASS);
-      }
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -3183,10 +3190,6 @@ export namespace DirListing {
       let fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS) as
         | HTMLElement
         | undefined;
-      const checkboxWrapper = DOMUtils.findElement(
-        node,
-        CHECKBOX_WRAPPER_CLASS
-      );
 
       const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
@@ -3276,9 +3279,6 @@ export namespace DirListing {
       }
 
       // Adds an aria-label to the checkbox element.
-      const checkbox = checkboxWrapper?.querySelector(
-        'input[type="checkbox"]'
-      ) as HTMLInputElement | undefined;
 
       if (checkbox) {
         let ariaLabel: string;
