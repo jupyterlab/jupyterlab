@@ -2864,6 +2864,7 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
+    private lastRenderedState = new WeakMap<HTMLElement, string>();
     /**
      * Create the DOM node for a dir listing.
      */
@@ -3150,15 +3151,28 @@ export namespace DirListing {
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<DirListing.IColumn['id'], number | null>
     ): void {
-      if (selected) {
-        node.classList.add(SELECTED_CLASS);
-      }
-
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
+
+      const prevState = this.lastRenderedState.get(node);
+      const newState = JSON.stringify({
+        name: model.name,
+        selected,
+        lastModified: model.last_modified,
+        fileSize: model.size
+      });
+
+      if (prevState === newState) return;
+      this.lastRenderedState.set(node, newState);
+
+      if (selected) {
+        node.classList.add(SELECTED_CLASS);
+      } else {
+        node.classList.remove(SELECTED_CLASS);
+      }
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -3199,12 +3213,14 @@ export namespace DirListing {
       }
 
       // render the file item's icon
-      LabIcon.resolveElement({
-        icon,
-        iconClass: classes(iconClass, 'jp-Icon'),
-        container: iconContainer,
-        className: ITEM_ICON_CLASS,
-        stylesheet: 'listing'
+      requestAnimationFrame(() => {
+        LabIcon.resolveElement({
+          icon,
+          iconClass: classes(iconClass, 'jp-Icon'),
+          container: iconContainer,
+          className: ITEM_ICON_CLASS,
+          stylesheet: 'listing'
+        });
       });
 
       let hoverText = trans.__('Name: %1', model.name);
