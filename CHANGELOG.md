@@ -393,6 +393,40 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.5
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.4...f8d4b0a1d283b8e70a1fc4be1a6dddb243845c3f))
+
+### Bugs fixed
+
+- Fix scrolling and selection restoration on undo/redo [#17158](https://github.com/jupyterlab/jupyterlab/pull/17158) ([@krassowski](https://github.com/krassowski))
+- Fix windowing crash due to out-of-bounds access [#17238](https://github.com/jupyterlab/jupyterlab/pull/17238) ([@krassowski](https://github.com/krassowski))
+- Increase color contrast of operators in code editor [#17173](https://github.com/jupyterlab/jupyterlab/pull/17173) ([@hxrshxz](https://github.com/hxrshxz))
+- Fix disabling Fuzzy Filtering in the File Browser [#17214](https://github.com/jupyterlab/jupyterlab/pull/17214) ([@Darshan808](https://github.com/Darshan808))
+- Fix display of tooltip/title for terminal and kernel sessions statusbar item [#17220](https://github.com/jupyterlab/jupyterlab/pull/17220) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix for inconsistent tab closure in "Close All Tabs" operation [#17203](https://github.com/jupyterlab/jupyterlab/pull/17203) ([@itsmevichu](https://github.com/itsmevichu))
+- Fix emission of `lastCell` from notebook run actions [#17156](https://github.com/jupyterlab/jupyterlab/pull/17156) ([@pawel99k](https://github.com/pawel99k))
+- Fix "running" prompt state with server-side execution [#17195](https://github.com/jupyterlab/jupyterlab/pull/17195) ([@krassowski](https://github.com/krassowski))
+- Improve contrast for 'Add' button in Keyboard Shortcuts UI in both dark and light theme [#17153](https://github.com/jupyterlab/jupyterlab/pull/17153) ([@hxrshxz](https://github.com/hxrshxz))
+- Ensure context menu closes when clicking outside it in the minimap [#17128](https://github.com/jupyterlab/jupyterlab/pull/17128) ([@peytondmurray](https://github.com/peytondmurray))
+- Fix sanitizer call in ToC if html data is array of strings [#17114](https://github.com/jupyterlab/jupyterlab/pull/17114) ([@martenrichter](https://github.com/martenrichter))
+- Use bare string `proxies` parameter for `httpx`\<0.28 [#17113](https://github.com/jupyterlab/jupyterlab/pull/17113) ([@AmberArr](https://github.com/AmberArr))
+- Add missing `bind(this)` to `NotebookAdapter`'s `isReady` function [#17109](https://github.com/jupyterlab/jupyterlab/pull/17109) ([@martenrichter](https://github.com/martenrichter))
+
+### Documentation improvements
+
+- Document named attributes sanitization [#17178](https://github.com/jupyterlab/jupyterlab/pull/17178) ([@hxrshxz](https://github.com/hxrshxz))
+- Fix jupyverse installation instructions [#17137](https://github.com/jupyterlab/jupyterlab/pull/17137) ([@SamuelMarks](https://github.com/SamuelMarks))
+- Use Zulip for instant messaging [#17031](https://github.com/jupyterlab/jupyterlab/pull/17031) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-12-18&to=2025-01-29&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2024-12-18..2025-01-29&type=Issues) | [@andreytaboola](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandreytaboola+updated%3A2024-12-18..2025-01-29&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-12-18..2025-01-29&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-12-18..2025-01-29&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2024-12-18..2025-01-29&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-12-18..2025-01-29&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2024-12-18..2025-01-29&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-12-18..2025-01-29&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-12-18..2025-01-29&type=Issues) | [@hxrshxz](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahxrshxz+updated%3A2024-12-18..2025-01-29&type=Issues) | [@ianthomas23](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aianthomas23+updated%3A2024-12-18..2025-01-29&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-12-18..2025-01-29&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-12-18..2025-01-29&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-12-18..2025-01-29&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-12-18..2025-01-29&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-12-18..2025-01-29&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-12-18..2025-01-29&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2024-12-18..2025-01-29&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.3.4
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.3...541b913d80679e1315a4d0843e1dfb6ac32ab16f))
@@ -414,8 +448,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-12-10&to=2024-12-18&type=c))
 
 [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-12-10..2024-12-18&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2024-12-10..2024-12-18&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-12-10..2024-12-18&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-12-10..2024-12-18&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-12-10..2024-12-18&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-12-10..2024-12-18&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-12-10..2024-12-18&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.3.3
 
