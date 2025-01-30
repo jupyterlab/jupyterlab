@@ -16,8 +16,10 @@ import {
   RunningSessions,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { IDisposable } from '@lumino/disposable';
 import { Title, Widget } from '@lumino/widgets';
 import { KeyboardEvent } from 'react';
 
@@ -139,39 +141,70 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   description: 'Add the running sessions and terminals status bar item.',
   autoStart: true,
   requires: [IStatusBar, ITranslator],
+  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    translator: ITranslator
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
   ) => {
-    const item = new RunningSessions({
-      onClick: () => app.shell.activateById('jp-running-sessions'),
-      onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
-        if (
-          event.key === 'Enter' ||
-          event.key === 'Spacebar' ||
-          event.key === ' '
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          app.shell.activateById('jp-running-sessions');
+    const createStatusItem = () => {
+      const item = new RunningSessions({
+        onClick: () => app.shell.activateById('jp-running-sessions'),
+        onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
+          if (
+            event.key === 'Enter' ||
+            event.key === 'Spacebar' ||
+            event.key === ' '
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+            app.shell.activateById('jp-running-sessions');
+          }
+        },
+        serviceManager: app.serviceManager,
+        translator
+      });
+
+      item.model.sessions = Array.from(
+        app.serviceManager.sessions.running()
+      ).length;
+      item.model.terminals = Array.from(
+        app.serviceManager.terminals.running()
+      ).length;
+
+      return item;
+    };
+
+    const registerItem = () => {
+      const item = createStatusItem();
+      return statusBar.registerStatusItem(runningSessionsStatus.id, {
+        item,
+        align: 'left',
+        rank: 0
+      });
+    };
+
+    if (settingRegistry) {
+      let disposable: IDisposable;
+      const onSettingsUpdated = (
+        settings: ISettingRegistry.ISettings
+      ): void => {
+        const showStatusBarItem = settings.get('showStatusBarItem')
+          .composite as boolean;
+
+        disposable?.dispose();
+        if (showStatusBarItem) {
+          disposable = registerItem();
         }
-      },
-      serviceManager: app.serviceManager,
-      translator
-    });
+      };
 
-    item.model.sessions = Array.from(
-      app.serviceManager.sessions.running()
-    ).length;
-    item.model.terminals = Array.from(
-      app.serviceManager.terminals.running()
-    ).length;
-
-    statusBar.registerStatusItem(runningSessionsStatus.id, {
-      item,
-      align: 'left',
-      rank: 0
-    });
+      void settingRegistry.load(runningSessionsStatus.id).then(settings => {
+        onSettingsUpdated(settings);
+        settings.changed.connect(onSettingsUpdated);
+      });
+    } else {
+      registerItem();
+    }
   }
 };
