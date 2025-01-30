@@ -50,9 +50,7 @@ function RunningSessionsComponent(
           <TextItem source={props.terminals} />
           <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
         </GroupItem>
-      ) : (
-        <div></div>
-      )}
+      ) : null}
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.sessions} />
         <kernelIcon.react verticalAlign="middle" stylesheet="statusBar" />
