@@ -441,7 +441,7 @@ export class Dialog<T> extends Widget {
         if (activeEl instanceof HTMLButtonElement) {
           index = this._buttonNodes.indexOf(activeEl);
           this.resolve(index !== -1 ? index : 0);
-        } else if (!(activeEl instanceof HTMLTextAreaElement) || !activeEl) {
+        } else if (!(activeEl instanceof HTMLTextAreaElement)) {
           this.resolve(index !== undefined ? index : 0);
         }
         break;
