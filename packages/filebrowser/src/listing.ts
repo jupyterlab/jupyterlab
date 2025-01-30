@@ -2864,7 +2864,6 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    private lastRenderedState = new WeakMap<HTMLElement, string>();
     /**
      * Create the DOM node for a dir listing.
      */
@@ -3160,11 +3159,14 @@ export namespace DirListing {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
 
-      const prevState = this.lastRenderedState.get(node);
+      const prevState = this._lastRenderedState.get(node);
       const newState = JSON.stringify({
         name: model.name,
         selected,
         lastModified: model.last_modified,
+        modifiedStyle,
+        hiddenColumns,
+        columnsSizes,
         fileSize: model.size
       });
 
@@ -3179,7 +3181,7 @@ export namespace DirListing {
       if (checkbox) checkbox.checked = selected ?? false;
 
       if (prevState === newState) return;
-      this.lastRenderedState.set(node, newState);
+      this._lastRenderedState.set(node, newState);
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -3484,6 +3486,8 @@ export namespace DirListing {
       HTMLElement,
       { date: string; style: Time.HumanStyle }
     >();
+
+    private _lastRenderedState = new WeakMap<HTMLElement, string>();
   }
 
   /**
