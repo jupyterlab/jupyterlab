@@ -184,6 +184,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       await waitForDialog();
       await framePromise();
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       let counter = 0;
       const listing = node.getElementsByClassName('jp-DirListing-content')[0];
@@ -246,6 +247,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       await waitForDialog();
       await framePromise();
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       let counter = 0;
       const listing = node.getElementsByClassName('jp-DirListing-content')[0];
@@ -329,6 +331,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       await waitForDialog();
       await framePromise();
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       let counter = 0;
       const listing = node.getElementsByClassName('jp-DirListing-content')[0];
