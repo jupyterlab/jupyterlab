@@ -436,13 +436,15 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined = this._defaultButton;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl);
-          this.resolve(index !== -1 ? index : 0);
+          const index = this._buttonNodes.indexOf(activeEl);
+          if (index !== -1) {
+            this.resolve(index);
+          }
         } else if (!(activeEl instanceof HTMLTextAreaElement)) {
-          this.resolve(index !== undefined ? index : 0);
+          const index = this._defaultButton;
+          this.resolve(index);
         }
         break;
       }
