@@ -157,3 +157,6 @@ untitled*.txt
 
 # pixi environments
 .pixi
+
+# ReadTheDocs
+_readthedocs
