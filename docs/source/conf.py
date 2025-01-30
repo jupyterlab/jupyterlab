@@ -25,14 +25,17 @@
 
 import json
 import os
+import re
 import shutil
+import sys
 import time
 from collections import ChainMap
-from functools import partial
 from pathlib import Path
 from subprocess import check_call
 
 HERE = Path(__file__).parent.resolve()
+
+RTD_VERSION = os.environ.get("READTHEDOCS_VERSION")
 
 # -- General configuration ------------------------------------------------
 
@@ -287,7 +290,7 @@ html_theme_options = {
         "json_url": "/".join(
             ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
         ),
-        "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
+        "version_match": RTD_VERSION or "latest",
     },
 }
 
@@ -401,6 +404,42 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
+def try_to_build_binder_preview(app, exception):
+    try:
+        build_binder_preview(app.builder.outdir)
+    except Exception as err:
+        sys.stderr.write(f"Failed to build wheel: {err}")
+
+
+def build_binder_preview(out_dir: Path):
+    root = HERE.parent.parent
+    dist = root / "dist"
+    static_dist = out_dir / "dist"
+    env_yaml = static_dist / "environment.yml"
+    env = dict(os.environ)
+    env.update(GROUP="release_test")
+    check_call(["bash", "scripts/ci_script.sh"], cwd=str(root), env=env)  # noqa S603
+    shutil.copytree(dist, static_dist)
+    wheels = sorted(dist.glob("*.whl"))
+    url = (
+        f"https://jupyterlab--{RTD_VERSION}.org.readthedocs.build/en/"
+        f"{RTD_VERSION}/_static/dist/{wheels[0].name}"
+    )
+    env_yaml.write_text(
+        f"""
+        channels:
+            - conda-forge
+            - nodefaults
+        dependencies:
+            - python 3.12.*
+            - pip
+            - pip:
+                - jupyterlab @ {url}
+        """,
+        encoding="utf-8",
+    )
+
+
 def setup(app):
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
@@ -413,15 +452,14 @@ def setup(app):
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
 
-    def clean_code_files(tmp_files, app, exception):
+    def clean_code_files(app, exception):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))
-        except Exception:  # noqa S110
+            for f in tmp_files:
+                f.unlink()
+        except Exception:  # noqa: S110
             pass
-
-        for f in tmp_files:
-            f.unlink()
 
     src_dir = Path(app.srcdir)
     document_commands_list(src_dir)
@@ -434,4 +472,6 @@ def setup(app):
         src_dir / TOKENS_LIST_DOC,
     )
 
-    app.connect("build-finished", partial(clean_code_files, tmp_files))
+    app.connect("build-finished", clean_code_files)
+    if RTD_VERSION and re.match(r"\d+", RTD_VERSION):
+        app.connect("build-finished", try_to_build_binder_preview)
