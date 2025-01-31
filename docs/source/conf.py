@@ -31,7 +31,7 @@ import sys
 import time
 from collections import ChainMap
 from pathlib import Path
-from subprocess import check_call
+from subprocess import call, check_call
 
 HERE = Path(__file__).parent.resolve()
 
@@ -413,29 +413,40 @@ def try_to_build_binder_preview(app, exception):
 
 def build_binder_preview(out_dir: Path):
     root = HERE.parent.parent
+    # pre-commit goes crazy
+    hooks = root / ".git/hooks"
+    shutil.rmtree(hooks, ignore_errors=True)
+    scripts = [
+        ["node", "buildutils/lib/local-repository.js", "start"],
+        ["jlpm", "publish:js", "--yes"],
+        ["jlpm", "prepare:python-release"],
+        ["node", "buildutils/lib/local-repository.js", "stop"],
+    ]
+    for args in scripts:
+        call(args, cwd=str(root))  # noqa S603
     dist = root / "dist"
-    static_dist = out_dir / "dist"
+    static_dist = out_dir / "_static/dist"
     env_yaml = static_dist / "environment.yml"
-    env = dict(os.environ)
-    env.update(GROUP="release_test")
-    check_call(["bash", "scripts/ci_script.sh"], cwd=str(root), env=env)  # noqa S603
     shutil.copytree(dist, static_dist)
-    wheels = sorted(dist.glob("*.whl"))
-    url = (
-        f"https://jupyterlab--{RTD_VERSION}.org.readthedocs.build/en/"
+    wheels = sorted(static_dist.glob("*.whl"))
+    spec = (
+        f"jupyterlab @ https://jupyterlab--{RTD_VERSION}.org.readthedocs.build/en/"
         f"{RTD_VERSION}/_static/dist/{wheels[0].name}"
     )
     env_yaml.write_text(
-        f"""
-        channels:
-            - conda-forge
-            - nodefaults
-        dependencies:
-            - python 3.12.*
-            - pip
-            - pip:
-                - jupyterlab @ {url}
-        """,
+        "\n".join(
+            [
+                "channels:",
+                "  - conda-forge",
+                "  - nodefaults",
+                "dependencies:",
+                "  - python 3.12.*",
+                "  - pip",
+                "  - pip:",
+                f"    - {spec}",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
 
