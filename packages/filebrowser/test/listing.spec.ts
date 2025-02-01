@@ -139,11 +139,9 @@ describe('filebrowser/listing', () => {
         Widget.attach(dirListing, document.body);
         dirListing.handleEvent(event);
         await signalToPromise(dirListing.allUploaded);
-        await new Promise(resolve => setTimeout(resolve, 200));
         const topLevel = getItemTitles(dirListing);
         expect(topLevel).toStrictEqual(['test-dir']);
         await dirListing.model.cd('test-dir');
-        await new Promise(resolve => setTimeout(resolve, 200));
         const testDir = getItemTitles(dirListing);
         expect(testDir).toEqual(
           expect.arrayContaining(['empty-dir', 'file.txt', 'code.py'])
@@ -576,7 +574,6 @@ describe('filebrowser/listing', () => {
           const checkbox = dirListing.renderer.getCheckboxNode!(
             itemNode
           ) as HTMLInputElement;
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkbox.checked).toBe(false);
           const nameNode = dirListing.renderer.getNameNode!(
             itemNode
@@ -586,7 +583,6 @@ describe('filebrowser/listing', () => {
           );
           dirListing.selectNext();
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkbox.checked).toBe(true);
           expect(checkbox.getAttribute('aria-label')).toBe(
             ariaDeselectFile(nameNode.textContent)
@@ -603,7 +599,6 @@ describe('filebrowser/listing', () => {
           ) as HTMLElement;
           dirListing.selectNext();
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkbox.checked).toBe(true);
           expect(checkbox.getAttribute('aria-label')).toBe(
             ariaDeselectFile(nameNode.textContent)
@@ -611,7 +606,6 @@ describe('filebrowser/listing', () => {
           // Selecting the next item unselects the first.
           dirListing.selectNext();
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkbox.checked).toBe(false);
           expect(checkbox.getAttribute('aria-label')).toBe(
             ariaSelectFile(nameNode.textContent)
@@ -666,7 +660,6 @@ describe('filebrowser/listing', () => {
           const nameNodes = itemNodes.map(node =>
             dirListing.renderer.getNameNode!(node)
           ) as HTMLElement[];
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkboxes[0].checked).toBe(false);
           expect(checkboxes[1].checked).toBe(false);
           expect(checkboxes[0].getAttribute('aria-label')).toBe(
@@ -678,7 +671,6 @@ describe('filebrowser/listing', () => {
           dirListing.selectNext();
           dirListing.selectNext(true); // true = keep existing selection
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkboxes[0].checked).toBe(true);
           expect(checkboxes[1].checked).toBe(true);
           expect(checkboxes[0].getAttribute('aria-label')).toBe(
@@ -718,7 +710,6 @@ describe('filebrowser/listing', () => {
           const waitForUpdate = signalToPromise(dirListing.updated);
           await dirListing.selectItemByName(item.value.name);
           await waitForUpdate;
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(checkbox.checked).toBe(true);
           expect(dirListing.isSelected(item.value.name)).toBe(true);
           const waitForUpdate2 = signalToPromise(dirListing.updated);
@@ -728,7 +719,6 @@ describe('filebrowser/listing', () => {
             button: 2
           });
           await waitForUpdate2;
-          await new Promise(resolve => setTimeout(resolve, 200));
           // Item is still selected and checkbox is still checked after
           // right-click.
           expect(dirListing.isSelected(item.value.name)).toBe(true);
@@ -897,7 +887,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -913,7 +902,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',
@@ -932,10 +920,8 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           dirListing.setNotebooksFirstSorting(true);
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -953,7 +939,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',
@@ -972,7 +957,6 @@ describe('filebrowser/listing', () => {
             key: 'last_modified'
           });
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -984,7 +968,6 @@ describe('filebrowser/listing', () => {
 
           dirListing.setNotebooksFirstSorting(true);
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -996,7 +979,6 @@ describe('filebrowser/listing', () => {
 
           dirListing.setNotebooksFirstSorting(false);
           await signalToPromise(dirListing.updated);
-          await new Promise(resolve => setTimeout(resolve, 200));
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',

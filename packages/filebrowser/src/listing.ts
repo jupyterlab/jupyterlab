@@ -41,7 +41,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { Widget } from '@lumino/widgets';
 import { FilterFileBrowserModel } from './model';
-import { Debouncer } from '@lumino/polling';
 
 /**
  * The class name added to DirListing widget.
@@ -971,19 +970,16 @@ export class DirListing extends Widget {
         );
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
-      const debounceUpdateItemNodes = new Debouncer(() => {
-        this.renderer.updateItemNode(
-          node,
-          item,
-          ft,
-          this.translator,
-          this._hiddenColumns,
-          this.selection[item.path],
-          this._modifiedStyle,
-          this._columnSizes
-        );
-      }, 200);
-      debounceUpdateItemNodes.invoke();
+      this.renderer.updateItemNode(
+        node,
+        item,
+        ft,
+        this.translator,
+        this._hiddenColumns,
+        this.selection[item.path],
+        this._modifiedStyle,
+        this._columnSizes
+      );
       if (
         this.selection[item.path] &&
         this._isCut &&
