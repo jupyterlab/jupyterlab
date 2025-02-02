@@ -268,6 +268,8 @@
   padding: 0;
   list-style-type: none;
   overflow: auto;
+  contain: layout style;
+  content-visibility: auto;
   background-color: var(--jp-layout-color1);
   overflow-x: hidden;
 }
