@@ -17,6 +17,8 @@ import {
 } from '@jupyterlab/workspaces';
 import { commandsPlugin } from './commands';
 import { workspacesSidebar } from './sidebar';
+import { WorkspaceSelectorWidget } from './top_indicator';
+import { IWindowResolver } from '@jupyterlab/apputils';
 
 /**
  * The extension populating sidebar with workspaces list.
@@ -47,12 +49,40 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The extension providing workspace indicator at topbar
+ */
+const workspacesIndicator: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/workspaces-extension:indicator',
+  description: 'Adds a worspace indicator and selector element at top',
+  requires: [IWorkspacesModel, IWorkspaceCommands, IWindowResolver],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    model: IWorkspacesModel,
+    commands: IWorkspaceCommands,
+    resolver: IWindowResolver
+  ) => {
+    const openWorkspace = (workspace: string) => {
+      app.commands.execute(commands.open, { workspace: workspace });
+    };
+    const widget = new WorkspaceSelectorWidget({
+      currentWorkspace: resolver.name,
+      identifiers: model.identifiers,
+      openWorkspace: openWorkspace,
+      model: model
+    });
+    app.shell.add(widget, 'top', { rank: 1000 });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   workspacesModel,
   commandsPlugin,
   workspacesSidebar,
-  workspacesMenu
+  workspacesMenu,
+  workspacesIndicator
 ];
 export default plugins;

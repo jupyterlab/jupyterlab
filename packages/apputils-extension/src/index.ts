@@ -372,20 +372,15 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
+    workspace =
+      workspace.length > 15 ? workspace.slice(0, 12).concat(`…`) : workspace;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
-
-    if (workspace.startsWith('auto-')) {
-      document.title = `${currentFile} (${workspace}${
-        count > 1 ? ` : ${count}` : ``
-      }) - ${name}`;
-    } else {
-      document.title = `${currentFile}${
-        count > 1 ? ` (${count})` : ``
-      } - ${name}`;
-    }
+    document.title = `${currentFile}${
+      count > 1 ? ` (${count})` : ``
+    } - ${workspace}`;
   }
 }
 
