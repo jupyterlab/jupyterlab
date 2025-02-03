@@ -726,6 +726,13 @@ async function activateConsole(
       label: trans.__(`Prompt to ${position}`),
       icon: iconMap[position]
     });
+
+    if (palette) {
+      palette.addItem({
+        command,
+        category
+      });
+    }
   });
 
   /**
