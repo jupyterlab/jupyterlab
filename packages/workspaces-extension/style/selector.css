@@ -11,7 +11,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-WorkspaceSelectorHeader {
+.jp-WorkspaceSelector-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,11 +24,11 @@
   color: var(--jp-ui-font-color1);
 }
 
-.jp-WorkspaceSelectorHeader:hover {
+.jp-WorkspaceSelector-header:hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-WorkspaceSelectorDropdown {
+.jp-WorkspaceSelector-dropdown {
   position: absolute;
   padding: 2px 4px;
   top: 100%;
@@ -42,13 +42,13 @@
   z-index: 1000;
 }
 
-.jp-WorkspaceSelectorSearch {
+.jp-WorkspaceSelector-search {
   display: flex;
   padding: 2px 4px;
   background: var(--jp-layout-color2);
 }
 
-.jp-WorkspaceSelectorInput {
+.jp-WorkspaceSelector-input {
   flex: 1;
   width: 110px;
   margin-left: 8px;
@@ -58,7 +58,7 @@
   color: var(--jp-ui-font-color1);
 }
 
-.jp-WorkspaceSelectorList {
+.jp-WorkspaceSelector-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -66,7 +66,7 @@
   overflow-y: auto;
 }
 
-.jp-WorkspaceSelectorItem {
+.jp-WorkspaceSelector-item {
   display: grid;
   align-items: center;
   grid-template-columns: 1fr 5fr;
@@ -74,7 +74,7 @@
   color: var(--jp-ui-font-color1);
 }
 
-.jp-WorkspaceSelectorItem:hover {
+.jp-WorkspaceSelector-item:hover {
   background: var(--jp-layout-color2);
 }
 
@@ -83,13 +83,13 @@
   color: var(--jp-ui-inverse-font-color1);
 }
 
-.jp-WorkspaceSelectorSearchIcon {
+.jp-WorkspaceSelector-searchIcon {
   display: flex;
   align-items: center;
   color: var(--jp-ui-font-color2);
 }
 
-.jp-WorkspaceSelectorCaret {
+.jp-WorkspaceSelector-caret {
   font-size: 0.8em;
   margin-left: 8px;
 }

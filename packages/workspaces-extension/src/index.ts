@@ -19,6 +19,8 @@ import { commandsPlugin } from './commands';
 import { workspacesSidebar } from './sidebar';
 import { WorkspaceSelectorWidget } from './top_indicator';
 import { IWindowResolver } from '@jupyterlab/apputils';
+import { ITranslator } from '@jupyterlab/translation';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The extension populating sidebar with workspaces list.
@@ -48,30 +50,65 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
   }
 };
 
+//Plugin id for workspaces indicator plugin
+const WORKSPACE_INDICATOR_PLUGIN_ID =
+  '@jupyterlab/workspaces-extension:indicator';
+//Command id for toggling workspace indicator
+const WORKSPACE_INDICATOR_COMMAND_ID = 'workspace-indicator:toggle';
+
 /**
  * The extension providing workspace indicator at topbar
  */
 const workspacesIndicator: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/workspaces-extension:indicator',
-  description: 'Adds a worspace indicator and selector element at top',
-  requires: [IWorkspacesModel, IWorkspaceCommands, IWindowResolver],
+  id: WORKSPACE_INDICATOR_PLUGIN_ID,
+  description: 'Adds a workspace indicator element at topbar',
+  requires: [
+    IWorkspacesModel,
+    IWorkspaceCommands,
+    IWindowResolver,
+    ITranslator,
+    ISettingRegistry
+  ],
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     model: IWorkspacesModel,
     commands: IWorkspaceCommands,
-    resolver: IWindowResolver
+    resolver: IWindowResolver,
+    translator: ITranslator,
+    registry: ISettingRegistry
   ) => {
+    const trans = translator.load('jupyterlab');
     const openWorkspace = (workspace: string) => {
       app.commands.execute(commands.open, { workspace: workspace });
     };
-    const widget = new WorkspaceSelectorWidget({
+    const workspaceSelector = new WorkspaceSelectorWidget({
       currentWorkspace: resolver.name,
       identifiers: model.identifiers,
       openWorkspace: openWorkspace,
-      model: model
+      model: model,
+      translator: translator
     });
-    app.shell.add(widget, 'top', { rank: 1000 });
+    const isToggled = await registry.get(
+      WORKSPACE_INDICATOR_PLUGIN_ID,
+      'toggled'
+    );
+    workspaceSelector.setHidden(!isToggled.composite as boolean);
+    app.shell.add(workspaceSelector, 'top', { rank: 1000 });
+    app.commands.addCommand(WORKSPACE_INDICATOR_COMMAND_ID, {
+      label: trans.__('Show Workspace Indicator'),
+      isToggled: () => workspaceSelector.isVisible,
+      execute: () => {
+        workspaceSelector.setHidden(workspaceSelector.isVisible);
+        if (registry) {
+          void registry.set(
+            WORKSPACE_INDICATOR_PLUGIN_ID,
+            'toggled',
+            workspaceSelector.isVisible
+          );
+        }
+      }
+    });
   }
 };
 

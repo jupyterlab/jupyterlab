@@ -378,9 +378,9 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
-    document.title = `${currentFile}${
-      count > 1 ? ` (${count})` : ``
-    } - ${workspace}`;
+    document.title = `${currentFile}${count > 1 ? ` (${count})` : ``} - ${
+      workspace === 'default' ? name : workspace
+    }`;
   }
 }
 

@@ -233,17 +233,19 @@ test.describe('Workspace', () => {
     page
   }) => {
     await page.goto();
-    const workspaceSelector = page.locator('.jp-WorkspaceSelectorHeader');
-    //Not visible when custom workspaces aren't created
-    await expect(workspaceSelector).toHaveCount(0);
+    const workspaceSelector = page.locator('.jp-WorkspaceSelector-header');
+    //Not visible by default
+    expect(await workspaceSelector.isVisible()).toBe(false);
 
     //Open custom workspace
     await page.goto('workspaces/foo');
-    await expect(workspaceSelector).toHaveCount(1);
+    await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+    expect(await workspaceSelector.isVisible()).toBe(true);
 
     await workspaceSelector.click();
-    await page.locator('.jp-WorkspaceSelectorItem:has-text("default")').click();
-    await expect(workspaceSelector).toHaveCount(1);
+    await page
+      .locator('.jp-WorkspaceSelector-item:has-text("default")')
+      .click();
 
     const url = page.url();
     expect(url).toContain('/workspaces/default');

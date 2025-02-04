@@ -9,25 +9,33 @@ import {
   LabIcon,
   ReactWidget
 } from '@jupyterlab/ui-components';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { searchIcon } from '@jupyterlab/ui-components';
 import { IWorkspacesModel } from '@jupyterlab/workspaces';
+import { ITranslator } from '@jupyterlab/translation';
 
 interface IWorkspaceSelectorProps {
   currentWorkspace: string;
   identifiers: string[];
   openWorkspace: (workspace: string) => void;
-  model?: IWorkspacesModel;
+  translator: ITranslator;
+}
+
+interface IWorkspaceSelectorWidgetProps extends IWorkspaceSelectorProps {
+  model: IWorkspacesModel;
 }
 
 const WorkspaceSelector: React.FC<IWorkspaceSelectorProps> = ({
   currentWorkspace,
   identifiers,
-  openWorkspace
+  openWorkspace,
+  translator
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownId = useId();
+  const trans = translator.load('jupyterlab');
 
   const filteredIdentifiers = identifiers.filter(identifier =>
     identifier.toLowerCase().includes(searchQuery.toLowerCase())
@@ -50,41 +58,48 @@ const WorkspaceSelector: React.FC<IWorkspaceSelectorProps> = ({
   return (
     <div className="jp-WorkspaceSelector" ref={dropdownRef}>
       <button
-        className="jp-WorkspaceSelectorHeader"
+        className="jp-WorkspaceSelector-header"
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
+        aria-controls={dropdownId}
       >
-        <span className="jp-WorkspaceSelectorCurrent">
+        <span className="jp-WorkspaceSelector-current">
           {currentWorkspace.length > 12
             ? `${currentWorkspace.slice(0, 12)}...`
             : currentWorkspace}
         </span>
-        <span className="jp-WorkspaceSelectorCaret">
+        <span className="jp-WorkspaceSelector-caret">
           {isExpanded ? '▲' : '▼'}
         </span>
       </button>
 
       {isExpanded && (
-        <div className="jp-WorkspaceSelectorDropdown">
-          <div className="jp-WorkspaceSelectorSearch">
-            <div className="jp-WorkspaceSelectorSearchIcon">
+        <div className="jp-WorkspaceSelector-dropdown" id={dropdownId}>
+          <div className="jp-WorkspaceSelector-search">
+            <div className="jp-WorkspaceSelector-searchIcon">
               <LabIcon.resolveReact icon={searchIcon} />
             </div>
             <input
               type="text"
-              className="jp-WorkspaceSelectorInput"
-              placeholder="Search"
+              className="jp-WorkspaceSelector-input"
+              placeholder={trans.__('Search workspace')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               autoFocus
+              aria-autocomplete="list"
+              role="combobox"
             />
           </div>
 
-          <ul className="jp-WorkspaceSelectorList">
+          <ul
+            className="jp-WorkspaceSelector-list"
+            role="listbox"
+            aria-label={trans.__('Workspace')}
+          >
             {filteredIdentifiers.map(identifier => (
               <li
                 key={identifier}
-                className="jp-WorkspaceSelectorItem"
+                className="jp-WorkspaceSelector-item"
                 onClick={() => {
                   if (identifier === currentWorkspace) return;
                   openWorkspace(identifier);
@@ -110,36 +125,32 @@ const WorkspaceSelector: React.FC<IWorkspaceSelectorProps> = ({
  * A Widget for Workspace Selector at topbar
  */
 export class WorkspaceSelectorWidget extends ReactWidget {
-  private currentWorkspace: string;
-  private identifiers: string[];
-  private openWorkspace: (workspace: string) => void;
-
-  constructor(props: IWorkspaceSelectorProps) {
+  constructor(props: IWorkspaceSelectorWidgetProps) {
     super();
     this.id = 'jp-workspace-top-indicator';
-    this.addClass('jp-react-widget');
-    this.identifiers = props.identifiers;
-    this.openWorkspace = props.openWorkspace;
-    this.currentWorkspace = props.currentWorkspace;
-    props.model?.refreshed.connect(() => {
-      this.identifiers = props.model?.identifiers!;
+    this._identifiers = props.identifiers;
+    this._openWorkspace = props.openWorkspace;
+    this._currentWorkspace = props.currentWorkspace;
+    this._translator = props.translator;
+    props.model.refreshed.connect(() => {
+      this._identifiers = props.model.identifiers!;
       this.update();
     });
   }
 
   render(): JSX.Element {
-    const validWorkspaces = this.identifiers.filter(
-      id => !id.startsWith('auto-') && id !== 'default'
-    );
-
-    return validWorkspaces.length > 0 ? (
+    return (
       <WorkspaceSelector
-        currentWorkspace={this.currentWorkspace}
-        identifiers={this.identifiers}
-        openWorkspace={this.openWorkspace}
+        currentWorkspace={this._currentWorkspace}
+        identifiers={this._identifiers}
+        openWorkspace={this._openWorkspace}
+        translator={this._translator}
       />
-    ) : (
-      <></>
     );
   }
+
+  private _currentWorkspace: string;
+  private _identifiers: string[];
+  private _openWorkspace: (workspace: string) => void;
+  private _translator: ITranslator;
 }
