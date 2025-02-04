@@ -228,6 +228,25 @@ test.describe('Workspace', () => {
     await expect(page.locator(`[role="main"] >> text=${mdFile}`)).toBeVisible();
     await expect(page.locator(`[role="main"] >> text=${nbFile}`)).toBeVisible();
   });
+
+  test('should display workspace indicator and switch workspaces', async ({
+    page
+  }) => {
+    await page.goto();
+    const workspaceSelector = page.locator('.jp-WorkspaceSelectorHeader');
+    //Not visible on default workspace
+    await expect(workspaceSelector).toHaveCount(0);
+
+    //Open custom workspace
+    await page.goto('workspaces/foo');
+    await expect(workspaceSelector).toHaveCount(1);
+
+    await workspaceSelector.click();
+    await page.locator('.jp-WorkspaceSelectorItem:has-text("default")').click();
+
+    const url = page.url();
+    expect(url).toContain('/workspaces/default');
+  });
 });
 
 test.describe('Workspace in doc mode', () => {

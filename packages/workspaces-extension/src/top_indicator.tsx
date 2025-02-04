@@ -123,12 +123,16 @@ export class WorkspaceSelectorWidget extends ReactWidget {
   }
 
   render(): JSX.Element {
-    return (
+    return this.currentWorkspace &&
+      !this.currentWorkspace.startsWith('auto-') &&
+      this.currentWorkspace !== 'default' ? (
       <WorkspaceSelector
         currentWorkspace={this.currentWorkspace}
         identifiers={this.identifiers}
         openWorkspace={this.openWorkspace}
       />
+    ) : (
+      <></>
     );
   }
 }
