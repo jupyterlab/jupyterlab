@@ -123,9 +123,11 @@ export class WorkspaceSelectorWidget extends ReactWidget {
   }
 
   render(): JSX.Element {
-    return this.currentWorkspace &&
-      !this.currentWorkspace.startsWith('auto-') &&
-      this.currentWorkspace !== 'default' ? (
+    const validWorkspaces = this.identifiers.filter(
+      id => !id.startsWith('auto-') && id !== 'default'
+    );
+
+    return validWorkspaces.length > 0 ? (
       <WorkspaceSelector
         currentWorkspace={this.currentWorkspace}
         identifiers={this.identifiers}

@@ -234,7 +234,7 @@ test.describe('Workspace', () => {
   }) => {
     await page.goto();
     const workspaceSelector = page.locator('.jp-WorkspaceSelectorHeader');
-    //Not visible on default workspace
+    //Not visible when custom workspaces aren't created
     await expect(workspaceSelector).toHaveCount(0);
 
     //Open custom workspace
@@ -243,6 +243,7 @@ test.describe('Workspace', () => {
 
     await workspaceSelector.click();
     await page.locator('.jp-WorkspaceSelectorItem:has-text("default")').click();
+    await expect(workspaceSelector).toHaveCount(1);
 
     const url = page.url();
     expect(url).toContain('/workspaces/default');
