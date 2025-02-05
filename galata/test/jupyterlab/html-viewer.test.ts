@@ -21,6 +21,7 @@ test.describe('HTML Viewer', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.getByRole('listitem', { name: fileName }).dblclick();
+    await page.waitForSelector('iframe[src^="blob:"]', { timeout: 5000 });
   });
 
   test('should notify links are blocked for untrusted file', async ({

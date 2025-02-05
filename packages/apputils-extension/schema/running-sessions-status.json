@@ -1,0 +1,14 @@
+{
+  "title": "Running Terminals and Kernels",
+  "description": "Running Terminals and Kernels settings",
+  "additionalProperties": false,
+  "properties": {
+    "showStatusBarItem": {
+      "type": "boolean",
+      "title": "Show the status bar item",
+      "description": "Whether to show the running terminals and kernels item in the status bar",
+      "default": true
+    }
+  },
+  "type": "object"
+}
