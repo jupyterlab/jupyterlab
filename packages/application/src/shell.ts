@@ -762,7 +762,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       );
       this._bottomPanel.node.setAttribute(
         'aria-label',
-        trans.__('bottom pannel')
+        trans.__('Bottom Panel')
       );
       this._dockPanel.node.setAttribute('aria-label', trans.__('main content'));
     }
