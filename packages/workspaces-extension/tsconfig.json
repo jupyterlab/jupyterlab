@@ -25,6 +25,9 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../statedb"
     },
     {
@@ -35,9 +38,6 @@
     },
     {
       "path": "../workspaces"
-    },
-    {
-      "path": "../settingregistry"
     }
   ]
 }
