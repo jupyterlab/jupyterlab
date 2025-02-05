@@ -121,7 +121,10 @@ export abstract class RenderedCommon
    */
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
 
-  keepExisting?: boolean = false;
+  /**
+   * Whether to Whether to keep the existing rendering by default.
+   */
+  readonly keepExisting?: boolean = false;
 
   /**
    * Set the URI fragment identifier.
@@ -420,6 +423,11 @@ export class RenderedSVG extends RenderedCommon {
  */
 export class RenderedText extends RenderedCommon {
   /**
+   * Keep existing node as `renderText` supports reuse of the existing nodes on streaming.
+   */
+  readonly keepExisting = true;
+
+  /**
    * Construct a new rendered text widget.
    *
    * @param options - The options for initializing the widget.
@@ -428,7 +436,6 @@ export class RenderedText extends RenderedCommon {
     super(options);
     this.addClass('jp-RenderedText');
   }
-  keepExisting = true;
 
   /**
    * Render a mime model.
@@ -448,11 +455,15 @@ export class RenderedText extends RenderedCommon {
 }
 
 export class RenderedError extends RenderedCommon {
+  /**
+   * Keep existing node as `renderError` supports reuse of the existing nodes on streaming.
+   */
+  readonly keepExisting = true;
+
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedText');
   }
-  keepExisting = true;
 
   render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderError({

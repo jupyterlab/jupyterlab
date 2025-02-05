@@ -995,7 +995,7 @@ function renderTextual(
       if (host.childNodes.length === 1 && host.childNodes[0] === pre) {
         // no-op
       } else {
-        replaceChangedNodes(host, pre);
+        Private.replaceChangedNodes(host, pre);
       }
     } else {
       // Persist nodes in cache by cloning them
@@ -1017,7 +1017,7 @@ function renderTextual(
         document.createTextNode(toBeAutoLinked)
       ]);
 
-      replaceChangedNodes(host, node);
+      Private.replaceChangedNodes(host, node);
     }
 
     // Continue unless:
@@ -1032,185 +1032,6 @@ function renderTextual(
   };
 
   Private.scheduleRendering(host, renderFrame);
-}
-
-interface ISelectionOffsets {
-  processedCharacters: number;
-  anchor: number | null;
-  focus: number | null;
-}
-
-function computeSelectionCharacterOffset(
-  root: Node,
-  selection: Selection
-): ISelectionOffsets {
-  let anchor: number | null = null;
-  let focus: number | null = null;
-  let offset = 0;
-  for (const node of [...root.childNodes]) {
-    if (node === selection.focusNode) {
-      focus = offset + selection.focusOffset;
-    }
-    if (node === selection.anchorNode) {
-      anchor = offset + selection.anchorOffset;
-    }
-    if (node.childNodes.length > 0) {
-      const result = computeSelectionCharacterOffset(node, selection);
-      if (result.anchor) {
-        anchor = offset + result.anchor;
-      }
-      if (result.focus) {
-        focus = offset + result.focus;
-      }
-      offset += result.processedCharacters;
-    } else {
-      offset += node.textContent!.length;
-    }
-    if (anchor && focus) {
-      break;
-    }
-  }
-  return {
-    processedCharacters: offset,
-    anchor,
-    focus
-  };
-}
-
-function findTextSelectionNode(
-  root: Node,
-  textOffset: number | null,
-  offset: number
-) {
-  if (textOffset !== null) {
-    for (const node of [...root.childNodes]) {
-      // As much as possible avoid calling `textContent` here as it will cause layout invalidation
-      const nodeEnd =
-        node instanceof Text
-          ? node.nodeValue!.length
-          : (node instanceof HTMLAnchorElement
-              ? node.childNodes[0].nodeValue?.length ?? node.textContent?.length
-              : node.textContent?.length) ?? 0;
-      if (textOffset > offset && textOffset < offset + nodeEnd) {
-        if (node instanceof Text) {
-          return { node, positionOffset: textOffset - offset };
-        } else {
-          return findTextSelectionNode(node, textOffset, offset);
-        }
-      } else {
-        offset += nodeEnd;
-      }
-    }
-  }
-  return {
-    node: null,
-    positionOffset: null
-  };
-}
-
-function selectByOffsets(
-  root: Node,
-  selection: Selection,
-  offsets: ISelectionOffsets
-) {
-  const { node: focusNode, positionOffset: focusOffset } =
-    findTextSelectionNode(root, offsets.focus, 0);
-  const { node: anchorNode, positionOffset: anchorOffset } =
-    findTextSelectionNode(root, offsets.anchor, 0);
-  if (
-    anchorNode &&
-    focusNode &&
-    anchorOffset !== null &&
-    focusOffset !== null
-  ) {
-    selection.setBaseAndExtent(
-      anchorNode,
-      anchorOffset,
-      focusNode,
-      focusOffset
-    );
-  }
-}
-
-function replaceChangedNodes(host: HTMLElement, node: HTMLPreElement) {
-  const result = checkChangedNodes(host, node);
-  const selection = window.getSelection();
-  const hasSelection = selection && selection.containsNode(host, true);
-  const selectionOffsets = hasSelection
-    ? computeSelectionCharacterOffset(host, selection)
-    : null;
-  const pre = result ? result.parent : node;
-  if (result) {
-    for (const element of result.toDelete) {
-      result.parent.removeChild(element);
-    }
-    result.parent.append(...result.toAppend);
-  } else {
-    host.replaceChildren(node);
-  }
-  // Restore selection - if there is a meaningful one.
-  if (selection && selectionOffsets) {
-    selectByOffsets(pre, selection, selectionOffsets);
-  }
-}
-
-/**
- * Find nodes in `node` which do not have the same content or type and thus need to be appended.
- */
-function checkChangedNodes(host: HTMLElement, node: HTMLPreElement) {
-  const oldPre = host.childNodes[0];
-  if (!oldPre) {
-    return;
-  }
-  if (!(oldPre instanceof HTMLPreElement)) {
-    return;
-  }
-  // this should be cheap as the new node is not in dom yet,. right?
-  node.normalize();
-  const newNodes = node.childNodes;
-  const oldNodes = oldPre.childNodes;
-
-  if (
-    // this could be generalized to appending a mix of text and non-text to a block of text too
-    // but for now handles the most common case of just streaming text
-    newNodes.length === 1 &&
-    newNodes[0] instanceof Text &&
-    [...oldNodes].every(n => n instanceof Text) &&
-    node.textContent!.startsWith(oldPre.textContent!)
-  ) {
-    const textNodeToAppend = document.createTextNode(
-      node.textContent!.slice(oldPre.textContent!.length)
-    );
-    return {
-      parent: oldPre,
-      toDelete: [],
-      toAppend: [textNodeToAppend]
-    };
-  }
-
-  let lastSharedNode: number = -1;
-  for (let i = 0; i < oldNodes.length; i++) {
-    const oldChild = oldNodes[i];
-    const newChild = newNodes[i];
-    if (
-      newChild &&
-      oldChild.nodeType === newChild.nodeType &&
-      oldChild.textContent === newChild.textContent
-    ) {
-      lastSharedNode = i;
-    } else {
-      break;
-    }
-  }
-
-  if (lastSharedNode === -1) {
-    return;
-  }
-  return {
-    parent: oldPre,
-    toDelete: [...oldNodes].slice(lastSharedNode),
-    toAppend: [...newNodes].slice(lastSharedNode)
-  };
 }
 
 function incrementalAutoLink(
@@ -1560,6 +1381,242 @@ namespace Private {
 
   export function hasNewRenderingRequest(host: HTMLElement) {
     return frameRequests.get(host);
+  }
+
+  /**
+   * Selection offset in character relative to a root node.
+   */
+  interface ISelectionOffsets {
+    /**
+     * Offset of the selection anchor end.
+     */
+    anchor: number | null;
+    /**
+     * Offset of the selection focus end.
+     */
+    focus: number | null;
+  }
+
+  /**
+   * Internal structure used for selection offset computation
+   */
+  interface ISelectionComputation extends ISelectionOffsets {
+    /**
+     * Number of characters already processed
+     * by the recursive DOM traversal algorithm.
+     */
+    processedCharacters: number;
+  }
+
+  /**
+   * Compute the position (anchor and focus) of the given selection
+   * as characters offsets relative to the `root` node.
+   *
+   * For example, given the selection encompassing `am` in the sentence
+   * `I am` we would expect to get anchor and focus with values 2 and 3
+   * (depending on the selection direction). These character offsets are
+   * stable, regardless of the number of DOM nodes encompassing the selection.
+   *
+   * This differs from the DOM-based selection representation used by browsers
+   * where the offsets mean either characters, or position of nodes (depending
+   * on parent node type), and are thus not suitable for retaining selection
+   * when content of the root node is replaced.
+   */
+  function computeSelectionCharacterOffset(
+    root: Node,
+    selection: Selection
+  ): ISelectionComputation {
+    let anchor: number | null = null;
+    let focus: number | null = null;
+    let offset = 0;
+    for (const node of [...root.childNodes]) {
+      if (node === selection.focusNode) {
+        focus = offset + selection.focusOffset;
+      }
+      if (node === selection.anchorNode) {
+        anchor = offset + selection.anchorOffset;
+      }
+      if (node.childNodes.length > 0) {
+        const result = computeSelectionCharacterOffset(node, selection);
+        if (result.anchor) {
+          anchor = offset + result.anchor;
+        }
+        if (result.focus) {
+          focus = offset + result.focus;
+        }
+        offset += result.processedCharacters;
+      } else {
+        offset += node.textContent!.length;
+      }
+      if (anchor && focus) {
+        break;
+      }
+    }
+    return {
+      processedCharacters: offset,
+      anchor,
+      focus
+    };
+  }
+
+  /**
+   * Finds a text node and offset within the given root node
+   * where the selection should be anchored to select exactly
+   * from n-th character given by `textOffset`.
+   */
+  function findTextSelectionNode(
+    root: Node,
+    textOffset: number | null,
+    offset: number = 0
+  ) {
+    if (textOffset !== null) {
+      for (const node of [...root.childNodes]) {
+        // As much as possible avoid calling `textContent` here as it is slower
+        const nodeEnd =
+          node instanceof Text
+            ? node.nodeValue!.length
+            : (node instanceof HTMLAnchorElement
+                ? node.childNodes[0].nodeValue?.length ??
+                  node.textContent?.length
+                : node.textContent?.length) ?? 0;
+        if (textOffset > offset && textOffset < offset + nodeEnd) {
+          if (node instanceof Text) {
+            return { node, positionOffset: textOffset - offset };
+          } else {
+            return findTextSelectionNode(node, textOffset, offset);
+          }
+        } else {
+          offset += nodeEnd;
+        }
+      }
+    }
+    return {
+      node: null,
+      positionOffset: null
+    };
+  }
+
+  /**
+   * Modify given `selection` object to span between the
+   * given selection offsets, within the given `root` node.
+   */
+  function selectByOffsets(
+    root: Node,
+    selection: Selection,
+    offsets: ISelectionOffsets
+  ) {
+    const { node: focusNode, positionOffset: focusOffset } =
+      findTextSelectionNode(root, offsets.focus, 0);
+    const { node: anchorNode, positionOffset: anchorOffset } =
+      findTextSelectionNode(root, offsets.anchor, 0);
+    if (
+      anchorNode &&
+      focusNode &&
+      anchorOffset !== null &&
+      focusOffset !== null
+    ) {
+      selection.setBaseAndExtent(
+        anchorNode,
+        anchorOffset,
+        focusNode,
+        focusOffset
+      );
+    }
+  }
+
+  /**
+   * Replace nodes in `target` using nodes from `source`, minimising DOM operations
+   * and preserving selection (mapped using character offsets) if any.
+   *
+   * In the worst-case scenario (when no optimizations can be applied),
+   * this is equivalent to `target.replaceChildren(source)`. However,
+   * if nodes of the same type and with identical content are found
+   * at the start of the `target` and `source` child list, these are
+   * reused, improving the performance for stream operations.
+   */
+  export function replaceChangedNodes(
+    target: HTMLElement,
+    source: HTMLPreElement
+  ) {
+    const result = checkChangedNodes(target, source);
+    const selection = window.getSelection();
+    const hasSelection = selection && selection.containsNode(target, true);
+    const selectionOffsets = hasSelection
+      ? computeSelectionCharacterOffset(target, selection)
+      : null;
+    const pre = result ? result.parent : source;
+    if (result) {
+      for (const element of result.toDelete) {
+        result.parent.removeChild(element);
+      }
+      result.parent.append(...result.toAppend);
+    } else {
+      target.replaceChildren(source);
+    }
+    // Restore selection - if there is a meaningful one.
+    if (selection && selectionOffsets) {
+      selectByOffsets(pre, selection, selectionOffsets);
+    }
+  }
+
+  /**
+   * Find nodes in `node` which do not have the same content or type and thus need to be appended.
+   */
+  function checkChangedNodes(host: HTMLElement, node: HTMLPreElement) {
+    const oldPre = host.childNodes[0];
+    if (!oldPre) {
+      return;
+    }
+    if (!(oldPre instanceof HTMLPreElement)) {
+      return;
+    }
+    // Normalization at this point should be cheap as the new node is not in the DOM yet.
+    node.normalize();
+    const newNodes = node.childNodes;
+    const oldNodes = oldPre.childNodes;
+
+    if (
+      // This could be generalized to appending a mix of text and non-text
+      // to a block of text too, but for now handles the most common case
+      // of just streaming text.
+      newNodes.length === 1 &&
+      newNodes[0] instanceof Text &&
+      [...oldNodes].every(n => n instanceof Text) &&
+      node.textContent!.startsWith(oldPre.textContent!)
+    ) {
+      const textNodeToAppend = document.createTextNode(
+        node.textContent!.slice(oldPre.textContent!.length)
+      );
+      return {
+        parent: oldPre,
+        toDelete: [],
+        toAppend: [textNodeToAppend]
+      };
+    }
+
+    let lastSharedNode: number = -1;
+    for (let i = 0; i < oldNodes.length; i++) {
+      const oldChild = oldNodes[i];
+      const newChild = newNodes[i];
+      if (
+        newChild &&
+        oldChild.nodeType === newChild.nodeType &&
+        oldChild.textContent === newChild.textContent
+      ) {
+        lastSharedNode = i;
+      } else {
+        break;
+      }
+    }
+
+    if (lastSharedNode === -1) {
+      return;
+    }
+    return {
+      parent: oldPre,
+      toDelete: [...oldNodes].slice(lastSharedNode),
+      toAppend: [...newNodes].slice(lastSharedNode)
+    };
   }
 
   /**
