@@ -935,7 +935,6 @@ function renderTextual(
     Private.beginRendering(host);
 
     if (fullPreTextContent === null) {
-      const ansiPrefixRe = '\x1b';
       const hasAnsiPrefix = source.includes(ansiPrefix);
 
       // Create the HTML content:
