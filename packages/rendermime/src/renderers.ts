@@ -809,6 +809,8 @@ function nativeSanitize(source: string): string {
   return el.innerHTML;
 }
 
+const ansiPrefix = '\x1b';
+
 /**
  * Render the textual representation into a host node.
  *
@@ -821,8 +823,7 @@ function renderTextual(
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
-  const ansiPrefixRe = /\x1b/; // eslint-disable-line no-control-regex
-  const hasAnsiPrefix = ansiPrefixRe.test(source);
+  const hasAnsiPrefix = source.includes(ansiPrefix);
 
   // Create the HTML content:
   // If no ANSI codes are present use a fast path for escaping.
