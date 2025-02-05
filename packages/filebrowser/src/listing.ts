@@ -970,7 +970,6 @@ export class DirListing extends Widget {
         );
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
-
       this.renderer.updateItemNode(
         node,
         item,
@@ -3153,12 +3152,35 @@ export namespace DirListing {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
       }
-
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
+
+      const prevState = this._lastRenderedState.get(node);
+      const newState = JSON.stringify({
+        name: model.name,
+        selected,
+        lastModified: model.last_modified,
+        modifiedStyle,
+        hiddenColumns,
+        columnsSizes,
+        fileSize: model.size
+      });
+
+      const checkboxWrapper = DOMUtils.findElement(
+        node,
+        CHECKBOX_WRAPPER_CLASS
+      );
+      const checkbox = checkboxWrapper?.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement | undefined;
+
+      if (checkbox) checkbox.checked = selected ?? false;
+
+      if (prevState === newState) return;
+      this._lastRenderedState.set(node, newState);
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -3169,10 +3191,6 @@ export namespace DirListing {
       let fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS) as
         | HTMLElement
         | undefined;
-      const checkboxWrapper = DOMUtils.findElement(
-        node,
-        CHECKBOX_WRAPPER_CLASS
-      );
 
       const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
@@ -3199,12 +3217,14 @@ export namespace DirListing {
       }
 
       // render the file item's icon
-      LabIcon.resolveElement({
-        icon,
-        iconClass: classes(iconClass, 'jp-Icon'),
-        container: iconContainer,
-        className: ITEM_ICON_CLASS,
-        stylesheet: 'listing'
+      requestAnimationFrame(() => {
+        LabIcon.resolveElement({
+          icon,
+          iconClass: classes(iconClass, 'jp-Icon'),
+          container: iconContainer,
+          className: ITEM_ICON_CLASS,
+          stylesheet: 'listing'
+        });
       });
 
       let hoverText = trans.__('Name: %1', model.name);
@@ -3260,9 +3280,6 @@ export namespace DirListing {
       }
 
       // Adds an aria-label to the checkbox element.
-      const checkbox = checkboxWrapper?.querySelector(
-        'input[type="checkbox"]'
-      ) as HTMLInputElement | undefined;
 
       if (checkbox) {
         let ariaLabel: string;
@@ -3468,6 +3485,8 @@ export namespace DirListing {
       HTMLElement,
       { date: string; style: Time.HumanStyle }
     >();
+
+    private _lastRenderedState = new WeakMap<HTMLElement, string>();
   }
 
   /**
