@@ -227,8 +227,7 @@ export class CellTagField {
               tag="span"
               height="18px"
               width="18px"
-              marginLeft="5px"
-              marginRight="-3px"
+              className={CELL_TAGS_HOLDER_CLASS}
             />
           </div>
         </div>
