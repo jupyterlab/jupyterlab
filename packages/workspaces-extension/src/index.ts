@@ -79,8 +79,8 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
     registry: ISettingRegistry
   ) => {
     const trans = translator.load('jupyterlab');
-    const openWorkspace = (workspace: string) => {
-      app.commands.execute(commands.open, { workspace: workspace });
+    const openWorkspace = async (workspace: string) => {
+      await app.commands.execute(commands.open, { workspace: workspace });
     };
     const workspaceSelector = new WorkspaceSelectorWidget({
       currentWorkspace: resolver.name,
