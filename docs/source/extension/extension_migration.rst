@@ -43,6 +43,27 @@ The **icons in use** are in the ``ui-components/style/icons/debugger`` folder, w
    * - ``import { viewBreakpointIcon } from '@jupyterlab/debugger/lib/icons';``
      - ``import { viewBreakpointIcon } from '@jupyterlab/ui-components';``
 
+TypeScript update
+^^^^^^^^^^^^^^^^^
+
+As a follow-up to the update to TypeScript 5.2, the ``tsconfig.json`` configuration of the ``@jupyterlab/buildutils`` package changed
+the ``module`` option from ``commonjs`` to ``Node16``:
+
+.. code:: diff
+
+   index 7095bede4bd5..8c5bff0d45d8 100644
+   --- a/buildutils/tsconfig.json
+   +++ b/buildutils/tsconfig.json
+   @@ -3,7 +3,7 @@
+     "compilerOptions": {
+       "outDir": "lib",
+       "rootDir": "src",
+   -   "module": "commonjs",
+   +   "module": "Node16",
+       "moduleResolution": "node16"
+     },
+     "include": ["src/*"],
+
 JupyterLab 4.2 to 4.3
 ---------------------
 
