@@ -46,7 +46,7 @@
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "rimraf": "~5.0.5",
-    "typescript": "~5.2.2"
+    "typescript": "~5.4.5"
   },
   "publishConfig": {
     "access": "public"
