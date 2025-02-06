@@ -51,7 +51,7 @@
 .jp-WorkspaceSelector-input {
   flex: 1;
   width: 110px;
-  margin-left: 8px;
+  margin-left: 2px;
   border: none;
   outline: none;
   background: transparent;
@@ -76,11 +76,6 @@
 
 .jp-WorkspaceSelector-item:hover {
   background: var(--jp-layout-color2);
-}
-
-.jp-mod-active {
-  background: var(--jp-brand-color2);
-  color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-WorkspaceSelector-searchIcon {
