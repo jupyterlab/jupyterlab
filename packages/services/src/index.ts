@@ -7,6 +7,7 @@
 
 export * from './basemanager';
 export * from './config';
+export * from './connectionstatus';
 export * from './contents';
 export * from './event';
 export * from './kernel';
@@ -16,6 +17,7 @@ export * from './serverconnection';
 export * from './session';
 export * from './setting';
 export * from './terminal';
+export * from './tokens';
 export * from './user';
 export * from './workspace';
 export * from './nbconvert';

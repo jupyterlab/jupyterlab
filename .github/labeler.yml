@@ -355,6 +355,8 @@ pkg:services:
   - any-glob-to-any-file:
     - packages/services/**/*
     - packages/services/*
+    - packages/services-extension/**/*
+    - packages/services-extension/*
 
 pkg:settingeditor:
 - changed-files:

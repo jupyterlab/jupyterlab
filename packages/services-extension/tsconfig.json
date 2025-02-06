@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../services"
+    }
+  ]
+}
