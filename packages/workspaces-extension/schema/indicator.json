@@ -1,0 +1,35 @@
+{
+  "title": "Workspace Indicator",
+  "description": "Workspace Indicator Settings",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-appearance",
+              "items": [
+                {
+                  "command": "workspace-indicator:toggle",
+                  "rank": 16
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "toggled": {
+      "type": "boolean",
+      "title": "Workspace Indicator Visibility",
+      "description": "Whether to show workspace indicator or not",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
