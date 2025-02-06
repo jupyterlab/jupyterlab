@@ -652,11 +652,49 @@ namespace Private {
    * A comparator function that sorts allowedExtensions orgs to the top.
    */
   export function comparator(a: IEntry, b: IEntry): number {
-    if (a.name === b.name) {
-      return 0;
-    } else {
-      return a.name > b.name ? 1 : -1;
+    // Define priority organizations
+    const priorityOrgs = ['jupyterlab', 'jupyter', 'jupyterlab-contrib'];
+
+    // Helper function to extract organization from package URLs
+    function extractOrg(entry: IEntry): string {
+      const urls = [
+        entry.homepage_url,
+        entry.package_manager_url,
+        entry.repository_url
+      ];
+
+      for (const url of urls) {
+        if (url) {
+          const match = url.match(
+            /(?:github\.com|pypi\.org)\/(?:project\/|)([^/]+)/i
+          );
+          if (match) {
+            return match[1].toLowerCase();
+          }
+        }
+      }
+
+      return '';
     }
+
+    // First, check organization priority
+    const orgA = extractOrg(a);
+    const orgB = extractOrg(b);
+
+    const priorityA = priorityOrgs.indexOf(orgA);
+    const priorityB = priorityOrgs.indexOf(orgB);
+
+    // Prioritize known organizations
+    if (priorityA !== -1 && priorityB === -1) return -1;
+    if (priorityA === -1 && priorityB !== -1) return 1;
+    if (priorityA !== -1 && priorityB !== -1) {
+      // If both are priority orgs, sort by their priority index
+      if (priorityA !== priorityB) return priorityA - priorityB;
+    }
+
+    // If organizations are the same or not in priority list,
+    // sort by name as a fallback
+    return a.name.localeCompare(b.name);
   }
 
   const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;
