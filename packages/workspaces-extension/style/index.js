@@ -9,4 +9,5 @@ import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/filebrowser/style/index.js';
 import '@jupyterlab/running/style/index.js';
-import './selector.css';
+
+import './base.css';
