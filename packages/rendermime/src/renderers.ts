@@ -531,11 +531,29 @@ interface ILinker {
 }
 
 namespace ILinker {
+  // Matching regular expressions is slow; we can fast-reject
+  // a string if it does not start with `data:`, `www.`, or
+  // a valid schema. We define a valid schema as an alphanumeric
+  // sequence of length at least two and followed by `://`,
+  // e.g.`https://`. To fast-reject in long sequence of characters
+  // we need to impose an additional restriction on the length.
+  // As of 2025 the longest registered URI schemes are:
+  // - machineProvisioningProgressReporter - 35
+  // - microsoft.windows.camera.multipicker - 36
+  // See https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
+  // While technically any length is allowed, it is unlikely that any scheme
+  // longer than 40 characters would be of a general benefit to most users,
+  // and if one finds themselves with a use case which requires it, they are
+  // welcome to open a PR which allows to customize this restriction.
+  const maxAcceptedProtocolLength = 40;
+
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
   const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
   export const webLinkRegex = new RegExp(
-    '(?<path>(?:[a-zA-Z][a-zA-Z0-9+.-]{2,}:\\/\\/|data:|www\\.)[^\\s' +
+    '(?<path>(?:[a-zA-Z][a-zA-Z0-9+.-]{2,' +
+      maxAcceptedProtocolLength +
+      '}:\\/\\/|data:|www\\.)[^\\s' +
       controlCodes +
       '"]{2,}[^\\s' +
       controlCodes +
@@ -809,6 +827,8 @@ function nativeSanitize(source: string): string {
   return el.innerHTML;
 }
 
+const ansiPrefix = '\x1b';
+
 /**
  * Render the textual representation into a host node.
  *
@@ -821,8 +841,7 @@ function renderTextual(
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
-  const ansiPrefixRe = /\x1b/; // eslint-disable-line no-control-regex
-  const hasAnsiPrefix = ansiPrefixRe.test(source);
+  const hasAnsiPrefix = source.includes(ansiPrefix);
 
   // Create the HTML content:
   // If no ANSI codes are present use a fast path for escaping.

@@ -525,7 +525,7 @@ class ExtensionManager(PluginManager):
                     rules.extend(j.get("blocked_extensions", []))
         elif len(self.options.allowed_extensions_uris):
             self.log.info(
-                f"Fetching allowed extensions from { self.options.allowed_extensions_uris}"
+                f"Fetching allowed extensions from {self.options.allowed_extensions_uris}"
             )
             for allowed_extensions_uri in self.options.allowed_extensions_uris:
                 r = await client.fetch(
