@@ -43,39 +43,38 @@ The **icons in use** are in the ``ui-components/style/icons/debugger`` folder, w
    * - ``import { viewBreakpointIcon } from '@jupyterlab/debugger/lib/icons';``
      - ``import { viewBreakpointIcon } from '@jupyterlab/ui-components';``
 
-.. note::
+Support for Conditional Rendering in GroupItem
+-----------------------------------------------
 
-   **Support for Conditional Rendering in GroupItem (JupyterLab 4.4 Update)**
+As of JupyterLab 4.4, the ``GroupItem`` component now supports conditional
+rendering of elements. This improvement allows the component to gracefully handle ``null`` or
+``undefined`` children, eliminating the need for placeholder elements like ``<div></div>``.
 
-   As of JupyterLab 4.4, the ``GroupItem`` component now supports conditional
-   rendering of elements. This improvement allows the component to gracefully handle ``null`` or
-   ``undefined`` children, eliminating the need for placeholder elements like ``<div></div>``.
+**Recommended Update for Extension Authors:**
+Review your usage of ``GroupItem`` and replace any empty elements used as placeholders
+with ``null`` values. This change ensures cleaner and more maintainable code while leveraging
+the updated rendering logic.
 
-   **Recommended Update for Extension Authors:**
-   Review your usage of ``GroupItem`` and replace any empty elements used as placeholders
-   with ``null`` values. This change ensures cleaner and more maintainable code while leveraging
-   the updated rendering logic.
+**Example Update:**
 
-   **Example Update:**
+**Before:**
 
-   **Before:**
+.. code-block:: tsx
 
-   .. code-block:: tsx
+   <GroupItem spacing={8}>
+     {condition ? <SomeComponent /> : <div></div>}
+   </GroupItem>
 
-      <GroupItem spacing={8}>
-        {condition ? <SomeComponent /> : <div></div>}
-      </GroupItem>
+**After:**
 
-   **After:**
+.. code-block:: tsx
 
-   .. code-block:: tsx
+   <GroupItem spacing={8}>
+     {condition ? <SomeComponent /> : null}
+   </GroupItem>
 
-      <GroupItem spacing={8}>
-        {condition ? <SomeComponent /> : null}
-      </GroupItem>
-
-   This change improves both the rendering performance and the maintainability of extensions
-   using the ``GroupItem`` component.
+This change improves both the rendering performance and the maintainability of extensions
+using the ``GroupItem`` component.
 
 JupyterLab 4.2 to 4.3
 ---------------------
