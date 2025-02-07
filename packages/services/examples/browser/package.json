@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6",
+    "typescript": "~5.4.5",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
   }

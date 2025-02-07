@@ -724,8 +724,16 @@ async function activateConsole(
       },
       isEnabled: isEnabled,
       label: trans.__(`Prompt to ${position}`),
-      icon: iconMap[position]
+      icon: args => (args['isPalette'] ? undefined : iconMap[position])
     });
+
+    if (palette) {
+      palette.addItem({
+        command,
+        category,
+        args: { isPalette: true }
+      });
+    }
   });
 
   /**
