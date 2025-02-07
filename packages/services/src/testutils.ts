@@ -1,6 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+// We explicitly reference the jest typings since the jest.d.ts file shipped
+// with jest 26 masks the @types/jest typings
+
+/// <reference types="jest" preserve="true"/>
+
 import { PathExt } from '@jupyterlab/coreutils';
 import { PartialJSONObject, ReadonlyJSONObject, UUID } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
