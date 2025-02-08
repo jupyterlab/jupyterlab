@@ -53,7 +53,7 @@
     "@lumino/coreutils": "^2.2.0",
     "@lumino/disposable": "^2.1.3",
     "@lumino/signaling": "^2.1.3",
-    "@lumino/widgets": "^2.5.0",
+    "@lumino/widgets": "^2.6.0",
     "react": "^18.2.0"
   },
   "devDependencies": {

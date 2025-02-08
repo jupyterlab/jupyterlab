@@ -40,7 +40,7 @@
     "@jupyterlab/settingregistry": "^4.4.0-alpha.3",
     "@jupyterlab/translation": "^4.4.0-alpha.3",
     "@lumino/commands": "^2.3.1",
-    "@lumino/widgets": "^2.5.0"
+    "@lumino/widgets": "^2.6.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
