@@ -65,7 +65,7 @@
     "@types/glob": "^7.1.1",
     "@types/inquirer": "^9.0.3",
     "@types/micromatch": "^4.0.1",
-    "@types/node": "^20.11.27",
+    "@types/node": "~20.14.8",
     "@types/prettier": "~2.6.0",
     "rimraf": "~5.0.5"
   },

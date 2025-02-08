@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
-    "@types/node": "^20.11.27",
+    "@types/node": "~20.14.8",
     "rimraf": "~5.0.5",
     "typescript": "~5.6.3"
   },
