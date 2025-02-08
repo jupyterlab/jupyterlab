@@ -322,7 +322,10 @@ class PyPIExtensionManager(ExtensionManager):
             ]
 
             for url in urls_to_check:
-                if any(org in url for org in ["github.com/jupyter/", "jupyter.org"]):
+                if any(
+                    org in url
+                    for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
+                ):
                     priority = 1
                     break
                 elif "github.com/jupyterlab-contrib/" in url:
