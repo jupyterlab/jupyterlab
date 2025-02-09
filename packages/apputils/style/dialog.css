@@ -114,16 +114,17 @@ button.jp-Dialog-close-button {
 .jp-Dialog-footer {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   flex: 0 0 auto;
-  margin-left: -12px;
-  margin-right: -12px;
+  margin-left: 0px;
+  margin-right: 51px;
   padding: 12px;
 }
 
 .jp-Dialog-checkbox {
   padding-right: 5px;
+  display: none;
 }
 
 .jp-Dialog-spacer {
