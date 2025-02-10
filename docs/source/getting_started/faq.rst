@@ -16,6 +16,27 @@ General
    JupyterLab? <https://jupyterlab.readthedocs.io>`__
 -  :ref:`How can you report a bug or issue? <issue>`
 
+OS X Specific Issues
+--------------------
+
+Holding down buttons does not produce repeated key press events
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Recent version of OS X change the default behavior for holding down buttons: instead of giving a repeated key press, a Character Accents Popup occurs.
+For example, when in vim mode in the editor, holding down any of the navigation keys `h j k l` does not cause repeated movement as it normally does in a desktop terminal application.
+
+To change this behavior *globally* (including browsers like Safari, Firefox and Google Chrome) enter the following command into a terminal, then log out and back in:
+
+.. code-block:: bash
+
+    defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+To change this behavior back to standard use the following command, then log out and back in:
+
+.. code-block:: bash
+
+    defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true
+
 Usage
 -----
 
