@@ -79,3 +79,20 @@ Development
    For more discussion and potential alternative solutions, please see issues
    `#4623 <https://github.com/jupyterlab/jupyterlab/issues/4623>`__ and
    `#5789 <https://github.com/jupyterlab/jupyterlab/issues/5789>`__.
+
+
+Nightly releases
+----------------
+
+The JupyterLab project does not publish nightly releases to PyPI.
+
+However JupyterLab is built on CI for every commit on the ``main`` branch, and generates the wheel and source distributions as GitHub Action artifacts.
+These artifacts can be downloaded and installed locally.
+
+To download the JupyterLab wheels from the latest commits on ``main``:
+
+- Go to `Check Release GitHub Action page <https://github.com/jupyterlab/jupyterlab/actions/workflows/check-release.yml?query=branch%3Amain+is%3Asuccess>`__
+- Click on one of the workflow runs
+- Under the "Artifacts" section, click on ``jupyterlab-releaser-dist-<build-number>`` to download the archive
+- Locally, extract the archive
+- Install with ``python -m ./jupyterlab-x.y.z.whl``
