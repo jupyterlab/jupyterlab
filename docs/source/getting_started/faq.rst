@@ -95,7 +95,7 @@ To download the JupyterLab wheels from the latest commits on ``main``:
 - Click on one of the workflow runs
 - Under the "Artifacts" section, click on ``jupyterlab-releaser-dist-<build-number>`` to download the archive
 - Locally, extract the archive
-- Install with ``python -m ./jupyterlab-x.y.z.whl``
+- Install with ``python -m pip install ./jupyterlab-x.y.z.whl``
 
 .. note::
 
