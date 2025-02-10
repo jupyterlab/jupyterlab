@@ -50,10 +50,8 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
   }
 };
 
-//Plugin id for workspaces indicator plugin
 const WORKSPACE_INDICATOR_PLUGIN_ID =
   '@jupyterlab/workspaces-extension:indicator';
-//Command id for toggling workspace indicator
 const WORKSPACE_INDICATOR_COMMAND_ID = 'workspace-indicator:toggle';
 
 /**
@@ -89,24 +87,34 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
       model: model,
       translator: translator
     });
-    const isToggled = await registry.get(
-      WORKSPACE_INDICATOR_PLUGIN_ID,
-      'toggled'
-    );
-    workspaceSelector.setHidden(!isToggled.composite as boolean);
     app.shell.add(workspaceSelector, 'top', { rank: 1000 });
+
+    const loadSettings = registry.load(WORKSPACE_INDICATOR_PLUGIN_ID);
+    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+      const visible = settings.get('visible').composite as boolean;
+      workspaceSelector.setHidden(!visible);
+    };
+
+    Promise.all([loadSettings, app.restored])
+      .then(([settings]) => {
+        updateSettings(settings);
+        settings.changed.connect(settings => {
+          updateSettings(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.error(reason.message);
+      });
+
     app.commands.addCommand(WORKSPACE_INDICATOR_COMMAND_ID, {
       label: trans.__('Show Workspace Indicator'),
       isToggled: () => workspaceSelector.isVisible,
       execute: () => {
-        workspaceSelector.setHidden(workspaceSelector.isVisible);
-        if (registry) {
-          void registry.set(
-            WORKSPACE_INDICATOR_PLUGIN_ID,
-            'toggled',
-            workspaceSelector.isVisible
-          );
-        }
+        void registry.set(
+          WORKSPACE_INDICATOR_PLUGIN_ID,
+          'visible',
+          !workspaceSelector.isVisible
+        );
       }
     });
   }

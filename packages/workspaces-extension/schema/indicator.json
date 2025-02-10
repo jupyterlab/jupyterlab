@@ -23,7 +23,7 @@
     ]
   },
   "properties": {
-    "toggled": {
+    "visible": {
       "type": "boolean",
       "title": "Workspace Indicator Visibility",
       "description": "Whether to show workspace indicator or not",

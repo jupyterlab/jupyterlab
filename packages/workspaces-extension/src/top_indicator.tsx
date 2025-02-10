@@ -133,7 +133,7 @@ export class WorkspaceSelectorWidget extends ReactWidget {
     this._currentWorkspace = props.currentWorkspace;
     this._translator = props.translator;
     props.model.refreshed.connect(() => {
-      this._identifiers = props.model.identifiers!;
+      this._identifiers = props.model.identifiers;
       this.update();
     });
   }
