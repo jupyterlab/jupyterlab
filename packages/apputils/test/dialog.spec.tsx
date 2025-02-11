@@ -178,6 +178,50 @@ describe('@jupyterlab/apputils', () => {
           expect((await prompt).button.accept).toBe(true);
         });
 
+        it('should not accept on enter key within textarea', async () => {
+          class CustomDialogBody
+            extends ReactWidget
+            implements Dialog.IBodyWidget<ReactWidget>
+          {
+            constructor() {
+              super();
+              this.addClass('jp-Dialog-body');
+            }
+
+            render(): JSX.Element {
+              return (
+                <div>
+                  <textarea data-testid="dialog-textarea" />
+                </div>
+              );
+            }
+
+            getValue(): ReactWidget {
+              return this;
+            }
+          }
+
+          const body = new CustomDialogBody();
+          const dialog = new Dialog({ body });
+          const promptPromise = dialog.launch();
+
+          await waitForDialog();
+
+          const textarea = dialog.node.querySelector(
+            '[data-testid="dialog-textarea"]'
+          );
+          expect(textarea).not.toBeNull();
+
+          if (textarea) {
+            (textarea as HTMLTextAreaElement).focus();
+            simulate(textarea, 'keydown', { key: 'Enter', keyCode: 13 });
+          }
+
+          expect(dialog.isVisible).toBe(true);
+          dialog.dispose();
+          await promptPromise.catch(() => {});
+        });
+
         it('should resolve with currently focused button', async () => {
           const dialog = new TestDialog({
             buttons: [
@@ -192,12 +236,15 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
+
           // press right arrow twice (focusing on "third")
           simulate(dialog.node, 'keydown', { keyCode: 39 });
           simulate(dialog.node, 'keydown', { keyCode: 39 });
+
           // press enter
           simulate(dialog.node, 'keydown', { keyCode: 13 });
-          expect((await prompt).button.label).toBe('third');
+          const promptResult = await prompt;
+          expect(promptResult.button.label).toBe('third');
           dialog.dispose();
         });
 
