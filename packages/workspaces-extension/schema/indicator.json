@@ -1,6 +1,14 @@
 {
   "title": "Workspace Indicator",
   "description": "Workspace Indicator Settings",
+  "jupyter.lab.toolbars": {
+    "TopBar": [
+      {
+        "name": "workspaceIndicator",
+        "rank": 1000
+      }
+    ]
+  },
   "jupyter.lab.menus": {
     "main": [
       {

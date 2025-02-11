@@ -18,7 +18,7 @@ import {
 import { commandsPlugin } from './commands';
 import { workspacesSidebar } from './sidebar';
 import { WorkspaceSelectorWidget } from './top_indicator';
-import { IWindowResolver } from '@jupyterlab/apputils';
+import { IToolbarWidgetRegistry, IWindowResolver } from '@jupyterlab/apputils';
 import { ITranslator } from '@jupyterlab/translation';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
@@ -65,7 +65,8 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
     IWorkspaceCommands,
     IWindowResolver,
     ITranslator,
-    ISettingRegistry
+    ISettingRegistry,
+    IToolbarWidgetRegistry
   ],
   autoStart: true,
   activate: async (
@@ -74,7 +75,8 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
     commands: IWorkspaceCommands,
     resolver: IWindowResolver,
     translator: ITranslator,
-    registry: ISettingRegistry
+    registry: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry
   ) => {
     const trans = translator.load('jupyterlab');
     const openWorkspace = async (workspace: string) => {
@@ -87,7 +89,10 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
       model: model,
       translator: translator
     });
-    app.shell.add(workspaceSelector, 'top', { rank: 1000 });
+
+    toolbarRegistry.addFactory('TopBar', 'workspaceIndicator', () => {
+      return workspaceSelector;
+    });
 
     const loadSettings = registry.load(WORKSPACE_INDICATOR_PLUGIN_ID);
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
