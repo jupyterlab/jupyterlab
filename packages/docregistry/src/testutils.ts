@@ -4,7 +4,7 @@
 // We explicitly reference the jest typings since the jest.d.ts file shipped
 // with jest 26 masks the @types/jest typings
 
-/// <reference types="jest" />
+/// <reference types="jest" preserve="true"/>
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import {
