@@ -346,9 +346,9 @@ async function activateConsole(
           tooltip: trans.__('Change Console Prompt Position'),
           icon: dotsIcon,
           onClick: () => {
-            const left = button.node.getBoundingClientRect().left;
+            const right = button.node.getBoundingClientRect().right;
             const bottom = button.node.getBoundingClientRect().bottom;
-            promptMenu.open(left, bottom);
+            promptMenu.open(right, bottom, { horizontalAlignment: 'right' });
           }
         });
         return button;
