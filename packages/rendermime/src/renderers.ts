@@ -866,6 +866,7 @@ function renderTextual(
   let pre: HTMLPreElement;
 
   let isVisible = false;
+  isVisible = true;
 
   // We will use the observer to pause rendering if the element
   // is not visible; this is helpful when opening a notebook
@@ -886,6 +887,7 @@ function renderTextual(
     observer.observe(host);
   }
   let wasEverVisible = false;
+  wasEverVisible = true;
 
   const stopRendering = () => {
     // Remove the host from rendering queue
