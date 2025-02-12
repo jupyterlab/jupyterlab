@@ -214,6 +214,78 @@ See the `JupyterLab Light Theme <https://github.com/jupyterlab/jupyterlab/tree/m
 
 See the `TypeScript extension template <https://github.com/jupyterlab/extension-template>`__ (choosing ``theme`` as ``kind`` ) for a quick start to developing a theme plugin.
 
+Service Manager Plugins
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+   This is an advanced topic. If you are new to JupyterLab extensions, you can skip this section.
+
+The Service Manager is a core component of a JupyterLab application and the interface to the Jupyter Server REST API.
+Before JupyterLab 4.4.0, the Service Manager had to be created as a singleton object and passed when creating a JupyterLab application object.
+This was not convenient if some extensions needed to change the behavior of some of the core services provided by the Service Manager,
+as they would have to build a new JupyterLab application from scratch.
+
+.. versionadded:: 4.4
+  The Service Manager is now itself a plugin which can be provided by a third-party extension using the ``IServiceManager`` token.
+  Its underlying services (such as the kernel manager and the contents manager) are also now available as plugins.
+
+The Service Manager plugins can be provided by third-party extensions via the following tokens:
+
+* ``IConnectionStatus``: The connection status service.
+* ``IContentsManager``: The contents manager service, responsible for managing files and directories.
+* ``IDefaultDrive``: The default drive service, responsible for providing the default drive in which the contents manager operates.
+* ``IServerSettings``: The server settings service, defining a set of default server settings.
+* ``IEventManager``: The event manager service for emitting events that are broadcast by an event bus managed by Jupyter Server.
+* ``IKernelManager``: The kernel manager service.
+* ``IKernelSpecManager``: The kernel spec manager service.
+* ``INbConvertManager``: The nbconvert manager service, used for exports in various formats.
+* ``ISessionManager``: The session manager service.
+* ``ISettingManager``: The setting manager service, for managing user settings.
+* ``ITerminalManager``: The terminal manager service.
+* ``IUserManager``: The user manager service.
+* ``IWorkspaceManager``: The workspace manager service, to interact with the workspace API.
+
+The following example shows how you can provide a custom contents manager service, which logs the path of the requested content in the console:
+
+.. code-block:: typescript
+
+   import {
+     Contents,
+     ContentsManager,
+     IContentsManager,
+     ServiceManagerPlugin
+   } from '@jupyterlab/services';
+
+   class CustomContents extends ContentsManager {
+     async get(
+       path: string,
+       options?: Contents.IFetchOptions
+     ): Promise<Contents.IModel> {
+       console.log('CustomContents.get', path);
+       return super.get(path, options);
+     }
+   }
+
+   const plugin: ServiceManagerPlugin<IContentsManager> = {
+     id: 'my-extension:contents-manager',
+     autoStart: true,
+     provides: IContentsManager,
+     description: 'A JupyterLab extension providing a custom contents manager',
+     activate: (_: null): Contents.IManager => {
+       return new CustomContents();
+     }
+   };
+
+   export default plugin;
+
+
+.. warning::
+   Note the use of ``ServiceManagerPlugin`` to declare the plugin.
+   ``ServiceManagerPlugin`` is different from ``JupyterFrontEndPlugin`` in that it provides a service manager plugin, which will be
+   activated before the application is set. As a consequence, the first parameter of the ``activate`` function is ``null``.
+   ``ServiceManagerPlugin<T>`` is equivalent to ``IPlugin<null, T>`` where ``T`` is the service provided by the plugin.
+
+
 .. _source_extensions:
 
 Source Extensions

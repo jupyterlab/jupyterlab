@@ -1,5 +1,4 @@
 {
-  "@jupyterlab/application:IMimeDocumentTracker": "A widget tracker for documents rendered using a mime renderer extension. Use this if you want to list and interact with documents rendered by such extensions.",
   "@jupyterlab/application:ITreePathUpdater": "A service to update the tree path.",
   "@jupyterlab/application:ILayoutRestorer": "A service providing application layout restoration functionality. Use this to have your activities restored across page loads.",
   "@jupyterlab/application:IRouter": "The URL router used by the application. Use this to add custom URL-routing for your extension (e.g., to invoke a command if the user navigates to a sub-path).",
@@ -42,6 +41,7 @@
   "@jupyterlab/filebrowser:IFileBrowserFactory": "A factory object that creates file browsers.\n  Use this if you want to create your own file browser (e.g., for a custom storage backend),\n  or to interact with other file browsers that have been created by extensions.",
   "@jupyterlab/filebrowser:IDefaultFileBrowser": "A service for the default file browser.",
   "@jupyterlab/filebrowser:IFileBrowserCommands": "A token to ensure file browser commands are loaded.",
+  "@jupyterlab/fileeditor:IEditorWidgetFactory": "A factory for creating file editors.",
   "@jupyterlab/fileeditor:IEditorTracker": "A widget tracker for file editors.\n  Use this if you want to be able to iterate over and interact with file editors\n  created by the application.",
   "@jupyterlab/htmlviewer:IHTMLViewerTracker": "A widget tracker for rendered HTML documents.\n  Use this if you want to be able to iterate over and interact with HTML documents\n  viewed by the application.",
   "@jupyterlab/application:IConnectionLost": "A service for invoking the dialog shown\n  when JupyterLab has lost its connection to the server. Use this if, for some reason,\n  you want to bring up the \"connection lost\" dialog under new circumstances.",
@@ -69,6 +69,19 @@
   "@jupyterlab/rendermime:IRenderMimeRegistry": "A service for the rendermime registry for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a \"mime renderer extension\" rather than using this service directly.",
   "@jupyterlab/running:IRunningSessionManagers": "A service to add running session managers.",
   "@jupyterlab/running:IRunningSessionsSidebar": "A token allowing to modify the running sessions sidebar.",
+  "@jupyterlab/services:IContentsManager": "The contents manager token.",
+  "@jupyterlab/services:IDefaultDrive": "The default drive for the contents manager.",
+  "@jupyterlab/services:IEventManager": "The event manager token.",
+  "@jupyterlab/services:IKernelManager": "The kernel manager token.",
+  "@jupyterlab/services:IKernelSpecManager": "The kernel spec manager token.",
+  "@jupyterlab/services:INbConvertManager": "The nbconvert manager token.",
+  "@jupyterlab/services:ISessionManager": "The session manager token.",
+  "@jupyterlab/services:ISettingManager": "The setting manager token.",
+  "@jupyterlab/services:IServerSettings": "The server settings for the application.",
+  "@jupyterlab/services:IServiceManager": "The service manager for the application.",
+  "@jupyterlab/services:ITerminalManager": "The terminal manager token.",
+  "@jupyterlab/services:IUserManager": "The user manager token.",
+  "@jupyterlab/services:IWorkspaceManager": "The workspace manager token.",
   "@jupyterlab/settingeditor:ISettingEditorTracker": "A widget tracker for the interactive setting editor.\n  Use this if you want to be able to iterate over and interact with setting editors\n  created by the application.",
   "@jupyterlab/settingeditor:IJSONSettingEditorTracker": "A widget tracker for the JSON setting editor.\n  Use this if you want to be able to iterate over and interact with setting editors\n  created by the application.",
   "@jupyterlab/statusbar:IStatusBar": "A service for the status bar on the application. Use this if you want to add new status bar items.",
@@ -80,5 +93,6 @@
   "@jupyterlab/ui-components:ILabIconManager": "A service to register and request icons.",
   "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration.",
   "@jupyterlab/workspaces:IWorkspacesModel": "Provides a model for available workspaces.",
-  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands."
+  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands.",
+  "@jupyterlab/application:IMimeDocumentTracker": "A widget tracker for documents rendered using a mime renderer extension. Use this if you want to list and interact with documents rendered by such extensions."
 }

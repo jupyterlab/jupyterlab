@@ -250,6 +250,14 @@ if [[ $GROUP == usage ]]; then
     cat labextensions | grep -q "mock-extension"
     # build it again without a static-url to avoid causing errors
     jupyter labextension build extension
+
+    # Test with a service manager extension
+    python -m pip install -e service-manager-extension
+    jupyter labextension develop service-manager-extension --overwrite --debug
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-service-manager-extension.*enabled.*OK"
+    python -m jupyterlab.browser_check
+
     popd
 
     jupyter lab workspaces export > workspace.json --debug
