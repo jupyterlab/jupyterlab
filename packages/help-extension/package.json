@@ -47,12 +47,12 @@
     "@lumino/coreutils": "^2.2.0",
     "@lumino/signaling": "^2.1.3",
     "@lumino/virtualdom": "^2.0.2",
-    "@lumino/widgets": "^2.5.0",
+    "@lumino/widgets": "^2.6.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.4.5"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

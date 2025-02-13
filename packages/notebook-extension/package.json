@@ -72,13 +72,13 @@
     "@lumino/disposable": "^2.1.3",
     "@lumino/messaging": "^2.0.2",
     "@lumino/polling": "^2.1.3",
-    "@lumino/widgets": "^2.5.0",
+    "@lumino/widgets": "^2.6.0",
     "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.4.5"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"
