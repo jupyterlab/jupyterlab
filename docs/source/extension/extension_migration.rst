@@ -64,6 +64,39 @@ the ``module`` option from ``commonjs`` to ``Node16``:
      },
      "include": ["src/*"],
 
+Support for Conditional Rendering in GroupItem
+-----------------------------------------------
+
+As of JupyterLab 4.4, the ``GroupItem`` component now supports conditional
+rendering of elements. This improvement allows the component to gracefully handle ``null`` or
+``undefined`` children, eliminating the need for placeholder elements like ``<div></div>``.
+
+**Recommended Update for Extension Authors:**
+Review your usage of ``GroupItem`` and replace any empty elements used as placeholders
+with ``null`` values. This change ensures cleaner and more maintainable code while leveraging
+the updated rendering logic.
+
+**Example Update:**
+
+**Before:**
+
+.. code-block:: tsx
+
+   <GroupItem spacing={8}>
+     {condition ? <SomeComponent /> : <div></div>}
+   </GroupItem>
+
+**After:**
+
+.. code-block:: tsx
+
+   <GroupItem spacing={8}>
+     {condition ? <SomeComponent /> : null}
+   </GroupItem>
+
+This change improves both the rendering performance and the maintainability of extensions
+using the ``GroupItem`` component.
+
 JupyterLab 4.2 to 4.3
 ---------------------
 
