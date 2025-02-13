@@ -123,7 +123,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
   /**
    * A list of all errors encountered when registering plugins.
    *
-   * @deprecated This is unused and may be remove in a future version.
+   * @deprecated This is unused and may be removed in a future version.
    */
   readonly registerPluginErrors: Array<Error> = [];
 
@@ -168,7 +168,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    *
    * @param mod - The plugin module to register.
    *
-   * @deprecated This is unused and may be remove in a future version.
+   * @deprecated This is unused and may be removed in a future version.
    */
   registerPluginModule(mod: JupyterLab.IPluginModule): void {
     let data = mod.default;
@@ -193,7 +193,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    *
    * @param mods - The plugin modules to register.
    *
-   * @deprecated This is unused and may be remove in a future version.
+   * @deprecated This is unused and may be removed in a future version.
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
     mods.forEach(mod => {
