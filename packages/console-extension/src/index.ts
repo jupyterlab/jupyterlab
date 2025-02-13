@@ -12,15 +12,19 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
   ISanitizer,
   ISessionContext,
   ISessionContextDialogs,
+  IToolbarWidgetRegistry,
   Sanitizer,
   SessionContextDialogs,
+  setToolbar,
   showDialog,
+  Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -30,6 +34,7 @@ import {
 } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import {
+  CodeConsole,
   ConsolePanel,
   IConsoleCellExecutor,
   IConsoleTracker
@@ -41,9 +46,18 @@ import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  clearIcon,
   consoleIcon,
+  dockBottomIcon,
+  dockLeftIcon,
+  dockRightIcon,
+  dockTopIcon,
+  dotsIcon,
   IFormRendererRegistry,
   redoIcon,
+  refreshIcon,
+  runIcon,
+  ToolbarButton,
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
@@ -55,7 +69,7 @@ import {
   UUID
 } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout, Widget } from '@lumino/widgets';
+import { DockLayout, Menu, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 
@@ -127,7 +141,9 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ILabStatus,
     ISessionContextDialogs,
     IFormRendererRegistry,
-    ITranslator
+    ITranslator,
+    ISessionContextDialogs,
+    IToolbarWidgetRegistry
   ],
   activate: activateConsole,
   autoStart: true
@@ -266,7 +282,9 @@ async function activateConsole(
   status: ILabStatus | null,
   sessionDialogs_: ISessionContextDialogs | null,
   formRegistry: IFormRendererRegistry | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  sessionContextDialogs: ISessionContextDialogs | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): Promise<IConsoleTracker> {
   const translator = translator_ ?? nullTranslator;
   const trans = translator.load('jupyterlab');
@@ -275,6 +293,68 @@ async function activateConsole(
   const category = trans.__('Console');
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
+
+  const pluginId = '@jupyterlab/console-extension:tracker';
+  const promptCellPositions: CodeConsole.PromptCellPosition[] = [
+    'top',
+    'bottom',
+    'left',
+    'right'
+  ];
+
+  // Instantiate the toolbar factory for console panel at plugin activation time
+  // since the plugin defines toolbar items and "jupyter.lab.toolbars" is set to true.
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
+  if (toolbarRegistry) {
+    const factory = 'ConsolePanel';
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      factory,
+      pluginId,
+      translator
+    );
+
+    if (sessionContextDialogs) {
+      toolbarRegistry.addFactory<ConsolePanel>(factory, 'kernelName', panel =>
+        Toolbar.createKernelNameItem(
+          panel.sessionContext,
+          sessionContextDialogs,
+          translator
+        )
+      );
+    }
+
+    toolbarRegistry.addFactory<ConsolePanel>(factory, 'kernelStatus', panel => {
+      const sessionContext = panel.sessionContext;
+      // TODO: update use of deprecated APIs, without having to depend on @jupyterlab/notebook
+      const indicator = Toolbar.createKernelStatusItem(sessionContext);
+      return indicator;
+    });
+
+    const promptMenu = new Menu({ commands });
+    promptMenu.addClass('jp-CodeConsolePromptMenu');
+    promptCellPositions.forEach(position => {
+      promptMenu.addItem({ command: `console:prompt-to-${position}` });
+    });
+
+    toolbarRegistry.addFactory<ConsolePanel>(
+      factory,
+      'promptPosition',
+      panel => {
+        const button = new ToolbarButton({
+          tooltip: trans.__('Change Console Prompt Position'),
+          icon: dotsIcon,
+          onClick: () => {
+            const right = button.node.getBoundingClientRect().right;
+            const bottom = button.node.getBoundingClientRect().bottom;
+            promptMenu.open(right, bottom, { horizontalAlignment: 'right' });
+          }
+        });
+        return button;
+      }
+    );
+  }
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
@@ -395,6 +475,10 @@ async function activateConsole(
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
+    if (toolbarFactory) {
+      setToolbar(panel, toolbarFactory);
+    }
+
     const interactionMode: string = (
       await settingRegistry.get(
         '@jupyterlab/console-extension:tracker',
@@ -446,9 +530,13 @@ async function activateConsole(
     return panel;
   }
 
-  const pluginId = '@jupyterlab/console-extension:tracker';
+  let clearCellsOnExecute: boolean;
+  let clearCodeContentOnExecute: boolean;
+  let hideCodeInput: boolean;
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
+  let promptCellPosition: CodeConsole.PromptCellPosition;
+  let showBanner: boolean;
 
   /**
    * Update settings for one console or all consoles.
@@ -456,10 +544,23 @@ async function activateConsole(
    * @param panel Optional - single console to update.
    */
   async function updateSettings(panel?: ConsolePanel) {
+    clearCellsOnExecute = (
+      await settingRegistry.get(pluginId, 'clearCellsOnExecute')
+    ).composite as boolean;
+    clearCodeContentOnExecute = (
+      await settingRegistry.get(pluginId, 'clearCodeContentOnExecute')
+    ).composite as boolean;
+    hideCodeInput = (await settingRegistry.get(pluginId, 'hideCodeInput'))
+      .composite as boolean;
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     promptCellConfig = (await settingRegistry.get(pluginId, 'promptCellConfig'))
       .composite as JSONObject;
+    promptCellPosition = (
+      await settingRegistry.get(pluginId, 'promptCellPosition')
+    ).composite as CodeConsole.PromptCellPosition;
+    showBanner = (await settingRegistry.get(pluginId, 'showBanner'))
+      .composite as boolean;
 
     const setWidgetOptions = (widget: ConsolePanel) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
@@ -467,6 +568,14 @@ async function activateConsole(
       widget.console.editorConfig = promptCellConfig;
       // Update promptCell already on screen
       widget.console.promptCell?.editor?.setOptions(promptCellConfig);
+      // Set other config options
+      widget.console.setConfig({
+        clearCellsOnExecute,
+        clearCodeContentOnExecute,
+        hideCodeInput,
+        promptCellPosition,
+        showBanner
+      });
     };
 
     if (panel) {
@@ -595,6 +704,39 @@ async function activateConsole(
   }
 
   /**
+   * Create commands to change the position of the prompt cell.
+   */
+  const iconMap = {
+    top: dockTopIcon,
+    bottom: dockBottomIcon,
+    right: dockRightIcon,
+    left: dockLeftIcon
+  };
+  promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
+    const command = `console:prompt-to-${position}`;
+    commands.addCommand(command, {
+      execute: args => {
+        const current = getCurrent(args);
+        if (!current) {
+          return;
+        }
+        current.console.setConfig({ promptCellPosition: position });
+      },
+      isEnabled: isEnabled,
+      label: trans.__(`Prompt to ${position}`),
+      icon: args => (args['isPalette'] ? undefined : iconMap[position])
+    });
+
+    if (palette) {
+      palette.addItem({
+        command,
+        category,
+        args: { isPalette: true }
+      });
+    }
+  });
+
+  /**
    * Add undo command
    */
   commands.addCommand(CommandIDs.undo, {
@@ -664,6 +806,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
+    icon: args => (args.toolbar ? clearIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -676,6 +819,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.runUnforced, {
     label: trans.__('Run Cell (unforced)'),
+    icon: args => (args.toolbar ? runIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -688,6 +832,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.runForced, {
     label: trans.__('Run Cell (forced)'),
+    icon: args => (args.toolbar ? runIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -740,6 +885,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
+    icon: args => (args.toolbar ? refreshIcon : undefined),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {

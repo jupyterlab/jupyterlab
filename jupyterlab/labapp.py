@@ -497,10 +497,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"custom_css": True}},
         "Load custom CSS in template html files. Default is False",
     )
-    flags["subshell-console"] = (
-        {"LabApp": {"subshell_console": True}},
-        "Enable subshell console for kernels that support subshells.",
-    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -625,14 +621,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
     )
 
-    subshell_console = Bool(
-        False,
-        config=True,
-        help="""Enable subshell console for kernels that support subshells.
-        See https://github.com/jupyter/enhancement-proposals/pull/91
-        """,
-    )
-
     @default("app_dir")
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -748,7 +736,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
-        page_config["subshellConsole"] = self.subshell_console
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config["notebookVersion"] = json.dumps(jpserver_version_info)
