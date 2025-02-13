@@ -40,13 +40,13 @@
     "@lumino/coreutils": "^2.2.0",
     "@lumino/disposable": "^2.1.3",
     "@lumino/signaling": "^2.1.3",
-    "@lumino/widgets": "^2.5.0",
+    "@lumino/widgets": "^2.6.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "jest": "^29.2.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.4.5"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"
