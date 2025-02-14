@@ -146,12 +146,9 @@ test.describe('File search from selection', () => {
     // Wait for search to complete
     await page.locator('text=1/2').waitFor();
 
-    // Workaround selection not showing up initially (bug!) by selecting next match twice
+    // Workaround selection not showing up initially (bug!)
     await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
-    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
-    await page.locator('text=2/2').waitFor();
-    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
-    await page.locator('text=1/2').waitFor();
+    await page.locator('.jp-current-match').waitFor();
 
     // Take a screenshot to verify the search results
     const screenshot = await page.getByLabel('untitled.txt').screenshot();
