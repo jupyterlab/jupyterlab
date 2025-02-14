@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "test-hyphens-underscore"
-license = ""
+license = "BSD-3-Clause"
 version = "3.0.2"
 
 [tool.hatch.build.targets.wheel.shared-data]
