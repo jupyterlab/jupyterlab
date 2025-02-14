@@ -113,6 +113,48 @@ test.describe('File search from selection', () => {
     ).toHaveCount(2);
   });
 
+  test('search highlighting', async ({ page }) => {
+    const textToType = `True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins
+  True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins`;
+
+    await page.locator('[role="main"] .cm-content').selectText();
+    await page.keyboard.press('Backspace');
+    await page.locator('[role="main"] .cm-content').fill(textToType);
+
+    // Open the search bar with Ctrl + F
+    await page.keyboard.press('Control+f');
+
+    // Define the search text
+    const searchText = `True, False, def, assert # keywords
+  1, 0.1, 0x21 # numbers
+  'a', "b", "f", "c" # strings
+  bool, int, open, help # builtins`;
+
+    // Fill the search query into the search bar
+    const searchBox = page.getByPlaceholder('Find');
+    await searchBox.fill(searchText);
+
+    // Verify the search input is populated correctly
+    await expect(searchBox).toHaveValue(searchText);
+
+    // Wait for search to complete
+    await page.locator('text=1/2').waitFor();
+
+    // Workaround selection not showing up initially (bug!)
+    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
+    await page.locator('.jp-current-match').first().waitFor();
+
+    // Take a screenshot to verify the search results
+    const screenshot = await page.getByLabel('untitled.txt').screenshot();
+    expect(screenshot).toMatchSnapshot('search-results.png');
+  });
+
   test('should expand the selection to all occurrences', async ({ page }) => {
     // This could be improved as the following statement will double click
     // on the last line that will result in the last word being selected.
