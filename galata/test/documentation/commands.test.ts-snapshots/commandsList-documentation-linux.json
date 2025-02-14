@@ -408,6 +408,30 @@
     "shortcuts": []
   },
   {
+    "id": "console:prompt-to-bottom",
+    "label": "Prompt to bottom",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:prompt-to-left",
+    "label": "Prompt to left",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:prompt-to-right",
+    "label": "Prompt to right",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:prompt-to-top",
+    "label": "Prompt to top",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "console:redo",
     "label": "Redo",
     "caption": "",
@@ -1651,6 +1675,12 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:create-subshell-console",
+    "label": "New Subshell Console for Notebook",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:cut-cell",
     "label": "Cut Cell",
     "caption": "Cut this cell",
@@ -2246,6 +2276,18 @@
     ]
   },
   {
+    "id": "settingeditor:export",
+    "label": "Export Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "settingeditor:import",
+    "label": "Import Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "settingeditor:open",
     "label": "Settings Editor",
     "caption": "",
@@ -2272,12 +2314,6 @@
     "shortcuts": [
       "Ctrl S"
     ]
-  },
-  {
-    "id": "settingeditor:export",
-    "label": "Export User Settings",
-    "caption": "",
-    "shortcuts": []
   },
   {
     "id": "settingsmenu:open",

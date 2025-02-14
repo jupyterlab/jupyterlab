@@ -4,6 +4,7 @@
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
+  Cell,
   CodeCell,
   ICodeCellModel,
   MarkdownCell,
@@ -1110,6 +1111,26 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[2])).toBe(true);
+      });
+
+      it('should run the selected cells', async () => {
+        let emitted = 0;
+        let notebook: Notebook | null = null;
+        let lastCell: Cell | null = null;
+        NotebookActions.selectionExecuted.connect(async (_, args) => {
+          notebook = args.notebook;
+          lastCell = args.lastCell;
+          emitted += 1;
+        });
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[1], widget.widgets[2]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(emitted).toBe(1);
+        expect(notebook).toBeInstanceOf(Notebook);
+        expect(lastCell).toBeInstanceOf(Cell);
       });
     });
 
