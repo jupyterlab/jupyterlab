@@ -320,8 +320,15 @@ class PyPIExtensionManager(ExtensionManager):
                 str(homepage_url).lower() if homepage_url else "",
                 str(best_guess_home_url).lower() if best_guess_home_url else "",
             ]
+            exclude = [
+                "https://github.com/jupyterlab/jupyterlab_apod",
+                "https://github.com/jupyterlab/extension-examples",
+            ]
 
             for url in urls_to_check:
+                if url in exclude:
+                    priority = 3
+                    break
                 if any(
                     org in url
                     for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
