@@ -7,9 +7,10 @@ import abc
 import hashlib
 import json
 import xml.etree.ElementTree as ET
+from collections.abc import Awaitable
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Awaitable, Optional, Tuple, Union
+from typing import Optional, Union
 
 from jupyter_server.base.handlers import APIHandler
 from jupyterlab_server.translation_utils import translator
@@ -44,7 +45,7 @@ class Notification:
     message: str
     modifiedAt: float  # noqa
     type: str = "default"
-    link: Tuple[str, str] = field(default_factory=tuple)
+    link: tuple[str, str] = field(default_factory=tuple)
     options: dict = field(default_factory=dict)
 
 
@@ -63,7 +64,7 @@ class CheckForUpdateABC(abc.ABC):
         self.version = version
 
     @abc.abstractmethod
-    async def __call__(self) -> Awaitable[Union[None, str, Tuple[str, Tuple[str, str]]]]:
+    async def __call__(self) -> Awaitable[Union[None, str, tuple[str, tuple[str, str]]]]:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -86,7 +87,7 @@ class CheckForUpdate(CheckForUpdateABC):
         logger - logging.Logger: Server logger
     """
 
-    async def __call__(self) -> Awaitable[Tuple[str, Tuple[str, str]]]:
+    async def __call__(self) -> Awaitable[tuple[str, tuple[str, str]]]:
         """Get the notification message if a new version is available.
 
         Returns:

@@ -11,7 +11,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { IScore } from '@jupyterlab/ui-components';
+import { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -609,10 +609,15 @@ export class FileBrowserModel implements IDisposable {
     const path = this._model.path;
     const { sessions } = this.manager.services;
     const { oldValue, newValue } = change;
+    const prefix = this.driveName.length > 0 ? this.driveName + ':' : '';
     const value =
-      oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
+      oldValue &&
+      oldValue.path &&
+      prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
-        : newValue && newValue.path && PathExt.dirname(newValue.path) === path
+        : newValue &&
+          newValue.path &&
+          prefix + PathExt.dirname(newValue.path) === path
         ? newValue
         : undefined;
 
@@ -769,6 +774,7 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
         return {};
       });
     this._filterDirectories = options.filterDirectories ?? true;
+    this._useFuzzyFilter = options.useFuzzyFilter ?? true;
   }
 
   /**
@@ -779,6 +785,30 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   }
   set filterDirectories(value: boolean) {
     this._filterDirectories = value;
+  }
+
+  /**
+   * Whether to apply fuzzy filter.
+   */
+  get useFuzzyFilter(): boolean {
+    return this._useFuzzyFilter;
+  }
+  set useFuzzyFilter(value: boolean) {
+    if (this._useFuzzyFilter === value) {
+      return;
+    }
+    this._useFuzzyFilter = value;
+    this._filterSettingsChanged.emit({ useFuzzyFilter: value });
+  }
+
+  /**
+   * Signal for settings changed
+   */
+  get filterSettingsChanged(): ISignal<
+    FileBrowserModel,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  > {
+    return this._filterSettingsChanged;
   }
 
   /**
@@ -805,6 +835,11 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
 
   private _filter: (value: Contents.IModel) => Partial<IScore> | null;
   private _filterDirectories: boolean;
+  private _useFuzzyFilter: boolean;
+  private _filterSettingsChanged = new Signal<
+    FileBrowserModel,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >(this);
 }
 
 /**
@@ -824,5 +859,10 @@ export namespace FilterFileBrowserModel {
      * Filter directories
      */
     filterDirectories?: boolean;
+
+    /**
+     * Use Fuzzy Filter
+     */
+    useFuzzyFilter?: boolean;
   }
 }

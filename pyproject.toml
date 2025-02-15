@@ -10,7 +10,7 @@ name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -28,11 +28,11 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
     "async_lru>=1.0.0",
@@ -47,7 +47,7 @@ dependencies = [
     "jupyterlab_server>=2.27.1,<3",
     "notebook_shim>=0.2",
     "packaging",
-    "setuptools>=40.1.0",
+    "setuptools>=41.1.0",
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
@@ -72,7 +72,7 @@ Changelog = "https://jupyterlab.readthedocs.io/en/stable/getting_started/changel
 Documentation = "https://jupyterlab.readthedocs.io"
 Source = "https://github.com/jupyterlab/jupyterlab"
 Issues = "https://github.com/jupyterlab/jupyterlab/issues/new/choose"
-Gitter = "https://gitter.im/jupyterlab/jupyterlab"
+Zulip = "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab"
 Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
@@ -87,15 +87,15 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.4.1",
+    "altair==5.5.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.2.post3",
-    "matplotlib==3.9.2",
+    "jupyterlab-language-pack-zh-CN==4.3.post1",
+    "matplotlib==3.10.0",
     "nbconvert>=7.0.0",
     "pandas==2.2.3",
-    "scipy==1.14.1",
+    "scipy==1.15.1",
     "vega_datasets==0.9.0",
 ]
 test = [
@@ -119,7 +119,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.7.2",
+    "ruff==0.9.4",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -249,7 +249,7 @@ after-publish-assets = "npm run after:publish:assets"
 
 [tool.ruff]
 exclude = ["*.ipynb"]
-target-version = "py38"
+target-version = "py39"
 line-length = 100
 lint.select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",

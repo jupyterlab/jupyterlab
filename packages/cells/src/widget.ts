@@ -567,7 +567,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
-      this.editor.setOptions(this._editorConfig);
+      this.editor.setBaseOptions(this._editorConfig);
     }
   }
 
@@ -807,6 +807,11 @@ export namespace Cell {
      * The maximum number of output items to display in cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder?: boolean;
 
     /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
@@ -1094,7 +1099,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
       promptOverlay: true,
-      inputHistoryScope: options.inputHistoryScope
+      inputHistoryScope: options.inputHistoryScope,
+      showInputPlaceholder: options.showInputPlaceholder
     }));
     output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
 
@@ -1306,9 +1312,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
         // Parse HTML output
         if (htmlType) {
+          let htmlData = m.data[htmlType] as string | string[];
+          if (typeof htmlData !== 'string') {
+            htmlData = htmlData.join('\n');
+          }
           headings.push(
             ...TableOfContentsUtils.getHTMLHeadings(
-              this._rendermime.sanitizer.sanitize(m.data[htmlType] as string)
+              this._rendermime.sanitizer.sanitize(htmlData)
             ).map(heading => {
               return {
                 ...heading,
@@ -1594,7 +1604,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
-        this.model.executionState = 'idle';
+        if (args.newValue !== null) {
+          // Mark execution state if execution count was set.
+          this.model.executionState = 'idle';
+        }
         this._updatePrompt();
         break;
       case 'executionState':
@@ -1948,7 +1961,8 @@ export abstract class AttachmentsCell<
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    if (event.clipboardData) {
+    const isEditable = this.model.getMetadata('editable') ?? true;
+    if (event.clipboardData && isEditable) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         if (items[i].type === 'text/plain') {

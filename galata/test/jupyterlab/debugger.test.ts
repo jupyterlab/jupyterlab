@@ -247,6 +247,9 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
     ).toHaveCount(0);
+
+    await page.getByRole('menu').press('Escape');
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Copy to globals not available from kernel', async ({
@@ -284,6 +287,8 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.getByRole('menuitem', { name: 'Copy to Clipboard' })
     ).toHaveCount(0);
+
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Copy to clipboard', async ({ page, tmpPath }) => {
@@ -317,6 +322,8 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.getByRole('menuitem', { name: 'Copy to Clipboard' })
     ).toHaveCount(0);
+
+    await page.click('jp-button[title^=Continue]');
   });
 });
 

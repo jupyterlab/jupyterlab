@@ -50,7 +50,16 @@ export class NotebookViewModel extends WindowedListModel {
    * @returns Cell height in pixels
    */
   estimateWidgetSize = (index: number): number => {
-    const model = this.cells[index].model;
+    const cell = this.cells[index];
+    if (!cell) {
+      // This should not happen, but if it does,
+      // do not throw if cell was deleted in the meantime
+      console.warn(
+        `estimateWidgetSize requested for cell ${index} in notebook with only ${this.cells.length} cells`
+      );
+      return 0;
+    }
+    const model = cell.model;
     const height = this.cellsEstimatedHeight.get(model.id);
     if (typeof height === 'number') {
       return height;
@@ -58,7 +67,7 @@ export class NotebookViewModel extends WindowedListModel {
 
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
-    if (model instanceof CodeCellModel) {
+    if (model instanceof CodeCellModel && !model.isDisposed) {
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
         const data = output.data['text/plain'];

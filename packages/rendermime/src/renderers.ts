@@ -531,11 +531,29 @@ interface ILinker {
 }
 
 namespace ILinker {
+  // Matching regular expressions is slow; we can fast-reject
+  // a string if it does not start with `data:`, `www.`, or
+  // a valid schema. We define a valid schema as an alphanumeric
+  // sequence of length at least two and followed by `://`,
+  // e.g.`https://`. To fast-reject in long sequence of characters
+  // we need to impose an additional restriction on the length.
+  // As of 2025 the longest registered URI schemes are:
+  // - machineProvisioningProgressReporter - 35
+  // - microsoft.windows.camera.multipicker - 36
+  // See https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
+  // While technically any length is allowed, it is unlikely that any scheme
+  // longer than 40 characters would be of a general benefit to most users,
+  // and if one finds themselves with a use case which requires it, they are
+  // welcome to open a PR which allows to customize this restriction.
+  const maxAcceptedProtocolLength = 40;
+
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
   const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
   export const webLinkRegex = new RegExp(
-    '(?<path>(?:[a-zA-Z][a-zA-Z0-9+.-]{2,}:\\/\\/|data:|www\\.)[^\\s' +
+    '(?<path>(?:[a-zA-Z][a-zA-Z0-9+.-]{2,' +
+      maxAcceptedProtocolLength +
+      '}:\\/\\/|data:|www\\.)[^\\s' +
       controlCodes +
       '"]{2,}[^\\s' +
       controlCodes +
@@ -787,13 +805,51 @@ function* alignedNodes<T extends Node, U extends Node>(
  * @returns A promise which resolves when rendering is complete.
  */
 export function renderText(options: renderText.IRenderOptions): Promise<void> {
+  renderTextual(options, {
+    checkWeb: true,
+    checkPaths: false
+  });
+
+  // Return the rendered promise.
+  return Promise.resolve(undefined);
+}
+
+/**
+ * Sanitize HTML out using native browser sanitizer.
+ *
+ * Compared to the `ISanitizer.sanitize` this does not allow to selectively
+ * allow to keep certain tags but escapes everything; on the other hand
+ * it is much faster as it uses platform-optimized code.
+ */
+function nativeSanitize(source: string): string {
+  const el = document.createElement('span');
+  el.textContent = source;
+  return el.innerHTML;
+}
+
+const ansiPrefix = '\x1b';
+
+/**
+ * Render the textual representation into a host node.
+ *
+ * Implements the shared logic for `renderText` and `renderError`.
+ */
+function renderTextual(
+  options: renderText.IRenderOptions,
+  autoLinkOptions: IAutoLinkOptions
+): void {
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
-  // Create the HTML content.
-  const content = sanitizer.sanitize(Private.ansiSpan(source), {
-    allowedTags: ['span']
-  });
+  const hasAnsiPrefix = source.includes(ansiPrefix);
+
+  // Create the HTML content:
+  // If no ANSI codes are present use a fast path for escaping.
+  const content = hasAnsiPrefix
+    ? sanitizer.sanitize(Private.ansiSpan(source), {
+        allowedTags: ['span']
+      })
+    : nativeSanitize(source);
 
   // Set the sanitized content for the host node.
   const pre = document.createElement('pre');
@@ -801,16 +857,60 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 
   const preTextContent = pre.textContent;
 
+  const cacheStoreOptions = [];
+  if (autoLinkOptions.checkWeb) {
+    cacheStoreOptions.push('web');
+  }
+  if (autoLinkOptions.checkPaths) {
+    cacheStoreOptions.push('paths');
+  }
+  const cacheStoreKey = cacheStoreOptions.join('-');
+  let cacheStore = Private.autoLinkCache.get(cacheStoreKey);
+  if (!cacheStore) {
+    cacheStore = new WeakMap();
+    Private.autoLinkCache.set(cacheStoreKey, cacheStore);
+  }
+
   let ret: HTMLPreElement;
   if (preTextContent) {
     // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
-    const linkedNodes =
-      sanitizer.getAutolink?.() ?? true
-        ? autolink(preTextContent, {
-            checkWeb: true,
-            checkPaths: false
-          })
-        : [document.createTextNode(content)];
+    let linkedNodes: (HTMLAnchorElement | Text)[];
+    if (sanitizer.getAutolink?.() ?? true) {
+      const cache = getApplicableLinkCache(
+        cacheStore.get(host),
+        preTextContent
+      );
+      if (cache) {
+        const { cachedNodes: fromCache, addedText } = cache;
+        const newAdditions = autolink(addedText, autoLinkOptions);
+        const lastInCache = fromCache[fromCache.length - 1];
+        const firstNewNode = newAdditions[0];
+
+        if (lastInCache instanceof Text && firstNewNode instanceof Text) {
+          const joiningNode = lastInCache;
+          joiningNode.data += firstNewNode.data;
+          linkedNodes = [
+            ...fromCache.slice(0, -1),
+            joiningNode,
+            ...newAdditions.slice(1)
+          ];
+        } else {
+          linkedNodes = [...fromCache, ...newAdditions];
+        }
+      } else {
+        linkedNodes = autolink(preTextContent, autoLinkOptions);
+      }
+      cacheStore.set(host, {
+        preTextContent,
+        // Clone the nodes before storing them in the cache in case if another component
+        // attempts to modify (e.g. dispose of) them - which is the case for search highlights!
+        linkedNodes: linkedNodes.map(
+          node => node.cloneNode(true) as HTMLAnchorElement | Text
+        )
+      });
+    } else {
+      linkedNodes = [document.createTextNode(content)];
+    }
 
     const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
     ret = mergeNodes(preNodes, linkedNodes);
@@ -819,9 +919,6 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
   }
 
   host.appendChild(ret);
-
-  // Return the rendered promise.
-  return Promise.resolve(undefined);
 }
 
 /**
@@ -854,6 +951,68 @@ export namespace renderText {
   }
 }
 
+interface IAutoLinkCacheEntry {
+  preTextContent: string;
+  linkedNodes: (HTMLAnchorElement | Text)[];
+}
+
+/**
+ * Return the information from the cache that can be used given the cache entry and current text.
+ * If the cache is invalid given the current text (or cannot be used) `null` is returned.
+ */
+function getApplicableLinkCache(
+  cachedResult: IAutoLinkCacheEntry | undefined,
+  preTextContent: string
+): {
+  cachedNodes: IAutoLinkCacheEntry['linkedNodes'];
+  addedText: string;
+} | null {
+  if (!cachedResult) {
+    return null;
+  }
+  if (preTextContent.length < cachedResult.preTextContent.length) {
+    // If the new content is shorter than the cached content
+    // we cannot use the cache as we only support appending.
+    return null;
+  }
+  let addedText = preTextContent.substring(cachedResult.preTextContent.length);
+  let cachedNodes = cachedResult.linkedNodes;
+  const lastCachedNode =
+    cachedResult.linkedNodes[cachedResult.linkedNodes.length - 1];
+
+  // Only use cached nodes if:
+  // - the last cached node is a text node
+  // - the new content starts with a new line
+  // - the old content ends with a new line
+  if (
+    cachedResult.preTextContent.endsWith('\n') ||
+    addedText.startsWith('\n')
+  ) {
+    // Second or third condition is met, we can use the cached nodes
+    // (this is a no-op, we just continue execution).
+  } else if (lastCachedNode instanceof Text) {
+    // The first condition is met, we can use the cached nodes,
+    // but first we remove the Text node to re-analyse its text.
+    // This is required when we cached `aaa www.one.com bbb www.`
+    // and the incoming addition is `two.com`. We can still
+    // use text node `aaa ` and anchor node `www.one.com`, but
+    // we need to pass `bbb www.` + `two.com` through linkify again.
+    cachedNodes = cachedNodes.slice(0, -1);
+    addedText = lastCachedNode.textContent + addedText;
+  } else {
+    return null;
+  }
+
+  // Finally check if text has not changed.
+  if (!preTextContent.startsWith(cachedResult.preTextContent)) {
+    return null;
+  }
+  return {
+    cachedNodes,
+    addedText
+  };
+}
+
 /**
  * Render error into a host node.
  *
@@ -865,36 +1024,12 @@ export function renderError(
   options: renderError.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, linkHandler, sanitizer, resolver, source } = options;
+  const { host, linkHandler, resolver } = options;
 
-  // Create the HTML content.
-  const content = sanitizer.sanitize(Private.ansiSpan(source), {
-    allowedTags: ['span']
+  renderTextual(options, {
+    checkWeb: true,
+    checkPaths: true
   });
-
-  // Set the sanitized content for the host node.
-  const pre = document.createElement('pre');
-  pre.innerHTML = content;
-
-  const preTextContent = pre.textContent;
-
-  let ret: HTMLPreElement;
-  if (preTextContent) {
-    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
-    const linkedNodes =
-      sanitizer.getAutolink?.() ?? true
-        ? autolink(preTextContent, {
-            checkWeb: true,
-            checkPaths: true
-          })
-        : [document.createTextNode(content)];
-
-    const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
-    ret = mergeNodes(preNodes, linkedNodes);
-  } else {
-    ret = document.createElement('pre');
-  }
-  host.appendChild(ret);
 
   // Patch the paths if a resolver is available.
   let promise: Promise<void>;
@@ -1012,6 +1147,14 @@ export namespace renderError {
  * The namespace for module implementation details.
  */
 namespace Private {
+  /**
+   * Cache for auto-linking results to provide better performance when streaming outputs.
+   */
+  export const autoLinkCache = new Map<
+    string,
+    WeakMap<HTMLElement, IAutoLinkCacheEntry>
+  >();
+
   /**
    * Eval the script tags contained in a host populated by `innerHTML`.
    *
