@@ -31,5 +31,7 @@
       }
     ]
   },
+  "properties": {},
+  "additionalProperties": false,
   "type": "object"
 }
