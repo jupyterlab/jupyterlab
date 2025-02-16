@@ -240,8 +240,7 @@ test.describe('Workspace', () => {
     // Open custom workspace
     await page.goto('workspaces/foo');
     await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
-    expect(await workspaceSelector.isVisible()).toBe(true);
-
+    await expect(workspaceSelector).toBeVisible();
     await workspaceSelector.click();
     await page
       .locator('.jp-WorkspaceSelector-item:has-text("default")')
