@@ -103,15 +103,16 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
           'toolbar'
         );
         if (Array.isArray(toolbar.composite)) {
-          const newS = toolbar.composite.map((item: any) => {
+          const updatedToolbar = toolbar.composite.map((item: any) => {
             if (item.name === 'workspaceIndicator') {
               return { ...item, disabled: !item.disabled };
             }
             return item;
           });
-          await registry.upload(
+          await registry.set(
             '@jupyterlab/application-extension:top-bar',
-            JSON.stringify({ toolbar: newS })
+            'toolbar',
+            updatedToolbar
           );
         }
       }
