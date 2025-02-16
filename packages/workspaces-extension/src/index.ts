@@ -94,32 +94,26 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
       return workspaceSelector;
     });
 
-    const loadSettings = registry.load(WORKSPACE_INDICATOR_PLUGIN_ID);
-    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      const visible = settings.get('visible').composite as boolean;
-      workspaceSelector.setHidden(!visible);
-    };
-
-    Promise.all([loadSettings, app.restored])
-      .then(([settings]) => {
-        updateSettings(settings);
-        settings.changed.connect(settings => {
-          updateSettings(settings);
-        });
-      })
-      .catch((reason: Error) => {
-        console.error(reason.message);
-      });
-
     app.commands.addCommand(WORKSPACE_INDICATOR_COMMAND_ID, {
       label: trans.__('Show Workspace Indicator'),
       isToggled: () => workspaceSelector.isVisible,
-      execute: () => {
-        void registry.set(
-          WORKSPACE_INDICATOR_PLUGIN_ID,
-          'visible',
-          !workspaceSelector.isVisible
+      execute: async () => {
+        const toolbar = await registry.get(
+          '@jupyterlab/application-extension:top-bar',
+          'toolbar'
         );
+        if (Array.isArray(toolbar.composite)) {
+          const newS = toolbar.composite.map((item: any) => {
+            if (item.name === 'workspaceIndicator') {
+              return { ...item, disabled: !item.disabled };
+            }
+            return item;
+          });
+          await registry.upload(
+            '@jupyterlab/application-extension:top-bar',
+            JSON.stringify({ toolbar: newS })
+          );
+        }
       }
     });
   }

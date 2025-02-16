@@ -5,7 +5,8 @@
     "TopBar": [
       {
         "name": "workspaceIndicator",
-        "rank": 1000
+        "rank": 1000,
+        "disabled": true
       }
     ]
   },
@@ -30,14 +31,5 @@
       }
     ]
   },
-  "properties": {
-    "visible": {
-      "type": "boolean",
-      "title": "Workspace Indicator Visibility",
-      "description": "Whether to show workspace indicator or not",
-      "default": false
-    }
-  },
-  "additionalProperties": false,
   "type": "object"
 }

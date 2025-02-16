@@ -5,6 +5,8 @@
 
 import {
   blankIcon,
+  caretDownEmptyThinIcon,
+  caretUpEmptyThinIcon,
   checkIcon,
   LabIcon,
   ReactWidget
@@ -69,7 +71,9 @@ const WorkspaceSelector: React.FC<IWorkspaceSelectorProps> = ({
             : currentWorkspace}
         </span>
         <span className="jp-WorkspaceSelector-caret">
-          {isExpanded ? '▲' : '▼'}
+          <LabIcon.resolveReact
+            icon={isExpanded ? caretUpEmptyThinIcon : caretDownEmptyThinIcon}
+          />
         </span>
       </button>
 
