@@ -42,6 +42,7 @@
   "@jupyterlab/filebrowser:IFileBrowserFactory": "A factory object that creates file browsers.\n  Use this if you want to create your own file browser (e.g., for a custom storage backend),\n  or to interact with other file browsers that have been created by extensions.",
   "@jupyterlab/filebrowser:IDefaultFileBrowser": "A service for the default file browser.",
   "@jupyterlab/filebrowser:IFileBrowserCommands": "A token to ensure file browser commands are loaded.",
+  "@jupyterlab/fileeditor:IEditorWidgetFactory": "A factory for creating file editors.",
   "@jupyterlab/fileeditor:IEditorTracker": "A widget tracker for file editors.\n  Use this if you want to be able to iterate over and interact with file editors\n  created by the application.",
   "@jupyterlab/htmlviewer:IHTMLViewerTracker": "A widget tracker for rendered HTML documents.\n  Use this if you want to be able to iterate over and interact with HTML documents\n  viewed by the application.",
   "@jupyterlab/application:IConnectionLost": "A service for invoking the dialog shown\n  when JupyterLab has lost its connection to the server. Use this if, for some reason,\n  you want to bring up the \"connection lost\" dialog under new circumstances.",
