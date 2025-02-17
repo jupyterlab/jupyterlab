@@ -2401,15 +2401,7 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => {
-      // Can't run below if there are multiple cells selected,
-      // or if we are at the bottom of the notebook.
-      return (
-        isEnabledAndSingleSelected() &&
-        tracker.currentWidget!.content.activeCellIndex !==
-          tracker.currentWidget!.content.widgets.length - 1
-      );
-    }
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.renderAllMarkdown, {
     label: trans.__('Render All Markdown Cells'),
