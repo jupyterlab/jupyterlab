@@ -152,3 +152,10 @@ button.jp-Dialog-close-button {
 .jp-Dialog-button.jp-mod-styled:not(:last-child) {
   margin-right: 12px;
 }
+
+@media (width <= 768px) {
+  .jp-Dialog-footer-save-first-time {
+    flex-direction: column;
+    gap: 7px;
+  }
+}
