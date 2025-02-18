@@ -149,7 +149,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           workspaceId = result.value;
         }
 
-        if (!workspaceId) {
+        if (!workspaceId || !model.identifiers.includes(workspaceId)) {
           return;
         }
 
