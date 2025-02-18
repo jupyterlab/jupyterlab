@@ -81,10 +81,6 @@ export const jupyterEditorTheme = EditorView.theme({
 
   '.cm-tooltip': {
     backgroundColor: 'var(--jp-layout-color1)'
-  },
-
-  '.cm-builtin': {
-    color: 'var(--jp-mirror-editor-builtin-color)'
   }
 });
 
