@@ -5145,11 +5145,13 @@ __metadata:
     "@jupyterlab/filebrowser": ^4.4.0-alpha.3
     "@jupyterlab/running": ^4.4.0-alpha.3
     "@jupyterlab/services": ^7.4.0-alpha.3
+    "@jupyterlab/settingregistry": ^4.4.0-alpha.3
     "@jupyterlab/statedb": ^4.4.0-alpha.3
     "@jupyterlab/translation": ^4.4.0-alpha.3
     "@jupyterlab/ui-components": ^4.4.0-alpha.3
     "@jupyterlab/workspaces": ^4.4.0-alpha.3
     "@types/jest": ^29.2.0
+    react: ^18.2.0
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown
@@ -10947,14 +10949,14 @@ __metadata:
   linkType: hard
 
 "dompurify@npm:^3.2.1":
-  version: 3.2.3
-  resolution: "dompurify@npm:3.2.3"
+  version: 3.2.4
+  resolution: "dompurify@npm:3.2.4"
   dependencies:
     "@types/trusted-types": ^2.0.7
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: cd66ae8b22e1cfe5bc207b95fc119ce62f9a56eb313a9a1af6262d789d84e7bd27e29f26ed80110d108670dacb9527cb96ddf48a1da89126a37ec8b48702279a
+  checksum: 7a299cbbfe3b3d189e5fc77ab94ad312807e37fda1e24a927548b76a58a9c98137e612ce8d94a2f6cd3d3db59844f14fca477676b5eae6103568a82142771df6
   languageName: node
   linkType: hard
 
