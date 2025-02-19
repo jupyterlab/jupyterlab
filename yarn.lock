@@ -2250,6 +2250,7 @@ __metadata:
     "@jupyterlab/pluginmanager-extension": ~4.4.0-alpha.3
     "@jupyterlab/rendermime-extension": ~4.4.0-alpha.3
     "@jupyterlab/running-extension": ~4.4.0-alpha.3
+    "@jupyterlab/services-extension": ~4.4.0-alpha.3
     "@jupyterlab/settingeditor-extension": ~4.4.0-alpha.3
     "@jupyterlab/shortcuts-extension": ~5.2.0-alpha.3
     "@jupyterlab/statusbar-extension": ~4.4.0-alpha.3
@@ -4182,6 +4183,7 @@ __metadata:
     "@jupyterlab/running": ^4.4.0-alpha.3
     "@jupyterlab/running-extension": ^4.4.0-alpha.3
     "@jupyterlab/services": ^7.4.0-alpha.3
+    "@jupyterlab/services-extension": ^4.4.0-alpha.3
     "@jupyterlab/settingeditor": ^4.4.0-alpha.3
     "@jupyterlab/settingeditor-extension": ^4.4.0-alpha.3
     "@jupyterlab/settingregistry": ^4.4.0-alpha.3
@@ -4239,6 +4241,15 @@ __metadata:
   dependencies:
     "@jupyterlab/builder": ^4.4.0-alpha.3
     "@jupyterlab/mock-token": ^4.4.0-alpha.3
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension"
+  dependencies:
+    "@jupyterlab/builder": ^4.4.0-alpha.3
+    "@jupyterlab/services": ^7.4.0-alpha.3
   languageName: unknown
   linkType: soft
 
@@ -4609,6 +4620,19 @@ __metadata:
     "@lumino/signaling": ^2.1.3
     "@lumino/widgets": ^2.6.0
     react: ^18.2.0
+    rimraf: ~5.0.5
+    typescript: ~5.5.4
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/services-extension@^4.4.0-alpha.3, @jupyterlab/services-extension@workspace:packages/services-extension, @jupyterlab/services-extension@~4.4.0-alpha.3":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/services-extension@workspace:packages/services-extension"
+  dependencies:
+    "@jupyterlab/services": ^7.4.0-alpha.3
+    "@jupyterlab/testing": ^4.4.0-alpha.3
+    "@lumino/coreutils": ^2.2.0
+    "@types/jest": ^29.2.0
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown

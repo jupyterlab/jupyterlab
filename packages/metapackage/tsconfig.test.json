@@ -222,6 +222,9 @@
       "path": "../services"
     },
     {
+      "path": "../services-extension"
+    },
+    {
       "path": "../settingeditor"
     },
     {

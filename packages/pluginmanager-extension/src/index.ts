@@ -82,6 +82,8 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
         serverSettings: app.serviceManager.serverSettings,
         extraLockedPlugins: [
           PLUGIN_ID,
+          // The app needs a service manager to function
+          '@jupyterlab/services-extension:service-manager',
           // UI will not proceed beyond splash without `layout` plugin
           '@jupyterlab/application-extension:layout',
           // State restoration does not work well without resolver,

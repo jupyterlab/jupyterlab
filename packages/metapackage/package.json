@@ -110,6 +110,7 @@
     "@jupyterlab/running": "^4.4.0-alpha.3",
     "@jupyterlab/running-extension": "^4.4.0-alpha.3",
     "@jupyterlab/services": "^7.4.0-alpha.3",
+    "@jupyterlab/services-extension": "^4.4.0-alpha.3",
     "@jupyterlab/settingeditor": "^4.4.0-alpha.3",
     "@jupyterlab/settingeditor-extension": "^4.4.0-alpha.3",
     "@jupyterlab/settingregistry": "^4.4.0-alpha.3",
