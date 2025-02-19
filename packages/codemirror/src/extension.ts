@@ -735,7 +735,7 @@ export namespace EditorExtensionRegistry {
             // - Disable default Enter handler because it prevents us from
             //   accepting a completer suggestion with Enter.
             // - Disable Ctrl-m (Shift-Alt-m on Mac) which toggles tab focus mode;
-            //   JupyterLab binds `Esc` to an equivalent behaviour (switching
+            //   JupyterLab binds `Esc` to an equivalent behavior (switching
             //   between command end edit mode) in notebooks, but has no equivalent
             //   in the File Editor; instead, a `codemirror:toggle-tab-focus-mode`
             //   command can be bound to invoke this behaviour.

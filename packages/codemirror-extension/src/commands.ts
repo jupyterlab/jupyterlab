@@ -108,7 +108,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.toggleTabFocusMode, {
       label: trans.__('Toggle Tab Focus Mode'),
       caption: trans.__(
-        'Toggles behaviour of Tab key between inserting indentation and moving to next focusable element'
+        'Toggles behavior of Tab key between inserting indentation and moving to next focusable element'
       ),
       execute: () => {
         const view = findEditorView();
