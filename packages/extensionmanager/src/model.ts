@@ -422,7 +422,7 @@ export class ListModel extends VDomModel {
       const [extensions] = await Private.requestAPI<IEntry[]>({
         refresh: force ? 1 : 0
       });
-      this._installed = extensions.sort(Private.comparator);
+      this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
       this.installedError = reason.toString();
     } finally {
@@ -466,9 +466,9 @@ export class ListModel extends VDomModel {
       }
 
       const installedNames = this._installed.map(pkg => pkg.name);
-      this._lastSearchResult = extensions
-        .filter(pkg => !installedNames.includes(pkg.name))
-        .sort(Private.comparator);
+      this._lastSearchResult = extensions.filter(
+        pkg => !installedNames.includes(pkg.name)
+      );
     } catch (reason) {
       this.searchError = reason.toString();
     } finally {
@@ -649,14 +649,13 @@ export namespace ListModel {
  */
 namespace Private {
   /**
-   * A comparator function that sorts allowedExtensions orgs to the top.
+   * A comparator function that sorts installed extensions.
+   *
+   * In past it used to sort allowedExtensions orgs to the top,
+   * which needs to be restored (or documentation updated).
    */
-  export function comparator(a: IEntry, b: IEntry): number {
-    if (a.name === b.name) {
-      return 0;
-    } else {
-      return a.name > b.name ? 1 : -1;
-    }
+  export function installedComparator(a: IEntry, b: IEntry): number {
+    return a.name.localeCompare(b.name);
   }
 
   const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;
