@@ -316,9 +316,9 @@ class PyPIExtensionManager(ExtensionManager):
             # Determine organization priority
             priority = 3  # Default priority for other packages
             urls_to_check = [
-                str(source_url).lower() if source_url else "",
-                str(homepage_url).lower() if homepage_url else "",
-                str(best_guess_home_url).lower() if best_guess_home_url else "",
+                str(source_url).lower()
+                for url in [source_url, homepage_url, best_guess_home_url]
+                if url
             ]
             exclude = [
                 "https://github.com/jupyterlab/jupyterlab_apod",
