@@ -9,6 +9,11 @@ import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { requestTranslationsAPI } from './server';
 
+/**
+ * Application default locale
+ */
+export const DEFAULT_LANGUAGE_CODE = 'en-US';
+
 /*
  * Translation
  */

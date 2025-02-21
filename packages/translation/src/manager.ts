@@ -4,6 +4,7 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
 import {
+  DEFAULT_LANGUAGE_CODE,
   ITranslator,
   ITranslatorConnector,
   TranslationBundle,
@@ -60,7 +61,7 @@ export class TranslationManager implements ITranslator {
           break;
         }
       } catch (reason) {
-        this._currentLocale = 'en';
+        this._currentLocale = DEFAULT_LANGUAGE_CODE;
       }
     } else {
       this._currentLocale = locale;
@@ -68,7 +69,7 @@ export class TranslationManager implements ITranslator {
 
     this._domainData = this._languageData?.data ?? {};
     const message: string = this._languageData?.message;
-    if (message && locale !== 'en') {
+    if (message && locale !== DEFAULT_LANGUAGE_CODE) {
       console.warn(message);
     }
   }
@@ -80,7 +81,7 @@ export class TranslationManager implements ITranslator {
    */
   load(domain: string): TranslationBundle {
     if (this._domainData) {
-      if (this._currentLocale == 'en') {
+      if (this._currentLocale == DEFAULT_LANGUAGE_CODE) {
         return this._englishBundle;
       } else {
         domain = normalizeDomain(domain);
