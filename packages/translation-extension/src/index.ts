@@ -31,7 +31,7 @@ const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
 /**
  * Provide the translator connector as a separate plugin to allow for alternative
  * implementations that may want to fetch translation bundles from a different
- * source.
+ * source or endpoint.
  */
 const translatorConnector: JupyterFrontEndPlugin<ITranslatorConnector> = {
   id: '@jupyterlab/translation:translator-connector',
