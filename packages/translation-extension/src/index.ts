@@ -16,6 +16,7 @@ import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
+  DEFAULT_LANGUAGE_CODE,
   ITranslator,
   requestTranslationsAPI,
   TranslationManager
@@ -53,6 +54,10 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
       serverSettings
     );
     await translationManager.fetch(currentLocale);
+
+    // Set the document language after optionally fetching the system language
+    // if the setting 'locale' is set to 'default'
+    document.documentElement.lang = translationManager.languageCode;
 
     // Set translator to UI
     if (labShell) {
@@ -100,16 +105,6 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         // Read the settings
         loadSetting(setting);
 
-        // Ensure currentLocale is not 'default' which is not a valid language code
-        if (currentLocale !== 'default') {
-          document.documentElement.lang = (currentLocale ?? '').replace(
-            '_',
-            '-'
-          );
-        } else {
-          document.documentElement.lang = 'en-US';
-        }
-
         // Listen for your plugin setting changes using Signal
         setting.changed.connect(loadSetting);
 
@@ -133,7 +128,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
               const displayName = value.displayName;
               const nativeName = value.nativeName;
               const toggled =
-                (currentLocale === 'default' ? 'en' : currentLocale) === locale;
+                (currentLocale === 'default' ? DEFAULT_LANGUAGE_CODE : currentLocale) === locale;
               const label = toggled
                 ? `${displayName}`
                 : `${displayName} - ${nativeName}`;

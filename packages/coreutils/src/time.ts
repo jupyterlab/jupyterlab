@@ -30,7 +30,7 @@ export namespace Time {
     value: string | Date,
     format: HumanStyle = 'long'
   ): string {
-    const lang = document.documentElement.lang || 'en';
+    const lang = document.documentElement.lang || 'en-US';
     const formatter = new Intl.RelativeTimeFormat(lang, {
       numeric: 'auto',
       style: format
@@ -54,7 +54,7 @@ export namespace Time {
    * @returns A formatted date.
    */
   export function format(value: string | Date): string {
-    const lang = document.documentElement.lang || 'en';
+    const lang = document.documentElement.lang || 'en-US';
     const formatter = new Intl.DateTimeFormat(lang, {
       dateStyle: 'short',
       timeStyle: 'short'

@@ -82,7 +82,7 @@ function testToolbarFactory() {
   });
   const factoryName = 'dummyFactory';
   const translator: ITranslator = {
-    languageCode: 'en',
+    languageCode: 'en-US',
     load: jest.fn()
   };
 

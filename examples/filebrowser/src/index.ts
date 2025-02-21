@@ -40,7 +40,7 @@ import {
 
 import { addIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
-const LANG = 'en';
+const LANG = 'default';
 
 async function main(): Promise<void> {
   // init translator
