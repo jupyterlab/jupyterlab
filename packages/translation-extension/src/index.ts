@@ -17,8 +17,10 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
+  ITranslatorConnector,
   requestTranslationsAPI,
-  TranslationManager
+  TranslationManager,
+  TranslatorConnector
 } from '@jupyterlab/translation';
 
 /**
@@ -26,18 +28,40 @@ import {
  */
 const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
 
+/**
+ * Provide the translator connector as a separate plugin to allow for alternative
+ * implementations that may want to fetch translation bundles from a different
+ * source.
+ */
+const translatorConnector: JupyterFrontEndPlugin<ITranslatorConnector> = {
+  id: '@jupyterlab/translation:translator-connector',
+  description: 'Provides the application translation connector.',
+  autoStart: true,
+  requires: [JupyterFrontEnd.IPaths],
+  provides: ITranslatorConnector,
+  activate: (app: JupyterFrontEnd, paths: JupyterFrontEnd.IPaths) => {
+    const url = paths.urls.translations;
+    const serverSettings = app.serviceManager.serverSettings;
+    return new TranslatorConnector(url, serverSettings);
+  }
+};
+
+/**
+ * The main translator plugin.
+ */
 const translator: JupyterFrontEndPlugin<ITranslator> = {
   id: '@jupyterlab/translation:translator',
   description: 'Provides the application translation object.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
-  optional: [ILabShell],
+  optional: [ILabShell, ITranslatorConnector],
   provides: ITranslator,
   activate: async (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     settings: ISettingRegistry,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    connector: ITranslatorConnector | null
   ) => {
     const setting = await settings.load(PLUGIN_ID);
     const currentLocale: string = setting.get('locale').composite as string;
@@ -50,7 +74,8 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     const translationManager = new TranslationManager(
       paths.urls.translations,
       stringsPrefix,
-      serverSettings
+      serverSettings,
+      connector ?? undefined
     );
     await translationManager.fetch(currentLocale);
 
@@ -203,5 +228,9 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [translator, langMenu];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  translatorConnector,
+  translator,
+  langMenu
+];
 export default plugins;
