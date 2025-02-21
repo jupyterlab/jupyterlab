@@ -20,7 +20,7 @@ export class TranslationManager implements ITranslator {
    *
    * @param translationsUrl The URL of the translation server.
    * @param stringsPrefix (optional) The prefix for translation strings.
-   * @param serverSettings (optional) The settings for the translation server.
+   * @param serverSettings (optional) The server settings.
    * @param connector (optional) The translation connector. If provided, the `translationsUrl` and `serverSettings` parameters will be ignored.
    */
   constructor(
