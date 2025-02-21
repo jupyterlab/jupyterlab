@@ -16,7 +16,9 @@ import {
 import { SettingConnector } from './settingconnector';
 
 /**
- * The default settings connector.
+ * Provide the settings connector as a separate plugin to allow for alternative
+ * implementations that may want to fetch settings from a different source or
+ * endpoint.
  */
 export const settingsConnector: JupyterFrontEndPlugin<ISettingsConnector> = {
   id: '@jupyterlab/apputils-extension:settings-connector',
