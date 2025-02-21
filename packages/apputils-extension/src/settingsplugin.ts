@@ -22,6 +22,7 @@ import { SettingConnector } from './settingconnector';
  */
 export const settingsConnector: JupyterFrontEndPlugin<ISettingsConnector> = {
   id: '@jupyterlab/apputils-extension:settings-connector',
+  description: 'Provides the settings connector.',
   autoStart: true,
   provides: ISettingsConnector,
   activate: (app: JupyterFrontEnd) =>
