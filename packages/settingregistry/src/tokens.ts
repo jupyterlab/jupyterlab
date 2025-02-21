@@ -18,6 +18,20 @@ import { ISchemaValidator } from './settingregistry';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 /**
+ * The settings connector interface.
+ */
+export interface ISettingsConnector
+  extends IDataConnector<ISettingRegistry.IPlugin, string> {}
+
+/**
+ * A service to connect to the server endpoint.
+ */
+export const ISettingsConnector = new Token<ISettingsConnector>(
+  '@jupyterlab/coreutils:ISettingsConnector',
+  'A service to connect to the settings endpoint.'
+);
+
+/**
  * The setting registry token.
  */
 export const ISettingRegistry = new Token<ISettingRegistry>(
