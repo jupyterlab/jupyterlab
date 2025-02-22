@@ -201,7 +201,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
         this.reloadConnection();
       } else {
         console.log(
-          'Keeping old LSP connection as the new kernel uses the same langauge'
+          'Keeping old LSP connection as the new kernel uses the same language'
         );
       }
     } catch (err) {
