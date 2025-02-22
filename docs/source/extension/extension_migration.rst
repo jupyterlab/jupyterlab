@@ -65,7 +65,7 @@ the ``module`` option from ``commonjs`` to ``Node16``:
      "include": ["src/*"],
 
 Support for Conditional Rendering in GroupItem
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As of JupyterLab 4.4, the ``GroupItem`` component now supports conditional
 rendering of elements. This improvement allows the component to gracefully handle ``null`` or
@@ -98,7 +98,7 @@ This change improves both the rendering performance and the maintainability of e
 using the ``GroupItem`` component.
 
 Plugins
--------
+^^^^^^^
 
 - ``@jupyterlab/translation-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
