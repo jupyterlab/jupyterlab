@@ -718,3 +718,50 @@ test.describe('UISchema', () => {
     );
   });
 });
+
+test.describe('Advanced tools', () => {
+  test('should remove a field from cellMedata and verify it is updated', async ({
+    page,
+    baseURL,
+    tmpPath
+  }) => {
+    // Open the Notebook.
+    await page.goto(baseURL);
+    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+
+    // Activate the property inspector.
+    await activatePropertyInspector(page);
+
+    // Retrieves the form from its header's text, it should be collapsed.
+    const form = page.locator('.jp-NotebookTools .jp-Collapse', {
+      hasText: 'Advanced Tools'
+    });
+    await form.click();
+    const cellMetadataEditor = page.locator(
+      '.jp-CellMetadataEditor .cm-content'
+    );
+
+    // Modifying the cell metadata - removing the "trusted": "true" line
+    const trustedLine = cellMetadataEditor.locator('.cm-line').filter({
+      has: page.locator('span', { hasText: 'trusted' })
+    });
+    await trustedLine.evaluate(element => {
+      element.remove();
+    });
+    await page
+      .locator(
+        '.jp-CellMetadataEditor .jp-JSONEditor-header [title="Commit changes to data"]'
+      )
+      .click();
+
+    // Close the sidebar
+    await page.locator('[title="Property Inspector"]').click();
+    // Reopen the sidebar
+    await activatePropertyInspector(page);
+
+    // Verify the updaetd cellMetadata
+    const cmLinesAfter = cellMetadataEditor.locator('.cm-line');
+    await expect(cmLinesAfter).toHaveCount(1);
+    await expect(cellMetadataEditor).toContainText('{}');
+  });
+});
