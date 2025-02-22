@@ -60,10 +60,17 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
-    if (this.editor.source) {
-      this._tracker.activeCell?.model.sharedModel.setMetadata(
-        this.editor.source.toJSON()
-      );
+    const activeCell = this._tracker.activeCell?.model.sharedModel;
+    if (activeCell && this.editor.source) {
+      const metadataKeys = Object.keys(activeCell.metadata ?? {});
+      const source = this.editor.source.toJSON() ?? {};
+
+      activeCell.transact(() => {
+        // Iterate over all existing metadata keys and delete each one.
+        // This ensures that any keys not present in the new metadata are removed.
+        metadataKeys.forEach(key => activeCell.deleteMetadata(key));
+        activeCell.setMetadata(source);
+      });
     }
   }
 
