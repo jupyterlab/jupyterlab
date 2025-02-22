@@ -34,7 +34,7 @@ const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
  * source or endpoint.
  */
 const translatorConnector: JupyterFrontEndPlugin<ITranslatorConnector> = {
-  id: '@jupyterlab/translation:translator-connector',
+  id: '@jupyterlab/translation-extension:translator-connector',
   description: 'Provides the application translation connector.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths],
@@ -50,7 +50,7 @@ const translatorConnector: JupyterFrontEndPlugin<ITranslatorConnector> = {
  * The main translator plugin.
  */
 const translator: JupyterFrontEndPlugin<ITranslator> = {
-  id: '@jupyterlab/translation:translator',
+  id: '@jupyterlab/translation-extension:translator',
   description: 'Provides the application translation object.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
