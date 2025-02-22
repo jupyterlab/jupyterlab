@@ -3,23 +3,41 @@
 
 import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
-import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
+import {
+  ITranslator,
+  ITranslatorConnector,
+  TranslationBundle,
+  TranslatorConnector
+} from './tokens';
 import { normalizeDomain } from './utils';
 
 /**
- * Translation Manager
+ * Translation Manager.
  */
 export class TranslationManager implements ITranslator {
+  /**
+   * Construct a new TranslationManager.
+   *
+   * @param translationsUrl The URL of the translation server.
+   * @param stringsPrefix (optional) The prefix for translation strings.
+   * @param serverSettings (optional) The server settings.
+   * @param connector (optional) The translation connector. If provided, the `translationsUrl` and `serverSettings` parameters will be ignored.
+   */
   constructor(
     translationsUrl: string = '',
     stringsPrefix?: string,
-    serverSettings?: ServerConnection.ISettings
+    serverSettings?: ServerConnection.ISettings,
+    connector?: ITranslatorConnector
   ) {
-    this._connector = new TranslatorConnector(translationsUrl, serverSettings);
+    this._connector =
+      connector ?? new TranslatorConnector(translationsUrl, serverSettings);
     this._stringsPrefix = stringsPrefix || '';
     this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });
   }
 
+  /**
+   * Get the language code of the current locale.
+   */
   get languageCode(): string {
     return this._currentLocale;
   }
@@ -90,7 +108,7 @@ export class TranslationManager implements ITranslator {
     }
   }
 
-  private _connector: TranslatorConnector;
+  private _connector: ITranslatorConnector;
   private _currentLocale: string;
   private _domainData: any = {};
   private _englishBundle: Gettext;
