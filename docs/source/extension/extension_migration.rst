@@ -97,6 +97,12 @@ the updated rendering logic.
 This change improves both the rendering performance and the maintainability of extensions
 using the ``GroupItem`` component.
 
+Plugins
+-------
+
+- ``@jupyterlab/translation-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
+
 JupyterLab 4.2 to 4.3
 ---------------------
 
