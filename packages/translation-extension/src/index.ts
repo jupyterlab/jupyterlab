@@ -152,6 +152,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         // Get list of available locales
         translatorConnector
           .fetch({ language: '' })
+          // TODO: fix usage of any
           .then((data: any) => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
