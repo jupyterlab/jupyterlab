@@ -89,7 +89,7 @@
   "@jupyterlab/extensionmanager-extension:plugin": "Adds the extension manager plugin.",
   "@jupyterlab/filebrowser-extension:factory": "Provides the file browser factory.",
   "@jupyterlab/filebrowser-extension:default-file-browser": "Provides the default file browser",
-  "@jupyterlab/filebrowser-extension:browser": "Set up the default file browser commands",
+  "@jupyterlab/filebrowser-extension:browser": "Set up the default file browser commands and state restoration",
   "@jupyterlab/filebrowser-extension:settings": "Set up the default file browser settings",
   "@jupyterlab/filebrowser-extension:share-file": "Adds the \"Copy Shareable Link\" command; useful for JupyterHub deployment for example.",
   "@jupyterlab/filebrowser-extension:file-upload-status": "Adds a file upload status widget.",
