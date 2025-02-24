@@ -19,6 +19,7 @@ test('All plugins and tokens must have a description', async ({
 }, testInfo) => {
   const { plugins, tokens } = await page.evaluate(async ignored => {
     const pluginIDs = window.jupyterapp.listPlugins();
+    pluginIDs.sort();
 
     const plugins: Record<string, string> = {};
     const tokens: Record<string, string> = {};
@@ -49,6 +50,7 @@ test('All plugins and tokens must have a description', async ({
   if (!(await fs.pathExists(testInfo.snapshotDir))) {
     await fs.mkdir(testInfo.snapshotDir);
   }
+
   await fs.writeJSON(testInfo.snapshotPath('plugins.json'), plugins, {
     encoding: 'utf-8',
     spaces: 2
