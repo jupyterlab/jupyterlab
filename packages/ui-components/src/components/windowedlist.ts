@@ -1161,10 +1161,21 @@ export class WindowedList<
       this.viewModel.scrollOffset = scrollOffset;
       this._scrollUpdateWasRequested = false;
 
+      if (this._viewport.dataset.isScrolling != 'true') {
+        this._viewport.dataset.isScrolling = 'true';
+      }
+
+      if (this._timerToClearScollStatus) {
+        window.clearTimeout(this._timerToClearScollStatus);
+      }
+      this._timerToClearScollStatus = window.setTimeout(() => {
+        this._viewport.dataset.isScrolling = 'false';
+      }, 500);
       this.update();
       // }
     }
   }
+  private _timerToClearScollStatus: number | null = null;
 
   /**
    * A message handler invoked on an `'resize-request'` message.
@@ -1407,12 +1418,9 @@ export class WindowedList<
           this._updateTotalSize();
 
           // Update position of window container
-          const [top, minHeight] = this.viewModel.getSpan(
-            startIndex,
-            stopIndex
-          );
-          this._viewport.style.top = `${top}px`;
-          this._viewport.style.minHeight = `${minHeight}px`;
+          let [top, _minHeight] = this.viewModel.getSpan(startIndex, stopIndex);
+
+          this._viewport.style.transform = `translateY(${top}px)`;
         } else {
           // Update inner container height
           this._innerElement.style.height = `0px`;

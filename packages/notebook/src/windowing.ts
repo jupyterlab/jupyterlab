@@ -10,9 +10,70 @@ import {
   WindowedListModel
 } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Debouncer } from '@lumino/polling';
+import { Debouncer, Throttler } from '@lumino/polling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
+
+/**
+ * Check whether the element is in a scrolling notebook.
+ * Traverses open shadow DOM roots if needed.
+ */
+export function isInScrollingNotebook(element: Element | null): boolean {
+  if (!element) {
+    return false;
+  }
+  const notebook = element.closest('.jp-WindowedPanel-viewport') as
+    | HTMLElement
+    | undefined;
+  if (notebook && notebook.dataset.isScrolling == 'true') {
+    return true;
+  }
+  const root = element.getRootNode();
+  return !!(
+    root &&
+    root instanceof ShadowRoot &&
+    isInScrollingNotebook(root.host)
+  );
+}
+
+/**
+ * Subclass IntersectionObserver to allow suspending callbacks when notebook is scrolling.
+ */
+window.IntersectionObserver = class extends window.IntersectionObserver {
+  constructor(
+    protected callback: IntersectionObserverCallback,
+    options: IntersectionObserverInit
+  ) {
+    super(entries => {
+      this._delayCallbackInScrollingNotebook(entries);
+    }, options);
+    this._throttler = new Throttler(
+      entries => {
+        // keep delaying until no longer in scrolling notebook
+        this._delayCallbackInScrollingNotebook(entries);
+      },
+      { limit: 1000, edge: 'trailing' }
+    );
+  }
+
+  private _delayCallbackInScrollingNotebook = (
+    entries: IntersectionObserverEntry[]
+  ) => {
+    const inScrollingNotebook = entries.filter(e =>
+      isInScrollingNotebook(e.target)
+    );
+    const nonOutputEntries = entries.filter(
+      e => !isInScrollingNotebook(e.target)
+    );
+    if (nonOutputEntries.length) {
+      this.callback(nonOutputEntries, this);
+    }
+    if (inScrollingNotebook.length) {
+      this._throttler.invoke(inScrollingNotebook);
+    }
+  };
+  private _throttler: Throttler;
+};
 
 /**
  * Notebook view model for the windowed list.
@@ -154,6 +215,17 @@ export class NotebookViewModel extends WindowedListModel {
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
   private _footer: Widget | null = null;
+
+  constructor() {
+    super();
+    this._resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const node = entry.target;
+        const previous = this._resizeCounter.get(node) ?? 0;
+        this._resizeCounter.set(node, previous + 1);
+      }
+    });
+  }
 
   /**
    * Notebook's header
@@ -300,6 +372,8 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
 
     (widget as Cell).inViewport = true;
+    // This is safe to call multiple times on the same node, see spec.
+    this._resizeObserver.observe(widget.node, { box: 'border-box' });
   }
 
   /**
@@ -329,11 +403,27 @@ export class NotebookWindowedLayout extends WindowedLayout {
       // Do not change display of the active cell to allow user to continue providing input
       // into the code mirror editor when out of view. We still hide the cell so to prevent
       // minor visual glitches when scrolling.
+      this._resizeCounter.set(widget.node, 0);
       this._toggleSoftVisibility(widget, false);
       // Return before sending "AfterDetach" message to CodeCell
       // to prevent removing contents of the active cell.
       return;
     }
+
+    let requiresSoftHiding = false;
+    // TODO: reset counter when toggling command/edit mode as resize then is expected
+    /// also reset counter when cell content changes
+    if ((this._resizeCounter.get(widget.node) ?? 0) > 1) {
+      requiresSoftHiding = true;
+    } else if (widget.node.querySelector('defs')) {
+      requiresSoftHiding = true;
+    }
+
+    if (requiresSoftHiding) {
+      this._toggleSoftVisibility(widget, false);
+      return;
+    }
+    this._resizeCounter.set(widget.node, 0);
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
       // We detach the code cell currently dragged otherwise it won't be attached at the correct position
@@ -516,4 +606,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
   private _willBeRemoved: Widget | null = null;
   private _topHiddenCodeCells: number = -1;
+  private _resizeCounter: WeakMap<Element, number> = new WeakMap();
+  private _resizeObserver: ResizeObserver;
 }
