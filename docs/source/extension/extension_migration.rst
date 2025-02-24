@@ -102,7 +102,7 @@ Plugins
 
 - ``@jupyterlab/application-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/application:mimedocument`` plugin id has been renamed to ``@jupyterlab/application-extension:mimedocument``
-- ``@jupyterlab/lsp:ILSPCodeExtractorsManager`` from 4.3 to 4.4
+- ``@jupyterlab/lsp-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/lsp:ILSPCodeExtractorsManager`` plugin id has been renamed to ``@jupyterlab/lsp-extension:code-extractor-manager``
 - ``@jupyterlab/translation-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
