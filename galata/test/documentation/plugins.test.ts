@@ -8,8 +8,10 @@ import * as fs from 'fs-extra';
 
 // As the test is ran in the documentation environments, some plugins and tokens are not from core.
 const IGNORED_PLUGINS = [
-  '@jupyterlab/geojson-extension:factory',
-  '@jupyterlab/galata-extension:helpers'
+  /^@jupyterlab\/geojson-extension:factory$/,
+  /^@jupyterlab\/galata-extension:helpers$/,
+  /^@jupyter-widgets\//,
+  /^jupyterlab_pygments/
 ];
 
 test('All plugins and tokens must have a description', async ({
@@ -21,7 +23,10 @@ test('All plugins and tokens must have a description', async ({
     const plugins: Record<string, string> = {};
     const tokens: Record<string, string> = {};
     pluginIDs.forEach(id => {
-      if (!id.startsWith('@jupyterlab/') || ignored.includes(id)) {
+      if (
+        !id.startsWith('@jupyterlab/') ||
+        ignored.some(pattern => pattern.test(id))
+      ) {
         return;
       }
 
@@ -73,7 +78,7 @@ test('Plugins must be named using the same convention', async ({
 }, testInfo) => {
   const pluginIDs = await page.evaluate(async ignored => {
     return window.jupyterapp.listPlugins().filter(id => {
-      return !ignored.includes(id);
+      return !ignored.some(pattern => pattern.test(id));
     });
   }, IGNORED_PLUGINS);
 
