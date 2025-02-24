@@ -75,7 +75,7 @@ export const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
  * The workspace commands
  */
 export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
-  id: '@jupyterlab/workspaces:commands',
+  id: '@jupyterlab/workspaces-extension:commands',
   description: 'Add workspace commands.',
   autoStart: true,
   requires: [
