@@ -77,6 +77,7 @@ test('Plugins must be named using the same convention', async ({
     });
   }, IGNORED_PLUGINS);
 
+  // Create a list so it's easier to find the plugins not following the convention
   const invalidNames = pluginIDs.filter(id => {
     // Plugin ids should match the @jupyterlab/<name>-extension:<type> convention
     const pattern = /^@jupyterlab\/[a-z0-9-]+?-extension:[a-zA-Z0-9-]+$/;
