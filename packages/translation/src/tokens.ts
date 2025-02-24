@@ -12,7 +12,7 @@ import { requestTranslationsAPI } from './server';
 /**
  * Application default locale
  */
-export const DEFAULT_LANGUAGE_CODE = 'en-US';
+export const DEFAULT_LANGUAGE_CODE = 'en';
 
 /*
  * Translation

@@ -16,7 +16,7 @@ test.describe('Internationalization', () => {
     await page.goto();
 
     // Expect the default language to be English
-    expect.soft(await page.getAttribute('html', 'lang')).toEqual('en-US');
+    expect.soft(await page.getAttribute('html', 'lang')).toEqual('en');
 
     await page.sidebar.setWidth();
 

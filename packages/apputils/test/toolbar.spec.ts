@@ -17,7 +17,7 @@ import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
-const DEFAULT_LANGUAGE_CODE = 'en-US';
+const DEFAULT_LANGUAGE_CODE = 'en';
 
 const server = new JupyterServer();
 
