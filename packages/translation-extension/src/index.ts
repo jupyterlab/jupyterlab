@@ -16,6 +16,7 @@ import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
+  DEFAULT_LANGUAGE_CODE,
   ITranslator,
   ITranslatorConnector,
   TranslationManager,
@@ -132,15 +133,19 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         const appLocale = translator.languageCode.replace('-', '_');
         for (const locale in data['data']) {
           const value = data['data'][locale];
+          // Test for backward compatibility with JupyterLab server not having
+          // https://github.com/jupyterlab/jupyterlab_server/pull/467
+          const backwardCompatibleLocale =
+            locale === 'en' ? DEFAULT_LANGUAGE_CODE.replace('-', '_') : locale;
           const displayName = value.displayName;
           const nativeName = value.nativeName;
-          const toggled = appLocale === locale;
+          const toggled = appLocale === backwardCompatibleLocale;
           const label = toggled
             ? `${displayName}`
             : `${displayName} - ${nativeName}`;
 
           // Add a command per language
-          const command = `jupyterlab-translation:${locale}`;
+          const command = `jupyterlab-translation:${backwardCompatibleLocale}`;
           commands.addCommand(command, {
             label: label,
             caption: trans.__('Change interface language to %1', label),
@@ -161,11 +166,15 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
               if (result.button.accept) {
                 try {
-                  await settings.set(PLUGIN_ID, 'locale', locale);
+                  await settings.set(
+                    PLUGIN_ID,
+                    'locale',
+                    backwardCompatibleLocale
+                  );
                   window.location.reload();
                 } catch (reason) {
                   console.error(
-                    `Failed to update language locale to ${locale}`,
+                    `Failed to update language locale to ${backwardCompatibleLocale}`,
                     reason
                   );
                 }
