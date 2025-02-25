@@ -16,7 +16,6 @@ import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  DEFAULT_LANGUAGE_CODE,
   ITranslator,
   ITranslatorConnector,
   TranslationManager,
