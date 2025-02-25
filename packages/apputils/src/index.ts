@@ -39,6 +39,7 @@ export * from './dialog';
 export * from './domutils';
 export * from './inputdialog';
 export * from './kernelstatuses';
+export * from './licenses';
 export * from './mainareawidget';
 export * from './menufactory';
 export * from './notification';
