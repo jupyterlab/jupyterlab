@@ -9,6 +9,9 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { CommandPalette, Widget } from '@lumino/widgets';
 import { ISessionContext } from './sessioncontext';
+import { IWidgetTracker } from './widgettracker';
+import { MainAreaWidget } from './mainareawidget';
+import { Licenses } from './licenses';
 
 /**
  * The command palette token.
@@ -70,6 +73,20 @@ export interface IKernelStatusModel {
     provider: (widget: Widget | null) => ISessionContext | null
   ) => void;
 }
+
+/**
+ * The license widget tracker.
+ */
+export const ILicensesTracker = new Token<ILicensesTracker>(
+  '@jupyterlab/apputils:ILicensesTracker',
+  'A service for tracking the license widgets.'
+);
+
+/**
+ * An interface for the license widget tracker.
+ */
+export interface ILicensesTracker
+  extends IWidgetTracker<MainAreaWidget<Licenses>> {}
 
 /**
  * An interface for the session context dialogs.
