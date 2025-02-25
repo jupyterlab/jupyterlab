@@ -79,4 +79,41 @@ test.describe.serial('Notebook Run', () => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await expect(page.notebook.close(true)).resolves.not.toThrow();
   });
+
+  test('Restart kernel and execute cells', async ({ page, tmpPath }) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+
+    const acceptDialog = async () => {
+      const dialogSelector = '.jp-Dialog-content';
+      await page.waitForSelector(dialogSelector);
+      // Accept option to trust the notebook
+      await page.click('.jp-Dialog-button.jp-mod-accept');
+    };
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    const firstCell = await page.notebook.getCell(0);
+
+    // 1. Restart and run all using a single command
+    await page.menu.clickMenuItem('Kernel>Restart Kernel and Run All Cells…');
+    await acceptDialog();
+    await page.notebook.waitForRun();
+    // Click on first cell to avoid random hover effects due to mouse movement
+    await firstCell.click();
+    expect(await nbPanel.screenshot()).toMatchSnapshot('restart-and-run.png');
+
+    // 2. Restart manually and run all cells at once
+    await page.menu.clickMenuItem('Kernel>Restart Kernel…');
+    await acceptDialog();
+    await page.notebook.run();
+    await firstCell.click();
+    expect(await nbPanel.screenshot()).toMatchSnapshot('restart-and-run.png');
+
+    // 3. Restart manually and run cell-by-cell
+    await page.menu.clickMenuItem('Kernel>Restart Kernel…');
+    await acceptDialog();
+    await page.notebook.runCellByCell();
+    await firstCell.click();
+    expect(await nbPanel.screenshot()).toMatchSnapshot('restart-and-run.png');
+  });
 });
