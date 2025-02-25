@@ -17,6 +17,10 @@ jobs:
     if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
     timeout-minutes: 80
     runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        browser: ['chromium', 'firefox'] #Test on both Chromium and Firefox
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +33,7 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
-          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+            key: ${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
@@ -46,31 +50,34 @@ jobs:
           cd galata
           jlpm start 2>&1 > /tmp/jupyterlab_server.log &
 
-      - name: Install browser
-        run: |
-          cd galata
-          # Install only Chromium browser
-          jlpm playwright install chromium
-          jlpm run build
+          - name: Install browser
+
+          run: |
+            cd galata
+            # Install the browser specified in the matrix
+            jlpm playwright install ${{ matrix.browser }}
+            jlpm run build
 
       - name: Wait for JupyterLab
         run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |
+
           cd galata
-          jlpm run test --project galata jupyterlab
-          mv galata/test-results galata/test-jupyterlab-results || true
+          PLAYWRIGHT_BROWSERS="${{ matrix.browser }}" jlpm run test --project galata jupyterlab
+          mv galata/test-results galata/test-jupyterlab-results-${{ matrix.browser }} || true
           # Run once benchmark tests to ensure they have no regression
+
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
 
       - name: Upload Galata Test assets
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-test-assets
+          name: jupyterlab-galata-test-assets-${{ matrix.browser }}
           path: |
-            galata/test-jupyterlab-results
+            galata/test-jupyterlab-results-${{ matrix.browser }}
             galata/test-results
 
       - name: Upload Galata Test report
