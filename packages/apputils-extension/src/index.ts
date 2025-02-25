@@ -35,6 +35,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { announcements } from './announcements';
+import { licensesPlugin, licensesTracker } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsConnector, settingsPlugin } from './settingsplugin';
@@ -732,6 +733,8 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   announcements,
   kernelStatus,
+  licensesPlugin,
+  licensesTracker,
   notificationPlugin,
   palette,
   paletteRestorer,
