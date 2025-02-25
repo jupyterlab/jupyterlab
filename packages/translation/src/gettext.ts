@@ -142,7 +142,8 @@ class Gettext {
     // default values that could be overridden in Gettext() constructor
     this._defaults = {
       domain: 'messages',
-      locale: document.documentElement.getAttribute('lang') || DEFAULT_LANGUAGE_CODE,
+      locale:
+        document.documentElement.getAttribute('lang') || DEFAULT_LANGUAGE_CODE,
       pluralFunc: function (n: number) {
         return { nplurals: 2, plural: n != 1 ? 1 : 0 };
       },
