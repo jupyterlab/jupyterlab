@@ -69,6 +69,11 @@ export namespace ConfigSection {
      */
     serverSettings?: ServerConnection.ISettings;
   }
+
+  /**
+   * The interface for the build manager.
+   */
+  export interface IManager extends ConfigSectionManager {}
 }
 
 /**
@@ -241,5 +246,48 @@ export namespace ConfigWithDefaults {
      * The optional classname namespace.
      */
     className?: string;
+  }
+}
+
+/**
+ * A manager for config sections.
+ */
+export class ConfigSectionManager implements ConfigSection.IManager {
+  /**
+   * Create a config section manager.
+   */
+  constructor(options: ConfigSectionManager.IOptions) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * Create a config section.
+   */
+  async create(options: ConfigSection.IOptions): Promise<IConfigSection> {
+    return ConfigSection.create({
+      ...options,
+      serverSettings: this.serverSettings
+    });
+  }
+
+  /**
+   * The server settings used to make API requests.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+}
+
+/**
+ * A namespace for config section API interfaces.
+ */
+export namespace ConfigSectionManager {
+  /**
+   * The instantiation options for a config section manager.
+   */
+  export interface IOptions {
+    /**
+     * The server settings used to make API requests.
+     */
+    serverSettings?: ServerConnection.ISettings;
   }
 }

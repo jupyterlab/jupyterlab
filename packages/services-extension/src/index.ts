@@ -8,12 +8,15 @@
  */
 
 import {
+  ConfigSection,
+  ConfigSectionManager,
   ConnectionStatus,
   Contents,
   ContentsManager,
   Drive,
   Event,
   EventManager,
+  IConfigSectionManager,
   IConnectionStatus,
   IContentsManager,
   IDefaultDrive,
@@ -50,6 +53,23 @@ import {
 } from '@jupyterlab/services';
 
 import type { IPlugin } from '@lumino/coreutils';
+
+/**
+ * Config section manager plugin.
+ */
+export const configSectionManager: IPlugin<null, ConfigSection.IManager> = {
+  id: '@jupyterlab/services-extension:config-section-manager',
+  autoStart: true,
+  provides: IConfigSectionManager,
+  optional: [IServerSettings],
+  description: 'Provides the config section manager.',
+  activate: (
+    _: null,
+    serverSettings: ServerConnection.ISettings | undefined
+  ) => {
+    return new ConfigSectionManager({ serverSettings });
+  }
+};
 
 /**
  * The default connection status provider.
@@ -331,6 +351,7 @@ const serviceManagerPlugin: ServiceManagerPlugin<ServiceManager.IManager> = {
 };
 
 export default [
+  configSectionManager,
   contentsManagerPlugin,
   defaultDrivePlugin,
   eventManagerPlugin,
