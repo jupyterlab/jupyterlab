@@ -6,7 +6,7 @@ import { Token } from '@lumino/coreutils';
 import { expect } from '@playwright/test';
 import * as fs from 'fs-extra';
 
-// As the test is ran in the documentation environments, some plugins and tokens are not from core.
+// As the test is run in the documentation environment, some plugins and tokens are not from core.
 const IGNORED_PLUGINS = [
   /^@jupyterlab\/geojson-extension:factory$/,
   /^@jupyterlab\/galata-extension:helpers$/,
