@@ -5,8 +5,8 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import {
-  ISettingRegistry,
-  ISettingsConnector
+  ISettingConnector,
+  ISettingRegistry
 } from '@jupyterlab/settingregistry';
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 import { Throttler } from '@lumino/polling';
@@ -19,7 +19,7 @@ import { Throttler } from '@lumino/polling';
  */
 export class SettingConnector
   extends DataConnector<ISettingRegistry.IPlugin, string>
-  implements ISettingsConnector
+  implements ISettingConnector
 {
   constructor(connector: IDataConnector<ISettingRegistry.IPlugin, string>) {
     super();

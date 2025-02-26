@@ -9,8 +9,8 @@ import {
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
 import {
+  ISettingConnector,
   ISettingRegistry,
-  ISettingsConnector,
   SettingRegistry
 } from '@jupyterlab/settingregistry';
 import { SettingConnector } from './settingconnector';
@@ -20,11 +20,11 @@ import { SettingConnector } from './settingconnector';
  * implementations that may want to fetch settings from a different source or
  * endpoint.
  */
-export const settingsConnector: JupyterFrontEndPlugin<ISettingsConnector> = {
+export const settingsConnector: JupyterFrontEndPlugin<ISettingConnector> = {
   id: '@jupyterlab/apputils-extension:settings-connector',
   description: 'Provides the settings connector.',
   autoStart: true,
-  provides: ISettingsConnector,
+  provides: ISettingConnector,
   activate: (app: JupyterFrontEnd) =>
     new SettingConnector(app.serviceManager.settings)
 };
@@ -36,11 +36,11 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
   autoStart: true,
   provides: ISettingRegistry,
-  optional: [ISettingsConnector],
+  optional: [ISettingConnector],
   description: 'Provides the setting registry.',
   activate: async (
     app: JupyterFrontEnd,
-    settingsConnector: ISettingsConnector | null
+    settingsConnector: ISettingConnector | null
   ): Promise<ISettingRegistry> => {
     const { isDisabled } = PageConfig.Extension;
     const connector =

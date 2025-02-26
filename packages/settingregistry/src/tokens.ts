@@ -20,8 +20,8 @@ import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 /**
  * A service to connect to the server endpoint.
  */
-export const ISettingsConnector = new Token<ISettingsConnector>(
-  '@jupyterlab/coreutils:ISettingsConnector',
+export const ISettingConnector = new Token<ISettingConnector>(
+  '@jupyterlab/coreutils:ISettingConnector',
   'A service to connect to the settings endpoint.'
 );
 
@@ -38,7 +38,7 @@ export const ISettingRegistry = new Token<ISettingRegistry>(
 /**
  * The settings connector interface.
  */
-export interface ISettingsConnector
+export interface ISettingConnector
   extends IDataConnector<ISettingRegistry.IPlugin, string> {}
 
 /**
