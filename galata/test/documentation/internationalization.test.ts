@@ -18,6 +18,7 @@ test.describe('Internationalization', () => {
     // Expect the default language to be English
     expect.soft(await page.getAttribute('html', 'lang')).toEqual('en');
 
+    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     await page.sidebar.setWidth();
 
     // Check menu
@@ -45,7 +46,7 @@ test.describe('Internationalization', () => {
 
     // Check UI is in Chinese
     await Promise.all([
-      page.waitForURL(baseURL! + '/lab'),
+      page.waitForURL(baseURL! + '/lab*'),
       page.locator('#jupyterlab-splash').waitFor(),
       page.click('button:has-text("Change and reload")')
     ]);
