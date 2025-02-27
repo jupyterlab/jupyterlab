@@ -57,7 +57,7 @@ import type { IPlugin } from '@lumino/coreutils';
 /**
  * Config section manager plugin.
  */
-export const configSectionManager: IPlugin<null, ConfigSection.IManager> = {
+const configSectionManager: IPlugin<null, ConfigSection.IManager> = {
   id: '@jupyterlab/services-extension:config-section-manager',
   autoStart: true,
   provides: IConfigSectionManager,
@@ -74,7 +74,7 @@ export const configSectionManager: IPlugin<null, ConfigSection.IManager> = {
 /**
  * The default connection status provider.
  */
-export const connectionStatus: IPlugin<null, IConnectionStatus> = {
+const connectionStatusPlugin: IPlugin<null, IConnectionStatus> = {
   id: '@jupyterlab/services-extension:connection-status',
   autoStart: true,
   provides: IConnectionStatus,
@@ -352,6 +352,7 @@ const serviceManagerPlugin: ServiceManagerPlugin<ServiceManager.IManager> = {
 
 export default [
   configSectionManager,
+  connectionStatusPlugin,
   contentsManagerPlugin,
   defaultDrivePlugin,
   eventManagerPlugin,
