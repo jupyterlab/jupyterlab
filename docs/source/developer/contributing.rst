@@ -692,7 +692,8 @@ Main reasons for UI test failures are:
    - ``please update snapshots``: Combine the two previous comments effects.
 
     The bot will react with +1 emoji to indicate that the run started and then comment
-    back once it concluded.
+    back once it concluded. This feature is restricted to a subset of users with higher
+    privileges due to security concerns.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/4.3.x/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
