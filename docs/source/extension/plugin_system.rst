@@ -1,7 +1,7 @@
 .. Copyright (c) Jupyter Development Team.
 .. Distributed under the terms of the Modified BSD License.
 
-.. _jupyterlab_plugin_system:
+.. _jupyterlab-plugin-system:
 
 The JupyterLab Plugin System
 ============================
