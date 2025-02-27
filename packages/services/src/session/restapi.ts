@@ -142,3 +142,57 @@ export async function updateSession(
   validateModel(data);
   return data;
 }
+
+/**
+ * The session API client.
+ */
+export class SessionAPIClient {
+  /**
+   * Create a new session API client.
+   */
+  constructor(options: { serverSettings?: ServerConnection.ISettings }) {
+    this._serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * List the running sessions.
+   */
+  async listRunning(): Promise<Session.IModel[]> {
+    return listRunning(this._serverSettings);
+  }
+
+  /**
+   * Get a session model.
+   */
+  async getSessionModel(id: string): Promise<Session.IModel> {
+    return getSessionModel(id, this._serverSettings);
+  }
+
+  /**
+   * Create a new session.
+   */
+  async startSession(
+    options: Session.ISessionOptions
+  ): Promise<Session.IModel> {
+    return startSession(options, this._serverSettings);
+  }
+
+  /**
+   * Shut down a session by id.
+   */
+  async shutdownSession(id: string): Promise<void> {
+    return shutdownSession(id, this._serverSettings);
+  }
+
+  /**
+   * Update a session by id.
+   */
+  async updateSession(
+    model: Pick<Session.IModel, 'id'> & DeepPartial<Omit<Session.IModel, 'id'>>
+  ): Promise<Session.IModel> {
+    return updateSession(model, this._serverSettings);
+  }
+
+  private _serverSettings: ServerConnection.ISettings;
+}

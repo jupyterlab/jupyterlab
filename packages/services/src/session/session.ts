@@ -9,6 +9,8 @@ import { Kernel, KernelMessage } from '../kernel';
 
 import { ServerConnection } from '..';
 
+import { SessionAPIClient } from './restapi';
+
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
 /**
@@ -180,6 +182,14 @@ export interface ISessionConnection extends IObservableDisposable {
   shutdown(): Promise<void>;
 }
 
+/**
+ * Interface for making requests to the session API.
+ */
+export interface ISessionAPIClient extends SessionAPIClient {}
+
+/**
+ * A namespace for ISessionConnection statics.
+ */
 export namespace ISessionConnection {
   /**
    * The session initialization options.
@@ -201,6 +211,11 @@ export namespace ISessionConnection {
      * The server settings.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The session API client.
+     */
+    sessionAPIClient?: ISessionAPIClient;
 
     /**
      * The username of the session client.
