@@ -177,4 +177,3 @@ Here's the interface the token uses:
 This means that anyone who makes a provider plugin for the StepCounter service
 must return an object that has a getStepCount method, incrementStepCount method,
 and a countChanges Signal (a Lumino Signal object).
-
