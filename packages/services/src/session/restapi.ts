@@ -145,10 +145,16 @@ export async function updateSession(
 
 /**
  * The session API client.
+ *
+ * #### Notes
+ * Use this class to interact with the Jupyter Server Session API.
+ * This class adheres to the Jupyter Server API endpoints.
  */
 export class SessionAPIClient {
   /**
    * Create a new session API client.
+   *
+   * @param options - The options used to create the client.
    */
   constructor(options: { serverSettings?: ServerConnection.ISettings }) {
     this._serverSettings =
@@ -157,6 +163,13 @@ export class SessionAPIClient {
 
   /**
    * List the running sessions.
+   *
+   * @returns A promise that resolves with the list of running session models.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions) and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async listRunning(): Promise<Session.IModel[]> {
     return listRunning(this._serverSettings);
@@ -164,6 +177,15 @@ export class SessionAPIClient {
 
   /**
    * Get a session model.
+   *
+   * @param id - The id of the session of interest.
+   *
+   * @returns A promise that resolves with the session model.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions) and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async getSessionModel(id: string): Promise<Session.IModel> {
     return getSessionModel(id, this._serverSettings);
@@ -171,6 +193,15 @@ export class SessionAPIClient {
 
   /**
    * Create a new session.
+   *
+   * @param options - The options used to create the session.
+   *
+   * @returns A promise that resolves with the session model.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions) and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async startSession(
     options: Session.ISessionOptions
@@ -180,6 +211,15 @@ export class SessionAPIClient {
 
   /**
    * Shut down a session by id.
+   *
+   * @param id - The id of the session to shut down.
+   *
+   * @returns A promise that resolves when the session is shut down.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions) and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async shutdownSession(id: string): Promise<void> {
     return shutdownSession(id, this._serverSettings);
@@ -187,6 +227,15 @@ export class SessionAPIClient {
 
   /**
    * Update a session by id.
+   *
+   * @param model - The session model to update.
+   *
+   * @returns A promise that resolves with the updated session model.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/sessions) and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async updateSession(
     model: Pick<Session.IModel, 'id'> & DeepPartial<Omit<Session.IModel, 'id'>>
