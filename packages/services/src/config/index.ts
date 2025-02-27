@@ -46,7 +46,7 @@ export namespace ConfigSection {
    *
    * @returns A Promise that is fulfilled with the config section is loaded.
    *
-   * @deprecated Use `IConfigSectionManager` in a plugin instead
+   * @deprecated Require `IConfigSectionManager` in a plugin instead.
    */
   export async function create(
     options: ConfigSection.IOptions
