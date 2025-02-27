@@ -183,11 +183,6 @@ export interface ISessionConnection extends IObservableDisposable {
 }
 
 /**
- * Interface for making requests to the session API.
- */
-export interface ISessionAPIClient extends SessionAPIClient {}
-
-/**
  * A namespace for ISessionConnection statics.
  */
 export namespace ISessionConnection {
@@ -408,3 +403,8 @@ export interface IModel {
 export type ISessionOptions = Pick<IModel, 'path' | 'type' | 'name'> & {
   kernel?: Partial<Pick<Kernel.IModel, 'name'>>;
 };
+
+/**
+ * Interface for making requests to the Session API.
+ */
+export interface ISessionAPIClient extends SessionAPIClient {}

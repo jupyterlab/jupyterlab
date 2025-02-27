@@ -109,7 +109,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
     const sessionConnection = new SessionConnection({
       ...options,
       connectToKernel: this._connectToKernel,
-      serverSettings: this.serverSettings
+      serverSettings: this.serverSettings,
+      sessionAPIClient: this._sessionAPIClient
     });
     this._onStarted(sessionConnection);
     if (!this._models.has(options.model.id)) {

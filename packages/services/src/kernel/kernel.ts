@@ -14,7 +14,7 @@ import * as KernelMessage from './messages';
 import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
 
-import { IKernelOptions, IModel } from './restapi';
+import { IKernelOptions, IModel, KernelAPIClient } from './restapi';
 
 export { Status } from './messages';
 export { IModel, IKernelOptions };
@@ -625,6 +625,11 @@ export namespace IKernelConnection {
     serverSettings?: ServerConnection.ISettings;
 
     /**
+     * The kernel API client.
+     */
+    kernelAPIClient?: IKernelAPIClient;
+
+    /**
      * The username of the kernel client.
      */
     username?: string;
@@ -998,3 +1003,8 @@ export interface IAnyMessageArgs {
    */
   direction: 'send' | 'recv';
 }
+
+/**
+ * Interface for making requests to the Kernel API.
+ */
+export interface IKernelAPIClient extends KernelAPIClient {}
