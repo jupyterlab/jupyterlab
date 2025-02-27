@@ -45,25 +45,21 @@ export namespace ConfigSection {
    * Create a config section.
    *
    * @returns A Promise that is fulfilled with the config section is loaded.
+   *
+   * @deprecated Use `IConfigSectionManager` in a plugin instead
    */
-  export function create(
+  export async function create(
     options: ConfigSection.IOptions
   ): Promise<IConfigSection> {
     const section = new DefaultConfigSection(options);
-    return section.load().then(() => {
-      return section;
-    });
+    await section.load();
+    return section;
   }
 
   /**
    * The options used to create a config section.
    */
-  export interface IOptions {
-    /**
-     * The section name.
-     */
-    name: string;
-
+  export interface IOptions extends ConfigSectionManager.ICreateOptions {
     /**
      * The optional server settings.
      */
@@ -264,11 +260,12 @@ export class ConfigSectionManager implements ConfigSection.IManager {
   /**
    * Create a config section.
    */
-  async create(options: ConfigSection.IOptions): Promise<IConfigSection> {
-    return ConfigSection.create({
-      ...options,
-      serverSettings: this.serverSettings
-    });
+  async create(
+    options: ConfigSectionManager.ICreateOptions
+  ): Promise<IConfigSection> {
+    const section = new DefaultConfigSection(options);
+    await section.load();
+    return section;
   }
 
   /**
@@ -289,5 +286,15 @@ export namespace ConfigSectionManager {
      * The server settings used to make API requests.
      */
     serverSettings?: ServerConnection.ISettings;
+  }
+
+  /**
+   * The config section create options
+   */
+  export interface ICreateOptions {
+    /**
+     * The section name.
+     */
+    name: string;
   }
 }
