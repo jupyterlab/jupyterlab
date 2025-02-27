@@ -4,7 +4,7 @@
 import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { JSONObject, UUID } from '@lumino/coreutils';
 import { ConfigSectionManager, ConfigWithDefaults } from '../../src';
-import { handleRequest, makeSettings } from '../utils';
+import { getRequestHandler, handleRequest, makeSettings } from '../utils';
 
 /**
  * Generate a random config section name.
@@ -19,11 +19,12 @@ function randomName() {
 }
 
 const server = new JupyterServer();
-const serverSettings = makeSettings();
-const configSectionManager = new ConfigSectionManager({ serverSettings });
+let configSectionManager: ConfigSectionManager;
 
 beforeAll(async () => {
   await server.start();
+  const serverSettings = makeSettings();
+  configSectionManager = new ConfigSectionManager({ serverSettings });
 }, 30000);
 
 afterAll(async () => {
@@ -45,7 +46,9 @@ describe('config', () => {
     });
 
     it('should fail for an incorrect response', async () => {
-      const configPromise = configSectionManager.create({
+      const settings = getRequestHandler(201, {});
+      const manager = new ConfigSectionManager({ serverSettings: settings });
+      const configPromise = manager.create({
         name: randomName()
       });
       await expect(configPromise).rejects.toThrow(/Invalid response: 201/);
@@ -148,7 +151,9 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a falsey value', async () => {
       const defaults: JSONObject = { foo: true };
       const className = 'testclass';
-      const section = await configSectionManager.create({
+      const settings = getRequestHandler(200, { foo: false });
+      const manager = new ConfigSectionManager({ serverSettings: settings });
+      const section = await manager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
