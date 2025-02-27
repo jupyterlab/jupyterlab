@@ -263,7 +263,10 @@ export class ConfigSectionManager implements ConfigSection.IManager {
   async create(
     options: ConfigSectionManager.ICreateOptions
   ): Promise<IConfigSection> {
-    const section = new DefaultConfigSection(options);
+    const section = new DefaultConfigSection({
+      ...options,
+      serverSettings: this.serverSettings
+    });
     await section.load();
     return section;
   }
