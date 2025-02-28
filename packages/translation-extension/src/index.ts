@@ -18,7 +18,6 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   ITranslatorConnector,
-  requestTranslationsAPI,
   TranslationManager,
   TranslatorConnector
 } from '@jupyterlab/translation';
@@ -96,13 +95,14 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
 const langMenu: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   description: 'Adds translation commands and settings.',
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ISettingRegistry, ITranslator, ITranslatorConnector],
   optional: [IMainMenu, ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
     translator: ITranslator,
+    translatorConnector: ITranslatorConnector,
     mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
@@ -149,10 +149,11 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
         let command: string;
 
-        const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<any>('', '', {}, serverSettings)
-          .then(data => {
+        translatorConnector
+          .fetch({ language: '' })
+          // TODO: fix usage of any
+          .then((data: any) => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
               const displayName = value.displayName;
