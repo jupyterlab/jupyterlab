@@ -392,7 +392,7 @@ describe('session', () => {
         await previous.info;
         const path = UUID.uuid4() + '.ipynb';
         const model = { ...session.model, path };
-        handleRequest(session, 200, model);
+        handleRequest(sessionAPIClient, 200, model);
         await session.changeKernel({ name: previous.name });
         expect(session.kernel!.name).toBe(previous.name);
         expect(session.path).toBe(model.path);
