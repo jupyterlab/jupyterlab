@@ -53,7 +53,8 @@ import { find, some } from '@lumino/algorithm';
 import {
   JSONExt,
   PromiseDelegate,
-  ReadonlyPartialJSONValue
+  ReadonlyPartialJSONValue,
+  Token
 } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
@@ -761,13 +762,20 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 };
 
 /**
+ * The context menu suppressor token.
+ */
+const IContextMenuSuppressor = new Token<void>(
+  '__internal:context-menu-suppressor'
+);
+
+/**
  * Plugin to build the context menu from the settings.
  */
 const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:context-menu',
   description: 'Populates the context menu.',
   autoStart: true,
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ISettingRegistry, ITranslator, IContextMenuSuppressor],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
@@ -799,6 +807,32 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
           reason
         );
       });
+  }
+};
+
+/**
+ * Plugin to suppress the context menu if user has disabled it.
+ */
+const contextMenuSuppressor: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:context-menu-suppressor',
+  description: 'Checks whether the context menu should be suppressed.',
+  autoStart: true,
+  provides: IContextMenuSuppressor,
+  requires: [ISettingRegistry, ITranslator],
+  activate: async (
+    app: JupyterFrontEnd,
+    registry: ISettingRegistry
+  ): Promise<void> => {
+    const updateSettings = (settings: ISettingRegistry.ISettings) => {
+      if (settings.get('disabled').composite) {
+        document.body.setAttribute('data-jp-suppress-context-menu', 'true');
+      } else {
+        document.body.removeAttribute('data-jp-suppress-context-menu');
+      }
+    };
+    const settings = await registry.load(contextMenuSuppressor.id);
+    updateSettings(settings);
+    settings.changed.connect(updateSettings);
   }
 };
 
@@ -1307,6 +1341,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   contextMenuPlugin,
+  contextMenuSuppressor,
   dirty,
   main,
   mainCommands,

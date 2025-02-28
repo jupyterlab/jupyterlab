@@ -1,0 +1,15 @@
+{
+  "title": "Context Menu Suppression",
+  "description": "Context Menu Suppression Settings.",
+  "jupyter.lab.menus": {},
+  "jupyter.lab.shortcuts": [],
+  "properties": {
+    "disabled": {
+      "title": "Whether the context menu is suppressed",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
