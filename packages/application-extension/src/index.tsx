@@ -765,7 +765,8 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
  * The context menu suppressor token.
  */
 const IContextMenuSuppressor = new Token<void>(
-  '__internal:context-menu-suppressor'
+  '__internal:context-menu-suppressor',
+  'A private token for a helper plugin that suppresses the context menu'
 );
 
 /**
