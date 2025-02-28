@@ -250,9 +250,14 @@ export class KernelAPIClient {
    * @param options - The options used to create the client.
    */
   constructor(options: { serverSettings?: ServerConnection.ISettings } = {}) {
-    this._serverSettings =
+    this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
   }
+
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * List the running kernels.
@@ -265,7 +270,7 @@ export class KernelAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async listRunning(): Promise<IModel[]> {
-    return listRunning(this._serverSettings);
+    return listRunning(this.serverSettings);
   }
 
   /**
@@ -282,7 +287,7 @@ export class KernelAPIClient {
    * If the kernel does not exist on the server, the promise is resolved with `undefined`.
    */
   async getKernelModel(id: string): Promise<IModel | undefined> {
-    return getKernelModel(id, this._serverSettings);
+    return getKernelModel(id, this.serverSettings);
   }
 
   /**
@@ -298,7 +303,7 @@ export class KernelAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async startNew(options: IKernelOptions = {}): Promise<IModel> {
-    return startNew(options, this._serverSettings);
+    return startNew(options, this.serverSettings);
   }
 
   /**
@@ -314,7 +319,7 @@ export class KernelAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async restartKernel(id: string): Promise<void> {
-    return restartKernel(id, this._serverSettings);
+    return restartKernel(id, this.serverSettings);
   }
 
   /**
@@ -330,7 +335,7 @@ export class KernelAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async interruptKernel(id: string): Promise<void> {
-    return interruptKernel(id, this._serverSettings);
+    return interruptKernel(id, this.serverSettings);
   }
 
   /**
@@ -346,8 +351,6 @@ export class KernelAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async shutdownKernel(id: string): Promise<void> {
-    return shutdownKernel(id, this._serverSettings);
+    return shutdownKernel(id, this.serverSettings);
   }
-
-  private _serverSettings: ServerConnection.ISettings;
 }
