@@ -157,9 +157,14 @@ export class SessionAPIClient {
    * @param options - The options used to create the client.
    */
   constructor(options: { serverSettings?: ServerConnection.ISettings }) {
-    this._serverSettings =
+    this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
   }
+
+  /**
+   * The server settings used by the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
 
   /**
    * List the running sessions.
@@ -172,7 +177,7 @@ export class SessionAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async listRunning(): Promise<Session.IModel[]> {
-    return listRunning(this._serverSettings);
+    return listRunning(this.serverSettings);
   }
 
   /**
@@ -188,7 +193,7 @@ export class SessionAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async getSessionModel(id: string): Promise<Session.IModel> {
-    return getSessionModel(id, this._serverSettings);
+    return getSessionModel(id, this.serverSettings);
   }
 
   /**
@@ -206,7 +211,7 @@ export class SessionAPIClient {
   async startSession(
     options: Session.ISessionOptions
   ): Promise<Session.IModel> {
-    return startSession(options, this._serverSettings);
+    return startSession(options, this.serverSettings);
   }
 
   /**
@@ -222,7 +227,7 @@ export class SessionAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
   async shutdownSession(id: string): Promise<void> {
-    return shutdownSession(id, this._serverSettings);
+    return shutdownSession(id, this.serverSettings);
   }
 
   /**
@@ -240,8 +245,6 @@ export class SessionAPIClient {
   async updateSession(
     model: Pick<Session.IModel, 'id'> & DeepPartial<Omit<Session.IModel, 'id'>>
   ): Promise<Session.IModel> {
-    return updateSession(model, this._serverSettings);
+    return updateSession(model, this.serverSettings);
   }
-
-  private _serverSettings: ServerConnection.ISettings;
 }
