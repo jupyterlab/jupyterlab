@@ -40,7 +40,7 @@ export class SemanticCommand {
   /**
    * The `args` key for a semantic command's current widget ID.
    */
-  static readonly WIDGET = 'semantic-widget';
+  static readonly WIDGET = 'semanticWidget';
 
   /**
    * The command IDs used by this semantic command.
