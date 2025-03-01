@@ -5,7 +5,7 @@
   "jupyter.lab.shortcuts": [],
   "properties": {
     "disabled": {
-      "title": "Whether the context menu is suppressed",
+      "title": "Whether the application context menu is suppressed",
       "type": "boolean",
       "default": false
     }
