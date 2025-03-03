@@ -73,8 +73,9 @@ export async function main() {
     PageConfig.getOption('federated_extensions')
   );
 
-  // Keep a list of renamed plugin ids to ensure user configs don't break.
-  // And emit a warning in the dev tools console to notify about the rename.
+  // Keep a mapping of renamed plugin ids to ensure user configs don't break.
+  // The mapping is defined in the main index.js for JupyterLab, since it may not be relevant for
+  // other lab-based applications (they may not use the same set of plugins).
   const renamedPluginIds = {
     '@jupyterlab/application:mimedocument': '@jupyterlab/application-extension:mimedocument',
     '@jupyterlab/lsp:ILSPCodeExtractorsManager': '@jupyterlab/lsp-extension:code-extractor-manager',
@@ -83,6 +84,8 @@ export async function main() {
   };
 
   // Transparently handle the case of renamed plugins, so current configs don't break.
+  // And emit a warning in the dev tools console to notify about the rename so
+  // users can update their config.
   const disabledExtensions = PageConfig.Extension.disabled.map(id => {
     if (renamedPluginIds[id]) {
       console.warn(`Plugin ${id} has been renamed to ${renamedPluginIds[id]}. Consider updating your config to use the new name.`);
