@@ -5,6 +5,7 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
+import { PluginRegistry } from '@lumino/coreutils';
 
 import './style.js';
 
@@ -56,6 +57,7 @@ export async function main() {
      };
   }
 
+  var pluginRegistry = new PluginRegistry();
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
   var disabled = [];
   var deferred = [];
@@ -92,12 +94,9 @@ export async function main() {
   const allPlugins = [];
 
   /**
-   * Iterate over active plugins in an extension.
-   *
-   * #### Notes
-   * This also populates the disabled, deferred, and ignored arrays.
+   * Get the plugins from an extension.
    */
-  function* activePlugins(extension) {
+  function getPlugins(extension) {
     // Handle commonjs or es2015 modules
     let exports;
     if (extension.hasOwnProperty('__esModule')) {
@@ -107,7 +106,17 @@ export async function main() {
       exports = extension;
     }
 
-    let plugins = Array.isArray(exports) ? exports : [exports];
+    return Array.isArray(exports) ? exports : [exports];
+  }
+
+  /**
+   * Iterate over active plugins in an extension.
+   *
+   * #### Notes
+   * This also populates the disabled, deferred, and ignored arrays.
+   */
+  function* activePlugins(extension) {
+    const plugins = getPlugins(extension);
     for (let plugin of plugins) {
       const isDisabled = PageConfig.Extension.isDisabled(plugin.id);
       allPlugins.push({
@@ -192,8 +201,20 @@ export async function main() {
     console.error(reason);
   });
 
+  // 2. Register the plugins
+  pluginRegistry.registerPlugins(register);
+
+  // 3. Get and resolve the service manager and connection status plugins
+  const IConnectionStatus = require('@jupyterlab/services').IConnectionStatus;
+  const IServiceManager = require('@jupyterlab/services').IServiceManager;
+  const connectionStatus = await pluginRegistry.resolveOptionalService(IConnectionStatus);
+  const serviceManager = await pluginRegistry.resolveRequiredService(IServiceManager);
+
   const lab = new JupyterLab({
+    pluginRegistry,
+    serviceManager,
     mimeExtensions,
+    connectionStatus,
     disabled: {
       matches: disabled,
       patterns: PageConfig.Extension.disabled
@@ -206,8 +227,8 @@ export async function main() {
     },
     availablePlugins: allPlugins
   });
-  register.forEach(function(item) { lab.registerPluginModule(item); });
 
+  // 4. Start the application, which will activate the other plugins
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
@@ -227,5 +248,4 @@ export async function main() {
     // Handle failures to restore after the timeout has elapsed.
     window.setTimeout(function() { report(errors); }, timeout);
   }
-
 }
