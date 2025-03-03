@@ -3,6 +3,27 @@
   "description": "JupyterLab context menu settings.",
   "jupyter.lab.setting-icon-label": "Application Context Menu",
   "jupyter.lab.shortcuts": [],
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-settings",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 100
+          },
+          {
+            "command": "application:toggle-context-menu",
+            "rank": 100
+          },
+          {
+            "type": "separator",
+            "rank": 100
+          }
+        ]
+      }
+    ]
+  },
   "jupyter.lab.transform": true,
   "properties": {
     "contextMenu": {

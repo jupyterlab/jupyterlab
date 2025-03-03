@@ -30,7 +30,6 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { IMainMenu } from '@jupyterlab/mainmenu';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
@@ -94,6 +93,8 @@ namespace CommandIDs {
   export const showPropertyPanel: string = 'property-inspector:show-panel';
 
   export const resetLayout: string = 'application:reset-layout';
+
+  export const toggleContextMenu: string = 'application:toggle-context-menu';
 
   export const toggleHeader: string = 'application:toggle-header';
 
@@ -769,12 +770,10 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Populates the context menu.',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
-  optional: [IMainMenu],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator,
-    mainMenu: IMainMenu | null
+    translator: ITranslator
   ): void => {
     const trans = translator.load('jupyterlab');
 
@@ -791,6 +790,7 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
       .then(() => {
         return Private.loadSettingsContextMenu(
           app.contextMenu,
+          app.commands,
           settingRegistry,
           createMenu,
           translator
@@ -1350,6 +1350,7 @@ namespace Private {
 
   export async function loadSettingsContextMenu(
     contextMenu: ContextMenuSvg,
+    commands: CommandRegistry,
     registry: ISettingRegistry,
     menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
     translator: ITranslator
@@ -1518,7 +1519,15 @@ namespace Private {
       }
     });
 
+    // Handle disabled status.
     setDisabled(settings);
+    commands.addCommand(CommandIDs.toggleContextMenu, {
+      label: trans.__('Enable Context (right-click) Menu'),
+      isToggleable: true,
+      isToggled: () => !settings.get('disabled').composite,
+      execute: () =>
+        void settings.set('disabled', !settings.get('disabled').composite)
+    });
   }
 
   export function activateSidebarSwitcher(

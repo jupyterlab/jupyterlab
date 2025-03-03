@@ -8,7 +8,6 @@ import '@lumino/widgets/style/index.js';
 import '@jupyterlab/ui-components/style/index.js';
 import '@jupyterlab/statusbar/style/index.js';
 import '@jupyterlab/application/style/index.js';
-import '@jupyterlab/mainmenu/style/index.js';
 import '@jupyterlab/property-inspector/style/index.js';
 
 import './base.css';
