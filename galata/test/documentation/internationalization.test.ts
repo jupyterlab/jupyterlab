@@ -46,7 +46,7 @@ test.describe('Internationalization', () => {
 
     // Check UI is in Chinese
     await Promise.all([
-      page.waitForURL(baseURL! + '/lab*'),
+      page.waitForURL(baseURL! + '/lab/tree/data'),
       page.locator('#jupyterlab-splash').waitFor(),
       page.click('button:has-text("Change and reload")')
     ]);
