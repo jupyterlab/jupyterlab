@@ -200,6 +200,32 @@ export async function main() {
     console.error(reason);
   });
 
+  // Keep a list of renamed plugin ids to ensure user configs don't break.
+  // And emit a warning in the dev tools console to notify about the rename.
+  const renamedPluginIds = {
+    '@jupyterlab/application:mimedocument': '@jupyterlab/application-extension:mimedocument',
+    '@jupyterlab/lsp:ILSPCodeExtractorsManager': '@jupyterlab/lsp-extension:code-extractor-manager',
+    '@jupyterlab/translation:translator': '@jupyterlab/translation-extension:translator',
+    '@jupyterlab/workspaces:commands': '@jupyterlab/workspaces-extension:commands'
+  };
+
+  const disabledExtensions = PageConfig.Extension.disabled.map(id => {
+    if (renamedPluginIds[id]) {
+      console.warn(`Plugin ${id} has been renamed to ${renamedPluginIds[id]}. Consider updating your config to use the new name.`);
+      return renamedPluginIds[id];
+    }
+    return id;
+  });
+
+  const deferredExtensions = PageConfig.Extension.deferred.map(id => {
+    if (renamedPluginIds[id]) {
+      console.warn(`Plugin id ${id} has been renamed to ${renamedPluginIds[id]}. Consider updating your config to use the new name.`);
+      return renamedPluginIds[id];
+    }
+    return id;
+  });
+
+
   // 2. Register the plugins
   pluginRegistry.registerPlugins(register);
 
@@ -216,12 +242,12 @@ export async function main() {
     connectionStatus,
     disabled: {
       matches: disabled,
-      patterns: PageConfig.Extension.disabled
+      patterns: disabledExtensions
         .map(function (val) { return val.raw; })
     },
     deferred: {
       matches: deferred,
-      patterns: PageConfig.Extension.deferred
+      patterns: deferredExtensions
         .map(function (val) { return val.raw; })
     },
     availablePlugins: allPlugins
