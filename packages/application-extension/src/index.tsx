@@ -30,6 +30,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
@@ -53,8 +54,7 @@ import { find, some } from '@lumino/algorithm';
 import {
   JSONExt,
   PromiseDelegate,
-  ReadonlyPartialJSONValue,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
@@ -762,25 +762,19 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 };
 
 /**
- * The context menu suppressor token.
- */
-const IContextMenuSuppressor = new Token<void>(
-  '__internal:context-menu-suppressor',
-  'A private token for a helper plugin that suppresses the context menu'
-);
-
-/**
  * Plugin to build the context menu from the settings.
  */
 const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:context-menu',
   description: 'Populates the context menu.',
   autoStart: true,
-  requires: [ISettingRegistry, ITranslator, IContextMenuSuppressor],
+  requires: [ISettingRegistry, ITranslator],
+  optional: [IMainMenu],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator,
+    mainMenu: IMainMenu | null
   ): void => {
     const trans = translator.load('jupyterlab');
 
@@ -808,32 +802,6 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
           reason
         );
       });
-  }
-};
-
-/**
- * Plugin to suppress the context menu if user has disabled it.
- */
-const contextMenuSuppressor: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:context-menu-suppressor',
-  description: 'Checks whether the context menu should be suppressed.',
-  autoStart: true,
-  provides: IContextMenuSuppressor,
-  requires: [ISettingRegistry, ITranslator],
-  activate: async (
-    app: JupyterFrontEnd,
-    registry: ISettingRegistry
-  ): Promise<void> => {
-    const updateSettings = (settings: ISettingRegistry.ISettings) => {
-      if (settings.get('disabled').composite) {
-        document.body.setAttribute('data-jp-suppress-context-menu', 'true');
-      } else {
-        document.body.removeAttribute('data-jp-suppress-context-menu');
-      }
-    };
-    const settings = await registry.load(contextMenuSuppressor.id);
-    updateSettings(settings);
-    settings.changed.connect(updateSettings);
   }
 };
 
@@ -1342,7 +1310,6 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   contextMenuPlugin,
-  contextMenuSuppressor,
   dirty,
   main,
   mainCommands,
@@ -1391,7 +1358,6 @@ namespace Private {
     const pluginId = contextMenuPlugin.id;
     let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
-
     /**
      * Populate the plugin's schema defaults.
      *
@@ -1477,6 +1443,18 @@ namespace Private {
     // preloaded all initial plugins.
     const settings = await registry.load(pluginId);
 
+    // Set the suppress flag on document.body if necessary.
+    const setDisabled = (settings: ISettingRegistry.ISettings) => {
+      const root = document.body;
+      const isDisabled = root.hasAttribute('data-jp-suppress-context-menu');
+      const shouldDisable = settings.get('disabled').composite;
+      if (isDisabled && !shouldDisable) {
+        root.removeAttribute('data-jp-suppress-context-menu');
+      } else if (shouldDisable && !isDisabled) {
+        root.setAttribute('data-jp-suppress-context-menu', 'true');
+      }
+    };
+
     const contextItems: ISettingRegistry.IContextMenuItem[] =
       (settings.composite.contextMenu as any) ?? [];
 
@@ -1500,6 +1478,7 @@ namespace Private {
       if (!JSONExt.deepEqual(contextItems, newItems)) {
         void displayInformation(trans);
       }
+      setDisabled(settings);
     });
 
     registry.pluginChanged.connect(async (sender, plugin) => {
@@ -1538,6 +1517,8 @@ namespace Private {
         }
       }
     });
+
+    setDisabled(settings);
   }
 
   export function activateSidebarSwitcher(
