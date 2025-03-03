@@ -2408,8 +2408,9 @@ function addCommands(
       // or if we are at the bottom of the notebook.
       return (
         isEnabledAndSingleSelected() &&
-        tracker.currentWidget!.content.activeCellIndex !==
-          tracker.currentWidget!.content.widgets.length - 1
+        (tracker.currentWidget!.content.widgets.length === 1 ||
+          tracker.currentWidget!.content.activeCellIndex !==
+            tracker.currentWidget!.content.widgets.length - 1)
       );
     }
   });
