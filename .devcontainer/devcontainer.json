@@ -9,7 +9,7 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [8888],
+  "forwardPorts": [80],
 
   // Use 'postCreateCommand' to run commands after the container is created.
   // Populate the yarn cache
