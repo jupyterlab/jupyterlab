@@ -371,6 +371,11 @@ export namespace CodeEditor {
     setOptions(options: Record<string, any>): void;
 
     /**
+     * Set a base config options for the editor.
+     */
+    setBaseOptions(options: Record<string, any>): void;
+
+    /**
      * Inject an extension into the editor
      *
      * @alpha

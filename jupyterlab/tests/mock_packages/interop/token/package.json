@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mock-token",
-  "version": "4.4.0-alpha.2",
+  "version": "4.4.0-beta.0",
   "private": true,
   "dependencies": {
     "@lumino/coreutils": "^2.2.0"

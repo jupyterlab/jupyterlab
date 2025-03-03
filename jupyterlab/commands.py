@@ -726,7 +726,7 @@ class _AppHandler:
         info = ["production" if production else "development"]
         if production:
             info.append("minimized" if minimize else "not minimized")
-        self.logger.info(f'Building jupyterlab assets ({", ".join(info)})')
+        self.logger.info(f"Building jupyterlab assets ({', '.join(info)})")
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -746,7 +746,7 @@ class _AppHandler:
 
         # Build the app.
         dedupe_yarn(staging, self.logger)
-        command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
+        command = f"build:{'prod' if production else 'dev'}{':minimize' if minimize else ''}"
         ret = self._run(["node", YARN_PATH, "run", command], cwd=staging)
         if ret != 0:
             msg = "JupyterLab failed to build"
@@ -2043,8 +2043,7 @@ class _AppHandler:
             # All singleton deps in current version of lab are newer than those
             # in the latest version of the extension
             return (
-                f'The extension "{name}" does not yet support the current version of '
-                "JupyterLab.\n"
+                f'The extension "{name}" does not yet support the current version of JupyterLab.\n'
             )
 
         parts = [

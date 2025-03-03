@@ -422,3 +422,71 @@ test('Settings Import: Importing a JSON file applies the correct settings', asyn
 
   fs.unlinkSync(importFilePath);
 });
+
+test('Ensure that fuzzy filter works properly', async ({ page }) => {
+  // Helper function to rename a notebook
+  const renameFile = async (oldName: string, newName: string) => {
+    await page
+      .locator(`.jp-DirListing-itemName:has-text("${oldName}")`)
+      .click();
+    await page.keyboard.press('F2');
+    await page.keyboard.type(newName);
+    await page.keyboard.press('Enter');
+  };
+
+  // Create and rename the first file
+  await page.menu.clickMenuItem('File>New>Text File');
+  await renameFile('untitled.txt', 'test');
+
+  // Create and rename the second file
+  await page.menu.clickMenuItem('File>New>Text File');
+  await renameFile('untitled.txt', 'tst');
+
+  // Enable file filter and apply a filter for "tst"
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('filebrowser:toggle-file-filter')
+  );
+  await page.locator('input[placeholder="Filter files by name"]').fill('tst');
+
+  // Both files should be visible
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(2);
+
+  // Change fuzzy filter setting
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'File Browser'
+    })
+  );
+  await page
+    .locator('label:has-text("Filter on file name with a fuzzy search")')
+    .click();
+
+  // Only one file should be visible
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
+});
+
+test('Read-only cells should remain read-only after changing settings', async ({
+  page
+}) => {
+  await page.notebook.createNew();
+  await page.sidebar.close();
+  await page.notebook.setCell(0, 'code', '"test"');
+
+  // Set the cell to read-only using the Property Inspector
+  await page.menu.clickMenuItem('View>Property Inspector');
+  await page.locator('.jp-Collapse:has-text("Common Tools")').click();
+  await page
+    .locator('select:has-text("Editable")')
+    .selectOption({ label: 'Read-Only' });
+
+  // Change a notebook setting (kernel preference)
+  await page.notebook
+    .getToolbarItemLocator('kernelName')
+    .then(item => item?.click());
+  await page.locator('.jp-Dialog-checkbox').click();
+  await page.locator('.jp-Dialog-button:has-text("Select")').click();
+
+  // Assert the first cell is still read-only
+  const cell = page.locator('.jp-Notebook-cell').nth(0);
+  await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
+});
