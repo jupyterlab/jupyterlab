@@ -99,7 +99,8 @@ export async function main() {
     return id;
   });
 
-  // Custom helper function to take into account the case of renamed plugins.
+  // This is basically a copy of PageConfig.Extension.isDisabled to
+  // take into account the case of renamed plugins.
   const isPluginDisabled = (id) => {
     const separatorIndex = id.indexOf(':');
     let extName = '';
@@ -109,7 +110,8 @@ export async function main() {
     return disabledExtensions.some(val => val === id || (extName && val === extName));
   }
 
-  // Custom helper function to take into account the case of renamed plugins.
+  // This is basically a copy of PageConfig.Extension.isDeferred to
+  // take into account the case of renamed plugins.
   const isPluginDeferred = (id) => {
     const separatorIndex = id.indexOf(':');
     let extName = '';
