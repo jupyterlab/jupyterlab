@@ -567,7 +567,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
-      this.editor.setOptions(this._editorConfig);
+      this.editor.setBaseOptions(this._editorConfig);
     }
   }
 
@@ -1604,7 +1604,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
-        this.model.executionState = 'idle';
+        if (args.newValue !== null) {
+          // Mark execution state if execution count was set.
+          this.model.executionState = 'idle';
+        }
         this._updatePrompt();
         break;
       case 'executionState':

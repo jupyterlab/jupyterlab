@@ -45,10 +45,12 @@ function RunningSessionsComponent(
       onKeyDown={props.handleKeyDown}
       style={{ cursor: 'pointer' }}
     >
-      <GroupItem spacing={HALF_SPACING}>
-        <TextItem source={props.terminals} />
-        <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
-      </GroupItem>
+      {props.terminals > 0 ? (
+        <GroupItem spacing={HALF_SPACING}>
+          <TextItem source={props.terminals} />
+          <terminalIcon.react verticalAlign="middle" stylesheet="statusBar" />
+        </GroupItem>
+      ) : null}
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.sessions} />
         <kernelIcon.react verticalAlign="middle" stylesheet="statusBar" />
@@ -124,11 +126,18 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     }
     // TODO-TRANS: Should probably be handled differently.
     // This is more localizable friendly: "Terminals: %1 | Kernels: %2"
-    this.title.caption = this._trans.__(
+
+    // Generate a localized caption for the tooltip
+    const caption = this._trans.__(
       '%1 Terminals, %2 Kernel sessions',
       this.model.terminals,
-      this.model!.sessions
+      this.model.sessions
     );
+
+    // Explicitly synchronize the title attribute with the Lumino widget's DOM
+    // This ensures the tooltip displays correctly when hovering over the widget
+    this.node.title = caption;
+
     return (
       <RunningSessionsComponent
         sessions={this.model.sessions}

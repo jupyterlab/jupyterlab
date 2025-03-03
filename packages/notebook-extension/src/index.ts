@@ -26,6 +26,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SemanticCommand,
   SessionContextDialogs,
   showDialog,
   Toolbar,
@@ -1418,10 +1419,7 @@ function activateCodeConsole(
     isVisible: () => {
       const kernel =
         tracker.currentWidget?.context.sessionContext.session?.kernel;
-      return (
-        (kernel?.supportsSubshells ?? false) &&
-        PageConfig.getOption('subshellConsole').toLowerCase() === 'true'
-      );
+      return kernel?.supportsSubshells ?? false;
     }
   });
 
@@ -2176,7 +2174,9 @@ function getCurrent(
   shell: JupyterFrontEnd.IShell,
   args: ReadonlyPartialJSONObject
 ): NotebookPanel | null {
-  const widget = tracker.currentWidget;
+  const widget = args[SemanticCommand.WIDGET]
+    ? tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null
+    : tracker.currentWidget;
   const activate = args['activate'] !== false;
 
   if (activate && widget) {
@@ -2352,7 +2352,6 @@ function addCommands(
 
       if (current) {
         const { context, content } = current;
-
         return NotebookActions.runAll(
           content,
           context.sessionContext,

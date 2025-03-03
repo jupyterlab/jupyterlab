@@ -43,6 +43,66 @@ The **icons in use** are in the ``ui-components/style/icons/debugger`` folder, w
    * - ``import { viewBreakpointIcon } from '@jupyterlab/debugger/lib/icons';``
      - ``import { viewBreakpointIcon } from '@jupyterlab/ui-components';``
 
+TypeScript update
+^^^^^^^^^^^^^^^^^
+
+As a follow-up to the update to TypeScript 5.5, the ``tsconfig.json`` configuration of the ``@jupyterlab/buildutils`` package changed
+the ``module`` option from ``commonjs`` to ``Node16``:
+
+.. code:: diff
+
+   index 7095bede4bd5..8c5bff0d45d8 100644
+   --- a/buildutils/tsconfig.json
+   +++ b/buildutils/tsconfig.json
+   @@ -3,7 +3,7 @@
+     "compilerOptions": {
+       "outDir": "lib",
+       "rootDir": "src",
+   -   "module": "commonjs",
+   +   "module": "Node16",
+       "moduleResolution": "node16"
+     },
+     "include": ["src/*"],
+
+Support for Conditional Rendering in GroupItem
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As of JupyterLab 4.4, the ``GroupItem`` component now supports conditional
+rendering of elements. This improvement allows the component to gracefully handle ``null`` or
+``undefined`` children, eliminating the need for placeholder elements like ``<div></div>``.
+
+**Recommended Update for Extension Authors:**
+Review your usage of ``GroupItem`` and replace any empty elements used as placeholders
+with ``null`` values. This change ensures cleaner and more maintainable code while leveraging
+the updated rendering logic.
+
+**Example Update:**
+
+**Before:**
+
+.. code-block:: tsx
+
+   <GroupItem spacing={8}>
+     {condition ? <SomeComponent /> : <div></div>}
+   </GroupItem>
+
+**After:**
+
+.. code-block:: tsx
+
+   <GroupItem spacing={8}>
+     {condition ? <SomeComponent /> : null}
+   </GroupItem>
+
+This change improves both the rendering performance and the maintainability of extensions
+using the ``GroupItem`` component.
+
+Plugins
+^^^^^^^
+
+- ``@jupyterlab/translation-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
+
 JupyterLab 4.2 to 4.3
 ---------------------
 
