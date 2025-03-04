@@ -47,7 +47,7 @@ export namespace ConfigSection {
    * @returns A Promise that is fulfilled with the config section is loaded.
    *
    * @deprecated Creating a config section via the `ConfigSection.create()` global has been deprecated and may be removed in a future version.
-   * Instead, require the config section manager service via the `IConfigSectionManager` token in a plugin.
+   * Instead, require the config section manager via the `IConfigSectionManager` token in a plugin.
    */
   export async function create(
     options: ConfigSection.IOptions
