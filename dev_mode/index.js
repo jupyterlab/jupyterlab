@@ -78,6 +78,7 @@ export async function main() {
   // other lab-based applications (they may not use the same set of plugins).
   const renamedPluginIds = {
     '@jupyterlab/application:mimedocument': '@jupyterlab/application-extension:mimedocument',
+    '@jupyterlab/help-extension:licenses': '@jupyterlab/apputils-extension:licenses-plugin',
     '@jupyterlab/lsp:ILSPCodeExtractorsManager': '@jupyterlab/lsp-extension:code-extractor-manager',
     '@jupyterlab/translation:translator': '@jupyterlab/translation-extension:translator',
     '@jupyterlab/workspaces:commands': '@jupyterlab/workspaces-extension:commands'
