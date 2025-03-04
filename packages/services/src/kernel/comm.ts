@@ -230,7 +230,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   private _maybeCloseSubshell() {
-    if (this._subshellId) {
+    if (this._subshellId && this._kernel.status !== 'dead') {
       this._kernel.requestDeleteSubshell(
         { subshell_id: this._subshellId },
         true
