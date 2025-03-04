@@ -215,9 +215,9 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   dispose(): void {
-    super.dispose();
-
     this._maybeCloseSubshell();
+
+    super.dispose();
   }
 
   private async _maybeStartSubshell() {
