@@ -163,16 +163,20 @@ export const licensesTracker: JupyterFrontEndPlugin<ILicensesTracker> = {
 export const licensesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:licenses-plugin',
   description: 'Adds licenses reporting tools.',
-  requires: [ILicensesTracker, ITranslator],
-  optional: [IMainMenu, ICommandPalette],
+  requires: [ITranslator],
+  optional: [ILicensesTracker, IMainMenu, ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    licensesTracker: ILicensesTracker,
     translator: ITranslator,
+    licensesTracker: ILicensesTracker | null,
     menu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
+    if (!licensesTracker) {
+      return;
+    }
+
     const { commands } = app;
 
     const trans = translator.load('jupyterlab');
