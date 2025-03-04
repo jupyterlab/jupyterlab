@@ -90,6 +90,7 @@
   "@jupyterlab/toc:ITableOfContentsRegistry": "A service to register table of content factory.",
   "@jupyterlab/toc:ITableOfContentsTracker": "A widget tracker for table of contents.",
   "@jupyterlab/tooltip:ITooltipManager": "A service for the tooltip manager for the application. Use this to allow your extension to invoke a tooltip.",
+  "@jupyterlab/translation:ITranslatorConnector": "A service to connect to the server translation endpoint.",
   "@jupyterlab/translation:ITranslator": "A service to translate strings.",
   "@jupyterlab/ui-components:ILabIconManager": "A service to register and request icons.",
   "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration.",
