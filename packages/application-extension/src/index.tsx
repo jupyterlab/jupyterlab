@@ -770,10 +770,12 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Populates the context menu.',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator,
+    palette: ICommandPalette | null
   ): void => {
     const trans = translator.load('jupyterlab');
 
@@ -795,6 +797,14 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
           createMenu,
           translator
         );
+      })
+      .then(() => {
+        if (palette) {
+          palette?.addItem({
+            category: trans.__('Settings'),
+            command: CommandIDs.toggleContextMenu
+          });
+        }
       })
       .catch(reason => {
         console.error(
@@ -1522,7 +1532,7 @@ namespace Private {
     // Handle disabled status.
     setDisabled(settings);
     commands.addCommand(CommandIDs.toggleContextMenu, {
-      label: trans.__('Enable Context (right-click) Menu'),
+      label: trans.__('Enable Context Menu'),
       isToggleable: true,
       isToggled: () => !settings.get('disabled').composite,
       execute: () =>
