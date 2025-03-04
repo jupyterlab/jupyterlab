@@ -22,7 +22,7 @@ test('All plugins and tokens must have a description', async ({
     pluginIDs.sort();
 
     const plugins: Record<string, string> = {};
-    const tokens: Record<string, string> = {};
+    const tokens: Record<string, string | undefined> = {};
     pluginIDs.forEach(id => {
       if (
         !id.startsWith('@jupyterlab/') ||
@@ -44,7 +44,14 @@ test('All plugins and tokens must have a description', async ({
       }
     });
 
-    return Promise.resolve({ plugins, tokens });
+    // sort the tokens
+    const tokenKeys = Object.keys(tokens).sort();
+    const sortedTokens: Record<string, string | undefined> = {};
+    tokenKeys.forEach(key => {
+      sortedTokens[key] = tokens[key];
+    });
+
+    return Promise.resolve({ plugins, tokens: sortedTokens });
   }, IGNORED_PLUGINS);
 
   if (!(await fs.pathExists(testInfo.snapshotDir))) {
