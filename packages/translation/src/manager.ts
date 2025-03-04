@@ -4,6 +4,7 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
 import {
+  DEFAULT_LANGUAGE_CODE,
   ITranslator,
   ITranslatorConnector,
   TranslationBundle,
@@ -33,10 +34,13 @@ export class TranslationManager implements ITranslator {
       connector ?? new TranslatorConnector(translationsUrl, serverSettings);
     this._stringsPrefix = stringsPrefix || '';
     this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });
+    this._currentLocale = DEFAULT_LANGUAGE_CODE;
   }
 
   /**
-   * Get the language code of the current locale.
+   * Get the language code (tag) of the current locale.
+   *
+   * It respects BCP47 (RFC5646): https://datatracker.ietf.org/doc/html/rfc5646
    */
   get languageCode(): string {
     return this._currentLocale;
@@ -49,26 +53,29 @@ export class TranslationManager implements ITranslator {
    */
   async fetch(locale: string): Promise<void> {
     this._languageData = await this._connector.fetch({ language: locale });
+    let serverLocale: string | undefined;
     if (this._languageData && locale === 'default') {
       try {
         for (const lang of Object.values(this._languageData.data ?? {})) {
-          this._currentLocale =
+          serverLocale =
             // If the language is provided by the system set up, we need to retrieve the final
             // language. This is done through the `""` entry in `_languageData` that contains
             // language metadata.
-            ((lang as any)['']['language'] as string).replace('_', '-');
+            (lang as any)['']['language'] as string;
           break;
         }
       } catch (reason) {
-        this._currentLocale = 'en';
+        // no-op
       }
-    } else {
-      this._currentLocale = locale;
     }
+
+    this._currentLocale = (
+      locale !== 'default' ? locale : serverLocale ?? DEFAULT_LANGUAGE_CODE
+    ).replace('_', '-');
 
     this._domainData = this._languageData?.data ?? {};
     const message: string = this._languageData?.message;
-    if (message && locale !== 'en') {
+    if (message && this._currentLocale !== DEFAULT_LANGUAGE_CODE) {
       console.warn(message);
     }
   }
@@ -80,7 +87,7 @@ export class TranslationManager implements ITranslator {
    */
   load(domain: string): TranslationBundle {
     if (this._domainData) {
-      if (this._currentLocale == 'en') {
+      if (this._currentLocale == DEFAULT_LANGUAGE_CODE) {
         return this._englishBundle;
       } else {
         domain = normalizeDomain(domain);

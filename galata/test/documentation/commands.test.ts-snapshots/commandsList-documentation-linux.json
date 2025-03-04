@@ -1403,13 +1403,13 @@
   {
     "id": "jupyterlab-translation:en",
     "label": "English",
-    "caption": "English",
+    "caption": "Change interface language to English",
     "shortcuts": []
   },
   {
     "id": "jupyterlab-translation:zh_CN",
     "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "caption": "Change interface language to Chinese (Simplified, China) - 中文 (简体, 中国)",
     "shortcuts": []
   },
   {
