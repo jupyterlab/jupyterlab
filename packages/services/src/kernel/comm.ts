@@ -26,7 +26,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this._id = id;
     this._target = target;
     this._kernel = kernel;
-    this._maybeStartSubshell();
+    void this._maybeStartSubshell();
   }
 
   /**
