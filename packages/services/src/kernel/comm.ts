@@ -221,6 +221,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   private async _maybeStartSubshell() {
+    await this._kernel.info;
     if (this._kernel.supportsSubshells) {
       // Create subshell
       const replyMsg = await this._kernel.requestCreateSubshell({}).done;
