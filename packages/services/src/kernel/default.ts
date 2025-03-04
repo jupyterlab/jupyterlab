@@ -24,7 +24,7 @@ import {
 import * as validate from './validate';
 import { KernelSpec, KernelSpecAPI } from '../kernelspec';
 
-import * as restapi from './restapi';
+import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
 
 // Stub for requirejs.
 declare let requirejs: any;
@@ -50,6 +50,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._id = options.model.id;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this._kernelAPIClient =
+      options.kernelAPIClient ??
+      new KernelAPIClient({ serverSettings: this.serverSettings });
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
@@ -262,6 +265,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       serverSettings: this.serverSettings,
       // handleComms defaults to false since that is safer
       handleComms: false,
+      kernelAPIClient: this._kernelAPIClient,
       ...options
     });
   }
@@ -491,7 +495,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    return restapi.interruptKernel(this.id, this.serverSettings);
+    return this._kernelAPIClient.interruptKernel(this.id);
   }
 
   /**
@@ -519,7 +523,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._clearKernelState();
     this._kernelSession = RESTARTING_KERNEL_SESSION;
-    await restapi.restartKernel(this.id, this.serverSettings);
+    await this._kernelAPIClient.restartKernel(this.id);
     // Reconnect to the kernel to address cases where kernel ports
     // have changed during the restart.
     await this.reconnect();
@@ -577,7 +581,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   async shutdown(): Promise<void> {
     if (this.status !== 'dead') {
-      await restapi.shutdownKernel(this.id, this.serverSettings);
+      await this._kernelAPIClient.shutdownKernel(this.id);
     }
     this.handleShutdown();
   }
@@ -1396,7 +1400,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     const settings = this.serverSettings;
     const partialUrl = URLExt.join(
       settings.wsUrl,
-      restapi.KERNEL_SERVICE_URL,
+      KERNEL_SERVICE_URL,
       encodeURIComponent(this._id)
     );
 
@@ -1435,7 +1439,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._reason = '';
       this._model = undefined;
       try {
-        const model = await restapi.getKernelModel(this._id, settings);
+        const model = await this._kernelAPIClient.getKernelModel(this._id);
         this._model = model;
         if (model?.execution_state === 'dead') {
           this._updateStatus('dead');
@@ -1785,6 +1789,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Websocket to communicate with kernel.
    */
   private _ws: WebSocket | null = null;
+  private _kernelAPIClient: Kernel.IKernelAPIClient;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
