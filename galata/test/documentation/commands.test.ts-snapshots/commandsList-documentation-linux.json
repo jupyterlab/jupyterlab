@@ -71,7 +71,7 @@
   },
   {
     "id": "application:toggle-context-menu",
-    "label": "Enable Context (right-click) Menu",
+    "label": "Enable Context Menu",
     "caption": "",
     "shortcuts": []
   },
