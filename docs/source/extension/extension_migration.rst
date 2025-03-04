@@ -100,8 +100,14 @@ using the ``GroupItem`` component.
 Plugins
 ^^^^^^^
 
+- ``@jupyterlab/application-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/application:mimedocument`` plugin id has been renamed to ``@jupyterlab/application-extension:mimedocument``
+- ``@jupyterlab/lsp-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/lsp:ILSPCodeExtractorsManager`` plugin id has been renamed to ``@jupyterlab/lsp-extension:code-extractor-manager``
 - ``@jupyterlab/translation-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
+- ``@jupyterlab/workspaces-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/workspaces:commands`` plugin id has been renamed to ``@jupyterlab/workspaces-extension:commands``
 
 JupyterLab 4.2 to 4.3
 ---------------------
