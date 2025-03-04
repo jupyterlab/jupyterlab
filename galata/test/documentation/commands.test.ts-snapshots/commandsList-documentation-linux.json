@@ -70,6 +70,12 @@
     "shortcuts": []
   },
   {
+    "id": "application:toggle-context-menu",
+    "label": "Enable Context Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "application:toggle-fullscreen-mode",
     "label": "Fullscreen Mode",
     "caption": "",
