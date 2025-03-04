@@ -73,6 +73,57 @@ export async function main() {
     PageConfig.getOption('federated_extensions')
   );
 
+  // Keep a mapping of renamed plugin ids to ensure user configs don't break.
+  // The mapping is defined in the main index.js for JupyterLab, since it may not be relevant for
+  // other lab-based applications (they may not use the same set of plugins).
+  const renamedPluginIds = {
+    '@jupyterlab/application:mimedocument': '@jupyterlab/application-extension:mimedocument',
+    '@jupyterlab/lsp:ILSPCodeExtractorsManager': '@jupyterlab/lsp-extension:code-extractor-manager',
+    '@jupyterlab/translation:translator': '@jupyterlab/translation-extension:translator',
+    '@jupyterlab/workspaces:commands': '@jupyterlab/workspaces-extension:commands'
+  };
+
+  // Transparently handle the case of renamed plugins, so current configs don't break.
+  // And emit a warning in the dev tools console to notify about the rename so
+  // users can update their config.
+  const disabledExtensions = PageConfig.Extension.disabled.map(id => {
+    if (renamedPluginIds[id]) {
+      console.warn(`Plugin ${id} has been renamed to ${renamedPluginIds[id]}. Consider updating your config to use the new name.`);
+      return renamedPluginIds[id];
+    }
+    return id;
+  });
+
+  const deferredExtensions = PageConfig.Extension.deferred.map(id => {
+    if (renamedPluginIds[id]) {
+      console.warn(`Plugin id ${id} has been renamed to ${renamedPluginIds[id]}. Consider updating your config to use the new name.`);
+      return renamedPluginIds[id];
+    }
+    return id;
+  });
+
+  // This is basically a copy of PageConfig.Extension.isDisabled to
+  // take into account the case of renamed plugins.
+  const isPluginDisabled = (id) => {
+    const separatorIndex = id.indexOf(':');
+    let extName = '';
+    if (separatorIndex !== -1) {
+      extName = id.slice(0, separatorIndex);
+    }
+    return disabledExtensions.some(val => val === id || (extName && val === extName));
+  }
+
+  // This is basically a copy of PageConfig.Extension.isDeferred to
+  // take into account the case of renamed plugins.
+  const isPluginDeferred = (id) => {
+    const separatorIndex = id.indexOf(':');
+    let extName = '';
+    if (separatorIndex !== -1) {
+      extName = id.slice(0, separatorIndex);
+    }
+    return deferredExtensions.some(val => val === id || (extName && val === extName));
+  }
+
   const queuedFederated = [];
 
   extensions.forEach(data => {
@@ -85,7 +136,7 @@ export async function main() {
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
 
-    if (data.style && !PageConfig.Extension.isDisabled(data.name)) {
+    if (data.style && !isPluginDisabled(data.name)) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
   });
@@ -117,7 +168,7 @@ export async function main() {
   function* activePlugins(extension) {
     const plugins = getPlugins(extension);
     for (let plugin of plugins) {
-      const isDisabled = PageConfig.Extension.isDisabled(plugin.id);
+      const isDisabled = isPluginDisabled(plugin.id);
       allPlugins.push({
         id: plugin.id,
         description: plugin.description,
@@ -132,7 +183,7 @@ export async function main() {
         disabled.push(plugin.id);
         continue;
       }
-      if (PageConfig.Extension.isDeferred(plugin.id)) {
+      if (isPluginDeferred(plugin.id)) {
         deferred.push(plugin.id);
         ignorePlugins.push(plugin.id);
       }
@@ -216,12 +267,12 @@ export async function main() {
     connectionStatus,
     disabled: {
       matches: disabled,
-      patterns: PageConfig.Extension.disabled
+      patterns: disabledExtensions
         .map(function (val) { return val.raw; })
     },
     deferred: {
       matches: deferred,
-      patterns: PageConfig.Extension.deferred
+      patterns: deferredExtensions
         .map(function (val) { return val.raw; })
     },
     availablePlugins: allPlugins
