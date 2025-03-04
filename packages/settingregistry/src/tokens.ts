@@ -18,7 +18,7 @@ import { ISchemaValidator } from './settingregistry';
 import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 /**
- * A service to connect to the server endpoint.
+ * A service to connect to the settings endpoint.
  */
 export const ISettingConnector = new Token<ISettingConnector>(
   '@jupyterlab/coreutils:ISettingConnector',

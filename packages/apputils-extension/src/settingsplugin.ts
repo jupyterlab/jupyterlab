@@ -16,7 +16,7 @@ import {
 import { SettingConnector } from './settingconnector';
 
 /**
- * Provide the settings connector as a separate plugin to allow for alternative
+ * Provides the settings connector as a separate plugin to allow for alternative
  * implementations that may want to fetch settings from a different source or
  * endpoint.
  */
