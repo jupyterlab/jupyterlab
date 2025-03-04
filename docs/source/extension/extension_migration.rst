@@ -124,7 +124,7 @@ Plugins
    * The ``@jupyterlab/application:mimedocument`` plugin id has been renamed to ``@jupyterlab/application-extension:mimedocument``
 - ``@jupyterlab/help-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/help-extension:licences`` plugin id has been moved to the ``@jupyterlab/apputils-extension`` extension,
-   and is now named ``@jupyterlab/apputils-extension:licenses-plugin``
+     and is now named ``@jupyterlab/apputils-extension:licenses-plugin``
 - ``@jupyterlab/lsp-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/lsp:ILSPCodeExtractorsManager`` plugin id has been renamed to ``@jupyterlab/lsp-extension:code-extractor-manager``
 - ``@jupyterlab/translation-extension`` from 4.3 to 4.4
