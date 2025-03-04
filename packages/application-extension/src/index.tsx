@@ -94,6 +94,8 @@ namespace CommandIDs {
 
   export const resetLayout: string = 'application:reset-layout';
 
+  export const toggleContextMenu: string = 'application:toggle-context-menu';
+
   export const toggleHeader: string = 'application:toggle-header';
 
   export const toggleMode: string = 'application:toggle-mode';
@@ -768,10 +770,12 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Populates the context menu.',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator,
+    palette: ICommandPalette | null
   ): void => {
     const trans = translator.load('jupyterlab');
 
@@ -788,10 +792,19 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
       .then(() => {
         return Private.loadSettingsContextMenu(
           app.contextMenu,
+          app.commands,
           settingRegistry,
           createMenu,
           translator
         );
+      })
+      .then(() => {
+        if (palette) {
+          palette?.addItem({
+            category: trans.__('Settings'),
+            command: CommandIDs.toggleContextMenu
+          });
+        }
       })
       .catch(reason => {
         console.error(
@@ -1347,6 +1360,7 @@ namespace Private {
 
   export async function loadSettingsContextMenu(
     contextMenu: ContextMenuSvg,
+    commands: CommandRegistry,
     registry: ISettingRegistry,
     menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
     translator: ITranslator
@@ -1355,7 +1369,6 @@ namespace Private {
     const pluginId = contextMenuPlugin.id;
     let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
-
     /**
      * Populate the plugin's schema defaults.
      *
@@ -1441,6 +1454,18 @@ namespace Private {
     // preloaded all initial plugins.
     const settings = await registry.load(pluginId);
 
+    // Set the suppress flag on document.body if necessary.
+    const setDisabled = (settings: ISettingRegistry.ISettings) => {
+      const root = document.body;
+      const isDisabled = root.hasAttribute('data-jp-suppress-context-menu');
+      const shouldDisable = settings.get('disabled').composite;
+      if (isDisabled && !shouldDisable) {
+        root.removeAttribute('data-jp-suppress-context-menu');
+      } else if (shouldDisable && !isDisabled) {
+        root.setAttribute('data-jp-suppress-context-menu', 'true');
+      }
+    };
+
     const contextItems: ISettingRegistry.IContextMenuItem[] =
       (settings.composite.contextMenu as any) ?? [];
 
@@ -1464,6 +1489,7 @@ namespace Private {
       if (!JSONExt.deepEqual(contextItems, newItems)) {
         void displayInformation(trans);
       }
+      setDisabled(settings);
     });
 
     registry.pluginChanged.connect(async (sender, plugin) => {
@@ -1501,6 +1527,16 @@ namespace Private {
           }
         }
       }
+    });
+
+    // Handle disabled status.
+    setDisabled(settings);
+    commands.addCommand(CommandIDs.toggleContextMenu, {
+      label: trans.__('Enable Context Menu'),
+      isToggleable: true,
+      isToggled: () => !settings.get('disabled').composite,
+      execute: () =>
+        void settings.set('disabled', !settings.get('disabled').composite)
     });
   }
 
