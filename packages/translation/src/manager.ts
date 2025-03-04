@@ -40,7 +40,7 @@ export class TranslationManager implements ITranslator {
   /**
    * Get the language code (tag) of the current locale.
    *
-   * It respects RFC5646: https://datatracker.ietf.org/doc/html/rfc5646
+   * It respects BCP47 (RFC5646): https://datatracker.ietf.org/doc/html/rfc5646
    */
   get languageCode(): string {
     return this._currentLocale;
