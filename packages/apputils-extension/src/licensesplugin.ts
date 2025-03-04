@@ -153,7 +153,7 @@ export const licensesTracker: JupyterFrontEndPlugin<ILicensesTracker> = {
 };
 
 export const licensesPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:licenses',
+  id: '@jupyterlab/apputils-extension:licenses-plugin',
   description: 'Adds licenses reporting tools.',
   requires: [ILicensesTracker, ITranslator],
   optional: [IMainMenu, ICommandPalette],
