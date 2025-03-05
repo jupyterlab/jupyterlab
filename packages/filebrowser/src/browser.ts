@@ -405,8 +405,8 @@ export class FileBrowser extends SidePanel {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  delete(): Promise<void> {
-    return this.listing.delete();
+  delete(deleteToTrash: boolean  = false): Promise<void> {
+    return this.listing.delete(deleteToTrash);
   }
 
   /**

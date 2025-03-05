@@ -425,30 +425,32 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  async delete(): Promise<void> {
+  async delete(deleteToTrash: boolean = false): Promise<void> {
     const items = this._sortedItems.filter(item => this.selection[item.path]);
 
     if (!items.length) {
       return;
     }
 
+    const actionMessage  = deleteToTrash ? "move to trash" : "permanently delete";
+    const actionName = deleteToTrash ? this._trans.__('Move to Trash') : this._trans.__('Delete');
     const message =
       items.length === 1
         ? this._trans.__(
-            'Are you sure you want to permanently delete: %1?',
+            `Are you sure you want to ${actionMessage}: %1?`,
             items[0].name
           )
         : this._trans._n(
-            'Are you sure you want to permanently delete the %1 selected item?',
-            'Are you sure you want to permanently delete the %1 selected items?',
+            `Are you sure you want to ${actionMessage} the %1 selected item?`,
+            `Are you sure you want to ${actionMessage} the %1 selected items?`,
             items.length
           );
     const result = await showDialog({
-      title: this._trans.__('Delete'),
+      title: actionName,
       body: message,
       buttons: [
         Dialog.cancelButton({ label: this._trans.__('Cancel') }),
-        Dialog.warnButton({ label: this._trans.__('Delete') })
+        Dialog.warnButton({ label: actionName })
       ],
       // By default focus on "Cancel" to protect from accidental deletion
       // ("delete" and "Enter" are next to each other on many keyboards).
