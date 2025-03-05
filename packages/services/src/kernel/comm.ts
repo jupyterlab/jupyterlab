@@ -21,16 +21,13 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     id: string,
     kernel: Kernel.IKernelConnection,
     disposeCb: () => void,
-    commsOverSubshells?: boolean,
+    commsOverSubshells?: boolean
   ) {
     super(disposeCb);
     this._id = id;
     this._target = target;
     this._kernel = kernel;
-    this._commsOverSubshells = commsOverSubshells ?? false;
-    if (this._commsOverSubshells) {
-      void this._maybeStartSubshell();
-    }
+    this.commsOverSubshells = commsOverSubshells ?? false;
   }
 
   /**
@@ -45,6 +42,32 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   get targetName(): string {
     return this._target;
+  }
+
+  /**
+   * The current subshell id.
+   */
+  get subshellId(): string | null {
+    return this._subshellId;
+  }
+
+  /**
+   * Whether comms are running on a subshell, or not
+   */
+  get commsOverSubshells(): boolean {
+    return !!this.subshellId && this._commsOverSubshells;
+  }
+
+  /**
+   * Set whether comms are running on subshells, or not
+   */
+  set commsOverSubshells(value: boolean) {
+    this._commsOverSubshells = value;
+    if (this._commsOverSubshells) {
+      void this._maybeStartSubshell();
+    } else {
+      this._maybeCloseSubshell();
+    }
   }
 
   /**
@@ -240,6 +263,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         true
       );
     }
+    this._subshellId = null;
   }
 
   private _commsOverSubshells: boolean;
