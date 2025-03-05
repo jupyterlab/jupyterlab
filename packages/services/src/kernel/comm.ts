@@ -20,13 +20,17 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     target: string,
     id: string,
     kernel: Kernel.IKernelConnection,
-    disposeCb: () => void
+    disposeCb: () => void,
+    commsOverSubshells?: boolean,
   ) {
     super(disposeCb);
     this._id = id;
     this._target = target;
     this._kernel = kernel;
-    void this._maybeStartSubshell();
+    this._commsOverSubshells = commsOverSubshells ?? false;
+    if (this._commsOverSubshells) {
+      void this._maybeStartSubshell();
+    }
   }
 
   /**
@@ -238,6 +242,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     }
   }
 
+  private _commsOverSubshells: boolean;
   private _subshellId: string | null = null;
 
   private _target = '';

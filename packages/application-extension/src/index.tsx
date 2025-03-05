@@ -816,6 +816,38 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Plugin to configure subshells usage through settings.
+ */
+const kernelSubshellsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:kernel-subshells',
+  description: 'Configure the subshells usage through settings.',
+  autoStart: true,
+  requires: [ISettingRegistry, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
+  ): void => {
+    // Load the context menu lately so plugins are loaded.
+    app.started.then(async () => {
+      const subshellsSettings = await settingRegistry.load(kernelSubshellsPlugin.id);
+
+      const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
+        .composite as boolean;
+
+      app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
+
+      subshellsSettings.changed.connect(() => {
+        const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
+          .composite as boolean;
+        app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
+        console.log('changed comms over subshells', app.serviceManager.kernels.commsOverSubshells);
+      })
+    });
+  }
+};
+
+/**
  * Check if the application is dirty before closing the browser tab.
  */
 const dirty: JupyterFrontEndPlugin<void> = {
@@ -1320,6 +1352,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   contextMenuPlugin,
+  kernelSubshellsPlugin,
   dirty,
   main,
   mainCommands,

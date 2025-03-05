@@ -112,6 +112,19 @@ export interface IKernelConnection extends IObservableDisposable {
   handleComms: boolean;
 
   /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * If enabled, we'll create one subshell per-comm, this may lead to issue
+   * if many comms are open, so it's disabled by default.
+   */
+  commsOverSubshells?: boolean;
+
+  /**
    * Whether the kernel connection has pending input.
    *
    * #### Notes
@@ -655,6 +668,19 @@ export namespace IKernelConnection {
     handleComms?: boolean;
 
     /**
+     * Whether comm messages should be sent to kernel subshells, if the
+     * kernel supports it.
+     *
+     * #### Notes
+     * Sending comm messages over subshells allows processing comms whilst
+     * processing execute-request on the "main shell". This prevents blocking
+     * comm processing.
+     * If enabled, we'll create one subshell per-comm, this may lead to issue
+     * if many comms are open, so it's disabled by default.
+     */
+    commsOverSubshells?: boolean;
+
+    /**
      * The unique identifier for the kernel client.
      */
     clientId?: string;
@@ -706,6 +732,19 @@ export interface IManager extends IBaseManager {
    * The number of running kernels.
    */
   readonly runningCount: number;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * If enabled, we'll create one subshell per-comm, this may lead to issue
+   * if many comms are open, so it's disabled by default.
+   */
+  commsOverSubshells: boolean;
 
   /**
    * Force a refresh of the running kernels.
