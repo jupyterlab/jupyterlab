@@ -917,17 +917,18 @@ function addCommands(
   const trans = translator.load('jupyterlab');
   const { docRegistry: registry, commands } = app;
   const { tracker } = factory;
+  const deleteToTrash = PageConfig.getOption('delete_to_trash') === 'true';
 
   commands.addCommand(CommandIDs.del, {
     execute: () => {
       const widget = tracker.currentWidget;
 
       if (widget) {
-        return widget.delete();
+        return widget.delete(deleteToTrash);
       }
     },
     icon: closeIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Delete'),
+    label: deleteToTrash ? trans.__('Move to Trash') : trans.__('Delete'),
     mnemonic: 0
   });
 
