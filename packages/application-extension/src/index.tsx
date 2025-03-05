@@ -829,26 +829,27 @@ const kernelSubshellsPlugin: JupyterFrontEndPlugin<void> = {
     translator: ITranslator
   ): void => {
     // Load the context menu lately so plugins are loaded.
-    app.started.then(async () => {
-      const subshellsSettings = await settingRegistry.load(
-        kernelSubshellsPlugin.id
-      );
+    app.started
+      .then(async () => {
+        const subshellsSettings = await settingRegistry.load(
+          kernelSubshellsPlugin.id
+        );
 
-      const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
-        .composite as boolean;
-
-      app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
-
-      subshellsSettings.changed.connect(() => {
         const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
           .composite as boolean;
+
         app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
+
+        subshellsSettings.changed.connect(() => {
+          const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
+            .composite as boolean;
+          app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
+        });
+      })
+      .catch(reason => {
+        console.error('Fail to load settings for the subshells.');
+        console.error(reason);
       });
-    })
-    .catch(reason => {
-      console.error('Fail to load settings for the subshells.');
-      console.error(reason);
-    });;
   }
 };
 
