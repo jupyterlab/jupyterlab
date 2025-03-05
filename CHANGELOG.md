@@ -4,6 +4,57 @@
 
 # JupyterLab Changelog
 
+## v4.4
+
+JupyterLab 4.4 includes a number of new features (described below), bug fixes, and enhancements.
+This release is compatible with extensions supporting JupyterLab 4.0.
+Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-3-to-4-4) which lists deprecations and changes to the public API.
+
+### Code console improvements
+
+TODO
+
+### Settings import and export
+
+Settings can now be exported to `overrides.json` from the Settings Editor,
+which can be used to pre-configure defaults on deployments or for restoring
+the settings.
+
+### Workspace indicator
+
+An opt-in workspace indicator displayed on the top bar (next to the menu bar) can be enabled
+in the Settings → View → Appearance → Show Workspace Indicator.
+
+### Support for collaboration without `RTC:` drive
+
+Real time collaboration in previous versions of JupyterLab
+(which can be enabled by installing jupyter-collaboration package)
+was implemented by swapping the default JupyterLab file system
+drive to a collaborative drive with the `RTC:` prefix.
+This was not compatible with multiple extensions.
+JupyterLab 4.4 introduces Content Providers API which will
+enable the next version of `jupyter-collaboration` to work
+without changing the drive prefix, and thus improves
+compatibility with extensions which do not support arbitrary drives.
+
+
+### Kernel subshells support
+
+TODO
+
+### Context menu opt-out
+
+The context menu, available under right mouse click in browsers, can now be disabled globally
+by toggling the `Enable Context Menu` option available in the Command Palette,
+r via JSON Settings Editor in the Application Context Menu.
+
+### Slimmer status bar
+
+The terminals counter no longer shows up on the status bar if no terminals are open.
+The kernels counter can be disabled by toggling the "Show the status bar item" setting
+in "Running Terminals and Kernels" (code name `showStatusBarItem`).
+
+
 ## v4.3
 
 JupyterLab 4.3 includes a number of new features (described below), bug fixes, and enhancements.
