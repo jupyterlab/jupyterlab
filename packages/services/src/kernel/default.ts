@@ -53,6 +53,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
+    this._commsOverSubshells = options.commsOverSubshells ?? false;
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
@@ -78,6 +79,29 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * See https://github.com/jupyter/jupyter_client/issues/263
    */
   readonly handleComms: boolean;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * If enabled, we'll create one subshell per-comm, this may lead to issue
+   * if many comms are open, so it's disabled by default.
+   */
+  get commsOverSubshells(): boolean {
+    return this._commsOverSubshells;
+  };
+
+  set commsOverSubshells(value: boolean) {
+    this._commsOverSubshells = value;
+
+    for (const [_, comm] of this._comms) {
+      const handler = comm as CommHandler;
+    }
+  };
 
   /**
    * A signal emitted when the kernel status changes.
@@ -262,6 +286,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       serverSettings: this.serverSettings,
       // handleComms defaults to false since that is safer
       handleComms: false,
+      commsOverSubshells: false,
       ...options
     });
   }
@@ -1008,7 +1033,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     const comm = new CommHandler(targetName, commId, this, () => {
       this._unregisterComm(commId);
-    });
+    }, this._commsOverSubshells);
     this._comms.set(commId, comm);
     return comm;
   }
@@ -1309,13 +1334,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
   ): Promise<void> {
     this._assertCurrentMessage(msg);
     const content = msg.content;
+    console.log('create comm over subshell', this.commsOverSubshells);
     const comm = new CommHandler(
       content.target_name,
       content.comm_id,
       this,
       () => {
         this._unregisterComm(content.comm_id);
-      }
+      },
+      this.commsOverSubshells
     );
     this._comms.set(content.comm_id, comm);
 
@@ -1793,6 +1820,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     KernelMessage.supportedKernelWebSocketProtocols
   );
   private _selectedProtocol: string = '';
+
+  private _commsOverSubshells: boolean;
 
   private _futures = new Map<
     string,
