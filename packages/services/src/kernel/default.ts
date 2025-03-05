@@ -96,15 +96,16 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   get commsOverSubshells(): boolean {
     return this._commsOverSubshells;
-  };
+  }
 
   set commsOverSubshells(value: boolean) {
     this._commsOverSubshells = value;
 
     for (const [_, comm] of this._comms) {
-      const handler = comm as CommHandler;
+      const handler = comm;
+      handler.commsOverSubshells = value;
     }
-  };
+  }
 
   /**
    * A signal emitted when the kernel status changes.
@@ -1035,9 +1036,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
       throw new Error('Comm is already created');
     }
 
-    const comm = new CommHandler(targetName, commId, this, () => {
-      this._unregisterComm(commId);
-    }, this._commsOverSubshells);
+    const comm = new CommHandler(
+      targetName,
+      commId,
+      this,
+      () => {
+        this._unregisterComm(commId);
+      },
+      this._commsOverSubshells
+    );
     this._comms.set(commId, comm);
     return comm;
   }
@@ -1305,7 +1312,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         KernelMessage.IShellControlMessage
       >
     >();
-    this._comms = new Map<string, Kernel.IComm>();
+    this._comms = new Map<string, CommHandler>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
   }
@@ -1338,7 +1345,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
   ): Promise<void> {
     this._assertCurrentMessage(msg);
     const content = msg.content;
-    console.log('create comm over subshell', this.commsOverSubshells);
     const comm = new CommHandler(
       content.target_name,
       content.comm_id,
@@ -1835,7 +1841,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.IShellControlMessage
     >
   >();
-  private _comms = new Map<string, Kernel.IComm>();
+  private _comms = new Map<string, CommHandler>();
   private _targetRegistry: {
     [key: string]: (
       comm: Kernel.IComm,
