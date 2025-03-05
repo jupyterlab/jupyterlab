@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  ConfigSection,
   Contents,
   Event,
   Kernel,
@@ -56,6 +57,14 @@ export interface IConnectionStatus {
 export const IConnectionStatus = new Token<IConnectionStatus>(
   '@jupyterlab/application:IConnectionStatus',
   'A service providing the application connection status.'
+);
+
+/**
+ * Token providing the config section manager.
+ */
+export const IConfigSectionManager = new Token<ConfigSection.IManager>(
+  '@jupyterlab/services:IConfigSectionManager',
+  'A service providing the config section manager.'
 );
 
 /**

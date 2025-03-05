@@ -45,30 +45,32 @@ export namespace ConfigSection {
    * Create a config section.
    *
    * @returns A Promise that is fulfilled with the config section is loaded.
+   *
+   * @deprecated Creating a config section via the `ConfigSection.create()` global has been deprecated and may be removed in a future version.
+   * Instead, require the config section manager via the `IConfigSectionManager` token in a plugin.
    */
-  export function create(
+  export async function create(
     options: ConfigSection.IOptions
   ): Promise<IConfigSection> {
     const section = new DefaultConfigSection(options);
-    return section.load().then(() => {
-      return section;
-    });
+    await section.load();
+    return section;
   }
 
   /**
    * The options used to create a config section.
    */
-  export interface IOptions {
-    /**
-     * The section name.
-     */
-    name: string;
-
+  export interface IOptions extends ConfigSectionManager.ICreateOptions {
     /**
      * The optional server settings.
      */
     serverSettings?: ServerConnection.ISettings;
   }
+
+  /**
+   * The interface for the build manager.
+   */
+  export interface IManager extends ConfigSectionManager {}
 }
 
 /**
@@ -241,5 +243,62 @@ export namespace ConfigWithDefaults {
      * The optional classname namespace.
      */
     className?: string;
+  }
+}
+
+/**
+ * A manager for config sections.
+ */
+export class ConfigSectionManager implements ConfigSection.IManager {
+  /**
+   * Create a config section manager.
+   */
+  constructor(options: ConfigSectionManager.IOptions) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * Create a config section.
+   */
+  async create(
+    options: ConfigSectionManager.ICreateOptions
+  ): Promise<IConfigSection> {
+    const section = new DefaultConfigSection({
+      ...options,
+      serverSettings: this.serverSettings
+    });
+    await section.load();
+    return section;
+  }
+
+  /**
+   * The server settings used to make API requests.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+}
+
+/**
+ * A namespace for config section API interfaces.
+ */
+export namespace ConfigSectionManager {
+  /**
+   * The instantiation options for a config section manager.
+   */
+  export interface IOptions {
+    /**
+     * The server settings used to make API requests.
+     */
+    serverSettings?: ServerConnection.ISettings;
+  }
+
+  /**
+   * The config section create options
+   */
+  export interface ICreateOptions {
+    /**
+     * The section name.
+     */
+    name: string;
   }
 }
