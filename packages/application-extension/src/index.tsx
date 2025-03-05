@@ -830,12 +830,12 @@ const kernelSubshellsPlugin: JupyterFrontEndPlugin<void> = {
         const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
           .composite as boolean;
         app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
-        console.log(
-          'changed comms over subshells',
-          app.serviceManager.kernels.commsOverSubshells
-        );
       });
-    });
+    })
+    .catch(reason => {
+      console.error('Fail to load settings for the subshells.');
+      console.error(reason);
+    });;
   }
 };
 
