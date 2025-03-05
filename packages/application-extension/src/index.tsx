@@ -817,7 +817,9 @@ const kernelSubshellsPlugin: JupyterFrontEndPlugin<void> = {
   ): void => {
     // Load the context menu lately so plugins are loaded.
     app.started.then(async () => {
-      const subshellsSettings = await settingRegistry.load(kernelSubshellsPlugin.id);
+      const subshellsSettings = await settingRegistry.load(
+        kernelSubshellsPlugin.id
+      );
 
       const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
         .composite as boolean;
@@ -828,8 +830,11 @@ const kernelSubshellsPlugin: JupyterFrontEndPlugin<void> = {
         const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
           .composite as boolean;
         app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
-        console.log('changed comms over subshells', app.serviceManager.kernels.commsOverSubshells);
-      })
+        console.log(
+          'changed comms over subshells',
+          app.serviceManager.kernels.commsOverSubshells
+        );
+      });
     });
   }
 };
