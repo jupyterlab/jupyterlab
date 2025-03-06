@@ -20,12 +20,14 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     target: string,
     id: string,
     kernel: Kernel.IKernelConnection,
-    disposeCb: () => void
+    disposeCb: () => void,
+    commsOverSubshells?: boolean
   ) {
     super(disposeCb);
     this._id = id;
     this._target = target;
     this._kernel = kernel;
+    this.commsOverSubshells = commsOverSubshells ?? false;
   }
 
   /**
@@ -40,6 +42,32 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
    */
   get targetName(): string {
     return this._target;
+  }
+
+  /**
+   * The current subshell id.
+   */
+  get subshellId(): string | null {
+    return this._subshellId;
+  }
+
+  /**
+   * Whether comms are running on a subshell, or not
+   */
+  get commsOverSubshells(): boolean {
+    return !!this.subshellId && this._commsOverSubshells;
+  }
+
+  /**
+   * Set whether comms are running on subshells, or not
+   */
+  set commsOverSubshells(value: boolean) {
+    this._commsOverSubshells = value;
+    if (this._commsOverSubshells) {
+      void this._maybeStartSubshell();
+    } else {
+      this._maybeCloseSubshell();
+    }
   }
 
   /**
@@ -112,7 +140,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId,
-      subshellId: this._kernel.subshellId,
+      subshellId: this._subshellId || this._kernel.subshellId,
       content: {
         comm_id: this._id,
         target_name: this._target,
@@ -146,7 +174,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId,
-      subshellId: this._kernel.subshellId,
+      subshellId: this._subshellId || this._kernel.subshellId,
       content: {
         comm_id: this._id,
         data: data
@@ -181,7 +209,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       channel: 'shell',
       username: this._kernel.username,
       session: this._kernel.clientId,
-      subshellId: this._kernel.subshellId,
+      subshellId: this._subshellId || this._kernel.subshellId,
       content: {
         comm_id: this._id,
         data: data ?? {}
@@ -197,6 +225,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
         channel: 'iopub',
         username: this._kernel.username,
         session: this._kernel.clientId,
+        subshellId: this._subshellId || this._kernel.subshellId,
         content: {
           comm_id: this._id,
           data: data ?? {}
@@ -211,6 +240,34 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this.dispose();
     return future;
   }
+
+  dispose(): void {
+    this._maybeCloseSubshell();
+
+    super.dispose();
+  }
+
+  private async _maybeStartSubshell() {
+    await this._kernel.info;
+    if (this._kernel.supportsSubshells) {
+      // Create subshell
+      const replyMsg = await this._kernel.requestCreateSubshell({}).done;
+      this._subshellId = replyMsg.content.subshell_id;
+    }
+  }
+
+  private _maybeCloseSubshell() {
+    if (this._subshellId && this._kernel.status !== 'dead') {
+      this._kernel.requestDeleteSubshell(
+        { subshell_id: this._subshellId },
+        true
+      );
+    }
+    this._subshellId = null;
+  }
+
+  private _commsOverSubshells: boolean;
+  private _subshellId: string | null = null;
 
   private _target = '';
   private _id = '';

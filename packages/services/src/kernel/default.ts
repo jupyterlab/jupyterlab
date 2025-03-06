@@ -53,6 +53,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
+    this._commsOverSubshells = options.commsOverSubshells ?? false;
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
@@ -78,6 +79,30 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * See https://github.com/jupyter/jupyter_client/issues/263
    */
   readonly handleComms: boolean;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * If enabled, we'll create one subshell per-comm, this may lead to issue
+   * if many comms are open, so it's disabled by default.
+   */
+  get commsOverSubshells(): boolean {
+    return this._commsOverSubshells;
+  }
+
+  set commsOverSubshells(value: boolean) {
+    this._commsOverSubshells = value;
+
+    for (const [_, comm] of this._comms) {
+      const handler = comm;
+      handler.commsOverSubshells = value;
+    }
+  }
 
   /**
    * A signal emitted when the kernel status changes.
@@ -262,6 +287,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       serverSettings: this.serverSettings,
       // handleComms defaults to false since that is safer
       handleComms: false,
+      commsOverSubshells: false,
       ...options
     });
   }
@@ -1006,9 +1032,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
       throw new Error('Comm is already created');
     }
 
-    const comm = new CommHandler(targetName, commId, this, () => {
-      this._unregisterComm(commId);
-    });
+    const comm = new CommHandler(
+      targetName,
+      commId,
+      this,
+      () => {
+        this._unregisterComm(commId);
+      },
+      this._commsOverSubshells
+    );
     this._comms.set(commId, comm);
     return comm;
   }
@@ -1276,7 +1308,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         KernelMessage.IShellControlMessage
       >
     >();
-    this._comms = new Map<string, Kernel.IComm>();
+    this._comms = new Map<string, CommHandler>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
   }
@@ -1315,7 +1347,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this,
       () => {
         this._unregisterComm(content.comm_id);
-      }
+      },
+      this.commsOverSubshells
     );
     this._comms.set(content.comm_id, comm);
 
@@ -1794,6 +1827,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
   );
   private _selectedProtocol: string = '';
 
+  private _commsOverSubshells: boolean;
+
   private _futures = new Map<
     string,
     KernelFutureHandler<
@@ -1801,7 +1836,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.IShellControlMessage
     >
   >();
-  private _comms = new Map<string, Kernel.IComm>();
+  private _comms = new Map<string, CommHandler>();
   private _targetRegistry: {
     [key: string]: (
       comm: Kernel.IComm,
