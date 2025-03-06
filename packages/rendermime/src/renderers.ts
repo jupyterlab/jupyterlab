@@ -662,6 +662,7 @@ function autolink(
 
     while (null != (match = regex.exec(content))) {
       const stringBeforeMatch = content.substring(currentIndex, match.index);
+
       if (stringBeforeMatch) {
         linkify(stringBeforeMatch, regexIndex + 1);
       }
@@ -1020,7 +1021,7 @@ function getApplicableLinkCache(
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderError(
+export async function renderError(
   options: renderError.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
@@ -1032,15 +1033,9 @@ export function renderError(
   });
 
   // Patch the paths if a resolver is available.
-  let promise: Promise<void>;
   if (resolver) {
-    promise = Private.handlePaths(host, resolver, linkHandler);
-  } else {
-    promise = Promise.resolve(undefined);
+    await Private.handlePaths(host, resolver, linkHandler);
   }
-
-  // Return the rendered promise.
-  return promise;
 }
 
 /**
@@ -1274,7 +1269,7 @@ namespace Private {
   }
 
   /**
-   * Resolve the paths in `<a>` elements `data` attributes.
+   * Resolve the paths in `<a>` elements that have a `data-path` attribute.
    *
    * @param node - The head html element.
    *
@@ -1288,12 +1283,13 @@ namespace Private {
     node: HTMLElement,
     resolver: IRenderMime.IResolver,
     linkHandler: IRenderMime.ILinkHandler | null
-  ): Promise<void> {
-    // Handle anchor elements.
-    const anchors = node.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      await handlePathAnchor(anchors[i], resolver, linkHandler);
-    }
+  ): Promise<unknown> {
+    const anchors: HTMLAnchorElement[] = Array.from(
+      node.querySelectorAll('a[data-path]')
+    );
+    return Promise.all(
+      anchors.map(anchor => handlePathAnchor(anchor, resolver, linkHandler))
+    );
   }
 
   /**
@@ -1431,7 +1427,7 @@ namespace Private {
       !linkHandler.handlePath
     ) {
       anchor.replaceWith(...anchor.childNodes);
-      return Promise.resolve(undefined);
+      return;
     }
     try {
       // Find given path
@@ -1440,7 +1436,7 @@ namespace Private {
       if (!resolution) {
         // Bail if the file does not exist
         console.log('Path resolution bailing: does not exist');
-        return Promise.resolve(undefined);
+        return;
       }
 
       // Handle the click override.
@@ -1460,6 +1456,7 @@ namespace Private {
       anchor.href = '#linking-failed-see-console';
     }
   }
+
   const ANSI_COLORS = [
     'ansi-black',
     'ansi-red',

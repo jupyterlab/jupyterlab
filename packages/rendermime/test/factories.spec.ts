@@ -877,6 +877,18 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(expected);
       });
+
+      it('should autolink mixed content with URLs and files', async () => {
+        const f = errorRendererFactory;
+        const source = 'URL www.example.com File ~/jupyterlab/a_file.py:1';
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...options });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
+        );
+      });
     });
   });
 });
