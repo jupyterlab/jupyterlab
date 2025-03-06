@@ -46,7 +46,7 @@ TODO
 
 The context menu, available under right mouse click in browsers, can now be disabled globally
 by toggling the `Enable Context Menu` option available in the Command Palette,
-r via JSON Settings Editor in the Application Context Menu.
+or via JSON Settings Editor in the Application Context Menu.
 
 ### Slimmer status bar
 
