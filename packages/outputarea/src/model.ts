@@ -569,11 +569,11 @@ namespace Private {
       );
       text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
       lastEnd = idx1 + 1;
+      idx0 += prefix.length;
 
       if (idx1 === -1) {
         break;
       }
-      idx0 += prefix.length;
 
       const newChar = newText[idx1];
       if (newChar === '\b') {
