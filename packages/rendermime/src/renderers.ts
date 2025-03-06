@@ -1020,27 +1020,13 @@ function getApplicableLinkCache(
  *
  * @returns A promise which resolves when rendering is complete.
  */
-export function renderError(
+export async function renderError(
   options: renderError.IRenderOptions
 ): Promise<void> {
-  // Unpack the options.
-  const { host, linkHandler, resolver } = options;
-
   renderTextual(options, {
     checkWeb: true,
-    checkPaths: true
+    checkPaths: false
   });
-
-  // Patch the paths if a resolver is available.
-  let promise: Promise<void>;
-  if (resolver) {
-    promise = Private.handlePaths(host, resolver, linkHandler);
-  } else {
-    promise = Promise.resolve(undefined);
-  }
-
-  // Return the rendered promise.
-  return promise;
 }
 
 /**
@@ -1122,19 +1108,9 @@ export namespace renderError {
     sanitizer: IRenderMime.ISanitizer;
 
     /**
-     * The source error to render.
+     * The source text to render.
      */
     source: string;
-
-    /**
-     * An optional url resolver.
-     */
-    resolver: IRenderMime.IResolver | null;
-
-    /**
-     * An optional link handler.
-     */
-    linkHandler: IRenderMime.ILinkHandler | null;
 
     /**
      * The application language translator.
