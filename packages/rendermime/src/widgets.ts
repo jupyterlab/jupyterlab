@@ -455,8 +455,6 @@ export class RenderedError extends RenderedCommon {
       host: this.node,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
-      linkHandler: this.linkHandler,
-      resolver: this.resolver,
       translator: this.translator
     });
   }
