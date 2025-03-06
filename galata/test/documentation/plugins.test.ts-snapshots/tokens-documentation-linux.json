@@ -12,6 +12,7 @@
   "@jupyterlab/application:ITreeResolver": "A service to resolve the tree path.",
   "@jupyterlab/apputils:ICommandPalette": "A service for the application command palette\n  in the left panel. Use this to add commands to the palette.",
   "@jupyterlab/apputils:IKernelStatusModel": "A service to register kernel session provider to the kernel status indicator.",
+  "@jupyterlab/apputils:ILicensesTracker": "A service for tracking the license widgets.",
   "@jupyterlab/apputils:ISanitizer": "A service for sanitizing HTML strings.",
   "@jupyterlab/apputils:ISessionContextDialogs": "A service for handling the session dialogs.",
   "@jupyterlab/apputils:ISplashScreen": "A service for the splash screen for the application.\n  Use this if you want to show the splash screen for your own purposes.",
