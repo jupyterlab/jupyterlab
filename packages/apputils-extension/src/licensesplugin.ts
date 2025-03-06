@@ -42,7 +42,7 @@ namespace CommandIDs {
  */
 export const licensesTracker: JupyterFrontEndPlugin<ILicensesTracker> = {
   id: '@jupyterlab/apputils-extension:licenses-tracker',
-  description: 'Adds licenses used report tools.',
+  description: 'The main licenses widget tracker plugin.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ILayoutRestorer],

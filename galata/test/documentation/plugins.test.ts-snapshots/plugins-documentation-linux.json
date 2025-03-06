@@ -20,7 +20,7 @@
   "@jupyterlab/apputils-extension:announcements": "Add the announcement feature. It will fetch news on the internet and check for application updates.",
   "@jupyterlab/apputils-extension:kernel-status": "Provides the kernel status indicator model.",
   "@jupyterlab/apputils-extension:licenses-plugin": "Adds licenses reporting tools.",
-  "@jupyterlab/apputils-extension:licenses-tracker": "Adds licenses used report tools.",
+  "@jupyterlab/apputils-extension:licenses-tracker": "The main licenses widget tracker plugin.",
   "@jupyterlab/apputils-extension:notification": "Add the notification center and its status indicator.",
   "@jupyterlab/apputils-extension:palette": "Provides the command palette.",
   "@jupyterlab/apputils-extension:palette-restorer": "Restores the command palette.",
