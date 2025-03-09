@@ -24,10 +24,21 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
+import {
+  KeyboardLayouts,
+  setKeyboardLayout,
+  useBrowserLayout
+} from '@lumino/keyboard';
 import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
-import { renderShortCut } from './renderer';
+import {
+  renderKeyboardLayout,
+  renderLayoutDropdown,
+  renderShortCut
+} from './renderer';
 import { ISignal, Signal } from '@lumino/signaling';
+import { KeyboardLayoutRegistry } from './layoutregistry';
 
+const KEYBOARD_PLUGIN_ID = '@jupyterlab/shortcuts-extension:keyboard-layout';
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
 function getExternalForJupyterLab(
@@ -46,6 +57,80 @@ function getExternalForJupyterLab(
     actionRequested
   };
 }
+
+const keyboardLayout: JupyterFrontEndPlugin<void> = {
+  id: KEYBOARD_PLUGIN_ID,
+  description: 'Keyboard layout settings provider.',
+  requires: [ISettingRegistry],
+  optional: [ITranslator, IFormRendererRegistry],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    registry: ISettingRegistry,
+    translator: ITranslator | null,
+    editorRegistry: IFormRendererRegistry | null
+  ) => {
+    // const translator_ = translator ?? nullTranslator;
+
+    const layoutRegistry = new KeyboardLayoutRegistry(KeyboardLayouts);
+
+    async function updateLayout(useBrowser: boolean, keyboardLayout?: string) {
+      if (useBrowser) {
+        useBrowserLayout();
+      } else if (keyboardLayout) {
+        const selection = layoutRegistry.get(keyboardLayout);
+        if (selection) {
+          setKeyboardLayout(selection);
+        }
+      }
+    }
+
+    if (editorRegistry) {
+      const component: IFormRenderer = {
+        fieldRenderer: (props: any) => {
+          return renderKeyboardLayout({
+            ...props,
+            layoutRegistry: layoutRegistry
+          });
+        }
+      };
+      editorRegistry.addRenderer(
+        `${keyboardLayout.id}.customLayouts`,
+        component
+      );
+      editorRegistry.addRenderer(`${keyboardLayout.id}.layout`, {
+        widgetRenderer: (props: any) => {
+          return renderLayoutDropdown({
+            ...props,
+            layoutRegistry: layoutRegistry
+          });
+        }
+      });
+    }
+
+    try {
+      const settings = await registry.load(keyboardLayout.id);
+      layoutRegistry.customLayouts = settings.composite.customLayouts as any;
+      updateLayout(
+        settings.composite.useBrowserLayout as boolean,
+        settings.composite.layout as string | undefined
+      );
+      settings.changed.connect(() => {
+        layoutRegistry.customLayouts = settings.composite.customLayouts as any;
+        updateLayout(
+          settings.composite.useBrowserLayout as boolean,
+          settings.composite.layout as string | undefined
+        );
+      });
+
+      layoutRegistry.changed.connect(() => {
+        settings.set('customLayouts', layoutRegistry.serialize());
+      });
+    } catch (error) {
+      console.error(`Loading ${keyboardLayout.id} failed.`, error);
+    }
+  }
+};
 
 /**
  * The default shortcuts extension.
@@ -330,10 +415,12 @@ List of keyboard shortcuts:`,
   autoStart: true
 };
 
+const plugins = [keyboardLayout, shortcuts];
+
 /**
- * Export the shortcut plugin as default.
+ * Export the plugins as default.
  */
-export default shortcuts;
+export default plugins;
 
 /**
  * A namespace for private module data.

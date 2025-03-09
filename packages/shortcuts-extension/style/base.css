@@ -372,3 +372,98 @@
   margin-left: 8px;
   margin-right: 16px;
 }
+
+.jp-Keyboard-layoutDetails {
+  padding-block-end: 0.5lh;
+}
+
+.jp-Keyboard-layoutDetails > summary {
+  font-weight: bold;
+}
+
+.jp-Keyboard-layoutDetails > h4 {
+  padding-inline-start: 20px;
+}
+
+.jp-ThemedContainer .jp-Keyboard-layoutDetails kbd,
+.jp-ThemedContainer .jp-Keyboard-captureAreaOutput kbd {
+  border: 2px solid var(--jp-ui-font-color2);
+  display: inline-block;
+  font-size: calc(0.85 * var(--jp-code-font-size));
+  font-weight: 700;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.jp-Keyboard-ModifierList {
+  display: flex;
+  list-style-type: none;
+}
+
+.jp-Keyboard-List {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 7em 10em);
+}
+
+.jp-Keyboard-List .jp-Keyboard-Entry {
+  display: grid;
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+}
+
+.jp-Keyboard-Entry {
+  padding: 6px 12px;
+}
+
+.jp-Keyboard-layoutDetails button {
+  background: var(--jp-shortcuts-button-background);
+  border-color: var(--jp-layout-color0);
+  border-radius: var(--jp-border-radius);
+  border-width: var(--jp-border-width);
+  padding: 5px 6px;
+  color: var(--jp-ui-inverse-font-color1);
+  margin-inline-start: 20px;
+  cursor: pointer;
+}
+
+.jp-Keyboard-layoutDetails button:hover {
+  background: var(--jp-shortcuts-button-hover-background);
+}
+
+.jp-Keyboard-captureContainer {
+  padding: 4px 7px;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  margin: 4px;
+  flex-basis: 100%;
+}
+
+.jp-Keyboard-captureActions {
+  margin-inline-start: 6px;
+  padding-inline-start: 6px;
+}
+
+.jp-Keyboard-captureActions input,
+.jp-Keyboard-captureActions button {
+  margin-inline: 6px;
+}
+
+.jp-Keyboard-captureActions button {
+  background: var(--jp-shortcuts-button-background);
+  border-color: var(--jp-layout-color0);
+  border-radius: var(--jp-border-radius);
+  border-width: var(--jp-border-width);
+  padding: 5px 6px;
+  color: var(--jp-ui-inverse-font-color1);
+  cursor: pointer;
+}
+
+.jp-Keyboard-captureActions button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.jp-Keyboard-captureAreaOutput {
+  margin: 6px;
+  padding: 6px;
+}
