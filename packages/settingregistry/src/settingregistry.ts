@@ -738,13 +738,15 @@ export class BaseSettings<
       const defaultValue = this.default(key);
       if (
         value === undefined ||
-        defaultValue === undefined ||
         JSONExt.deepEqual(value, JSONExt.emptyObject) ||
         JSONExt.deepEqual(value, JSONExt.emptyArray)
       ) {
         continue;
       }
-      if (!JSONExt.deepEqual(value, defaultValue)) {
+      if (
+        defaultValue === undefined ||
+        !JSONExt.deepEqual(value, defaultValue)
+      ) {
         return false;
       }
     }

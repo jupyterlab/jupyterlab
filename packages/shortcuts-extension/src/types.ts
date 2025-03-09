@@ -8,6 +8,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import type { ISignal } from '@lumino/signaling';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
+import type { IKeyboardLayout, KeycodeLayout } from '@lumino/keyboard';
 
 /**
  * Identifiers of commands registered by shortcuts UI.
@@ -221,4 +222,30 @@ export interface IShortcutRegistry
    * Find targets that would conflict with given keys chord under given sequence.
    */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[];
+}
+
+/**
+ * Registry of keyboard layouts.
+ */
+export interface IKeyboardLayoutRegistry {
+  get(name: string): IKeyboardLayout | undefined;
+
+  getRaw(name: string): IKeyboardLayoutSettings | undefined;
+
+  add(layout: IKeyboardLayoutSettings): void;
+
+  remove(name: string): void;
+
+  get names(): string[];
+
+  get changed(): ISignal<unknown, unknown>;
+}
+
+/**
+ * Structure of settings of individual stored keyboard layouts.
+ */
+export interface IKeyboardLayoutSettings {
+  name: string;
+  codeMap: KeycodeLayout.ModernCodeMap;
+  modifiers: string[];
 }
