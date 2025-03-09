@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-FormGroup-content {
+  width: 100%;
+}
+
 .jp-FormGroup-content fieldset {
   border: none;
   padding: 0;
@@ -43,6 +47,10 @@
 .jp-FormGroup-content .checkbox label {
   cursor: pointer;
   font-size: var(--jp-content-font-size1);
+}
+
+.jp-FormGroup-content .jp-root {
+  width: 100%;
 }
 
 .jp-FormGroup-content .jp-root > fieldset > legend {
@@ -95,6 +103,10 @@
 }
 
 /* RJSF ARRAY style */
+
+.jp-arrayFieldWrapper {
+  width: 100%;
+}
 
 .jp-arrayFieldWrapper legend {
   font-size: var(--jp-content-font-size2);
