@@ -67,7 +67,10 @@ const configSectionManager: IPlugin<null, ConfigSection.IManager> = {
     _: null,
     serverSettings: ServerConnection.ISettings | undefined
   ) => {
-    return new ConfigSectionManager({ serverSettings });
+    const manager = new ConfigSectionManager({ serverSettings });
+    // Set the config section manager for the global ConfigSection.
+    ConfigSection._setConfigSectionManager(manager);
+    return manager;
   }
 };
 

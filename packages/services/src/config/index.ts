@@ -38,6 +38,38 @@ export interface IConfigSection {
 }
 
 /**
+ * A manager for config sections.
+ */
+export class ConfigSectionManager implements ConfigSection.IManager {
+  /**
+   * Create a config section manager.
+   */
+  constructor(options: ConfigSectionManager.IOptions) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * Create a config section.
+   */
+  async create(
+    options: ConfigSectionManager.ICreateOptions
+  ): Promise<IConfigSection> {
+    const section = new DefaultConfigSection({
+      ...options,
+      serverSettings: this.serverSettings
+    });
+    await section.load();
+    return section;
+  }
+
+  /**
+   * The server settings used to make API requests.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+}
+
+/**
  * The namespace for ConfigSection statics.
  */
 export namespace ConfigSection {
@@ -52,9 +84,30 @@ export namespace ConfigSection {
   export async function create(
     options: ConfigSection.IOptions
   ): Promise<IConfigSection> {
-    const section = new DefaultConfigSection(options);
-    await section.load();
+    if (!_configSectionManager) {
+      const section = new DefaultConfigSection(options);
+      await section.load();
+      return section;
+    }
+    const section = await _configSectionManager.create(options);
     return section;
+  }
+
+  let _configSectionManager: ConfigSectionManager | undefined;
+
+  /**
+   * Internal function to set the config section manager.
+   *
+   * @deprecated This function is an internal helper kept for backward compatiblity.
+   * It is not part of the public API and may be removed in a future version.
+   */
+  export function _setConfigSectionManager(manager: ConfigSectionManager) {
+    if (_configSectionManager) {
+      throw new Error(
+        'ConfigSectionManager already set. If you would like to create a config section, use the `IConfigSectionManager` token in a plugin.'
+      );
+    }
+    _configSectionManager = manager;
   }
 
   /**
@@ -244,38 +297,6 @@ export namespace ConfigWithDefaults {
      */
     className?: string;
   }
-}
-
-/**
- * A manager for config sections.
- */
-export class ConfigSectionManager implements ConfigSection.IManager {
-  /**
-   * Create a config section manager.
-   */
-  constructor(options: ConfigSectionManager.IOptions) {
-    this.serverSettings =
-      options.serverSettings ?? ServerConnection.makeSettings();
-  }
-
-  /**
-   * Create a config section.
-   */
-  async create(
-    options: ConfigSectionManager.ICreateOptions
-  ): Promise<IConfigSection> {
-    const section = new DefaultConfigSection({
-      ...options,
-      serverSettings: this.serverSettings
-    });
-    await section.load();
-    return section;
-  }
-
-  /**
-   * The server settings used to make API requests.
-   */
-  readonly serverSettings: ServerConnection.ISettings;
 }
 
 /**
