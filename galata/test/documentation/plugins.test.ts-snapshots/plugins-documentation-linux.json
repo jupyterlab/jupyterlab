@@ -163,6 +163,8 @@
   "@jupyterlab/running-extension:recently-closed": "Adds recently closed documents list.",
   "@jupyterlab/running-extension:search-tabs": "Adds a widget to search open and closed tabs.",
   "@jupyterlab/running-extension:sidebar": "Provides the running session sidebar.",
+  "@jupyterlab/services-extension:config-section-manager": "Provides the config section manager.",
+  "@jupyterlab/services-extension:connection-status": "Provides the default connection status.",
   "@jupyterlab/services-extension:contents-manager": "The default contents manager plugin.",
   "@jupyterlab/services-extension:default-drive": "The default drive for the contents manager.",
   "@jupyterlab/services-extension:event-manager": "The event manager plugin.",
