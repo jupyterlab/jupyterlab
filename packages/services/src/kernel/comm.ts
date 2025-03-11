@@ -61,7 +61,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   /**
-   * Promise that resolves when the subshell started
+   * Promise that resolves when the subshell started, if any
    */
   get subshellStarted(): Promise<void> {
     return this._subshellStarted.promise;
