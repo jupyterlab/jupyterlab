@@ -941,7 +941,7 @@ export interface IComm extends IDisposable {
   subshellId: string | null;
 
   /**
-   * Promise that resolves when the subshell started
+   * Promise that resolves when the subshell started, if any
    */
   get subshellStarted(): Promise<void>;
 
