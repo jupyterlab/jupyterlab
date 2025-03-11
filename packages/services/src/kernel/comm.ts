@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@lumino/coreutils';
+import { JSONObject, PromiseDelegate } from '@lumino/coreutils';
 
 import { DisposableDelegate } from '@lumino/disposable';
 
@@ -61,12 +61,17 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   /**
+   * Promise that resolves when the subshell started
+   */
+  get subshellStarted(): Promise<void> {
+    return this._subshellStarted.promise;
+  }
+
+  /**
    * Whether comms are running on a subshell, or not
    */
   get commsOverSubshells(): CommsOverSubshells {
-    return !this.subshellId
-      ? CommsOverSubshells.Disabled
-      : this._commsOverSubshells;
+    return this._commsOverSubshells;
   }
 
   /**
@@ -268,17 +273,20 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       // Create subshell
       const replyMsg = await this._kernel.requestCreateSubshell({}).done;
       this._subshellId = replyMsg.content.subshell_id;
+      this._subshellStarted.resolve();
       return;
     }
 
     // One shell per comm-target
     if (CommHandler._commTargetSubShellsId[this._target]) {
       this._subshellId = CommHandler._commTargetSubShellsId[this._target];
+      this._subshellStarted.resolve();
     } else {
       // Create subshell
       const replyMsg = await this._kernel.requestCreateSubshell({}).done;
       this._subshellId = replyMsg.content.subshell_id;
       CommHandler._commTargetSubShellsId[this._target] = this._subshellId;
+      this._subshellStarted.resolve();
     }
   }
 
@@ -298,6 +306,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this._subshellId = null;
   }
 
+  private _subshellStarted = new PromiseDelegate<void>();
   private static _commTargetSubShellsId: { [targetName: string]: string } = {};
 
   private _commsOverSubshells: CommsOverSubshells;

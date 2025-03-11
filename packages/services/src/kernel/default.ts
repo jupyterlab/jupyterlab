@@ -107,8 +107,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._commsOverSubshells = value;
 
     for (const [_, comm] of this._comms) {
-      const handler = comm;
-      handler.commsOverSubshells = value;
+      comm.commsOverSubshells = value;
     }
   }
 
