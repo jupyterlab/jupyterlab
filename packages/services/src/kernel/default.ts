@@ -7,7 +7,7 @@ import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { CommsOverSubshells, ServerConnection } from '..';
 
 import { CommHandler } from './comm';
 
@@ -60,7 +60,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
-    this._commsOverSubshells = options.commsOverSubshells ?? false;
+    this._commsOverSubshells =
+      options.commsOverSubshells ?? CommsOverSubshells.Disabled;
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
@@ -98,11 +99,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * If enabled, we'll create one subshell per-comm, this may lead to issue
    * if many comms are open, so it's disabled by default.
    */
-  get commsOverSubshells(): boolean {
+  get commsOverSubshells(): CommsOverSubshells {
     return this._commsOverSubshells;
   }
 
-  set commsOverSubshells(value: boolean) {
+  set commsOverSubshells(value: CommsOverSubshells) {
     this._commsOverSubshells = value;
 
     for (const [_, comm] of this._comms) {
@@ -293,7 +294,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       // handleComms defaults to false since that is safer
       handleComms: false,
       kernelAPIClient: this._kernelAPIClient,
-      commsOverSubshells: false,
+      commsOverSubshells: CommsOverSubshells.Disabled,
       ...options
     });
   }
@@ -1835,7 +1836,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   );
   private _selectedProtocol: string = '';
 
-  private _commsOverSubshells: boolean;
+  private _commsOverSubshells: CommsOverSubshells = CommsOverSubshells.Disabled;
 
   private _futures = new Map<
     string,

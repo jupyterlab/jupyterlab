@@ -3,7 +3,7 @@
 
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { KernelSpec, ServerConnection } from '..';
+import { CommsOverSubshells, KernelSpec, ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
 import { IKernelOptions, KernelAPIClient } from './restapi';
@@ -160,11 +160,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     return this._models.size;
   }
 
-  get commsOverSubshells(): boolean {
+  get commsOverSubshells(): CommsOverSubshells {
     return this._commsOverSubshells;
   }
 
-  set commsOverSubshells(value: boolean) {
+  set commsOverSubshells(value: CommsOverSubshells) {
     this._commsOverSubshells = value;
 
     for (const connection of this._kernelConnections) {
@@ -352,7 +352,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     }
   }
 
-  private _commsOverSubshells = false;
+  private _commsOverSubshells: CommsOverSubshells = CommsOverSubshells.Disabled;
   private _isReady = false;
   private _ready: Promise<void>;
   private _kernelConnections = new Set<KernelConnection>();
