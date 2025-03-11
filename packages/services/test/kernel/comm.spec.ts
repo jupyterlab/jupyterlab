@@ -127,8 +127,8 @@ describe('jupyter.services - Comm', () => {
         const replyMsg2 = await echoKernel.requestListSubshell({}).done;
         const after = replyMsg2.content.subshell_id.length;
 
-        // We should have more subshells after the second comm creation than before
-        expect(before).not.toEqual(after);
+        // We should have less subshells after the comm disposal than before
+        expect(after).toBeLessThan(before);
       });
 
       it('should spawn a subshell per-comm-target', async () => {
