@@ -9,4 +9,10 @@ import * as KernelAPI from './restapi';
 import { KernelConnection } from './default';
 
 export * from './manager';
-export { Kernel, KernelMessage, KernelAPI, KernelConnection, CommsOverSubshells };
+export {
+  Kernel,
+  KernelMessage,
+  KernelAPI,
+  KernelConnection,
+  CommsOverSubshells
+};
