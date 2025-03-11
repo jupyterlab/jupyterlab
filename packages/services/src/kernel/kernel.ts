@@ -936,6 +936,11 @@ export interface IComm extends IDisposable {
   readonly targetName: string;
 
   /**
+   * The subshell ID, null if not using a subshell.
+   */
+  subshellId: string | null;
+
+  /**
    * Callback for a comm close event.
    *
    * #### Notes

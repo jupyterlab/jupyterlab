@@ -3,7 +3,7 @@
 
 import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Kernel, KernelManager, KernelMessage } from '../../src';
+import { CommsOverSubshells, Kernel, KernelManager, KernelMessage } from '../../src';
 
 const BLIP = `
 from ipykernel.comm import Comm
@@ -70,6 +70,41 @@ describe('jupyter.services - Comm', () => {
         const comm = kernel.createComm('test');
         expect(comm.targetName).toBe('test');
         expect(typeof comm.commId).toBe('string');
+      });
+
+      it('should not spawn a subshell by default', () => {
+        const comm = kernel.createComm('test');
+        expect(comm.subshellId).toBeNull();
+      });
+
+      it('should spawn a subshell per-comm', async () => {
+        kernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm = kernel.createComm('testTarget', '1');
+        expect(comm.subshellId).not.toBeNull();
+
+        const comm2 = kernel.createComm('testTarget', '2');
+        expect(comm2.subshellId).not.toBeNull();
+
+        expect(comm.subshellId).not.toEqual(comm2.subshellId);
+
+        const replyMsg = await kernel.requestListSubshell({}).done;
+        expect(replyMsg.content.subshell_id.length).toBe(2);
+      });
+
+      it('should spawn a subshell per-comm-target', async () => {
+        kernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
+
+        const comm = kernel.createComm('testTarget', '1');
+        expect(comm.subshellId).not.toBeNull();
+
+        const comm2 = kernel.createComm('testTarget', '2');
+        expect(comm2.subshellId).not.toBeNull();
+
+        expect(comm.subshellId).toEqual(comm2.subshellId);
+
+        const replyMsg = await kernel.requestListSubshell({}).done;
+        expect(replyMsg.content.subshell_id.length).toBe(1);
       });
 
       it('should use the given id', () => {
