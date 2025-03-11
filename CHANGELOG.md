@@ -37,10 +37,25 @@ enable the next version of `jupyter-collaboration` to work
 without changing the drive prefix, and thus improves
 compatibility with extensions which do not support arbitrary drives.
 
-
 ### Kernel subshells support
 
-TODO
+Kernel subshells, introduced in [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html),
+enable concurrent code execution, in kernels which support them.
+When performing a long-running computation (such as training of a model), subshells enable:
+- using `ipywidgets` with updates displayed immediately,
+- monitoring the kernel resource usage (e.g. memory usage),
+- invoking arbitrary commands, e.g. to continue improving code to be used in a subsequent
+  cell, while having live access to the previously defined variables.
+
+Subshells are supported by `ipykernel` 7 (currently in alpha).
+
+To create a subshell, open context menu (right-click)
+over a notebook using a kernel supporting subshells
+and select "New Subshell Console for Notebook".
+A new console panel will open allowing access to variables from the main session.
+
+To enable the use of subshell by widgets (such as `ipywidgets`)
+change the Kernel Comms over subshells setting.
 
 ### Context menu opt-out
 
