@@ -97,6 +97,21 @@ describe('jupyter.services - Comm', () => {
         expect(replyMsg.content.subshell_id.length).toBe(2);
       });
 
+      it('should dispose the subshell per-comm', async () => {
+        kernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm = kernel.createComm('testTarget');
+        expect(comm.subshellId).not.toBeNull();
+
+        const replyMsg = await kernel.requestListSubshell({}).done;
+        expect(replyMsg.content.subshell_id.length).toBe(1);
+
+        comm.dispose();
+
+        const replyMsg2 = await kernel.requestListSubshell({}).done;
+        expect(replyMsg2.content.subshell_id.length).toBe(0);
+      });
+
       it('should spawn a subshell per-comm-target', async () => {
         kernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
 
