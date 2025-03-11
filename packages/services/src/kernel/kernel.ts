@@ -7,7 +7,7 @@ import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { CommsOverSubshells, ServerConnection } from '..';
 
 import * as KernelMessage from './messages';
 
@@ -119,7 +119,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * If enabled, we'll create one subshell per-comm, this may lead to issue
    * if many comms are open, so it's disabled by default.
    */
-  commsOverSubshells?: boolean;
+  commsOverSubshells?: CommsOverSubshells;
 
   /**
    * Whether the kernel connection has pending input.
@@ -670,7 +670,7 @@ export namespace IKernelConnection {
      * If enabled, we'll create one subshell per-comm, this may lead to issue
      * if many comms are open, so it's disabled by default.
      */
-    commsOverSubshells?: boolean;
+    commsOverSubshells?: CommsOverSubshells;
 
     /**
      * The unique identifier for the kernel client.
@@ -736,7 +736,7 @@ export interface IManager extends IBaseManager {
    * If enabled, we'll create one subshell per-comm, this may lead to issue
    * if many comms are open, so it's disabled by default.
    */
-  commsOverSubshells: boolean;
+  commsOverSubshells: CommsOverSubshells;
 
   /**
    * Force a refresh of the running kernels.

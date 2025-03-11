@@ -39,7 +39,8 @@ import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsConnector, settingsPlugin } from './settingsplugin';
-import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
+import { kernelStatus } from './statusbarplugin';
+import { sessionsSettings } from './sessions-settings';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
@@ -589,44 +590,6 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
 };
 
 /**
- * Plugin to configure kernels subshells settings.
- */
-const kernelsSubshellsSettings: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:kernels-subshells',
-  description: 'Configure the kernels subshells settings.',
-  autoStart: true,
-  requires: [ISettingRegistry, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
-    translator: ITranslator
-  ): void => {
-    // Load the context menu lately so plugins are loaded.
-    app.started
-      .then(async () => {
-        const subshellsSettings = await settingRegistry.load(
-          kernelsSubshellsSettings.id
-        );
-
-        const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
-          .composite as boolean;
-
-        app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
-
-        subshellsSettings.changed.connect(() => {
-          const commsOverSubshells = subshellsSettings.get('commsOverSubshells')
-            .composite as boolean;
-          app.serviceManager.kernels.commsOverSubshells = commsOverSubshells;
-        });
-      })
-      .catch(reason => {
-        console.error('Fail to load settings for the subshells.');
-        console.error(reason);
-      });
-  }
-};
-
-/**
  * Utility commands
  */
 const utilityCommands: JupyterFrontEndPlugin<void> = {
@@ -773,13 +736,12 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
   licensesClient,
   licensesPlugin,
-  kernelsSubshellsSettings,
   notificationPlugin,
   palette,
   paletteRestorer,
   print,
   resolver,
-  runningSessionsStatus,
+  sessionsSettings,
   sanitizer,
   settingsConnector,
   settingsPlugin,

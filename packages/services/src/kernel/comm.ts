@@ -10,6 +10,15 @@ import * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 
 /**
+ * The Comm Over Subshell Enum
+ */
+export enum CommsOverSubshells {
+  Disabled = 'disabled',
+  PerComm = 'perComm',
+  PerCommTarget = 'perCommTarget'
+}
+
+/**
  * Comm channel handler.
  */
 export class CommHandler extends DisposableDelegate implements Kernel.IComm {
@@ -21,13 +30,13 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     id: string,
     kernel: Kernel.IKernelConnection,
     disposeCb: () => void,
-    commsOverSubshells?: boolean
+    commsOverSubshells?: CommsOverSubshells
   ) {
     super(disposeCb);
     this._id = id;
     this._target = target;
     this._kernel = kernel;
-    this.commsOverSubshells = commsOverSubshells ?? false;
+    this.commsOverSubshells = commsOverSubshells ?? CommsOverSubshells.Disabled;
   }
 
   /**
@@ -54,19 +63,21 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   /**
    * Whether comms are running on a subshell, or not
    */
-  get commsOverSubshells(): boolean {
-    return !!this.subshellId && this._commsOverSubshells;
+  get commsOverSubshells(): CommsOverSubshells {
+    return !this.subshellId
+      ? CommsOverSubshells.Disabled
+      : this._commsOverSubshells;
   }
 
   /**
    * Set whether comms are running on subshells, or not
    */
-  set commsOverSubshells(value: boolean) {
+  set commsOverSubshells(value: CommsOverSubshells) {
     this._commsOverSubshells = value;
-    if (this._commsOverSubshells) {
-      void this._maybeStartSubshell();
-    } else {
+    if (this._commsOverSubshells === CommsOverSubshells.Disabled) {
       this._maybeCloseSubshell();
+    } else {
+      void this._maybeStartSubshell();
     }
   }
 
@@ -249,14 +260,35 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
 
   private async _maybeStartSubshell() {
     await this._kernel.info;
-    if (this._kernel.supportsSubshells) {
+    if (!this._kernel.supportsSubshells) {
+      return;
+    }
+
+    if (this._commsOverSubshells === CommsOverSubshells.PerComm) {
       // Create subshell
       const replyMsg = await this._kernel.requestCreateSubshell({}).done;
       this._subshellId = replyMsg.content.subshell_id;
+      return;
+    }
+
+    // One shell per comm-target
+    if (CommHandler._commTargetSubShellsId[this._target]) {
+      this._subshellId = CommHandler._commTargetSubShellsId[this._target];
+    } else {
+      // Create subshell
+      const replyMsg = await this._kernel.requestCreateSubshell({}).done;
+      this._subshellId = replyMsg.content.subshell_id;
+      CommHandler._commTargetSubShellsId[this._target] = this._subshellId;
     }
   }
 
   private _maybeCloseSubshell() {
+    // Only close subshell if we have one subshell per comm
+    if (this._commsOverSubshells !== CommsOverSubshells.PerComm) {
+      this._subshellId = null;
+      return;
+    }
+
     if (this._subshellId && this._kernel.status !== 'dead') {
       this._kernel.requestDeleteSubshell(
         { subshell_id: this._subshellId },
@@ -266,7 +298,9 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this._subshellId = null;
   }
 
-  private _commsOverSubshells: boolean;
+  private static _commTargetSubShellsId: { [targetName: string]: string } = {};
+
+  private _commsOverSubshells: CommsOverSubshells;
   private _subshellId: string | null = null;
 
   private _target = '';
