@@ -41,8 +41,8 @@ namespace CommandIDs {
  * The license connector plugin.
  */
 export const licensesClient: JupyterFrontEndPlugin<ILicensesClient> = {
-  id: '@jupyterlab/apputils-extension:licenses-connector',
-  description: 'The licenses connector plugin.',
+  id: '@jupyterlab/apputils-extension:licenses-client',
+  description: 'The licenses client plugin for fetching licenses.',
   autoStart: true,
   provides: ILicensesClient,
   activate: (app: JupyterFrontEnd) => {
