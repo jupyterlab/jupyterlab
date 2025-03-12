@@ -26,6 +26,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SemanticCommand,
   SessionContextDialogs,
   showDialog,
   Toolbar,
@@ -2173,7 +2174,9 @@ function getCurrent(
   shell: JupyterFrontEnd.IShell,
   args: ReadonlyPartialJSONObject
 ): NotebookPanel | null {
-  const widget = tracker.currentWidget;
+  const widget = args[SemanticCommand.WIDGET]
+    ? tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null
+    : tracker.currentWidget;
   const activate = args['activate'] !== false;
 
   if (activate && widget) {
@@ -2349,7 +2352,6 @@ function addCommands(
 
       if (current) {
         const { context, content } = current;
-
         return NotebookActions.runAll(
           content,
           context.sessionContext,
@@ -2406,8 +2408,9 @@ function addCommands(
       // or if we are at the bottom of the notebook.
       return (
         isEnabledAndSingleSelected() &&
-        tracker.currentWidget!.content.activeCellIndex !==
-          tracker.currentWidget!.content.widgets.length - 1
+        (tracker.currentWidget!.content.widgets.length === 1 ||
+          tracker.currentWidget!.content.activeCellIndex !==
+            tracker.currentWidget!.content.widgets.length - 1)
       );
     }
   });

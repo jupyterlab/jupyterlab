@@ -23,6 +23,11 @@
       },
       "type": "array",
       "default": []
+    },
+    "disabled": {
+      "description": "Whether the application context (right-click) menu is disabled",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

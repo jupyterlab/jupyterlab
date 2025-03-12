@@ -19,6 +19,7 @@ from jupyterlab_server import (
     WorkspaceImportApp,
     WorkspaceListApp,
 )
+from jupyterlab_server.config import get_static_page_config
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Type, Unicode, default
 
@@ -729,6 +730,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         # Set config for Jupyterlab
         page_config = self.serverapp.web_app.settings.setdefault("page_config_data", {})
+        page_config.update(get_static_page_config(logger=self.log, level="all"))
+
         page_config.setdefault("buildAvailable", not self.core_mode and not self.dev_mode)
         page_config.setdefault("buildCheck", not self.core_mode and not self.dev_mode)
         page_config["devMode"] = self.dev_mode

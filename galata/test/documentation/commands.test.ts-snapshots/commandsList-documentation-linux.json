@@ -70,6 +70,12 @@
     "shortcuts": []
   },
   {
+    "id": "application:toggle-context-menu",
+    "label": "Enable Context Menu",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "application:toggle-fullscreen-mode",
     "label": "Fullscreen Mode",
     "caption": "",
@@ -296,6 +302,12 @@
     "shortcuts": [
       "Ctrl /"
     ]
+  },
+  {
+    "id": "codemirror:toggle-tab-focus-mode",
+    "label": "Toggle Tab Focus Mode",
+    "caption": "Toggles behavior of Tab key between inserting indentation and moving to next focusable element",
+    "shortcuts": []
   },
   {
     "id": "completer:invoke-console",
@@ -1391,13 +1403,13 @@
   {
     "id": "jupyterlab-translation:en",
     "label": "English",
-    "caption": "English",
+    "caption": "Change interface language to English",
     "shortcuts": []
   },
   {
     "id": "jupyterlab-translation:zh_CN",
     "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "caption": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "caption": "Change interface language to Chinese (Simplified, China) - 中文 (简体, 中国)",
     "shortcuts": []
   },
   {
@@ -2536,6 +2548,12 @@
   {
     "id": "viewmenu:word-wrap",
     "label": "Wrap Words",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-indicator:toggle",
+    "label": "Show Workspace Indicator",
     "caption": "",
     "shortcuts": []
   },

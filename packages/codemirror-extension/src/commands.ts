@@ -6,7 +6,8 @@
 import {
   deleteLine,
   toggleBlockComment,
-  toggleComment
+  toggleComment,
+  toggleTabFocusMode
 } from '@codemirror/commands';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
@@ -24,6 +25,7 @@ namespace CommandIDs {
   export const toggleBlockComment = 'codemirror:toggle-block-comment';
   export const toggleComment = 'codemirror:toggle-comment';
   export const selectNextOccurrence = 'codemirror:select-next-occurrence';
+  export const toggleTabFocusMode = 'codemirror:toggle-tab-focus-mode';
 }
 
 /**
@@ -99,6 +101,21 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           return;
         }
         toggleComment(view);
+      },
+      isEnabled
+    });
+
+    app.commands.addCommand(CommandIDs.toggleTabFocusMode, {
+      label: trans.__('Toggle Tab Focus Mode'),
+      caption: trans.__(
+        'Toggles behavior of Tab key between inserting indentation and moving to next focusable element'
+      ),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        toggleTabFocusMode(view);
       },
       isEnabled
     });

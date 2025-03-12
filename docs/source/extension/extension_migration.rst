@@ -65,7 +65,7 @@ the ``module`` option from ``commonjs`` to ``Node16``:
      "include": ["src/*"],
 
 Support for Conditional Rendering in GroupItem
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As of JupyterLab 4.4, the ``GroupItem`` component now supports conditional
 rendering of elements. This improvement allows the component to gracefully handle ``null`` or
@@ -96,6 +96,38 @@ the updated rendering logic.
 
 This change improves both the rendering performance and the maintainability of extensions
 using the ``GroupItem`` component.
+
+API updates
+^^^^^^^^^^^
+
+- The ``ConfigSection.create(options: ConfigSection.IOptions)`` function has been deprecated.
+   This was previously exposed as a helper function to create config sections on the Jupyter Server.
+   Instead, require the ``IConfigSectionManager`` token in a plugin, and use then ``create`` method to create a config section:
+
+.. code-block:: ts
+
+   const plugin: JupyterFrontEndPlugin<void> = {
+     id: 'example',
+     requires: [IConfigSectionManager],
+     activate: (
+       app: JupyterFrontEnd,
+       configSectionManager: ConfigSection.IManager
+     ): void => {
+        const section = configSectionManager.create({ name: 'notebook' });
+     }
+   };
+
+Plugins
+^^^^^^^
+
+- ``@jupyterlab/application-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/application:mimedocument`` plugin id has been renamed to ``@jupyterlab/application-extension:mimedocument``
+- ``@jupyterlab/lsp-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/lsp:ILSPCodeExtractorsManager`` plugin id has been renamed to ``@jupyterlab/lsp-extension:code-extractor-manager``
+- ``@jupyterlab/translation-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
+- ``@jupyterlab/workspaces-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/workspaces:commands`` plugin id has been renamed to ``@jupyterlab/workspaces-extension:commands``
 
 JupyterLab 4.2 to 4.3
 ---------------------
