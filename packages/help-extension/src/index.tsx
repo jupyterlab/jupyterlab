@@ -73,14 +73,23 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd): void => {
     const { commands } = app;
+
+    const apputilsLicencesCommand = 'apputils:licenses';
     commands.addCommand(CommandIDs.licenses, {
-      execute: () => commands.execute('apputils:licenses')
+      label: commands.label(apputilsLicencesCommand),
+      execute: () => commands.execute(apputilsLicencesCommand)
     });
+
+    const apputilsLicenseReportCommand = 'apputils:license-report';
     commands.addCommand(CommandIDs.licenseReport, {
-      execute: () => commands.execute('apputils:license-report')
+      label: commands.label(apputilsLicenseReportCommand),
+      execute: () => commands.execute(apputilsLicenseReportCommand)
     });
+
+    const apputilsRefreshLicensesCommand = 'apputils:licenses-refresh';
     commands.addCommand(CommandIDs.refreshLicenses, {
-      execute: () => commands.execute('apputils:licenses-refresh')
+      label: commands.label(apputilsRefreshLicensesCommand),
+      execute: () => commands.execute(apputilsRefreshLicensesCommand)
     });
   }
 };
