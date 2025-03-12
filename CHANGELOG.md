@@ -77,8 +77,6 @@ over a notebook using a kernel supporting subshells
 and select "New Subshell Console for Notebook".
 A new console panel will open allowing access to variables from the main session.
 
-To enable the use of subshell by widgets (such as `ipywidgets`)
-change the Kernel Comms over subshells setting.
 
 <img alt="The subshell console" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
 
