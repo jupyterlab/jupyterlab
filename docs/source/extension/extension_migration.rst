@@ -97,6 +97,26 @@ the updated rendering logic.
 This change improves both the rendering performance and the maintainability of extensions
 using the ``GroupItem`` component.
 
+API updates
+^^^^^^^^^^^
+
+- The ``ConfigSection.create(options: ConfigSection.IOptions)`` function has been deprecated.
+   This was previously exposed as a helper function to create config sections on the Jupyter Server.
+   Instead, require the ``IConfigSectionManager`` token in a plugin, and use then ``create`` method to create a config section:
+
+.. code-block:: ts
+
+   const plugin: JupyterFrontEndPlugin<void> = {
+     id: 'example',
+     requires: [IConfigSectionManager],
+     activate: (
+       app: JupyterFrontEnd,
+       configSectionManager: ConfigSection.IManager
+     ): void => {
+        const section = configSectionManager.create({ name: 'notebook' });
+     }
+   };
+
 Plugins
 ^^^^^^^
 
