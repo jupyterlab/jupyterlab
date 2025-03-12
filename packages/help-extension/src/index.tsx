@@ -47,6 +47,11 @@ namespace CommandIDs {
   export const hide = 'help:hide';
 
   export const jupyterForum = 'help:jupyter-forum';
+
+  // Commands kept for backwards compatibility after the move to the apputils-extension
+  export const licenses = 'help:licenses';
+  export const licenseReport = 'help:license-report';
+  export const refreshLicenses = 'help:licenses-refresh';
 }
 
 /**
@@ -58,6 +63,27 @@ const LAB_IS_SECURE = window.location.protocol === 'https:';
  * The class name added to the help widget.
  */
 const HELP_CLASS = 'jp-Help';
+
+/**
+ * A plugin to keep licenses commands that were previously defined in the help-extension.
+ * This is mostly for backwards compatibility, in case some other plugins were manually executing these commands.
+ */
+const licensesCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:licenses-commands',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd): void => {
+    const { commands } = app;
+    commands.addCommand(CommandIDs.licenses, {
+      execute: () => commands.execute('apputils:licenses')
+    });
+    commands.addCommand(CommandIDs.licenseReport, {
+      execute: () => commands.execute('apputils:license-report')
+    });
+    commands.addCommand(CommandIDs.refreshLicenses, {
+      execute: () => commands.execute('apputils:licenses-refresh')
+    });
+  }
+};
 
 /**
  * Add a command to show an About dialog.
@@ -462,6 +488,7 @@ const resources: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
   jupyterForum,
+  licensesCommands,
   open,
   resources
 ];
