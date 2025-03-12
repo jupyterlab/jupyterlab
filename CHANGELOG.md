@@ -12,21 +12,20 @@ Extension authors are recommended to consult the [Extension Migration Guide](htt
 
 ### Code console improvements
 
-The code console prompt can now be positioned on top, left, or right side of the console,
+The code console prompt can now be positioned on the top, left, or right side of the console,
 in addition to the default bottom placement. The placement is persisted in the Prompt Cell
 Position setting.
 
 The console toolbar now includes buttons to:
-- execute code,
-- restart the kernel,
-- clear the cells,
-- switch the kernel.
+- Execute code
+- Restart the kernel
+- Clear the cells
+- Switch the kernel
 
-Additional settings for console behavior were added:
-- Clear Code Content on Execute (enabled by default) - when disabled,
-  the code submitted for execution remains in the code editor, allowing for further edits
-- Hide Code Input - when enabled shows only the output of the execution in the console
-- Clear Cells on Execute - when enabled shows only last cell
+Additional settings for console behavior have been added:
+- Clear Code Content on Execute (enabled by default) – When disabled, the code submitted for execution remains in the code editor, allowing for further edits.
+- Hide Code Input – When enabled, only the execution output is shown in the console.
+- Clear Cells on Execute – When enabled, only the last cell is displayed.
 
 Toggling all the three new settings transforms the console into an interactive editor
 resembling an ephemeral notebook with a single cell.
@@ -36,8 +35,7 @@ resembling an ephemeral notebook with a single cell.
 ### Settings import and export
 
 Settings can now be exported to `overrides.json` from the Settings Editor,
-which can be used to pre-configure defaults on deployments or for restoring
-the settings.
+which can be used to pre-configure defaults in deployments or to restore settings.
 
 <img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
 
@@ -54,21 +52,18 @@ Real time collaboration in previous versions of JupyterLab
 (which can be enabled by installing jupyter-collaboration package)
 was implemented by swapping the default JupyterLab file system
 drive to a collaborative drive with the `RTC:` prefix.
-This was not compatible with multiple extensions.
-JupyterLab 4.4 introduces Content Providers API which will
-enable the next version of `jupyter-collaboration` to work
-without changing the drive prefix, and thus improves
-compatibility with extensions which do not support arbitrary drives.
+This approach was incompatible with multiple extensions.
+JupyterLab 4.4 introduces the Content Providers API, which allows the next version of `jupyter-collaboration` to work without changing the drive prefix.
+This improves compatibility with extensions that do not support arbitrary drives.
 
 ### Kernel subshells support
 
 Kernel subshells, introduced in [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html),
-enable concurrent code execution, in kernels which support them.
-When performing a long-running computation (such as training of a model), subshells enable:
-- using `ipywidgets` with updates displayed immediately,
-- monitoring the kernel resource usage (e.g. memory usage),
-- invoking arbitrary commands, e.g. to continue improving code to be used in a subsequent
-  cell, while having live access to the previously defined variables.
+enable concurrent code execution in kernels that support them.
+When performing long-running computations (such as training a model), subshells enable users to:
+- Use `ipywidgets` with updates displayed immediately
+- Monitor kernel resource usage (e.g. memory usage)
+- Invoke arbitrary commands (e.g., refine code for a subsequent cell) while maintaining live access to previously defined variables
 
 Subshells are supported by `ipykernel` 7 (currently in alpha).
 
@@ -84,11 +79,11 @@ A new console panel will open allowing access to variables from the main session
 
 The context menu, available under right mouse click in browsers, can now be disabled globally
 by toggling the `Enable Context Menu` option available in the Command Palette,
-or via JSON Settings Editor in the Application Context Menu.
+or via the JSON Settings Editor in the Application Context Menu.
 
 ### Slimmer status bar
 
-The terminals counter no longer shows up on the status bar if no terminals are open.
+The terminals counter no longer appears in the status bar if no terminals are open.
 The kernels counter can be disabled by toggling the "Show the status bar item" setting
 in "Running Terminals and Kernels" (code name `showStatusBarItem`).
 
