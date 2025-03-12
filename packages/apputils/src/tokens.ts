@@ -73,7 +73,7 @@ export interface IKernelStatusModel {
 }
 
 /**
- * The license connector.
+ * The license client for fetching licenses.
  */
 export const ILicensesClient = new Token<ILicensesClient>(
   '@jupyterlab/apputils:ILicensesClient',
@@ -81,7 +81,7 @@ export const ILicensesClient = new Token<ILicensesClient>(
 );
 
 /**
- * An interface for the license connector.
+ * An interface for the license client.
  */
 export interface ILicensesClient extends Licenses.LicensesClient {}
 
