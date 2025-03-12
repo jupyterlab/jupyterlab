@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/application';
 import {
   ICommandPalette,
-  ILicensesTracker,
+  ILicensesClient,
   Licenses,
   MainAreaWidget,
   WidgetTracker
@@ -38,27 +38,53 @@ namespace CommandIDs {
 }
 
 /**
- * The license widget tracker plugin.
+ * The license connector plugin.
  */
-export const licensesTracker: JupyterFrontEndPlugin<ILicensesTracker> = {
-  id: '@jupyterlab/apputils-extension:licenses-tracker',
-  description: 'The main licenses widget tracker plugin.',
+export const licensesClient: JupyterFrontEndPlugin<ILicensesClient> = {
+  id: '@jupyterlab/apputils-extension:licenses-connector',
+  description: 'The licenses connector plugin.',
   autoStart: true,
-  requires: [ITranslator],
-  optional: [ILayoutRestorer],
-  provides: ILicensesTracker,
+  provides: ILicensesClient,
+  activate: (app: JupyterFrontEnd) => {
+    const licensesUrl =
+      URLExt.join(
+        PageConfig.getBaseUrl(),
+        PageConfig.getOption('licensesUrl')
+      ) + '/';
+    const serverSettings = app.serviceManager.serverSettings;
+    return new Licenses.LicensesClient({ licensesUrl, serverSettings });
+  }
+};
+
+/**
+ * A plugin to add a licenses reporting tools.
+ */
+export const licensesPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:licenses-plugin',
+  description: 'Adds licenses reporting tools.',
+  requires: [ILicensesClient, ITranslator],
+  optional: [ILayoutRestorer, IMainMenu, ICommandPalette],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
+    client: ILicensesClient,
     translator: ITranslator,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    menu: IMainMenu | null,
+    palette: ICommandPalette | null
   ) => {
+    const { commands, shell } = app;
+
+    const trans = translator.load('jupyterlab');
+
+    const category = trans.__('Help');
+    const downloadAsText = trans.__('Download All Licenses as');
+    const refreshLicenses = trans.__('Refresh Licenses');
+
     const licensesNamespace = 'help-licenses';
     const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
       namespace: licensesNamespace
     });
-
-    const { commands, shell } = app;
-    const trans = translator.load('jupyterlab');
 
     // translation strings
     const licensesText = trans.__('Licenses');
@@ -66,21 +92,14 @@ export const licensesTracker: JupyterFrontEndPlugin<ILicensesTracker> = {
     // an incrementer for license widget ids
     let counter = 0;
 
-    const licensesUrl =
-      URLExt.join(
-        PageConfig.getBaseUrl(),
-        PageConfig.getOption('licensesUrl')
-      ) + '/';
-
     /**
      * Create a MainAreaWidget for a license viewer
      */
     function createLicenseWidget(args: Licenses.ICreateArgs) {
       const licensesModel = new Licenses.Model({
         ...args,
-        licensesUrl,
-        trans,
-        serverSettings: app.serviceManager.serverSettings
+        client,
+        trans
       });
       const content = new Licenses({ model: licensesModel });
       content.id = `${licensesNamespace}-${++counter}`;
@@ -135,56 +154,6 @@ export const licensesTracker: JupyterFrontEndPlugin<ILicensesTracker> = {
       }
     });
 
-    if (restorer) {
-      void restorer.restore(licensesTracker, {
-        command: CommandIDs.licenses,
-        name: widget => 'licenses',
-        args: widget => {
-          const { currentBundleName, currentPackageIndex, packageFilter } =
-            widget.content.model;
-
-          const args: Licenses.ICreateArgs = {
-            currentBundleName,
-            currentPackageIndex,
-            packageFilter
-          };
-          return args as ReadonlyJSONObject;
-        }
-      });
-    }
-
-    return licensesTracker;
-  }
-};
-
-/**
- * A plugin to add a licenses reporting tools.
- */
-export const licensesPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:licenses-plugin',
-  description: 'Adds licenses reporting tools.',
-  requires: [ITranslator],
-  optional: [ILicensesTracker, IMainMenu, ICommandPalette],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    translator: ITranslator,
-    licensesTracker: ILicensesTracker | null,
-    menu: IMainMenu | null,
-    palette: ICommandPalette | null
-  ) => {
-    if (!licensesTracker) {
-      return;
-    }
-
-    const { commands } = app;
-
-    const trans = translator.load('jupyterlab');
-
-    const category = trans.__('Help');
-    const downloadAsText = trans.__('Download All Licenses as');
-    const refreshLicenses = trans.__('Refresh Licenses');
-
     /**
      * Return a full license report format based on a format name
      */
@@ -236,6 +205,24 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
     if (menu) {
       const helpMenu = menu.helpMenu;
       helpMenu.addGroup([{ command: CommandIDs.licenses }], 0);
+    }
+
+    if (restorer) {
+      void restorer.restore(licensesTracker, {
+        command: CommandIDs.licenses,
+        name: widget => 'licenses',
+        args: widget => {
+          const { currentBundleName, currentPackageIndex, packageFilter } =
+            widget.content.model;
+
+          const args: Licenses.ICreateArgs = {
+            currentBundleName,
+            currentPackageIndex,
+            packageFilter
+          };
+          return args as ReadonlyJSONObject;
+        }
+      });
     }
   }
 };
