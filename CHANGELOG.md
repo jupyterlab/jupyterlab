@@ -41,7 +41,7 @@ which can be used to pre-configure defaults in deployments or to restore setting
 
 ### Workspace indicator
 
-An opt-in workspace indicator displayed on the top bar (next to the menu bar) can be enabled
+An opt-in workspace indicator is displayed on the top bar (next to the menu bar). It can be enabled
 in the Settings → View → Appearance → Show Workspace Indicator.
 
 <img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
