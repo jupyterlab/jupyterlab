@@ -21,7 +21,7 @@ import {
 import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
   jupyterIcon,
@@ -71,25 +71,48 @@ const HELP_CLASS = 'jp-Help';
 const licensesCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:licenses-commands',
   autoStart: true,
-  activate: (app: JupyterFrontEnd): void => {
+  optional: [ITranslator],
+  description: 'Add licenses commands for backwards compatibility.',
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null): void => {
     const { commands } = app;
+
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const licensesText = trans.__('Licenses');
+    const downloadAsText = trans.__('Download All Licenses');
+    const refreshLicenses = trans.__('Refresh Licenses');
 
     const apputilsLicencesCommand = 'apputils:licenses';
     commands.addCommand(CommandIDs.licenses, {
-      label: commands.label(apputilsLicencesCommand),
-      execute: () => commands.execute(apputilsLicencesCommand)
+      label: licensesText,
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.licenses} is deprecated, use ${apputilsLicencesCommand} instead.`
+        );
+        return commands.execute(apputilsLicencesCommand, args);
+      }
     });
 
     const apputilsLicenseReportCommand = 'apputils:license-report';
     commands.addCommand(CommandIDs.licenseReport, {
-      label: commands.label(apputilsLicenseReportCommand),
-      execute: () => commands.execute(apputilsLicenseReportCommand)
+      label: downloadAsText,
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.licenseReport} is deprecated, use ${apputilsLicenseReportCommand} instead.`
+        );
+        return commands.execute(apputilsLicenseReportCommand, args);
+      }
     });
 
     const apputilsRefreshLicensesCommand = 'apputils:licenses-refresh';
     commands.addCommand(CommandIDs.refreshLicenses, {
-      label: commands.label(apputilsRefreshLicensesCommand),
-      execute: () => commands.execute(apputilsRefreshLicensesCommand)
+      label: refreshLicenses,
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.refreshLicenses} is deprecated, use ${apputilsRefreshLicensesCommand} instead.`
+        );
+        return commands.execute(apputilsRefreshLicensesCommand, args);
+      }
     });
   }
 };

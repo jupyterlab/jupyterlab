@@ -133,6 +133,16 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
       return main;
     }
 
+    /**
+     * Return a full license report format based on a format name
+     */
+    function formatOrDefault(format: string): Licenses.IReportFormat {
+      return (
+        Licenses.REPORT_FORMATS[format] ||
+        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
+      );
+    }
+
     // register license-related commands
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
@@ -153,16 +163,6 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
         return licenseMain;
       }
     });
-
-    /**
-     * Return a full license report format based on a format name
-     */
-    function formatOrDefault(format: string): Licenses.IReportFormat {
-      return (
-        Licenses.REPORT_FORMATS[format] ||
-        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
-      );
-    }
 
     commands.addCommand(CommandIDs.refreshLicenses, {
       label: args => (args.noLabel ? '' : refreshLicenses),

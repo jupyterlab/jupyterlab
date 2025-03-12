@@ -105,6 +105,7 @@
   "@jupyterlab/fileeditor-extension:widget-factory": "Provides the factory for creating file editors.",
   "@jupyterlab/help-extension:about": "Adds a \"About\" dialog feature.",
   "@jupyterlab/help-extension:jupyter-forum": "Adds command to open the Jupyter Forum website.",
+  "@jupyterlab/help-extension:licenses-commands": "Add licenses commands for backwards compatibility.",
   "@jupyterlab/help-extension:open": "Add command to open websites as panel or browser tab.",
   "@jupyterlab/help-extension:resources": "Adds menu entries to Jupyter reference documentation websites.",
   "@jupyterlab/htmlviewer-extension:plugin": "Adds HTML file viewer and provides its tracker.",
