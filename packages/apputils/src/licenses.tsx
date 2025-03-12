@@ -296,9 +296,12 @@ export namespace Licenses {
   }
 
   /**
-   * A data connector for fetching license data from the server
+   * A class used for fetching licenses from the server.
    */
   export class LicensesClient implements ILicensesClient {
+    /**
+     * Create a new license client.
+     */
     constructor(options: ILicenseClientOptions = {}) {
       this._licensesUrl = options.licensesUrl || '';
       this._serverSettings =
@@ -306,14 +309,14 @@ export namespace Licenses {
     }
 
     /**
-     * Get the link to download the licenses in a given format
+     * Get the link to download the licenses in a given format.
      */
     async getDownloadLink(options: IDownloadOptions): Promise<string> {
       return `${this._licensesUrl}?format=${options.format}&download=1`;
     }
 
     /**
-     * Fetch the licenses from the server
+     * Fetch the license bundles from the server.
      */
     async getBundles(): Promise<ILicenseResponse> {
       const response = await ServerConnection.makeRequest(
