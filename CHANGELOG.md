@@ -12,7 +12,26 @@ Extension authors are recommended to consult the [Extension Migration Guide](htt
 
 ### Code console improvements
 
-TODO
+The code console prompt can now be positioned on top, left, or right side of the console,
+in addition to the default bottom placement. The placement is persisted in the Prompt Cell
+Position setting.
+
+The console toolbar now includes buttons to:
+- execute code,
+- restart the kernel,
+- clear the cells,
+- switch the kernel.
+
+Additional settings for console behavior were added:
+- Clear Code Content on Execute (enabled by default) - when disabled,
+  the code submitted for execution remains in the code editor, allowing for further edits
+- Hide Code Input - when enabled shows only the output of the execution in the console
+- Clear Cells on Execute - when enabled shows only last cell
+
+Toggling all the three new settings transforms the console into an interactive editor
+resembling an ephemeral notebook with a single cell.
+
+<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
 
 ### Settings import and export
 
@@ -20,10 +39,14 @@ Settings can now be exported to `overrides.json` from the Settings Editor,
 which can be used to pre-configure defaults on deployments or for restoring
 the settings.
 
+<img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
+
 ### Workspace indicator
 
 An opt-in workspace indicator displayed on the top bar (next to the menu bar) can be enabled
 in the Settings → View → Appearance → Show Workspace Indicator.
+
+<img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
 
 ### Support for collaboration without `RTC:` drive
 
@@ -56,6 +79,8 @@ A new console panel will open allowing access to variables from the main session
 
 To enable the use of subshell by widgets (such as `ipywidgets`)
 change the Kernel Comms over subshells setting.
+
+<img alt="The subshell console" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
 
 ### Context menu opt-out
 
