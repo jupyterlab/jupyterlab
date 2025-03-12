@@ -442,15 +442,23 @@ export class DirListing extends Widget {
     const moveToTrashItemsActionMessage = this._trans._n(
       'Are you sure you want to move to trash the %1 selected item?',
       'Are you sure you want to move to trash the %1 selected items?',
-      items.length);
+      items.length
+    );
     const deleteActionItemsMessage = this._trans._n(
       'Are you sure you want to permanently delete the %1 selected item?',
       'Are you sure you want to permanently delete the %1 selected items?',
-      items.length);
+      items.length
+    );
 
-    const actionMessage = deleteToTrash ? moveToTrashActionMessage : deleteActionMessage;
-    const itemsActionMessage = deleteToTrash ? moveToTrashItemsActionMessage : deleteActionItemsMessage;
-    const actionName = deleteToTrash ? this._trans.__('Move to Trash') : this._trans.__('Delete');
+    const actionMessage = deleteToTrash
+      ? moveToTrashActionMessage
+      : deleteActionMessage;
+    const itemsActionMessage = deleteToTrash
+      ? moveToTrashItemsActionMessage
+      : deleteActionItemsMessage;
+    const actionName = deleteToTrash
+      ? this._trans.__('Move to Trash')
+      : this._trans.__('Delete');
     const message = items.length === 1 ? actionMessage : itemsActionMessage;
     const result = await showDialog({
       title: actionName,
