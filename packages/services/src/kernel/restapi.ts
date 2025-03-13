@@ -286,7 +286,7 @@ export class KernelAPIClient {
    * The promise is fulfilled on a valid response and rejected otherwise.
    * If the kernel does not exist on the server, the promise is resolved with `undefined`.
    */
-  async getKernelModel(id: string): Promise<IModel | undefined> {
+  async getModel(id: string): Promise<IModel | undefined> {
     return getKernelModel(id, this.serverSettings);
   }
 
@@ -318,7 +318,7 @@ export class KernelAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async restartKernel(id: string): Promise<void> {
+  async restart(id: string): Promise<void> {
     return restartKernel(id, this.serverSettings);
   }
 
@@ -334,7 +334,7 @@ export class KernelAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async interruptKernel(id: string): Promise<void> {
+  async interrupt(id: string): Promise<void> {
     return interruptKernel(id, this.serverSettings);
   }
 
@@ -350,7 +350,7 @@ export class KernelAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async shutdownKernel(id: string): Promise<void> {
+  async shutdown(id: string): Promise<void> {
     return shutdownKernel(id, this.serverSettings);
   }
 }

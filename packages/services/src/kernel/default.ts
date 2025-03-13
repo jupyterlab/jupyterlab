@@ -495,7 +495,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    return this._kernelAPIClient.interruptKernel(this.id);
+    return this._kernelAPIClient.interrupt(this.id);
   }
 
   /**
@@ -523,7 +523,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._clearKernelState();
     this._kernelSession = RESTARTING_KERNEL_SESSION;
-    await this._kernelAPIClient.restartKernel(this.id);
+    await this._kernelAPIClient.restart(this.id);
     // Reconnect to the kernel to address cases where kernel ports
     // have changed during the restart.
     await this.reconnect();
@@ -581,7 +581,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   async shutdown(): Promise<void> {
     if (this.status !== 'dead') {
-      await this._kernelAPIClient.shutdownKernel(this.id);
+      await this._kernelAPIClient.shutdown(this.id);
     }
     this.handleShutdown();
   }
@@ -1439,7 +1439,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._reason = '';
       this._model = undefined;
       try {
-        const model = await this._kernelAPIClient.getKernelModel(this._id);
+        const model = await this._kernelAPIClient.getModel(this._id);
         this._model = model;
         if (model?.execution_state === 'dead') {
           this._updateStatus('dead');

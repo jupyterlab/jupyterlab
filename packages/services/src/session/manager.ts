@@ -161,7 +161,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
       'model' | 'connectToKernel' | 'serverSettings'
     > = {}
   ): Promise<Session.ISessionConnection> {
-    const model = await this._sessionAPIClient.startSession(createOptions);
+    const model = await this._sessionAPIClient.startNew(createOptions);
     await this.refreshRunning();
     return this.connectTo({ ...connectOptions, model });
   }
@@ -170,7 +170,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Shut down a session by id.
    */
   async shutdown(id: string): Promise<void> {
-    await this._sessionAPIClient.shutdownSession(id);
+    await this._sessionAPIClient.shutdown(id);
     await this.refreshRunning();
   }
 
@@ -185,9 +185,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
 
     // Shut down all models.
     await Promise.all(
-      [...this._models.keys()].map(id =>
-        this._sessionAPIClient.shutdownSession(id)
-      )
+      [...this._models.keys()].map(id => this._sessionAPIClient.shutdown(id))
     );
 
     // Update the list of models to clear out our state.

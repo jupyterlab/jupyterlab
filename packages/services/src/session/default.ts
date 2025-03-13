@@ -300,7 +300,7 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    await this._sessionAPIClient.shutdownSession(this.id);
+    await this._sessionAPIClient.shutdown(this.id);
     this.dispose();
   }
 
@@ -394,7 +394,7 @@ export class SessionConnection implements Session.ISessionConnection {
   private async _patch(
     body: DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
-    const model = await this._sessionAPIClient.updateSession({
+    const model = await this._sessionAPIClient.update({
       ...body,
       id: this._id
     });

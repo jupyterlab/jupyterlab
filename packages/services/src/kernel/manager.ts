@@ -197,7 +197,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * @returns A promise that resolves when the operation is complete.
    */
   async shutdown(id: string): Promise<void> {
-    await this._kernelAPIClient.shutdownKernel(id);
+    await this._kernelAPIClient.shutdown(id);
     await this.refreshRunning();
   }
 
@@ -212,9 +212,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     // Shut down all models.
     await Promise.all(
-      [...this._models.keys()].map(id =>
-        this._kernelAPIClient.shutdownKernel(id)
-      )
+      [...this._models.keys()].map(id => this._kernelAPIClient.shutdown(id))
     );
 
     // Update the list of models to clear out our state.

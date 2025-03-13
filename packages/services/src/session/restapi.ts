@@ -192,7 +192,7 @@ export class SessionAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async getSessionModel(id: string): Promise<Session.IModel> {
+  async getModel(id: string): Promise<Session.IModel> {
     return getSessionModel(id, this.serverSettings);
   }
 
@@ -208,9 +208,7 @@ export class SessionAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async startSession(
-    options: Session.ISessionOptions
-  ): Promise<Session.IModel> {
+  async startNew(options: Session.ISessionOptions): Promise<Session.IModel> {
     return startSession(options, this.serverSettings);
   }
 
@@ -226,7 +224,7 @@ export class SessionAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async shutdownSession(id: string): Promise<void> {
+  async shutdown(id: string): Promise<void> {
     return shutdownSession(id, this.serverSettings);
   }
 
@@ -242,7 +240,7 @@ export class SessionAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async updateSession(
+  async update(
     model: Pick<Session.IModel, 'id'> & DeepPartial<Omit<Session.IModel, 'id'>>
   ): Promise<Session.IModel> {
     return updateSession(model, this.serverSettings);
