@@ -22,12 +22,12 @@ The console toolbar now includes buttons to:
 - Clear the cells
 - Switch the kernel
 
+<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+
 Additional settings for console behavior have been added:
 - Clear Code Content on Execute (enabled by default) – When disabled, the code submitted for execution remains in the code editor, allowing for further edits.
 - Hide Code Input – When enabled, only the execution output is shown in the console.
 - Clear Cells on Execute – When enabled, only the last cell is displayed.
-
-<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
 
 Toggling all the three new settings transforms the console into an interactive editor
 resembling an ephemeral notebook with a single cell.
