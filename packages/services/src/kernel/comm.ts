@@ -36,7 +36,8 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this._id = id;
     this._target = target;
     this._kernel = kernel;
-    this.commsOverSubshells = commsOverSubshells ?? CommsOverSubshells.PerCommTarget;
+    this.commsOverSubshells =
+      commsOverSubshells ?? CommsOverSubshells.PerCommTarget;
   }
 
   /**
@@ -283,10 +284,12 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
       this._subshellStarted.resolve();
     } else {
       // Create subshell
-      CommHandler._commTargetSubShellsId[this._target] = this._kernel.requestCreateSubshell({}).done.then((replyMsg) => {
-        this._subshellId = replyMsg.content.subshell_id;
-        return this._subshellId;
-      });
+      CommHandler._commTargetSubShellsId[this._target] = this._kernel
+        .requestCreateSubshell({})
+        .done.then(replyMsg => {
+          this._subshellId = replyMsg.content.subshell_id;
+          return this._subshellId;
+        });
       await CommHandler._commTargetSubShellsId[this._target];
       this._subshellStarted.resolve();
     }
@@ -309,7 +312,9 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   private _subshellStarted = new PromiseDelegate<void>();
-  private static _commTargetSubShellsId: { [targetName: string]: Promise<string> | null } = {};
+  private static _commTargetSubShellsId: {
+    [targetName: string]: Promise<string> | null;
+  } = {};
 
   private _commsOverSubshells: CommsOverSubshells;
   private _subshellId: string | null = null;

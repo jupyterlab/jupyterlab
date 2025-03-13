@@ -1832,7 +1832,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
   );
   private _selectedProtocol: string = '';
 
-  private _commsOverSubshells: CommsOverSubshells = CommsOverSubshells.PerCommTarget;
+  private _commsOverSubshells: CommsOverSubshells =
+    CommsOverSubshells.PerCommTarget;
 
   private _futures = new Map<
     string,

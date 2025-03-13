@@ -199,10 +199,12 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
         }
       };
 
-      void settingRegistry.load('@jupyterlab/apputils-extension:sessions-settings').then(settings => {
-        onSettingsUpdated(settings);
-        settings.changed.connect(onSettingsUpdated);
-      });
+      void settingRegistry
+        .load('@jupyterlab/apputils-extension:sessions-settings')
+        .then(settings => {
+          onSettingsUpdated(settings);
+          settings.changed.connect(onSettingsUpdated);
+        });
     } else {
       registerItem();
     }
