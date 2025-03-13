@@ -16,6 +16,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualElement } from '@lumino/virtualdom';
 import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { ILicensesClient } from './tokens';
 
 const FILTER_SECTION_TITLE_CLASS = 'jp-Licenses-Filters-title';
 
@@ -204,18 +205,8 @@ export namespace Licenses {
    * Options for instantiating a license model
    */
   export interface IModelOptions extends ICreateArgs {
-    licensesUrl: string;
-    serverSettings?: ServerConnection.ISettings;
+    client: ILicensesClient;
     trans: TranslationBundle;
-  }
-
-  /**
-   * The JSON response from the API
-   */
-  export interface ILicenseResponse {
-    bundles: {
-      [key: string]: ILicenseBundle;
-    };
   }
 
   /**
@@ -281,15 +272,73 @@ export namespace Licenses {
   }
 
   /**
+   * The options for a new license client.
+   */
+  export interface ILicenseClientOptions {
+    /**
+     * The URL for the licenses API
+     */
+    licensesUrl?: string;
+
+    /**
+     * The server settings
+     */
+    serverSettings?: ServerConnection.ISettings;
+  }
+
+  /**
+   * The JSON response from the API
+   */
+  export interface ILicenseResponse {
+    bundles: {
+      [key: string]: Licenses.ILicenseBundle;
+    };
+  }
+
+  /**
+   * A class used for fetching licenses from the server.
+   */
+  export class LicensesClient implements ILicensesClient {
+    /**
+     * Create a new license client.
+     */
+    constructor(options: ILicenseClientOptions = {}) {
+      this._licensesUrl = options.licensesUrl || '';
+      this._serverSettings =
+        options.serverSettings ?? ServerConnection.makeSettings();
+    }
+
+    /**
+     * Get the link to download the licenses in a given format.
+     */
+    async getDownloadLink(options: IDownloadOptions): Promise<string> {
+      return `${this._licensesUrl}?format=${options.format}&download=1`;
+    }
+
+    /**
+     * Fetch the license bundles from the server.
+     */
+    async getBundles(): Promise<ILicenseResponse> {
+      const response = await ServerConnection.makeRequest(
+        this._licensesUrl,
+        {},
+        this._serverSettings
+      );
+      return response.json();
+    }
+
+    private _serverSettings: ServerConnection.ISettings;
+    private _licensesUrl: string;
+  }
+
+  /**
    * A model for license data
    */
   export class Model extends VDomModel implements ICreateArgs {
     constructor(options: IModelOptions) {
       super();
       this._trans = options.trans;
-      this._licensesUrl = options.licensesUrl;
-      this._serverSettings =
-        options.serverSettings || ServerConnection.makeSettings();
+      this._client = options.client;
       if (options.currentBundleName) {
         this._currentBundleName = options.currentBundleName;
       }
@@ -306,12 +355,7 @@ export namespace Licenses {
      */
     async initLicenses(): Promise<void> {
       try {
-        const response = await ServerConnection.makeRequest(
-          this._licensesUrl,
-          {},
-          this._serverSettings
-        );
-        this._serverResponse = await response.json();
+        this._serverResponse = await this._client.getBundles();
         this._licensesReady.resolve();
         this.stateChanged.emit(void 0);
       } catch (err) {
@@ -324,13 +368,14 @@ export namespace Licenses {
      * file download.
      */
     async download(options: IDownloadOptions): Promise<void> {
-      const url = `${this._licensesUrl}?format=${options.format}&download=1`;
+      const url = await this._client.getDownloadLink(options);
       const element = document.createElement('a');
       element.href = url;
       element.download = '';
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
+      URL.revokeObjectURL(url);
       return void 0;
     }
 
@@ -489,8 +534,7 @@ export namespace Licenses {
     private _selectedPackageChanged: Signal<Model, void> = new Signal(this);
     private _trackerDataChanged: Signal<Model, void> = new Signal(this);
     private _serverResponse: ILicenseResponse | null;
-    private _licensesUrl: string;
-    private _serverSettings: ServerConnection.ISettings;
+    private _client: ILicensesClient;
     private _currentBundleName: string | null;
     private _trans: TranslationBundle;
     private _currentPackageIndex: number | null = 0;

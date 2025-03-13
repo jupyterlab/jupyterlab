@@ -9,6 +9,7 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { CommandPalette, Widget } from '@lumino/widgets';
 import { ISessionContext } from './sessioncontext';
+import { Licenses } from './licenses';
 
 /**
  * The command palette token.
@@ -70,6 +71,19 @@ export interface IKernelStatusModel {
     provider: (widget: Widget | null) => ISessionContext | null
   ) => void;
 }
+
+/**
+ * The license client for fetching licenses.
+ */
+export const ILicensesClient = new Token<ILicensesClient>(
+  '@jupyterlab/apputils:ILicensesClient',
+  'A service for fetching licenses.'
+);
+
+/**
+ * An interface for the license client.
+ */
+export interface ILicensesClient extends Licenses.LicensesClient {}
 
 /**
  * An interface for the session context dialogs.
