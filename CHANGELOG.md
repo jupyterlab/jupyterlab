@@ -22,6 +22,8 @@ The console toolbar now includes buttons to:
 - Clear the cells
 - Switch the kernel
 
+<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+
 Additional settings for console behavior have been added:
 - Clear Code Content on Execute (enabled by default) – When disabled, the code submitted for execution remains in the code editor, allowing for further edits.
 - Hide Code Input – When enabled, only the execution output is shown in the console.
@@ -30,21 +32,21 @@ Additional settings for console behavior have been added:
 Toggling all the three new settings transforms the console into an interactive editor
 resembling an ephemeral notebook with a single cell.
 
-<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+<img alt="Toggling all the three new settings transforms the console into a single cell" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console-singlecell.png" class="jp-screenshot">
 
 ### Settings import and export
 
 Settings can now be exported to `overrides.json` from the Settings Editor,
 which can be used to pre-configure defaults in deployments or to restore settings.
 
-<img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
+<img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
 
 ### Workspace indicator
 
 An opt-in workspace indicator is displayed on the top bar (next to the menu bar). It can be enabled
 in the Settings → View → Appearance → Show Workspace Indicator.
 
-<img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
+<img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
 
 ### Support for collaboration without `RTC:` drive
 
@@ -73,7 +75,7 @@ and select "New Subshell Console for Notebook".
 A new console panel will open allowing access to variables from the main session.
 
 
-<img alt="The subshell console" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
+<img alt="The subshell console" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
 
 ### Context menu opt-out
 
