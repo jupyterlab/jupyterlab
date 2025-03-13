@@ -27,10 +27,12 @@ Additional settings for console behavior have been added:
 - Hide Code Input – When enabled, only the execution output is shown in the console.
 - Clear Cells on Execute – When enabled, only the last cell is displayed.
 
+<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+
 Toggling all the three new settings transforms the console into an interactive editor
 resembling an ephemeral notebook with a single cell.
 
-<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+<img alt="Toggling all the three new settings transforms the console into a single cell" src="https://raw.githubusercontent.com/jtpio/jupyterlab/update-changelog-links/docs/source/getting_started/changelog_assets/4.4-console-singlecell.png" class="jp-screenshot">
 
 ### Settings import and export
 
