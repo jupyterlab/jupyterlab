@@ -4,6 +4,90 @@
 
 # JupyterLab Changelog
 
+## v4.4
+
+JupyterLab 4.4 includes a number of new features (described below), bug fixes, and enhancements.
+This release is compatible with extensions supporting JupyterLab 4.0.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-3-to-4-4) which lists deprecations and changes to the public API.
+
+### Code console improvements
+
+The code console prompt can now be positioned on the top, left, or right side of the console,
+in addition to the default bottom placement. The placement is persisted in the Prompt Cell
+Position setting.
+
+The console toolbar now includes buttons to:
+- Execute code
+- Restart the kernel
+- Clear the cells
+- Switch the kernel
+
+Additional settings for console behavior have been added:
+- Clear Code Content on Execute (enabled by default) – When disabled, the code submitted for execution remains in the code editor, allowing for further edits.
+- Hide Code Input – When enabled, only the execution output is shown in the console.
+- Clear Cells on Execute – When enabled, only the last cell is displayed.
+
+Toggling all the three new settings transforms the console into an interactive editor
+resembling an ephemeral notebook with a single cell.
+
+<img alt="The option to change console prompt position is available under the three dots button in the console toolbar, which is the last toolbar button" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-console.png" class="jp-screenshot">
+
+### Settings import and export
+
+Settings can now be exported to `overrides.json` from the Settings Editor,
+which can be used to pre-configure defaults in deployments or to restore settings.
+
+<img alt="The Import and Export buttons in the Settings Editor are the first two items in the toolbar panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-settings-import-export.png" class="jp-screenshot">
+
+### Workspace indicator
+
+An opt-in workspace indicator is displayed on the top bar (next to the menu bar). It can be enabled
+in the Settings → View → Appearance → Show Workspace Indicator.
+
+<img alt="The workspace indicator in the open state" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-workspace-indicator.png" class="jp-screenshot">
+
+### Support for collaboration without `RTC:` drive
+
+Real time collaboration in previous versions of JupyterLab
+(which can be enabled by installing jupyter-collaboration package)
+was implemented by swapping the default JupyterLab file system
+drive to a collaborative drive with the `RTC:` prefix.
+This approach was incompatible with multiple extensions.
+JupyterLab 4.4 introduces the Content Providers API, which allows the next version of `jupyter-collaboration` to work without changing the drive prefix.
+This improves compatibility with extensions that do not support arbitrary drives.
+
+### Kernel subshells support
+
+Kernel subshells, introduced in [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html),
+enable concurrent code execution in kernels that support them.
+When performing long-running computations (such as training a model), subshells enable users to:
+- Use `ipywidgets` with updates displayed immediately
+- Monitor kernel resource usage (e.g. memory usage)
+- Invoke arbitrary commands (e.g., refine code for a subsequent cell) while maintaining live access to previously defined variables
+
+Subshells are supported by `ipykernel` 7 (currently in alpha).
+
+To create a subshell, open context menu (right-click)
+over a notebook using a kernel supporting subshells
+and select "New Subshell Console for Notebook".
+A new console panel will open allowing access to variables from the main session.
+
+
+<img alt="The subshell console" src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.4/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
+
+### Context menu opt-out
+
+The context menu, available under right mouse click in browsers, can now be disabled globally
+by toggling the `Enable Context Menu` option available in the Command Palette,
+or via the JSON Settings Editor in the Application Context Menu.
+
+### Slimmer status bar
+
+The terminals counter no longer appears in the status bar if no terminals are open.
+The kernels counter can be disabled by toggling the "Show the status bar item" setting
+in "Running Terminals and Kernels" (code name `showStatusBarItem`).
+
+
 ## v4.3
 
 JupyterLab 4.3 includes a number of new features (described below), bug fixes, and enhancements.
