@@ -36,6 +36,14 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this._id = id;
     this._target = target;
     this._kernel = kernel;
+
+    // Clean subshell ids upon restart
+    this._kernel.statusChanged.connect(() => {
+      if (this._kernel.status === 'restarting') {
+        this._cleanSubshells();
+      }
+    });
+
     this.commsOverSubshells =
       commsOverSubshells ?? CommsOverSubshells.PerCommTarget;
   }
@@ -262,6 +270,10 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     this._maybeCloseSubshell();
 
     super.dispose();
+  }
+
+  private async _cleanSubshells() {
+    CommHandler._commTargetSubShellsId = {};
   }
 
   private async _maybeStartSubshell() {
