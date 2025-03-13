@@ -13,7 +13,7 @@
       "type": "string",
       "title": "Kernel Comms over subshells",
       "description": "Whether comm messages should be sent to kernel subshells, if the kernel supports it.",
-      "default": "disabled",
+      "default": "perCommTarget",
       "oneOf": [
         { "const": "disabled", "title": "Disabled" },
         { "const": "perComm", "title": "One subshell per comm" },

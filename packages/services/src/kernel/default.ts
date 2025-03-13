@@ -61,7 +61,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
     this._commsOverSubshells =
-      options.commsOverSubshells ?? CommsOverSubshells.Disabled;
+      options.commsOverSubshells ?? CommsOverSubshells.PerCommTarget;
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
@@ -1835,7 +1835,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   );
   private _selectedProtocol: string = '';
 
-  private _commsOverSubshells: CommsOverSubshells = CommsOverSubshells.Disabled;
+  private _commsOverSubshells: CommsOverSubshells = CommsOverSubshells.PerCommTarget;
 
   private _futures = new Map<
     string,
