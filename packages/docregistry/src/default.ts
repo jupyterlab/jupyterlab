@@ -595,7 +595,7 @@ export class DocumentWidget<
    * Handle a title change.
    */
   private async _onTitleChanged(_sender: Title<this>) {
-    const validNameExp = /[\/\\:]/;
+    const validNameExp = /[/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name
     const filename =
