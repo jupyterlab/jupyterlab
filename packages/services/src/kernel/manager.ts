@@ -352,7 +352,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     }
   }
 
-  private _commsOverSubshells: CommsOverSubshells = CommsOverSubshells.PerCommTarget;
+  private _commsOverSubshells: CommsOverSubshells =
+    CommsOverSubshells.PerCommTarget;
   private _isReady = false;
   private _ready: Promise<void>;
   private _kernelConnections = new Set<KernelConnection>();
