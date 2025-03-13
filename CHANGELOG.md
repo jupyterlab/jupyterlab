@@ -32,7 +32,7 @@ Additional settings for console behavior have been added:
 Toggling all the three new settings transforms the console into an interactive editor
 resembling an ephemeral notebook with a single cell.
 
-<img alt="Toggling all the three new settings transforms the console into a single cell" src="https://raw.githubusercontent.com/jtpio/jupyterlab/update-changelog-links/docs/source/getting_started/changelog_assets/4.4-console-singlecell.png" class="jp-screenshot">
+<img alt="Toggling all the three new settings transforms the console into a single cell" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-console-singlecell.png" class="jp-screenshot">
 
 ### Settings import and export
 
