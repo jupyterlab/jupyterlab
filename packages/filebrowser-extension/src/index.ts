@@ -924,7 +924,7 @@ function addCommands(
       const widget = tracker.currentWidget;
 
       if (widget) {
-        return widget.delete(deleteToTrash);
+        return widget.delete();
       }
     },
     icon: closeIcon.bindprops({ stylesheet: 'menuItem' }),

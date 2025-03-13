@@ -7,7 +7,7 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PathExt, Time } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   IDocumentManager,
   isValidFileName,
@@ -425,7 +425,8 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  async delete(deleteToTrash: boolean = false): Promise<void> {
+  async delete(): Promise<void> {
+    const deleteToTrash = PageConfig.getOption('delete_to_trash') === 'true';
     const items = this._sortedItems.filter(item => this.selection[item.path]);
 
     if (!items.length) {
