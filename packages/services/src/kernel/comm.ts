@@ -272,7 +272,7 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     super.dispose();
   }
 
-  private async _cleanSubshells() {
+  private _cleanSubshells() {
     CommHandler._commTargetSubShellsId = {};
   }
 
