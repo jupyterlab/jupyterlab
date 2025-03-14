@@ -40,7 +40,7 @@ export async function getSpecs(
  * The Kernel Spec API client.
  *
  * #### Notes
- * Use this class to interact with the Jupyter Server Kernel API.
+ * Use this class to interact with the Jupyter Server Kernel Spec API.
  * This class adheres to the Jupyter Server API endpoints.
  */
 export class KernelSpecAPIClient {
