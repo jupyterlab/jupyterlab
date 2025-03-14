@@ -4,7 +4,7 @@
 import { ISignal } from '@lumino/signaling';
 
 import { IManager as IBaseManager } from '../basemanager';
-import { ISpecModel, ISpecModels } from './restapi';
+import { ISpecModel, ISpecModels, KernelSpecAPIClient } from './restapi';
 export { ISpecModel, ISpecModels };
 
 /**
@@ -38,3 +38,8 @@ export interface IManager extends IBaseManager {
    */
   refreshSpecs(): Promise<void>;
 }
+
+/**
+ * Interface for making requests to the Kernel Spec API.
+ */
+export interface IKernelSpecAPIClient extends KernelSpecAPIClient {}

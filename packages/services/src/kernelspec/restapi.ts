@@ -37,6 +37,42 @@ export async function getSpecs(
 }
 
 /**
+ * The Kernel Spec API client.
+ *
+ * #### Notes
+ * Use this class to interact with the Jupyter Server Kernel API.
+ * This class adheres to the Jupyter Server API endpoints.
+ */
+export class KernelSpecAPIClient {
+  /**
+   * Create a new Kernel Spec API client.
+   *
+   * @param options - The options used to create the client.
+   */
+  constructor(options: { serverSettings?: ServerConnection.ISettings } = {}) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Fetch all of the kernel specs.
+   *
+   * @returns A promise that resolves with the kernel specs.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernelspecs).
+   */
+  async get(): Promise<ISpecModels> {
+    return getSpecs(this.serverSettings);
+  }
+}
+
+/**
  * Kernel Spec interface.
  *
  * #### Notes

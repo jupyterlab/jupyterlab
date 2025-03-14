@@ -22,9 +22,10 @@ import {
 } from './future';
 
 import * as validate from './validate';
-import { KernelSpec, KernelSpecAPI } from '../kernelspec';
+import { KernelSpec } from '../kernelspec';
 
 import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
+import { KernelSpecAPIClient } from '../kernelspec/restapi';
 
 // Stub for requirejs.
 declare let requirejs: any;
@@ -53,6 +54,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._kernelAPIClient =
       options.kernelAPIClient ??
       new KernelAPIClient({ serverSettings: this.serverSettings });
+    this._kernelSpecAPIClient =
+      options.kernelSpecAPIClient ??
+      new KernelSpecAPIClient({ serverSettings: this.serverSettings });
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
@@ -235,11 +239,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this._specPromise) {
       return this._specPromise;
     }
-    this._specPromise = KernelSpecAPI.getSpecs(this.serverSettings).then(
-      specs => {
-        return specs.kernelspecs[this._name];
-      }
-    );
+    this._specPromise = this._kernelSpecAPIClient.get().then(specs => {
+      return specs.kernelspecs[this._name];
+    });
     return this._specPromise;
   }
 
@@ -1790,6 +1792,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   private _ws: WebSocket | null = null;
   private _kernelAPIClient: Kernel.IKernelAPIClient;
+  private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
