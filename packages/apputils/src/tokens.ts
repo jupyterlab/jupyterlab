@@ -90,9 +90,9 @@ export interface ILicensesClient {
   getBundles(): Promise<Licenses.ILicenseResponse>;
 
   /**
-   * Get the link to download the licenses in a given format.
+   * Download the licenses in the requested format.
    */
-  getDownloadLink(options: Licenses.IDownloadOptions): Promise<string>;
+  download(options: Licenses.IDownloadOptions): Promise<void>;
 }
 
 /**
