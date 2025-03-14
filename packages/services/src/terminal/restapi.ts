@@ -122,6 +122,10 @@ export async function shutdownTerminal(
 
 /**
  * The Terminal API client.
+ *
+ * #### Notes
+ * Use this class to interact with the Jupyter Server Terminal API.
+ * This class adheres to the Jupyter Server API endpoints.
  */
 export class TerminalAPIClient {
   /**
