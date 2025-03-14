@@ -11,13 +11,16 @@ import { ServerConnection } from '..';
 
 import * as KernelMessage from './messages';
 
-import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
+
+import { KernelSpec } from '../kernelspec';
+
+import { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
 
 import { IKernelOptions, IModel, KernelAPIClient } from './restapi';
 
 export { Status } from './messages';
-export { IModel, IKernelOptions };
+export { IKernelOptions, IModel };
 
 /**
  * Interface of a Kernel connection that is managed by a session.
@@ -628,6 +631,11 @@ export namespace IKernelConnection {
      * The kernel API client.
      */
     kernelAPIClient?: IKernelAPIClient;
+
+    /**
+     * The kernel spec API client.
+     */
+    kernelSpecAPIClient?: IKernelSpecAPIClient;
 
     /**
      * The username of the kernel client.
