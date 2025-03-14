@@ -85,7 +85,7 @@ export const ILicensesClient = new Token<ILicensesClient>(
  */
 export interface ILicensesClient {
   /**
-   * fetch the license bundles from the server.
+   * Fetch the license bundles from the server.
    */
   getBundles(): Promise<Licenses.ILicenseResponse>;
 
