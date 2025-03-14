@@ -324,7 +324,7 @@ export namespace Licenses {
     }
 
     /**
-     * fetch the license bundles from the server.
+     * Fetch the license bundles from the server.
      */
     async getBundles(): Promise<ILicenseResponse> {
       const response = await ServerConnection.makeRequest(
