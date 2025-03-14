@@ -27,7 +27,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
       new TerminalAPIClient({ serverSettings: this.serverSettings });
 
     // Check if terminals are available
-    if (!this._terminalAPIClient.isAvailable) {
+    if (!this.isAvailable()) {
       this._ready = Promise.reject('Terminals unavailable');
       this._ready.catch(_ => undefined);
       return;
