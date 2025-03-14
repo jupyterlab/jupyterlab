@@ -83,7 +83,17 @@ export const ILicensesClient = new Token<ILicensesClient>(
 /**
  * An interface for the license client.
  */
-export interface ILicensesClient extends Licenses.LicensesClient {}
+export interface ILicensesClient {
+  /**
+   * fetch the license bundles from the server.
+   */
+  getBundles(): Promise<Licenses.ILicenseResponse>;
+
+  /**
+   * Get the link to download the licenses in a given format.
+   */
+  getDownloadLink(options: Licenses.IDownloadOptions): Promise<string>;
+}
 
 /**
  * An interface for the session context dialogs.
