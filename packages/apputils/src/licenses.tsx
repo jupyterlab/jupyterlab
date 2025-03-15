@@ -309,10 +309,18 @@ export namespace Licenses {
     }
 
     /**
-     * Get the link to download the licenses in a given format.
+     * Download the licenses in the requested format.
      */
-    async getDownloadLink(options: IDownloadOptions): Promise<string> {
-      return `${this._licensesUrl}?format=${options.format}&download=1`;
+    async download(options: IDownloadOptions): Promise<void> {
+      const url = `${this._licensesUrl}?format=${options.format}&download=1`;
+      const element = document.createElement('a');
+      element.href = url;
+      element.download = '';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      URL.revokeObjectURL(url);
+      return void 0;
     }
 
     /**
@@ -364,19 +372,10 @@ export namespace Licenses {
     }
 
     /**
-     * Create a temporary download link, and emulate clicking it to trigger a named
-     * file download.
+     * Download the licenses in the requested format.
      */
     async download(options: IDownloadOptions): Promise<void> {
-      const url = await this._client.getDownloadLink(options);
-      const element = document.createElement('a');
-      element.href = url;
-      element.download = '';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-      URL.revokeObjectURL(url);
-      return void 0;
+      return this._client.download(options);
     }
 
     /**
