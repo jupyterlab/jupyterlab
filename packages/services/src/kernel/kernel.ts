@@ -17,7 +17,7 @@ import { KernelSpec } from '../kernelspec';
 
 import { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
 
-import { IKernelOptions, IModel, KernelAPIClient } from './restapi';
+import { IKernelOptions, IModel } from './restapi';
 
 export { Status } from './messages';
 export { IKernelOptions, IModel };
