@@ -11,7 +11,7 @@ import { ServerConnection } from '..';
 
 import { IManager as IBaseManager } from '../basemanager';
 
-import { IModel, isAvailable } from './restapi';
+import { IModel, isAvailable, TerminalAPIClient } from './restapi';
 export { IModel, isAvailable };
 
 export namespace ITerminal {
@@ -216,3 +216,8 @@ export interface IManager extends IBaseManager {
  *   trying to reconnect.
  */
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
+
+/**
+ * Interface for the Terminal API client.
+ */
+export interface ITerminalAPIClient extends TerminalAPIClient {}
