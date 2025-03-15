@@ -4,7 +4,8 @@
 import { ISignal } from '@lumino/signaling';
 
 import { IManager as IBaseManager } from '../basemanager';
-import { ISpecModel, ISpecModels, KernelSpecAPIClient } from './restapi';
+import { ISpecModel, ISpecModels } from './restapi';
+import { ServerConnection } from '..';
 export { ISpecModel, ISpecModels };
 
 /**
@@ -42,4 +43,19 @@ export interface IManager extends IBaseManager {
 /**
  * Interface for making requests to the Kernel Spec API.
  */
-export interface IKernelSpecAPIClient extends KernelSpecAPIClient {}
+export interface IKernelSpecAPIClient {
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Fetch all of the kernel specs.
+   *
+   * @returns A promise that resolves with the kernel specs.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   */
+  get(): Promise<ISpecModels>;
+}

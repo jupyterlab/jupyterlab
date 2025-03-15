@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '../serverconnection';
+import { IKernelSpecAPIClient } from './kernelspec';
 import { validateSpecModels } from './validate';
 
 import { URLExt } from '@jupyterlab/coreutils';
@@ -43,7 +44,7 @@ export async function getSpecs(
  * Use this class to interact with the Jupyter Server Kernel Spec API.
  * This class adheres to the Jupyter Server API endpoints.
  */
-export class KernelSpecAPIClient {
+export class KernelSpecAPIClient implements IKernelSpecAPIClient {
   /**
    * Create a new Kernel Spec API client.
    *

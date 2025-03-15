@@ -5,10 +5,7 @@ import { ServerConnection } from '../serverconnection';
 import { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
 import { updateLegacySessionModel, validateModel } from './validate';
-
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+import { DeepPartial, ISessionAPIClient } from './session';
 
 /**
  * The url for the session service.
@@ -150,7 +147,7 @@ export async function updateSession(
  * Use this class to interact with the Jupyter Server Session API.
  * This class adheres to the Jupyter Server API endpoints.
  */
-export class SessionAPIClient {
+export class SessionAPIClient implements ISessionAPIClient {
   /**
    * Create a new session API client.
    *

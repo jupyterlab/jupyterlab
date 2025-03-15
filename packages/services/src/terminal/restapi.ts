@@ -3,6 +3,7 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
+import { ITerminalAPIClient } from './terminal';
 
 /**
  * The url for the terminal service.
@@ -127,7 +128,7 @@ export async function shutdownTerminal(
  * Use this class to interact with the Jupyter Server Terminal API.
  * This class adheres to the Jupyter Server API endpoints.
  */
-export class TerminalAPIClient {
+export class TerminalAPIClient implements ITerminalAPIClient {
   /**
    * Create a new Terminal API client.
    */

@@ -11,7 +11,7 @@ import { ServerConnection } from '..';
 
 import { IManager as IBaseManager } from '../basemanager';
 
-import { IModel, isAvailable, TerminalAPIClient } from './restapi';
+import { IModel, isAvailable } from './restapi';
 export { IModel, isAvailable };
 
 export namespace ITerminal {
@@ -218,6 +218,43 @@ export interface IManager extends IBaseManager {
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 /**
- * Interface for the Terminal API client.
+ * Interface for making requests to the Terminal API.
  */
-export interface ITerminalAPIClient extends TerminalAPIClient {}
+export interface ITerminalAPIClient {
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Whether terminals are available.
+   */
+  readonly isAvailable: boolean;
+
+  /**
+   * Start a new terminal session.
+   *
+   * @param name - The name of the target terminal.
+   *
+   * @param cwd - The path in which the terminal will start.
+   *
+   * @returns A promise that resolves with the session model.
+   */
+  startNew(name?: string, cwd?: string): Promise<IModel>;
+
+  /**
+   * List the running terminal sessions.
+   *
+   * @returns A promise that resolves with the list of running session models.
+   */
+  listRunning(): Promise<IModel[]>;
+
+  /**
+   * Shut down a terminal session by name.
+   *
+   * @param name - The name of the target session.
+   *
+   * @returns A promise that resolves when the session is shut down.
+   */
+  shutdown(name: string): Promise<void>;
+}
