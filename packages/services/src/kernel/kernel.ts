@@ -7,7 +7,7 @@ import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { CommsOverSubshells, ServerConnection } from '..';
 
 import * as KernelMessage from './messages';
 
@@ -107,6 +107,19 @@ export interface IKernelConnection extends IObservableDisposable {
    * See https://github.com/jupyter/jupyter_client/issues/263
    */
   handleComms: boolean;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * If enabled, we'll create one subshell per-comm, this may lead to issue
+   * if many comms are open, so it's disabled by default.
+   */
+  commsOverSubshells?: CommsOverSubshells;
 
   /**
    * Whether the kernel connection has pending input.
@@ -647,6 +660,19 @@ export namespace IKernelConnection {
     handleComms?: boolean;
 
     /**
+     * Whether comm messages should be sent to kernel subshells, if the
+     * kernel supports it.
+     *
+     * #### Notes
+     * Sending comm messages over subshells allows processing comms whilst
+     * processing execute-request on the "main shell". This prevents blocking
+     * comm processing.
+     * If enabled, we'll create one subshell per-comm, this may lead to issue
+     * if many comms are open, so it's disabled by default.
+     */
+    commsOverSubshells?: CommsOverSubshells;
+
+    /**
      * The unique identifier for the kernel client.
      */
     clientId?: string;
@@ -698,6 +724,19 @@ export interface IManager extends IBaseManager {
    * The number of running kernels.
    */
   readonly runningCount: number;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * If enabled, we'll create one subshell per-comm, this may lead to issue
+   * if many comms are open, so it's disabled by default.
+   */
+  commsOverSubshells: CommsOverSubshells;
 
   /**
    * Force a refresh of the running kernels.
@@ -887,6 +926,21 @@ export interface IComm extends IDisposable {
    * The target name for the comm channel.
    */
   readonly targetName: string;
+
+  /**
+   * The subshell ID, null if not using a subshell.
+   */
+  subshellId: string | null;
+
+  /**
+   * Promise that resolves when the subshell started, if any
+   */
+  get subshellStarted(): Promise<void>;
+
+  /**
+   * Whether comms are running on subshell or not.
+   */
+  commsOverSubshells: CommsOverSubshells;
 
   /**
    * Callback for a comm close event.

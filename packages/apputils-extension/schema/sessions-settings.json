@@ -1,0 +1,25 @@
+{
+  "title": "Terminals and Kernels sessions settings",
+  "description": "Terminals and Kernels sessions settings",
+  "additionalProperties": false,
+  "properties": {
+    "showStatusBarItem": {
+      "type": "boolean",
+      "title": "Show the status bar item",
+      "description": "Whether to show the running terminals and kernels item in the status bar",
+      "default": true
+    },
+    "commsOverSubshells": {
+      "type": "string",
+      "title": "Kernel Comms over subshells",
+      "description": "Whether comm messages should be sent to kernel subshells, if the kernel supports it.",
+      "default": "perCommTarget",
+      "oneOf": [
+        { "const": "disabled", "title": "Disabled" },
+        { "const": "perComm", "title": "One subshell per comm" },
+        { "const": "perCommTarget", "title": "One subshell per comm-target" }
+      ]
+    }
+  },
+  "type": "object"
+}
