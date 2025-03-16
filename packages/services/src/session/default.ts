@@ -10,11 +10,8 @@ import { ServerConnection } from '..';
 import * as Session from './session';
 
 import { UUID } from '@lumino/coreutils';
-import { SessionAPIClient } from './restapi';
 
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+import { DeepPartial, SessionAPIClient } from './restapi';
 
 /**
  * Session object for accessing the session REST api. The session

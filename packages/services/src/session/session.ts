@@ -11,9 +11,7 @@ import { ServerConnection } from '..';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
-export type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+import { DeepPartial } from './restapi';
 
 /**
  * Interface of a session object.

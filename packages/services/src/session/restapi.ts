@@ -5,7 +5,11 @@ import { ServerConnection } from '../serverconnection';
 import { Session } from '.';
 import { URLExt } from '@jupyterlab/coreutils';
 import { updateLegacySessionModel, validateModel } from './validate';
-import { DeepPartial, ISessionAPIClient } from './session';
+import { ISessionAPIClient } from './session';
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
 
 /**
  * The url for the session service.
