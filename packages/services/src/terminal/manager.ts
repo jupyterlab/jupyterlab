@@ -297,7 +297,7 @@ export namespace TerminalManager {
     standby?: Poll.Standby | (() => boolean | Poll.Standby);
 
     /**
-     * The Terminal API Client
+     * The Terminal API client.
      */
     terminalAPIClient?: Terminal.ITerminalAPIClient;
   }
