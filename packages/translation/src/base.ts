@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Gettext } from './gettext';
-import { ITranslator, TranslationBundle } from './tokens';
+import {
+  DEFAULT_LANGUAGE_CODE,
+  ITranslator,
+  TranslationBundle
+} from './tokens';
 
 /**
  * A translator that loads a dummy language bundle that returns the same input
@@ -13,7 +17,7 @@ export class NullTranslator implements ITranslator {
     this._languageBundle = bundle;
   }
 
-  readonly languageCode: string = 'en';
+  readonly languageCode: string = DEFAULT_LANGUAGE_CODE;
 
   load(domain: string): TranslationBundle {
     return this._languageBundle;

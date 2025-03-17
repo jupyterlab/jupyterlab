@@ -18,7 +18,6 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   ITranslatorConnector,
-  requestTranslationsAPI,
   TranslationManager,
   TranslatorConnector
 } from '@jupyterlab/translation';
@@ -34,7 +33,7 @@ const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
  * source or endpoint.
  */
 const translatorConnector: JupyterFrontEndPlugin<ITranslatorConnector> = {
-  id: '@jupyterlab/translation:translator-connector',
+  id: '@jupyterlab/translation-extension:translator-connector',
   description: 'Provides the application translation connector.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths],
@@ -50,7 +49,7 @@ const translatorConnector: JupyterFrontEndPlugin<ITranslatorConnector> = {
  * The main translator plugin.
  */
 const translator: JupyterFrontEndPlugin<ITranslator> = {
-  id: '@jupyterlab/translation:translator',
+  id: '@jupyterlab/translation-extension:translator',
   description: 'Provides the application translation object.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
@@ -77,7 +76,13 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
       serverSettings,
       connector ?? undefined
     );
+    // As we wait for fetching the translation, ITranslator is guarantee to be
+    // ready when consumed in other plugins.
     await translationManager.fetch(currentLocale);
+
+    // Set the document language after optionally fetching the system language
+    // if the setting 'locale' is set to 'default'
+    document.documentElement.lang = translationManager.languageCode;
 
     // Set translator to UI
     if (labShell) {
@@ -96,131 +101,96 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
 const langMenu: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   description: 'Adds translation commands and settings.',
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ISettingRegistry, ITranslator, ITranslatorConnector],
   optional: [IMainMenu, ICommandPalette],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
     translator: ITranslator,
+    translatorConnector: ITranslatorConnector,
     mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
-    let currentLocale: string;
-    /**
-     * Load the settings for this extension
-     *
-     * @param setting Extension settings
-     */
-    function loadSetting(setting: ISettingRegistry.ISettings): void {
-      // Read the settings and convert to the correct type
-      currentLocale = setting.get('locale').composite as string;
-    }
 
-    settings
-      .load(PLUGIN_ID)
-      .then(setting => {
-        // Read the settings
-        loadSetting(setting);
+    // Create a languages menu
+    const languagesMenu = mainMenu
+      ? mainMenu.settingsMenu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-settings-language'
+        )?.submenu
+      : null;
 
-        // Ensure currentLocale is not 'default' which is not a valid language code
-        if (currentLocale !== 'default') {
-          document.documentElement.lang = (currentLocale ?? '').replace(
-            '_',
-            '-'
-          );
-        } else {
-          document.documentElement.lang = 'en-US';
-        }
+    // Get list of available locales
+    translatorConnector
+      .fetch({ language: '' })
+      // TODO: fix usage of any
+      .then((data: any) => {
+        const appLocale = translator.languageCode.replace('-', '_');
+        for (const locale in data['data']) {
+          const value = data['data'][locale];
+          const displayName = value.displayName;
+          const nativeName = value.nativeName;
+          const toggled = appLocale === locale;
+          const label = toggled
+            ? `${displayName}`
+            : `${displayName} - ${nativeName}`;
 
-        // Listen for your plugin setting changes using Signal
-        setting.changed.connect(loadSetting);
-
-        // Create a languages menu
-        const languagesMenu = mainMenu
-          ? mainMenu.settingsMenu.items.find(
-              item =>
-                item.type === 'submenu' &&
-                item.submenu?.id === 'jp-mainmenu-settings-language'
-            )?.submenu
-          : null;
-
-        let command: string;
-
-        const serverSettings = app.serviceManager.serverSettings;
-        // Get list of available locales
-        requestTranslationsAPI<any>('', '', {}, serverSettings)
-          .then(data => {
-            for (const locale in data['data']) {
-              const value = data['data'][locale];
-              const displayName = value.displayName;
-              const nativeName = value.nativeName;
-              const toggled =
-                (currentLocale === 'default' ? 'en' : currentLocale) === locale;
-              const label = toggled
-                ? `${displayName}`
-                : `${displayName} - ${nativeName}`;
-
-              // Add a command per language
-              command = `jupyterlab-translation:${locale}`;
-              commands.addCommand(command, {
-                label: label,
-                caption: label,
-                isEnabled: () => !toggled,
-                isVisible: () => true,
-                isToggled: () => toggled,
-                execute: () => {
-                  return showDialog({
-                    title: trans.__('Change interface language?'),
-                    body: trans.__(
-                      'After changing the interface language to %1, you will need to reload JupyterLab to see the changes.',
-                      label
-                    ),
-                    buttons: [
-                      Dialog.cancelButton({ label: trans.__('Cancel') }),
-                      Dialog.okButton({ label: trans.__('Change and reload') })
-                    ]
-                  }).then(result => {
-                    if (result.button.accept) {
-                      setting
-                        .set('locale', locale)
-                        .then(() => {
-                          window.location.reload();
-                        })
-                        .catch(reason => {
-                          console.error(reason);
-                        });
-                    }
-                  });
-                }
+          // Add a command per language
+          const command = `jupyterlab-translation:${locale}`;
+          commands.addCommand(command, {
+            label: label,
+            caption: trans.__('Change interface language to %1', label),
+            isEnabled: () => !toggled,
+            isToggled: () => toggled,
+            execute: async () => {
+              const result = await showDialog({
+                title: trans.__('Change interface language?'),
+                body: trans.__(
+                  'After changing the interface language to %1, you will need to reload JupyterLab to see the changes.',
+                  label
+                ),
+                buttons: [
+                  Dialog.cancelButton(),
+                  Dialog.okButton({ label: trans.__('Change and reload') })
+                ]
               });
 
-              // Add the language command to the menu
-              if (languagesMenu) {
-                languagesMenu.addItem({
-                  command,
-                  args: {}
-                });
-              }
-
-              if (palette) {
-                palette.addItem({
-                  category: trans.__('Display Languages'),
-                  command
-                });
+              if (result.button.accept) {
+                try {
+                  await settings.set(PLUGIN_ID, 'locale', locale);
+                  window.location.reload();
+                } catch (reason) {
+                  console.error(
+                    `Failed to update language locale to ${locale}`,
+                    reason
+                  );
+                }
               }
             }
-          })
-          .catch(reason => {
-            console.error(`Available locales errored!\n${reason}`);
           });
+
+          // Add the language command to the menu
+          if (languagesMenu) {
+            languagesMenu.addItem({
+              command,
+              args: {}
+            });
+          }
+
+          if (palette) {
+            palette.addItem({
+              category: trans.__('Display Languages'),
+              command
+            });
+          }
+        }
       })
       .catch(reason => {
-        console.error(
-          `The jupyterlab translation extension appears to be missing.\n${reason}`
-        );
+        console.error(`Available locales errored!\n${reason}`);
       });
   }
 };
