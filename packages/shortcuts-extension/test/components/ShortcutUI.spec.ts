@@ -131,6 +131,34 @@ describe('@jupyterlab/shortcut-extension', () => {
           selector: 'body'
         });
       });
+
+      it('should not add a duplicate keybinding for given target', async () => {
+        const keybinding = {
+          keys: ['Ctrl A'],
+          isDefault: true
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        expect(data.composite.shortcuts[0].keys).toEqual(['Ctrl A']);
+        `Add duplicate keybinding`
+        await shortcutUI.addKeybinding(target, ['Ctrl A']);
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl A'],
+          selector: 'body'
+        });
+        `Make sure default one hasn't changed`
+        expect(data.composite.shortcuts).toHaveLength(1);
+        expect(data.composite.shortcuts[0].keys).toEqual(['Ctrl A']);
+      });
     });
 
     describe('#replaceKeybinding()', () => {
@@ -152,6 +180,26 @@ describe('@jupyterlab/shortcut-extension', () => {
         await shortcutUI.replaceKeybinding(target, keybinding, ['Ctrl X']);
         expect(data.user.shortcuts).toHaveLength(1);
         expect(data.user.shortcuts[0].keys).toEqual(['Ctrl X']);
+      });
+      
+      it('should not add a duplicate keybinding set by user', async () => {
+        const keybinding = {
+          keys: ['Ctrl A'],
+          isDefault: false
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        expect(data.user.shortcuts[0].keys).toEqual(['Ctrl A']);
+        await shortcutUI.replaceKeybinding(target, keybinding, ['Ctrl A']);
+        expect(data.user.shortcuts).toHaveLength(1);
+        expect(data.user.shortcuts[0].keys).toEqual(['Ctrl A']);
       });
 
       it('should replace a default keybinding by disabling the default and adding a new one', async () => {
