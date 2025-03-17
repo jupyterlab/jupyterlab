@@ -5,7 +5,7 @@ Frequently Asked Questions (FAQ)
 ================================
 
 Below are some frequently asked questions. Click on a question to be directed to
-relevant information in our documentation or our GitHub repo.
+relevant information in our documentation or our GitHub repository.
 
 General
 -------
@@ -79,3 +79,45 @@ Development
    For more discussion and potential alternative solutions, please see issues
    `#4623 <https://github.com/jupyterlab/jupyterlab/issues/4623>`__ and
    `#5789 <https://github.com/jupyterlab/jupyterlab/issues/5789>`__.
+
+
+Nightly releases
+----------------
+
+The JupyterLab project does not publish nightly releases to PyPI.
+
+However JupyterLab is built on CI for every commit on the ``main`` branch, and generates the wheel and source distributions as GitHub Action artifacts.
+These artifacts can be downloaded and installed locally.
+
+To download the JupyterLab wheels from the latest commits on ``main``:
+
+- Go to `Check Release GitHub Action page <https://github.com/jupyterlab/jupyterlab/actions/workflows/check-release.yml?query=branch%3Amain+is%3Asuccess>`__
+- Click on one of the workflow runs
+- Under the "Artifacts" section, click on ``jupyterlab-releaser-dist-<build-number>`` to download the archive
+- Locally, extract the archive
+- Install with ``python -m pip install ./jupyterlab-x.y.z.whl``
+
+.. note::
+
+    Downloading artifacts requires signing in to GitHub.
+
+OS X Specific Issues
+--------------------
+
+Holding down buttons does not produce repeated key press events
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Recent version of OS X change the default behavior for holding down buttons: instead of giving a repeated key press, a Character Accents Popup occurs.
+For example, when in vim mode in the editor, holding down any of the navigation keys ``h j k l`` does not cause repeated movement as it normally does in a desktop terminal application.
+
+To change this behavior *globally* (including browsers like Safari, Firefox and Google Chrome) enter the following command into a terminal, then log out and back in:
+
+.. code-block:: bash
+
+    defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+To change this behavior back to standard use the following command, then log out and back in:
+
+.. code-block:: bash
+
+    defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true

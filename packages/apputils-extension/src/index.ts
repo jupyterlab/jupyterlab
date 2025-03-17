@@ -35,9 +35,10 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { announcements } from './announcements';
+import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
-import { settingsPlugin } from './settingsplugin';
+import { settingsConnector, settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
@@ -695,6 +696,8 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   announcements,
   kernelStatus,
+  licensesClient,
+  licensesPlugin,
   notificationPlugin,
   palette,
   paletteRestorer,
@@ -702,6 +705,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   resolver,
   runningSessionsStatus,
   sanitizer,
+  settingsConnector,
   settingsPlugin,
   state,
   splash,

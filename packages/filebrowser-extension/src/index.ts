@@ -257,8 +257,12 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             browser[key] = value;
           }
 
-          const value = settings.get('filterDirectories').composite as boolean;
-          browser.model.filterDirectories = value;
+          const filterDirectories = settings.get('filterDirectories')
+            .composite as boolean;
+          const useFuzzyFilter = settings.get('useFuzzyFilter')
+            .composite as boolean;
+          browser.model.filterDirectories = filterDirectories;
+          browser.model.useFuzzyFilter = useFuzzyFilter;
         }
         settings.changed.connect(onSettingsChanged);
         onSettingsChanged(settings);
@@ -913,6 +917,7 @@ function addCommands(
   const trans = translator.load('jupyterlab');
   const { docRegistry: registry, commands } = app;
   const { tracker } = factory;
+  const deleteToTrash = PageConfig.getOption('delete_to_trash') === 'true';
 
   commands.addCommand(CommandIDs.del, {
     execute: () => {
@@ -923,7 +928,7 @@ function addCommands(
       }
     },
     icon: closeIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Delete'),
+    label: deleteToTrash ? trans.__('Move to Trash') : trans.__('Delete'),
     mnemonic: 0
   });
 

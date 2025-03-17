@@ -8,18 +8,43 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
+import {
+  ISettingConnector,
+  ISettingRegistry,
+  SettingRegistry
+} from '@jupyterlab/settingregistry';
 import { SettingConnector } from './settingconnector';
+
+/**
+ * Provides the settings connector as a separate plugin to allow for alternative
+ * implementations that may want to fetch settings from a different source or
+ * endpoint.
+ */
+export const settingsConnector: JupyterFrontEndPlugin<ISettingConnector> = {
+  id: '@jupyterlab/apputils-extension:settings-connector',
+  description: 'Provides the settings connector.',
+  autoStart: true,
+  provides: ISettingConnector,
+  activate: (app: JupyterFrontEnd) =>
+    new SettingConnector(app.serviceManager.settings)
+};
 
 /**
  * The default setting registry provider.
  */
 export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
+  autoStart: true,
+  provides: ISettingRegistry,
+  optional: [ISettingConnector],
   description: 'Provides the setting registry.',
-  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
+  activate: async (
+    app: JupyterFrontEnd,
+    settingsConnector: ISettingConnector | null
+  ): Promise<ISettingRegistry> => {
     const { isDisabled } = PageConfig.Extension;
-    const connector = new SettingConnector(app.serviceManager.settings);
+    const connector =
+      settingsConnector ?? new SettingConnector(app.serviceManager.settings);
 
     // On startup, check if a plugin is available in the application.
     // This helps avoid loading plugin files from other lab-based applications
@@ -61,7 +86,5 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
     });
 
     return registry;
-  },
-  autoStart: true,
-  provides: ISettingRegistry
+  }
 };

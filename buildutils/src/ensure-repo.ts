@@ -267,6 +267,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/rendermime-extension',
     '@jupyterlab/running',
     '@jupyterlab/running-extension',
+    '@jupyterlab/services-extension',
     '@jupyterlab/settingeditor',
     '@jupyterlab/settingeditor-extension',
     '@jupyterlab/shortcuts-extension',

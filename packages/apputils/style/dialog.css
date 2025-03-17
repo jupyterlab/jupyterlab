@@ -124,6 +124,8 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-checkbox {
   padding-right: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .jp-Dialog-spacer {

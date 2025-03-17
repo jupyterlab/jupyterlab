@@ -9,12 +9,9 @@ import { ServerConnection } from '..';
 
 import * as Session from './session';
 
-import { shutdownSession, updateSession } from './restapi';
 import { UUID } from '@lumino/coreutils';
 
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+import { DeepPartial, SessionAPIClient } from './restapi';
 
 /**
  * Session object for accessing the session REST api. The session
@@ -36,6 +33,9 @@ export class SessionConnection implements Session.ISessionConnection {
     this._kernelConnectionOptions = options.kernelConnectionOptions ?? {};
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this._sessionAPIClient =
+      options.sessionAPIClient ??
+      new SessionAPIClient({ serverSettings: this.serverSettings });
     this.setupKernel(options.model.kernel);
   }
 
@@ -297,7 +297,7 @@ export class SessionConnection implements Session.ISessionConnection {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
-    await shutdownSession(this.id, this.serverSettings);
+    await this._sessionAPIClient.shutdown(this.id);
     this.dispose();
   }
 
@@ -391,10 +391,10 @@ export class SessionConnection implements Session.ISessionConnection {
   private async _patch(
     body: DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
-    const model = await updateSession(
-      { ...body, id: this._id },
-      this.serverSettings
-    );
+    const model = await this._sessionAPIClient.update({
+      ...body,
+      id: this._id
+    });
     this.update(model);
     return model;
   }
@@ -443,4 +443,5 @@ export class SessionConnection implements Session.ISessionConnection {
     Kernel.IKernelConnection.IOptions,
     'model' | 'username' | 'clientId' | 'serverSettings'
   >;
+  private _sessionAPIClient: Session.ISessionAPIClient;
 }
