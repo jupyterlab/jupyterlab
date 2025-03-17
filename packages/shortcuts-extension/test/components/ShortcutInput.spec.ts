@@ -49,9 +49,9 @@ describe('@jupyterlab/shortcut-extension', () => {
       const ready = new PromiseDelegate<void>();
       const element = React.createElement(ShortcutInput, {
         ...mockProps,
-        ref: el => {
-          if (el) {
-            shortcutInput = el;
+        ref: element => {
+          if (element) {
+            shortcutInput = element;
             ready.resolve();
           }
         }
