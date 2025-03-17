@@ -29,7 +29,7 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
@@ -1113,6 +1113,73 @@ const shell: JupyterFrontEndPlugin<ILabShell> = {
 };
 
 /**
+ * Update the browser title based on the workspace and the current
+ * active item.
+ */
+async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
+  const data: any = await db.toJSON();
+  let current: string = data['layout-restorer:data']?.main?.current;
+  if (current === undefined) {
+    document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
+      workspace.startsWith('auto-') ? ` (${workspace})` : ``
+    }`;
+  } else {
+    // File name from current path
+    let currentFile: string = PathExt.basename(
+      decodeURIComponent(window.location.href)
+    );
+    // Truncate to first 12 characters of current document name + ... if length > 15
+    currentFile =
+      currentFile.length > 15
+        ? currentFile.slice(0, 12).concat(`…`)
+        : currentFile;
+    // Number of restorable items that are either notebooks or editors
+    const count: number = Object.keys(data).filter(
+      item => item.startsWith('notebook') || item.startsWith('editor')
+    ).length;
+
+    if (workspace.startsWith('auto-')) {
+      document.title = `${currentFile} (${workspace}${
+        count > 1 ? ` : ${count}` : ``
+      }) - ${name}`;
+    } else {
+      document.title = `${currentFile}${
+        count > 1 ? ` (${count})` : ``
+      } - ${name}`;
+    }
+  }
+}
+
+/**
+ * A JupyterLab plugin that dynamically updates the browser tab title
+ */
+const titleUpdater: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:title-updater',
+  description: 'Dynamically updates the browser tab title',
+  autoStart: true,
+  requires: [IStateDB, IWindowResolver],
+  activate: (
+    app: JupyterFrontEnd,
+    stateDB: IStateDB,
+    resolver: IWindowResolver
+  ) => {
+    if (!(app.shell instanceof LabShell)) {
+      throw new Error(
+        `Expected a LabShell instance, but got shell ID: ${app.shell.id}`
+      );
+    }
+
+    const appName = app.name || 'JupyterLab';
+    const workspace = resolver.name;
+
+    // Update title whenever the layout changes
+    app.shell.layoutModified.connect(() => {
+      void updateTabTitle(workspace, stateDB, appName);
+    });
+  }
+};
+
+/**
  * The default JupyterLab application status provider.
  */
 const status: JupyterFrontEndPlugin<ILabStatus> = {
@@ -1322,7 +1389,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   paths,
   propertyInspector,
   jupyterLogo,
-  topbar
+  topbar,
+  titleUpdater
 ];
 
 export default plugins;
