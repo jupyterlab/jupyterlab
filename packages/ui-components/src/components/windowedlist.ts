@@ -1165,17 +1165,17 @@ export class WindowedList<
         this._viewport.dataset.isScrolling = 'true';
       }
 
-      if (this._timerToClearScollStatus) {
-        window.clearTimeout(this._timerToClearScollStatus);
+      if (this._timerToClearScrollStatus) {
+        window.clearTimeout(this._timerToClearScrollStatus);
       }
-      this._timerToClearScollStatus = window.setTimeout(() => {
+      this._timerToClearScrollStatus = window.setTimeout(() => {
         this._viewport.dataset.isScrolling = 'false';
       }, 500);
       this.update();
       // }
     }
   }
-  private _timerToClearScollStatus: number | null = null;
+  private _timerToClearScrollStatus: number | null = null;
 
   /**
    * A message handler invoked on an `'resize-request'` message.
@@ -1379,6 +1379,7 @@ export class WindowedList<
           last.offsetTop - first.offsetTop + last.offsetHeight + 'px';
       }
 
+      const scrollTopBefore = this._outerElement.scrollTop;
       const toAdd: Widget[] = [];
       if (stopIndex >= 0) {
         for (let index = startIndex; index <= stopIndex; index++) {
@@ -1409,6 +1410,10 @@ export class WindowedList<
 
         // The widget may have moved due to drag-and-drop
         this.layout.insertWidget(index, item);
+      }
+
+      if (this._outerElement.scrollTop != scrollTopBefore) {
+        this._outerElement.scrollTop = scrollTopBefore;
       }
 
       if (this.viewModel.windowingActive) {
@@ -1626,6 +1631,11 @@ export class WindowedList<
    */
   private _updateTotalSize(): void {
     if (this.viewModel.windowingActive) {
+      if (this._viewport.dataset.isScrolling == 'true') {
+        // Do not update while scrolling, delay until later
+        requestAnimationFrame(() => this._updateTotalSize());
+        return;
+      }
       const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
       const heightWithPadding =
         estimatedTotalHeight +
