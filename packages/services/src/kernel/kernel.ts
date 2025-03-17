@@ -11,13 +11,16 @@ import { ServerConnection } from '..';
 
 import * as KernelMessage from './messages';
 
-import { KernelSpec } from '../kernelspec';
 import { IManager as IBaseManager } from '../basemanager';
+
+import { KernelSpec } from '../kernelspec';
+
+import { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
 
 import { IKernelOptions, IModel } from './restapi';
 
 export { Status } from './messages';
-export { IModel, IKernelOptions };
+export { IKernelOptions, IModel };
 
 /**
  * Interface of a Kernel connection that is managed by a session.
@@ -625,6 +628,16 @@ export namespace IKernelConnection {
     serverSettings?: ServerConnection.ISettings;
 
     /**
+     * The kernel API client.
+     */
+    kernelAPIClient?: IKernelAPIClient;
+
+    /**
+     * The kernel spec API client.
+     */
+    kernelSpecAPIClient?: IKernelSpecAPIClient;
+
+    /**
      * The username of the kernel client.
      */
     username?: string;
@@ -997,4 +1010,66 @@ export interface IAnyMessageArgs {
    * The direction of the message.
    */
   direction: 'send' | 'recv';
+}
+
+/**
+ * Interface for making requests to the Kernel API.
+ */
+export interface IKernelAPIClient {
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * List the running kernels.
+   *
+   * @returns A promise that resolves with the list of running kernel models.
+   */
+  listRunning(): Promise<IModel[]>;
+
+  /**
+   * Get a kernel model.
+   *
+   * @param id - The id of the kernel of interest.
+   *
+   * @returns A promise that resolves with the kernel model.
+   */
+  getModel(id: string): Promise<IModel | undefined>;
+
+  /**
+   * Start a new kernel.
+   *
+   * @param options - The options used to create the kernel.
+   *
+   * @returns A promise that resolves with the kernel model.
+   */
+  startNew(options?: IKernelOptions): Promise<IModel>;
+
+  /**
+   * Restart a kernel.
+   *
+   * @param id - The id of the kernel to restart.
+   *
+   * @returns A promise that resolves when the kernel is restarted.
+   */
+  restart(id: string): Promise<void>;
+
+  /**
+   * Interrupt a kernel.
+   *
+   * @param id - The id of the kernel to interrupt.
+   *
+   * @returns A promise that resolves when the kernel is interrupted.
+   */
+  interrupt(id: string): Promise<void>;
+
+  /**
+   * Shut down a kernel by id.
+   *
+   * @param id - The id of the kernel to shut down.
+   *
+   * @returns A promise that resolves when the kernel is shut down.
+   */
+  shutdown(id: string): Promise<void>;
 }

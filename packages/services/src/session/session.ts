@@ -11,6 +11,8 @@ import { ServerConnection } from '..';
 
 import { IChangedArgs } from '@jupyterlab/coreutils';
 
+import { DeepPartial } from './restapi';
+
 /**
  * Interface of a session object.
  *
@@ -180,6 +182,9 @@ export interface ISessionConnection extends IObservableDisposable {
   shutdown(): Promise<void>;
 }
 
+/**
+ * A namespace for ISessionConnection statics.
+ */
 export namespace ISessionConnection {
   /**
    * The session initialization options.
@@ -201,6 +206,11 @@ export namespace ISessionConnection {
      * The server settings.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The session API client.
+     */
+    sessionAPIClient?: ISessionAPIClient;
 
     /**
      * The username of the session client.
@@ -393,3 +403,83 @@ export interface IModel {
 export type ISessionOptions = Pick<IModel, 'path' | 'type' | 'name'> & {
   kernel?: Partial<Pick<Kernel.IModel, 'name'>>;
 };
+
+/**
+ * Interface for making requests to the Session API.
+ */
+export interface ISessionAPIClient {
+  /**
+   * The server settings used by the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * List the running sessions.
+   *
+   * @returns A promise that resolves with the list of running session models.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  listRunning(): Promise<IModel[]>;
+
+  /**
+   * Get a session model.
+   *
+   * @param id - The id of the session of interest.
+   *
+   * @returns A promise that resolves with the session model.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  getModel(id: string): Promise<IModel>;
+
+  /**
+   * Create a new session.
+   *
+   * @param options - The options used to create the session.
+   *
+   * @returns A promise that resolves with the session model.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  startNew(options: ISessionOptions): Promise<IModel>;
+
+  /**
+   * Shut down a session by id.
+   *
+   * @param id - The id of the session to shut down.
+   *
+   * @returns A promise that resolves when the session is shut down.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  shutdown(id: string): Promise<void>;
+
+  /**
+   * Update a session by id.
+   *
+   * @param model - The session model to update.
+   *
+   * @returns A promise that resolves with the updated session model.
+   *
+   * #### Notes
+   * Uses the Jupyter Server API and validates the response model.
+   *
+   * The promise is fulfilled on a valid response and rejected otherwise.
+   */
+  update(
+    model: Pick<IModel, 'id'> & DeepPartial<Omit<IModel, 'id'>>
+  ): Promise<IModel>;
+}

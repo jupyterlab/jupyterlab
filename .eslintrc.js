@@ -104,6 +104,7 @@ module.exports = {
           'display_id',
           'display_name',
           'embed_options',
+          'en_US',
           'execute_input',
           'execute_result',
           'execution_count',
@@ -142,6 +143,7 @@ module.exports = {
           'parent_header',
           'per_page',
           'plugin_name',
+          'plural_forms',
           'pf_re',
           'pkg_type',
           'protocol_version',
@@ -157,7 +159,8 @@ module.exports = {
           'target_module',
           'UNSAFE_componentWillUpdate',
           'UNSAFE_componentWillReceiveProps',
-          'user_expressions'
+          'user_expressions',
+          'zh_CN'
         ]
       }
     ],

@@ -325,7 +325,7 @@ export namespace JupyterLab {
   }
 
   /**
-   * The layout restorer token.
+   * The application info token.
    */
   export const IInfo = new Token<IInfo>(
     '@jupyterlab/application:IInfo',
