@@ -918,7 +918,6 @@ function addCommands(
               title: trans.__('Rename file'),
               okLabel: trans.__('Rename and Save'),
               placeholder: trans.__('File name'),
-              cancelLabel: trans.__('Save as %1', oldName),
               text: oldName,
               selectionRange: oldName.length - PathExt.extname(oldName).length,
               checkbox: {

@@ -17,6 +17,7 @@
   width: 100%;
   height: 100%;
   background: var(--jp-dialog-background);
+  container-type: inline-size;
 }
 
 .jp-Dialog-content {
@@ -155,9 +156,10 @@ button.jp-Dialog-close-button {
   margin-right: 12px;
 }
 
-@media (width <= 768px) {
-  .jp-Dialog-footer-save-first-time {
+@container (max-width: 560px) {
+  .jp-Dialog-footer {
     flex-direction: column;
+    align-items: center;
     gap: 7px;
   }
 }

@@ -137,13 +137,6 @@ export class Dialog<T> extends Widget {
     content.addWidget(body);
     content.addWidget(footer);
 
-    // Check if 'normalized.checkbox.label' exists and its length is greater than or equal to 35
-    if (normalized?.checkbox?.label && normalized.checkbox.label.length >= 35) {
-      // Add the class 'jp-Dialog-footer-save-first-time' to the footer element
-      // This class is used to adjust the footer for smaller screens when the label text is long
-      footer.addClass('jp-Dialog-footer-save-first-time');
-    }
-
     this._bodyWidget = body;
     this._primary = this._buttonNodes[this._defaultButton];
     this._focusNodeSelector = options.focusNodeSelector;
@@ -984,9 +977,11 @@ export namespace Dialog {
           '<div class="jp-Dialog-spacer"></div>'
         );
       }
+      const footerButton = document.createElement('div');
       for (const button of buttons) {
-        footer.node.appendChild(button);
+        footerButton.appendChild(button);
       }
+      footer.node.appendChild(footerButton);
       Styling.styleNode(footer.node);
 
       return footer;
