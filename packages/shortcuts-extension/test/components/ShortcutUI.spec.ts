@@ -148,7 +148,6 @@ describe('@jupyterlab/shortcut-extension', () => {
         };
         registerKeybinding(target, keybinding);
         expect(data.composite.shortcuts[0].keys).toEqual(['Ctrl A']);
-        `Add duplicate keybinding`
         await shortcutUI.addKeybinding(target, ['Ctrl A']);
         expect(data.user.shortcuts).toHaveLength(1);
         expect(data.user.shortcuts[0]).toEqual({
@@ -156,7 +155,6 @@ describe('@jupyterlab/shortcut-extension', () => {
           keys: ['Ctrl A'],
           selector: 'body'
         });
-        `Make sure default one hasn't changed`
         expect(data.composite.shortcuts).toHaveLength(1);
         expect(data.composite.shortcuts[0].keys).toEqual(['Ctrl A']);
       });
