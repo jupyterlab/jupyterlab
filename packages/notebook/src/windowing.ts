@@ -59,7 +59,7 @@ window.IntersectionObserver = class extends window.IntersectionObserver {
   private _delayCallbackInScrollingNotebook = (
     entries: IntersectionObserverEntry[]
   ) => {
-    const inScrollingNotebook = entries.filter(e =>
+    const entriesInScrollingNotebook = entries.filter(e =>
       isInScrollingNotebook(e.target)
     );
     const nonOutputEntries = entries.filter(
@@ -68,8 +68,44 @@ window.IntersectionObserver = class extends window.IntersectionObserver {
     if (nonOutputEntries.length) {
       this.callback(nonOutputEntries, this);
     }
-    if (inScrollingNotebook.length) {
-      this._throttler.invoke(inScrollingNotebook);
+    if (entriesInScrollingNotebook.length) {
+      void this._throttler.invoke(entriesInScrollingNotebook);
+    }
+  };
+  private _throttler: Throttler;
+};
+
+/**
+ * Subclass ResizeObserver to allow suspending callbacks when notebook is scrolling.
+ */
+window.ResizeObserver = class extends window.ResizeObserver {
+  constructor(protected callback: ResizeObserverCallback) {
+    super(entries => {
+      this._delayCallbackInScrollingNotebook(entries);
+    });
+    this._throttler = new Throttler(
+      entries => {
+        // keep delaying until no longer in scrolling notebook
+        this._delayCallbackInScrollingNotebook(entries);
+      },
+      { limit: 1000, edge: 'trailing' }
+    );
+  }
+
+  private _delayCallbackInScrollingNotebook = (
+    entries: ResizeObserverEntry[]
+  ) => {
+    const entriesInScrollingNotebook = entries.filter(e =>
+      isInScrollingNotebook(e.target)
+    );
+    const nonOutputEntries = entries.filter(
+      e => !isInScrollingNotebook(e.target)
+    );
+    if (nonOutputEntries.length) {
+      this.callback(nonOutputEntries, this);
+    }
+    if (entriesInScrollingNotebook.length) {
+      void this._throttler.invoke(entriesInScrollingNotebook);
     }
   };
   private _throttler: Throttler;
@@ -216,17 +252,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
   private _footer: Widget | null = null;
 
-  constructor() {
-    super();
-    this._resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const node = entry.target;
-        const previous = this._resizeCounter.get(node) ?? 0;
-        this._resizeCounter.set(node, previous + 1);
-      }
-    });
-  }
-
   /**
    * Notebook's header
    */
@@ -372,8 +397,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
 
     (widget as Cell).inViewport = true;
-    // This is safe to call multiple times on the same node, see spec.
-    this._resizeObserver.observe(widget.node, { box: 'border-box' });
   }
 
   /**
@@ -403,27 +426,29 @@ export class NotebookWindowedLayout extends WindowedLayout {
       // Do not change display of the active cell to allow user to continue providing input
       // into the code mirror editor when out of view. We still hide the cell so to prevent
       // minor visual glitches when scrolling.
-      this._resizeCounter.set(widget.node, 0);
       this._toggleSoftVisibility(widget, false);
       // Return before sending "AfterDetach" message to CodeCell
       // to prevent removing contents of the active cell.
       return;
     }
 
-    let requiresSoftHiding = false;
-    // TODO: reset counter when toggling command/edit mode as resize then is expected
-    /// also reset counter when cell content changes
-    if ((this._resizeCounter.get(widget.node) ?? 0) > 1) {
-      requiresSoftHiding = true;
-    } else if (widget.node.querySelector('defs')) {
-      requiresSoftHiding = true;
-    }
+    // Do not apply `display: none` on cells which contain:
+    // - `<defs>` as multiple browsers (Chrome and Firefox)
+    //   are bugged and do not respect the spec here, see
+    //   https://github.com/jupyterlab/jupyterlab/issues/16952
+    //   https://issues.chromium.org/issues/40324398
+    //   https://bugzilla.mozilla.org/show_bug.cgi?id=376027
+    // - elements containing `.myst` class as jupyterlab-myst
+    //   re-renders cause height jitter and scrolling issues;
+    //   in future this could be addressed by the proposal
+    //   to allow renderers to specify hiding mode, see
+    //   https://github.com/jupyterlab/jupyterlab/issues/17331
+    const requiresSoftHiding = widget.node.querySelector('defs,.myst');
 
     if (requiresSoftHiding) {
       this._toggleSoftVisibility(widget, false);
       return;
     }
-    this._resizeCounter.set(widget.node, 0);
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
       // We detach the code cell currently dragged otherwise it won't be attached at the correct position
@@ -606,6 +631,4 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
   private _willBeRemoved: Widget | null = null;
   private _topHiddenCodeCells: number = -1;
-  private _resizeCounter: WeakMap<Element, number> = new WeakMap();
-  private _resizeObserver: ResizeObserver;
 }
