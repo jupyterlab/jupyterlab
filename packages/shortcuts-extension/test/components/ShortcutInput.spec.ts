@@ -18,7 +18,7 @@ describe('@jupyterlab/shortcut-extension', () => {
     let findConflictsFor: jest.Mock;
     let displayConflicts: jest.Mock;
     let toggleInput: jest.Mock;
-    
+
     beforeEach(async () => {
       addKeybinding = jest.fn();
       findConflictsFor = jest.fn().mockReturnValue([]);
