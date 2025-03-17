@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 
 describe('ShortcutInput', () => {
   let mockProps: any;
-  
+
   beforeEach(() => {
     mockProps = {
       addKeybinding: jest.fn().mockResolvedValue(undefined),
@@ -80,4 +80,4 @@ describe('ShortcutInput', () => {
     // Verify input was toggled off
     expect(mockProps.toggleInput).toHaveBeenCalled();
   });
-}); 
+});
