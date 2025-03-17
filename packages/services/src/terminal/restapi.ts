@@ -3,7 +3,7 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
-import { ITerminalAPIClient } from './terminal';
+import { ITerminal, ITerminalAPIClient } from './terminal';
 
 /**
  * The url for the terminal service.
@@ -152,13 +152,12 @@ export class TerminalAPIClient implements ITerminalAPIClient {
   /**
    * Start a new terminal session.
    *
-   * @param name - The name of the target terminal.
+   * @param options - The options used to create the terminal.
    *
-   * @param cwd - The path in which the terminal will start.
-   *
-   * @returns A promise that resolves with the session model.
+   * @returns A promise that resolves with the terminal session model.
    */
-  async startNew(name?: string, cwd?: string): Promise<IModel> {
+  async startNew(options: ITerminal.IOptions = {}): Promise<IModel> {
+    const { name, cwd } = options;
     return startNew(this.serverSettings, name, cwd);
   }
 

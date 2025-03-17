@@ -15,6 +15,9 @@ import { IModel, isAvailable } from './restapi';
 export { IModel, isAvailable };
 
 export namespace ITerminal {
+  /**
+   * The instantiation options for a terminal session.
+   */
   export interface IOptions {
     /**
      * The terminal name.
@@ -234,13 +237,11 @@ export interface ITerminalAPIClient {
   /**
    * Start a new terminal session.
    *
-   * @param name - The name of the target terminal.
-   *
-   * @param cwd - The path in which the terminal will start.
+   * @param options - The options used to create the terminal.
    *
    * @returns A promise that resolves with the session model.
    */
-  startNew(name?: string, cwd?: string): Promise<IModel>;
+  startNew(options?: ITerminal.IOptions): Promise<IModel>;
 
   /**
    * List the running terminal sessions.
