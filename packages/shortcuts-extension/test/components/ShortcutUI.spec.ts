@@ -181,7 +181,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(data.user.shortcuts).toHaveLength(1);
         expect(data.user.shortcuts[0].keys).toEqual(['Ctrl X']);
       });
-      
+
       it('should not add a duplicate keybinding set by user', async () => {
         const keybinding = {
           keys: ['Ctrl A'],
