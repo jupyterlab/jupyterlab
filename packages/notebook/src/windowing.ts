@@ -59,12 +59,15 @@ window.IntersectionObserver = class extends window.IntersectionObserver {
   private _delayCallbackInScrollingNotebook = (
     entries: IntersectionObserverEntry[]
   ) => {
-    const entriesInScrollingNotebook = entries.filter(e =>
-      isInScrollingNotebook(e.target)
-    );
-    const nonOutputEntries = entries.filter(
-      e => !isInScrollingNotebook(e.target)
-    );
+    const entriesInScrollingNotebook = [];
+    const nonOutputEntries = [];
+    for (const entry of entries) {
+      if (isInScrollingNotebook(entry.target)) {
+        entriesInScrollingNotebook.push(entry);
+      } else {
+        nonOutputEntries.push(entry);
+      }
+    }
     if (nonOutputEntries.length) {
       this.callback(nonOutputEntries, this);
     }
@@ -95,12 +98,15 @@ window.ResizeObserver = class extends window.ResizeObserver {
   private _delayCallbackInScrollingNotebook = (
     entries: ResizeObserverEntry[]
   ) => {
-    const entriesInScrollingNotebook = entries.filter(e =>
-      isInScrollingNotebook(e.target)
-    );
-    const nonOutputEntries = entries.filter(
-      e => !isInScrollingNotebook(e.target)
-    );
+    const entriesInScrollingNotebook = [];
+    const nonOutputEntries = [];
+    for (const entry of entries) {
+      if (isInScrollingNotebook(entry.target)) {
+        entriesInScrollingNotebook.push(entry);
+      } else {
+        nonOutputEntries.push(entry);
+      }
+    }
     if (nonOutputEntries.length) {
       this.callback(nonOutputEntries, this);
     }
