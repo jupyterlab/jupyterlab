@@ -750,7 +750,7 @@ export interface IManager extends IBaseManager {
    * - one subshell per comm-target (default)
    * - one subshell per comm (can lead to issues if creating many comms)
    */
-  commsOverSubshells: CommsOverSubshells;
+  commsOverSubshells?: CommsOverSubshells;
 
   /**
    * Force a refresh of the running kernels.
@@ -954,7 +954,7 @@ export interface IComm extends IDisposable {
   /**
    * Whether comms are running on subshell or not.
    */
-  commsOverSubshells: CommsOverSubshells;
+  commsOverSubshells?: CommsOverSubshells;
 
   /**
    * Callback for a comm close event.
