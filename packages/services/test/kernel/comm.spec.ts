@@ -9,6 +9,7 @@ import {
   KernelManager,
   KernelMessage
 } from '../../src';
+import { CommHandler } from '../../src/kernel/comm';
 
 const BLIP = `
 from ipykernel.comm import Comm
@@ -80,7 +81,7 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should not spawn a subshell by default', () => {
-        const comm = echoKernel.createComm('test');
+        const comm = echoKernel.createComm('test') as CommHandler;
         expect(comm.subshellId).toBeNull();
       });
 
@@ -91,8 +92,8 @@ describe('jupyter.services - Comm', () => {
 
         echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
 
-        const comm = echoKernel.createComm('testTarget');
-        const comm2 = echoKernel.createComm('testTarget');
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
+        const comm2 = echoKernel.createComm('testTarget') as CommHandler;
 
         expect(echoKernel.commsOverSubshells).toEqual(
           CommsOverSubshells.PerComm
@@ -115,7 +116,7 @@ describe('jupyter.services - Comm', () => {
 
         echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
 
-        const comm = echoKernel.createComm('testTarget');
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
         await comm.subshellStarted;
         expect(comm.subshellId).not.toBeNull();
 
@@ -138,14 +139,14 @@ describe('jupyter.services - Comm', () => {
 
         echoKernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
 
-        const comm = echoKernel.createComm('testTarget');
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
         await comm.subshellStarted;
         expect(comm.subshellId).not.toBeNull();
 
         const replyMsg = await echoKernel.requestListSubshell({}).done;
         const before = replyMsg.content.subshell_id.length;
 
-        const comm2 = echoKernel.createComm('testTarget');
+        const comm2 = echoKernel.createComm('testTarget') as CommHandler;
         await comm2.subshellStarted;
         expect(comm2.subshellId).not.toBeNull();
 

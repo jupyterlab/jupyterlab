@@ -942,16 +942,6 @@ export interface IComm extends IDisposable {
   readonly targetName: string;
 
   /**
-   * The subshell ID, null if not using a subshell.
-   */
-  subshellId: string | null;
-
-  /**
-   * Promise that resolves when the subshell started, if any
-   */
-  get subshellStarted(): Promise<void>;
-
-  /**
    * Whether comms are running on subshell or not.
    */
   commsOverSubshells?: CommsOverSubshells;
