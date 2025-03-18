@@ -3,11 +3,12 @@
 
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { ServerConnection } from '..';
+import { KernelSpec, ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
 import { IKernelOptions, KernelAPIClient } from './restapi';
 import { KernelConnection } from './default';
+import { KernelSpecAPIClient } from '../kernelspec/restapi';
 
 /**
  * An implementation of a kernel manager.
@@ -24,6 +25,12 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     this._kernelAPIClient =
       options.kernelAPIClient ??
       new KernelAPIClient({ serverSettings: this.serverSettings });
+
+    this._kernelSpecAPIClient =
+      options.kernelSpecAPIClient ??
+      new KernelSpecAPIClient({
+        serverSettings: this.serverSettings
+      });
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
@@ -120,7 +127,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       handleComms,
       ...options,
       serverSettings: this.serverSettings,
-      kernelAPIClient: this._kernelAPIClient
+      kernelAPIClient: this._kernelAPIClient,
+      kernelSpecAPIClient: this._kernelSpecAPIClient
     });
     this._onStarted(kernelConnection);
     if (!this._models.has(id)) {
@@ -337,6 +345,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
   private _kernelAPIClient: Kernel.IKernelAPIClient;
+  private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
 }
 
 /**
@@ -356,6 +365,11 @@ export namespace KernelManager {
      * The kernel API client.
      */
     kernelAPIClient?: Kernel.IKernelAPIClient;
+
+    /**
+     * The kernel spec API client.
+     */
+    kernelSpecAPIClient?: KernelSpec.IKernelSpecAPIClient;
   }
 
   /**
