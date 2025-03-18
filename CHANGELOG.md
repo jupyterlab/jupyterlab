@@ -76,6 +76,13 @@ A new console panel will open allowing access to variables from the main session
 
 <img alt="The subshell console" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.4-subshells.png" class="jp-screenshot">
 
+JupyterLab can automatically create subshells for comm messages if kernels support this feature.
+This enables concurrent execution of `ipywidgets` callbacks without requiring a user action.
+This behavior can be changed from the settings, with options to:
+- disable that feature to not use subshells for comms
+- (default) automatically create one subshell per comm-target (e.g. one subshell for all `ipywidgets`)
+- automatically create one subshell per comm (this can lead to issues if creating many comms)
+
 ### Context menu opt-out
 
 The context menu, available under right mouse click in browsers, can now be disabled globally
