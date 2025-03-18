@@ -2343,10 +2343,8 @@ export class Notebook extends StaticNotebook {
       }
     }
 
-    if (activeCell) {
-      if (count > 1) {
-        activeCell.addClass(OTHER_SELECTED_CLASS);
-      }
+    if (activeCell && count > 1) {
+      activeCell.addClass(OTHER_SELECTED_CLASS);
     }
   }
 
