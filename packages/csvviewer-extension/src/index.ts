@@ -186,7 +186,7 @@ function activateCsv(
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
 
-    // Make sure the theme is correctly when new widgets are created.
+    // Make sure the theme is correctly set when new widgets are created.
     updateThemes();
   });
 
