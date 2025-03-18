@@ -1380,7 +1380,6 @@ export class WindowedList<
           last.offsetTop - first.offsetTop + last.offsetHeight + 'px';
       }
 
-      const scrollTopBefore = this._outerElement.scrollTop;
       const toAdd: Widget[] = [];
       if (stopIndex >= 0) {
         for (let index = startIndex; index <= stopIndex; index++) {
@@ -1411,10 +1410,6 @@ export class WindowedList<
 
         // The widget may have moved due to drag-and-drop
         this.layout.insertWidget(index, item);
-      }
-
-      if (this._outerElement.scrollTop != scrollTopBefore) {
-        this._outerElement.scrollTop = scrollTopBefore;
       }
 
       if (this.viewModel.windowingActive) {
