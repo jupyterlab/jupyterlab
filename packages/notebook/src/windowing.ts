@@ -18,7 +18,7 @@ import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
  * Check whether the element is in a scrolling notebook.
  * Traverses open shadow DOM roots if needed.
  */
-export function isInScrollingNotebook(element: Element | null): boolean {
+function isInScrollingNotebook(element: Element | null): boolean {
   if (!element) {
     return false;
   }
