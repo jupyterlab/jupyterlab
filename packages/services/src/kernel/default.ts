@@ -96,8 +96,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Sending comm messages over subshells allows processing comms whilst
    * processing execute-request on the "main shell". This prevents blocking
    * comm processing.
-   * If enabled, we'll create one subshell per-comm, this may lead to issue
-   * if many comms are open, so it's disabled by default.
+   * Options are:
+   * - disabled: not using subshells
+   * - one subshell per comm-target (default)
+   * - one subshell per comm (can lead to issues if creating many comms)
    */
   get commsOverSubshells(): CommsOverSubshells {
     return this._commsOverSubshells;
