@@ -11,11 +11,11 @@ import { CommsOverSubshells } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /*
- * A plugin providing running terminals and sessions settings
+ * A plugin loading kernel subshell settings.
  */
 export const subshellsSettings: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:sessions-settings',
-  description: 'Sessions and terminals settings.',
+  id: '@jupyterlab/apputils-extension:subshell-settings',
+  description: 'Kernel subshell settings.',
   autoStart: true,
   requires: [],
   optional: [ISettingRegistry],

@@ -160,6 +160,9 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     return this._models.size;
   }
 
+  /**
+   * Whether comms are running on subshell or not.
+   */
   get commsOverSubshells(): CommsOverSubshells {
     return this._commsOverSubshells;
   }
