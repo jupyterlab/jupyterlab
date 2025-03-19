@@ -126,12 +126,11 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
     // Get list of available locales
     translatorConnector
-      .fetch({ language: '' })
-      // TODO: fix usage of any
-      .then((data: any) => {
+      .fetch()
+      .then(languageList => {
         const appLocale = translator.languageCode.replace('-', '_');
-        for (const locale in data['data']) {
-          const value = data['data'][locale];
+        for (const locale in languageList.data) {
+          const value = languageList.data[locale];
           const displayName = value.displayName;
           const nativeName = value.nativeName;
           const toggled = appLocale === locale;
@@ -198,7 +197,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   translatorConnector,
   translator,
   langMenu
