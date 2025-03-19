@@ -76,7 +76,7 @@ export interface ILanguageData {
 }
 
 /*
- * Language list is the reply returned when no specific language
+ * List of available languages.
  */
 export interface ILanguageList {
   /**
