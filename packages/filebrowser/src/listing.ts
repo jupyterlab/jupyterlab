@@ -1039,6 +1039,7 @@ export class DirListing extends Widget {
           name = spec ? spec.display_name : this._trans.__('unknown');
         }
 
+        // Update node title only if it has changed.
         const prevState = this._lastRenderedState.get(node);
         if (prevState !== node.title) {
           node.title = this._trans.__('%1\nKernel: %2', node.title, name);
