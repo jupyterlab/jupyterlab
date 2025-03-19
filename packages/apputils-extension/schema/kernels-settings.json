@@ -1,5 +1,5 @@
 {
-  "title": "Kernels settings",
+  "title": "Kernels",
   "description": "Kernels and kernel sessions settings",
   "jupyter.lab.setting-icon": "ui-components:kernel",
   "jupyter.lab.setting-icon-label": "Kernel",
