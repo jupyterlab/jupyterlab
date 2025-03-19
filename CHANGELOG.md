@@ -484,6 +484,38 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.0b2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.0b1...5408b22af13e3b695cfd3ae75733de0b6d0c9ac6))
+
+### Enhancements made
+
+- Add `IKernelSpecAPICLient` and `ITerminalAPIClient`, fix definitions of interfaces [#17395](https://github.com/jupyterlab/jupyterlab/pull/17395) ([@jtpio](https://github.com/jtpio))
+- If subshells are supported by the kernel, send comm messages to subshells [#17363](https://github.com/jupyterlab/jupyterlab/pull/17363) ([@martinRenou](https://github.com/martinRenou))
+
+### Bugs fixed
+
+- More specific selector for "Copy Output to Clipboard" [#17413](https://github.com/jupyterlab/jupyterlab/pull/17413) ([@jtpio](https://github.com/jtpio))
+- Fix rendering URLs as linked in errors [#17371](https://github.com/jupyterlab/jupyterlab/pull/17371) ([@afshin](https://github.com/afshin))
+
+### Maintenance and upkeep improvements
+
+- Fix types in translation package, remove usages of `any` [#17414](https://github.com/jupyterlab/jupyterlab/pull/17414) ([@krassowski](https://github.com/krassowski))
+- Remove workflow using `tj-actions/changed-files` [#17398](https://github.com/jupyterlab/jupyterlab/pull/17398) ([@jtpio](https://github.com/jtpio))
+- Fix definition of the `ILicensesClient` interface [#17397](https://github.com/jupyterlab/jupyterlab/pull/17397) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- If subshells are supported by the kernel, send comm messages to subshells [#17363](https://github.com/jupyterlab/jupyterlab/pull/17363) ([@martinRenou](https://github.com/martinRenou))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-03-13&to=2025-03-19&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2025-03-13..2025-03-19&type=Issues) | [@fleming79](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afleming79+updated%3A2025-03-13..2025-03-19&type=Issues) | [@ianthomas23](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aianthomas23+updated%3A2025-03-13..2025-03-19&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-03-13..2025-03-19&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-03-13..2025-03-19&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-03-13..2025-03-19&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-03-13..2025-03-19&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-03-13..2025-03-19&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2025-03-13..2025-03-19&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.0b1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.0b0...b64a95bc3533a503f26096e0e30bd6592ba8d4c1))
@@ -542,8 +574,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-02-19&to=2025-03-13&type=c))
 
 [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2025-02-19..2025-03-13&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2025-02-19..2025-03-13&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2025-02-19..2025-03-13&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-02-19..2025-03-13&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2025-02-19..2025-03-13&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2025-02-19..2025-03-13&type=Issues) | [@dlqqq](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adlqqq+updated%3A2025-02-19..2025-03-13&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2025-02-19..2025-03-13&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-02-19..2025-03-13&type=Issues) | [@ianthomas23](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aianthomas23+updated%3A2025-02-19..2025-03-13&type=Issues) | [@iisakkirotko](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aiisakkirotko+updated%3A2025-02-19..2025-03-13&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2025-02-19..2025-03-13&type=Issues) | [@jesuino](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajesuino+updated%3A2025-02-19..2025-03-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-02-19..2025-03-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-02-19..2025-03-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-02-19..2025-03-13&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-02-19..2025-03-13&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-02-19..2025-03-13&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2025-02-19..2025-03-13&type=Issues) | [@Princekumarofficial](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3APrincekumarofficial+updated%3A2025-02-19..2025-03-13&type=Issues) | [@RRosio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2025-02-19..2025-03-13&type=Issues) | [@rsaditya01](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Arsaditya01+updated%3A2025-02-19..2025-03-13&type=Issues) | [@SatyajitRedekar](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASatyajitRedekar+updated%3A2025-02-19..2025-03-13&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2025-02-19..2025-03-13&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.0b0
 
