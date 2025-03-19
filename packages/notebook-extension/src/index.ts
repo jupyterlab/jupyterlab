@@ -1587,7 +1587,7 @@ function activateCopyOutput(
 
   app.contextMenu.addItem({
     command: CommandIDs.copyToClipboard,
-    selector: '.jp-OutputArea-child',
+    selector: '.jp-Notebook .jp-OutputArea-child',
     rank: 0
   });
 }
