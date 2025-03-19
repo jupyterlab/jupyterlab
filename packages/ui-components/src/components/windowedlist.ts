@@ -1421,7 +1421,7 @@ export class WindowedList<
           // Update position of window container
           let [top, _minHeight] = this.viewModel.getSpan(startIndex, stopIndex);
 
-          this._viewport.style.transform = `translateY(${top}px)`;
+          this._viewport.style.top = `${top}px`;
         } else {
           // Update inner container height
           this._innerElement.style.height = `0px`;
