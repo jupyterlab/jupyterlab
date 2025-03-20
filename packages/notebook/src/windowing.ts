@@ -10,9 +10,112 @@ import {
   WindowedListModel
 } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Debouncer } from '@lumino/polling';
+import { Debouncer, Throttler } from '@lumino/polling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
+
+/**
+ * Check whether the element is in a scrolling notebook.
+ * Traverses open shadow DOM roots if needed.
+ */
+function isInScrollingNotebook(element: Element | null): boolean {
+  if (!element) {
+    return false;
+  }
+  const notebook = element.closest('.jp-WindowedPanel-viewport') as
+    | HTMLElement
+    | undefined;
+  if (notebook && notebook.dataset.isScrolling == 'true') {
+    return true;
+  }
+  const root = element.getRootNode();
+  return !!(
+    root &&
+    root instanceof ShadowRoot &&
+    isInScrollingNotebook(root.host)
+  );
+}
+
+/**
+ * Subclass IntersectionObserver to allow suspending callbacks when notebook is scrolling.
+ */
+window.IntersectionObserver = class extends window.IntersectionObserver {
+  constructor(
+    protected callback: IntersectionObserverCallback,
+    options: IntersectionObserverInit
+  ) {
+    super(entries => {
+      this._delayCallbackInScrollingNotebook(entries);
+    }, options);
+    this._throttler = new Throttler(
+      entries => {
+        // keep delaying until no longer in scrolling notebook
+        this._delayCallbackInScrollingNotebook(entries);
+      },
+      { limit: 1000, edge: 'trailing' }
+    );
+  }
+
+  private _delayCallbackInScrollingNotebook = (
+    entries: IntersectionObserverEntry[]
+  ) => {
+    const entriesInScrollingNotebook = [];
+    const nonOutputEntries = [];
+    for (const entry of entries) {
+      if (isInScrollingNotebook(entry.target)) {
+        entriesInScrollingNotebook.push(entry);
+      } else {
+        nonOutputEntries.push(entry);
+      }
+    }
+    if (nonOutputEntries.length) {
+      this.callback(nonOutputEntries, this);
+    }
+    if (entriesInScrollingNotebook.length) {
+      void this._throttler.invoke(entriesInScrollingNotebook);
+    }
+  };
+  private _throttler: Throttler;
+};
+
+/**
+ * Subclass ResizeObserver to allow suspending callbacks when notebook is scrolling.
+ */
+window.ResizeObserver = class extends window.ResizeObserver {
+  constructor(protected callback: ResizeObserverCallback) {
+    super(entries => {
+      this._delayCallbackInScrollingNotebook(entries);
+    });
+    this._throttler = new Throttler(
+      entries => {
+        // keep delaying until no longer in scrolling notebook
+        this._delayCallbackInScrollingNotebook(entries);
+      },
+      { limit: 1000, edge: 'trailing' }
+    );
+  }
+
+  private _delayCallbackInScrollingNotebook = (
+    entries: ResizeObserverEntry[]
+  ) => {
+    const entriesInScrollingNotebook = [];
+    const nonOutputEntries = [];
+    for (const entry of entries) {
+      if (isInScrollingNotebook(entry.target)) {
+        entriesInScrollingNotebook.push(entry);
+      } else {
+        nonOutputEntries.push(entry);
+      }
+    }
+    if (nonOutputEntries.length) {
+      this.callback(nonOutputEntries, this);
+    }
+    if (entriesInScrollingNotebook.length) {
+      void this._throttler.invoke(entriesInScrollingNotebook);
+    }
+  };
+  private _throttler: Throttler;
+};
 
 /**
  * Notebook view model for the windowed list.
@@ -332,6 +435,24 @@ export class NotebookWindowedLayout extends WindowedLayout {
       this._toggleSoftVisibility(widget, false);
       // Return before sending "AfterDetach" message to CodeCell
       // to prevent removing contents of the active cell.
+      return;
+    }
+
+    // Do not apply `display: none` on cells which contain:
+    // - `<defs>` as multiple browsers (Chrome and Firefox)
+    //   are bugged and do not respect the spec here, see
+    //   https://github.com/jupyterlab/jupyterlab/issues/16952
+    //   https://issues.chromium.org/issues/40324398
+    //   https://bugzilla.mozilla.org/show_bug.cgi?id=376027
+    // - elements containing `.myst` class as jupyterlab-myst
+    //   re-renders cause height jitter and scrolling issues;
+    //   in future this could be addressed by the proposal
+    //   to allow renderers to specify hiding mode, see
+    //   https://github.com/jupyterlab/jupyterlab/issues/17331
+    const requiresSoftHiding = widget.node.querySelector('defs,.myst');
+
+    if (requiresSoftHiding) {
+      this._toggleSoftVisibility(widget, false);
       return;
     }
     // TODO we could improve this further by discarding also the code cell without outputs

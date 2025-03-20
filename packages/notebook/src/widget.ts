@@ -2321,9 +2321,20 @@ export class Notebook extends StaticNotebook {
       // ArrowDown/ArrowUp, but (unlike tabIndex = 0) does not add the notebook
       // cells (which could be numerous) to the set of nodes that the user would
       // have to visit when pressing the tab key to move about the UI.
-      widget.node.tabIndex = -1;
-      widget.removeClass(ACTIVE_CLASS);
-      widget.removeClass(OTHER_SELECTED_CLASS);
+      // NOTE: we need to be very careful to avoid modifying DOM to avoid triggering layout on scroll
+      if (widget === activeCell) {
+        activeCell.addClass(ACTIVE_CLASS);
+        activeCell.addClass(SELECTED_CLASS);
+        // Set tab index to 0 on the active cell so that if the user tabs away from
+        // the notebook then tabs back, they will return to the cell where they
+        // left off.
+        activeCell.node.tabIndex = 0;
+      } else {
+        widget.node.tabIndex = -1;
+        widget.removeClass(ACTIVE_CLASS);
+        widget.removeClass(OTHER_SELECTED_CLASS);
+      }
+
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(SELECTED_CLASS);
         count++;
@@ -2332,16 +2343,8 @@ export class Notebook extends StaticNotebook {
       }
     }
 
-    if (activeCell) {
-      activeCell.addClass(ACTIVE_CLASS);
-      activeCell.addClass(SELECTED_CLASS);
-      // Set tab index to 0 on the active cell so that if the user tabs away from
-      // the notebook then tabs back, they will return to the cell where they
-      // left off.
-      activeCell.node.tabIndex = 0;
-      if (count > 1) {
-        activeCell.addClass(OTHER_SELECTED_CLASS);
-      }
+    if (activeCell && count > 1) {
+      activeCell.addClass(OTHER_SELECTED_CLASS);
     }
   }
 
