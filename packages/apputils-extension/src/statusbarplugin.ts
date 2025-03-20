@@ -225,14 +225,17 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
         }
       };
 
+      const kernelsPluginId = '@jupyterlab/apputils-extension:kernels-settings';
+      const terminalPluginId = '@jupyterlab/terminal-extension:plugin';
+
       void Promise.all([
-        // terminal settings may be missing if terminal plugin is not included
-        settingRegistry
-          .load('@jupyterlab/apputils-extension:kernels-settings')
-          .catch(() => undefined),
-        settingRegistry
-          .load('@jupyterlab/terminal-extension:plugin')
-          .catch(() => undefined)
+        // Settings may be missing if the respective plugins are not enabled/included.
+        kernelsPluginId in settingRegistry.plugins
+          ? settingRegistry.load(kernelsPluginId).catch(() => undefined)
+          : Promise.resolve(undefined),
+        terminalPluginId in settingRegistry.plugins
+          ? settingRegistry.load(terminalPluginId).catch(() => undefined)
+          : Promise.resolve(undefined)
       ]).then(([kernelSettings, terminalSettings]) => {
         onSettingsUpdated(kernelSettings, terminalSettings);
         if (kernelSettings) {
