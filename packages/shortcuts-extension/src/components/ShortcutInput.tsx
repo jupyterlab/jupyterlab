@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
-import { EN_US } from '@lumino/keyboard';
+import { getKeyboardLayout } from '@lumino/keyboard';
 import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
 import {
   IKeybinding,
@@ -153,11 +153,22 @@ export class ShortcutInput extends React.Component<
     keys: Array<string>,
     currentChain: string
   ): Array<any> => {
-    let key = EN_US.keyForKeydownEvent(event.nativeEvent);
-
+    let key = getKeyboardLayout().keyForKeydownEvent(event.nativeEvent);
     const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];
 
-    if (event.key === 'Backspace') {
+    if (event.key === 'Dead' || key === '') {
+      // Dead/urecognized key, do nothing
+    } else if (event.key === 'Backspace') {
+      if (value === '') {
+        // Backspace in empty input -> Delete the binding
+        if (this.props.keybinding) {
+          void this.props.deleteKeybinding(
+            this.props.shortcut,
+            this.props.keybinding
+          );
+        }
+        this.props.toggleInput();
+      }
       userInput = '';
       value = '';
       keys = [];
@@ -263,10 +274,10 @@ export class ShortcutInput extends React.Component<
     const shortcutKeys = this.state.currentChain.split(' ');
     const last = shortcutKeys[shortcutKeys.length - 1];
     this.setState({
-      isFunctional: !(dontEnd.indexOf(last) !== -1)
+      isFunctional: last.length > 0 && !(dontEnd.indexOf(last) !== -1)
     });
 
-    return dontEnd.indexOf(last) !== -1;
+    return last.length === 0 || dontEnd.indexOf(last) !== -1;
   };
 
   /** Check if shortcut being typed is already taken */

@@ -18,7 +18,7 @@ import {
 import { Debouncer } from '@lumino/polling';
 import { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
-import { Field, UiSchema } from '@rjsf/utils';
+import type { Field, UiSchema, Widget } from '@rjsf/utils';
 import { JSONSchema7 } from 'json-schema';
 import { Button } from '@jupyterlab/ui-components';
 
@@ -45,6 +45,11 @@ export namespace SettingsFormEditor {
      * Dictionary used for custom field renderers in the form.
      */
     renderers: { [id: string]: { [property: string]: Field } };
+
+    /**
+     * Dictionary used for custom widget renderers in the form.
+     */
+    widgetRenderers?: { [id: string]: { [property: string]: Widget } };
 
     /**
      * Translator object
@@ -132,7 +137,10 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
-    this._setUiSchema(prevProps.renderers[prevProps.settings.id]);
+    this._setUiSchema(
+      prevProps.renderers[prevProps.settings.id],
+      (prevProps.widgetRenderers ?? {})[prevProps.settings.id]
+    );
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.settings !== this.props.settings) {
@@ -226,6 +234,7 @@ export class SettingsFormEditor extends React.Component<
           formData={this._getFilteredFormData(this.state.filteredSchema)}
           uiSchema={this.state.uiSchema}
           fields={this.props.renderers[this.props.settings.id]}
+          widgets={(this.props.widgetRenderers ?? {})[this.props.settings.id]}
           formContext={this.state.formContext}
           liveValidate
           idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
@@ -249,24 +258,43 @@ export class SettingsFormEditor extends React.Component<
     this.props.onSelect(this.props.settings.id);
   };
 
-  private _setUiSchema(prevRenderers?: { [id: string]: Field }) {
+  private _setUiSchema(
+    prevRenderers?: { [id: string]: Field },
+    prevWidgetRenderers?: { [id: string]: Widget }
+  ) {
     const renderers = this.props.renderers[this.props.settings.id];
+    const widgetRenderers = (this.props.widgetRenderers ?? {})[
+      this.props.settings.id
+    ];
     if (
       !JSONExt.deepEqual(
         Object.keys(prevRenderers ?? {}).sort(),
         Object.keys(renderers ?? {}).sort()
+      ) ||
+      !JSONExt.deepEqual(
+        Object.keys(prevWidgetRenderers ?? {}).sort(),
+        Object.keys(widgetRenderers ?? {}).sort()
       )
     ) {
       /**
        * Construct uiSchema to pass any custom renderers to the form editor.
        */
       const uiSchema: UiSchema = {};
-      for (const id in this.props.renderers[this.props.settings.id]) {
+      for (const id in renderers) {
         if (
           Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
         ) {
           uiSchema[id] = {
             'ui:field': id
+          };
+        }
+      }
+      for (const id in widgetRenderers) {
+        if (
+          Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
+        ) {
+          uiSchema[id] = {
+            'ui:widget': id
           };
         }
       }
