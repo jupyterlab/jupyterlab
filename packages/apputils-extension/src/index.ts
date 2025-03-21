@@ -728,10 +728,24 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
   }
 };
 
+/*
+ * A plugin owning the kernel settings
+ */
+export const kernelSettings: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:kernels-settings',
+  description: 'Reserves the name for kernel settings.',
+  autoStart: true,
+  requires: [ISettingRegistry],
+  activate: (_app: JupyterFrontEnd, settingRegistry: ISettingRegistry) => {
+    void settingRegistry.load(kernelSettings.id);
+  }
+};
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  kernelSettings,
   announcements,
   kernelStatus,
   licensesClient,
