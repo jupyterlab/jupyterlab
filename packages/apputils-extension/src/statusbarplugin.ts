@@ -217,7 +217,7 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
           ];
 
         disposable?.dispose();
-        if (showKernels || showTerminals) {
+        if (showKernels || showTerminals !== false) {
           disposable = registerItem({
             showKernels,
             showTerminals
