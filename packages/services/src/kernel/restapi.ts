@@ -4,6 +4,7 @@
 import { ServerConnection } from '../serverconnection';
 import { URLExt } from '@jupyterlab/coreutils';
 import { validateModel, validateModels } from './validate';
+import { IKernelAPIClient } from './kernel';
 
 /**
  * The kernel model provided by the server.
@@ -243,7 +244,7 @@ export async function getKernelModel(
  * Use this class to interact with the Jupyter Server Kernel API.
  * This class adheres to the Jupyter Server API endpoints.
  */
-export class KernelAPIClient {
+export class KernelAPIClient implements IKernelAPIClient {
   /**
    * Create a new kernel API client.
    *
