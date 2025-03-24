@@ -27,7 +27,7 @@ export const subshellsSettings: JupyterFrontEndPlugin<void> = {
       app.started
         .then(async () => {
           const subshellsSettings = await settingRegistry.load(
-            '@jupyterlab/apputils-extension:sessions-settings'
+            '@jupyterlab/apputils-extension:kernels-settings'
           );
 
           const commsOverSubshells = subshellsSettings.get('commsOverSubshells')

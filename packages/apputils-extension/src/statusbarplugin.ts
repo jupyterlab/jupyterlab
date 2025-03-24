@@ -148,7 +148,10 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     settingRegistry: ISettingRegistry | null
   ) => {
-    const createStatusItem = () => {
+    const createStatusItem = (options: {
+      showKernels: boolean;
+      showTerminals?: boolean;
+    }) => {
       const item = new RunningSessions({
         onClick: () => app.shell.activateById('jp-running-sessions'),
         onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
@@ -163,7 +166,8 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
           }
         },
         serviceManager: app.serviceManager,
-        translator
+        translator,
+        ...options
       });
 
       item.model.sessions = Array.from(
@@ -176,8 +180,11 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
       return item;
     };
 
-    const registerItem = () => {
-      const item = createStatusItem();
+    const registerItem = (options: {
+      showKernels: boolean;
+      showTerminals?: boolean;
+    }) => {
+      const item = createStatusItem(options);
       return statusBar.registerStatusItem(runningSessionsStatus.id, {
         item,
         align: 'left',
@@ -188,25 +195,66 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
     if (settingRegistry) {
       let disposable: IDisposable;
       const onSettingsUpdated = (
-        settings: ISettingRegistry.ISettings
+        kernelSettings?: ISettingRegistry.ISettings,
+        terminalsSettings?: ISettingRegistry.ISettings
       ): void => {
-        const showStatusBarItem = settings.get('showStatusBarItem')
-          .composite as boolean;
+        const showTerminalsMap = {
+          'if-any': undefined,
+          never: false,
+          always: true
+        };
+        const showKernels =
+          (kernelSettings?.get('showStatusBarItem').composite as
+            | boolean
+            | undefined) ?? true;
+        const showTerminals =
+          showTerminalsMap[
+            (terminalsSettings?.get('showStatusBarItem').composite as
+              | 'if-any'
+              | 'never'
+              | 'always'
+              | undefined) ?? 'if-any'
+          ];
 
         disposable?.dispose();
-        if (showStatusBarItem) {
-          disposable = registerItem();
+        if (showKernels || showTerminals !== false) {
+          disposable = registerItem({
+            showKernels,
+            showTerminals
+          });
         }
       };
 
-      void settingRegistry
-        .load('@jupyterlab/apputils-extension:sessions-settings')
-        .then(settings => {
-          onSettingsUpdated(settings);
-          settings.changed.connect(onSettingsUpdated);
-        });
+      const kernelsPluginId = '@jupyterlab/apputils-extension:kernels-settings';
+      const terminalPluginId = '@jupyterlab/terminal-extension:plugin';
+
+      void Promise.all([
+        // Settings may be missing if the respective plugins are not enabled/included.
+        kernelsPluginId in settingRegistry.plugins
+          ? settingRegistry.load(kernelsPluginId).catch(() => undefined)
+          : Promise.resolve(undefined),
+        terminalPluginId in settingRegistry.plugins
+          ? settingRegistry.load(terminalPluginId).catch(() => undefined)
+          : Promise.resolve(undefined)
+      ]).then(([kernelSettings, terminalSettings]) => {
+        onSettingsUpdated(kernelSettings, terminalSettings);
+        if (kernelSettings) {
+          kernelSettings.changed.connect(settings => {
+            kernelSettings = settings;
+            onSettingsUpdated(kernelSettings, terminalSettings);
+          });
+        }
+        if (terminalSettings) {
+          terminalSettings.changed.connect(settings => {
+            terminalSettings = settings;
+            onSettingsUpdated(kernelSettings, terminalSettings);
+          });
+        }
+      });
     } else {
-      registerItem();
+      registerItem({
+        showKernels: true
+      });
     }
   }
 };
