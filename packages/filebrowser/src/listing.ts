@@ -968,7 +968,6 @@ export class DirListing extends Widget {
   }
 
   // Update item nodes based on widget state.
-  private _lastRenderedState = new WeakMap<HTMLElement, string>();
   protected updateNodes(
     items: Contents.IModel[],
     nodes: HTMLElement[],
@@ -2575,6 +2574,7 @@ export class DirListing extends Widget {
   );
   private _paddingWidth: number = 0;
   private _handleWidth: number = DEFAULT_HANDLE_WIDTH;
+  private _lastRenderedState = new WeakMap<HTMLElement, string>();
 }
 
 /**
