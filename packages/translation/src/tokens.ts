@@ -10,20 +10,102 @@ import { Token } from '@lumino/coreutils';
 import { requestTranslationsAPI } from './server';
 
 /**
- * Application default locale
+ * Application default locale.
  */
 export const DEFAULT_LANGUAGE_CODE = 'en';
 
-/*
- * Translation
+/**
+ * Metadata describing translation domain.
  */
-export type Language = { [key: string]: string };
+interface IDomainMetadata {
+  /**
+   * Domain name, e.g. jupyterlab-git.
+   */
+  domain: string;
+  /**
+   * Language.
+   */
+  language: string;
+  /**
+   * Plural forms string in gettext format, e.g. `nplurals=2; plural=(n > 1);`.
+   */
+  plural_forms: string;
+  /**
+   * Version.
+   */
+  version?: string;
+}
+
+/**
+ * Domain data is a key-value map of translations.
+ *
+ * Empty string key is a special value with the domain metadata.
+ */
+export type DomainData = Record<string, string[]> & {
+  '': IDomainMetadata;
+};
+
+/*
+ * Translation data.
+ */
+export type Language = {
+  /**
+   * Warning message, empty string if absent.
+   *
+   * Present if requested language pack is invalid or missing.
+   */
+  message: string;
+  /**
+   * Domain data, keyed by domain name.
+   */
+  data: Record<string, DomainData>;
+};
+
+/**
+ * Description of language.
+ */
+export interface ILanguageData {
+  /**
+   * Display name of the language in the current language.
+   */
+  displayName: string;
+  /**
+   * Display name of the language in the language itself.
+   */
+  nativeName: string;
+}
+
+/*
+ * List of available languages.
+ */
+export interface ILanguageList {
+  /**
+   * Warning message, empty string if absent.
+   *
+   * Present if one or more language packs is invalid.
+   */
+  message: string;
+  /**
+   * List of available languages, keyed by language identifier.
+   */
+  data: Record<string, ILanguageData>;
+}
 
 /**
  * Translation connection interface.
  */
 export interface ITranslatorConnector
-  extends IDataConnector<Language, Language, { language: string }> {}
+  extends IDataConnector<
+    Language,
+    Language | ILanguageList,
+    { language: string } | undefined
+  > {
+  /**
+   * Fetch language list or given language.
+   */
+  fetch(): Promise<ILanguageList>;
+  fetch(opts: { language: string }): Promise<Language>;
+}
 
 /**
  * A service to connect to the server translation endpoint
@@ -34,7 +116,7 @@ export const ITranslatorConnector = new Token<ITranslatorConnector>(
 );
 
 export class TranslatorConnector
-  extends DataConnector<Language, Language, { language: string }>
+  extends DataConnector<Language, Language, { language: string } | undefined>
   implements ITranslatorConnector
 {
   constructor(
@@ -46,10 +128,12 @@ export class TranslatorConnector
     this._serverSettings = serverSettings;
   }
 
-  async fetch(opts: { language: string }): Promise<Language> {
+  async fetch(): Promise<ILanguageList>;
+  async fetch(opts: { language: string }): Promise<Language>;
+  async fetch(opts?: { language: string }): Promise<Language | ILanguageList> {
     return requestTranslationsAPI(
       this._translationsUrl,
-      opts.language,
+      opts?.language ?? '',
       {},
       this._serverSettings
     );

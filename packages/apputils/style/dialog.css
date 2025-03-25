@@ -17,6 +17,9 @@
   width: 100%;
   height: 100%;
   background: var(--jp-dialog-background);
+  /* stylelint-disable */
+  container-type: inline-size;
+  /* stylelint-enable */
 }
 
 .jp-Dialog-content {
@@ -153,4 +156,14 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-button.jp-mod-styled:not(:last-child) {
   margin-right: 12px;
+}
+
+/* stylelint-disable */
+@container (max-width: 560px) {
+  /* stylelint-enable */
+  .jp-Dialog-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
 }
