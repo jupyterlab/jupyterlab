@@ -70,20 +70,19 @@ class CssProp {
 
   private static readonly _B3 = {
     fixed_size: `${CssProp._B1.fixed_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B1.fixed_breadth}\\s*\\)|minmax\\(\\s*${CssProp._B1.fixed_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)`,
-    track_size: `${CssProp._B2.track_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\))|fit-content\\(\\s*(${CssProp._B.len_or_perc}\\s*)*\\)`
+    track_size: `${CssProp._B2.track_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)|fit-content\\(\\s*(${CssProp._B.len_or_perc}\\s*)*\\)`
   };
 
   private static readonly _B4 = {
-    name_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero}|auto-fill\\s*,\\s*(${CssProp._B1.line_names})+\\s*\\)`,
+    name_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero}|auto-fill)\\s*,\\s*(${CssProp._B1.line_names})+\\s*\\)`,
     auto_repeat: `repeat\\(\\s*(auto-fill|auto-fit)\\s*,\\s*((${CssProp._B1.line_names}\\s+)?${CssProp._B3.fixed_size}\\s*)+(${CssProp._B1.line_names})?\\s*\\)`,
-    fixed_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero}\\s*,\\s*((${CssProp._B1.line_names})*\\s+(${CssProp._B3.fixed_size})\\s*)+\\s*(${CssProp._B1.line_names})\\)`
+    fixed_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero})\\s*,\\s*((${CssProp._B1.line_names}\\s+)?${CssProp._B3.fixed_size}\\s*)+(${CssProp._B1.line_names})?\\s*\\)`
   };
 
   private static readonly _B5 = {
     auto_track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.fixed_size}|${CssProp._B4.fixed_repeat})*(${CssProp._B1.line_names}\\s*)?${CssProp._B4.auto_repeat}(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.fixed_size}|${CssProp._B4.fixed_repeat})*(${CssProp._B1.line_names}\\s*)?`,
     explicit_track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size})+(${CssProp._B1.line_names}\\s*)?`,
-    track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size}|${CssProp._B4.name_repeat})+(${CssProp._B1.line_names}\\s*)?`,
-    track_size: `${CssProp._B2.track_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)|fit-content\\(\\s*(${CssProp._B.len_or_perc}\\s*)*\\)`
+    track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size}|${CssProp._B4.name_repeat})+(${CssProp._B1.line_names}\\s*)?`
   };
 
   private static readonly _B6 = {
@@ -355,16 +354,16 @@ class CssProp {
     grid_area: `${CssProp.B.ident}|auto|(${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer})`,
     grid_auto_columns: `(${CssProp.B.track_size})+`,
     grid_auto_rows: `(${CssProp.B.track_size})+`,
-    grid_column: `${CssProp.B.grid_line}(\\s*/\\s*${CssProp.B.grid_line})?`,
+    grid_column: `${CssProp.B.grid_line}(\\s*\\/\\s*${CssProp.B.grid_line})?`,
     grid_column_start: `${CssProp.B.grid_line}`,
     grid_column_end: `${CssProp.B.grid_line}`,
     grid_column_gap: `${CssProp.B.len_or_perc}|normal`,
     grid_gap: `(${CssProp.B.len_or_perc}|normal)(\\s*(${CssProp.B.len_or_perc}|normal))?`,
-    grid_row: `${CssProp.B.grid_line}(\\s*/\\s*${CssProp.B.grid_line})?`,
+    grid_row: `${CssProp.B.grid_line}(\\s*\\/\\s*${CssProp.B.grid_line})?`,
     grid_row_start: `${CssProp.B.grid_line}`,
     grid_row_end: `${CssProp.B.grid_line}`,
     grid_row_gap: `${CssProp.B.len_or_perc}|normal`,
-    grid_template: `none|(${CssProp.B.grid_template_rows}\\s*/\\s*${CssProp.B.grid_template_columns})|(${CssProp.B.line_names}\\s*)?(${CssProp.B.string}\\s*${CssProp.B.track_size}\\s*(${CssProp.B.line_names}\\s*)?)+\\s*(/\\s*${CssProp.B.explicit_track_list})?`,
+    grid_template: `none|(${CssProp.B.grid_template_rows}\\s*\\/\\s*${CssProp.B.grid_template_columns})|(${CssProp.B.line_names}\\s*)?(${CssProp.B.string}\\s*${CssProp.B.track_size}\\s*(${CssProp.B.line_names}\\s*)?)+\\s*(\\/\\s*${CssProp.B.explicit_track_list})?`,
     grid_template_areas: `none|(${CssProp.B.string})+`,
     grid_template_columns: `${CssProp.B.grid_template_columns}`,
     grid_template_rows: `${CssProp.B.grid_template_rows}`,
