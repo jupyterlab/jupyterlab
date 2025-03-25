@@ -196,6 +196,18 @@ describe('sanitizer', () => {
       expect(sanitizer.sanitize(div)).toBe(div);
     });
 
+    it('should allow grid-template-rows with minmax and repeat function', () => {
+      const div =
+        '<div style="grid-template-rows:repeat(2, minmax(100px, auto))"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
+    it('should allow grid-template with minmax and repeat function', () => {
+      const div =
+        '<div style="grid-template:repeat(2, minmax(100px, auto)) / repeat(3, minmax(100px, auto))"></div>';
+      expect(sanitizer.sanitize(div)).toBe(div);
+    });
+
     it('should allow grid-row with named line positions', () => {
       const div = '<div style="grid-row:header-start / header-end"></div>';
       expect(sanitizer.sanitize(div)).toBe(div);
@@ -238,7 +250,7 @@ describe('sanitizer', () => {
 
     it('should strip grid-template with expression function', () => {
       const div =
-        '<div style="grid-template:expression(document.cookie=1)"></div>';
+        '<div style="grid-template:expression(document.cookie="secret=Access achieved")"></div>';
       expect(sanitizer.sanitize(div)).toBe('<div></div>');
     });
 
@@ -287,12 +299,13 @@ describe('sanitizer', () => {
 
     it('should strip grid properties with HTML entity encoding tricks', () => {
       const div =
-        '<div style="grid-template:&amp;#106;avascript:alert(1)"></div>';
+        '<div style="grid-template:&#x004A;avascript:alert(1"Access achieved")"></div>';
       expect(sanitizer.sanitize(div)).toBe('<div></div>');
     });
 
     it('should strip grid properties with escaped characters', () => {
-      const div = '<div style="grid-template:\\65 xpression(alert(1))"></div>';
+      const div =
+        '<div style="grid-template:pression(alert("Access achieved"))"></div>';
       expect(sanitizer.sanitize(div)).toBe('<div></div>');
     });
   });
