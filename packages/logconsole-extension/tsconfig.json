@@ -16,6 +16,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docregistry"
+    },
+    {
       "path": "../logconsole"
     },
     {
@@ -32,9 +35,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../docregistry"
     }
   ]
 }
