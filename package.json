@@ -109,7 +109,9 @@
     "marked": "^15.0.7",
     "react": "^18.2.0",
     "type-fest": "^4.30.0",
-    "yjs": "^13.5.40"
+    "yjs": "^13.5.40",
+    "@jupyterlab/logconsole-extension@^4.4.0-rc.0": "patch:@jupyterlab/logconsole-extension@workspace%3Apackages/logconsole-extension#./.yarn/patches/@jupyterlab-logconsole-extension-workspace-a661810673.patch",
+    "@jupyterlab/logconsole-extension@~4.4.0-rc.0": "patch:@jupyterlab/logconsole-extension@workspace%3Apackages/logconsole-extension#./.yarn/patches/@jupyterlab-logconsole-extension-workspace-a661810673.patch"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "~6.13.2",
