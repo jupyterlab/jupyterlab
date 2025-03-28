@@ -9,12 +9,12 @@ import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
+import type { Field, Widget } from '@rjsf/utils';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
-
-import type { Field } from '@rjsf/utils';
 import type { SettingsEditor } from './settingseditor';
+
 export interface ISettingsPanelProps {
   /**
    * List of Settings objects that provide schema and values
@@ -129,24 +129,36 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorDirtyStates, updateDirtyState]
   );
 
-  const renderers = React.useMemo(
-    () =>
-      Object.entries(editorRegistry.renderers).reduce<{
-        [plugin: string]: { [property: string]: Field };
-      }>((agg, [id, renderer]) => {
-        const splitPosition = id.lastIndexOf('.');
-        const pluginId = id.substring(0, splitPosition);
-        const propertyName = id.substring(splitPosition + 1);
-        if (!agg[pluginId]) {
-          agg[pluginId] = {};
+  const { fieldRenderers, widgetRenderers } = React.useMemo(() => {
+    const fieldRenderers = {} as {
+      [id: string]: { [property: string]: Field };
+    };
+    const widgetRenderers = {} as {
+      [id: string]: { [property: string]: Widget };
+    };
+    for (const [id, renderer] of Object.entries(editorRegistry.renderers)) {
+      const splitPosition = id.lastIndexOf('.');
+      const pluginId = id.substring(0, splitPosition);
+      const propertyName = id.substring(splitPosition + 1);
+      if (renderer.fieldRenderer) {
+        if (!fieldRenderers[pluginId]) {
+          fieldRenderers[pluginId] = {};
         }
-        if (!agg[pluginId][propertyName] && renderer.fieldRenderer) {
-          agg[pluginId][propertyName] = renderer.fieldRenderer;
+        if (!fieldRenderers[pluginId][propertyName]) {
+          fieldRenderers[pluginId][propertyName] = renderer.fieldRenderer;
         }
-        return agg;
-      }, {}),
-    [editorRegistry]
-  );
+      }
+      if (renderer.widgetRenderer) {
+        if (!widgetRenderers[pluginId]) {
+          widgetRenderers[pluginId] = {};
+        }
+        if (!widgetRenderers[pluginId][propertyName]) {
+          widgetRenderers[pluginId][propertyName] = renderer.widgetRenderer;
+        }
+      }
+    }
+    return { fieldRenderers, widgetRenderers };
+  }, [editorRegistry]);
 
   if (!activePluginId && !filterPlugin) {
     return <SettingsEditorPlaceholder translator={translator} />;
@@ -174,7 +186,8 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             <SettingsFormEditor
               filteredValues={filtered}
               settings={pluginSettings}
-              renderers={renderers}
+              renderers={fieldRenderers}
+              widgetRenderers={widgetRenderers}
               hasError={(error: boolean) => {
                 hasError(pluginSettings.id, error);
               }}

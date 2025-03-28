@@ -1,0 +1,47 @@
+{
+  "jupyter.lab.setting-icon": "ui-components:keyboard",
+  "jupyter.lab.setting-icon-label": "Keyboard Layout",
+  "title": "Keyboard Layout",
+  "description": "Keyboard layout settings.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "useBrowserLayout": {
+      "title": "Browser layout",
+      "description": "Whether to use the browser's keyboard layout, if the browser supports it. If this is set, and the browser supports it, it will override the selected layout.",
+      "type": "boolean",
+      "default": true
+    },
+    "layout": {
+      "title": "Keyboard Layout",
+      "description": "The keyboard layout to use for shortcuts etc",
+      "type": "string"
+    },
+    "customLayouts": {
+      "title": "Custom Layouts",
+      "description": "User specified keyboard layouts",
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "keyMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "modifiers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
