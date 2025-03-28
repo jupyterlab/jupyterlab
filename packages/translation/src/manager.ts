@@ -5,8 +5,10 @@ import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
 import {
   DEFAULT_LANGUAGE_CODE,
+  DomainData,
   ITranslator,
   ITranslatorConnector,
+  Language,
   TranslationBundle,
   TranslatorConnector
 } from './tokens';
@@ -61,7 +63,7 @@ export class TranslationManager implements ITranslator {
             // If the language is provided by the system set up, we need to retrieve the final
             // language. This is done through the `""` entry in `_languageData` that contains
             // language metadata.
-            (lang as any)['']['language'] as string;
+            lang['']['language'];
           break;
         }
       } catch (reason) {
@@ -74,7 +76,7 @@ export class TranslationManager implements ITranslator {
     ).replace('_', '-');
 
     this._domainData = this._languageData?.data ?? {};
-    const message: string = this._languageData?.message;
+    const message = this._languageData?.message;
     if (message && this._currentLocale !== DEFAULT_LANGUAGE_CODE) {
       console.warn(message);
     }
@@ -98,13 +100,15 @@ export class TranslationManager implements ITranslator {
             stringsPrefix: this._stringsPrefix
           });
           if (domain in this._domainData) {
-            let metadata = this._domainData[domain][''];
-            if ('plural_forms' in metadata) {
-              metadata.pluralForms = metadata.plural_forms;
-              delete metadata.plural_forms;
-              this._domainData[domain][''] = metadata;
-            }
-            translationBundle.loadJSON(this._domainData[domain], domain);
+            const metadata = this._domainData[domain][''];
+            const harmonizedData = {
+              ...this._domainData[domain],
+              '': {
+                ...metadata,
+                pluralForms: metadata.plural_forms
+              }
+            };
+            translationBundle.loadJSON(harmonizedData, domain);
           }
           this._translationBundles[domain] = translationBundle;
         }
@@ -117,9 +121,9 @@ export class TranslationManager implements ITranslator {
 
   private _connector: ITranslatorConnector;
   private _currentLocale: string;
-  private _domainData: any = {};
+  private _domainData: Record<string, DomainData> = {};
   private _englishBundle: Gettext;
-  private _languageData: any;
+  private _languageData: Language | undefined;
   private _stringsPrefix: string;
-  private _translationBundles: any = {};
+  private _translationBundles: Record<string, TranslationBundle> = {};
 }

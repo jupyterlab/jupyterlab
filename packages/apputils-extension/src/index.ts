@@ -40,6 +40,7 @@ import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsConnector, settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
+import { subshellsSettings } from './subshell-settings';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
@@ -727,10 +728,24 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
   }
 };
 
+/*
+ * A plugin owning the kernel settings
+ */
+export const kernelSettings: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:kernels-settings',
+  description: 'Reserves the name for kernel settings.',
+  autoStart: true,
+  requires: [ISettingRegistry],
+  activate: (_app: JupyterFrontEnd, settingRegistry: ISettingRegistry) => {
+    void settingRegistry.load(kernelSettings.id);
+  }
+};
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  kernelSettings,
   announcements,
   kernelStatus,
   licensesClient,
@@ -741,6 +756,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   print,
   resolver,
   runningSessionsStatus,
+  subshellsSettings,
   sanitizer,
   settingsConnector,
   settingsPlugin,

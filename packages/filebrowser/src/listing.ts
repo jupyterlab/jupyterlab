@@ -1037,7 +1037,13 @@ export class DirListing extends Widget {
           const spec = specs.kernelspecs[name];
           name = spec ? spec.display_name : this._trans.__('unknown');
         }
-        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
+
+        // Update node title only if it has changed.
+        const prevState = this._lastRenderedState.get(node);
+        if (prevState !== node.title) {
+          node.title = this._trans.__('%1\nKernel: %2', node.title, name);
+          this._lastRenderedState.set(node, node.title);
+        }
       }
     }
   }
@@ -2568,6 +2574,7 @@ export class DirListing extends Widget {
   );
   private _paddingWidth: number = 0;
   private _handleWidth: number = DEFAULT_HANDLE_WIDTH;
+  private _lastRenderedState = new WeakMap<HTMLElement, string>();
 }
 
 /**

@@ -93,6 +93,11 @@ export namespace ITerminalConnection {
      * The server settings.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The Terminal API client.
+     */
+    terminalAPIClient?: ITerminalAPIClient;
   }
 }
 
