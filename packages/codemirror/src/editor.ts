@@ -25,6 +25,7 @@ import {
   IEditorLanguageRegistry,
   IExtensionsHandler
 } from './token';
+import { dropCursor } from '@codemirror/view';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -786,6 +787,10 @@ namespace Private {
     doc?: string
   ): EditorView {
     const extensions = editorConfig.getInitialExtensions();
+    // Check if dropCursor is enabled in the config (defaulting to true)
+    if (editorConfig.getOption('dropCursor') !== false) {
+      extensions.push(dropCursor());
+    }
     extensions.push(...additionalExtensions);
     const view = new EditorView({
       state: EditorState.create({
