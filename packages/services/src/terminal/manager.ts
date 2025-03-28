@@ -122,7 +122,8 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   ): Terminal.ITerminalConnection {
     const terminalConnection = new TerminalConnection({
       ...options,
-      serverSettings: this.serverSettings
+      serverSettings: this.serverSettings,
+      terminalAPIClient: this._terminalAPIClient
     });
     this._onStarted(terminalConnection);
     if (!this._names.includes(options.model.name)) {
