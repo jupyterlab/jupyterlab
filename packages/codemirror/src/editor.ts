@@ -25,7 +25,6 @@ import {
   IEditorLanguageRegistry,
   IExtensionsHandler
 } from './token';
-import { dropCursor } from '@codemirror/view';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -88,7 +87,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         // We need to set the order to high, otherwise the keybinding for ArrowUp/ArrowDown
         // will process the event shunting our edge detection code.
         Prec.high(onKeyDown),
-        dropCursor(),
         updateListener,
         // Initialize with empty extension
         this._language.of([]),
