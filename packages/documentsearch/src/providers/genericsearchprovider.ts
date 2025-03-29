@@ -20,8 +20,6 @@ export class HTMLSearchEngine {
   /**
    * We choose opt out as most node types should be searched (e.g. script).
    * Even nodes like <data>, could have textContent we care about.
-   *
-   * Note: nodeName is capitalized, so we do the same here
    */
   static UNSUPPORTED_ELEMENTS = {
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#Document_metadata
@@ -68,6 +66,27 @@ export class HTMLSearchEngine {
   };
 
   /**
+   * Check if a node is unsupported by the search engine.
+   *
+   * Note:
+   * We will be checking each node's nodeName attribute in the Node interface.
+   * ref: https://dom.spec.whatwg.org/#dom-node-nodename
+   *
+   * Specifically for Element nodes, where nodeName is stated as the
+   * 'HTML-uppercased qualified name'. However, that does not mean that HTML
+   * elements qualified name is guaranteed to be uppercased even when the
+   * content type is HTML, i.e. XML tags like <svg>. This only applies when the
+   * node's namespace is in HTML and the node document is a HTML document.
+   * ref: https://dom.spec.whatwg.org/#element-html-uppercased-qualified-name
+   *
+   * @param node The node to check
+   * @returns `true` if the node is unsupported, `false` otherwise
+   */
+  static isUnsupportedNode(node: Node): boolean {
+    return node.nodeName.toUpperCase() in HTMLSearchEngine.UNSUPPORTED_ELEMENTS;
+  }
+
+  /**
    * Search for a `query` in a DOM tree.
    *
    * @param query Regular expression to search
@@ -94,7 +113,7 @@ export class HTMLSearchEngine {
         // do not contain our search text
         let parentElement = node.parentElement!;
         while (parentElement !== rootNode) {
-          if (parentElement.nodeName in HTMLSearchEngine.UNSUPPORTED_ELEMENTS) {
+          if (HTMLSearchEngine.isUnsupportedNode(parentElement)) {
             return NodeFilter.FILTER_REJECT;
           }
           parentElement = parentElement.parentElement!;
