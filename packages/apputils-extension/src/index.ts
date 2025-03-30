@@ -26,7 +26,7 @@ import {
   SessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -353,6 +353,44 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Update the browser title based on the workspace and the current
+ * active item.
+ */
+async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
+  const data: any = await db.toJSON();
+  let current: string = data['layout-restorer:data']?.main?.current;
+  if (current === undefined) {
+    document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
+      workspace.startsWith('auto-') ? ` (${workspace})` : ``
+    }`;
+  } else {
+    // File name from current path
+    let currentFile: string = PathExt.basename(
+      decodeURIComponent(window.location.href)
+    );
+    // Truncate to first 12 characters of current document name + ... if length > 15
+    currentFile =
+      currentFile.length > 15
+        ? currentFile.slice(0, 12).concat(`…`)
+        : currentFile;
+    // Number of restorable items that are either notebooks or editors
+    const count: number = Object.keys(data).filter(
+      item => item.startsWith('notebook') || item.startsWith('editor')
+    ).length;
+
+    if (workspace.startsWith('auto-')) {
+      document.title = `${currentFile} (${workspace}${
+        count > 1 ? ` : ${count}` : ``
+      }) - ${name}`;
+    } else {
+      document.title = `${currentFile}${
+        count > 1 ? ` (${count})` : ``
+      } - ${name}`;
+    }
+  }
+}
+
+/**
  * The default state database for storing application state.
  *
  * #### Notes
@@ -381,7 +419,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     }
 
     let resolved = false;
-    const { commands, serviceManager } = app;
+    const { commands, name, serviceManager } = app;
     const { workspaces } = serviceManager;
     const workspace = resolver.name;
     const transform = new PromiseDelegate<StateDB.DataTransform>();
@@ -395,6 +433,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
+    db.changed.connect(() => updateTabTitle(workspace, db, name));
 
     commands.addCommand(CommandIDs.loadState, {
       label: trans.__('Load state for the current workspace.'),

@@ -65,7 +65,7 @@ test.describe('General Tests', () => {
 
     // Create a new text file and wait for it to lodd
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.locator('.cm-editor:not(.jp-mod-readOnly)').waitFor();
+    await page.locator('.cm-editor:not(.jp-mod-readOnly)').first().waitFor();
 
     // Verify the browser's tab name matches the new file name
     const title = await page.title();
