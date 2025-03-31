@@ -32,7 +32,7 @@ export class KernelSources extends PanelWithToolbar {
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Kernel Sources');
     this.toolbar.addClass('jp-DebuggerKernelSources-header');
-
+    this.toolbar.addAttribute('aria-label', 'Callstack panel toolbar');
     this._body = new KernelSourcesBody({
       service,
       model,

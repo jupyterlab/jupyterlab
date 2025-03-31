@@ -181,6 +181,13 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
+   * Add an HTML attribute on the node element
+   */
+  addAttribute(name: string, value: string) {
+    this.node.setAttribute(name, value);
+  }
+
+  /**
    * Get an iterator over the ordered toolbar item names.
    *
    * @returns An iterator over the toolbar item names.
@@ -1136,6 +1143,7 @@ class ToolbarPopup extends Widget {
    */
   constructor() {
     super({ node: document.createElement('jp-toolbar') });
+    this.node.setAttribute('aria-label', 'Responsive popup toolbar');
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
     this.addClass('jp-ThemedContainer');

@@ -195,6 +195,7 @@ export class CellToolbarTracker implements IDisposable {
       // Note: CELL_MENU_CLASS is deprecated.
       toolbarWidget.addClass(CELL_MENU_CLASS);
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
+      toolbarWidget.addAttribute('aria-label', 'Cell toolbar');
       const promises: Promise<void>[] = [cell.ready];
       if (this._toolbarFactory) {
         setToolbar(cell, this._toolbarFactory, toolbarWidget);

@@ -645,6 +645,7 @@ export class ExtensionsPanel extends SidePanel {
 
     const installed = new PanelWithToolbar();
     installed.addClass('jp-extensionmanager-installedlist');
+    installed.toolbar.addAttribute('aria-label', 'Extensions panel toolbar');
     installed.title.label = this.trans.__('Installed');
 
     installed.toolbar.addItem(

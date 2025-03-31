@@ -27,6 +27,7 @@ export class Callstack extends PanelWithToolbar {
     this.title.label = trans.__('Callstack');
     const body = new CallstackBody(model);
 
+    this.toolbar.addAttribute('aria-label', 'Callstack panel toolbar');
     this.toolbar.addItem(
       'continue',
       new CommandToolbarButton({
