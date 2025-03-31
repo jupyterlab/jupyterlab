@@ -19,6 +19,7 @@ import {
 import {
   crosshairCursor,
   drawSelection,
+  dropCursor,
   EditorView,
   highlightActiveLine,
   highlightSpecialChars,
@@ -774,6 +775,15 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'boolean',
           title: trans.__('Line Wrap')
+        }
+      }),
+      Object.freeze({
+        name: 'dropCursor',
+        default: true,
+        factory: () => createConditionalExtension(dropCursor()),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Drop Cursor')
         }
       }),
       Object.freeze({
