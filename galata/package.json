@@ -53,7 +53,7 @@
     "@jupyterlab/notebook": "^4.4.0-rc.0",
     "@jupyterlab/services": "^7.4.0-rc.0",
     "@jupyterlab/settingregistry": "^4.4.0-rc.0",
-    "@lumino/coreutils": "^2.2.0",
+    "@lumino/coreutils": "^2.2.1",
     "@playwright/test": "^1.51.0",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
