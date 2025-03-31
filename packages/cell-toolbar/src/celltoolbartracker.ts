@@ -24,6 +24,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { IMapChange } from '@jupyter/ydoc';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /*
  * Text mime types
@@ -62,13 +63,15 @@ export class CellToolbarTracker implements IDisposable {
     toolbar?: IObservableList<ToolbarRegistry.IToolbarItem>,
     toolbarFactory?: (
       widget: Cell
-    ) => IObservableList<ToolbarRegistry.IToolbarItem>
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>,
+    translator?: ITranslator
   ) {
     this._panel = panel;
     this._previousActiveCell = this._panel.content.activeCell;
     this._toolbarItems = toolbar ?? null;
     this._toolbarFactory = toolbarFactory ?? null;
     this._enabled = true; // If this has been set to false, it will be modified after settings are available
+    this._trans = (translator ?? nullTranslator).load('jupyterlab');
 
     if (this._toolbarItems === null && this._toolbarFactory === null) {
       throw Error('You must provide the toolbarFactory or the toolbar items.');
@@ -195,7 +198,11 @@ export class CellToolbarTracker implements IDisposable {
       // Note: CELL_MENU_CLASS is deprecated.
       toolbarWidget.addClass(CELL_MENU_CLASS);
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
-      toolbarWidget.addAttribute('aria-label', 'Cell toolbar');
+
+      toolbarWidget.node.setAttribute(
+        'aria-label',
+        this._trans.__('Cell toolbar')
+      );
       const promises: Promise<void>[] = [cell.ready];
       if (this._toolbarFactory) {
         setToolbar(cell, this._toolbarFactory, toolbarWidget);
@@ -475,6 +482,7 @@ export class CellToolbarTracker implements IDisposable {
   private _toolbarFactory:
     | ((widget: Cell) => IObservableList<ToolbarRegistry.IToolbarItem>)
     | null = null;
+  private _trans;
 }
 
 const defaultToolbarItems: ToolbarRegistry.IWidget[] = [

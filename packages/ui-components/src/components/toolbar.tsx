@@ -181,13 +181,6 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   }
 
   /**
-   * Add an HTML attribute on the node element
-   */
-  addAttribute(name: string, value: string) {
-    this.node.setAttribute(name, value);
-  }
-
-  /**
    * Get an iterator over the ordered toolbar item names.
    *
    * @returns An iterator over the toolbar item names.

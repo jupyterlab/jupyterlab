@@ -33,9 +33,10 @@ export const topbar: JupyterFrontEndPlugin<void> = {
     toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator | null
   ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const toolbar = new Toolbar();
     toolbar.id = 'jp-top-bar';
-    toolbar.addAttribute('aria-label', 'Topbar toolbar');
+    toolbar.node.setAttribute('aria-label', trans.__('Topbar toolbar'));
 
     // Set toolbar
     setToolbar(

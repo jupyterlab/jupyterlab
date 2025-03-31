@@ -365,7 +365,7 @@ namespace Private {
     const layout = (widget.layout = new BoxLayout({ spacing: 0 }));
     const banner = new Widget();
     const bar = new Toolbar();
-    bar.addAttribute('aria-label', 'Default editor toolbar');
+    bar.node.setAttribute('aria-label', trans.__('Default editor toolbar'));
     const defaultTitle = trans.__('System Defaults');
 
     banner.node.innerText = defaultTitle;
