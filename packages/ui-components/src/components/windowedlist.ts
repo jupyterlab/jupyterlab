@@ -995,6 +995,12 @@ export class WindowedList<
         // (which will close any open context menu, etc.)
         event.stopPropagation();
         break;
+      case 'scrollend':
+        if (this._timerToClearScrollStatus) {
+          window.clearTimeout(this._timerToClearScrollStatus);
+        }
+        this._viewport.dataset.isScrolling = 'false';
+        break;
       case 'scroll':
         this.onScroll(event);
         break;
@@ -1122,6 +1128,7 @@ export class WindowedList<
     this._viewportPaddingTop = this.viewModel.paddingTop;
     this._viewportPaddingBottom = parseFloat(viewportStyle.paddingBottom);
     this._scrollbarElement.addEventListener('pointerdown', this);
+    this._outerElement.addEventListener('scrollend', this);
   }
 
   /**
@@ -1130,6 +1137,7 @@ export class WindowedList<
   protected onBeforeDetach(msg: Message): void {
     this._removeListeners();
     this._scrollbarElement.removeEventListener('pointerdown', this);
+    this._outerElement.removeEventListener('scrollend', this);
     super.onBeforeDetach(msg);
   }
 
