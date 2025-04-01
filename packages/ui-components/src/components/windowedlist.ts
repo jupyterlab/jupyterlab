@@ -1176,10 +1176,10 @@ export class WindowedList<
       if (this._timerToClearScrollStatus) {
         window.clearTimeout(this._timerToClearScrollStatus);
       }
-      // TODO: use `scrollend` event instead once supported by Safari
+      // TODO: remove once `scrollend` event is supported by Safari
       this._timerToClearScrollStatus = window.setTimeout(() => {
         this._viewport.dataset.isScrolling = 'false';
-      }, 500);
+      }, 750);
       this.update();
       // }
     }
