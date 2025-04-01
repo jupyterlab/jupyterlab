@@ -904,6 +904,11 @@ export namespace DocumentRegistry {
     lastModifiedCheckMargin: number;
 
     /**
+     * Whether the document can be saved via the Contents API.
+     */
+    canSave?: boolean;
+
+    /**
      * The data model for the document.
      */
     readonly model: T;

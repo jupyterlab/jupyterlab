@@ -227,7 +227,7 @@ export class Context<
   /**
    * Whether the document can be saved via the Contents API.
    */
-  protected get canSave(): boolean {
+  get canSave(): boolean {
     return !!(this._contentsModel?.writable && !this._model.collaborative);
   }
 
