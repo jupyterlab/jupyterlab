@@ -48,7 +48,7 @@ test('should update displayed cells on resize', async ({ page, tmpPath }) => {
 
   const notebook = await page.notebook.getNotebookInPanelLocator();
 
-  const cell = page.locator('.jp-Cell[data-windowed-list-index="11"]');
+  const cell = page.locator('.jp-Cell[data-windowed-list-index="10"]');
 
   // Cell should be visible
   await expect.soft(cell).toBeVisible();
@@ -69,7 +69,7 @@ test('should update displayed cells on resize', async ({ page, tmpPath }) => {
   await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
   // The cell should be visible aqain
-  await expect.soft(cell).not.toBeVisible();
+  await expect.soft(cell).toBeVisible();
 });
 
 test('should not update height when hiding', async ({ page, tmpPath }) => {
