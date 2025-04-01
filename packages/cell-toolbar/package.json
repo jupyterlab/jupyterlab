@@ -46,6 +46,7 @@
     "@jupyterlab/docregistry": "^4.4.0-rc.0",
     "@jupyterlab/notebook": "^4.4.0-rc.0",
     "@jupyterlab/observables": "^5.4.0-rc.0",
+    "@jupyterlab/translation": "^4.4.0-rc.0",
     "@jupyterlab/ui-components": "^4.4.0-rc.0",
     "@lumino/algorithm": "^2.0.2",
     "@lumino/commands": "^2.3.1",

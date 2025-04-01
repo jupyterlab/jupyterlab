@@ -689,6 +689,10 @@ class Section extends PanelWithToolbar {
       );
     }
     this.toolbar.addClass('jp-RunningSessions-toolbar');
+    this._toolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('%1 toolbar', this.title.label)
+    );
   }
 
   private _onListChanged(): void {
