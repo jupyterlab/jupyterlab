@@ -996,10 +996,7 @@ export class WindowedList<
         event.stopPropagation();
         break;
       case 'scrollend':
-        if (this._timerToClearScrollStatus) {
-          window.clearTimeout(this._timerToClearScrollStatus);
-        }
-        this._viewport.dataset.isScrolling = 'false';
+        this._onScrollEnd();
         break;
       case 'scroll':
         this.onScroll(event);
@@ -1178,13 +1175,12 @@ export class WindowedList<
       }
       // TODO: remove once `scrollend` event is supported by Safari
       this._timerToClearScrollStatus = window.setTimeout(() => {
-        this._viewport.dataset.isScrolling = 'false';
+        this._onScrollEnd();
       }, 750);
       this.update();
       // }
     }
   }
-  private _timerToClearScrollStatus: number | null = null;
 
   /**
    * A message handler invoked on an `'resize-request'` message.
@@ -1632,13 +1628,27 @@ export class WindowedList<
   }
 
   /**
+   * Handle `scrollend` events on the scroller.
+   */
+  private _onScrollEnd() {
+    if (this._timerToClearScrollStatus) {
+      window.clearTimeout(this._timerToClearScrollStatus);
+    }
+    this._viewport.dataset.isScrolling = 'false';
+    if (this._requiresTotalSizeUpdate) {
+      this._updateTotalSize();
+    }
+    this._requiresTotalSizeUpdate = false;
+  }
+
+  /**
    * Update the total size
    */
   private _updateTotalSize(): void {
     if (this.viewModel.windowingActive) {
       if (this._viewport.dataset.isScrolling == 'true') {
         // Do not update while scrolling, delay until later
-        requestAnimationFrame(() => this._updateTotalSize());
+        this._requiresTotalSizeUpdate = true;
         return;
       }
       const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
@@ -1660,8 +1670,10 @@ export class WindowedList<
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
+  private _requiresTotalSizeUpdate: boolean = false;
   private _areaResizeObserver: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
+  private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
   private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
