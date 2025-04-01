@@ -58,7 +58,7 @@
     "@jupyterlab/services": "^7.4.0-rc.0",
     "@jupyterlab/settingregistry": "^4.4.0-rc.0",
     "@jupyterlab/translation": "^4.4.0-rc.0",
-    "@lumino/commands": "^2.3.1"
+    "@lumino/commands": "^2.3.2"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.4.0-rc.0",
