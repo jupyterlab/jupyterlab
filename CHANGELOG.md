@@ -484,6 +484,33 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.0rc1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.0rc0...7723a3d266b14aae183f9ec9ee04d60559169f46))
+
+### Bugs fixed
+
+- Fix CommandPalette gets re-rendered even if hidden [#17442](https://github.com/jupyterlab/jupyterlab/pull/17442) ([@fcollonval](https://github.com/fcollonval))
+- Add distinct accessible aria label for each toolbar [#17441](https://github.com/jupyterlab/jupyterlab/pull/17441) ([@nkn2022](https://github.com/nkn2022))
+- Fix read-only indicator not showing in RTC docprovider [#17440](https://github.com/jupyterlab/jupyterlab/pull/17440) ([@Darshan808](https://github.com/Darshan808))
+- Fix visual indication for drag and drop in editor [#17438](https://github.com/jupyterlab/jupyterlab/pull/17438) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix usage of `ITerminalAPIClient` in `TerminalConnection` [#17437](https://github.com/jupyterlab/jupyterlab/pull/17437) ([@jtpio](https://github.com/jtpio))
+- Improve scrolling edge cases [#17339](https://github.com/jupyterlab/jupyterlab/pull/17339) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Do not try to prettier `.mypy_cache` [#17444](https://github.com/jupyterlab/jupyterlab/pull/17444) ([@krassowski](https://github.com/krassowski))
+- Bump vega from 5.31.0 to 5.32.0 [#17436](https://github.com/jupyterlab/jupyterlab/pull/17436) ([@dependabot](https://github.com/dependabot))
+- Make `ILabShell` optional in the logconsole extension [#17430](https://github.com/jupyterlab/jupyterlab/pull/17430) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-03-25&to=2025-04-02&type=c))
+
+[@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-03-25..2025-04-02&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2025-03-25..2025-04-02&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2025-03-25..2025-04-02&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-03-25..2025-04-02&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-03-25..2025-04-02&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-03-25..2025-04-02&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-03-25..2025-04-02&type=Issues) | [@MUFFANUJ](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2025-03-25..2025-04-02&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-03-25..2025-04-02&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.0b2...4c6159f834ad1507384653a4aeba2ab67a11f255))
@@ -506,8 +533,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-03-19&to=2025-03-25&type=c))
 
 [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2025-03-19..2025-03-25&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-03-19..2025-03-25&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2025-03-19..2025-03-25&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-03-19..2025-03-25&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-03-19..2025-03-25&type=Issues) | [@MUFFANUJ](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2025-03-19..2025-03-25&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.0b2
 
