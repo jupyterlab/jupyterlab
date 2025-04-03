@@ -35,7 +35,6 @@ test.describe('CSV Viewer', () => {
   });
 
   test('should render CSV correctly in dark theme', async ({ page }) => {
-    // Open CSV file
     await page.filebrowser.open(csvFileName);
 
     await page.theme.setDarkTheme();
@@ -46,6 +45,7 @@ test.describe('CSV Viewer', () => {
     const screenshotName = 'csv-dark-theme.png';
     expect(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
 
+    // change to light theme and back to dark theme
     await page.theme.setLightTheme();
     await page.theme.setDarkTheme();
 
@@ -60,10 +60,8 @@ test.describe('CSV Viewer', () => {
     }
 
     try {
-      if (tempFilePath && fs.existsSync(tempFilePath)) {
-        fs.unlinkSync(tempFilePath);
-        fs.rmdirSync(path.dirname(tempFilePath));
-      }
+      fs.unlinkSync(tempFilePath);
+      fs.rmdirSync(path.dirname(tempFilePath));
     } catch (e) {
       console.error(`Error cleaning up temp file: ${e}`);
     }
