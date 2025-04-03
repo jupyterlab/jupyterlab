@@ -1204,8 +1204,8 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function copy(notebook: Notebook): void {
-    Private.copyOrCut(notebook, false);
+  export async function copy(notebook: Notebook): Promise<void> {
+    await Private.copyOrCut(notebook, false);
   }
 
   /**
@@ -1217,8 +1217,8 @@ export namespace NotebookActions {
    * This action can be undone.
    * A new code cell is added if all cells are cut.
    */
-  export function cut(notebook: Notebook): void {
-    Private.copyOrCut(notebook, true);
+  export async function cut(notebook: Notebook): Promise<void> {
+    await Private.copyOrCut(notebook, true);
   }
 
   /**
@@ -1237,17 +1237,18 @@ export namespace NotebookActions {
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
    */
-  export function paste(
+  export async function paste(
     notebook: Notebook,
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
-  ): void {
+  ): Promise<void> {
     const clipboard = Clipboard.getInstance();
 
-    if (!clipboard.hasData(JUPYTER_CELL_MIME)) {
+    const stored = await clipboard.getData(JUPYTER_CELL_MIME);
+    if (stored === null || stored === undefined) {
       return;
     }
 
-    const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    const values = stored as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -2575,7 +2576,10 @@ namespace Private {
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
    */
-  export function copyOrCut(notebook: Notebook, cut: boolean): void {
+  export async function copyOrCut(
+    notebook: Notebook,
+    cut: boolean
+  ): Promise<void> {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -2588,7 +2592,7 @@ namespace Private {
 
     const data = Private.selectedCells(notebook);
 
-    clipboard.setData(JUPYTER_CELL_MIME, data);
+    await clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
       deleteCells(notebook);
     } else {
