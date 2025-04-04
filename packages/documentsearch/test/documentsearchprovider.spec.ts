@@ -97,6 +97,19 @@ describe('documentsearch/genericsearchprovider', () => {
           expect(widget.node.firstElementChild!.innerHTML).toEqual(expected);
         }
       );
+
+      it.each([
+        [/z/, '<pre><svg>z</svg></pre>'],
+        [/y/, '<pre><svg><text>y</text></svg></pre>'],
+        [/x/, '<pre><svg><text x="5" y="15" fill="red">x</text></svg></pre>']
+      ])(
+        'should ignore %s in unsupported fragment %s',
+        async (query, content) => {
+          widget.node.innerHTML = content;
+          await provider.startQuery(query);
+          expect(widget.node.innerHTML).toEqual(content);
+        }
+      );
     });
 
     describe('#endQuery()', () => {
