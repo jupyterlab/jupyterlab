@@ -343,6 +343,9 @@ front: matter
       ['````\n```# Title\n```\n````', []],
       ['````\n~~~~# Title\n~~~\n````', []],
       ['~~~~\n```# Title\n```\n~~~~~', []],
+      ['<!--Foo-->', []],
+      ['<!--\nMarkdown comments\n-->', []],
+      ['<!--\nNested comments\n```\nBackticks\n``-->', []],
       [
         '````\n```# Title-1\n```\n````\n# Title-2\n````\n`````',
         [
