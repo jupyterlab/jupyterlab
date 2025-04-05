@@ -26,6 +26,8 @@ class CssProp {
     integer: `[+-]?[0-9]+`,
     integer_pos: `[+]?[0-9]+`,
     integer_zero_ff: `([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])`,
+    integer_non_zero: `[+-]?([1-9][0-9]*)`,
+    integer_pos_non_zero: `[+]?([1-9][0-9]*)`,
     number: `[+-]?([0-9]*[.])?[0-9]+(e-?[0-9]*)?`,
     number_pos: `[+]?([0-9]*[.])?[0-9]+(e-?[0-9]*)?`,
     number_zero_hundred: `[+]?(([0-9]|[1-9][0-9])([.][0-9]+)?|100)`,
@@ -35,7 +37,7 @@ class CssProp {
   /*
    * Base expressions of common CSS syntax elements
    */
-  private static readonly B = {
+  private static readonly _B = {
     angle: `(${CssProp.N.number}(deg|rad|grad|turn)|0)`,
     frequency: `${CssProp.N.number}(Hz|kHz)`,
     ident: String.raw`-?([_a-z]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*`,
@@ -49,6 +51,53 @@ class CssProp {
     time: `${CssProp.N.number}(s|ms)`,
     url: `url\\(.*?\\)`,
     z_index: `[+-]?[0-9]{1,7}`
+  };
+
+  /*
+   * Extended base expressions of common CSS syntax elements
+   */
+  private static readonly _B1 = {
+    flex: `(${CssProp.N.number}|${CssProp._B.len_or_perc}|none|auto)\\s*((${CssProp.N.number}|${CssProp._B.len_or_perc}|auto)\\s*){0,2}`,
+    fixed_breadth: `${CssProp._B.len_or_perc}`,
+    grid_line: `auto|${CssProp._B.ident}|(${CssProp.N.integer_non_zero}(\\s+${CssProp._B.ident})?)|(span\\s+(${CssProp.N.integer_pos_non_zero}|${CssProp._B.ident}))`,
+    line_names: String.raw`\[\s*${CssProp._B.ident}(\s+${CssProp._B.ident})*\s*\]`
+  };
+
+  private static readonly _B2 = {
+    inflexible_breadth: `${CssProp._B.len_or_perc}|auto|min-content|max-content`,
+    track_breadth: `${CssProp._B.len_or_perc}|${CssProp._B1.flex}|auto|min-content|max-content`
+  };
+
+  private static readonly _B3 = {
+    fixed_size: `${CssProp._B1.fixed_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B1.fixed_breadth}\\s*\\)|minmax\\(\\s*${CssProp._B1.fixed_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)`,
+    track_size: `${CssProp._B2.track_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)|fit-content\\(\\s*(${CssProp._B.len_or_perc}\\s*)*\\)`
+  };
+
+  private static readonly _B4 = {
+    name_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero}|auto-fill)\\s*,\\s*(${CssProp._B1.line_names})+\\s*\\)`,
+    auto_repeat: `repeat\\(\\s*(auto-fill|auto-fit)\\s*,\\s*((${CssProp._B1.line_names}\\s+)?${CssProp._B3.fixed_size}\\s*)+(${CssProp._B1.line_names})?\\s*\\)`,
+    fixed_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero})\\s*,\\s*((${CssProp._B1.line_names}\\s+)?${CssProp._B3.fixed_size}\\s*)+(${CssProp._B1.line_names})?\\s*\\)`
+  };
+
+  private static readonly _B5 = {
+    auto_track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.fixed_size}|${CssProp._B4.fixed_repeat})*(${CssProp._B1.line_names}\\s*)?${CssProp._B4.auto_repeat}(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.fixed_size}|${CssProp._B4.fixed_repeat})*(${CssProp._B1.line_names}\\s*)?`,
+    explicit_track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size})+(${CssProp._B1.line_names}\\s*)?`,
+    track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size}|${CssProp._B4.name_repeat})+(${CssProp._B1.line_names}\\s*)?`
+  };
+
+  private static readonly _B6 = {
+    grid_template_rows: `none|${CssProp._B5.track_list}|${CssProp._B5.auto_track_list}|subgrid\\s*(${CssProp._B1.line_names})?`,
+    grid_template_columns: `none|${CssProp._B5.track_list}|${CssProp._B5.auto_track_list}|subgrid\\s*(${CssProp._B1.line_names})?`
+  };
+
+  private static readonly B = {
+    ...CssProp._B,
+    ...CssProp._B1,
+    ...CssProp._B2,
+    ...CssProp._B3,
+    ...CssProp._B4,
+    ...CssProp._B5,
+    ...CssProp._B6
   };
 
   /*
@@ -143,29 +192,44 @@ class CssProp {
    * Property value regular expressions not dependent on other sub expressions
    */
   private static readonly AP = {
+    baseline_position: `baseline|first baseline|last baseline`,
     border_collapse: `collapse|separate`,
     box: `normal|none|contents`,
     box_sizing: `content-box|padding-box|border-box`,
     caption_side: `top|bottom`,
     clear: `none|left|right|both`,
+    content_position: `start|end|center|flex-start|flex-end`,
+    content_distribution: `stretch|space-between|space-around|space-evenly`,
     direction: `ltr|rtl`,
     empty_cells: `show|hide`,
+    flex_direction: `row|row-reverse|column|column-reverse`,
+    flex_wrap: `nowrap|wrap|wrap-reverse`,
     float: `left|right|none`,
     font_stretch: `normal|wider|narrower|ultra-condensed|extra-condensed|condensed|semi-condensed|semi-expanded|expanded|extra-expanded|ultra-expanded`,
     font_style: `normal|italic|oblique`,
     font_variant: `normal|small-caps`,
     font_weight: `normal|bold|bolder|lighter|100|200|300|400|500|600|700|800|900`,
     list_style_position: `inside|outside`,
+    gap: `normal`,
+    grid_auto_flow: `row|column|dense|row dense|column dense`,
+    justify_content: `start|end|center|stretch|space-between|space-around|space-evenly`,
+    justify_items: `start|end|center|stretch`,
+    justify_self: `auto|start|end|center|stretch`,
     list_style_type: `disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-latin|upper-latin|armenian|georgian|lower-alpha|upper-alpha|none`,
     overflow: `visible|hidden|scroll|auto`,
+    overflow_position: `unsafe|safe`,
     overflow_wrap: `normal|break-word`,
     overflow_x: `visible|hidden|scroll|auto|no-display|no-content`,
     page_break_after: `auto|always|avoid|left|right`,
     page_break_before: `auto|always|avoid|left|right`,
     page_break_inside: `avoid|auto`,
+    place_content: `(center|start|end|space-between|space-around|space-evenly|stretch){1,2}`,
+    place_items: `(center|start|end|baseline|stretch){1,2}`,
+    place_self: `(center|start|end|baseline|stretch){1,2}`,
     position: `static|relative|absolute`,
     resize: `none|both|horizontal|vertical`,
     speak: `normal|none|spell-out`,
+    self_position: `center|start|end|self-start|self-end|flex-start|flex-end`,
     speak_header: `once|always`,
     speak_numeral: `digits|continuous`,
     speak_punctuation: `code|none`,
@@ -184,6 +248,9 @@ class CssProp {
    * Compound propertiy value regular expressions (i.e. dependent on other sub expressions)
    */
   private static readonly _CP = {
+    align_content: `normal|${CssProp.AP.baseline_position}|${CssProp.AP.content_distribution}|${CssProp.AP.overflow_position}|${CssProp.AP.content_position}`,
+    align_items: `normal|stretch|${CssProp.AP.baseline_position}|(${CssProp.AP.overflow_position})?\\s*${CssProp.AP.self_position}|anchor-center`,
+    align_self: `auto|normal|stretch|${CssProp.AP.baseline_position}|(${CssProp.AP.overflow_position})?\\s*${CssProp.AP.self_position}|anchor-center`,
     background_attachment: `${CssProp.A.attachment}(,\\s*${CssProp.A.attachment})*`,
     background_color: CssProp.C.color,
     background_origin: `${CssProp.A.box}(,\\s*${CssProp.A.box})*`,
@@ -278,7 +345,32 @@ class CssProp {
     border_left: `((${CssProp.C.border_width}|${CssProp.A.border_style}|${CssProp.C.color})\\s*){1,3}`,
     quotes: `(${CssProp.B.string}\\s*${CssProp.B.string})+|none`,
     border_top_right_radius: `(${CssProp.B.length}|${CssProp.B.percentage})(\\s*(${CssProp.B.length}|${CssProp.B.percentage}))?`,
-    min_width: `${CssProp.B.length_pos}|${CssProp.B.percentage_pos}|auto`
+    min_width: `${CssProp.B.length_pos}|${CssProp.B.percentage_pos}|auto`,
+    // Add flexbox and grid properties
+    flex_basis: `${CssProp.B.len_or_perc}|auto|content|max-content|min-content|fit-content\\(\\s*(${CssProp.B.len_or_perc}\\s*)*\\)`, // simplified no <calc-size()> and <anchor-size()>
+    flex_grow: CssProp.N.number_pos,
+    flex_shrink: CssProp.N.number_pos,
+    grid: `(${CssProp.B.string}|none|subgrid)\\s*(\\/\\s*(${CssProp.B.string}|none|subgrid))?`,
+    grid_area: `${CssProp.B.ident}|auto|(${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer})`,
+    grid_auto_columns: `(${CssProp.B.track_size})+`,
+    grid_auto_rows: `(${CssProp.B.track_size})+`,
+    grid_column: `${CssProp.B.grid_line}(\\s*\\/\\s*${CssProp.B.grid_line})?`,
+    grid_column_start: `${CssProp.B.grid_line}`,
+    grid_column_end: `${CssProp.B.grid_line}`,
+    grid_column_gap: `${CssProp.B.len_or_perc}|normal`,
+    grid_gap: `(${CssProp.B.len_or_perc}|normal)(\\s*(${CssProp.B.len_or_perc}|normal))?`,
+    grid_row: `${CssProp.B.grid_line}(\\s*\\/\\s*${CssProp.B.grid_line})?`,
+    grid_row_start: `${CssProp.B.grid_line}`,
+    grid_row_end: `${CssProp.B.grid_line}`,
+    grid_row_gap: `${CssProp.B.len_or_perc}|normal`,
+    grid_template: `none|(${CssProp.B.grid_template_rows}\\s*\\/\\s*${CssProp.B.grid_template_columns})|(${CssProp.B.line_names}\\s*)?(${CssProp.B.string}\\s*${CssProp.B.track_size}\\s*(${CssProp.B.line_names}\\s*)?)+\\s*(\\/\\s*${CssProp.B.explicit_track_list})?`,
+    grid_template_areas: `none|(${CssProp.B.string})+`,
+    grid_template_columns: `${CssProp.B.grid_template_columns}`,
+    grid_template_rows: `${CssProp.B.grid_template_rows}`,
+    row_gap: `${CssProp.B.len_or_perc}|normal`,
+    column_gap: `${CssProp.B.len_or_perc}|normal`,
+    gap: `(${CssProp.B.len_or_perc}|normal)(\\s*(${CssProp.B.len_or_perc}|normal))?`,
+    order: CssProp.N.integer
   };
 
   private static readonly _CP1 = {
@@ -428,6 +520,47 @@ class CssProp {
     CssProp.CP.border_top_right_radius
   );
   static MIN_WIDTH = CssProp.reg(CssProp.CP.min_width);
+
+  // Flexbox properties
+  static ALIGN_CONTENT = CssProp.reg(CssProp.CP.align_content);
+  static ALIGN_ITEMS = CssProp.reg(CssProp.CP.align_items);
+  static ALIGN_SELF = CssProp.reg(CssProp.CP.align_self);
+  static FLEX = CssProp.reg(CssProp.B.flex);
+  static FLEX_BASIS = CssProp.reg(CssProp.CP.flex_basis);
+  static FLEX_DIRECTION = CssProp.reg(CssProp.AP.flex_direction);
+  static FLEX_GROW = CssProp.reg(CssProp.CP.flex_grow);
+  static FLEX_SHRINK = CssProp.reg(CssProp.CP.flex_shrink);
+  static FLEX_WRAP = CssProp.reg(CssProp.AP.flex_wrap);
+  static JUSTIFY_CONTENT = CssProp.reg(CssProp.AP.justify_content);
+  static JUSTIFY_ITEMS = CssProp.reg(CssProp.AP.justify_items);
+  static JUSTIFY_SELF = CssProp.reg(CssProp.AP.justify_self);
+  static ORDER = CssProp.reg(CssProp.CP.order);
+
+  // Grid properties
+  static GRID = CssProp.reg(CssProp.CP.grid);
+  static GRID_AREA = CssProp.reg(CssProp.CP.grid_area);
+  static GRID_AUTO_COLUMNS = CssProp.reg(CssProp.CP.grid_auto_columns);
+  static GRID_AUTO_FLOW = CssProp.reg(CssProp.AP.grid_auto_flow);
+  static GRID_AUTO_ROWS = CssProp.reg(CssProp.CP.grid_auto_rows);
+  static GRID_COLUMN = CssProp.reg(CssProp.CP.grid_column);
+  static GRID_COLUMN_END = CssProp.reg(CssProp.CP.grid_column_end);
+  static GRID_COLUMN_GAP = CssProp.reg(CssProp.CP.grid_column_gap);
+  static GRID_COLUMN_START = CssProp.reg(CssProp.CP.grid_column_start);
+  static GRID_GAP = CssProp.reg(CssProp.CP.grid_gap);
+  static GRID_ROW = CssProp.reg(CssProp.CP.grid_row);
+  static GRID_ROW_END = CssProp.reg(CssProp.CP.grid_row_end);
+  static GRID_ROW_GAP = CssProp.reg(CssProp.CP.grid_row_gap);
+  static GRID_ROW_START = CssProp.reg(CssProp.CP.grid_row_start);
+  static GRID_TEMPLATE = CssProp.reg(CssProp.CP.grid_template);
+  static GRID_TEMPLATE_AREAS = CssProp.reg(CssProp.CP.grid_template_areas);
+  static GRID_TEMPLATE_COLUMNS = CssProp.reg(CssProp.CP.grid_template_columns);
+  static GRID_TEMPLATE_ROWS = CssProp.reg(CssProp.CP.grid_template_rows);
+  static GAP = CssProp.reg(CssProp.CP.gap);
+  static ROW_GAP = CssProp.reg(CssProp.CP.row_gap);
+  static COLUMN_GAP = CssProp.reg(CssProp.CP.column_gap);
+  static PLACE_CONTENT = CssProp.reg(CssProp.AP.place_content);
+  static PLACE_ITEMS = CssProp.reg(CssProp.AP.place_items);
+  static PLACE_SELF = CssProp.reg(CssProp.AP.place_self);
 }
 
 /**
@@ -975,7 +1108,45 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         'word-spacing': [CssProp.WORD_SPACING],
         'word-wrap': [CssProp.WORD_WRAP],
         'z-index': [CssProp.Z_INDEX],
-        zoom: [CssProp.ZOOM]
+        zoom: [CssProp.ZOOM],
+        // Flexbox and Grid properties
+        'align-content': [CssProp.ALIGN_CONTENT],
+        'align-items': [CssProp.ALIGN_ITEMS],
+        'align-self': [CssProp.ALIGN_SELF],
+        flex: [CssProp.FLEX],
+        'flex-basis': [CssProp.FLEX_BASIS],
+        'flex-direction': [CssProp.FLEX_DIRECTION],
+        'flex-grow': [CssProp.FLEX_GROW],
+        'flex-shrink': [CssProp.FLEX_SHRINK],
+        'flex-wrap': [CssProp.FLEX_WRAP],
+        grid: [CssProp.GRID],
+        'grid-area': [CssProp.GRID_AREA],
+        'grid-auto-columns': [CssProp.GRID_AUTO_COLUMNS],
+        'grid-auto-flow': [CssProp.GRID_AUTO_FLOW],
+        'grid-auto-rows': [CssProp.GRID_AUTO_ROWS],
+        'grid-column': [CssProp.GRID_COLUMN],
+        'grid-column-end': [CssProp.GRID_COLUMN_END],
+        'grid-column-gap': [CssProp.GRID_COLUMN_GAP],
+        'grid-column-start': [CssProp.GRID_COLUMN_START],
+        'grid-gap': [CssProp.GRID_GAP],
+        'grid-row': [CssProp.GRID_ROW],
+        'grid-row-end': [CssProp.GRID_ROW_END],
+        'grid-row-gap': [CssProp.GRID_ROW_GAP],
+        'grid-row-start': [CssProp.GRID_ROW_START],
+        'grid-template': [CssProp.GRID_TEMPLATE],
+        'grid-template-areas': [CssProp.GRID_TEMPLATE_AREAS],
+        'grid-template-columns': [CssProp.GRID_TEMPLATE_COLUMNS],
+        'grid-template-rows': [CssProp.GRID_TEMPLATE_ROWS],
+        gap: [CssProp.GAP],
+        'row-gap': [CssProp.ROW_GAP],
+        'column-gap': [CssProp.COLUMN_GAP],
+        'justify-content': [CssProp.JUSTIFY_CONTENT],
+        'justify-items': [CssProp.JUSTIFY_ITEMS],
+        'justify-self': [CssProp.JUSTIFY_SELF],
+        order: [CssProp.ORDER],
+        'place-content': [CssProp.PLACE_CONTENT],
+        'place-items': [CssProp.PLACE_ITEMS],
+        'place-self': [CssProp.PLACE_SELF]
       }
     },
     transformTags: {
