@@ -32,6 +32,7 @@ export class Variables extends PanelWithToolbar {
     const trans = translator.load('jupyterlab');
     this.title.label = trans.__('Variables');
     this.toolbar.addClass('jp-DebuggerVariables-toolbar');
+    this.toolbar.node.setAttribute('aria-label', trans.__('Variables toolbar'));
     this._tree = new VariablesBodyTree({
       model,
       service,

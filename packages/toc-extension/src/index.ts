@@ -215,6 +215,10 @@ async function activateTOC(
     label: ''
   });
   numbering.addClass('jp-toc-numberingButton');
+  toc.toolbar.node.setAttribute(
+    'aria-label',
+    trans.__('Table of contents sidepanel toolbar')
+  );
   toc.toolbar.addItem('display-numbering', numbering);
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
