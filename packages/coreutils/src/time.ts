@@ -36,6 +36,10 @@ export namespace Time {
       style: format
     });
     const delta = new Date(value).getTime() - Date.now();
+    // Delta may be positive due to async execution; default to 0 seconds if it is
+    if (delta >= 0) {
+      return formatter.format(0, 'seconds');
+    }
     for (let unit of UNITS) {
       const amount = Math.ceil(delta / unit.milliseconds);
       if (amount === 0) {
