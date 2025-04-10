@@ -4885,6 +4885,7 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.5.0-alpha.2
     "@jupyterlab/apputils": ^4.6.0-alpha.2
+    "@jupyterlab/documentsearch": ^4.5.0-alpha.2
     "@jupyterlab/launcher": ^4.5.0-alpha.2
     "@jupyterlab/mainmenu": ^4.5.0-alpha.2
     "@jupyterlab/running": ^4.5.0-alpha.2
@@ -4895,6 +4896,8 @@ __metadata:
     "@jupyterlab/ui-components": ^4.5.0-alpha.2
     "@lumino/widgets": ^2.7.1
     "@types/webpack-env": ^1.18.0
+    "@xterm/addon-search": ~0.15.0
+    color: ^5.0.0
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown
@@ -4911,10 +4914,12 @@ __metadata:
     "@lumino/coreutils": ^2.2.1
     "@lumino/domutils": ^2.0.3
     "@lumino/messaging": ^2.0.3
+    "@lumino/signaling": ^2.1.4
     "@lumino/widgets": ^2.7.1
     "@types/jest": ^29.2.0
     "@xterm/addon-canvas": ~0.7.0
     "@xterm/addon-fit": ~0.10.0
+    "@xterm/addon-search": ~0.15.0
     "@xterm/addon-web-links": ~0.11.0
     "@xterm/addon-webgl": ~0.18.0
     "@xterm/xterm": ~5.5.0
@@ -8059,6 +8064,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xterm/addon-search@npm:~0.15.0":
+  version: 0.15.0
+  resolution: "@xterm/addon-search@npm:0.15.0"
+  peerDependencies:
+    "@xterm/xterm": ^5.0.0
+  checksum: d4f77e3637f915e86c9208da70f615f5e6150810943931a4bba8a3422d5c2b791b84d2136de65603dbc4437328f4c584c8faa1f53e71524dd667bee631ca3f1e
+  languageName: node
+  linkType: hard
+
 "@xterm/addon-web-links@npm:~0.11.0":
   version: 0.11.0
   resolution: "@xterm/addon-web-links@npm:0.11.0"
@@ -9623,6 +9637,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"color-convert@npm:^3.0.1":
+  version: 3.1.0
+  resolution: "color-convert@npm:3.1.0"
+  dependencies:
+    color-name: ^2.0.0
+  checksum: 7fdcebff4b5c33596de4b7a14953fdadf17352b217821fa02c84dcb2f5b5da9ab179152e01a4d449027ba4aa02fc5ab587bcb2395a17dd0276be6e2d323b9353
+  languageName: node
+  linkType: hard
+
 "color-name@npm:1.1.3":
   version: 1.1.3
   resolution: "color-name@npm:1.1.3"
@@ -9637,6 +9660,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"color-name@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "color-name@npm:2.0.0"
+  checksum: 10a1addae41de2987d6b90dbd3cfade266c2e6f680ce21749911df4493b4fae07654862c6b5358bdd13e155461acb4eedaa5e0ba172bf13542cdcca10866cf2b
+  languageName: node
+  linkType: hard
+
 "color-string@npm:^1.6.0":
   version: 1.9.1
   resolution: "color-string@npm:1.9.1"
@@ -9644,6 +9674,15 @@ __metadata:
     color-name: ^1.0.0
     simple-swizzle: ^0.2.2
   checksum: c13fe7cff7885f603f49105827d621ce87f4571d78ba28ef4a3f1a104304748f620615e6bf065ecd2145d0d9dad83a3553f52bb25ede7239d18e9f81622f1cc5
+  languageName: node
+  linkType: hard
+
+"color-string@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "color-string@npm:2.0.1"
+  dependencies:
+    color-name: ^2.0.0
+  checksum: a5ab024f78f67c0d5c1c995943ff95dce193beaa981492f6a36c05a9939a9db519e2d821d91df15677a47107fe90e4b12fd345729d755c65b543924db05c3a3f
   languageName: node
   linkType: hard
 
@@ -9663,6 +9702,16 @@ __metadata:
     color-convert: ^1.9.3
     color-string: ^1.6.0
   checksum: f81220e8b774d35865c2561be921f5652117638dcda7ca4029262046e37fc2444ac7bbfdd110cf1fd9c074a4ee5eda8f85944ffbdda26186b602dd9bb05f6400
+  languageName: node
+  linkType: hard
+
+"color@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "color@npm:5.0.0"
+  dependencies:
+    color-convert: ^3.0.1
+    color-string: ^2.0.0
+  checksum: 2985081f00d02dbeb544dc04b287011443d9fe97905cf917b5af9167513acbe1d0ea98fe0614ba7174033fedb2b874a4e35f146832d116da64193c7f4a549ec5
   languageName: node
   linkType: hard
 
