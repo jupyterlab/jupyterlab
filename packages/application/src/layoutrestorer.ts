@@ -184,7 +184,6 @@ export class LayoutRestorer implements ILayoutRestorer {
 
     try {
       const [data] = await Promise.all([layout, this.restored]);
-
       if (!data) {
         return blank;
       }
@@ -337,6 +336,19 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.main = this.isDeferred
       ? this._deferredMainArea
       : this._dehydrateMainArea(layout.mainArea);
+
+    // Update only the current widget in the db when restoration is deferred.
+    // Useful for providing the tab title in doc mode.
+    if (this.isDeferred) {
+      const currentWidget = layout.mainArea?.currentWidget;
+      if (currentWidget) {
+        const widgetName = Private.nameProperty.get(currentWidget);
+        dehydrated.main = {
+          ...dehydrated.main,
+          current: widgetName || undefined
+        };
+      }
+    }
     dehydrated.down = this._dehydrateDownArea(layout.downArea);
     dehydrated.left = this._dehydrateSideArea(layout.leftArea);
     dehydrated.right = this._dehydrateSideArea(layout.rightArea);

@@ -360,12 +360,9 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
 async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
-  if (
-    current === undefined ||
-    !(current.startsWith('notebook') || current.startsWith('editor'))
-  ) {
+  if (current === undefined) {
     document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
-      workspace === 'default' ? '' : ` (${workspace})`
+      workspace.startsWith('auto-') ? ` (${workspace})` : ``
     }`;
   } else {
     // File name from current path
@@ -377,15 +374,20 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
-    workspace =
-      workspace.length > 15 ? workspace.slice(0, 12).concat(`…`) : workspace;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
-    document.title = `${currentFile}${count > 1 ? ` (${count})` : ``} - ${
-      workspace === 'default' ? name : workspace
-    }`;
+
+    if (workspace.startsWith('auto-')) {
+      document.title = `${currentFile} (${workspace}${
+        count > 1 ? ` : ${count}` : ``
+      }) - ${name}`;
+    } else {
+      document.title = `${currentFile}${
+        count > 1 ? ` (${count})` : ``
+      } - ${name}`;
+    }
   }
 }
 
