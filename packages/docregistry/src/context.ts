@@ -418,7 +418,7 @@ export class Context<
     change: Contents.IChangedArgs
   ): void {
     if (change.type === 'save' && this._model.collaborative) {
-      //skip if the change isn't related to current file
+      // Skip if the change isn't related to current file.
       if (this._contentsModel?.path !== change.newValue?.path) {
         return;
       }
