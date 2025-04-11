@@ -1492,33 +1492,37 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#copy()', () => {
-      it('should copy the selected cells to a utils.clipboard', () => {
+      it('should copy the selected cells to a utils.clipboard', async () => {
         const next = widget.widgets[1];
         widget.select(next);
-        NotebookActions.copy(widget);
-        expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
-        const data = utils.clipboard.getData(JUPYTER_CELL_MIME);
+        await NotebookActions.copy(widget);
+        expect(await utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
+        const data = (await utils.clipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
         expect(data.length).toBe(2);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        NotebookActions.copy(widget);
-        expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(false);
+        await NotebookActions.copy(widget);
+        expect(await utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(false);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode', async () => {
         widget.mode = 'edit';
-        NotebookActions.copy(widget);
+        await NotebookActions.copy(widget);
         expect(widget.mode).toBe('command');
       });
 
-      it('should delete metadata.deletable', () => {
+      it('should delete metadata.deletable', async () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
-        NotebookActions.copy(widget);
-        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
+        await NotebookActions.copy(widget);
+        const data = (await utils.clipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
         data.map(cell => {
           expect(
             ((cell as JSONObject).metadata as JSONObject).deletable
@@ -1528,29 +1532,29 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#cut()', () => {
-      it('should cut the selected cells to a utils.clipboard', () => {
+      it('should cut the selected cells to a utils.clipboard', async () => {
         const next = widget.widgets[1];
         widget.select(next);
         const count = widget.widgets.length;
-        NotebookActions.cut(widget);
+        await NotebookActions.cut(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        NotebookActions.cut(widget);
-        expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(false);
+        await NotebookActions.cut(widget);
+        expect(await utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(false);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode', async () => {
         widget.mode = 'edit';
-        NotebookActions.cut(widget);
+        await NotebookActions.cut(widget);
         expect(widget.mode).toBe('command');
       });
 
-      it('should be undo-able', () => {
+      it('should be undo-able', async () => {
         const source = widget.activeCell!.model.sharedModel.getSource();
-        NotebookActions.cut(widget);
+        await NotebookActions.cut(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets[0].model.sharedModel.getSource()).toBe(source);
       });
@@ -1559,7 +1563,7 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
           widget.select(widget.widgets[i]);
         }
-        NotebookActions.cut(widget);
+        await NotebookActions.cut(widget);
         await sleep();
         expect(widget.widgets.length).toBe(1);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
@@ -1567,47 +1571,47 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#paste()', () => {
-      it('should paste cells from a utils.clipboard', () => {
+      it('should paste cells from a utils.clipboard', async () => {
         const source = widget.activeCell!.model.sharedModel.getSource();
         const next = widget.widgets[1];
         widget.select(next);
         const count = widget.widgets.length;
-        NotebookActions.cut(widget);
+        await NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
-        NotebookActions.paste(widget);
+        await NotebookActions.paste(widget);
         expect(widget.widgets.length).toBe(count);
         expect(widget.widgets[2].model.sharedModel.getSource()).toBe(source);
         expect(widget.activeCellIndex).toBe(3);
       });
 
-      it('should be a no-op if there is no model', () => {
-        NotebookActions.copy(widget);
+      it('should be a no-op if there is no model', async () => {
+        await NotebookActions.copy(widget);
         widget.model = null;
-        NotebookActions.paste(widget);
+        await NotebookActions.paste(widget);
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should be a no-op if there is no cell data on the utils.clipboard', () => {
+      it('should be a no-op if there is no cell data on the utils.clipboard', async () => {
         const count = widget.widgets.length;
-        NotebookActions.paste(widget);
+        await NotebookActions.paste(widget);
         expect(widget.widgets.length).toBe(count);
       });
 
-      it('should change to command mode', () => {
+      it('should change to command mode', async () => {
         widget.mode = 'edit';
-        NotebookActions.cut(widget);
-        NotebookActions.paste(widget);
+        await NotebookActions.cut(widget);
+        await NotebookActions.paste(widget);
         expect(widget.mode).toBe('command');
       });
 
-      it('should be undo-able', () => {
+      it('should be undo-able', async () => {
         const next = widget.widgets[1];
         widget.select(next);
         const count = widget.widgets.length;
-        NotebookActions.cut(widget);
+        await NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
         widget.model?.sharedModel.clearUndoHistory();
-        NotebookActions.paste(widget);
+        await NotebookActions.paste(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });
