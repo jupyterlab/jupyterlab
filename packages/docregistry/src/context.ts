@@ -418,6 +418,11 @@ export class Context<
     change: Contents.IChangedArgs
   ): void {
     if (change.type === 'save' && this._model.collaborative) {
+      // Skip if the change isn't related to current file.
+      if (this._contentsModel?.path !== change.newValue?.path) {
+        return;
+      }
+
       // Update the contents model with the new values provided on save.
       // This is needed for save operations performed on the server-side
       // by the collaborative drive which needs to update the `hash`
