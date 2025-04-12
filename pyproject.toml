@@ -38,7 +38,6 @@ dependencies = [
     "async_lru>=1.0.0",
     "httpx>=0.25.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
-    "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel>=6.5.0",
     "jinja2>=3.0.3",
     "jupyter_core",
@@ -119,7 +118,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.9.9",
+    "ruff==0.11.4",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
