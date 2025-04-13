@@ -114,6 +114,10 @@ export class FileBrowser extends SidePanel {
 
     this.filterToolbar = new Toolbar();
     this.filterToolbar.addClass(FILTER_TOOLBAR_CLASS);
+    this.filterToolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('File browser toolbar')
+    );
     this.filterToolbar.addItem('fileNameSearcher', searcher);
     this.filterToolbar.setHidden(!this.showFileFilter);
 

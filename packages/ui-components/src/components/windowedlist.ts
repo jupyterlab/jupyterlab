@@ -995,6 +995,9 @@ export class WindowedList<
         // (which will close any open context menu, etc.)
         event.stopPropagation();
         break;
+      case 'scrollend':
+        this._onScrollEnd();
+        break;
       case 'scroll':
         this.onScroll(event);
         break;
@@ -1122,6 +1125,7 @@ export class WindowedList<
     this._viewportPaddingTop = this.viewModel.paddingTop;
     this._viewportPaddingBottom = parseFloat(viewportStyle.paddingBottom);
     this._scrollbarElement.addEventListener('pointerdown', this);
+    this._outerElement.addEventListener('scrollend', this);
   }
 
   /**
@@ -1130,6 +1134,7 @@ export class WindowedList<
   protected onBeforeDetach(msg: Message): void {
     this._removeListeners();
     this._scrollbarElement.removeEventListener('pointerdown', this);
+    this._outerElement.removeEventListener('scrollend', this);
     super.onBeforeDetach(msg);
   }
 
@@ -1161,6 +1166,17 @@ export class WindowedList<
       this.viewModel.scrollOffset = scrollOffset;
       this._scrollUpdateWasRequested = false;
 
+      if (this._viewport.dataset.isScrolling != 'true') {
+        this._viewport.dataset.isScrolling = 'true';
+      }
+
+      if (this._timerToClearScrollStatus) {
+        window.clearTimeout(this._timerToClearScrollStatus);
+      }
+      // TODO: remove once `scrollend` event is supported by Safari
+      this._timerToClearScrollStatus = window.setTimeout(() => {
+        this._onScrollEnd();
+      }, 750);
       this.update();
       // }
     }
@@ -1407,12 +1423,9 @@ export class WindowedList<
           this._updateTotalSize();
 
           // Update position of window container
-          const [top, minHeight] = this.viewModel.getSpan(
-            startIndex,
-            stopIndex
-          );
-          this._viewport.style.top = `${top}px`;
-          this._viewport.style.minHeight = `${minHeight}px`;
+          let [top, _minHeight] = this.viewModel.getSpan(startIndex, stopIndex);
+
+          this._viewport.style.transform = `translateY(${top}px)`;
         } else {
           // Update inner container height
           this._innerElement.style.height = `0px`;
@@ -1614,10 +1627,29 @@ export class WindowedList<
   }
 
   /**
+   * Handle `scrollend` events on the scroller.
+   */
+  private _onScrollEnd() {
+    if (this._timerToClearScrollStatus) {
+      window.clearTimeout(this._timerToClearScrollStatus);
+    }
+    this._viewport.dataset.isScrolling = 'false';
+    if (this._requiresTotalSizeUpdate) {
+      this._updateTotalSize();
+    }
+    this._requiresTotalSizeUpdate = false;
+  }
+
+  /**
    * Update the total size
    */
   private _updateTotalSize(): void {
     if (this.viewModel.windowingActive) {
+      if (this._viewport.dataset.isScrolling == 'true') {
+        // Do not update while scrolling, delay until later
+        this._requiresTotalSizeUpdate = true;
+        return;
+      }
       const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
       const heightWithPadding =
         estimatedTotalHeight +
@@ -1637,8 +1669,10 @@ export class WindowedList<
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
+  private _requiresTotalSizeUpdate: boolean = false;
   private _areaResizeObserver: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
+  private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
   private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
