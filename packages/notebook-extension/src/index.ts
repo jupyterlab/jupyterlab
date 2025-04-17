@@ -609,21 +609,22 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const url = PageConfig.getNBConvertURL({
-          format: args['format'] as string,
-          download: true,
-          path: current.context.path
-        });
         const { context } = current;
+
+        const exportOptions = {
+          format: args['format'] as string,
+          path: current.context.path,
+          download: true
+        };
 
         if (context.model.dirty && !context.model.readOnly) {
           return context.save().then(() => {
-            window.open(url, '_blank', 'noopener');
+            void services.nbconvert.export?.(exportOptions);
           });
         }
 
         return new Promise<void>(resolve => {
-          window.open(url, '_blank', 'noopener');
+          void services.nbconvert.export?.(exportOptions);
           resolve(undefined);
         });
       },
