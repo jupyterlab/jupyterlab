@@ -1376,6 +1376,10 @@ export class DirListing extends Widget {
       //    previously focussed item will be focussed.
       this._focusItem(this._focusIndex);
     }
+
+    if (this._allowSingleClick) {
+      this.evtDblClick(event as MouseEvent);
+    }
   }
 
   /**
@@ -1469,10 +1473,6 @@ export class DirListing extends Widget {
       };
       document.addEventListener('mouseup', this, true);
       document.addEventListener('mousemove', this, true);
-    }
-
-    if (this._allowSingleClick) {
-      this.evtDblClick(event as MouseEvent);
     }
   }
 
