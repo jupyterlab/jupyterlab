@@ -154,7 +154,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     def _default_labextensions_path(self):
         lab = LabApp()
         lab.load_config_file()
-        return lab.extra_labextensions_path + lab.labextensions_path
+        return lab.labextensions_path + lab.extra_labextensions_path
 
     @default("splice_source")
     def _default_splice_source(self):
