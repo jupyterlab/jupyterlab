@@ -4,7 +4,8 @@
 import {
   Clipboard,
   ISessionContext,
-  SessionContextDialogs
+  SessionContextDialogs,
+  SystemClipboard
 } from '@jupyterlab/apputils';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
 import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
@@ -139,6 +140,8 @@ export namespace NBTestUtils {
   }
 
   export const clipboard = Clipboard.getInstance();
+
+  export const systemClipboard = SystemClipboard.getInstance();
 
   /**
    * Create a base cell content factory.
