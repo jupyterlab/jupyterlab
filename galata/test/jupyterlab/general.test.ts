@@ -55,15 +55,14 @@ test.describe('General Tests', () => {
   });
 
   test('Browser tab name updates to file name in /doc mode', async ({
-    page,
-    baseURL
+    page
   }) => {
     // Switch to single-document mode
     const currentUrl = page.url();
     const docUrl = currentUrl.replace('/lab/', '/doc/');
     await page.goto(docUrl);
 
-    // Create a new text file and wait for it to lodd
+    // Create a new text file and wait for it to load
     await page.menu.clickMenuItem('File>New>Text File');
     await page.locator('.cm-editor:not(.jp-mod-readOnly)').first().waitFor();
 
