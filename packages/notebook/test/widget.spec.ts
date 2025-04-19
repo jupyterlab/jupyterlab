@@ -26,6 +26,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();
 
@@ -1628,6 +1630,24 @@ describe('@jupyter/notebook', () => {
         widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.activeCell).toBe(widget.widgets[2]);
       });
+
+      it.each(['full', 'defer', 'none'])(
+        'should connect undoManager to the cell editor in %s windowing mode',
+        async mode => {
+          const widget = createActiveWidget();
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            windowingMode: mode as 'full' | 'defer' | 'none'
+          };
+          Widget.attach(widget, document.body);
+          widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
+          const child = widget.widgets[0];
+          await child.ready;
+          const editor = child.editorWidget!.editor as CodeMirrorEditor;
+          const conf = editor.editor.state.facet(yUndoManagerFacet);
+          expect(conf.undoManager).toBeTruthy();
+        }
+      );
 
       describe('`edgeRequested` signal', () => {
         it('should activate the previous cell if top is requested', async () => {
