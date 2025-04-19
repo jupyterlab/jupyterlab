@@ -6,6 +6,16 @@
 Extension Migration Guide
 =========================
 
+Jupyterlab 4.4 to 4.5
+---------------------
+
+``extra_labextensions_path`` Ordering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The default labextension paths now take precedence over those found in ``extra_labextensions_path``. In other words,
+``BaseExtensionApp.labextensions_path`` now lists the extensions from ``LabApp.labextensions_path``
+before those found in ``extra_labextensions_path``.
+
 JupyterLab 4.3 to 4.4
 ---------------------
 
