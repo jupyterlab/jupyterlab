@@ -119,6 +119,17 @@ export class OutputArea extends Widget {
     ) {
       const output = model.get(i);
       this._insertOutput(i, output);
+      if (output.type === 'stream') {
+        // This is a stream output, follow changes to the text.
+        output.streamText!.changed.connect(
+          (
+            sender: IObservableString,
+            event: IObservableString.IChangedArgs
+          ) => {
+            this._setOutput(i, output);
+          }
+        );
+      }
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
