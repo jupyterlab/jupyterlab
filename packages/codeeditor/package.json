@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@codemirror/state": "^6.4.1",
-    "@jupyter/ydoc": "^3.0.0",
+    "@jupyter/ydoc": "^3.0.4",
     "@jupyterlab/apputils": "^4.4.6",
     "@jupyterlab/coreutils": "^6.3.6",
     "@jupyterlab/nbformat": "^4.3.6",
