@@ -535,6 +535,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           // If the relevant leaf token has been found, stop iterating.
           if (offset >= ref.from && offset <= ref.to) {
             let currentNode = ref;
+            // The syntax tree of the code lines ending with an incomplete path create an erronous
+            // child of the last node, in this case the parent should be considered for the token.
             if (ref.name === '⚠' && ref.from === ref.to && ref.node.parent) {
               currentNode = ref.node.parent;
             }
