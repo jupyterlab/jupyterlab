@@ -37,7 +37,7 @@ export class NbConvertManager implements NbConvert.IManager {
   /**
    * Fetch and cache the export formats from the expensive nbconvert handler.
    */
-  protected async fetchExportFormats(): Promise<NbConvertManager.IExportFormats> {
+  protected async fetchExportFormats(): Promise<NbConvert.IExportFormats> {
     this._requestingFormats = new PromiseDelegate();
     this._exportFormats = null;
     const base = this.serverSettings.baseUrl;
@@ -53,7 +53,7 @@ export class NbConvertManager implements NbConvert.IManager {
       throw err;
     }
     const data = await response.json();
-    const exportList: NbConvertManager.IExportFormats = {};
+    const exportList: NbConvert.IExportFormats = {};
     const keys = Object.keys(data);
     keys.forEach(function (key) {
       const mimeType: string = data[key].output_mimetype;
@@ -69,7 +69,7 @@ export class NbConvertManager implements NbConvert.IManager {
    */
   async getExportFormats(
     force: boolean = true
-  ): Promise<NbConvertManager.IExportFormats> {
+  ): Promise<NbConvert.IExportFormats> {
     if (this._requestingFormats) {
       return this._requestingFormats.promise;
     }
@@ -89,12 +89,9 @@ export class NbConvertManager implements NbConvert.IManager {
    * @param options.path - The path to the notebook to export.
    * @param options.download - Whether to download the file or open it in a new tab. Defaults to false.
    */
-  async export(options: {
-    format: string;
-    path: string;
-    download?: boolean;
-  }): Promise<void> {
-    const { format, path, download = false } = options;
+  async exportAs(options: NbConvert.IExportOptions): Promise<void> {
+    const { format, path } = options;
+    const { download = false } = options;
 
     const baseUrl = this.serverSettings.baseUrl;
     const notebookPath = URLExt.encodeParts(path);
@@ -107,16 +104,16 @@ export class NbConvertManager implements NbConvert.IManager {
     window?.open(url, '_blank', 'noopener');
   }
 
-  protected _requestingFormats: PromiseDelegate<NbConvertManager.IExportFormats> | null;
-  protected _exportFormats: NbConvertManager.IExportFormats | null = null;
+  protected _requestingFormats: PromiseDelegate<NbConvert.IExportFormats> | null;
+  protected _exportFormats: NbConvert.IExportFormats | null = null;
 }
 
 /**
- * A namespace for `BuildManager` statics.
+ * A namespace for `NbConvertManager` statics.
  */
 export namespace NbConvertManager {
   /**
-   * The instantiation options for a setting manager.
+   * The instantiation options for a nbconvert manager.
    */
   export interface IOptions {
     /**
@@ -124,7 +121,12 @@ export namespace NbConvertManager {
      */
     serverSettings?: ServerConnection.ISettings;
   }
+}
 
+/**
+ * A namespace for nbconvert API interfaces.
+ */
+export namespace NbConvert {
   /**
    * A namespace for nbconvert API interfaces.
    */
@@ -134,14 +136,29 @@ export namespace NbConvertManager {
      */
     [key: string]: { output_mimetype: string };
   }
-}
 
-/**
- * A namespace for builder API interfaces.
- */
-export namespace NbConvert {
   /**
-   * The interface for the build manager.
+   * The interface for the nbconvert export options.
+   */
+  export interface IExportOptions {
+    /**
+     * The export format (e.g., 'html', 'pdf').
+     */
+    format: string;
+
+    /**
+     * The path to the notebook to export.
+     */
+    path: string;
+
+    /**
+     * Whether to download the file or open it in a new tab. Defaults to false.
+     */
+    download?: boolean;
+  }
+
+  /**
+   * The interface for the nbconvert manager.
    */
   export interface IManager {
     /**
@@ -155,7 +172,7 @@ export namespace NbConvert {
      * @param force - Whether to force a refresh or use cached formats if available.
      * @returns A promise that resolves with the list of export formats.
      */
-    getExportFormats(force?: boolean): Promise<NbConvertManager.IExportFormats>;
+    getExportFormats(force?: boolean): Promise<NbConvert.IExportFormats>;
 
     /**
      * Export a notebook to a given format.
@@ -165,10 +182,6 @@ export namespace NbConvert {
      * @param options.path - The path to the notebook to export.
      * @param options.download - Whether to download the file or open it in a new tab. Defaults to false.
      */
-    export?(options: {
-      format: string;
-      path: string;
-      download?: boolean;
-    }): Promise<void>;
+    exportAs?(options: NbConvert.IExportOptions): Promise<void>;
   }
 }

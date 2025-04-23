@@ -619,12 +619,12 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         if (context.model.dirty && !context.model.readOnly) {
           return context.save().then(() => {
-            void services.nbconvert.export?.(exportOptions);
+            void services.nbconvert.exportAs?.(exportOptions);
           });
         }
 
         return new Promise<void>(resolve => {
-          void services.nbconvert.export?.(exportOptions);
+          void services.nbconvert.exportAs?.(exportOptions);
           resolve(undefined);
         });
       },
