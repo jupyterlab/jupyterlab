@@ -93,6 +93,7 @@ import {
   IRenderMime,
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
+import { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -611,10 +612,12 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         const { context } = current;
 
-        const exportOptions = {
+        const exportOptions: NbConvert.IExportOptions = {
           format: args['format'] as string,
           path: current.context.path,
-          download: true
+          exporterOptions: {
+            download: true
+          }
         };
 
         if (context.model.dirty && !context.model.readOnly) {

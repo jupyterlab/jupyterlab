@@ -13,8 +13,10 @@ API updates
 ^^^^^^^^^^^
 
 - The ``NbConvert.IManager`` interface was fixed to not require classes implementing the interface to provide a
-  concrete ``NbConvertManager`` class. In addition, this interface now include an optional ``export`` method
+  concrete ``NbConvertManager`` class. In addition, this interface now include an optional ``exportAs`` method
   to export (and optional download) a notebook to a specific format.
+- The ``NbConvertManager.IExportFormats`` interface was moved to the ``NbConvert`` namespace. We should now be using ``NbConvert.IExportFormats`` instead of ``NbConvertManager.IExportFormats``.
+  ``NbConvertManager.IExportFormats`` was however kept for backward compatibility.
 
 JupyterLab 4.3 to 4.4
 ---------------------

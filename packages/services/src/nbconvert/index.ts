@@ -91,7 +91,7 @@ export class NbConvertManager implements NbConvert.IManager {
    */
   async exportAs(options: NbConvert.IExportOptions): Promise<void> {
     const { format, path } = options;
-    const { download = false } = options;
+    const { download = false } = options.exporterOptions || {};
 
     const baseUrl = this.serverSettings.baseUrl;
     const notebookPath = URLExt.encodeParts(path);
@@ -121,6 +121,14 @@ export namespace NbConvertManager {
      */
     serverSettings?: ServerConnection.ISettings;
   }
+
+  /**
+   * The interface for the export formats.
+   *
+   * Note: this interface is kept for backward compatibility.
+   * It is recommended to use `NbConvert.IExportFormats` instead.
+   */
+  export interface IExportFormats extends NbConvert.IExportFormats {}
 }
 
 /**
@@ -128,7 +136,7 @@ export namespace NbConvertManager {
  */
 export namespace NbConvert {
   /**
-   * A namespace for nbconvert API interfaces.
+   * The interface for the export formats.
    */
   export interface IExportFormats {
     /**
@@ -152,9 +160,9 @@ export namespace NbConvert {
     path: string;
 
     /**
-     * Whether to download the file or open it in a new tab. Defaults to false.
+     * Additional options for the exporter.
      */
-    download?: boolean;
+    exporterOptions?: { [key: string]: any };
   }
 
   /**
