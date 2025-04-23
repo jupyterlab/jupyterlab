@@ -125,8 +125,7 @@ export namespace NbConvertManager {
   /**
    * The interface for the export formats.
    *
-   * Note: this interface is kept for backward compatibility.
-   * It is recommended to use `NbConvert.IExportFormats` instead.
+   * @deprecated Kept for backward compatibility, use `NbConvert.IExportFormats` instead.
    */
   export interface IExportFormats extends NbConvert.IExportFormats {}
 }
