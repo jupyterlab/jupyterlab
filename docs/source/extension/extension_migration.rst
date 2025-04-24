@@ -6,6 +6,18 @@
 Extension Migration Guide
 =========================
 
+JupyterLab 4.4 to 4.5
+---------------------
+
+API updates
+^^^^^^^^^^^
+
+- The ``NbConvert.IManager`` interface was fixed to not require classes implementing the interface to provide a
+  concrete ``NbConvertManager`` class. In addition, this interface now includes an optional ``exportAs`` method
+  to export (and optionally download) a notebook to a specific format.
+- The ``NbConvertManager.IExportFormats`` interface was moved to the ``NbConvert`` namespace. You should now use ``NbConvert.IExportFormats`` instead of ``NbConvertManager.IExportFormats``.
+  ``NbConvertManager.IExportFormats`` was however kept for backward compatibility.
+
 JupyterLab 4.3 to 4.4
 ---------------------
 
