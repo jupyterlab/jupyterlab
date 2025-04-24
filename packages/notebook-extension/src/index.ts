@@ -603,7 +603,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           ? trans.__('Save and Export Notebook: %1', formatLabel)
           : formatLabel;
       },
-      execute: args => {
+      execute: async args => {
         const current = getCurrent(tracker, shell, args);
 
         if (!current) {
@@ -621,15 +621,10 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
         };
 
         if (context.model.dirty && !context.model.readOnly) {
-          return context.save().then(() => {
-            void services.nbconvert.exportAs?.(exportOptions);
-          });
+          await context.save();
         }
 
-        return new Promise<void>(resolve => {
-          void services.nbconvert.exportAs?.(exportOptions);
-          resolve(undefined);
-        });
+        return services.nbconvert.exportAs?.(exportOptions);
       },
       isEnabled
     });
