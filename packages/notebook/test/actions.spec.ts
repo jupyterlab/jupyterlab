@@ -1698,6 +1698,117 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });
+
+      it('should emit a signal with cut action', () => {
+        let signals: {
+          action: 'copy' | 'cut' | 'paste' | null;
+          count: number;
+        }[] = [];
+        widget.cellsPasted.connect(
+          (
+            _: Notebook,
+            interaction: {
+              action: 'copy' | 'cut' | 'paste' | null;
+              count: number;
+            }
+          ) => {
+            signals.push(interaction);
+          }
+        );
+        NotebookActions.cut(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].action).toBe('cut');
+      });
+
+      it('should emit a signal with copy action', () => {
+        let signals: {
+          action: 'copy' | 'cut' | 'paste' | null;
+          count: number;
+        }[] = [];
+        widget.cellsPasted.connect(
+          (
+            _: Notebook,
+            interaction: {
+              action: 'copy' | 'cut' | 'paste' | null;
+              count: number;
+            }
+          ) => {
+            signals.push(interaction);
+          }
+        );
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].action).toBe('copy');
+      });
+
+      it('should emit a signal with the number of copied cells', () => {
+        let signals: {
+          action: 'copy' | 'cut' | 'paste' | null;
+          count: number;
+        }[] = [];
+        widget.cellsPasted.connect(
+          (
+            _: Notebook,
+            interaction: {
+              action: 'copy' | 'cut' | 'paste' | null;
+              count: number;
+            }
+          ) => {
+            signals.push(interaction);
+          }
+        );
+        const next = widget.widgets[1];
+        widget.select(next);
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].count).toBe(2);
+      });
+
+      it('should emit a signal with action to null', () => {
+        let signals: {
+          action: 'copy' | 'cut' | 'paste' | null;
+          count: number;
+        }[] = [];
+        widget.cellsPasted.connect(
+          (
+            _: Notebook,
+            interaction: {
+              action: 'copy' | 'cut' | 'paste' | null;
+              count: number;
+            }
+          ) => {
+            signals.push(interaction);
+          }
+        );
+
+        // Create another notebook widget
+        const widget2 = new Notebook({
+          rendermime,
+          contentFactory: utils.createNotebookFactory(),
+          mimeTypeService: utils.mimeTypeService,
+          notebookConfig: {
+            ...StaticNotebook.defaultNotebookConfig,
+            windowingMode: 'none'
+          }
+        });
+        const model2 = new NotebookModel();
+        model2.fromJSON(utils.DEFAULT_CONTENT);
+        widget2.model = model2;
+        model2.sharedModel.clearUndoHistory();
+
+        widget2.activeCellIndex = 0;
+        NotebookActions.copy(widget2);
+        NotebookActions.paste(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].count).toBe(1);
+        expect(signals[0].action).toBeNull();
+      });
     });
 
     describe('#pasteFromSystemClipboard()', () => {
