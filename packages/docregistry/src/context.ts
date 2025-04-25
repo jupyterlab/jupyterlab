@@ -604,13 +604,6 @@ export class Context<
 
     try {
       await this._manager.ready;
-      if (this._model.collaborative) {
-        // Files cannot be saved in collaborative mode. The "save" command
-        // is disabled in the UI, but if the user tries to save anyway, act
-        // as though it succeeded.
-        this._saveState.emit('completed');
-        return Promise.resolve();
-      }
 
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
@@ -955,7 +948,8 @@ or load the version on disk (revert)?`,
     }
   }
 
-  private _createSaveOptions(): Partial<Contents.IModel> {
+  private _createSaveOptions(): Partial<Contents.IModel> &
+    Contents.IContentProvisionOptions {
     let content: PartialJSONValue = null;
     if (this._factory.fileFormat === 'json') {
       content = this._model.toJSON();
@@ -969,7 +963,8 @@ or load the version on disk (revert)?`,
     return {
       type: this._factory.contentType,
       format: this._factory.fileFormat,
-      content
+      content,
+      contentProviderId: this._contentProviderId
     };
   }
 
