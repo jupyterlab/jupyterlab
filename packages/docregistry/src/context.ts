@@ -948,8 +948,7 @@ or load the version on disk (revert)?`,
     }
   }
 
-  private _createSaveOptions(): Partial<Contents.IModel> &
-    Contents.IContentProvisionOptions {
+  private _createSaveOptions(): Partial<Contents.IModel> {
     let content: PartialJSONValue = null;
     if (this._factory.fileFormat === 'json') {
       content = this._model.toJSON();
@@ -963,8 +962,7 @@ or load the version on disk (revert)?`,
     return {
       type: this._factory.contentType,
       format: this._factory.fileFormat,
-      content,
-      contentProviderId: this._contentProviderId
+      content
     };
   }
 
