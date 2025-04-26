@@ -755,9 +755,11 @@ export class Context<
           );
           return this._raiseConflict(model, options);
         }
-
         return this._manager.contents
-          .save(path, options)
+          .save(path, {
+            ...options,
+            contentProviderId: this._contentProviderId
+          })
           .then(async contentsModel => {
             const model = await this._manager.contents.get(path, {
               content: false,
