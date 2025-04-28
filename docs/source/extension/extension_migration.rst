@@ -18,6 +18,14 @@ API updates
 - The ``NbConvertManager.IExportFormats`` interface was moved to the ``NbConvert`` namespace. You should now use ``NbConvert.IExportFormats`` instead of ``NbConvertManager.IExportFormats``.
   ``NbConvertManager.IExportFormats`` was however kept for backward compatibility.
 
+
+``extra_labextensions_path`` ordering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The default labextension paths now take precedence over those found in ``extra_labextensions_path``. In other words,
+``BaseExtensionApp.labextensions_path`` now lists the extensions from ``LabApp.labextensions_path``
+before those found in ``extra_labextensions_path``.
+
 JupyterLab 4.3 to 4.4
 ---------------------
 
