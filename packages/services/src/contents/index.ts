@@ -454,7 +454,7 @@ export namespace Contents {
      */
     save(
       path: string,
-      options?: Partial<IModel> & Contents.IContentProvisionOptions
+      options?: Partial<IModel> & Partial<Contents.IContentProvisionOptions>
     ): Promise<IModel>;
 
     /**
@@ -957,7 +957,8 @@ export class ContentsManager implements Contents.IManager {
    */
   save(
     path: string,
-    options: Partial<Contents.IModel> & Contents.IContentProvisionOptions = {}
+    options: Partial<Contents.IModel> &
+      Partial<Contents.IContentProvisionOptions> = {}
   ): Promise<Contents.IModel> {
     const globalPath = this.normalize(path);
     const [drive, localPath] = this._driveForPath(path);
