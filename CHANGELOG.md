@@ -393,6 +393,33 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.3.7
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.6...b1cef18046003274a80a47af824aca009deebc9e))
+
+### Bugs fixed
+
+- Fix editing shortcuts on Safari (allow shortcut edit button to receive focus) [#17511](https://github.com/jupyterlab/jupyterlab/pull/17511) ([@minrk](https://github.com/minrk))
+- Fix undo/redo in cells created in `none` windowing mode [#17486](https://github.com/jupyterlab/jupyterlab/pull/17486) ([@krassowski](https://github.com/krassowski))
+- Fix incorrect modifications in collaborative save events [#17466](https://github.com/jupyterlab/jupyterlab/pull/17466) ([@Darshan808](https://github.com/Darshan808))
+- Fix document search matching text within unsupported SVG tags [#17429](https://github.com/jupyterlab/jupyterlab/pull/17429) ([@achhina](https://github.com/achhina))
+- More specific selector for "Copy Output to Clipboard" [#17413](https://github.com/jupyterlab/jupyterlab/pull/17413) ([@jtpio](https://github.com/jtpio))
+- Fix rendering URLs as linked in errors [#17371](https://github.com/jupyterlab/jupyterlab/pull/17371) ([@afshin](https://github.com/afshin))
+
+### Maintenance and upkeep improvements
+
+- [4.3.x] Drop 3.8 from the testing matrix [#17522](https://github.com/jupyterlab/jupyterlab/pull/17522) ([@jtpio](https://github.com/jtpio))
+- Updated mock packages to use hatch-jupyter-builder [#17219](https://github.com/jupyterlab/jupyterlab/pull/17219) ([@Rishab87](https://github.com/Rishab87))
+- Remove workflow using `tj-actions/changed-files` [#17399](https://github.com/jupyterlab/jupyterlab/pull/17399) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-03-14&to=2025-04-30&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2025-03-14..2025-04-30&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-03-14..2025-04-30&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-03-14..2025-04-30&type=Issues) | [@fleming79](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afleming79+updated%3A2025-03-14..2025-04-30&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-03-14..2025-04-30&type=Issues) | [@ianthomas23](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aianthomas23+updated%3A2025-03-14..2025-04-30&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-03-14..2025-04-30&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-03-14..2025-04-30&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-03-14..2025-04-30&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-03-14..2025-04-30&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-03-14..2025-04-30&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-03-14..2025-04-30&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-03-14..2025-04-30&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2025-03-14..2025-04-30&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.3.6
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.3.5...ef6df9b9234692d5449808bf6cd845562400ab93))
@@ -426,8 +453,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-01-29&to=2025-03-14&type=c))
 
 [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2025-01-29..2025-03-14&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2025-01-29..2025-03-14&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2025-01-29..2025-03-14&type=Issues) | [@Carreau](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ACarreau+updated%3A2025-01-29..2025-03-14&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-01-29..2025-03-14&type=Issues) | [@dlqqq](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adlqqq+updated%3A2025-01-29..2025-03-14&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2025-01-29..2025-03-14&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2025-01-29..2025-03-14&type=Issues) | [@fleming79](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afleming79+updated%3A2025-01-29..2025-03-14&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-01-29..2025-03-14&type=Issues) | [@hxrshxz](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahxrshxz+updated%3A2025-01-29..2025-03-14&type=Issues) | [@ianthomas23](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aianthomas23+updated%3A2025-01-29..2025-03-14&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2025-01-29..2025-03-14&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-01-29..2025-03-14&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-01-29..2025-03-14&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-01-29..2025-03-14&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-01-29..2025-03-14&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-01-29..2025-03-14&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-01-29..2025-03-14&type=Issues) | [@rpwagner](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Arpwagner+updated%3A2025-01-29..2025-03-14&type=Issues) | [@RRosio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2025-01-29..2025-03-14&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2025-01-29..2025-03-14&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AZsailer+updated%3A2025-01-29..2025-03-14&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.3.5
 
