@@ -35,15 +35,14 @@ describe('@jupyterlab/apputils', () => {
       });
 
       // This test covers incorrect behaviour documented in issue #13045
-      it.failing(
-        'content should have an aria-label of notebook content and a role of region',
-        () => {
-          const content = new Widget();
-          const widget = new MainAreaWidget({ content });
-          expect(widget.content.node.getAttribute('aria-label')).toEqual('');
-          expect(widget.content.node.getAttribute('role')).toEqual('region');
-        }
-      );
+      it('content should have an aria-label of notebook content and a role of region', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        expect(widget.content.node.getAttribute('aria-label')).toEqual(
+          'notebook content'
+        );
+        expect(widget.content.node.getAttribute('role')).toEqual('region');
+      });
     });
 
     describe('contentHeader', () => {
