@@ -18,7 +18,7 @@
     "@jupyterlab/theme-light-extension": "^4.4.1",
     "@jupyterlab/translation": "^4.4.1",
     "@lumino/commands": "^2.3.2",
-    "@lumino/widgets": "^2.7.0"
+    "@lumino/widgets": "^2.7.1"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
