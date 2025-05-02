@@ -394,6 +394,10 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
       // Reset cache
       this._topHiddenCodeCells = -1;
+
+      if (this.parent!.isAttached && !widget.isAttached) {
+        widget.setFlag(Widget.Flag.IsAttached);
+      }
     } else if (!isSoftHidden) {
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
