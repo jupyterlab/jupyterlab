@@ -39,6 +39,7 @@ export class UserManager extends BaseManager implements User.IManager {
 
   private _identity: User.IIdentity;
   private _permissions: ReadonlyJSONObject;
+  private _updatableFields: User.UpdatableUserField[] | null;
 
   private _userChanged = new Signal<this, User.IUser>(this);
   private _connectionFailure = new Signal<this, Error>(this);
@@ -117,6 +118,13 @@ export class UserManager extends BaseManager implements User.IManager {
   }
 
   /**
+   * Get the most recently fetched updatable fields.
+   */
+  get updatableFields(): User.UpdatableUserField[] | null {
+    return this._updatableFields;
+  }
+
+  /**
    * A signal emitted when the user changes.
    */
   get userChanged(): ISignal<this, User.IUser> {
@@ -172,7 +180,8 @@ export class UserManager extends BaseManager implements User.IManager {
 
     const oldUser = {
       identity: this._identity,
-      permissions: this._permissions
+      permissions: this._permissions,
+      updatableFields: this._updatableFields ?? null
     };
     const newUser = await response.json();
     const identity = newUser.identity;
@@ -195,6 +204,7 @@ export class UserManager extends BaseManager implements User.IManager {
     if (!JSONExt.deepEqual(newUser, oldUser)) {
       this._identity = identity;
       this._permissions = newUser.permissions;
+      this._updatableFields = newUser.updatable_fields ?? null;
       localStorage.setItem(SERVICE_ID, JSON.stringify(identity));
       this._userChanged.emit(newUser);
     }
@@ -227,6 +237,8 @@ export namespace User {
     readonly identity: IIdentity;
 
     readonly permissions: PartialJSONObject;
+
+    readonly updatableFields: UpdatableUserField[] | null;
   }
 
   /**
@@ -267,6 +279,16 @@ export namespace User {
   }
 
   /**
+   * The user fields that can potentially be updated.
+   */
+  export type UpdatableUserField =
+    | 'name'
+    | 'display_name'
+    | 'initials'
+    | 'color'
+    | 'avatar_url';
+
+  /**
    * Object which manages user's identity.
    *
    * #### Notes
@@ -293,6 +315,11 @@ export namespace User {
      * The value will be null until the manager is ready.
      */
     readonly permissions: ReadonlyJSONObject | null;
+
+    /**
+     * Get the most recently fetched updatable fields.
+     */
+    readonly updatableFields: User.UpdatableUserField[] | null;
 
     /**
      * Force a refresh of user's identity from the server.

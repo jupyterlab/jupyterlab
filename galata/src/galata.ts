@@ -271,7 +271,8 @@ export namespace galata {
         initials: 'JP',
         color: 'var(--jp-collaborator-color1)'
       },
-      permissions: {}
+      permissions: {},
+      updatableFields: []
     };
     if (mockUser) {
       if (typeof mockUser !== 'boolean') {
