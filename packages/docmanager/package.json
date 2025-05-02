@@ -56,7 +56,7 @@
     "@lumino/polling": "^2.1.4",
     "@lumino/properties": "^2.0.3",
     "@lumino/signaling": "^2.1.4",
-    "@lumino/widgets": "^2.7.0",
+    "@lumino/widgets": "^2.7.1",
     "react": "^18.2.0"
   },
   "devDependencies": {
