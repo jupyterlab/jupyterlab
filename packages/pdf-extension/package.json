@@ -39,7 +39,7 @@
     "@jupyterlab/rendermime-interfaces": "^3.12.1",
     "@lumino/coreutils": "^2.2.1",
     "@lumino/disposable": "^2.1.4",
-    "@lumino/widgets": "^2.7.0"
+    "@lumino/widgets": "^2.7.1"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
