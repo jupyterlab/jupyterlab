@@ -7,6 +7,8 @@ build:
     nodejs: "20"
   jobs:
     post_install:
+      - git config --global user.email "jovyan@rtfd.org"
+      - git config --global user.name "jo v. un"
       # this should have already run, but show some errors/warnings more cleanly
       - jlpm
       # again ensure all packages are built
@@ -22,4 +24,5 @@ python:
     - method: pip
       path: .
       extra_requirements:
+        - dev
         - docs
