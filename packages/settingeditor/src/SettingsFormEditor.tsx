@@ -239,7 +239,6 @@ export class SettingsFormEditor extends React.Component<
     );
   }
 
-  //LYNN ADDITION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
     this.props.hasError(e.errors.length !== 0);
 
@@ -269,7 +268,6 @@ export class SettingsFormEditor extends React.Component<
     }
     this.props.onSelect(this.props.settings.id);
   };
-  //LYNN ADDITION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   private _setUiSchema(prevRenderers?: { [id: string]: Field }) {
     const renderers = this.props.renderers[this.props.settings.id];
