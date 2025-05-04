@@ -16,7 +16,7 @@ const versionCache = new Map();
 /**
  * Matches a simple semver range, where the version number could be an npm tag.
  */
-const SEMVER_RANGE = /^(~|\^|=|<|>|<=|>=)?([\w\-.]*)$/;
+const SEMVER_RANGE = /^([~^=<>]|<=|>=)?([\w\-.]*)$/;
 
 /**
  * Get the specifier we should use
