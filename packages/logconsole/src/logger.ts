@@ -201,9 +201,7 @@ export class Logger implements ILogger {
       contentFactory: new LogConsoleModelContentFactory(),
       maxLength: options.maxLength
     });
-    if (options.level) {
-      this._level = options.level;
-    }
+    this._level = options.level ?? 'warning';
   }
 
   /**
@@ -411,7 +409,7 @@ export class Logger implements ILogger {
   private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
   private _version = 0;
-  private _level: LogLevel = 'warning';
+  private _level: LogLevel;
 }
 
 /**
