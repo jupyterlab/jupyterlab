@@ -44,21 +44,11 @@ export class MainAreaWidget<T extends Widget = Widget>
     const trans = (options.translator || nullTranslator).load('jupyterlab');
     const content = (this._content = options.content);
     content.node.setAttribute('role', 'region');
-    content.node.setAttribute(
-      'aria-label',
-      this._widget
-        ? this._widget.getAriaLabel('content')
-        : trans.__('main area content')
-    );
+    content.node.setAttribute('aria-label', trans.__('main area content'));
     const toolbar = (this._toolbar =
       options.toolbar || new ReactiveToolbar({ noFocusOnClick: true }));
     toolbar.node.setAttribute('role', 'toolbar');
-    toolbar.node.setAttribute(
-      'aria-label',
-      this._widget
-        ? this._widget.getAriaLabel('actions')
-        : trans.__('main area toolbar')
-    );
+    toolbar.node.setAttribute('aria-label', trans.__('main area toolbar'));
     const contentHeader = (this._contentHeader =
       options.contentHeader ||
       new BoxPanel({
