@@ -85,7 +85,7 @@ export class LoggerRegistry implements ILoggerRegistry {
 
   /**
    * The default log level for new loggers.
-   * Applies to loggers created after the change.
+   * The new value will be applied to new loggers only.
    */
   get defaultLogLevel(): LogLevel {
     return this._defaultLogLevel;
