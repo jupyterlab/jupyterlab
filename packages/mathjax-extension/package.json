@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mathjax-extension",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "A JupyterLab extension providing MathJax Typesetting",
   "keywords": [
     "jupyter",
@@ -43,8 +43,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.1",
-    "@jupyterlab/rendermime": "^4.4.1",
+    "@jupyterlab/application": "^4.4.2",
+    "@jupyterlab/rendermime": "^4.4.2",
     "@lumino/coreutils": "^2.2.1",
     "mathjax-full": "^3.2.2"
   },
