@@ -24,7 +24,7 @@ export class LoggerRegistry implements ILoggerRegistry {
   constructor(options: LoggerRegistry.IOptions) {
     this._defaultRendermime = options.defaultRendermime;
     this._maxLength = options.maxLength;
-    this._defaultLogLevel = 'warning';
+    this._defaultLogLevel = options.defaultLogLevel ?? 'warning';
   }
 
   /**
@@ -85,15 +85,13 @@ export class LoggerRegistry implements ILoggerRegistry {
 
   /**
    * The default log level for new loggers.
+   * Applies to loggers created after the change.
    */
   get defaultLogLevel(): LogLevel {
     return this._defaultLogLevel;
   }
   set defaultLogLevel(value: LogLevel) {
     this._defaultLogLevel = value;
-    this._loggers.forEach(logger => {
-      logger.level = value;
-    });
   }
 
   /**
@@ -123,9 +121,26 @@ export class LoggerRegistry implements ILoggerRegistry {
   private _isDisposed = false;
 }
 
+/**
+ * The namespace for LoggerRegistry class statics.
+ */
 export namespace LoggerRegistry {
+  /**
+   * The options used to initialize a LoggerRegistry.
+   */
   export interface IOptions {
+    /**
+     * The default rendermime to render outputs with when logger is not
+     * supplied with one.
+     */
     defaultRendermime: IRenderMimeRegistry;
+    /**
+     * The maximum length of the log messages.
+     */
     maxLength: number;
+    /**
+     * The default log level for the loggers.
+     */
+    defaultLogLevel?: LogLevel;
   }
 }

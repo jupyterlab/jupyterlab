@@ -414,7 +414,13 @@ export class Logger implements ILogger {
   private _level: LogLevel = 'warning';
 }
 
+/**
+ * The namespace for Logger class statics.
+ */
 export namespace Logger {
+  /**
+   * The options used to initialize a Logger.
+   */
   export interface IOptions {
     /**
      * The log source identifier.
@@ -431,7 +437,13 @@ export namespace Logger {
   }
 }
 
+/**
+ * The namespace for Logger class private statics.
+ */
 namespace Private {
+  /**
+   * The log level enum.
+   */
   export enum LogLevel {
     debug,
     info,
