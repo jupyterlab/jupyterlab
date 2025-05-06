@@ -201,6 +201,9 @@ export class Logger implements ILogger {
       contentFactory: new LogConsoleModelContentFactory(),
       maxLength: options.maxLength
     });
+    if (options.level) {
+      this._level = options.level;
+    }
   }
 
   /**
@@ -421,6 +424,10 @@ export namespace Logger {
      * The maximum number of messages to store.
      */
     maxLength: number;
+    /**
+     * The default log level.
+     */
+    level?: LogLevel;
   }
 }
 
