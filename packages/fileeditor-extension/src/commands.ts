@@ -53,6 +53,7 @@ import {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { DisposableSet, IDisposable } from '@lumino/disposable';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -1157,20 +1158,27 @@ export namespace Commands {
 
   /**
    * Add ___ File items to the Launcher for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
    */
   export function addKernelLanguageLauncherItems(
     launcher: ILauncher,
     trans: TranslationBundle,
     availableKernelFileTypes: Iterable<IFileTypeData>
-  ): void {
-    for (let ext of availableKernelFileTypes) {
-      launcher.add({
-        command: CommandIDs.createNew,
-        category: trans.__('Other'),
-        rank: 3,
-        args: ext
-      });
+  ): IDisposable {
+    const disposables = new DisposableSet();
+
+    for (const ext of availableKernelFileTypes) {
+      disposables.add(
+        launcher.add({
+          command: CommandIDs.createNew,
+          category: trans.__('Other'),
+          rank: 3,
+          args: ext
+        })
+      );
     }
+
+    return disposables;
   }
 
   /**
@@ -1260,20 +1268,27 @@ export namespace Commands {
 
   /**
    * Add New ___ File commands to the File Editor palette for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
    */
   export function addKernelLanguagePaletteItems(
     palette: ICommandPalette,
     trans: TranslationBundle,
     availableKernelFileTypes: Iterable<IFileTypeData>
-  ): void {
+  ): IDisposable {
+    const disposables = new DisposableSet();
     const paletteCategory = trans.__('Text Editor');
-    for (let ext of availableKernelFileTypes) {
-      palette.addItem({
-        command: CommandIDs.createNew,
-        args: { ...ext, isPalette: true },
-        category: paletteCategory
-      });
+
+    for (const ext of availableKernelFileTypes) {
+      disposables.add(
+        palette.addItem({
+          command: CommandIDs.createNew,
+          args: { ...ext, isPalette: true },
+          category: paletteCategory
+        })
+      );
     }
+
+    return disposables;
   }
 
   /**
@@ -1323,18 +1338,25 @@ export namespace Commands {
 
   /**
    * Add Create New ___ File commands to the File menu for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
    */
   export function addKernelLanguageMenuItems(
     menu: IMainMenu,
     availableKernelFileTypes: Iterable<IFileTypeData>
-  ): void {
-    for (let ext of availableKernelFileTypes) {
-      menu.fileMenu.newMenu.addItem({
-        command: CommandIDs.createNew,
-        args: ext,
-        rank: 31
-      });
+  ): IDisposable {
+    const disposables = new DisposableSet();
+
+    for (const ext of availableKernelFileTypes) {
+      disposables.add(
+        menu.fileMenu.newMenu.addItem({
+          command: CommandIDs.createNew,
+          args: ext,
+          rank: 31
+        })
+      );
     }
+
+    return disposables;
   }
 
   /**
