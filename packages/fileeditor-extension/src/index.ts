@@ -410,9 +410,7 @@ function activate(
   let paletteDisposables: IDisposable | null = null;
   let menuDisposables: IDisposable | null = null;
 
-  const updateKernelFileTypeComponents = async (
-    fileTypes: Set<IFileTypeData>
-  ) => {
+  const updateKernelFileTypeComponents = (fileTypes: Set<IFileTypeData>) => {
     // Dispose of previous entries if they exist
     if (launcherDisposables) {
       launcherDisposables.dispose();
