@@ -67,6 +67,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry, MenuSvg } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
@@ -405,6 +406,59 @@ function activate(
     return fileTypes;
   };
 
+  let launcherDisposables: IDisposable | null = null;
+  let paletteDisposables: IDisposable | null = null;
+  let menuDisposables: IDisposable | null = null;
+
+  const updateKernelFileTypeComponents = (fileTypes: Set<IFileTypeData>) => {
+    // Dispose of previous entries if they exist
+    if (launcherDisposables) {
+      launcherDisposables.dispose();
+      launcherDisposables = null;
+    }
+
+    if (paletteDisposables) {
+      paletteDisposables.dispose();
+      paletteDisposables = null;
+    }
+
+    if (menuDisposables) {
+      menuDisposables.dispose();
+      menuDisposables = null;
+    }
+
+    if (launcher) {
+      launcherDisposables = Commands.addKernelLanguageLauncherItems(
+        launcher,
+        trans,
+        fileTypes
+      );
+    }
+
+    if (palette) {
+      paletteDisposables = Commands.addKernelLanguagePaletteItems(
+        palette,
+        trans,
+        fileTypes
+      );
+    }
+
+    if (menu) {
+      menuDisposables = Commands.addKernelLanguageMenuItems(menu, fileTypes);
+    }
+  };
+
+  // Update if new specs are added later
+  const specsManager = app.serviceManager.kernelspecs;
+  specsManager.specsChanged.connect(async () => {
+    try {
+      const updatedFileTypes = await getAvailableKernelFileTypes();
+      updateKernelFileTypeComponents(updatedFileTypes);
+    } catch (error) {
+      console.error('Error updating kernel file types:', error);
+    }
+  });
+
   // Handle state restoration.
   if (restorer) {
     void restorer.restore(tracker, {
@@ -566,27 +620,7 @@ function activate(
   }
 
   getAvailableKernelFileTypes()
-    .then(availableKernelFileTypes => {
-      if (launcher) {
-        Commands.addKernelLanguageLauncherItems(
-          launcher,
-          trans,
-          availableKernelFileTypes
-        );
-      }
-
-      if (palette) {
-        Commands.addKernelLanguagePaletteItems(
-          palette,
-          trans,
-          availableKernelFileTypes
-        );
-      }
-
-      if (menu) {
-        Commands.addKernelLanguageMenuItems(menu, availableKernelFileTypes);
-      }
-    })
+    .then(updateKernelFileTypeComponents)
     .catch((reason: Error) => {
       console.error(reason.message);
     });
