@@ -77,6 +77,8 @@ Pypi = "https://pypi.org/project/jupyterlab"
 [project.optional-dependencies]
 docs = [
     "sphinx>=1.8,<8.2.0",
+    # temporary pin for https://github.com/sphinx-doc/sphinx/issues/13533
+    "snowballstemmer<3.0.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
     "pytest",
