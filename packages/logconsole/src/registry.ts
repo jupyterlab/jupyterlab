@@ -4,7 +4,12 @@
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Logger } from './logger';
-import { ILogger, ILoggerRegistry, ILoggerRegistryChange } from './tokens';
+import {
+  ILogger,
+  ILoggerRegistry,
+  ILoggerRegistryChange,
+  LogLevel
+} from './tokens';
 
 /**
  * A concrete implementation of ILoggerRegistry.
@@ -19,6 +24,7 @@ export class LoggerRegistry implements ILoggerRegistry {
   constructor(options: LoggerRegistry.IOptions) {
     this._defaultRendermime = options.defaultRendermime;
     this._maxLength = options.maxLength;
+    this._defaultLogLevel = options.defaultLogLevel ?? 'warning';
   }
 
   /**
@@ -35,7 +41,11 @@ export class LoggerRegistry implements ILoggerRegistry {
       return logger;
     }
 
-    logger = new Logger({ source, maxLength: this.maxLength });
+    logger = new Logger({
+      source,
+      maxLength: this.maxLength,
+      level: this.defaultLogLevel
+    });
     logger.rendermime = this._defaultRendermime;
     loggers.set(source, logger);
 
@@ -74,6 +84,17 @@ export class LoggerRegistry implements ILoggerRegistry {
   }
 
   /**
+   * The default log level for new loggers.
+   * The new value will be applied to new loggers only.
+   */
+  get defaultLogLevel(): LogLevel {
+    return this._defaultLogLevel;
+  }
+  set defaultLogLevel(value: LogLevel) {
+    this._defaultLogLevel = value;
+  }
+
+  /**
    * Whether the register is disposed.
    */
   get isDisposed(): boolean {
@@ -95,13 +116,31 @@ export class LoggerRegistry implements ILoggerRegistry {
   private _defaultRendermime: IRenderMimeRegistry;
   private _loggers = new Map<string, ILogger>();
   private _maxLength: number;
+  private _defaultLogLevel: LogLevel;
   private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);
   private _isDisposed = false;
 }
 
+/**
+ * The namespace for LoggerRegistry class statics.
+ */
 export namespace LoggerRegistry {
+  /**
+   * The options used to initialize a LoggerRegistry.
+   */
   export interface IOptions {
+    /**
+     * The default rendermime to render outputs with when logger is not
+     * supplied with one.
+     */
     defaultRendermime: IRenderMimeRegistry;
+    /**
+     * The maximum length of the log messages.
+     */
     maxLength: number;
+    /**
+     * The default log level for the loggers.
+     */
+    defaultLogLevel?: LogLevel;
   }
 }
