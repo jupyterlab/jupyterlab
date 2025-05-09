@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Clipboard, DOMUtils } from '@jupyterlab/apputils';
+import { DOMUtils, SystemClipboard } from '@jupyterlab/apputils';
 import {
   Cell,
   CodeCell,
@@ -1766,33 +1766,38 @@ export class Notebook extends StaticNotebook {
     return this._lastClipboardInteraction;
   }
   set lastClipboardInteraction(newValue: 'copy' | 'cut' | 'paste' | null) {
-    const clipboard = Clipboard.getInstance();
-    if (clipboard.hasData(JUPYTER_CELL_MIME)) {
-      if (newValue === 'copy' || newValue === 'cut') {
-        // Save locally the copied/cut cells
-        this._localCopy = clipboard.getData(
-          JUPYTER_CELL_MIME
-        ) as nbformat.IBaseCell[];
-      } else if (newValue === 'paste') {
-        const pasted = clipboard.getData(
-          JUPYTER_CELL_MIME
-        ) as nbformat.IBaseCell[];
+    const clipboard = SystemClipboard.getInstance();
+    const lastInteraction = this._lastClipboardInteraction;
+    clipboard
+      .getData(JUPYTER_CELL_MIME)
+      .then(data => {
+        if (data !== null) {
+          if (newValue === 'copy' || newValue === 'cut') {
+            this._localCopy = data as nbformat.IBaseCell[];
+          } else if (newValue === 'paste') {
+            const pasted = data as nbformat.IBaseCell[];
 
-        // Check if the current clipboard match the previously copied/cut cells.
-        const isLocal = ArrayExt.shallowEqual(
-          pasted,
-          this._localCopy,
-          JSONExt.deepEqual
-        );
+            // Check if the current clipboard match the previously copied/cut cells.
+            const isLocal = ArrayExt.shallowEqual(
+              pasted,
+              this._localCopy,
+              JSONExt.deepEqual
+            );
 
-        // Emit a signal with the previous interaction, normally 'cut' or 'copy' if the
-        // pasted cells come from this Notebook, null otherwise.
-        this._cellsPasted.emit({
-          action: isLocal ? this._lastClipboardInteraction : null,
-          count: pasted.length
-        });
-      }
-    }
+            // Emit a signal with the previous interaction, normally 'cut' or 'copy' if the
+            // pasted cells come from this Notebook, null otherwise.
+            this._cellsPasted.emit({
+              action: isLocal ? lastInteraction : null,
+              count: pasted.length
+            });
+          }
+        }
+      })
+      .catch(() => {
+        // This is a no-op if the clipboard is not available.
+      });
+
+    // Update the last clipboard interaction.
     this._lastClipboardInteraction = newValue;
   }
 
