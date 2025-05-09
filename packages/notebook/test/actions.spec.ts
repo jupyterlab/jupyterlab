@@ -1699,7 +1699,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).toBe(count - 2);
       });
 
-      it('should emit a signal with cut action', () => {
+      it('should emit a signal with cut action', async () => {
         let signals: {
           action: 'copy' | 'cut' | 'paste' | null;
           count: number;
@@ -1715,14 +1715,14 @@ describe('@jupyterlab/notebook', () => {
             signals.push(interaction);
           }
         );
-        NotebookActions.cut(widget);
+        await NotebookActions.cutToSystemClipboard(widget);
         widget.activeCellIndex = 1;
-        NotebookActions.paste(widget);
+        await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
         expect(signals[0].action).toBe('cut');
       });
 
-      it('should emit a signal with copy action', () => {
+      it('should emit a signal with copy action', async () => {
         let signals: {
           action: 'copy' | 'cut' | 'paste' | null;
           count: number;
@@ -1738,14 +1738,14 @@ describe('@jupyterlab/notebook', () => {
             signals.push(interaction);
           }
         );
-        NotebookActions.copy(widget);
+        await NotebookActions.copyToSystemClipboard(widget);
         widget.activeCellIndex = 1;
-        NotebookActions.paste(widget);
+        await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
         expect(signals[0].action).toBe('copy');
       });
 
-      it('should emit a signal with the number of copied cells', () => {
+      it('should emit a signal with the number of copied cells', async () => {
         let signals: {
           action: 'copy' | 'cut' | 'paste' | null;
           count: number;
@@ -1763,14 +1763,14 @@ describe('@jupyterlab/notebook', () => {
         );
         const next = widget.widgets[1];
         widget.select(next);
-        NotebookActions.copy(widget);
+        await NotebookActions.copyToSystemClipboard(widget);
         widget.activeCellIndex = 1;
-        NotebookActions.paste(widget);
+        await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
         expect(signals[0].count).toBe(2);
       });
 
-      it('should emit a signal with action to null', () => {
+      it('should emit a signal with action to null', async () => {
         let signals: {
           action: 'copy' | 'cut' | 'paste' | null;
           count: number;
@@ -1803,8 +1803,8 @@ describe('@jupyterlab/notebook', () => {
         model2.sharedModel.clearUndoHistory();
 
         widget2.activeCellIndex = 0;
-        NotebookActions.copy(widget2);
-        NotebookActions.paste(widget);
+        await NotebookActions.copyToSystemClipboard(widget2);
+        await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
         expect(signals[0].count).toBe(1);
         expect(signals[0].action).toBeNull();
