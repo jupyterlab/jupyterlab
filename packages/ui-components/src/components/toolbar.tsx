@@ -842,6 +842,7 @@ export function ToolbarButtonComponent(
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
+      event.preventDefault();
       props.onClick?.();
     }
   };
