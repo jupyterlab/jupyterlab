@@ -44,7 +44,13 @@
       "type": "string",
       "title": "Default Log Level",
       "description": "Default log level for loggers",
-      "enum": ["critical", "error", "warning", "info", "debug"],
+      "oneOf": [
+        { "const": "critical", "title": "Critical" },
+        { "const": "error", "title": "Error" },
+        { "const": "warning", "title": "Warning" },
+        { "const": "info", "title": "Info" },
+        { "const": "debug", "title": "Debug" }
+      ],
       "default": "warning"
     }
   },
