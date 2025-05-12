@@ -280,22 +280,6 @@ export class ShortcutInput extends React.Component<
       this.props.shortcut.selector
     );
     const isAvailable = userInput === '' || conflicts.length === 0;
-
-    // Allow to set shortcut to what it initially was if replacing.
-    if (!isAvailable) {
-      // TODO: should we keep this logic? It masks what may be a genuine
-      // conflict in the defaults or between extensions; ideally we would
-      // allow saving, but still warn the user.
-      if (
-        conflicts.length === 1 &&
-        conflicts[0].id === this.props.shortcut.id &&
-        this._isReplacingExistingKeybinding
-      ) {
-        this.setState({ isAvailable: true });
-        return [];
-      }
-    }
-
     this.setState({ isAvailable: isAvailable });
     return conflicts;
   };
