@@ -37,7 +37,7 @@ export class Uploader extends ToolbarButton {
   }
 
   /**
-   * A signal emitted with file info when a batch of upload completes .
+   * A signal emitted with file info when a batch of upload completes.
    */
   get filesUploaded(): ISignal<this, Contents.IModel[]> {
     return this._filesUploaded;

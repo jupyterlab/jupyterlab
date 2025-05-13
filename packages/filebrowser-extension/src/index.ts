@@ -906,13 +906,15 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
 
 const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:notify-upload',
-  requires: [IDefaultFileBrowser, ISettingRegistry],
+  requires: [IDefaultFileBrowser, ISettingRegistry, ITranslator],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     defaultBrowser: FileBrowser,
-    settingRegistry: ISettingRegistry
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
   ) => {
+    const trans = translator.load('jupyterlab');
     // load and watch settings
     const settings = await settingRegistry.load(FILE_BROWSER_PLUGIN_ID);
     let autoOpen = settings.get('autoOpenUploads').composite as boolean;
@@ -938,12 +940,22 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
 
       uploader.filesUploaded.connect((_sender, models) => {
         // single-file case
+        const isBinaryFile = [
+          '.zip',
+          '.gz',
+          '.tar',
+          '.rar',
+          '.7z',
+          '.exe',
+          '.bin',
+          '.iso'
+        ].some(ext => models[0].name.endsWith(ext));
         if (
           models.length === 1 &&
           (models[0].type === 'notebook' || models[0].type === 'file')
         ) {
           const file = models[0];
-          if (autoOpen && file.size && file.size <= maxSize) {
+          if (autoOpen && file.size && file.size <= maxSize && !isBinaryFile) {
             // open immediately
             void app.commands
               .execute('docmanager:open', { path: file.path })
@@ -953,17 +965,19 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
           } else {
             // notify and offer an “Open” button
             Notification.emit(
-              `Uploaded ${file.name}${
+              trans.__(
+                'Uploaded %1%2',
+                file.name,
                 file.size
-                  ? ` (${(file.size / (1024 * 1024)).toFixed(1)} MB)`
+                  ? trans.__(' (%1 MB)', (file.size / (1024 * 1024)).toFixed(1))
                   : ''
-              }`,
+              ),
               'info',
               {
                 autoClose: 5000,
                 actions: [
                   {
-                    label: 'Open File',
+                    label: trans.__('Open File'),
                     callback: () => {
                       void app.commands
                         .execute('docmanager:open', { path: file.path })
@@ -982,13 +996,13 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
         } else {
           // multi-file case
           Notification.emit(
-            `Upload Complete (${models.length} files)`,
+            trans.__('Upload Complete (%1 files)', models.length),
             'info',
             {
               autoClose: 5000,
               actions: [
                 {
-                  label: 'Open All',
+                  label: trans.__('Open All'),
                   callback: () => {
                     models.forEach(
                       m =>
