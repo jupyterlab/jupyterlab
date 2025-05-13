@@ -841,12 +841,6 @@ function addCommands(
 
   const caption = () => {
     if (shell.currentWidget) {
-      const context = docManager.contextForWidget(shell.currentWidget);
-      if (context?.model.collaborative) {
-        return trans.__(
-          'In collaborative mode, the document is saved automatically after every change'
-        );
-      }
       if (!isWritable()) {
         return trans.__(
           `Document is read-only. "Save" is disabled; use "Save as…" instead`
