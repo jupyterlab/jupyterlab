@@ -1700,18 +1700,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should emit a signal with cut action', async () => {
-        let signals: {
-          action: 'copy' | 'cut' | 'paste' | null;
-          count: number;
-        }[] = [];
+        let signals: Notebook.IPasteCells[] = [];
         widget.cellsPasted.connect(
-          (
-            _: Notebook,
-            interaction: {
-              action: 'copy' | 'cut' | 'paste' | null;
-              count: number;
-            }
-          ) => {
+          (_: Notebook, interaction: Notebook.IPasteCells) => {
             signals.push(interaction);
           }
         );
@@ -1719,22 +1710,13 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 1;
         await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
-        expect(signals[0].action).toBe('cut');
+        expect(signals[0].previousInteraction).toBe('cut');
       });
 
       it('should emit a signal with copy action', async () => {
-        let signals: {
-          action: 'copy' | 'cut' | 'paste' | null;
-          count: number;
-        }[] = [];
+        let signals: Notebook.IPasteCells[] = [];
         widget.cellsPasted.connect(
-          (
-            _: Notebook,
-            interaction: {
-              action: 'copy' | 'cut' | 'paste' | null;
-              count: number;
-            }
-          ) => {
+          (_: Notebook, interaction: Notebook.IPasteCells) => {
             signals.push(interaction);
           }
         );
@@ -1742,22 +1724,13 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 1;
         await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
-        expect(signals[0].action).toBe('copy');
+        expect(signals[0].previousInteraction).toBe('copy');
       });
 
       it('should emit a signal with the number of copied cells', async () => {
-        let signals: {
-          action: 'copy' | 'cut' | 'paste' | null;
-          count: number;
-        }[] = [];
+        let signals: Notebook.IPasteCells[] = [];
         widget.cellsPasted.connect(
-          (
-            _: Notebook,
-            interaction: {
-              action: 'copy' | 'cut' | 'paste' | null;
-              count: number;
-            }
-          ) => {
+          (_: Notebook, interaction: Notebook.IPasteCells) => {
             signals.push(interaction);
           }
         );
@@ -1767,22 +1740,13 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 1;
         await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
-        expect(signals[0].count).toBe(2);
+        expect(signals[0].cellCount).toBe(2);
       });
 
       it('should emit a signal with action to null', async () => {
-        let signals: {
-          action: 'copy' | 'cut' | 'paste' | null;
-          count: number;
-        }[] = [];
+        let signals: Notebook.IPasteCells[] = [];
         widget.cellsPasted.connect(
-          (
-            _: Notebook,
-            interaction: {
-              action: 'copy' | 'cut' | 'paste' | null;
-              count: number;
-            }
-          ) => {
+          (_: Notebook, interaction: Notebook.IPasteCells) => {
             signals.push(interaction);
           }
         );
@@ -1806,8 +1770,8 @@ describe('@jupyterlab/notebook', () => {
         await NotebookActions.copyToSystemClipboard(widget2);
         await NotebookActions.pasteFromSystemClipboard(widget);
         expect(signals.length).toBe(1);
-        expect(signals[0].count).toBe(1);
-        expect(signals[0].action).toBeNull();
+        expect(signals[0].cellCount).toBe(1);
+        expect(signals[0].previousInteraction).toBeNull();
       });
     });
 

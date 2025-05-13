@@ -1621,10 +1621,10 @@ export class Notebook extends StaticNotebook {
     return this._selectionChanged;
   }
 
-  get cellsPasted(): ISignal<
-    this,
-    { action: 'copy' | 'cut' | 'paste' | null; count: number }
-  > {
+  /**
+   * A signal emitted when cells are pasted to the notebook.
+   */
+  get cellsPasted(): ISignal<this, Notebook.IPasteCells> {
     return this._cellsPasted;
   }
 
@@ -1784,11 +1784,10 @@ export class Notebook extends StaticNotebook {
               JSONExt.deepEqual
             );
 
-            // Emit a signal with the previous interaction, normally 'cut' or 'copy' if the
-            // pasted cells come from this Notebook, null otherwise.
+            // Emit a signal with the last interaction and the number of pasted cells.
             this._cellsPasted.emit({
-              action: isLocal ? lastInteraction : null,
-              count: pasted.length
+              previousInteraction: isLocal ? lastInteraction : null,
+              cellCount: pasted.length
             });
           }
         }
@@ -3251,10 +3250,7 @@ export class Notebook extends StaticNotebook {
   private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
-  private _cellsPasted = new Signal<
-    this,
-    { action: 'copy' | 'cut' | 'paste' | null; count: number }
-  >(this);
+  private _cellsPasted = new Signal<this, Notebook.IPasteCells>(this);
   private _localCopy: nbformat.IBaseCell[] = [];
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
@@ -3303,6 +3299,29 @@ export namespace Notebook {
      * An options object for initializing a notebook content factory.
      */
     export interface IOptions extends StaticNotebook.ContentFactory.IOptions {}
+  }
+
+  /**
+   * An interface for the paste cell event.
+   */
+  export interface IPasteCells {
+    /**
+     * The previous local clipboard interaction related to this pasted cell.
+     *
+     * If the pasted cell(s) has been copied or cut from the same notebook, this value
+     * will be the last interaction that was performed on the local clipboard. It should
+     * be either `copy` or `cut`.
+     * If the pasted cell(s) has been copied or cut from another notebook, this value
+     * will be `null`.
+     */
+    previousInteraction: 'copy' | 'cut' | 'paste' | null;
+    /**
+     * The number of cells that were pasted.
+     *
+     * This can be used to perform actions on all the pasted cells, the current cell
+     * should be the last pasted cell.
+     */
+    cellCount: number;
   }
 }
 
