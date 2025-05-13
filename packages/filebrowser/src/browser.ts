@@ -13,6 +13,7 @@ import {
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
@@ -128,6 +129,9 @@ export class FileBrowser extends SidePanel {
       state: options.state
     });
     this.listing.addClass(LISTING_CLASS);
+    this.listing.selectionChanged.connect(() => {
+      this._selectionChanged.emit();
+    });
 
     this.mainPanel.addWidget(this.crumbs);
     this.mainPanel.addWidget(this.filterToolbar);
@@ -299,6 +303,13 @@ export class FileBrowser extends SidePanel {
    */
   selectedItems(): IterableIterator<Contents.IModel> {
     return this.listing.selectedItems();
+  }
+
+  /**
+   * A signal emitted when the selection changes in the file browser.
+   */
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
   }
 
   /**
@@ -539,6 +550,7 @@ export class FileBrowser extends SidePanel {
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _selectionChanged = new Signal<this, void>(this);
 }
 
 /**
