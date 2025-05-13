@@ -105,6 +105,7 @@ describe('filebrowser/browser', () => {
         expect(items.length).toBeGreaterThan(1);
 
         let selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        // Select the first item
         await fileBrowser.selectItemByName(items[0].name);
         await selectionChanged;
 
@@ -114,6 +115,7 @@ describe('filebrowser/browser', () => {
         expect(itemNodes.length).toBeGreaterThan(1);
 
         selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        // Select the second item with shift key to select multiple items
         simulate(
           fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
           'mousedown',
