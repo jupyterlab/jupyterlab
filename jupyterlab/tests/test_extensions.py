@@ -152,6 +152,74 @@ async def test_ExtensionManager_uninstall():
 
 
 @patch("jupyterlab.extensions.pypi.xmlrpc.client")
+async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
+    extension_data = [
+        {
+            "name": "jupyterlab-apod",
+            "project_urls": {
+                "Homepage": "https://github.com/jupyterlab/jupyterlab_apod",
+            },
+        },
+        {
+            "name": "jupyterlab-gitlab",
+            "project_urls": {
+                "Homepage": "https://github.com/jupyterlab-contrib/jupyterlab-gitlab/issues",
+            },
+        },
+        {
+            "name": "jupyterlab-git",
+            "project_url": "https://github.com/jupyterlab/jupyterlab-git",
+        },
+        {
+            "name": "jupyterlab-rainbow-brackets",
+            "project_url": "https://github.com/krassowski/jupyterlab-rainbow-brackets",
+        },
+        {"name": "nbdime", "home_page": "https://github.com/jupyter/nbdime"},
+        {
+            "name": "rise",
+            "project_urls": {
+                "Source Code": "https://github.com/jupyterlab-contrib/rise",
+            },
+        },
+    ]
+
+    proxy = Mock(
+        browse=Mock(return_value=[[extension["name"], "1.0.0"] for extension in extension_data]),
+    )
+    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
+
+    manager = PyPIExtensionManager()
+
+    extensions = {
+        extension["name"]: {"version": "1.0.0", **extension} for extension in extension_data
+    }
+
+    async def mock_pkg_metadata(name, l, b):  # noqa
+        return extensions[name]
+
+    manager._fetch_package_metadata = mock_pkg_metadata
+
+    first_page, pages_count = await manager.list_extensions("", per_page=3)
+    assert [extension.name for extension in first_page] == [
+        # jupyter/jupyterlab
+        "jupyterlab-git",
+        "nbdime",
+        # jupyterlab-contrib
+        "jupyterlab-gitlab",
+    ]
+    assert pages_count == 2
+    second_page, pages_count = await manager.list_extensions("", page=2, per_page=3)
+    assert [extension.name for extension in second_page] == [
+        # jupyterlab-contrib
+        "rise",
+        # other third-party
+        "jupyterlab-rainbow-brackets",
+        # example extensions
+        "jupyterlab-apod",
+    ]
+
+
+@patch("jupyterlab.extensions.pypi.xmlrpc.client")
 async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension1 = ExtensionPackage(
         name="jupyterlab-git",
@@ -240,7 +308,6 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                     "packaging",
                     "pexpect",
                     "coverage ; extra == 'dev'",
-                    "jupyter-packaging (~=0.7.9) ; extra == 'dev'",
                     "jupyterlab (~=3.0) ; extra == 'dev'",
                     "pre-commit ; extra == 'dev'",
                     "pytest ; extra == 'dev'",
@@ -248,7 +315,6 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                     "pytest-cov ; extra == 'dev'",
                     "pytest-tornasync ; extra == 'dev'",
                     "coverage ; extra == 'tests'",
-                    "jupyter-packaging (~=0.7.9) ; extra == 'tests'",
                     "jupyterlab (~=3.0) ; extra == 'tests'",
                     "pre-commit ; extra == 'tests'",
                     "pytest ; extra == 'tests'",

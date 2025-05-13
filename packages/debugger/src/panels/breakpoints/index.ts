@@ -33,6 +33,10 @@ export class Breakpoints extends PanelWithToolbar {
 
     const body = new BreakpointsBody(model);
 
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      trans.__('Breakpoints panel toolbar')
+    );
     this.toolbar.addItem(
       'pauseOnException',
       new PauseOnExceptionsWidget({

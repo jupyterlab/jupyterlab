@@ -490,31 +490,8 @@ class ListWidget extends ReactWidget {
     );
   }
 
-  /**
-   * Check if the widget or any of it's parents is hidden.
-   *
-   * Checking parents is necessary as lumino does not propagate visibility
-   * changes from parents down to children (although it does notify parents
-   * about changes to children visibility).
-   */
-  private _isAnyHidden() {
-    let isHidden = this.isHidden;
-    if (isHidden) {
-      return isHidden;
-    }
-    let parent: Widget | null = this.parent;
-    while (parent != null) {
-      if (parent.isHidden) {
-        isHidden = true;
-        break;
-      }
-      parent = parent.parent;
-    }
-    return isHidden;
-  }
-
   private _emitUpdate() {
-    if (this._isAnyHidden()) {
+    if (!this.isVisible) {
       return;
     }
     this._update.emit();
@@ -689,6 +666,10 @@ class Section extends PanelWithToolbar {
       );
     }
     this.toolbar.addClass('jp-RunningSessions-toolbar');
+    this._toolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('%1 toolbar', this.title.label)
+    );
   }
 
   private _onListChanged(): void {

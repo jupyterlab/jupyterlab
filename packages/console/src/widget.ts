@@ -815,12 +815,16 @@ export class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     if (info.status !== 'ok') {
-      this._banner!.model.sharedModel.setSource(
-        'Error in getting kernel banner'
-      );
+      if (this._banner) {
+        this._banner.model.sharedModel.setSource(
+          'Error in getting kernel banner'
+        );
+      }
       return;
     }
-    this._banner!.model.sharedModel.setSource(info.banner);
+    if (this._banner) {
+      this._banner.model.sharedModel.setSource(info.banner);
+    }
     const lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.promptCell) {

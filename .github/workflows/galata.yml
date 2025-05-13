@@ -49,6 +49,7 @@ jobs:
       - name: Install browser
         run: |
           cd galata
+          jlpm playwright install-deps
           # Install only Chromium browser
           jlpm playwright install chromium
           jlpm run build
@@ -158,6 +159,7 @@ jobs:
         run: |
           set -ex
           cd galata
+          jlpm playwright install-deps
           # Install only Chromium browser
           jlpm playwright install chromium
           jlpm run build

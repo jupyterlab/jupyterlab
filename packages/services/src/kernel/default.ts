@@ -7,7 +7,7 @@ import { JSONExt, JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { ServerConnection } from '..';
+import { CommsOverSubshells, ServerConnection } from '..';
 
 import { CommHandler } from './comm';
 
@@ -22,9 +22,10 @@ import {
 } from './future';
 
 import * as validate from './validate';
-import { KernelSpec, KernelSpecAPI } from '../kernelspec';
+import { KernelSpec } from '../kernelspec';
 
-import * as restapi from './restapi';
+import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
+import { KernelSpecAPIClient } from '../kernelspec/restapi';
 
 // Stub for requirejs.
 declare let requirejs: any;
@@ -50,9 +51,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._id = options.model.id;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this._kernelAPIClient =
+      options.kernelAPIClient ??
+      new KernelAPIClient({ serverSettings: this.serverSettings });
+    this._kernelSpecAPIClient =
+      options.kernelSpecAPIClient ??
+      new KernelSpecAPIClient({ serverSettings: this.serverSettings });
     this._clientId = options.clientId ?? UUID.uuid4();
     this._username = options.username ?? '';
     this.handleComms = options.handleComms ?? true;
+    this._commsOverSubshells =
+      options.commsOverSubshells ?? CommsOverSubshells.PerCommTarget;
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
@@ -78,6 +87,31 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * See https://github.com/jupyter/jupyter_client/issues/263
    */
   readonly handleComms: boolean;
+
+  /**
+   * Whether comm messages should be sent to kernel subshells, if the
+   * kernel supports it.
+   *
+   * #### Notes
+   * Sending comm messages over subshells allows processing comms whilst
+   * processing execute-request on the "main shell". This prevents blocking
+   * comm processing.
+   * Options are:
+   * - disabled: not using subshells
+   * - one subshell per comm-target (default)
+   * - one subshell per comm (can lead to issues if creating many comms)
+   */
+  get commsOverSubshells(): CommsOverSubshells {
+    return this._commsOverSubshells;
+  }
+
+  set commsOverSubshells(value: CommsOverSubshells) {
+    this._commsOverSubshells = value;
+
+    for (const [_, comm] of this._comms) {
+      comm.commsOverSubshells = value;
+    }
+  }
 
   /**
    * A signal emitted when the kernel status changes.
@@ -232,11 +266,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this._specPromise) {
       return this._specPromise;
     }
-    this._specPromise = KernelSpecAPI.getSpecs(this.serverSettings).then(
-      specs => {
-        return specs.kernelspecs[this._name];
-      }
-    );
+    this._specPromise = this._kernelSpecAPIClient.get().then(specs => {
+      return specs.kernelspecs[this._name];
+    });
     return this._specPromise;
   }
 
@@ -262,6 +294,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
       serverSettings: this.serverSettings,
       // handleComms defaults to false since that is safer
       handleComms: false,
+      kernelAPIClient: this._kernelAPIClient,
+      commsOverSubshells: CommsOverSubshells.Disabled,
       ...options
     });
   }
@@ -491,7 +525,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    return restapi.interruptKernel(this.id, this.serverSettings);
+    return this._kernelAPIClient.interrupt(this.id);
   }
 
   /**
@@ -519,7 +553,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._clearKernelState();
     this._kernelSession = RESTARTING_KERNEL_SESSION;
-    await restapi.restartKernel(this.id, this.serverSettings);
+    await this._kernelAPIClient.restart(this.id);
     // Reconnect to the kernel to address cases where kernel ports
     // have changed during the restart.
     await this.reconnect();
@@ -577,7 +611,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   async shutdown(): Promise<void> {
     if (this.status !== 'dead') {
-      await restapi.shutdownKernel(this.id, this.serverSettings);
+      await this._kernelAPIClient.shutdown(this.id);
     }
     this.handleShutdown();
   }
@@ -1006,9 +1040,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
       throw new Error('Comm is already created');
     }
 
-    const comm = new CommHandler(targetName, commId, this, () => {
-      this._unregisterComm(commId);
-    });
+    const comm = new CommHandler(
+      targetName,
+      commId,
+      this,
+      () => {
+        this._unregisterComm(commId);
+      },
+      this._commsOverSubshells
+    );
     this._comms.set(commId, comm);
     return comm;
   }
@@ -1276,7 +1316,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         KernelMessage.IShellControlMessage
       >
     >();
-    this._comms = new Map<string, Kernel.IComm>();
+    this._comms = new Map<string, CommHandler>();
     this._displayIdToParentIds.clear();
     this._msgIdToDisplayIds.clear();
   }
@@ -1315,7 +1355,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this,
       () => {
         this._unregisterComm(content.comm_id);
-      }
+      },
+      this.commsOverSubshells
     );
     this._comms.set(content.comm_id, comm);
 
@@ -1396,7 +1437,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     const settings = this.serverSettings;
     const partialUrl = URLExt.join(
       settings.wsUrl,
-      restapi.KERNEL_SERVICE_URL,
+      KERNEL_SERVICE_URL,
       encodeURIComponent(this._id)
     );
 
@@ -1435,7 +1476,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._reason = '';
       this._model = undefined;
       try {
-        const model = await restapi.getKernelModel(this._id, settings);
+        const model = await this._kernelAPIClient.getModel(this._id);
         this._model = model;
         if (model?.execution_state === 'dead') {
           this._updateStatus('dead');
@@ -1785,6 +1826,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Websocket to communicate with kernel.
    */
   private _ws: WebSocket | null = null;
+  private _kernelAPIClient: Kernel.IKernelAPIClient;
+  private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
@@ -1794,6 +1837,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
   );
   private _selectedProtocol: string = '';
 
+  private _commsOverSubshells: CommsOverSubshells =
+    CommsOverSubshells.PerCommTarget;
+
   private _futures = new Map<
     string,
     KernelFutureHandler<
@@ -1801,7 +1847,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.IShellControlMessage
     >
   >();
-  private _comms = new Map<string, Kernel.IComm>();
+  private _comms = new Map<string, CommHandler>();
   private _targetRegistry: {
     [key: string]: (
       comm: Kernel.IComm,

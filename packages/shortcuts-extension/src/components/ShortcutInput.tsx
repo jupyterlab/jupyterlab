@@ -385,6 +385,7 @@ export class ShortcutInput extends React.Component<
           }
           disabled={!this.state.isAvailable || !this.state.isFunctional}
           onClick={this.handleSubmit}
+          tabIndex={0}
         >
           {this.state.isAvailable ? <checkIcon.react /> : <errorIcon.react />}
         </button>

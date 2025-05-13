@@ -6,6 +6,7 @@
 **/static
 **/.ipynb_checkpoints
 **/coverage
+**/.mypy_cache
 CHANGELOG.md
 
 .eggs

@@ -35,10 +35,12 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { announcements } from './announcements';
+import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
-import { settingsPlugin } from './settingsplugin';
+import { settingsConnector, settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
+import { subshellsSettings } from './subshell-settings';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
@@ -358,9 +360,12 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
 async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
-  if (current === undefined) {
+  if (
+    current === undefined ||
+    !(current.startsWith('notebook') || current.startsWith('editor'))
+  ) {
     document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
-      workspace.startsWith('auto-') ? ` (${workspace})` : ``
+      workspace === 'default' ? '' : ` (${workspace})`
     }`;
   } else {
     // File name from current path
@@ -372,20 +377,15 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
+    workspace =
+      workspace.length > 15 ? workspace.slice(0, 12).concat(`…`) : workspace;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
-
-    if (workspace.startsWith('auto-')) {
-      document.title = `${currentFile} (${workspace}${
-        count > 1 ? ` : ${count}` : ``
-      }) - ${name}`;
-    } else {
-      document.title = `${currentFile}${
-        count > 1 ? ` (${count})` : ``
-      } - ${name}`;
-    }
+    document.title = `${currentFile}${count > 1 ? ` (${count})` : ``} - ${
+      workspace === 'default' ? name : workspace
+    }`;
   }
 }
 
@@ -728,19 +728,37 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
   }
 };
 
+/*
+ * A plugin owning the kernel settings
+ */
+export const kernelSettings: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:kernels-settings',
+  description: 'Reserves the name for kernel settings.',
+  autoStart: true,
+  requires: [ISettingRegistry],
+  activate: (_app: JupyterFrontEnd, settingRegistry: ISettingRegistry) => {
+    void settingRegistry.load(kernelSettings.id);
+  }
+};
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  kernelSettings,
   announcements,
   kernelStatus,
+  licensesClient,
+  licensesPlugin,
   notificationPlugin,
   palette,
   paletteRestorer,
   print,
   resolver,
   runningSessionsStatus,
+  subshellsSettings,
   sanitizer,
+  settingsConnector,
   settingsPlugin,
   state,
   splash,
