@@ -52,7 +52,7 @@
   "devDependencies": {
     "@types/webpack-env": "^1.18.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.6.3"
   },
   "publishConfig": {
     "access": "public"

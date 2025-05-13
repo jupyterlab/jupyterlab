@@ -66,7 +66,7 @@ The **icons in use** are in the ``ui-components/style/icons/debugger`` folder, w
 TypeScript update
 ^^^^^^^^^^^^^^^^^
 
-As a follow-up to the update to TypeScript 5.5, the ``tsconfig.json`` configuration of the ``@jupyterlab/buildutils`` package changed
+As a follow-up to the update to TypeScript 5.6, the ``tsconfig.json`` configuration of the ``@jupyterlab/buildutils`` package changed
 the ``module`` option from ``commonjs`` to ``Node16``:
 
 .. code:: diff
