@@ -129,6 +129,22 @@ describe('filebrowser/browser', () => {
         const selectedItems = Array.from(fileBrowser.selectedItems());
         expect(selectedItems.length).toBe(2);
       });
+
+      it('should emit when selection is cleared', async () => {
+        const items = Array.from(model.items());
+        expect(items.length).toBeGreaterThan(0);
+        await fileBrowser.selectItemByName(items[0].name);
+
+        const selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBeGreaterThan(0);
+
+        const selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        fileBrowser.clearSelectedItems();
+        await selectionChanged;
+
+        const newSelectedItems = Array.from(fileBrowser.selectedItems());
+        expect(newSelectedItems.length).toBe(0);
+      });
     });
 
     describe('#createNewDirectory', () => {
