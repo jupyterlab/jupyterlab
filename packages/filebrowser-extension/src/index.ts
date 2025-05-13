@@ -20,6 +20,7 @@ import {
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
+  Notification,
   setToolbar,
   showErrorMessage,
   WidgetTracker
@@ -903,6 +904,128 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:notify-upload',
+  requires: [IDefaultFileBrowser, ISettingRegistry, ITranslator],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    defaultBrowser: FileBrowser,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
+  ) => {
+    const trans = translator.load('jupyterlab');
+    // load and watch settings
+    const settings = await settingRegistry.load(FILE_BROWSER_PLUGIN_ID);
+    let autoOpen = settings.get('autoOpenUploads').composite as boolean;
+    let maxSize =
+      (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+
+    settings.changed.connect(() => {
+      autoOpen = settings.get('autoOpenUploads').composite as boolean;
+      maxSize =
+        (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+    });
+
+    // attach to the Uploader after restore
+    void app.restored.then(() => {
+      const widgets = Array.from(defaultBrowser.toolbar.children());
+      const uploader = widgets.find(w => w instanceof Uploader) as
+        | Uploader
+        | undefined;
+      if (!uploader) {
+        console.warn('Uploader widget not found');
+        return;
+      }
+
+      uploader.filesUploaded.connect((_sender, models) => {
+        // single-file case
+        const isBinaryFile = [
+          '.zip',
+          '.gz',
+          '.tar',
+          '.rar',
+          '.7z',
+          '.exe',
+          '.bin',
+          '.iso'
+        ].some(ext => models[0].name.endsWith(ext));
+        if (
+          models.length === 1 &&
+          (models[0].type === 'notebook' || models[0].type === 'file')
+        ) {
+          const file = models[0];
+          if (autoOpen && file.size && file.size <= maxSize && !isBinaryFile) {
+            // open immediately
+            void app.commands
+              .execute('docmanager:open', { path: file.path })
+              .catch(err => {
+                void showErrorMessage(`Opening ${file.name} failed`, err);
+              });
+          } else {
+            // notify and offer an “Open” button
+            Notification.emit(
+              trans.__(
+                'Uploaded %1%2',
+                file.name,
+                file.size
+                  ? trans.__(' (%1 MB)', (file.size / (1024 * 1024)).toFixed(1))
+                  : ''
+              ),
+              'info',
+              {
+                autoClose: 5000,
+                actions: [
+                  {
+                    label: trans.__('Open File'),
+                    callback: () => {
+                      void app.commands
+                        .execute('docmanager:open', { path: file.path })
+                        .catch(err => {
+                          void showErrorMessage(
+                            `Could not open ${file.name}`,
+                            err
+                          );
+                        });
+                    }
+                  }
+                ]
+              }
+            );
+          }
+        } else {
+          // multi-file case
+          Notification.emit(
+            trans.__('Upload Complete (%1 files)', models.length),
+            'info',
+            {
+              autoClose: 5000,
+              actions: [
+                {
+                  label: trans.__('Open All'),
+                  callback: () => {
+                    models.forEach(
+                      m =>
+                        void app.commands
+                          .execute('docmanager:open', { path: m.path })
+                          .catch(err => {
+                            void showErrorMessage(
+                              `Could not open ${m.path}`,
+                              err
+                            );
+                          })
+                    );
+                  }
+                }
+              ]
+            }
+          );
+        }
+      });
+    });
+  }
+};
+
 /**
  * Add the main file browser commands to the application's command registry.
  */
@@ -1397,7 +1520,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browserWidget,
   openWithPlugin,
   openBrowserTabPlugin,
-  openUrlPlugin
+  openUrlPlugin,
+  notifyUploadPlugin
 ];
 export default plugins;
 
