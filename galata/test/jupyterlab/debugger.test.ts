@@ -246,6 +246,9 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
     ).toHaveCount(0);
+
+    await page.getByRole('menu').press('Escape');
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Copy to globals not available from kernel', async ({ page }) => {
@@ -278,6 +281,8 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveCount(0);
+
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Copy to clipboard', async ({ page }) => {
@@ -309,6 +314,8 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveCount(0);
+
+    await page.click('jp-button[title^=Continue]');
   });
 });
 
