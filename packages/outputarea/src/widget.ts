@@ -1188,6 +1188,8 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: KeyboardEvent): void {
+    // Stop bubbling
+    event.stopPropagation();
     if (this._resolved) {
       // Do not handle any more key events if the promise was resolved.
       event.preventDefault();
