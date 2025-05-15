@@ -37,6 +37,16 @@ function isInScrollingNotebook(element: Element | null): boolean {
 }
 
 /**
+ * Check whether the element is part of a CodeMirror editor.
+ */
+function isCodeMirrorElement(element: Element | null): boolean {
+  if (!element) {
+    return false;
+  }
+  return !!element.closest('.cm-editor');
+}
+
+/**
  * Subclass IntersectionObserver to allow suspending callbacks when notebook is scrolling.
  */
 window.IntersectionObserver = class extends window.IntersectionObserver {
@@ -62,7 +72,11 @@ window.IntersectionObserver = class extends window.IntersectionObserver {
     const entriesInScrollingNotebook = [];
     const nonOutputEntries = [];
     for (const entry of entries) {
-      if (isInScrollingNotebook(entry.target)) {
+      // Do not delay callbacks to CodeMirror editor logic
+      if (
+        isInScrollingNotebook(entry.target) &&
+        !isCodeMirrorElement(entry.target)
+      ) {
         entriesInScrollingNotebook.push(entry);
       } else {
         nonOutputEntries.push(entry);
@@ -380,6 +394,10 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
       // Reset cache
       this._topHiddenCodeCells = -1;
+
+      if (this.parent!.isAttached && !widget.isAttached) {
+        widget.setFlag(Widget.Flag.IsAttached);
+      }
     } else if (!isSoftHidden) {
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(

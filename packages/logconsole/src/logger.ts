@@ -201,6 +201,7 @@ export class Logger implements ILogger {
       contentFactory: new LogConsoleModelContentFactory(),
       maxLength: options.maxLength
     });
+    this._level = options.level ?? 'warning';
   }
 
   /**
@@ -408,10 +409,16 @@ export class Logger implements ILogger {
   private _stateChanged = new Signal<this, IStateChange>(this);
   private _rendermime: IRenderMimeRegistry | null = null;
   private _version = 0;
-  private _level: LogLevel = 'warning';
+  private _level: LogLevel;
 }
 
+/**
+ * The namespace for Logger class statics.
+ */
 export namespace Logger {
+  /**
+   * The options used to initialize a Logger.
+   */
   export interface IOptions {
     /**
      * The log source identifier.
@@ -421,10 +428,20 @@ export namespace Logger {
      * The maximum number of messages to store.
      */
     maxLength: number;
+    /**
+     * The default log level.
+     */
+    level?: LogLevel;
   }
 }
 
+/**
+ * The namespace for Logger class private statics.
+ */
 namespace Private {
+  /**
+   * The log level enum.
+   */
   export enum LogLevel {
     debug,
     info,

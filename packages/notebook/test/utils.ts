@@ -63,6 +63,7 @@ export const editorFactory = NBTestUtils.editorFactory;
 export const mimeTypeService = NBTestUtils.mimeTypeService;
 export const defaultEditorConfig = NBTestUtils.defaultEditorConfig;
 export const clipboard = NBTestUtils.clipboard;
+export const systemClipboard = NBTestUtils.systemClipboard;
 
 export function defaultRenderMime(): any {
   return NBTestUtils.defaultRenderMime();
