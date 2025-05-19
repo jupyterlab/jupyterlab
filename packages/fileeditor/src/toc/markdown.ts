@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { WidgetTracker } from '@jupyterlab/apputils';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { IMarkdownParser } from '@jupyterlab/rendermime';
 import {
   TableOfContents,
   TableOfContentsModel,
@@ -18,6 +20,16 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
   IEditorHeading,
   IDocumentWidget<FileEditor, DocumentRegistry.IModel>
 > {
+  protected parser: IMarkdownParser | null;
+
+  constructor(
+    widget: IDocumentWidget<FileEditor>,
+    configuration?: TableOfContents.IConfig | undefined,
+    parser?: IMarkdownParser | null
+  ) {
+    super(widget, configuration);
+    this.parser = parser ?? null;
+  }
   /**
    * Type of document supported by the model.
    *
@@ -34,7 +46,7 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  protected getHeadings(): Promise<IEditorHeading[] | null> {
+  protected async getHeadings(): Promise<IEditorHeading[] | null> {
     if (!this.isActive) {
       return Promise.resolve(null);
     }
@@ -42,7 +54,7 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
     const content = this.widget.content.model.sharedModel.getSource();
 
     const headings = TableOfContentsUtils.filterHeadings(
-      TableOfContentsUtils.Markdown.getHeadings(content),
+      await TableOfContentsUtils.Markdown.getHeadings(this.parser, content),
       {
         ...this.configuration,
         // Force removing numbering as they cannot be displayed
@@ -58,6 +70,16 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
  * Table of content model factory for Markdown files.
  */
 export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory {
+  parser: IMarkdownParser | null;
+
+  constructor(
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    parser?: IMarkdownParser | null
+  ) {
+    super(tracker);
+    this.parser = parser ?? null;
+  }
+
   /**
    * Whether the factory can handle the widget or not.
    *
@@ -85,6 +107,6 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
     widget: IDocumentWidget<FileEditor, DocumentRegistry.IModel>,
     configuration?: TableOfContents.IConfig
   ): MarkdownTableOfContentsModel {
-    return new MarkdownTableOfContentsModel(widget, configuration);
+    return new MarkdownTableOfContentsModel(widget, configuration, this.parser);
   }
 }

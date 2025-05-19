@@ -58,6 +58,7 @@ import {
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { IMarkdownParser } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -88,7 +89,8 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IEditorLanguageRegistry,
     IEditorThemeRegistry,
     IDefaultFileBrowser,
-    ISettingRegistry
+    ISettingRegistry,
+    IMarkdownParser
   ],
   optional: [
     IConsoleTracker,
@@ -333,7 +335,8 @@ function activate(
   sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
   translator_: ITranslator | null,
-  formRegistry: IFormRendererRegistry | null
+  formRegistry: IFormRendererRegistry | null,
+  parser: IMarkdownParser | null
 ): IEditorTracker {
   const id = plugin.id;
   const translator = translator_ ?? nullTranslator;
@@ -593,7 +596,7 @@ function activate(
 
   if (tocRegistry) {
     tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
-    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker));
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker, parser));
     tocRegistry.add(new PythonTableOfContentsFactory(tracker));
   }
 
