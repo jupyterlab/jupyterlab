@@ -484,6 +484,47 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.0a0
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.1...7160c308c0e66b2043818a4a5659e982b661b01f))
+
+### Enhancements made
+
+- Add an optional `exportAs` method to `NbConvert.IManager` [#17482](https://github.com/jupyterlab/jupyterlab/pull/17482) ([@jtpio](https://github.com/jtpio))
+- Reorder `extra_labextensions_path` to favor defaults [#17476](https://github.com/jupyterlab/jupyterlab/pull/17476) ([@peytondmurray](https://github.com/peytondmurray))
+
+### Bugs fixed
+
+- Fix Settings Editor incorrectly resetting values to default in filtered view [#17540](https://github.com/jupyterlab/jupyterlab/pull/17540) ([@yukiiii04](https://github.com/yukiiii04))
+- Update widget flag on attaching cell to viewport [#17532](https://github.com/jupyterlab/jupyterlab/pull/17532) ([@trungleduc](https://github.com/trungleduc))
+- Fix rendering of long cell editors in windowed notebook [#17528](https://github.com/jupyterlab/jupyterlab/pull/17528) ([@krassowski](https://github.com/krassowski))
+- Upgrade CodeMirror packages to latest [#17526](https://github.com/jupyterlab/jupyterlab/pull/17526) ([@krassowski](https://github.com/krassowski))
+- Update lumino to `v2025.4.30` to pull menu aria fix [#17525](https://github.com/jupyterlab/jupyterlab/pull/17525) ([@krassowski](https://github.com/krassowski))
+- Fix editing shortcuts on Safari (allow shortcut edit button to receive focus) [#17511](https://github.com/jupyterlab/jupyterlab/pull/17511) ([@minrk](https://github.com/minrk))
+- Add `aria-hidden` to icons (`<svg>` elements) which do not have a `title` [#17472](https://github.com/jupyterlab/jupyterlab/pull/17472) ([@nkn2022](https://github.com/nkn2022))
+
+### Maintenance and upkeep improvements
+
+- Bump actions/create-github-app-token from 1 to 2 in the actions group [#17529](https://github.com/jupyterlab/jupyterlab/pull/17529) ([@dependabot](https://github.com/dependabot))
+- Bump tough-cookie from 4.1.2 to 4.1.4 [#17502](https://github.com/jupyterlab/jupyterlab/pull/17502) ([@dependabot](https://github.com/dependabot))
+- Bump ws from 8.16.0 to 8.18.1 in /jupyterlab/tests/mock_packages/test-hyphens-underscore [#17500](https://github.com/jupyterlab/jupyterlab/pull/17500) ([@dependabot](https://github.com/dependabot))
+- Bump ws from 8.16.0 to 8.18.1 in /jupyterlab/tests/mock_packages/test_no_hyphens [#17499](https://github.com/jupyterlab/jupyterlab/pull/17499) ([@dependabot](https://github.com/dependabot))
+- Update to Playwright 1.52.0 [#17483](https://github.com/jupyterlab/jupyterlab/pull/17483) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Add new entry to Postmortems in `RELEASE.md` [#17505](https://github.com/jupyterlab/jupyterlab/pull/17505) ([@jtpio](https://github.com/jtpio))
+- Add an optional `exportAs` method to `NbConvert.IManager` [#17482](https://github.com/jupyterlab/jupyterlab/pull/17482) ([@jtpio](https://github.com/jtpio))
+- Reorder `extra_labextensions_path` to favor defaults [#17476](https://github.com/jupyterlab/jupyterlab/pull/17476) ([@peytondmurray](https://github.com/peytondmurray))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-04-22&to=2025-05-07&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2025-04-22..2025-05-07&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-04-22..2025-05-07&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-04-22..2025-05-07&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-04-22..2025-05-07&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aminrk+updated%3A2025-04-22..2025-05-07&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-04-22..2025-05-07&type=Issues) | [@peytondmurray](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apeytondmurray+updated%3A2025-04-22..2025-05-07&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2025-04-22..2025-05-07&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2025-04-22..2025-05-07&type=Issues) | [@yukiiii04](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayukiiii04+updated%3A2025-04-22..2025-05-07&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.0...431caf5477f1c329bb68449a785ca7edda9df963))
@@ -513,8 +554,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-04-03&to=2025-04-22&type=c))
 
 [@achhina](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aachhina+updated%3A2025-04-03..2025-04-22&type=Issues) | [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2025-04-03..2025-04-22&type=Issues) | [@bnavigator](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abnavigator+updated%3A2025-04-03..2025-04-22&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-04-03..2025-04-22&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-04-03..2025-04-22&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2025-04-03..2025-04-22&type=Issues) | [@DenisaCG](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADenisaCG+updated%3A2025-04-03..2025-04-22&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2025-04-03..2025-04-22&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-04-03..2025-04-22&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-04-03..2025-04-22&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-04-03..2025-04-22&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2025-04-03..2025-04-22&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.0
 
