@@ -8,7 +8,8 @@
  */
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  JupyterLab
 } from '@jupyterlab/application';
 import {
   IWorkspaceCommands,
@@ -30,9 +31,16 @@ const workspacesModel: JupyterFrontEndPlugin<IWorkspacesModel> = {
   description: 'Provides a model for available workspaces.',
   provides: IWorkspacesModel,
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
+  optional: [JupyterLab.IInfo],
+  activate: (app: JupyterFrontEnd, info: JupyterLab.IInfo | null) => {
     return new WorkspacesModel({
-      manager: app.serviceManager.workspaces
+      manager: app.serviceManager.workspaces,
+      refreshStandby: () => {
+        if (info) {
+          return !info.isConnected || 'when-hidden';
+        }
+        return 'when-hidden';
+      }
     });
   }
 };
