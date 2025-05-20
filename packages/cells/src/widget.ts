@@ -1332,8 +1332,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
           );
         } else if (mdType) {
           TableOfContentsUtils.Markdown.getHeadings(
-            this._rendermime.markdownParser,
-            m.data[mdType] as string
+            m.data[mdType] as string,
+            this._rendermime.markdownParser
           ).then(renderedHTML => {
             headings.push(
               ...renderedHTML.map(heading => {
@@ -2204,11 +2204,11 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
   async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      const renderedHTML = await TableOfContentsUtils.Markdown.getHeadings(
-        this._rendermime.markdownParser,
-        this.model.sharedModel.getSource()
+      const headings = await TableOfContentsUtils.Markdown.getHeadings(
+        this.model.sharedModel.getSource(),
+        this._rendermime.markdownParser
       );
-      this._headingsCache = renderedHTML.map(h => {
+      this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
     }

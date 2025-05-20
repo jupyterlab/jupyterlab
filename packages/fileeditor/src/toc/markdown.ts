@@ -24,11 +24,11 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
 
   constructor(
     widget: IDocumentWidget<FileEditor>,
-    configuration?: TableOfContents.IConfig | undefined,
-    parser?: IMarkdownParser | null
+    parser: IMarkdownParser | null,
+    configuration?: TableOfContents.IConfig | undefined
   ) {
     super(widget, configuration);
-    this.parser = parser ?? null;
+    this.parser = parser;
   }
   /**
    * Type of document supported by the model.
@@ -54,7 +54,7 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
     const content = this.widget.content.model.sharedModel.getSource();
 
     const headings = TableOfContentsUtils.filterHeadings(
-      await TableOfContentsUtils.Markdown.getHeadings(this.parser, content),
+      await TableOfContentsUtils.Markdown.getHeadings(content, this.parser),
       {
         ...this.configuration,
         // Force removing numbering as they cannot be displayed
@@ -62,7 +62,7 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
         numberHeaders: false
       }
     );
-    return Promise.resolve(headings);
+    return headings;
   }
 }
 
@@ -74,10 +74,10 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
 
   constructor(
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    parser?: IMarkdownParser | null
+    parser: IMarkdownParser | null
   ) {
     super(tracker);
-    this.parser = parser ?? null;
+    this.parser = parser;
   }
 
   /**
@@ -107,6 +107,6 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
     widget: IDocumentWidget<FileEditor, DocumentRegistry.IModel>,
     configuration?: TableOfContents.IConfig
   ): MarkdownTableOfContentsModel {
-    return new MarkdownTableOfContentsModel(widget, configuration, this.parser);
+    return new MarkdownTableOfContentsModel(widget, this.parser, configuration);
   }
 }

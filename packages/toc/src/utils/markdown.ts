@@ -62,43 +62,35 @@ export async function getHeadingId(
   return null;
 }
 
-async function getRenderedMarkdown(
-  parser: IMarkdownParser,
-  markdownText: string
-) {
-  const renderedHtml = parser.render(markdownText);
-  return renderedHtml;
-}
-
 export async function getHeadings(
-  parser: IMarkdownParser | null,
-  text: string
+  markdownText: string,
+  parser: IMarkdownParser | null
 ): Promise<IMarkdownHeading[]> {
-  let renderedHtml = '';
-  if (parser) {
-    renderedHtml = await getRenderedMarkdown(parser, text);
+  if (!parser) {
+    console.warn("Couldn't parse headings; Markdown parser is null");
+    return [];
   }
+  const renderedHtml = await parser.render(markdownText);
 
   const headings = new Array<IMarkdownHeading>();
   const domParser = new DOMParser();
-  const doc = domParser.parseFromString(renderedHtml, 'text/html');
+  const htmlDocument = domParser.parseFromString(renderedHtml, 'text/html');
 
   // Query all heading elements (h1-h6)
-  const headingElements = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  const headingElements = htmlDocument.querySelectorAll(
+    'h1, h2, h3, h4, h5, h6'
+  );
 
-  let line: number = 1;
-  headingElements.forEach(headingEl => {
-    const level = parseInt(headingEl.tagName.substring(1), 10);
-    const text = headingEl.textContent?.trim() || '';
-    // const id = headingEl.id;
+  headingElements.forEach((headingElement, lineIdx) => {
+    const level = parseInt(headingElement.tagName.substring(1), 10);
+    const headingText = headingElement.textContent?.trim() || '';
 
     headings.push({
-      text: text,
-      line: line++, //To compute line properly
+      text: headingText,
+      line: lineIdx, // Not the exact line from markdown source
       level: level,
-      // raw: headingEl.innerHTML,
-      raw: text,
-      skip: skipHeading.test(text)
+      raw: headingElement.innerHTML,
+      skip: skipHeading.test(headingText)
     });
   });
 

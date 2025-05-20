@@ -72,16 +72,16 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
    */
   protected async getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const markdownHeadings = await TableOfContentsUtils.Markdown.getHeadings(
-      this.parser,
-      content
+    const headings = await TableOfContentsUtils.Markdown.getHeadings(
+      content,
+      this.parser
     );
-    const headings = TableOfContentsUtils.filterHeadings(markdownHeadings, {
+    const filteredHeadings = TableOfContentsUtils.filterHeadings(headings, {
       ...this.configuration,
       // Force base number to be equal to 1
       baseNumbering: 1
     });
-    return Promise.resolve(headings);
+    return Promise.resolve(filteredHeadings);
   }
 }
 

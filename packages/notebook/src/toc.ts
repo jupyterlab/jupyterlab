@@ -243,7 +243,7 @@ export class NotebookToCModel extends TableOfContentsModel<
           ) {
             headings.push(
               ...TableOfContentsUtils.filterHeadings(
-                (await cell.getHeadings()) ?? [],
+                await cell.getHeadings(),
                 this.configuration,
                 documentLevels
               ).map(heading => {
@@ -261,7 +261,7 @@ export class NotebookToCModel extends TableOfContentsModel<
         }
         case 'markdown': {
           const cellHeadings = TableOfContentsUtils.filterHeadings(
-            (await cell.getHeadings()) ?? [],
+            await cell.getHeadings(),
             this.configuration,
             documentLevels
           ).map((heading, index) => {
