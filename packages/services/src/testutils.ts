@@ -764,6 +764,7 @@ export class FakeUserManager extends BaseManager implements User.IManager {
 
   private _identity: User.IIdentity;
   private _permissions: ReadonlyJSONObject;
+  private _updatableFields: User.UpdatableUserField[];
 
   private _userChanged = new Signal<this, User.IUser>(this);
   private _connectionFailure = new Signal<this, Error>(this);
@@ -774,7 +775,8 @@ export class FakeUserManager extends BaseManager implements User.IManager {
   constructor(
     options: UserManager.IOptions = {},
     identity: User.IIdentity,
-    permissions: ReadonlyJSONObject
+    permissions: ReadonlyJSONObject,
+    updatableFields: User.UpdatableUserField[] = []
   ) {
     super(options);
 
@@ -784,10 +786,12 @@ export class FakeUserManager extends BaseManager implements User.IManager {
       setTimeout(() => {
         this._identity = identity;
         this._permissions = permissions;
+        this._updatableFields = updatableFields;
 
         this._userChanged.emit({
           identity: this._identity,
-          permissions: this._permissions as PartialJSONObject
+          permissions: this._permissions as PartialJSONObject,
+          updatableFields: this._updatableFields
         });
 
         resolve();
@@ -833,6 +837,13 @@ export class FakeUserManager extends BaseManager implements User.IManager {
    */
   get permissions(): ReadonlyJSONObject | null {
     return this._permissions;
+  }
+
+  /**
+   * Get the most recently fetched updatable fields.
+   */
+  get updatableFields(): User.UpdatableUserField[] | null {
+    return this._updatableFields;
   }
 
   /**
