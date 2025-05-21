@@ -940,22 +940,34 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
 
       uploader.filesUploaded.connect((_sender, models) => {
         // single-file case
-        const isBinaryFile = [
-          '.zip',
-          '.gz',
-          '.tar',
-          '.rar',
-          '.7z',
-          '.exe',
-          '.bin',
-          '.iso'
-        ].some(ext => models[0].name.endsWith(ext));
+        // Get all allowed extensions from default file types
+        const defaultFileTypes = DocumentRegistry.getDefaultFileTypes();
+        const allowedExtensions = defaultFileTypes.reduce<string[]>(
+          (acc, ft) => {
+            if (ft.extensions) {
+              acc.push(...ft.extensions);
+            }
+            return acc;
+          },
+          []
+        );
+        // Check if the uploaded file has an allowed extension
+        const fileExt = models[0].name
+          .toLowerCase()
+          .slice(models[0].name.lastIndexOf('.'));
+        const isAllowedFileType = allowedExtensions.includes(fileExt);
+
         if (
           models.length === 1 &&
           (models[0].type === 'notebook' || models[0].type === 'file')
         ) {
           const file = models[0];
-          if (autoOpen && file.size && file.size <= maxSize && !isBinaryFile) {
+          if (
+            autoOpen &&
+            file.size &&
+            file.size <= maxSize &&
+            isAllowedFileType
+          ) {
             // open immediately
             void app.commands
               .execute('docmanager:open', { path: file.path })
