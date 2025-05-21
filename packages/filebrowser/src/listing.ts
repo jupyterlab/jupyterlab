@@ -1747,6 +1747,7 @@ export class DirListing extends Widget {
           } else {
             this.selection[path] = true;
           }
+          this._selectionChanged.emit();
 
           this.update();
           // Key was handled, so return.

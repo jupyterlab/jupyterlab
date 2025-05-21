@@ -115,6 +115,7 @@ describe('filebrowser/browser', () => {
         expect(itemNodes.length).toBeGreaterThan(1);
 
         selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+
         // Select the second item with shift key to select multiple items
         simulate(
           fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
@@ -144,6 +145,42 @@ describe('filebrowser/browser', () => {
 
         const newSelectedItems = Array.from(fileBrowser.selectedItems());
         expect(newSelectedItems.length).toBe(0);
+      });
+
+      it('should emit when selection is toggled with Ctrl+Space', async () => {
+        fileBrowser.clearSelectedItems();
+
+        const items = Array.from(model.items());
+        expect(items.length).toBeGreaterThan(0);
+
+        let selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        await fileBrowser.selectItemByName(items[1].name);
+
+        simulate(
+          fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
+          'mousedown'
+        );
+
+        let selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBe(1);
+
+        selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+
+        // Simulate Ctrl+Space on the focused item
+        simulate(
+          fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
+          'keydown',
+          {
+            ctrlKey: true,
+            key: ' ',
+            keyCode: 32
+          }
+        );
+
+        await selectionChanged;
+
+        selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBe(0);
       });
     });
 
