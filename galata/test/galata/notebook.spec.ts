@@ -26,7 +26,7 @@ test.describe('Notebook Tests', () => {
     expect(await page.contents.fileExists(`${tmpPath}/${fileName}`)).toEqual(
       true
     );
-    const toolbar = page.getByRole('toolbar', { name: 'notebook actions' });
+    const toolbar = page.getByRole('toolbar', { name: 'main area toolbar' });
     await expect(toolbar.getByText('Python 3 (ipykernel)')).toBeVisible();
   });
 
@@ -41,7 +41,7 @@ test.describe('Notebook Tests', () => {
     expect(await page.contents.fileExists(`${tmpPath}/${fileName}`)).toEqual(
       true
     );
-    const toolbar = page.getByRole('toolbar', { name: 'notebook actions' });
+    const toolbar = page.getByRole('toolbar', { name: 'main area toolbar' });
     await expect(toolbar.getByText('No Kernel')).toBeVisible();
   });
 
