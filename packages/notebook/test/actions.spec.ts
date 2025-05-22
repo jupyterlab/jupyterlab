@@ -1700,9 +1700,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should emit a signal with cut action', async () => {
-        let signals: Notebook.IPasteCells[] = [];
+        let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(
-          (_: Notebook, interaction: Notebook.IPasteCells) => {
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
             signals.push(interaction);
           }
         );
@@ -1714,9 +1714,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should emit a signal with copy action', async () => {
-        let signals: Notebook.IPasteCells[] = [];
+        let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(
-          (_: Notebook, interaction: Notebook.IPasteCells) => {
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
             signals.push(interaction);
           }
         );
@@ -1728,9 +1728,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should emit a signal with the number of copied cells', async () => {
-        let signals: Notebook.IPasteCells[] = [];
+        let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(
-          (_: Notebook, interaction: Notebook.IPasteCells) => {
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
             signals.push(interaction);
           }
         );
@@ -1744,9 +1744,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should emit a signal with action to null', async () => {
-        let signals: Notebook.IPasteCells[] = [];
+        let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(
-          (_: Notebook, interaction: Notebook.IPasteCells) => {
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
             signals.push(interaction);
           }
         );
