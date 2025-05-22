@@ -1624,7 +1624,7 @@ export class Notebook extends StaticNotebook {
   /**
    * A signal emitted when cells are pasted to the notebook.
    */
-  get cellsPasted(): ISignal<this, Notebook.IPasteCells> {
+  get cellsPasted(): ISignal<this, Notebook.IPastedCells> {
     return this._cellsPasted;
   }
 
@@ -3250,7 +3250,7 @@ export class Notebook extends StaticNotebook {
   private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
-  private _cellsPasted = new Signal<this, Notebook.IPasteCells>(this);
+  private _cellsPasted = new Signal<this, Notebook.IPastedCells>(this);
   private _localCopy: nbformat.IBaseCell[] = [];
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
@@ -3302,16 +3302,16 @@ export namespace Notebook {
   }
 
   /**
-   * An interface for the paste cell event.
+   * An interface for the pasted cells event.
    */
-  export interface IPasteCells {
+  export interface IPastedCells {
     /**
-     * The previous local clipboard interaction related to this pasted cell.
+     * The previous local clipboard interaction related to the pasted cells.
      *
-     * If the pasted cell(s) has been copied or cut from the same notebook, this value
+     * If the pasted cells have been copied or cut from the same notebook, this value
      * will be the last interaction that was performed on the local clipboard. It should
-     * be either `copy` or `cut`.
-     * If the pasted cell(s) has been copied or cut from another notebook, this value
+     * be either `copy`, `cut` or `paste`.
+     * If the pasted cells have been copied or cut from another notebook, this value
      * will be `null`.
      */
     previousInteraction: 'copy' | 'cut' | 'paste' | null;
