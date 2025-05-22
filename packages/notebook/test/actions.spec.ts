@@ -1698,6 +1698,81 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });
+
+      it('should emit a signal with cut action', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].previousInteraction).toBe('cut');
+      });
+
+      it('should emit a signal with copy action', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].previousInteraction).toBe('copy');
+      });
+
+      it('should emit a signal with the number of copied cells', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        const next = widget.widgets[1];
+        widget.select(next);
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].cellCount).toBe(2);
+      });
+
+      it('should emit a signal with action to null', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+
+        // Create another notebook widget
+        const widget2 = new Notebook({
+          rendermime,
+          contentFactory: utils.createNotebookFactory(),
+          mimeTypeService: utils.mimeTypeService,
+          notebookConfig: {
+            ...StaticNotebook.defaultNotebookConfig,
+            windowingMode: 'none'
+          }
+        });
+        const model2 = new NotebookModel();
+        model2.fromJSON(utils.DEFAULT_CONTENT);
+        widget2.model = model2;
+        model2.sharedModel.clearUndoHistory();
+
+        widget2.activeCellIndex = 0;
+        await NotebookActions.copyToSystemClipboard(widget2);
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].cellCount).toBe(1);
+        expect(signals[0].previousInteraction).toBeNull();
+      });
     });
 
     describe('#pasteFromSystemClipboard()', () => {
