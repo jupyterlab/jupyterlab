@@ -9,6 +9,15 @@ Extension Migration Guide
 JupyterLab 4.4 to 4.5
 ---------------------
 
+File Browser updates
+^^^^^^^^^^^^^^^^^^^^
+
+The file browser now emits a ``selectionChanged`` signal when the selected files and folders change.
+
+If you maintain an extension which implements a subclass of ``DirListing`` that changes selection, it is recommended to
+emit the ``selectionChanged`` signal when the selection changes. This will ensure that any listeners to the
+``selectionChanged`` signal are notified of the change.
+
 API updates
 ^^^^^^^^^^^
 

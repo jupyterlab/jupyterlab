@@ -317,6 +317,13 @@ export class DirListing extends Widget {
   }
 
   /**
+   * A signal fired when the selection changes.
+   */
+  get selectionChanged(): ISignal<DirListing, void> {
+    return this._selectionChanged;
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -710,6 +717,7 @@ export class DirListing extends Widget {
    */
   clearSelectedItems(): void {
     this.selection = Object.create(null);
+    this._selectionChanged.emit();
   }
 
   /**
@@ -1357,6 +1365,7 @@ export class DirListing extends Widget {
           this._sortedItems.forEach(
             (item: Contents.IModel) => (this.selection[item.path] = true)
           );
+          this._selectionChanged.emit();
         } else {
           // Unselect all items
           this.clearSelectedItems();
@@ -1487,6 +1496,7 @@ export class DirListing extends Widget {
       if (!altered && event.button === 0) {
         this.clearSelectedItems();
         this.selection[this._softSelection] = true;
+        this._selectionChanged.emit();
         this.update();
       }
       this._softSelection = '';
@@ -1737,6 +1747,7 @@ export class DirListing extends Widget {
           } else {
             this.selection[path] = true;
           }
+          this._selectionChanged.emit();
 
           this.update();
           // Key was handled, so return.
@@ -2138,6 +2149,7 @@ export class DirListing extends Widget {
       } else {
         this.selection[path] = true;
       }
+      this._selectionChanged.emit();
       this._focusItem(index);
       // Handle multiple select.
     } else if (event.shiftKey) {
@@ -2217,7 +2229,10 @@ export class DirListing extends Widget {
       // the focussed item to gain but not lose selected status on shift-click.
       // (MacOS is irrelevant here because MacOS Finder has no notion of a
       // focused-but-not-selected state.)
-      this.selection[target.path] = true;
+      if (!this.selection[target.path]) {
+        this.selection[target.path] = true;
+        this._selectionChanged.emit();
+      }
       return;
     }
 
@@ -2247,6 +2262,7 @@ export class DirListing extends Widget {
           (!anteAnchor || !this.selection[anteAnchor.path])
         ) {
           delete this.selection[anchor.path];
+          this._selectionChanged.emit();
         }
       } else if (this._allSelectedBetween(fromIndex, index)) {
         shouldAdd = false;
@@ -2256,20 +2272,32 @@ export class DirListing extends Widget {
     // Select (or unselect) the rows between chosen index (target) and the last
     // focussed.
     const step = fromIndex < index ? 1 : -1;
+    let selectionModified = false;
+
     for (let i = fromIndex; i !== index + step; i += step) {
       if (shouldAdd) {
         if (i === fromIndex) {
           // Do not change the selection state of the starting (fromIndex) item.
           continue;
         }
-        this.selection[items[i].path] = true;
+        if (!this.selection[items[i].path]) {
+          this.selection[items[i].path] = true;
+          selectionModified = true;
+        }
       } else {
         if (i === index) {
           // Do not unselect the target item.
           continue;
         }
-        delete this.selection[items[i].path];
+        if (this.selection[items[i].path]) {
+          delete this.selection[items[i].path];
+          selectionModified = true;
+        }
       }
+    }
+
+    if (selectionModified) {
+      this._selectionChanged.emit();
     }
   }
 
@@ -2425,10 +2453,12 @@ export class DirListing extends Widget {
     }
     const path = items[index].path;
     this.selection[path] = true;
+    this._selectionChanged.emit();
 
     if (focus) {
       this._focusItem(index);
     }
+
     this.update();
   }
 
@@ -2515,6 +2545,7 @@ export class DirListing extends Widget {
     key: 'name'
   };
   private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
+  private _selectionChanged = new Signal<DirListing, void>(this);
   private _drag: Drag | null = null;
   private _dragData: {
     pressX: number;
