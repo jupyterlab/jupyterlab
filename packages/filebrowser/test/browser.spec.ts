@@ -153,7 +153,6 @@ describe('filebrowser/browser', () => {
         const items = Array.from(model.items());
         expect(items.length).toBeGreaterThan(0);
 
-        let selectionChanged = signalToPromise(fileBrowser.selectionChanged);
         await fileBrowser.selectItemByName(items[1].name);
 
         simulate(
@@ -164,7 +163,7 @@ describe('filebrowser/browser', () => {
         let selectedItems = Array.from(fileBrowser.selectedItems());
         expect(selectedItems.length).toBe(1);
 
-        selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        const selectionChanged = signalToPromise(fileBrowser.selectionChanged);
 
         // Simulate Ctrl+Space on the focused item
         simulate(
