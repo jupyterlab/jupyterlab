@@ -907,6 +907,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
 const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:notify-upload',
   requires: [IDefaultFileBrowser, ISettingRegistry, ITranslator],
+  description: 'Adds feature to auto-open files after upload',
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
@@ -940,23 +941,22 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
 
       uploader.filesUploaded.connect((_sender, models) => {
         // single-file case
-        // Get all allowed extensions from default file types
-        const defaultFileTypes = DocumentRegistry.getDefaultFileTypes();
-        const allowedExtensions = defaultFileTypes.reduce<string[]>(
-          (acc, ft) => {
-            if (ft.extensions) {
-              acc.push(...ft.extensions);
+        // Get all allowed extensions
+        const allFileTypes = Array.from(app.docRegistry.fileTypes());
+        const allExtensions = allFileTypes.reduce<string[]>((acc, ft) => {
+          if (ft.extensions) {
+            for (const ext of ft.extensions) {
+              acc.push(ext.toLowerCase());
             }
-            return acc;
-          },
-          []
-        );
-        // Check if the uploaded file has an allowed extension
-        const fileExt = models[0].name
-          .toLowerCase()
-          .slice(models[0].name.lastIndexOf('.'));
-        const isAllowedFileType = allowedExtensions.includes(fileExt);
+          }
+          return acc;
+        }, []);
 
+        // Check if the uploaded file has an allowed extension
+        const fileName = models[0].name.toLowerCase();
+        const isAllowedFileType = allExtensions.some(ext =>
+          fileName.endsWith(ext)
+        );
         if (
           models.length === 1 &&
           (models[0].type === 'notebook' || models[0].type === 'file')
