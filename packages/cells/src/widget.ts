@@ -1091,6 +1091,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
         ? trans.__('Code Cell Content')
         : trans.__('Code Cell Content with Output');
     this.node.setAttribute('aria-label', ariaLabel);
+    this.node.setAttribute('role', 'region');
 
     const output = (this._output = new OutputArea({
       model: this.model.outputs,

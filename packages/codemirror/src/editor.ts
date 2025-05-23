@@ -800,6 +800,13 @@ namespace Private {
       }),
       parent: host
     });
+    if (
+      view.contentDOM.getAttribute('role') === 'textbox' &&
+      view.contentDOM.getAttribute('contenteditable') === 'true'
+    ) {
+      view.contentDOM.setAttribute('aria-label', 'Enter code here');
+      view.contentDOM.setAttribute('tabIndex', '0');
+    }
 
     return view;
   }

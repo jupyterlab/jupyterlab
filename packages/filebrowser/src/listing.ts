@@ -1105,6 +1105,9 @@ export class DirListing extends Widget {
         // Must check if the name node is there because it gets replaced by the
         // edit node when editing the name of the file or directory.
         nameNode.tabIndex = i === this._focusIndex ? 0 : -1;
+        if (nameNode.tabIndex === 0 && !nameNode.role) {
+          nameNode.role = 'button';
+        }
       }
     });
 

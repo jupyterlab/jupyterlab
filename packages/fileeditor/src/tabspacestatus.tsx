@@ -49,7 +49,13 @@ function TabSpaceComponent(
       : trans.__('Tab Indent');
   return (
     <TextItem
+      role="button"
       onClick={props.handleClick}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.handleClick();
+        }
+      }}
       source={
         typeof props.tabSpace === 'number'
           ? `${description}: ${props.tabSpace}`
