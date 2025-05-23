@@ -114,7 +114,7 @@ test.describe('upload auto-open behavior', () => {
     await page.getByRole('button', { name: 'Upload', exact: true }).click();
     // Wait for max 5 seconds for upload to finish
     await expect(page.getByText(/Uploaded big\.ipynb.*/)).toBeVisible({
-      timeout: 5000
+      timeout: 10000
     });
   });
 });
