@@ -213,6 +213,11 @@
   padding-top: var(--jp-code-padding);
 }
 
+/* fix illegible yellow text with yellow background in exception stacktrace */
+.jp-RenderedText pre .ansi-yellow-bg.ansi-yellow-fg {
+  color: black;
+}
+
 /*-----------------------------------------------------------------------------
 | RenderedLatex
 |----------------------------------------------------------------------------*/
