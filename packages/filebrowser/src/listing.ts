@@ -1004,7 +1004,8 @@ export class DirListing extends Widget {
         this._hiddenColumns,
         this.selection[item.path],
         this._modifiedStyle,
-        this._columnSizes
+        this._columnSizes,
+        this._model.manager.services.contents
       );
       if (
         this.selection[item.path] &&
@@ -2765,7 +2766,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      contentsManager?: Contents.IManager
     ): void;
 
     /**
@@ -3203,7 +3205,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      contentsManager?: Contents.IManager
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3285,8 +3288,8 @@ export namespace DirListing {
 
       let hoverText = trans.__('Name: %1', model.name);
 
-      // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
+        // add file size to pop up if its available
         const fileSizeText = Private.formatFileSize(model.size, 1, 1024);
         if (fileSize) {
           fileSize.textContent = fileSizeText;
@@ -3296,7 +3299,28 @@ export namespace DirListing {
           Private.formatFileSize(model.size, 1, 1024)
         );
       } else if (fileSize) {
-        fileSize.textContent = '';
+        if (model.type === 'directory') {
+          fileSize.textContent = trans.__('Loading...');
+
+          if (contentsManager) {
+            void contentsManager
+              .get(model.path)
+              .then(contents => {
+                if (contents.content && fileSize) {
+                  const count = contents.content.length;
+                  fileSize.textContent = `${count} items`;
+                  const currentHover = node.title;
+                  node.title = currentHover + trans.__('\nItems: %1', count);
+                }
+              })
+              .catch(error => {
+                if (fileSize) {
+                  fileSize.textContent = '-';
+                }
+                console.error('Error getting directory contents:', error);
+              });
+          }
+        }
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
