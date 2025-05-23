@@ -57,6 +57,7 @@ function KernelStatusComponent(
   }
   return (
     <TextItem
+      role="button"
       onClick={props.handleClick}
       onKeyDown={props.handleKeyDown}
       source={`${props.kernelName}${statusText}`}

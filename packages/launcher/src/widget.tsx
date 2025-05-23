@@ -290,8 +290,9 @@ function Card(
     <div
       className="jp-LauncherCard"
       title={title}
+      role="button"
       onClick={onclick}
-      onKeyPress={onkeypress}
+      onKeyDown={onkeypress}
       tabIndex={0}
       data-category={item.category || trans.__('Other')}
       key={Private.keyProperty.get(item)}

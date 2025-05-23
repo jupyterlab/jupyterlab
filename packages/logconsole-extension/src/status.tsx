@@ -36,7 +36,17 @@ function LogConsoleStatusComponent(
     title += trans.__('%1 log entries for %2', props.logEntries, props.source);
   }
   return (
-    <GroupItem spacing={0} onClick={props.handleClick} title={title}>
+    <GroupItem
+      role="button"
+      spacing={0}
+      onClick={props.handleClick}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.handleClick();
+        }
+      }}
+      title={title}
+    >
       <listIcon.react top={'2px'} stylesheet={'statusBar'} />
       {props.newMessages > 0 ? <TextItem source={props.newMessages} /> : <></>}
     </GroupItem>
