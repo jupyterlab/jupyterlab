@@ -604,13 +604,6 @@ export class Context<
 
     try {
       await this._manager.ready;
-      if (this._model.collaborative) {
-        // Files cannot be saved in collaborative mode. The "save" command
-        // is disabled in the UI, but if the user tries to save anyway, act
-        // as though it succeeded.
-        this._saveState.emit('completed');
-        return Promise.resolve();
-      }
 
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
@@ -762,9 +755,11 @@ export class Context<
           );
           return this._raiseConflict(model, options);
         }
-
         return this._manager.contents
-          .save(path, options)
+          .save(path, {
+            ...options,
+            contentProviderId: this._contentProviderId
+          })
           .then(async contentsModel => {
             const model = await this._manager.contents.get(path, {
               content: false,
