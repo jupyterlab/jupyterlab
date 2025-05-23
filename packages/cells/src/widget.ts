@@ -324,6 +324,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     return new Array<Cell.IHeading>();
   }
 
+  public async getHeadings(): Promise<Cell.IHeading[]> {
+    return [];
+  }
   /**
    * Get the model used by the cell.
    */
@@ -1328,17 +1331,20 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
-          headings.push(
-            ...TableOfContentsUtils.Markdown.getHeadings(
-              m.data[mdType] as string
-            ).map(heading => {
-              return {
-                ...heading,
-                outputIndex: j,
-                type: Cell.HeadingType.Markdown
-              };
-            })
-          );
+          TableOfContentsUtils.Markdown.getHeadings(
+            m.data[mdType] as string,
+            this._rendermime.markdownParser
+          ).then(renderedHTML => {
+            headings.push(
+              ...renderedHTML.map(heading => {
+                return {
+                  ...heading,
+                  outputIndex: j,
+                  type: Cell.HeadingType.Markdown
+                };
+              })
+            );
+          });
         }
       }
 
@@ -2193,10 +2199,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      // Use table of content algorithm for consistency
-      const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.sharedModel.getSource()
+      const headings = await TableOfContentsUtils.Markdown.getHeadings(
+        this.model.sharedModel.getSource(),
+        this._rendermime.markdownParser
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
