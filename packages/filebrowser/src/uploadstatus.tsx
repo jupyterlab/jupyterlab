@@ -212,7 +212,7 @@ export namespace FileUploadStatus {
           this._items,
           val => val.path === uploads.newValue.path
         );
-      }
+      } else return;
 
       this.stateChanged.emit(void 0);
     };

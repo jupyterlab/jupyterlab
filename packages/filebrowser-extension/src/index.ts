@@ -20,6 +20,7 @@ import {
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
+  Notification,
   setToolbar,
   showErrorMessage,
   WidgetTracker
@@ -31,6 +32,7 @@ import {
   FileBrowser,
   FileUploadStatus,
   FilterFileBrowserModel,
+  formatFileSize,
   IDefaultFileBrowser,
   IFileBrowserCommands,
   IFileBrowserFactory,
@@ -903,6 +905,138 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:notify-upload',
+  requires: [IDefaultFileBrowser, ISettingRegistry, ITranslator],
+  description: 'Adds feature to auto-open supported files after upload',
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    defaultBrowser: FileBrowser,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
+  ) => {
+    const trans = translator.load('jupyterlab');
+    // load and watch settings
+    const settings = await settingRegistry.load(FILE_BROWSER_PLUGIN_ID);
+    let autoOpen = settings.get('autoOpenUploads').composite as boolean;
+    let maxSize =
+      (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+
+    settings.changed.connect(() => {
+      autoOpen = settings.get('autoOpenUploads').composite as boolean;
+      maxSize =
+        (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+    });
+
+    // attach to the Uploader after restore
+    void app.restored.then(() => {
+      const widgets = Array.from(defaultBrowser.toolbar.children());
+      const uploader = widgets.find(w => w instanceof Uploader) as
+        | Uploader
+        | undefined;
+      if (!uploader) {
+        console.warn('Uploader widget not found');
+        return;
+      }
+
+      uploader.filesUploaded.connect((_sender, models) => {
+        // single-file case
+        // Get all allowed extensions
+        const allFileTypes = Array.from(app.docRegistry.fileTypes());
+        const allExtensions = allFileTypes.reduce<string[]>((acc, ft) => {
+          if (ft.extensions) {
+            for (const ext of ft.extensions) {
+              acc.push(ext.toLowerCase());
+            }
+          }
+          return acc;
+        }, []);
+
+        // Check if the uploaded file has an allowed extension
+        const fileName = models[0].name.toLowerCase();
+        const isAllowedFileType = allExtensions.some(ext =>
+          fileName.endsWith(ext)
+        );
+        if (
+          models.length === 1 &&
+          (models[0].type === 'notebook' || models[0].type === 'file')
+        ) {
+          const file = models[0];
+          if (
+            autoOpen &&
+            file.size &&
+            file.size <= maxSize &&
+            isAllowedFileType
+          ) {
+            // open immediately
+            app.commands
+              .execute('docmanager:open', { path: file.path })
+              .catch(err => {
+                void showErrorMessage(`Opening ${file.name} failed`, err);
+              });
+          } else {
+            // notify and offer an “Open” button
+            Notification.emit(
+              trans.__(
+                'Uploaded %1%2',
+                file.name,
+                file.size ? ` (${formatFileSize(file.size, 1, 1024)})` : ''
+              ),
+              'info',
+              {
+                autoClose: 5000,
+                actions: [
+                  {
+                    label: trans.__('Open File'),
+                    callback: () => {
+                      void app.commands
+                        .execute('docmanager:open', { path: file.path })
+                        .catch(err => {
+                          void showErrorMessage(
+                            `Could not open ${file.name}`,
+                            err
+                          );
+                        });
+                    }
+                  }
+                ]
+              }
+            );
+          }
+        } else {
+          // multi-file case
+          Notification.emit(
+            trans.__('Upload complete (%1 files)', models.length),
+            'info',
+            {
+              autoClose: 5000,
+              actions: [
+                {
+                  label: trans.__('Open All'),
+                  callback: () => {
+                    models.forEach(
+                      m =>
+                        void app.commands
+                          .execute('docmanager:open', { path: m.path })
+                          .catch(err => {
+                            void showErrorMessage(
+                              `Could not open ${m.path}`,
+                              err
+                            );
+                          })
+                    );
+                  }
+                }
+              ]
+            }
+          );
+        }
+      });
+    });
+  }
+};
+
 /**
  * Add the main file browser commands to the application's command registry.
  */
@@ -1397,7 +1531,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browserWidget,
   openWithPlugin,
   openBrowserTabPlugin,
-  openUrlPlugin
+  openUrlPlugin,
+  notifyUploadPlugin
 ];
 export default plugins;
 
