@@ -26,6 +26,7 @@ stringmd5() {
             num=$(( 0x$(echo "$1" | command "${cmd}" | cut -d ' ' -f 1 | head -c 15) ))
             [[ $num -lt 0 ]] && num=$((num * -1))
             echo $num
+            break
         fi
     done
 }
