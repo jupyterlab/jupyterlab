@@ -32,6 +32,7 @@ import {
   FileBrowser,
   FileUploadStatus,
   FilterFileBrowserModel,
+  formatFileSize,
   IDefaultFileBrowser,
   IFileBrowserCommands,
   IFileBrowserFactory,
@@ -907,7 +908,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
 const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:notify-upload',
   requires: [IDefaultFileBrowser, ISettingRegistry, ITranslator],
-  description: 'Adds feature to auto-open files after upload',
+  description: 'Adds feature to auto-open supported files after upload',
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
@@ -969,7 +970,7 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
             isAllowedFileType
           ) {
             // open immediately
-            void app.commands
+            app.commands
               .execute('docmanager:open', { path: file.path })
               .catch(err => {
                 void showErrorMessage(`Opening ${file.name} failed`, err);
@@ -980,9 +981,7 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
               trans.__(
                 'Uploaded %1%2',
                 file.name,
-                file.size
-                  ? trans.__(' (%1 MB)', (file.size / (1024 * 1024)).toFixed(1))
-                  : ''
+                file.size ? ` (${formatFileSize(file.size, 1, 1024)})` : ''
               ),
               'info',
               {
@@ -1008,7 +1007,7 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
         } else {
           // multi-file case
           Notification.emit(
-            trans.__('Upload Complete (%1 files)', models.length),
+            trans.__('Upload complete (%1 files)', models.length),
             'info',
             {
               autoClose: 5000,

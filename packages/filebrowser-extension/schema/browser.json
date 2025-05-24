@@ -246,7 +246,7 @@
     "autoOpenUploads": {
       "type": "boolean",
       "title": "Auto-open uploads",
-      "description": "Automatically open uploaded notebooks and files",
+      "description": "Automatically open uploaded notebooks and supported files",
       "default": true
     },
     "maxAutoOpenSizeMB": {
