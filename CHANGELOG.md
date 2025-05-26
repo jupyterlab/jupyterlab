@@ -484,6 +484,33 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.2...763903ff99eed3bd50f0c9a9081b4f226138d634))
+
+### Bugs fixed
+
+- Enable save in collaborative mode [#17508](https://github.com/jupyterlab/jupyterlab/pull/17508) ([@Darshan808](https://github.com/Darshan808))
+- Fix error handing in extension manager (typo and undefined variable) [#17592](https://github.com/jupyterlab/jupyterlab/pull/17592) ([@Darshan808](https://github.com/Darshan808))
+- Ensure strings with yellow background in tracebacks are visible [#17577](https://github.com/jupyterlab/jupyterlab/pull/17577) ([@EtiennePelletier](https://github.com/EtiennePelletier))
+- Fix stdin input triggering cell re-execution on Shift+Enter [#17565](https://github.com/jupyterlab/jupyterlab/pull/17565) ([@Darshan808](https://github.com/Darshan808))
+- Add `standby` callback to lumino polls [#17567](https://github.com/jupyterlab/jupyterlab/pull/17567) ([@mahendrapaipuri](https://github.com/mahendrapaipuri))
+- Fix incorrect ARIA labels in the `MainAreaWidget` [#17527](https://github.com/jupyterlab/jupyterlab/pull/17527) ([@dnlzrgz](https://github.com/dnlzrgz))
+- `fileeditor-extension`: fix handling of launcher, commands and menu entries on `specsChanged` [#17550](https://github.com/jupyterlab/jupyterlab/pull/17550) ([@jtpio](https://github.com/jtpio))
+
+### Maintenance and upkeep improvements
+
+- Use hatch to get the version [#17559](https://github.com/jupyterlab/jupyterlab/pull/17559) ([@krassowski](https://github.com/krassowski))
+- Temporarily ignore links to github.com [#17544](https://github.com/jupyterlab/jupyterlab/pull/17544) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-05-06&to=2025-05-26&type=c))
+
+[@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-05-06..2025-05-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-05-06..2025-05-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-05-06..2025-05-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-05-06..2025-05-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-05-06..2025-05-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.1...ad8d84f6505b3cc201cb59a95a828eeed4392bd6))
@@ -512,8 +539,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-04-22&to=2025-05-06&type=c))
 
 [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-04-22..2025-05-06&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-04-22..2025-05-06&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-04-22..2025-05-06&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-04-22..2025-05-06&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-04-22..2025-05-06&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.1
 
