@@ -454,7 +454,7 @@ export namespace Contents {
      */
     save(
       path: string,
-      options?: Partial<IModel> & Contents.IContentProvisionOptions
+      options?: Partial<IModel> & Partial<Contents.IContentProvisionOptions>
     ): Promise<IModel>;
 
     /**
@@ -608,7 +608,10 @@ export namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(localPath: string, options?: Partial<IModel>): Promise<IModel>;
+    save(
+      localPath: string,
+      options?: Partial<IModel> & Contents.IContentProvisionOptions
+    ): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -954,7 +957,8 @@ export class ContentsManager implements Contents.IManager {
    */
   save(
     path: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> &
+      Partial<Contents.IContentProvisionOptions> = {}
   ): Promise<Contents.IModel> {
     const globalPath = this.normalize(path);
     const [drive, localPath] = this._driveForPath(path);
