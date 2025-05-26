@@ -3287,13 +3287,13 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
-        const fileSizeText = Private.formatFileSize(model.size, 1, 1024);
+        const fileSizeText = formatFileSize(model.size, 1, 1024);
         if (fileSize) {
           fileSize.textContent = fileSizeText;
         }
         hoverText += trans.__(
           '\nSize: %1',
-          Private.formatFileSize(model.size, 1, 1024)
+          formatFileSize(model.size, 1, 1024)
         );
       } else if (fileSize) {
         fileSize.textContent = '';
@@ -3748,28 +3748,6 @@ namespace Private {
   }
 
   /**
-   * Format bytes to human readable string.
-   */
-  export function formatFileSize(
-    bytes: number,
-    decimalPoint: number,
-    k: number
-  ): string {
-    // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
-    if (bytes === 0) {
-      return '0 B';
-    }
-    const dm = decimalPoint || 2;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    if (i >= 0 && i < sizes.length) {
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    } else {
-      return String(bytes);
-    }
-  }
-
-  /**
    * Update an inline svg caret icon in a node.
    */
   export function updateCaret(
@@ -3863,5 +3841,27 @@ namespace Private {
       }
     }
     return allEntries;
+  }
+}
+
+/**
+ * Format bytes to human readable string.
+ */
+export function formatFileSize(
+  bytes: number,
+  decimalPoint: number,
+  k: number
+): string {
+  // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
+  if (bytes === 0) {
+    return '0 B';
+  }
+  const dm = decimalPoint || 2;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  if (i >= 0 && i < sizes.length) {
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  } else {
+    return String(bytes);
   }
 }
