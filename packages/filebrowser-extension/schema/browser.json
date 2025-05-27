@@ -92,11 +92,6 @@
         "rank": 12
       },
       {
-        "command": "filebrowser:select-all",
-        "selector": ".jp-DirListing-item",
-        "rank": 12.5
-      },
-      {
         "command": "filebrowser:copy-path",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 14
