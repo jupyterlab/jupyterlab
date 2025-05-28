@@ -72,7 +72,7 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
    */
   protected async getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const headings = await TableOfContentsUtils.Markdown.getHeadings(
+    const headings = await TableOfContentsUtils.Markdown.parseHeadings(
       content,
       this.parser
     );

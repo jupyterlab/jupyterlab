@@ -319,12 +319,19 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Cell headings
+   *
+   * @deprecated In favour of async {@link getHeadings}
    */
   get headings(): Cell.IHeading[] {
     return new Array<Cell.IHeading>();
   }
 
-  public async getHeadings(): Promise<Cell.IHeading[]> {
+  /**
+   * Async Cell headings
+   *
+   */
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     return [];
   }
   /**
@@ -1331,7 +1338,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
-          TableOfContentsUtils.Markdown.getHeadings(
+          TableOfContentsUtils.Markdown.parseHeadings(
             m.data[mdType] as string,
             this._rendermime.markdownParser
           ).then(renderedHTML => {
@@ -2202,9 +2209,17 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     return this._headingsCache ?? [];
   }
 
+  /**
+   * Parses and returns the list of Markdown headings in the cell.
+   *
+   * @returns A promise that resolves to an array of cell headings.
+   *
+   * @remarks
+   * This method caches the result after the first call to avoid redundant parsing.
+   **/
   async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      const headings = await TableOfContentsUtils.Markdown.getHeadings(
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
         this.model.sharedModel.getSource(),
         this._rendermime.markdownParser
       );

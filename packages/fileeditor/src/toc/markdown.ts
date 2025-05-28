@@ -20,15 +20,12 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
   IEditorHeading,
   IDocumentWidget<FileEditor, DocumentRegistry.IModel>
 > {
-  protected parser: IMarkdownParser | null;
-
   constructor(
-    widget: IDocumentWidget<FileEditor>,
-    parser: IMarkdownParser | null,
-    configuration?: TableOfContents.IConfig | undefined
+    protected widget: IDocumentWidget<FileEditor>,
+    configuration?: TableOfContents.IConfig | undefined,
+    protected parser: IMarkdownParser | null = null
   ) {
     super(widget, configuration);
-    this.parser = parser;
   }
   /**
    * Type of document supported by the model.
@@ -54,7 +51,7 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
     const content = this.widget.content.model.sharedModel.getSource();
 
     const headings = TableOfContentsUtils.filterHeadings(
-      await TableOfContentsUtils.Markdown.getHeadings(content, this.parser),
+      await TableOfContentsUtils.Markdown.parseHeadings(content, this.parser),
       {
         ...this.configuration,
         // Force removing numbering as they cannot be displayed
@@ -70,14 +67,11 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
  * Table of content model factory for Markdown files.
  */
 export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory {
-  parser: IMarkdownParser | null;
-
   constructor(
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    parser: IMarkdownParser | null
+    protected parser: IMarkdownParser | null = null
   ) {
     super(tracker);
-    this.parser = parser;
   }
 
   /**
@@ -107,6 +101,6 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
     widget: IDocumentWidget<FileEditor, DocumentRegistry.IModel>,
     configuration?: TableOfContents.IConfig
   ): MarkdownTableOfContentsModel {
-    return new MarkdownTableOfContentsModel(widget, this.parser, configuration);
+    return new MarkdownTableOfContentsModel(widget, configuration, this.parser);
   }
 }
