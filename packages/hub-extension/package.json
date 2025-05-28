@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/hub-extension",
-  "version": "4.5.0-alpha.0",
+  "version": "4.5.0-alpha.1",
   "description": "JupyterLab integration for JupyterHub",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,11 +39,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.0-alpha.0",
-    "@jupyterlab/apputils": "^4.6.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.5.0-alpha.0",
-    "@jupyterlab/services": "^7.5.0-alpha.0",
-    "@jupyterlab/translation": "^4.5.0-alpha.0"
+    "@jupyterlab/application": "^4.5.0-alpha.1",
+    "@jupyterlab/apputils": "^4.6.0-alpha.1",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.1",
+    "@jupyterlab/services": "^7.5.0-alpha.1",
+    "@jupyterlab/translation": "^4.5.0-alpha.1"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",

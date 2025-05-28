@@ -242,6 +242,18 @@
       "title": "Navigate files and directories with single click",
       "description": "Whether to allow single click selection on file browser items",
       "default": false
+    },
+    "autoOpenUploads": {
+      "type": "boolean",
+      "title": "Auto-open uploads",
+      "description": "Automatically open uploaded notebooks and supported files",
+      "default": true
+    },
+    "maxAutoOpenSizeMB": {
+      "type": "number",
+      "title": "Max auto-open size",
+      "description": "Maximum file size (MB) to auto-open files on upload",
+      "default": 50
     }
   },
   "additionalProperties": false,

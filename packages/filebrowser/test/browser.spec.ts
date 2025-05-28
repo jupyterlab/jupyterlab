@@ -54,6 +54,7 @@ describe('filebrowser/browser', () => {
     await contents.newUntitled({ type: 'directory' });
     await contents.newUntitled({ type: 'file' });
     await contents.newUntitled({ type: 'notebook' });
+    await model.cd();
   });
 
   describe('FileBrowser', () => {
@@ -77,6 +78,108 @@ describe('filebrowser/browser', () => {
         const toolbar = fileBrowser.toolbar.node;
         expect(toolbar.getAttribute('aria-label')).toEqual('file browser');
         expect(toolbar.getAttribute('role')).toEqual('toolbar');
+      });
+    });
+
+    describe('#selectionChanged', () => {
+      it('should emit when a file is selected', async () => {
+        let selectionChanged = false;
+        fileBrowser.selectionChanged.connect(() => {
+          selectionChanged = true;
+        });
+
+        // Get a file name to select
+        const items = Array.from(model.items());
+        expect(items.length).toBeGreaterThan(0);
+
+        const fileName = items[0].name;
+        await fileBrowser.selectItemByName(fileName);
+
+        expect(selectionChanged).toBe(true);
+      });
+
+      it('should emit when multiple files are selected', async () => {
+        fileBrowser.clearSelectedItems();
+
+        const items = Array.from(model.items());
+        expect(items.length).toBeGreaterThan(1);
+
+        let selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        // Select the first item
+        await fileBrowser.selectItemByName(items[0].name);
+        await selectionChanged;
+
+        const itemNodes = Array.from(
+          document.querySelectorAll(`.${ITEM_CLASS}`)
+        );
+        expect(itemNodes.length).toBeGreaterThan(1);
+
+        selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+
+        // Select the second item with shift key to select multiple items
+        simulate(
+          fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
+          'mousedown',
+          {
+            shiftKey: true
+          }
+        );
+        await selectionChanged;
+
+        // Verify that multiple items are selected
+        const selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBe(2);
+      });
+
+      it('should emit when selection is cleared', async () => {
+        const items = Array.from(model.items());
+        expect(items.length).toBeGreaterThan(0);
+        await fileBrowser.selectItemByName(items[0].name);
+
+        const selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBeGreaterThan(0);
+
+        const selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+        fileBrowser.clearSelectedItems();
+        await selectionChanged;
+
+        const newSelectedItems = Array.from(fileBrowser.selectedItems());
+        expect(newSelectedItems.length).toBe(0);
+      });
+
+      it('should emit when selection is toggled with Ctrl+Space', async () => {
+        fileBrowser.clearSelectedItems();
+
+        const items = Array.from(model.items());
+        expect(items.length).toBeGreaterThan(0);
+
+        await fileBrowser.selectItemByName(items[1].name);
+
+        simulate(
+          fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
+          'mousedown'
+        );
+
+        let selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBe(1);
+
+        const selectionChanged = signalToPromise(fileBrowser.selectionChanged);
+
+        // Simulate Ctrl+Space on the focused item
+        simulate(
+          fileBrowser.node.querySelectorAll(`.${ITEM_CLASS}`)[1]!,
+          'keydown',
+          {
+            ctrlKey: true,
+            key: ' ',
+            keyCode: 32
+          }
+        );
+
+        await selectionChanged;
+
+        selectedItems = Array.from(fileBrowser.selectedItems());
+        expect(selectedItems.length).toBe(0);
       });
     });
 

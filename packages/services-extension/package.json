@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services-extension",
-  "version": "4.5.0-alpha.0",
+  "version": "4.5.0-alpha.1",
   "description": "JupyterLab - Services Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,11 +38,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/services": "^7.5.0-alpha.0",
+    "@jupyterlab/services": "^7.5.0-alpha.1",
     "@lumino/coreutils": "^2.2.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.5.0-alpha.0",
+    "@jupyterlab/testing": "^4.5.0-alpha.1",
     "@types/jest": "^29.2.0",
     "rimraf": "~5.0.5",
     "typescript": "~5.5.4"
