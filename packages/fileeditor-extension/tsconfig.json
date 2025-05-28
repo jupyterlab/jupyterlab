@@ -52,6 +52,9 @@
       "path": "../observables"
     },
     {
+      "path": "../rendermime"
+    },
+    {
       "path": "../rendermime-interfaces"
     },
     {
@@ -71,9 +74,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../rendermime"
     }
   ]
 }

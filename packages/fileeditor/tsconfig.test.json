@@ -24,6 +24,9 @@
       "path": "../lsp"
     },
     {
+      "path": "../rendermime"
+    },
+    {
       "path": "../statusbar"
     },
     {
@@ -34,9 +37,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../rendermime"
     },
     {
       "path": "."
