@@ -3520,6 +3520,7 @@ __metadata:
     "@jupyterlab/lsp": ^4.5.0-alpha.0
     "@jupyterlab/mainmenu": ^4.5.0-alpha.0
     "@jupyterlab/observables": ^5.5.0-alpha.0
+    "@jupyterlab/rendermime": ^4.5.0-alpha.0
     "@jupyterlab/rendermime-interfaces": ^3.13.0-alpha.0
     "@jupyterlab/services": ^7.5.0-alpha.0
     "@jupyterlab/settingregistry": ^4.5.0-alpha.0
@@ -3549,6 +3550,7 @@ __metadata:
     "@jupyterlab/docregistry": ^4.5.0-alpha.0
     "@jupyterlab/documentsearch": ^4.5.0-alpha.0
     "@jupyterlab/lsp": ^4.5.0-alpha.0
+    "@jupyterlab/rendermime": ^4.5.0-alpha.0
     "@jupyterlab/statusbar": ^4.5.0-alpha.0
     "@jupyterlab/testing": ^4.5.0-alpha.0
     "@jupyterlab/toc": ^6.5.0-alpha.0

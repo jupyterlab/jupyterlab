@@ -71,6 +71,9 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../rendermime"
     }
   ]
 }
