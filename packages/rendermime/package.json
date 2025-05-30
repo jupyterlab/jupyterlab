@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "4.5.0-alpha.0",
+  "version": "4.5.0-alpha.1",
   "description": "JupyterLab - RenderMime",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,13 +41,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.6.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.5.0-alpha.0",
-    "@jupyterlab/nbformat": "^4.5.0-alpha.0",
-    "@jupyterlab/observables": "^5.5.0-alpha.0",
-    "@jupyterlab/rendermime-interfaces": "^3.13.0-alpha.0",
-    "@jupyterlab/services": "^7.5.0-alpha.0",
-    "@jupyterlab/translation": "^4.5.0-alpha.0",
+    "@jupyterlab/apputils": "^4.6.0-alpha.1",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.1",
+    "@jupyterlab/nbformat": "^4.5.0-alpha.1",
+    "@jupyterlab/observables": "^5.5.0-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^3.13.0-alpha.1",
+    "@jupyterlab/services": "^7.5.0-alpha.1",
+    "@jupyterlab/translation": "^4.5.0-alpha.1",
     "@lumino/coreutils": "^2.2.1",
     "@lumino/messaging": "^2.0.3",
     "@lumino/signaling": "^2.1.4",
@@ -55,7 +55,7 @@
     "lodash.escape": "^4.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.5.0-alpha.0",
+    "@jupyterlab/testing": "^4.5.0-alpha.1",
     "@types/jest": "^29.2.0",
     "@types/lodash.escape": "^4.0.6",
     "fs-extra": "^10.1.0",

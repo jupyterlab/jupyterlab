@@ -9,6 +9,8 @@ import {
 } from '@jupyterlab/translation';
 import { fileUploadIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { FileBrowserModel } from './model';
+import { Contents } from '@jupyterlab/services';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A widget which provides an upload button.
@@ -35,6 +37,13 @@ export class Uploader extends ToolbarButton {
   }
 
   /**
+   * A signal emitted with file info when a batch of upload completes.
+   */
+  get filesUploaded(): ISignal<this, Contents.IModel[]> {
+    return this._filesUploaded;
+  }
+
+  /**
    * The underlying file browser fileBrowserModel for the widget.
    *
    * This cannot be named model as that conflicts with the model property of VDomRenderer.
@@ -47,12 +56,17 @@ export class Uploader extends ToolbarButton {
   private _onInputChanged = () => {
     const files = Array.prototype.slice.call(this._input.files) as File[];
     const pending = files.map(file => this.fileBrowserModel.upload(file));
-    void Promise.all(pending).catch(error => {
-      void showErrorMessage(
-        this._trans._p('showErrorMessage', 'Upload Error'),
-        error
-      );
-    });
+    void Promise.all(pending)
+      .then(models => {
+        // emit the batch
+        this._filesUploaded.emit(models);
+      })
+      .catch(error => {
+        void showErrorMessage(
+          this._trans._p('showErrorMessage', 'Upload Error'),
+          error
+        );
+      });
   };
 
   /**
@@ -67,6 +81,7 @@ export class Uploader extends ToolbarButton {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _input = Private.createUploadInput();
+  private _filesUploaded = new Signal<this, Contents.IModel[]>(this);
 }
 
 /**

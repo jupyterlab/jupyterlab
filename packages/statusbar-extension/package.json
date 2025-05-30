@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "4.5.0-alpha.0",
+  "version": "4.5.0-alpha.1",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,11 +36,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.0-alpha.0",
-    "@jupyterlab/apputils": "^4.6.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.5.0-alpha.0",
-    "@jupyterlab/statusbar": "^4.5.0-alpha.0",
-    "@jupyterlab/translation": "^4.5.0-alpha.0"
+    "@jupyterlab/application": "^4.5.0-alpha.1",
+    "@jupyterlab/apputils": "^4.6.0-alpha.1",
+    "@jupyterlab/settingregistry": "^4.5.0-alpha.1",
+    "@jupyterlab/statusbar": "^4.5.0-alpha.1",
+    "@jupyterlab/translation": "^4.5.0-alpha.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata",
-  "version": "5.5.0-alpha.0",
+  "version": "5.5.0-alpha.1",
   "description": "JupyterLab UI Testing Framework",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,15 +44,15 @@
     "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.0-alpha.0",
-    "@jupyterlab/apputils": "^4.6.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.5.0-alpha.0",
-    "@jupyterlab/debugger": "^4.5.0-alpha.0",
-    "@jupyterlab/docmanager": "^4.5.0-alpha.0",
-    "@jupyterlab/nbformat": "^4.5.0-alpha.0",
-    "@jupyterlab/notebook": "^4.5.0-alpha.0",
-    "@jupyterlab/services": "^7.5.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.5.0-alpha.0",
+    "@jupyterlab/application": "^4.5.0-alpha.1",
+    "@jupyterlab/apputils": "^4.6.0-alpha.1",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.1",
+    "@jupyterlab/debugger": "^4.5.0-alpha.1",
+    "@jupyterlab/docmanager": "^4.5.0-alpha.1",
+    "@jupyterlab/nbformat": "^4.5.0-alpha.1",
+    "@jupyterlab/notebook": "^4.5.0-alpha.1",
+    "@jupyterlab/services": "^7.5.0-alpha.1",
+    "@jupyterlab/settingregistry": "^4.5.0-alpha.1",
     "@lumino/coreutils": "^2.2.1",
     "@playwright/test": "^1.52.0",
     "@stdlib/stats": "~0.0.13",
