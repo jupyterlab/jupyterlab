@@ -612,13 +612,15 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   /**
    * Set the whether to allow `name` and `id` attributes.
    */
-  setAllowNamedProperties(allowNamedProperties: boolean): void {
+  setAllowNamedProperties(allowNamedProperties: boolean, useCustomSchemes: boolean = false): void {
     this._allowNamedProperties = allowNamedProperties;
+    this._useCustomSchemes = useCustomSchemes;
     this._options = this._generateOptions();
   }
 
   private _autolink: boolean = true;
   private _allowNamedProperties: boolean = false;
+  private _useCustomSchemes: boolean = false;
   private _options: sanitize.IOptions;
   private _generateOptions = (): sanitize.IOptions => ({
     // HTML tags that are allowed to be used. Tags were extracted from Google Caja
@@ -1155,7 +1157,9 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       // Set the "disabled" attribute for <input> tags.
       input: sanitize.simpleTransform('input', { disabled: 'disabled' })
     },
-    allowedSchemes: [...sanitize.defaults.allowedSchemes],
+    allowedSchemes: this._useCustomSchemes
+      ? this._options.allowedSchemes
+      : [...sanitize.defaults.allowedSchemes],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])
