@@ -805,7 +805,6 @@ namespace Private {
       view.contentDOM.getAttribute('contenteditable') === 'true'
     ) {
       view.contentDOM.setAttribute('aria-label', 'Enter code here');
-      view.contentDOM.setAttribute('tabIndex', '0');
     }
 
     return view;
