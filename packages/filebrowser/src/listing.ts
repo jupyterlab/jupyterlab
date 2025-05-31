@@ -515,7 +515,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Select all directory listing items
+   * Select all listing items in the current directory.
    */
   selectAll(): void {
     const items = this._model.items();
