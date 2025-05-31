@@ -526,6 +526,7 @@ export class DirListing extends Widget {
     }
 
     this.selection = newSelection;
+    this._selectionChanged.emit()
     this.update();
   }
 
