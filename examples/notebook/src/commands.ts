@@ -290,21 +290,21 @@ export const setupCommands = (
     label: args => (args.toolbar ? '' : 'Cut the selected cells'),
     caption: 'Cut the selected cells',
     icon: args => (args.toolbar ? cutIcon : undefined),
-    execute: () => NotebookActions.cut(nbWidget.content)
+    execute: () => NotebookActions.cutToSystemClipboard(nbWidget.content)
   });
 
   commands.addCommand(COMMAND_IDS.copy, {
     label: args => (args.toolbar ? '' : 'Copy the selected cells'),
     caption: 'Copy the selected cells',
     icon: args => (args.toolbar ? copyIcon : undefined),
-    execute: () => NotebookActions.copy(nbWidget.content)
+    execute: () => NotebookActions.copyToSystemClipboard(nbWidget.content)
   });
 
   commands.addCommand(COMMAND_IDS.paste, {
     label: args => (args.toolbar ? '' : 'Paste cells from the clipboard'),
     caption: 'Paste cells from the clipboard',
     icon: args => (args.toolbar ? pasteIcon : undefined),
-    execute: () => NotebookActions.paste(nbWidget.content)
+    execute: () => NotebookActions.pasteFromSystemClipboard(nbWidget.content)
   });
 
   commands.addCommand(COMMAND_IDS.restartAndRun, {

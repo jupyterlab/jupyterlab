@@ -1527,6 +1527,51 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#copyToSystemClipboard()', () => {
+      it('should copy the selected cells to a utils.systemClipboard', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        await NotebookActions.copyToSystemClipboard(widget);
+        expect(await utils.systemClipboard.hasData(JUPYTER_CELL_MIME)).toBe(
+          true
+        );
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        expect(data.length).toBe(2);
+      });
+
+      it('should be a no-op if there is no model', async () => {
+        widget.model = null;
+        utils.systemClipboard.clear();
+        await NotebookActions.copyToSystemClipboard(widget);
+        expect(await utils.systemClipboard.hasData(JUPYTER_CELL_MIME)).toBe(
+          false
+        );
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        await NotebookActions.copyToSystemClipboard(widget);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should delete metadata.deletable', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        next.model.setMetadata('deletable', false);
+        await NotebookActions.copyToSystemClipboard(widget);
+        const data = (await utils.systemClipboard.getData(
+          JUPYTER_CELL_MIME
+        )) as JSONArray;
+        data.map(cell => {
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeUndefined();
+        });
+      });
+    });
+
     describe('#cut()', () => {
       it('should cut the selected cells to a utils.clipboard', () => {
         const next = widget.widgets[1];
@@ -1560,6 +1605,48 @@ describe('@jupyterlab/notebook', () => {
           widget.select(widget.widgets[i]);
         }
         NotebookActions.cut(widget);
+        await sleep();
+        expect(widget.widgets.length).toBe(1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+      });
+    });
+
+    describe('#cutToSystemClipboard()', () => {
+      it('should cut the selected cells to a utils.systemClipboard', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        const count = widget.widgets.length;
+        await NotebookActions.cutToSystemClipboard(widget);
+        expect(widget.widgets.length).toBe(count - 2);
+      });
+
+      it('should be a no-op if there is no model', async () => {
+        widget.model = null;
+        utils.systemClipboard.clear();
+        await NotebookActions.cutToSystemClipboard(widget);
+        expect(await utils.systemClipboard.hasData(JUPYTER_CELL_MIME)).toBe(
+          false
+        );
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        await NotebookActions.cutToSystemClipboard(widget);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should be undo-able', async () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        await NotebookActions.cutToSystemClipboard(widget);
+        NotebookActions.undo(widget);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should add a new code cell if all cells were cut', async () => {
+        for (let i = 0; i < widget.widgets.length; i++) {
+          widget.select(widget.widgets[i]);
+        }
+        await NotebookActions.cutToSystemClipboard(widget);
         await sleep();
         expect(widget.widgets.length).toBe(1);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
@@ -1608,6 +1695,129 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 1;
         widget.model?.sharedModel.clearUndoHistory();
         NotebookActions.paste(widget);
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).toBe(count - 2);
+      });
+
+      it('should emit a signal with cut action', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].previousInteraction).toBe('cut');
+      });
+
+      it('should emit a signal with copy action', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].previousInteraction).toBe('copy');
+      });
+
+      it('should emit a signal with the number of copied cells', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+        const next = widget.widgets[1];
+        widget.select(next);
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].cellCount).toBe(2);
+      });
+
+      it('should emit a signal with action to null', async () => {
+        let signals: Notebook.IPastedCells[] = [];
+        widget.cellsPasted.connect(
+          (_: Notebook, interaction: Notebook.IPastedCells) => {
+            signals.push(interaction);
+          }
+        );
+
+        // Create another notebook widget
+        const widget2 = new Notebook({
+          rendermime,
+          contentFactory: utils.createNotebookFactory(),
+          mimeTypeService: utils.mimeTypeService,
+          notebookConfig: {
+            ...StaticNotebook.defaultNotebookConfig,
+            windowingMode: 'none'
+          }
+        });
+        const model2 = new NotebookModel();
+        model2.fromJSON(utils.DEFAULT_CONTENT);
+        widget2.model = model2;
+        model2.sharedModel.clearUndoHistory();
+
+        widget2.activeCellIndex = 0;
+        await NotebookActions.copyToSystemClipboard(widget2);
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(signals.length).toBe(1);
+        expect(signals[0].cellCount).toBe(1);
+        expect(signals[0].previousInteraction).toBeNull();
+      });
+    });
+
+    describe('#pasteFromSystemClipboard()', () => {
+      it('should paste cells from a utils.systemClipboard', async () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const next = widget.widgets[1];
+        widget.select(next);
+        const count = widget.widgets.length;
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[2].model.sharedModel.getSource()).toBe(source);
+        expect(widget.activeCellIndex).toBe(3);
+      });
+
+      it('should be a no-op if there is no model', async () => {
+        await NotebookActions.copyToSystemClipboard(widget);
+        widget.model = null;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.activeCellIndex).toBe(-1);
+      });
+
+      it('should be a no-op if there is no cell data on the utils.systemClipboard', async () => {
+        utils.systemClipboard.clear();
+        const count = widget.widgets.length;
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.widgets.length).toBe(count);
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        await NotebookActions.cutToSystemClipboard(widget);
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should be undo-able', async () => {
+        const next = widget.widgets[1];
+        widget.select(next);
+        const count = widget.widgets.length;
+        await NotebookActions.cutToSystemClipboard(widget);
+        widget.activeCellIndex = 1;
+        widget.model?.sharedModel.clearUndoHistory();
+        await NotebookActions.pasteFromSystemClipboard(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });

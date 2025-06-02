@@ -298,6 +298,8 @@ function activateLogConsole(
       loggerRegistry.maxLength = settings.get('maxLogEntries')
         .composite as number;
       status.model.flashEnabled = settings.get('flash').composite as boolean;
+      loggerRegistry.defaultLogLevel = settings.get('defaultLogLevel')
+        .composite as LogLevel;
     };
 
     Promise.all([settingRegistry.load(LOG_CONSOLE_PLUGIN_ID), app.restored])

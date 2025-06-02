@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "4.5.0-alpha.0",
+  "version": "4.5.0-alpha.1",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -9,14 +9,14 @@
   "dependencies": {
     "@jupyter/web-components": "^0.16.6",
     "@jupyter/ydoc": "^3.0.4",
-    "@jupyterlab/application": "^4.5.0-alpha.0",
-    "@jupyterlab/codemirror": "^4.5.0-alpha.0",
-    "@jupyterlab/console": "^4.5.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.5.0-alpha.0",
-    "@jupyterlab/rendermime": "^4.5.0-alpha.0",
-    "@jupyterlab/services": "^7.5.0-alpha.0",
-    "@jupyterlab/theme-light-extension": "^4.5.0-alpha.0",
-    "@jupyterlab/translation": "^4.5.0-alpha.0",
+    "@jupyterlab/application": "^4.5.0-alpha.1",
+    "@jupyterlab/codemirror": "^4.5.0-alpha.1",
+    "@jupyterlab/console": "^4.5.0-alpha.1",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.1",
+    "@jupyterlab/rendermime": "^4.5.0-alpha.1",
+    "@jupyterlab/services": "^7.5.0-alpha.1",
+    "@jupyterlab/theme-light-extension": "^4.5.0-alpha.1",
+    "@jupyterlab/translation": "^4.5.0-alpha.1",
     "@lumino/commands": "^2.3.2",
     "@lumino/widgets": "^2.7.1"
   },

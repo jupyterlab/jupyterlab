@@ -6,7 +6,8 @@ import {
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
-  showDialog
+  showDialog,
+  SystemClipboard
 } from '@jupyterlab/apputils';
 import {
   Cell,
@@ -1203,9 +1204,22 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
+   *
+   * @deprecated will be removed in a future release. Use `copyToSystemClipboard` instead.
    */
   export function copy(notebook: Notebook): void {
     Private.copyOrCut(notebook, false);
+  }
+
+  /**
+   * Copy the selected cell(s) data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function copyToSystemClipboard(
+    notebook: Notebook
+  ): Promise<void> {
+    await Private.copyOrCutToSystemClipboard(notebook, false);
   }
 
   /**
@@ -1216,9 +1230,26 @@ export namespace NotebookActions {
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
+   *
+   * @deprecated will be removed in a future release. Use `cutToSystemClipboard` instead.
    */
   export function cut(notebook: Notebook): void {
     Private.copyOrCut(notebook, true);
+  }
+
+  /**
+   * Cut the selected cell data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * #### Notes
+   * This action can be undone.
+   * A new code cell is added if all cells are cut.
+   */
+  export async function cutToSystemClipboard(
+    notebook: Notebook
+  ): Promise<void> {
+    await Private.copyOrCutToSystemClipboard(notebook, true);
   }
 
   /**
@@ -1236,6 +1267,8 @@ export namespace NotebookActions {
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
+   *
+   * @deprecated will be removed in a future release. Use `pasteFromSystemClipboard` instead.
    */
   export function paste(
     notebook: Notebook,
@@ -1248,6 +1281,39 @@ export namespace NotebookActions {
     }
 
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+
+    addCells(notebook, mode, values, true);
+    void focusActiveCell(notebook);
+  }
+
+  /**
+   * Paste cells from the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * #### Notes
+   * The last pasted cell becomes the active cell.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action can be undone.
+   */
+  export async function pasteFromSystemClipboard(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+  ): Promise<void> {
+    const clipboard = SystemClipboard.getInstance();
+
+    const stored = await clipboard.getData(JUPYTER_CELL_MIME);
+    if (stored === null || stored === undefined) {
+      return;
+    }
+
+    const values = stored as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -2574,6 +2640,8 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
+   *
+   * @deprecated will be removed in a future release. Use `copyOrCutToSystemClipboard` instead.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -2589,6 +2657,43 @@ namespace Private {
     const data = Private.selectedCells(notebook);
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
+    if (cut) {
+      deleteCells(notebook);
+    } else {
+      notebook.deselectAll();
+    }
+    if (cut) {
+      notebook.lastClipboardInteraction = 'cut';
+    } else {
+      notebook.lastClipboardInteraction = 'copy';
+    }
+    void handleState(notebook, state);
+  }
+
+  /**
+   * Copy or cut the selected cell data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param cut - True if the cells should be cut, false if they should be copied.
+   */
+  export async function copyOrCutToSystemClipboard(
+    notebook: Notebook,
+    cut: boolean
+  ): Promise<void> {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = getState(notebook);
+    const clipboard = SystemClipboard.getInstance();
+
+    notebook.mode = 'command';
+    clipboard.clear();
+
+    const data = Private.selectedCells(notebook);
+
+    await clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
       deleteCells(notebook);
     } else {

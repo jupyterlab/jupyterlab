@@ -484,6 +484,48 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.0a1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.0a0...9241bcb7a2283e1749ac6bc8934e4eef670ef603))
+
+### Enhancements made
+
+- Add a `selectionChanged` signal to the file browser [#17563](https://github.com/jupyterlab/jupyterlab/pull/17563) ([@jtpio](https://github.com/jtpio))
+- Auto-open uploaded files with size and settings control [#17556](https://github.com/jupyterlab/jupyterlab/pull/17556) ([@Darshan808](https://github.com/Darshan808))
+- Add a setting to configure the default log level for the Log Console [#17547](https://github.com/jupyterlab/jupyterlab/pull/17547) ([@jtpio](https://github.com/jtpio))
+- Add a signal when cells are pasted in the Notebook [#17506](https://github.com/jupyterlab/jupyterlab/pull/17506) ([@brichet](https://github.com/brichet))
+- Add new CSS rule for expanding linked output to 100% height [#17487](https://github.com/jupyterlab/jupyterlab/pull/17487) ([@SylvainCorlay](https://github.com/SylvainCorlay))
+- Use the system clipboard for copying and pasting cells [#17445](https://github.com/jupyterlab/jupyterlab/pull/17445) ([@yacchin1205](https://github.com/yacchin1205))
+
+### Bugs fixed
+
+- Fix error handing in extension manager (typo and undefined variable) [#17592](https://github.com/jupyterlab/jupyterlab/pull/17592) ([@Darshan808](https://github.com/Darshan808))
+- Fix `stringmd5` in docker image if both `md5sum` and `md5` are present [#17590](https://github.com/jupyterlab/jupyterlab/pull/17590) ([@ritzdevp](https://github.com/ritzdevp))
+- Ensure strings with yellow background in tracebacks are visible [#17577](https://github.com/jupyterlab/jupyterlab/pull/17577) ([@EtiennePelletier](https://github.com/EtiennePelletier))
+- Add `standby` callback to lumino polls [#17567](https://github.com/jupyterlab/jupyterlab/pull/17567) ([@mahendrapaipuri](https://github.com/mahendrapaipuri))
+- Fix stdin input triggering cell re-execution on Shift+Enter [#17565](https://github.com/jupyterlab/jupyterlab/pull/17565) ([@Darshan808](https://github.com/Darshan808))
+- `fileeditor-extension`: fix handling of launcher, commands and menu entries on `specsChanged` [#17550](https://github.com/jupyterlab/jupyterlab/pull/17550) ([@jtpio](https://github.com/jtpio))
+- Fix incorrect ARIA labels in the `MainAreaWidget` [#17527](https://github.com/jupyterlab/jupyterlab/pull/17527) ([@dnlzrgz](https://github.com/dnlzrgz))
+- Enable save in collaborative mode [#17508](https://github.com/jupyterlab/jupyterlab/pull/17508) ([@Darshan808](https://github.com/Darshan808))
+- Allow `grid` and `flexbox` style attributes during Markdown/HTML sanitization [#17408](https://github.com/jupyterlab/jupyterlab/pull/17408) ([@dotnetautor](https://github.com/dotnetautor))
+
+### Maintenance and upkeep improvements
+
+- Use hatch to get the version [#17559](https://github.com/jupyterlab/jupyterlab/pull/17559) ([@krassowski](https://github.com/krassowski))
+- Temporarily ignore links to github.com [#17544](https://github.com/jupyterlab/jupyterlab/pull/17544) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Add a `selectionChanged` signal to the file browser [#17563](https://github.com/jupyterlab/jupyterlab/pull/17563) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-05-07&to=2025-05-26&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-05-07..2025-05-26&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-05-07..2025-05-26&type=Issues) | [@dnlzrgz](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adnlzrgz+updated%3A2025-05-07..2025-05-26&type=Issues) | [@dotnetautor](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adotnetautor+updated%3A2025-05-07..2025-05-26&type=Issues) | [@EtiennePelletier](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AEtiennePelletier+updated%3A2025-05-07..2025-05-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-05-07..2025-05-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-05-07..2025-05-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-05-07..2025-05-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-05-07..2025-05-26&type=Issues) | [@mahendrapaipuri](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amahendrapaipuri+updated%3A2025-05-07..2025-05-26&type=Issues) | [@ritzdevp](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aritzdevp+updated%3A2025-05-07..2025-05-26&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2025-05-07..2025-05-26&type=Issues) | [@yacchin1205](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayacchin1205+updated%3A2025-05-07..2025-05-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.0a0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.1...7160c308c0e66b2043818a4a5659e982b661b01f))
@@ -522,8 +564,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-04-22&to=2025-05-07&type=c))
 
 [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2025-04-22..2025-05-07&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-04-22..2025-05-07&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-04-22..2025-05-07&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-04-22..2025-05-07&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aminrk+updated%3A2025-04-22..2025-05-07&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-04-22..2025-05-07&type=Issues) | [@peytondmurray](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apeytondmurray+updated%3A2025-04-22..2025-05-07&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2025-04-22..2025-05-07&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2025-04-22..2025-05-07&type=Issues) | [@yukiiii04](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayukiiii04+updated%3A2025-04-22..2025-05-07&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.1
 
