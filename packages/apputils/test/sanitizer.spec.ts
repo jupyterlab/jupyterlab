@@ -12,11 +12,12 @@ describe('sanitizer', () => {
         'http', 'https', 'mailto', 'ftp', 'tel', 'zoommtg'
       ]);
       customSanitizer.setAllowNamedProperties(true);
-
       const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
+      // The `rel="nofollow"` attribute is added to all `<a>` tags in _generateOptions()
+      const expected = '<a href="zoommtg://meeting_link" rel="nofollow">Join Meeting</a>';
+      
       const result = customSanitizer.sanitize(link);
-
-      expect(result).toBe(link);
+      expect(result).toBe(expected);
     });
 
 
