@@ -12,10 +12,10 @@ describe('sanitizer', () => {
         'http', 'https', 'mailto', 'ftp', 'tel', 'zoommtg'
       ]);
       customSanitizer.setAllowNamedProperties(true);
-    
+
       const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
       const result = customSanitizer.sanitize(link);
-    
+
       expect(result).toBe(link);
     });
 
