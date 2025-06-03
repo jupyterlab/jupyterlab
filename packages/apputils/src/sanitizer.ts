@@ -591,7 +591,9 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
-   * Set the allowed schemes
+   * Set the allowed schemes.
+   * Automatically regenerates sanitizer options to apply the change.
+   * Note: the schemes merge into the current config and does not get overwritten.
    *
    * @param scheme Allowed schemes
    */
