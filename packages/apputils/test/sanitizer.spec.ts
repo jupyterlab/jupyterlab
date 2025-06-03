@@ -6,6 +6,18 @@ const sanitizer = new Sanitizer();
 
 describe('sanitizer', () => {
   describe('#sanitize()', () => {
+    it('should preserve custom schemes like zoommtg:// when allowed', () => {
+      const customSanitizer = new Sanitizer();
+      customSanitizer.setAllowedSchemes([
+        'http', 'https', 'mailto', 'ftp', 'tel', 'zoommtg'
+      ]);
+    
+      const link = '<a href="zoommtg://zoom/url">Meeting Link</a>';
+      const result = customSanitizer.sanitize(link);
+    
+      expect(result).toBe(link);
+    });
+
     it('should allow h1 tags', () => {
       const h1 = '<h1>foo</h1>';
       expect(sanitizer.sanitize(h1)).toBe(h1);
