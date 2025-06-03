@@ -11,10 +11,10 @@ describe('sanitizer', () => {
       customSanitizer.setAllowedSchemes([
         'http', 'https', 'mailto', 'ftp', 'tel', 'zoommtg'
       ]);
-    
+
       const link = '<a href="zoommtg://zoom/url">Meeting Link</a>';
       const result = customSanitizer.sanitize(link);
-    
+
       expect(result).toBe(link);
     });
 
