@@ -6,17 +6,19 @@ const sanitizer = new Sanitizer();
 
 describe('sanitizer', () => {
   describe('#sanitize()', () => {
-    it('should preserve custom schemes like zoommtg:// when allowed', () => {
+    it('should preserve links containing user-defied schemes when named properties are allowed', () => {
       const customSanitizer = new Sanitizer();
       customSanitizer.setAllowedSchemes([
         'http', 'https', 'mailto', 'ftp', 'tel', 'zoommtg'
       ]);
-
-      const link = '<a href="zoommtg://zoom/url">Meeting Link</a>';
+      customSanitizer.setAllowNamedProperties(true);
+    
+      const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
       const result = customSanitizer.sanitize(link);
-
+    
       expect(result).toBe(link);
     });
+
 
     it('should allow h1 tags', () => {
       const h1 = '<h1>foo</h1>';
