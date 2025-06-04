@@ -232,11 +232,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         manager.source = handlers[widget.id];
       }
     };
-    if (app.shell.currentChanged) {
-      app.shell.currentChanged.connect((_, args) => setSource(args.newValue));
-    } else {
-      setSource(app.shell.currentWidget);
-    }
+    app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
     void app.restored.then(() => setSource(app.shell.currentWidget));
   }
 };
@@ -294,11 +290,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         manager.source = handlers[widget.id];
       }
     };
-    if (app.shell.currentChanged) {
-      app.shell.currentChanged.connect((_, args) => setSource(args.newValue));
-    } else {
-      setSource(app.shell.currentWidget);
-    }
+    app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
     void app.restored.then(() => setSource(app.shell.currentWidget));
   }
 };
