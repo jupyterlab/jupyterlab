@@ -1158,7 +1158,9 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       // Set the "disabled" attribute for <input> tags.
       input: sanitize.simpleTransform('input', { disabled: 'disabled' })
     },
-    allowedSchemes: this._options?.allowedSchemes ?? [...sanitize.defaults.allowedSchemes],
+    allowedSchemes: this._options?.allowedSchemes ?? [
+      ...sanitize.defaults.allowedSchemes
+    ],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])

@@ -9,17 +9,22 @@ describe('sanitizer', () => {
     it('should preserve links containing user-defied schemes when named properties are allowed', () => {
       const customSanitizer = new Sanitizer();
       customSanitizer.setAllowedSchemes([
-        'http', 'https', 'mailto', 'ftp', 'tel', 'zoommtg'
+        'http',
+        'https',
+        'mailto',
+        'ftp',
+        'tel',
+        'zoommtg'
       ]);
       customSanitizer.setAllowNamedProperties(true);
       const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
       // The `rel="nofollow"` attribute is added to all `<a>` tags in _generateOptions()
-      const expected = '<a href="zoommtg://meeting_link" rel="nofollow">Join Meeting</a>';
+      const expected =
+        '<a href="zoommtg://meeting_link" rel="nofollow">Join Meeting</a>';
 
       const result = customSanitizer.sanitize(link);
       expect(result).toBe(expected);
     });
-
 
     it('should allow h1 tags', () => {
       const h1 = '<h1>foo</h1>';
