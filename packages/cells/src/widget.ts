@@ -1341,17 +1341,21 @@ export class CodeCell extends Cell<ICodeCellModel> {
           TableOfContentsUtils.Markdown.parseHeadings(
             m.data[mdType] as string,
             this._rendermime.markdownParser
-          ).then(renderedHTML => {
-            headings.push(
-              ...renderedHTML.map(heading => {
-                return {
-                  ...heading,
-                  outputIndex: j,
-                  type: Cell.HeadingType.Markdown
-                };
-              })
-            );
-          });
+          )
+            .then(renderedHTML => {
+              headings.push(
+                ...renderedHTML.map(heading => {
+                  return {
+                    ...heading,
+                    outputIndex: j,
+                    type: Cell.HeadingType.Markdown
+                  };
+                })
+              );
+            })
+            .catch(error => {
+              console.warn('Failed to parse markdown headings:', error);
+            });
         }
       }
 
