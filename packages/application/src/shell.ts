@@ -464,9 +464,26 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this
     );
 
+    const onSideHandlerUpdated = (handler: Private.SideBarHandler) => {
+      this._onLayoutModified();
+      // Ensure the current widget in the side bar gets focus
+      const currentTitle = handler.sideBar.currentTitle;
+      if (currentTitle) {
+        const widget = currentTitle.owner;
+        if (widget) {
+          widget.activate();
+          widget.node.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+        }
+      }
+    };
+
     // Catch current changed events on the side handlers.
-    this._leftHandler.updated.connect(this._onLayoutModified, this);
-    this._rightHandler.updated.connect(this._onLayoutModified, this);
+    this._leftHandler.updated.connect(() => {
+      onSideHandlerUpdated(this._leftHandler);
+    }, this);
+    this._rightHandler.updated.connect(() => {
+      onSideHandlerUpdated(this._rightHandler);
+    }, this);
 
     // Catch update events on the horizontal split panel
     this._hsplitPanel.updated.connect(this._onLayoutModified, this);
@@ -2020,6 +2037,7 @@ namespace Private {
       if (widget) {
         this._sideBar.currentTitle = widget.title;
         widget.activate();
+        widget.node.focus();
       }
     }
 
