@@ -2037,7 +2037,6 @@ namespace Private {
       if (widget) {
         this._sideBar.currentTitle = widget.title;
         widget.activate();
-        widget.node.focus();
       }
     }
 
