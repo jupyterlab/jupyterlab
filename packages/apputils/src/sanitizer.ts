@@ -591,13 +591,16 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
-   * Set the allowed schemes
+   * Set the allowed schemes.
+   * Automatically regenerates sanitizer options to apply the change.
+   * Note: the schemes merge into the current config and does not get overwritten.
    *
    * @param scheme Allowed schemes
    */
   setAllowedSchemes(scheme: Array<string>): void {
     // Force copy of `scheme`
     this._options.allowedSchemes = [...scheme];
+    this._options = this._generateOptions();
   }
 
   /**
@@ -1155,7 +1158,9 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       // Set the "disabled" attribute for <input> tags.
       input: sanitize.simpleTransform('input', { disabled: 'disabled' })
     },
-    allowedSchemes: [...sanitize.defaults.allowedSchemes],
+    allowedSchemes: this._options?.allowedSchemes ?? [
+      ...sanitize.defaults.allowedSchemes
+    ],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])
