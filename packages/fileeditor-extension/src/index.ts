@@ -90,8 +90,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IEditorLanguageRegistry,
     IEditorThemeRegistry,
     IDefaultFileBrowser,
-    ISettingRegistry,
-    IMarkdownParser
+    ISettingRegistry
   ],
   optional: [
     IConsoleTracker,
@@ -102,7 +101,8 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ISessionContextDialogs,
     ITableOfContentsRegistry,
     ITranslator,
-    IFormRendererRegistry
+    IFormRendererRegistry,
+    IMarkdownParser
   ],
   provides: IEditorTracker,
   autoStart: true
