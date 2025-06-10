@@ -7,7 +7,6 @@ import React from 'react';
 import { ShortcutInput } from '../../src/components/ShortcutInput';
 import { IShortcutTarget } from '../../src/types';
 import { nullTranslator } from '@jupyterlab/translation';
-import '@testing-library/jest-dom';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { createRoot } from 'react-dom/client';
 
