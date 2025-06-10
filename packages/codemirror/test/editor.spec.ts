@@ -480,6 +480,17 @@ describe('CodeMirrorEditor', () => {
         value: 'import'
       });
     });
+    it('should return token of parent when erronous leaf is found', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('a = "/home');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokenAt(10)).toStrictEqual({
+        offset: 4,
+        type: 'String',
+        value: '"/home'
+      });
+    });
   });
 
   describe('#getTokens()', () => {

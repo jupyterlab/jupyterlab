@@ -93,6 +93,7 @@ import {
   IRenderMime,
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
+import { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -602,30 +603,28 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           ? trans.__('Save and Export Notebook: %1', formatLabel)
           : formatLabel;
       },
-      execute: args => {
+      execute: async args => {
         const current = getCurrent(tracker, shell, args);
 
         if (!current) {
           return;
         }
 
-        const url = PageConfig.getNBConvertURL({
-          format: args['format'] as string,
-          download: true,
-          path: current.context.path
-        });
         const { context } = current;
 
+        const exportOptions: NbConvert.IExportOptions = {
+          format: args['format'] as string,
+          path: current.context.path,
+          exporterOptions: {
+            download: true
+          }
+        };
+
         if (context.model.dirty && !context.model.readOnly) {
-          return context.save().then(() => {
-            window.open(url, '_blank', 'noopener');
-          });
+          await context.save();
         }
 
-        return new Promise<void>(resolve => {
-          window.open(url, '_blank', 'noopener');
-          resolve(undefined);
-        });
+        return services.nbconvert.exportAs?.(exportOptions);
       },
       isEnabled
     });
@@ -2658,11 +2657,11 @@ function addCommands(
         current?.content.selectedCells.length ?? 1
       );
     },
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.cut(current.content);
+        return await NotebookActions.cutToSystemClipboard(current.content);
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
@@ -2685,11 +2684,11 @@ function addCommands(
         current?.content.selectedCells.length ?? 1
       );
     },
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.copy(current.content);
+        return await NotebookActions.copyToSystemClipboard(current.content);
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
@@ -2712,11 +2711,14 @@ function addCommands(
         current?.content.selectedCells.length ?? 1
       );
     },
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.paste(current.content, 'below');
+        return await NotebookActions.pasteFromSystemClipboard(
+          current.content,
+          'below'
+        );
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
@@ -2739,11 +2741,14 @@ function addCommands(
         current?.content.selectedCells.length ?? 1
       );
     },
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.paste(current.content, 'above');
+        return await NotebookActions.pasteFromSystemClipboard(
+          current.content,
+          'above'
+        );
       }
     },
     isEnabled
@@ -2784,11 +2789,14 @@ function addCommands(
         current?.content.selectedCells.length ?? 1
       );
     },
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.paste(current.content, 'replace');
+        return await NotebookActions.pasteFromSystemClipboard(
+          current.content,
+          'replace'
+        );
       }
     },
     isEnabled

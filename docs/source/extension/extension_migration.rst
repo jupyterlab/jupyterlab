@@ -6,6 +6,35 @@
 Extension Migration Guide
 =========================
 
+JupyterLab 4.4 to 4.5
+---------------------
+
+File Browser updates
+^^^^^^^^^^^^^^^^^^^^
+
+The file browser now emits a ``selectionChanged`` signal when the selected files and folders change.
+
+If you maintain an extension which implements a subclass of ``DirListing`` that changes selection, it is recommended to
+emit the ``selectionChanged`` signal when the selection changes. This will ensure that any listeners to the
+``selectionChanged`` signal are notified of the change.
+
+API updates
+^^^^^^^^^^^
+
+- The ``NbConvert.IManager`` interface was fixed to not require classes implementing the interface to provide a
+  concrete ``NbConvertManager`` class. In addition, this interface now includes an optional ``exportAs`` method
+  to export (and optionally download) a notebook to a specific format.
+- The ``NbConvertManager.IExportFormats`` interface was moved to the ``NbConvert`` namespace. You should now use ``NbConvert.IExportFormats`` instead of ``NbConvertManager.IExportFormats``.
+  ``NbConvertManager.IExportFormats`` was however kept for backward compatibility.
+
+
+``extra_labextensions_path`` ordering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The default labextension paths now take precedence over those found in ``extra_labextensions_path``. In other words,
+``BaseExtensionApp.labextensions_path`` now lists the extensions from ``LabApp.labextensions_path``
+before those found in ``extra_labextensions_path``.
+
 JupyterLab 4.3 to 4.4
 ---------------------
 
