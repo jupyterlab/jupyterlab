@@ -1,3 +1,4 @@
+To test the UI tests in CI
 **[Installation](#installation)** |
 **[Documentation](https://jupyterlab.readthedocs.io)** |
 **[Contributing](#contributing)** |
