@@ -2,11 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import {
-  createDefaultFactory,
-  setToolbar,
-  ToolbarRegistry
-} from '@jupyterlab/apputils';
+import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
   Cell,
   CellModel,
@@ -17,7 +13,11 @@ import {
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import { ReactWidget, Toolbar } from '@jupyterlab/ui-components';
+import {
+  CommandToolbarButton,
+  ReactWidget,
+  Toolbar
+} from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -205,11 +205,18 @@ export class CellToolbarTracker implements IDisposable {
       );
       const promises: Promise<void>[] = [cell.ready];
       if (this._toolbarFactory) {
-        setToolbar(cell, this._toolbarFactory, toolbarWidget);
-        // FIXME toolbarWidget.update() - strangely this does not work
-        (toolbarWidget.layout as PanelLayout).widgets.forEach(w => {
-          w.update();
-        });
+        // Use our custom factory directly instead of setToolbar
+        const toolbarItems = this._toolbarFactory(cell);
+        for (const { name, widget } of toolbarItems) {
+          toolbarWidget.addItem(name, widget);
+          if (
+            widget instanceof ReactWidget &&
+            (widget as ReactWidget).renderPromise !== undefined
+          ) {
+            (widget as ReactWidget).update();
+            promises.push((widget as ReactWidget).renderPromise!);
+          }
+        }
       } else {
         for (const { name, widget } of this._toolbarItems!) {
           toolbarWidget.addItem(name, widget);
@@ -545,11 +552,58 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
+    // Create a custom factory that includes the panel ID in command args
+    const customFactory = this.createFactoryWithPanelId(panel);
+
     return (this._tracker = new CellToolbarTracker(
       panel,
       undefined,
-      this._toolbarFactory
+      customFactory
     ));
+  }
+
+  /**
+   * Create a toolbar factory that includes the panel ID in command arguments
+   */
+  private createFactoryWithPanelId(
+    panel: NotebookPanel
+  ): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
+    return (widget: Widget) => {
+      // Get the original items from the default factory
+      const originalItems = this._toolbarFactory(widget);
+
+      // Create new items with modified command args
+      const modifiedItems = new ObservableList<ToolbarRegistry.IToolbarItem>();
+
+      for (const item of originalItems) {
+        if (item.widget.hasClass('jp-CommandToolbarButton')) {
+          // Get the original button
+          const originalButton = item.widget as any;
+          const originalProps = originalButton.props;
+
+          // Create new button with modified args
+          const newArgs = {
+            ...originalProps.args,
+            panelId: panel.id
+          };
+
+          const newButton = new CommandToolbarButton({
+            ...originalProps,
+            args: newArgs
+          });
+
+          modifiedItems.push({
+            name: item.name,
+            widget: newButton
+          });
+        } else {
+          // Keep non-command items as-is
+          modifiedItems.push(item);
+        }
+      }
+
+      return modifiedItems;
+    };
   }
 
   /**

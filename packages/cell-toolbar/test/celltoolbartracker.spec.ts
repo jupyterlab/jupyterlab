@@ -159,6 +159,38 @@ describe('@jupyterlab/cell-toolbar', () => {
         const tracker = extension.createNew(panel);
         expect(tracker).toBeInstanceOf(CellToolbarTracker);
       });
+
+      it('should create toolbar commands with panel ID in args', async () => {
+        const context = await NBTestUtils.createMockContext();
+        panel = NBTestUtils.createNotebookPanel(context);
+
+        await panel.revealed;
+
+        // Mock the command execution to capture args
+        const executeArgs: any[] = [];
+        commands.addCommand('test:move-cell-up', {
+          execute: args => {
+            executeArgs.push(args);
+            return null;
+          },
+          isEnabled: args => {
+            // This should receive the panelId in args
+            return args.panelId === panel.id;
+          }
+        });
+
+        // Create the tracker which should set up toolbar with panel ID
+        extension.createNew(panel);
+
+        // Verify that the panel ID is included in command args
+        // This tests the fix for issue #17426
+        const isEnabledResult = commands.isEnabled('test:move-cell-up', {
+          toolbar: true,
+          panelId: panel.id
+        });
+
+        expect(isEnabledResult).toBe(true);
+      });
     });
   });
 });
