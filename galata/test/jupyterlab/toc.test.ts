@@ -23,7 +23,9 @@ test.describe('Table of Contents', () => {
 
     await page.sidebar.openTab('table-of-contents');
 
-    await page.getByTitle('Show heading number in the document').click();
+    await page
+      .getByRole('button', { name: 'Show heading number in the' })
+      .click();
   });
 
   test.afterEach(async ({ page }) => {
