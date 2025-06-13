@@ -1041,6 +1041,83 @@ a plugin:
       }
     };
 
+Kernel Subshells
+----------------
+
+Kernel subshells enable concurrent code execution within kernels that support them. Subshells are separate threads of execution that allow interaction with a kernel while it's busy executing long-running code, enabling non-blocking communication and parallel execution.
+
+**Kernel Support**
+
+Subshells are supported by:
+
+- **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via ``supported_features: ['kernel subshells']`` in kernel info replies
+- Other kernels implementing `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__
+
+**User Interface**
+
+Users can create subshell consoles in two ways:
+
+1. **Command Palette**: Press ``Ctrl+Shift+C`` and search for "New Subshell Console for Notebook"
+2. **Context Menu**: Right-click in a notebook (only visible when kernel supports subshells)
+
+To verify subshell functionality, use the ``%subshell`` magic command in Python kernels:
+
+.. code:: python
+
+  %subshell
+  # Output shows:
+  # subshell id: None (main shell) or unique ID (subshell)
+  # subshell list: ['id1', 'id2', ...] (active subshells)
+
+**Extension Development**
+
+Extension developers can use subshell functionality through the kernel service API:
+
+.. code:: typescript
+
+  import { INotebookTracker } from '@jupyterlab/notebook';
+
+  // Get the current kernel from a notebook
+  const current = tracker.currentWidget;
+  if (!current) return;
+
+  const kernel = current.sessionContext.session?.kernel;
+  if (!kernel) return;
+
+  // Check if kernel supports subshells
+  if (kernel.supportsSubshells) {
+    // Create a new subshell
+    const reply = await kernel.requestCreateSubshell({}).done;
+    const subshellId = reply.content.subshell_id;
+    console.log(`Created subshell: ${subshellId}`);
+
+    // List existing subshells
+    const listReply = await kernel.requestListSubshell({}).done;
+    console.log(`Active subshells: ${listReply.content.subshell_id}`);
+
+    // Execute code in a specific subshell
+    const future = kernel.requestExecute(
+      { code: 'print("Hello from subshell!")' },
+      false, // disposeOnDone
+      { subshell_id: subshellId } // metadata
+    );
+    await future.done;
+
+    // Delete a subshell when done
+    await kernel.requestDeleteSubshell({ subshell_id: subshellId }).done;
+    console.log(`Deleted subshell: ${subshellId}`);
+  }
+
+**Communication Settings**
+
+Configure how widget communications use subshells via Settings → Advanced Settings → Kernel:
+
+- ``disabled``: No subshells for communications
+- ``perCommTarget``: One subshell per communication target (default)
+- ``perComm``: One subshell per communication (can create many subshells)
+
+For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
+
 LSP Features
 --------------
 
