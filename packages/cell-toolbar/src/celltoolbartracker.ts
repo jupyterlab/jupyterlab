@@ -13,11 +13,7 @@ import {
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import {
-  CommandToolbarButton,
-  ReactWidget,
-  Toolbar
-} from '@jupyterlab/ui-components';
+import { ReactWidget, Toolbar } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -525,11 +521,13 @@ const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
  */
 export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   static readonly FACTORY_NAME = 'Cell';
+  static readonly WIDGET_ID_ARG = 'widgetId';
 
   constructor(
     commands: CommandRegistry,
     toolbarFactory?: (
-      widget: Widget
+      widget: Widget,
+      commandArgs?: Record<string, any>
     ) => IObservableList<ToolbarRegistry.IToolbarItem>
   ) {
     this._commands = commands;
@@ -537,73 +535,45 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   protected get defaultToolbarFactory(): (
-    widget: Widget
+    widget: Widget,
+    commandArgs?: Record<string, any>
   ) => IObservableList<ToolbarRegistry.IToolbarItem> {
     const itemFactory = createDefaultFactory(this._commands);
-    return (widget: Widget) =>
+    return (widget: Widget, commandArgs?: Record<string, any>) =>
       new ObservableList({
         values: defaultToolbarItems.map(item => {
+          const itemWithArgs = commandArgs
+            ? {
+                ...item,
+                args: { ...item.args, ...commandArgs }
+              }
+            : item;
+
           return {
             name: item.name,
-            widget: itemFactory(CellBarExtension.FACTORY_NAME, widget, item)
+            widget: itemFactory(
+              CellBarExtension.FACTORY_NAME,
+              widget,
+              itemWithArgs
+            )
           };
         })
       });
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    // Create a custom factory that includes the panel ID in command args
-    const customFactory = this.createFactoryWithPanelId(panel);
+    // Create a factory that passes the widget ID to the toolbar factory
+    const factoryWithWidgetId = (widget: Widget) => {
+      return this._toolbarFactory(widget, {
+        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+      });
+    };
 
     return (this._tracker = new CellToolbarTracker(
       panel,
       undefined,
-      customFactory
+      factoryWithWidgetId
     ));
-  }
-
-  /**
-   * Create a toolbar factory that includes the panel ID in command arguments
-   */
-  private createFactoryWithPanelId(
-    panel: NotebookPanel
-  ): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
-    return (widget: Widget) => {
-      // Get the original items from the default factory
-      const originalItems = this._toolbarFactory(widget);
-
-      // Create new items with modified command args
-      const modifiedItems = new ObservableList<ToolbarRegistry.IToolbarItem>();
-
-      for (const item of originalItems) {
-        if (item.widget.hasClass('jp-CommandToolbarButton')) {
-          // Get the original button
-          const originalButton = item.widget as any;
-          const originalProps = originalButton.props;
-
-          // Create new button with modified args
-          const newArgs = {
-            ...originalProps.args,
-            panelId: panel.id
-          };
-
-          const newButton = new CommandToolbarButton({
-            ...originalProps,
-            args: newArgs
-          });
-
-          modifiedItems.push({
-            name: item.name,
-            widget: newButton
-          });
-        } else {
-          // Keep non-command items as-is
-          modifiedItems.push(item);
-        }
-      }
-
-      return modifiedItems;
-    };
   }
 
   /**
@@ -624,7 +594,8 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
 
   private _commands: CommandRegistry;
   private _toolbarFactory: (
-    widget: Widget
+    widget: Widget,
+    commandArgs?: Record<string, any>
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
   private _tracker: CellToolbarTracker;
 }
