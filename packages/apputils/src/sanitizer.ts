@@ -600,7 +600,6 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   setAllowedSchemes(scheme: Array<string>): void {
     // Force copy of `scheme`
     this._options.allowedSchemes = [...scheme];
-    this._options = this._generateOptions();
   }
 
   /**
