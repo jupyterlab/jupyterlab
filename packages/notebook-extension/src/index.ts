@@ -2173,9 +2173,18 @@ function getCurrent(
   shell: JupyterFrontEnd.IShell,
   args: ReadonlyPartialJSONObject
 ): NotebookPanel | null {
-  const widget = args[SemanticCommand.WIDGET]
-    ? tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null
-    : tracker.currentWidget;
+  let widget: NotebookPanel | null = null;
+
+  // Check for panelId in args (used by cell toolbars)
+  if (args['panelId']) {
+    widget = tracker.find(panel => panel.id === args['panelId']) ?? null;
+  } else if (args[SemanticCommand.WIDGET]) {
+    widget =
+      tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null;
+  } else {
+    widget = tracker.currentWidget;
+  }
+
   const activate = args['activate'] !== false;
 
   if (activate && widget) {
