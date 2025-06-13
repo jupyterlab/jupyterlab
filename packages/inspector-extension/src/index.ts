@@ -6,7 +6,6 @@
  */
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -190,13 +189,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
   // FIXME This should be in @jupyterlab/console-extension
   id: '@jupyterlab/inspector-extension:consoles',
   description: 'Adds code introspection support to consoles.',
-  requires: [IInspector, IConsoleTracker, ILabShell],
+  requires: [IInspector, IConsoleTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
     consoles: IConsoleTracker,
-    labShell: ILabShell,
     translator: ITranslator
   ): void => {
     // Maintain association of new consoles with their respective handlers.
@@ -234,8 +232,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
         manager.source = handlers[widget.id];
       }
     };
-    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
-    void app.restored.then(() => setSource(labShell.currentWidget));
+    app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(app.shell.currentWidget));
   }
 };
 
@@ -246,13 +244,12 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   // FIXME This should be in @jupyterlab/notebook-extension
   id: '@jupyterlab/inspector-extension:notebooks',
   description: 'Adds code introspection to notebooks.',
-  requires: [IInspector, INotebookTracker, ILabShell],
+  requires: [IInspector, INotebookTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
-    notebooks: INotebookTracker,
-    labShell: ILabShell
+    notebooks: INotebookTracker
   ): void => {
     // Maintain association of new notebooks with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -293,8 +290,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         manager.source = handlers[widget.id];
       }
     };
-    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
-    void app.restored.then(() => setSource(labShell.currentWidget));
+    app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(app.shell.currentWidget));
   }
 };
 
