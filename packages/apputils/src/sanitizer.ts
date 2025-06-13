@@ -1160,7 +1160,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
     ],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
-      img: sanitize.defaults.allowedSchemes.concat(['attachment'])
+      img: (this._options?.allowedSchemes ?? sanitize.defaults.allowedSchemes).concat(['attachment'])
     },
     // Override of the default option, so we can skip 'src' attribute validation.
     // 'src' Attributes are validated to be URIs, which does not allow for embedded (image) data.
