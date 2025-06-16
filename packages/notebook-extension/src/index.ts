@@ -2176,8 +2176,8 @@ function getCurrent(
   let widget: NotebookPanel | null = null;
 
   // Check for panelId in args (used by cell toolbars)
-  if (args['panelId']) {
-    widget = tracker.find(panel => panel.id === args['panelId']) ?? null;
+  if (args[CellBarExtension.WIDGET_ID_ARG]) {
+    widget = tracker.find(panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]) ?? null;
   } else if (args[SemanticCommand.WIDGET]) {
     widget =
       tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null;
