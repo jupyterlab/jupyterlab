@@ -175,7 +175,7 @@ describe('@jupyterlab/cell-toolbar', () => {
           },
           isEnabled: args => {
             // This should receive the panelId in args
-            return args.panelId === panel.id;
+            return args.widgetId === panel.id;
           }
         });
 
