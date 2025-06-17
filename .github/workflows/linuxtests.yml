@@ -54,8 +54,14 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - name: Setup firefox
-        uses: browser-actions/setup-firefox@latest
+      - name: Restore Playwright browsers cache
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: /home/runner/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-v1
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
 
       - name: Install dependencies
         env:
