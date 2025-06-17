@@ -1175,5 +1175,5 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       // See https://github.com/jupyterlab/jupyterlab/issues/5183
       allowedSchemesAppliedToAttributes: ['href', 'cite']
     };
-  }
+  };
 }

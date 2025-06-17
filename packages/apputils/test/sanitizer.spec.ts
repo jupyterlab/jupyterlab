@@ -30,7 +30,7 @@ describe('sanitizer', () => {
       customSanitizer.setAllowedSchemes(['http', 'https']); // No 'attachment'
       const img = '<img src="attachment:myimage.png" alt="img" />';
       expect(customSanitizer.sanitize(img)).toBe(img);
-      })
+    });
 
     it('should allow h1 tags', () => {
       const h1 = '<h1>foo</h1>';
