@@ -267,8 +267,8 @@ html_theme_options = {
         },
         {
             "name": "Zulip",
-            "url": "https://jupyter.zulipchat.com/channel/469762-jupyterlab",
-            "icon": "fab fa-zulip",
+            "url": "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab",
+            "icon": "fab fa-comments",
         },
     ],
     "logo": {
