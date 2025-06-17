@@ -6,7 +6,7 @@ const sanitizer = new Sanitizer();
 
 describe('sanitizer', () => {
   describe('#sanitize()', () => {
-    it('should preserve links containing user-defied schemes when named properties are allowed', () => {
+    it('should preserve links containing user-defined schemes', () => {
       const customSanitizer = new Sanitizer();
       customSanitizer.setAllowedSchemes([
         'http',
@@ -16,7 +16,6 @@ describe('sanitizer', () => {
         'tel',
         'zoommtg'
       ]);
-      customSanitizer.setAllowNamedProperties(true);
       const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
       // The `rel="nofollow"` attribute is added to all `<a>` tags in _generateOptions()
       const expected =
