@@ -13,19 +13,16 @@
       "path": "../apputils"
     },
     {
-      "path": "../docregistry"
+      "path": "../coreutils"
     },
     {
-      "path": "../rendermime-interfaces"
+      "path": "../docregistry"
     },
     {
       "path": "../services"
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../coreutils"
     }
   ]
 }

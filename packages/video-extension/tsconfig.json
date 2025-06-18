@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../docregistry"
     },
     {
@@ -20,9 +23,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../coreutils"
     }
   ]
 }
