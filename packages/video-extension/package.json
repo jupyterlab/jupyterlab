@@ -37,8 +37,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.13.0-alpha.1",
-    "@lumino/coreutils": "^2.2.1",
+    "@jupyterlab/application": "^4.5.0-alpha.1",
+    "@jupyterlab/apputils": "^4.6.0-alpha.1",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.1",
+    "@jupyterlab/docregistry": "^4.5.0-alpha.1",
+    "@jupyterlab/services": "^7.5.0-alpha.1",
+    "@jupyterlab/translation": "^4.5.0-alpha.1",
     "@lumino/widgets": "^2.7.1"
   },
   "devDependencies": {
@@ -53,7 +57,7 @@
     "access": "public"
   },
   "jupyterlab": {
-    "mimeExtension": true
+    "extension": true
   },
   "styleModule": "style/index.js"
 }

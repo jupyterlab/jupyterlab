@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/**
+ * Base styles for video viewer
+ */
+
 .jp-RenderedVideo {
   display: flex;
   justify-content: center;
@@ -14,4 +18,5 @@
 .jp-RenderedVideo video {
   width: 100%;
   height: auto;
+  object-fit: contain;
 }

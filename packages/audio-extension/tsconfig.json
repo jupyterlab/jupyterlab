@@ -7,7 +7,25 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
       "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../coreutils"
     }
   ]
 }

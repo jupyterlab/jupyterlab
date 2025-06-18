@@ -2418,8 +2418,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/audio-extension@workspace:packages/audio-extension"
   dependencies:
+    "@jupyterlab/application": ^4.5.0-alpha.1
+    "@jupyterlab/apputils": ^4.6.0-alpha.1
+    "@jupyterlab/coreutils": ^6.5.0-alpha.1
+    "@jupyterlab/docregistry": ^4.5.0-alpha.1
     "@jupyterlab/rendermime-interfaces": ^3.13.0-alpha.1
+    "@jupyterlab/services": ^7.5.0-alpha.1
     "@jupyterlab/testutils": ^4.5.0-alpha.1
+    "@jupyterlab/translation": ^4.5.0-alpha.1
     "@lumino/coreutils": ^2.2.1
     "@lumino/widgets": ^2.7.1
     "@types/jest": ^29.2.0
@@ -5170,9 +5176,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/video-extension@workspace:packages/video-extension"
   dependencies:
-    "@jupyterlab/rendermime-interfaces": ^3.13.0-alpha.1
+    "@jupyterlab/application": ^4.5.0-alpha.1
+    "@jupyterlab/apputils": ^4.6.0-alpha.1
+    "@jupyterlab/coreutils": ^6.5.0-alpha.1
+    "@jupyterlab/docregistry": ^4.5.0-alpha.1
+    "@jupyterlab/services": ^7.5.0-alpha.1
     "@jupyterlab/testutils": ^4.5.0-alpha.1
-    "@lumino/coreutils": ^2.2.1
+    "@jupyterlab/translation": ^4.5.0-alpha.1
     "@lumino/widgets": ^2.7.1
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0

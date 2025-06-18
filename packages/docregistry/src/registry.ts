@@ -1588,6 +1588,22 @@ export namespace DocumentRegistry {
         fileFormat: 'base64'
       },
       {
+        name: 'flac',
+        displayName: trans.__('Audio'),
+        extensions: ['.flac'],
+        mimeTypes: ['audio/flac'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'opus',
+        displayName: trans.__('Audio'),
+        extensions: ['.opus'],
+        mimeTypes: ['audio/opus'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
         name: 'mp4',
         displayName: trans.__('Video'),
         extensions: ['.mp4'],
@@ -1608,6 +1624,54 @@ export namespace DocumentRegistry {
         displayName: trans.__('Video'),
         extensions: ['.webm'],
         mimeTypes: ['video/webm'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'ogv',
+        displayName: trans.__('Video'),
+        extensions: ['.ogv', '.ogg'],
+        mimeTypes: ['video/ogg'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'avi',
+        displayName: trans.__('Video'),
+        extensions: ['.avi'],
+        mimeTypes: ['video/x-msvideo'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mov',
+        displayName: trans.__('Video'),
+        extensions: ['.mov'],
+        mimeTypes: ['video/quicktime'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'm4v',
+        displayName: trans.__('Video'),
+        extensions: ['.m4v'],
+        mimeTypes: ['video/x-m4v'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: '3gp',
+        displayName: trans.__('Video'),
+        extensions: ['.3gp'],
+        mimeTypes: ['video/3gpp'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mkv',
+        displayName: trans.__('Video'),
+        extensions: ['.mkv'],
+        mimeTypes: ['video/x-matroska'],
         fileFormat: 'base64',
         icon: videoIcon
       }

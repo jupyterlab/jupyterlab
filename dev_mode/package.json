@@ -236,6 +236,7 @@
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
+      "@jupyterlab/audio-extension": "",
       "@jupyterlab/cell-toolbar-extension": "",
       "@jupyterlab/celltags-extension": "",
       "@jupyterlab/codemirror-extension": "",
@@ -278,16 +279,15 @@
       "@jupyterlab/tooltip-extension": "",
       "@jupyterlab/translation-extension": "",
       "@jupyterlab/ui-components-extension": "",
+      "@jupyterlab/video-extension": "",
       "@jupyterlab/workspaces-extension": ""
     },
     "mimeExtensions": {
-      "@jupyterlab/audio-extension": "",
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
       "@jupyterlab/mermaid-extension": "lib/mime.js",
       "@jupyterlab/pdf-extension": "",
-      "@jupyterlab/vega5-extension": "",
-      "@jupyterlab/video-extension": ""
+      "@jupyterlab/vega5-extension": ""
     },
     "buildDir": "./static",
     "outputDir": ".",
