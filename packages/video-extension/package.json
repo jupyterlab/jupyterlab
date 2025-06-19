@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/video-extension",
   "version": "4.5.0-alpha.1",
-  "description": "JupyterLab - Video File Renderer Extension",
+  "description": "JupyterLab - Video File Viewer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
