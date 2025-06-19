@@ -21,7 +21,7 @@ import {
 } from '@jupyterlab/docregistry';
 import {
   Contents,
-  ContentsManager,
+  IDefaultDrive,
   RestContentProvider,
   ServerConnection
 } from '@jupyterlab/services';
@@ -62,96 +62,16 @@ function getAudioFileTypes(docRegistry: DocumentRegistry): string[] {
 }
 
 /**
- * Get MIME type for an audio file extension from the document registry
- */
-function getAudioMimeType(docRegistry: DocumentRegistry, path: string): string {
-  const fileTypes = docRegistry.getFileTypesForPath(path);
-
-  // Find the first audio file type
-  for (const fileType of fileTypes) {
-    if (fileType.mimeTypes.some(mimeType => mimeType.startsWith('audio/'))) {
-      // Return the first audio MIME type
-      const audioMimeType = fileType.mimeTypes.find(mimeType =>
-        mimeType.startsWith('audio/')
-      );
-      if (audioMimeType) {
-        return audioMimeType;
-      }
-    }
-  }
-
-  // Fallback to mp3 if no match found
-  return 'audio/mp3';
-}
-
-/**
- * Custom content model for audio streaming
- */
-interface IAudioContentsModel extends Contents.IModel {
-  /**
-   * The streaming URL for the audio
-   */
-  content: string; // This will be the direct URL to the audio file
-}
-
-/**
- * Options for AudioStreamContentProvider constructor
- */
-interface IAudioStreamContentProviderOptions {
-  /**
-   * The API endpoint for content operations
-   */
-  apiEndpoint: string;
-
-  /**
-   * The server settings
-   */
-  serverSettings: ServerConnection.ISettings;
-}
-
-/**
  * Custom content provider for audio streaming
  */
 class AudioContentProvider extends RestContentProvider {
-  constructor(options: IAudioStreamContentProviderOptions) {
-    super(options);
-    this._serverSettings = options.serverSettings;
-  }
-
   async get(
     localPath: string,
     options?: Contents.IFetchOptions
-  ): Promise<IAudioContentsModel> {
-    try {
-      // Instead of fetching the actual content, we return a URL that points
-      // directly to the audio file, allowing the browser to handle streaming
-      const baseUrl = this._serverSettings.baseUrl;
-      const audioUrl = URLExt.join(
-        baseUrl,
-        'files',
-        encodeURIComponent(localPath)
-      );
-
-      // Get basic file info from the server
-      const model = await super.get(localPath, { ...options, content: false });
-
-      return {
-        ...model,
-        content: audioUrl,
-        format: 'text' // We return the URL as text content
-      } as IAudioContentsModel;
-    } catch (error) {
-      console.error('Error creating audio URL:', error);
-      // Fallback to original behavior if needed
-      const model = await super.get(localPath, options);
-      return {
-        ...model,
-        content: model.content || ''
-      } as IAudioContentsModel;
-    }
+  ): Promise<Contents.IModel> {
+    // Always pass content: false to avoid loading large audio files into memory
+    return super.get(localPath, { ...options, content: false });
   }
-
-  private _serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -165,10 +85,7 @@ export class AudioViewer extends Widget {
     super();
     this.addClass(AUDIO_CLASS);
     this._context = options.context;
-    this._docRegistry = options.docRegistry;
-
-    // Get MIME type from document registry
-    this._mimeType = getAudioMimeType(this._docRegistry, this._context.path);
+    this._serverSettings = options.serverSettings;
 
     // Create the audio element
     this._audio = document.createElement('audio');
@@ -186,21 +103,12 @@ export class AudioViewer extends Widget {
   }
 
   /**
-   * The audio viewer's context.
-   */
-  get context(): DocumentRegistry.Context {
-    return this._context;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    this._context = null!;
-    this._docRegistry = null!;
     super.dispose();
   }
 
@@ -218,49 +126,18 @@ export class AudioViewer extends Widget {
    * Update the audio source.
    */
   private _updateAudio(): void {
-    if (!this._context.model || !this._audio) {
-      return;
-    }
-
-    const content = this._context.model.toString();
-    if (content) {
-      try {
-        // Check if content is a URL (from our content provider)
-        if (
-          content.startsWith('http://') ||
-          content.startsWith('https://') ||
-          content.startsWith('/')
-        ) {
-          // Direct URL - let the browser handle streaming
-          this._audio.src = content;
-        } else {
-          // Fallback: treat as base64 content (for backwards compatibility)
-          const byteCharacters = atob(content);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: this._mimeType });
-          const url = URL.createObjectURL(blob);
-
-          // Clean up previous URL if it was a blob URL
-          if (this._audio.src && this._audio.src.startsWith('blob:')) {
-            URL.revokeObjectURL(this._audio.src);
-          }
-
-          this._audio.src = url;
-        }
-      } catch (error) {
-        console.error('Error loading audio:', error);
-      }
-    }
+    // Use the file path directly - the browser will request it from the server
+    const audioUrl = URLExt.join(
+      this._serverSettings.baseUrl,
+      'files',
+      this._context.path
+    );
+    this._audio.src = audioUrl;
   }
 
   private _context: DocumentRegistry.Context;
-  private _docRegistry: DocumentRegistry;
   private _audio: HTMLAudioElement;
-  private _mimeType: string;
+  private _serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -277,14 +154,9 @@ export namespace AudioViewer {
     context: DocumentRegistry.Context;
 
     /**
-     * The document registry.
+     * The server settings.
      */
-    docRegistry: DocumentRegistry;
-
-    /**
-     * The MIME type of the audio.
-     */
-    mimeType?: string;
+    serverSettings: ServerConnection.ISettings;
   }
 }
 
@@ -304,12 +176,7 @@ export namespace AudioDocumentWidget {
   /**
    * The options used to create an audio document widget.
    */
-  export interface IOptions extends DocumentWidget.IOptions<AudioViewer> {
-    /**
-     * The MIME type of the audio.
-     */
-    mimeType?: string;
-  }
+  export interface IOptions extends DocumentWidget.IOptions<AudioViewer> {}
 }
 
 /**
@@ -323,7 +190,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
    */
   constructor(options: AudioViewerFactory.IOptions) {
     super(options);
-    this._docRegistry = options.docRegistry;
+    this._serverSettings = options.serverSettings;
   }
 
   /**
@@ -334,7 +201,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
   ): IDocumentWidget<AudioViewer> {
     const content = new AudioViewer({
       context,
-      docRegistry: this._docRegistry
+      serverSettings: this._serverSettings
     });
     const widget = new AudioDocumentWidget({
       content,
@@ -343,7 +210,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
     return widget;
   }
 
-  private _docRegistry: DocumentRegistry;
+  private _serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -355,9 +222,9 @@ export namespace AudioViewerFactory {
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
-     * The document registry.
+     * The server settings.
      */
-    docRegistry: DocumentRegistry;
+    serverSettings: ServerConnection.ISettings;
   }
 }
 
@@ -368,25 +235,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/audio-extension:plugin',
   description: 'Adds viewer for audio files',
   autoStart: true,
-  requires: [ITranslator],
+  requires: [ITranslator, IDefaultDrive],
   optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    defaultDrive: Contents.IDrive,
     restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
+    const serverSettings = app.serviceManager.serverSettings;
 
     // Get audio file types from the document registry
     const audioFileTypes = getAudioFileTypes(app.docRegistry);
 
     // Register the audio stream content provider once
-    const drive = (app.serviceManager.contents as ContentsManager).defaultDrive;
-    const registry = drive?.contentProviderRegistry;
+    const registry = defaultDrive.contentProviderRegistry;
     if (registry) {
       const audioContentProvider = new AudioContentProvider({
         apiEndpoint: '/api/contents',
-        serverSettings: app.serviceManager.serverSettings
+        serverSettings
       });
       registry.register(AUDIO_CONTENT_PROVIDER_ID, audioContentProvider);
     }
@@ -406,7 +274,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       translator,
       modelName: 'text',
       contentProviderId: AUDIO_CONTENT_PROVIDER_ID,
-      docRegistry: app.docRegistry
+      serverSettings
     });
 
     app.docRegistry.addWidgetFactory(factory);
@@ -429,9 +297,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       );
 
       if (audioFileType) {
-        widget.title.icon = audioFileType.icon!;
-        widget.title.iconClass = audioFileType.iconClass!;
-        widget.title.iconLabel = audioFileType.iconLabel!;
+        widget.title.icon = audioFileType.icon;
+        widget.title.iconClass = audioFileType.iconClass || '';
+        widget.title.iconLabel = audioFileType.iconLabel || '';
       }
     });
 

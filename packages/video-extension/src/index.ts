@@ -21,7 +21,7 @@ import {
 } from '@jupyterlab/docregistry';
 import {
   Contents,
-  ContentsManager,
+  IDefaultDrive,
   RestContentProvider,
   ServerConnection
 } from '@jupyterlab/services';
@@ -62,96 +62,16 @@ function getVideoFileTypes(docRegistry: DocumentRegistry): string[] {
 }
 
 /**
- * Get MIME type for a video file extension from the document registry
- */
-function getVideoMimeType(docRegistry: DocumentRegistry, path: string): string {
-  const fileTypes = docRegistry.getFileTypesForPath(path);
-
-  // Find the first video file type
-  for (const fileType of fileTypes) {
-    if (fileType.mimeTypes.some(mimeType => mimeType.startsWith('video/'))) {
-      // Return the first video MIME type
-      const videoMimeType = fileType.mimeTypes.find(mimeType =>
-        mimeType.startsWith('video/')
-      );
-      if (videoMimeType) {
-        return videoMimeType;
-      }
-    }
-  }
-
-  // Fallback to mp4 if no match found
-  return 'video/mp4';
-}
-
-/**
- * Custom content model for video streaming
- */
-interface IVideoContentsModel extends Contents.IModel {
-  /**
-   * The streaming URL for the video
-   */
-  content: string; // This will be the direct URL to the video file
-}
-
-/**
- * Options for VideoStreamContentProvider constructor
- */
-interface IVideoStreamContentProviderOptions {
-  /**
-   * The API endpoint for content operations
-   */
-  apiEndpoint: string;
-
-  /**
-   * The server settings
-   */
-  serverSettings: ServerConnection.ISettings;
-}
-
-/**
  * Custom content provider for video streaming
  */
 class VideoContentProvider extends RestContentProvider {
-  constructor(options: IVideoStreamContentProviderOptions) {
-    super(options);
-    this._serverSettings = options.serverSettings;
-  }
-
   async get(
     localPath: string,
     options?: Contents.IFetchOptions
-  ): Promise<IVideoContentsModel> {
-    try {
-      // Instead of fetching the actual content, we return a URL that points
-      // directly to the video file, allowing the browser to handle streaming
-      const baseUrl = this._serverSettings.baseUrl;
-      const videoUrl = URLExt.join(
-        baseUrl,
-        'files',
-        encodeURIComponent(localPath)
-      );
-
-      // Get basic file info from the server
-      const model = await super.get(localPath, { ...options, content: false });
-
-      return {
-        ...model,
-        content: videoUrl,
-        format: 'text' // We return the URL as text content
-      } as IVideoContentsModel;
-    } catch (error) {
-      console.error('Error creating video URL:', error);
-      // Fallback to original behavior if needed
-      const model = await super.get(localPath, options);
-      return {
-        ...model,
-        content: model.content || ''
-      } as IVideoContentsModel;
-    }
+  ): Promise<Contents.IModel> {
+    // Always pass content: false to avoid loading large video files into memory
+    return super.get(localPath, { ...options, content: false });
   }
-
-  private _serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -165,10 +85,7 @@ export class VideoViewer extends Widget {
     super();
     this.addClass(VIDEO_CLASS);
     this._context = options.context;
-    this._docRegistry = options.docRegistry;
-
-    // Get MIME type from document registry
-    this._mimeType = getVideoMimeType(this._docRegistry, this._context.path);
+    this._serverSettings = options.serverSettings;
 
     // Create the video element
     this._video = document.createElement('video');
@@ -186,21 +103,12 @@ export class VideoViewer extends Widget {
   }
 
   /**
-   * The video viewer's context.
-   */
-  get context(): DocumentRegistry.Context {
-    return this._context;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    this._context = null!;
-    this._docRegistry = null!;
     super.dispose();
   }
 
@@ -219,49 +127,18 @@ export class VideoViewer extends Widget {
    * Update the video source.
    */
   private _updateVideo(): void {
-    if (!this._context.model || !this._video) {
-      return;
-    }
-
-    const content = this._context.model.toString();
-    if (content) {
-      try {
-        // Check if content is a URL (from our content provider)
-        if (
-          content.startsWith('http://') ||
-          content.startsWith('https://') ||
-          content.startsWith('/')
-        ) {
-          // Direct URL - let the browser handle streaming
-          this._video.src = content;
-        } else {
-          // Fallback: treat as base64 content (for backwards compatibility)
-          const byteCharacters = atob(content);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: this._mimeType });
-          const url = URL.createObjectURL(blob);
-
-          // Clean up previous URL if it was a blob URL
-          if (this._video.src && this._video.src.startsWith('blob:')) {
-            URL.revokeObjectURL(this._video.src);
-          }
-
-          this._video.src = url;
-        }
-      } catch (error) {
-        console.error('Error loading video:', error);
-      }
-    }
+    // Use the file path directly - the browser will request it from the server
+    const videoUrl = URLExt.join(
+      this._serverSettings.baseUrl,
+      'files',
+      this._context.path
+    );
+    this._video.src = videoUrl;
   }
 
   private _context: DocumentRegistry.Context;
-  private _docRegistry: DocumentRegistry;
   private _video: HTMLVideoElement;
-  private _mimeType: string;
+  private _serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -278,14 +155,9 @@ export namespace VideoViewer {
     context: DocumentRegistry.Context;
 
     /**
-     * The document registry.
+     * The server settings.
      */
-    docRegistry: DocumentRegistry;
-
-    /**
-     * The MIME type of the video.
-     */
-    mimeType?: string;
+    serverSettings: ServerConnection.ISettings;
   }
 }
 
@@ -305,12 +177,7 @@ export namespace VideoDocumentWidget {
   /**
    * The options used to create a video document widget.
    */
-  export interface IOptions extends DocumentWidget.IOptions<VideoViewer> {
-    /**
-     * The MIME type of the video.
-     */
-    mimeType?: string;
-  }
+  export interface IOptions extends DocumentWidget.IOptions<VideoViewer> {}
 }
 
 /**
@@ -324,7 +191,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
    */
   constructor(options: VideoViewerFactory.IOptions) {
     super(options);
-    this._docRegistry = options.docRegistry;
+    this._serverSettings = options.serverSettings;
   }
 
   /**
@@ -335,7 +202,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
   ): IDocumentWidget<VideoViewer> {
     const content = new VideoViewer({
       context,
-      docRegistry: this._docRegistry
+      serverSettings: this._serverSettings
     });
     const widget = new VideoDocumentWidget({
       content,
@@ -344,7 +211,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
     return widget;
   }
 
-  private _docRegistry: DocumentRegistry;
+  private _serverSettings: ServerConnection.ISettings;
 }
 
 /**
@@ -356,9 +223,9 @@ export namespace VideoViewerFactory {
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
-     * The document registry.
+     * The server settings.
      */
-    docRegistry: DocumentRegistry;
+    serverSettings: ServerConnection.ISettings;
   }
 }
 
@@ -369,25 +236,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/video-extension:plugin',
   description: 'Adds viewer for video files',
   autoStart: true,
-  requires: [ITranslator],
+  requires: [ITranslator, IDefaultDrive],
   optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    defaultDrive: Contents.IDrive,
     restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
+    const serverSettings = app.serviceManager.serverSettings;
 
     // Get video file types from the document registry
     const videoFileTypes = getVideoFileTypes(app.docRegistry);
 
     // Register the video stream content provider once
-    const drive = (app.serviceManager.contents as ContentsManager).defaultDrive;
-    const registry = drive?.contentProviderRegistry;
+    const registry = defaultDrive.contentProviderRegistry;
     if (registry) {
       const videoContentProvider = new VideoContentProvider({
         apiEndpoint: '/api/contents',
-        serverSettings: app.serviceManager.serverSettings
+        serverSettings
       });
       registry.register(VIDEO_CONTENT_PROVIDER_ID, videoContentProvider);
     }
@@ -407,7 +275,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       translator,
       modelName: 'text',
       contentProviderId: VIDEO_CONTENT_PROVIDER_ID,
-      docRegistry: app.docRegistry
+      serverSettings
     });
 
     app.docRegistry.addWidgetFactory(factory);
@@ -430,9 +298,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       );
 
       if (videoFileType) {
-        widget.title.icon = videoFileType.icon!;
-        widget.title.iconClass = videoFileType.iconClass!;
-        widget.title.iconLabel = videoFileType.iconLabel!;
+        widget.title.icon = videoFileType.icon;
+        widget.title.iconClass = videoFileType.iconClass || '';
+        widget.title.iconLabel = videoFileType.iconLabel || '';
       }
     });
 
