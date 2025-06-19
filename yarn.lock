@@ -3602,7 +3602,7 @@ __metadata:
     "@jupyterlab/services": ^7.5.0-alpha.1
     "@jupyterlab/settingregistry": ^4.5.0-alpha.1
     "@lumino/coreutils": ^2.2.1
-    "@playwright/test": ^1.53.0
+    "@playwright/test": ^1.53.1
     "@stdlib/stats": ~0.0.13
     fs-extra: ^10.1.0
     json5: ^2.2.3
@@ -6001,14 +6001,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.53.0":
-  version: 1.53.0
-  resolution: "@playwright/test@npm:1.53.0"
+"@playwright/test@npm:^1.53.1":
+  version: 1.53.1
+  resolution: "@playwright/test@npm:1.53.1"
   dependencies:
-    playwright: 1.53.0
+    playwright: 1.53.1
   bin:
     playwright: cli.js
-  checksum: 63c8264134b9ceb1a9e40af9a2e262f11f74c791c739ade6d39177de42a28016d3a9c807ce893048b2c3247a633b5e8c7805e013c6f87c85b1360a83363d74ba
+  checksum: 9d7c09d27c6e24740e1be6aa1ed98cc0257a5a1d9b2d44f94f7f12c5f9804a58ac2855b7a0e8330551527c94b9d4d46bb122c4bb362d1bc6cd72c75beb5e6a84
   languageName: node
   linkType: hard
 
@@ -17599,27 +17599,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.53.0":
-  version: 1.53.0
-  resolution: "playwright-core@npm:1.53.0"
+"playwright-core@npm:1.53.1":
+  version: 1.53.1
+  resolution: "playwright-core@npm:1.53.1"
   bin:
     playwright-core: cli.js
-  checksum: 00d6c8f566608681e1ab529ecb86a4e8c818f77605438e38e1b7ebf04b41b4df115217fe89cfe535d0a0a9f08807ab0b66d4f9da61c5609060cc68859c7c4354
+  checksum: 19600abe104c7f1793212ad12d8c66c6b42c534a2b760aab55ee9c198c058f0027c8f3ba469bb4f2e268e20e8f84272ea32aeb9ea840b184b58f58f71d29549d
   languageName: node
   linkType: hard
 
-"playwright@npm:1.53.0":
-  version: 1.53.0
-  resolution: "playwright@npm:1.53.0"
+"playwright@npm:1.53.1":
+  version: 1.53.1
+  resolution: "playwright@npm:1.53.1"
   dependencies:
     fsevents: 2.3.2
-    playwright-core: 1.53.0
+    playwright-core: 1.53.1
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: a8e69cecac82515e018f68aeccdae0bd8d4e18e3741330e79129c1705780fef6591294c0fe0f71f1ab4242a00032c3896eae9ceb40c5e03d53265f993de8cd42
+  checksum: 6d9b0ae3f4abe794528b213bb0b492be0d93ee611efca3122aca81a8127b0a13206a91c97f5b22449b1b97d5d65979dd70e1286b015c93c45143e722293d3b95
   languageName: node
   linkType: hard
 
