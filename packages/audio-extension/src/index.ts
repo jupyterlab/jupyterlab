@@ -242,7 +242,7 @@ class AudioContentProvider extends RestContentProvider {
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/audio-extension:plugin',
-  description: 'Adds viewer for audio files',
+  description: 'Adds a viewer for audio files',
   autoStart: true,
   requires: [ITranslator, IDefaultDrive],
   optional: [ILayoutRestorer],

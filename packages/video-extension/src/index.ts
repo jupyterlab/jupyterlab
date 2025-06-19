@@ -239,7 +239,7 @@ class VideoContentProvider extends RestContentProvider {
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/video-extension:plugin',
-  description: 'Adds viewer for video files',
+  description: 'Adds a viewer for video files',
   autoStart: true,
   requires: [ITranslator, IDefaultDrive],
   optional: [ILayoutRestorer],
