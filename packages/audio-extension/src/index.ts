@@ -22,11 +22,9 @@ import {
 import {
   Contents,
   IDefaultDrive,
-  RestContentProvider,
-  ServerConnection
+  RestContentProvider
 } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
-import { URLExt } from '@jupyterlab/coreutils';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -62,19 +60,6 @@ function getAudioFileTypes(docRegistry: DocumentRegistry): string[] {
 }
 
 /**
- * Custom content provider for audio streaming
- */
-class AudioContentProvider extends RestContentProvider {
-  async get(
-    localPath: string,
-    options?: Contents.IFetchOptions
-  ): Promise<Contents.IModel> {
-    // Always pass content: false to avoid loading large audio files into memory
-    return super.get(localPath, { ...options, content: false });
-  }
-}
-
-/**
  * An audio viewer widget.
  */
 export class AudioViewer extends Widget {
@@ -85,7 +70,7 @@ export class AudioViewer extends Widget {
     super();
     this.addClass(AUDIO_CLASS);
     this._context = options.context;
-    this._serverSettings = options.serverSettings;
+    this._contentsManager = options.contentsManager;
 
     // Create the audio element
     this._audio = document.createElement('audio');
@@ -95,7 +80,7 @@ export class AudioViewer extends Widget {
 
     // Load audio when context is ready
     void this._context.ready.then(() => {
-      this._updateAudio();
+      void this._updateAudio();
     });
 
     // Listen for context model changes
@@ -125,11 +110,9 @@ export class AudioViewer extends Widget {
   /**
    * Update the audio source.
    */
-  private _updateAudio(): void {
-    // Use the file path directly - the browser will request it from the server
-    const audioUrl = URLExt.join(
-      this._serverSettings.baseUrl,
-      'files',
+  private async _updateAudio(): Promise<void> {
+    // Use getDownloadUrl for proper URL encoding and security tokens
+    const audioUrl = await this._contentsManager.getDownloadUrl(
       this._context.path
     );
     this._audio.src = audioUrl;
@@ -137,7 +120,7 @@ export class AudioViewer extends Widget {
 
   private _context: DocumentRegistry.Context;
   private _audio: HTMLAudioElement;
-  private _serverSettings: ServerConnection.ISettings;
+  private _contentsManager: Contents.IManager;
 }
 
 /**
@@ -154,9 +137,9 @@ export namespace AudioViewer {
     context: DocumentRegistry.Context;
 
     /**
-     * The server settings.
+     * The contents manager.
      */
-    serverSettings: ServerConnection.ISettings;
+    contentsManager: Contents.IManager;
   }
 }
 
@@ -190,7 +173,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
    */
   constructor(options: AudioViewerFactory.IOptions) {
     super(options);
-    this._serverSettings = options.serverSettings;
+    this._contentsManager = options.contentsManager;
   }
 
   /**
@@ -201,7 +184,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
   ): IDocumentWidget<AudioViewer> {
     const content = new AudioViewer({
       context,
-      serverSettings: this._serverSettings
+      contentsManager: this._contentsManager
     });
     const widget = new AudioDocumentWidget({
       content,
@@ -210,7 +193,7 @@ export class AudioViewerFactory extends ABCWidgetFactory<
     return widget;
   }
 
-  private _serverSettings: ServerConnection.ISettings;
+  private _contentsManager: Contents.IManager;
 }
 
 /**
@@ -222,9 +205,35 @@ export namespace AudioViewerFactory {
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
-     * The server settings.
+     * The contents manager.
      */
-    serverSettings: ServerConnection.ISettings;
+    contentsManager: Contents.IManager;
+  }
+}
+
+/**
+ * A content provider for audio files.
+ *
+ * This overrides the default behavior of the RestContentProvider to not include the file content.
+ */
+class AudioContentProvider extends RestContentProvider {
+  constructor(options: RestContentProvider.IOptions) {
+    super(options);
+  }
+
+  /**
+   * Get a file or directory.
+   *
+   * @param localPath - The path to the file.
+   * @param options - The options used to fetch the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  async get(
+    localPath: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel> {
+    return super.get(localPath, { ...options, content: false });
   }
 }
 
@@ -244,7 +253,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
-    const serverSettings = app.serviceManager.serverSettings;
+
+    const { contents, serverSettings } = app.serviceManager;
 
     // Get audio file types from the document registry
     const audioFileTypes = getAudioFileTypes(app.docRegistry);
@@ -272,9 +282,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       defaultFor: audioFileTypes,
       readOnly: true,
       translator,
-      modelName: 'text',
+      modelName: 'base64',
       contentProviderId: AUDIO_CONTENT_PROVIDER_ID,
-      serverSettings
+      contentsManager: contents
     });
 
     app.docRegistry.addWidgetFactory(factory);

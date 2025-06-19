@@ -22,11 +22,9 @@ import {
 import {
   Contents,
   IDefaultDrive,
-  RestContentProvider,
-  ServerConnection
+  RestContentProvider
 } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
-import { URLExt } from '@jupyterlab/coreutils';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -50,28 +48,14 @@ const VIDEO_CONTENT_PROVIDER_ID = 'video-provider';
 function getVideoFileTypes(docRegistry: DocumentRegistry): string[] {
   const videoFileTypes: string[] = [];
 
-  // Iterate through all registered file types
+  // Find all video file types
   for (const fileType of docRegistry.fileTypes()) {
-    // Check if it's a video file type by checking the MIME types
     if (fileType.mimeTypes.some(mimeType => mimeType.startsWith('video/'))) {
       videoFileTypes.push(fileType.name);
     }
   }
 
   return videoFileTypes;
-}
-
-/**
- * Custom content provider for video streaming
- */
-class VideoContentProvider extends RestContentProvider {
-  async get(
-    localPath: string,
-    options?: Contents.IFetchOptions
-  ): Promise<Contents.IModel> {
-    // Always pass content: false to avoid loading large video files into memory
-    return super.get(localPath, { ...options, content: false });
-  }
 }
 
 /**
@@ -85,20 +69,17 @@ export class VideoViewer extends Widget {
     super();
     this.addClass(VIDEO_CLASS);
     this._context = options.context;
-    this._serverSettings = options.serverSettings;
+    this._contentsManager = options.contentsManager;
 
-    // Create the video element
     this._video = document.createElement('video');
     this._video.controls = true;
 
     this.node.appendChild(this._video);
 
-    // Load video when context is ready
     void this._context.ready.then(() => {
-      this._updateVideo();
+      void this._updateVideo();
     });
 
-    // Listen for context model changes
     this._context.model.contentChanged.connect(this._updateVideo, this);
   }
 
@@ -126,11 +107,9 @@ export class VideoViewer extends Widget {
   /**
    * Update the video source.
    */
-  private _updateVideo(): void {
-    // Use the file path directly - the browser will request it from the server
-    const videoUrl = URLExt.join(
-      this._serverSettings.baseUrl,
-      'files',
+  private async _updateVideo(): Promise<void> {
+    // Use getDownloadUrl for proper URL encoding and security tokens
+    const videoUrl = await this._contentsManager.getDownloadUrl(
       this._context.path
     );
     this._video.src = videoUrl;
@@ -138,7 +117,7 @@ export class VideoViewer extends Widget {
 
   private _context: DocumentRegistry.Context;
   private _video: HTMLVideoElement;
-  private _serverSettings: ServerConnection.ISettings;
+  private _contentsManager: Contents.IManager;
 }
 
 /**
@@ -155,9 +134,9 @@ export namespace VideoViewer {
     context: DocumentRegistry.Context;
 
     /**
-     * The server settings.
+     * The contents manager.
      */
-    serverSettings: ServerConnection.ISettings;
+    contentsManager: Contents.IManager;
   }
 }
 
@@ -191,7 +170,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
    */
   constructor(options: VideoViewerFactory.IOptions) {
     super(options);
-    this._serverSettings = options.serverSettings;
+    this._contentsManager = options.contentsManager;
   }
 
   /**
@@ -202,7 +181,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
   ): IDocumentWidget<VideoViewer> {
     const content = new VideoViewer({
       context,
-      serverSettings: this._serverSettings
+      contentsManager: this._contentsManager
     });
     const widget = new VideoDocumentWidget({
       content,
@@ -211,7 +190,7 @@ export class VideoViewerFactory extends ABCWidgetFactory<
     return widget;
   }
 
-  private _serverSettings: ServerConnection.ISettings;
+  private _contentsManager: Contents.IManager;
 }
 
 /**
@@ -223,9 +202,35 @@ export namespace VideoViewerFactory {
    */
   export interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
     /**
-     * The server settings.
+     * The contents manager.
      */
-    serverSettings: ServerConnection.ISettings;
+    contentsManager: Contents.IManager;
+  }
+}
+
+/**
+ * A content provider for video files.
+ *
+ * This overrides the default behavior of the RestContentProvider to not include the file content.
+ */
+class VideoContentProvider extends RestContentProvider {
+  constructor(options: RestContentProvider.IOptions) {
+    super(options);
+  }
+
+  /**
+   * Get a file or directory.
+   *
+   * @param localPath - The path to the file.
+   * @param options - The options used to fetch the file.
+   *
+   * @returns A promise which resolves with the file content.
+   */
+  async get(
+    localPath: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel> {
+    return super.get(localPath, { ...options, content: false });
   }
 }
 
@@ -245,7 +250,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
-    const serverSettings = app.serviceManager.serverSettings;
+    const { contents, serverSettings } = app.serviceManager;
 
     // Get video file types from the document registry
     const videoFileTypes = getVideoFileTypes(app.docRegistry);
@@ -273,9 +278,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       defaultFor: videoFileTypes,
       readOnly: true,
       translator,
-      modelName: 'text',
+      modelName: 'base64',
       contentProviderId: VIDEO_CONTENT_PROVIDER_ID,
-      serverSettings
+      contentsManager: contents
     });
 
     app.docRegistry.addWidgetFactory(factory);
