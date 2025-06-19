@@ -182,5 +182,31 @@ describe('sanitizer', () => {
       const div = '<div style="orphans: 3;"></div>';
       expect(sanitizer.sanitize(div)).toBe('<div></div>');
     });
+
+    it('should preserve links containing user-defined schemes', () => {
+      const customSanitizer = new Sanitizer();
+      customSanitizer.setAllowedSchemes([
+        'http',
+        'https',
+        'mailto',
+        'ftp',
+        'tel',
+        'zoommtg'
+      ]);
+      const link = '<a href="zoommtg://meeting_link">Join Meeting</a>';
+      // The `rel="nofollow"` attribute is added to all `<a>` tags in _generateOptions()
+      const expected =
+        '<a href="zoommtg://meeting_link" rel="nofollow">Join Meeting</a>';
+
+      const result = customSanitizer.sanitize(link);
+      expect(result).toBe(expected);
+    });
+
+    it('should allow img tags with "attachment:" when using custom allowed schemes', () => {
+      const customSanitizer = new Sanitizer();
+      customSanitizer.setAllowedSchemes(['http', 'https']); // No 'attachment'
+      const img = '<img src="attachment:myimage.png" alt="img" />';
+      expect(customSanitizer.sanitize(img)).toBe(img);
+    });
   });
 });
