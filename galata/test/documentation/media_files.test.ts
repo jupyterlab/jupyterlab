@@ -24,8 +24,8 @@ test.describe('Media Files', () => {
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
-    await page.locator('text=audio.wav').waitFor();
-    await page.dblclick('text=audio.wav');
+    await page.locator('text=rocket.wav').waitFor();
+    await page.dblclick('text=rocket.wav');
 
     await page.locator('.jp-AudioViewer').waitFor();
 
@@ -34,7 +34,7 @@ test.describe('Media Files', () => {
     await expect(audioElement).toHaveAttribute('controls');
 
     const src = await audioElement.getAttribute('src');
-    expect(src).toContain('audio.wav');
+    expect(src).toContain('rocket.wav');
   });
 
   test('should open and display video file', async ({ page }) => {
@@ -50,8 +50,8 @@ test.describe('Media Files', () => {
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
-    await page.locator('text=video.mp4').waitFor();
-    await page.dblclick('text=video.mp4');
+    await page.locator('text=jupiter.mp3').waitFor();
+    await page.dblclick('text=jupiter.mp3');
 
     await page.locator('.jp-VideoViewer').waitFor();
 
@@ -60,6 +60,6 @@ test.describe('Media Files', () => {
     await expect(videoElement).toHaveAttribute('controls');
 
     const src = await videoElement.getAttribute('src');
-    expect(src).toContain('video.mp4');
+    expect(src).toContain('jupiter.mp3');
   });
 });
