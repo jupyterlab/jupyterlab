@@ -50,8 +50,8 @@ test.describe('Media Files', () => {
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
-    await page.locator('text=jupiter.mp3').waitFor();
-    await page.dblclick('text=jupiter.mp3');
+    await page.locator('text=jupiter.mp4').waitFor();
+    await page.dblclick('text=jupiter.mp4');
 
     await page.locator('.jp-VideoViewer').waitFor();
 
@@ -60,6 +60,6 @@ test.describe('Media Files', () => {
     await expect(videoElement).toHaveAttribute('controls');
 
     const src = await videoElement.getAttribute('src');
-    expect(src).toContain('jupiter.mp3');
+    expect(src).toContain('jupiter.mp4');
   });
 });
