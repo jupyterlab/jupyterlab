@@ -158,3 +158,5 @@ untitled*.txt
 
 # pixi environments
 .pixi
+
+tmp
