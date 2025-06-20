@@ -18,6 +18,7 @@ import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the plugin.
@@ -72,8 +73,42 @@ function activateHubExtension(
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Server'),
     caption: trans.__('Request that the Hub restart this server'),
-    execute: () => {
-      window.open(restartUrl, '_blank');
+    execute: async () => {
+      // Create a widget for the iframe
+      const iframe = document.createElement('iframe');
+      iframe.src = restartUrl;
+      iframe.style.width = '70vw';
+      iframe.style.maxWidth = '100%';
+      iframe.style.height = '50vh';
+      iframe.style.maxHeight = '100%';
+      iframe.style.border = 'none';
+      // Wrap iframe in a Lumino Widget
+      const widget = new Widget({ node: iframe });
+
+      // Function to close the dialog
+      let dialog: Dialog<any> | null = null;
+      const onIframeNavigate = () => {
+        try {
+          if (iframe.contentWindow?.location) {
+            const currentUrl = iframe.contentWindow.location.href;
+            if (currentUrl.search(/lab/) > -1) {
+              dialog?.close();
+            }
+          } else {
+            console.log("Could not get location of iframe");
+          }
+        } catch (e) {
+          console.log("Error checking on iframe navigation:", e);
+        }
+      };
+      iframe.addEventListener('load', onIframeNavigate);
+
+      dialog = new Dialog({
+        title: trans.__('Restarting Server...'),
+        body: widget,
+        buttons: [Dialog.okButton({ label: trans.__('Close') })]
+      });
+      await dialog.launch();
     }
   });
 
@@ -180,14 +215,14 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
         ]
       });
 
+      if (result.button.accept) {
+        await app.commands.execute(CommandIDs.restart);
+      }
+
       if (info) {
         info.isConnected = true;
       }
       showingError = false;
-
-      if (result.button.accept) {
-        await app.commands.execute(CommandIDs.restart);
-      }
     };
     return onConnectionLost;
   },
