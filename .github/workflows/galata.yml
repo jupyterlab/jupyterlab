@@ -108,8 +108,8 @@ jobs:
       - name: Checkout demo project
         uses: actions/checkout@v4
         with:
-          repository: jupyterlab/jupyterlab-demo
-          ref: master
+          repository: jtpio/jupyterlab-demo
+          ref: audio-video
           path: demo
 
       - name: Get demo folder
