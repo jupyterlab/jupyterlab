@@ -109,6 +109,9 @@
     "marked": "^15.0.7",
     "react": "^18.2.0",
     "type-fest": "^4.30.0",
+    "vscode-jsonrpc": "^9.0.0-next.7",
+    "vscode-languageserver": "^10.0.0-next.12",
+    "vscode-languageserver-protocol": "^3.17.6-next.12",
     "yjs": "^13.5.40"
   },
   "dependencies": {
