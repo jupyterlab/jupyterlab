@@ -455,6 +455,22 @@ is to force packages deduplication using:
 
    jlpm dlx yarn-berry-deduplicate
 
+Extension Status
+^^^^^^^^^^^^^^^^
+The extension has four possible status reportings: red 'X', red 'DISABLED', green 'OK', and green 'ENABLED'.
+The extension status is determined in the following ways:
+- Red 'X': the extension is reporting compatibility errors
+- Red 'DISABLED': the extension is disabled.
+- Green 'OK': the extension is installed.
+- Green 'ENABLED': the extension is installed and enabled.
+
+When upgrading extensions manually you may encounter the red 'X' status that indicates compatibility errors
+in the dependencies of your extension. It is likely that there are dependencies, in addition those which
+are JupyterLab packages, that are being compared to the dependencies of core JupyterLab and whose versions
+are not coinciding. Some of those dependencies may include the following: yjs, react, react-dom,
+and more. Once those versions declared for your extension match those that are declared in JupyterLab, the
+extension status can be observed as `OK`.
+
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
 
