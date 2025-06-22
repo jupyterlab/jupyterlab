@@ -130,6 +130,7 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
+import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
@@ -2177,7 +2178,10 @@ function getCurrent(
 
   // Check for panelId in args (used by cell toolbars)
   if (args[CellBarExtension.WIDGET_ID_ARG]) {
-    widget = tracker.find(panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]) ?? null;
+    widget =
+      tracker.find(
+        panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]
+      ) ?? null;
   } else if (args[SemanticCommand.WIDGET]) {
     widget =
       tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null;
