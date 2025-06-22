@@ -9,6 +9,16 @@ import { Message } from '@lumino/messaging';
 import { DockPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
+/**
+ * The class name added to the current widget's title.
+ */
+const CURRENT_CLASS = 'jp-mod-current';
+
+/**
+ * The class name added to the active widget's title.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
+
 class ContentWidget extends Widget {
   activated = false;
 
@@ -74,6 +84,25 @@ describe('LabShell', () => {
       expect(shell.currentWidget).toBe(widget);
       widget.parent = null;
       expect(shell.currentWidget).toBe(null);
+    });
+
+    it('should add and clear active class when current widget changes', () => {
+      const foo = new Widget();
+      foo.id = 'foo';
+      shell.add(foo, 'main');
+      const fooOriginalClassName = foo.title.className;
+      const bar = new Widget();
+      bar.id = 'bar';
+      shell.add(bar, 'main');
+      simulate(foo.node, 'focus');
+      expect(shell.currentWidget).toBe(foo);
+      expect(shell.currentWidget?.title.className).toContain(CURRENT_CLASS);
+      expect(shell.currentWidget?.title.className).toContain(ACTIVE_CLASS);
+      simulate(bar.node, 'focus');
+      simulate(foo.node, 'focus');
+      simulate(bar.node, 'focus');
+      expect(shell.currentWidget).toBe(bar);
+      expect(foo.title.className).toEqual(fooOriginalClassName);
     });
   });
 
