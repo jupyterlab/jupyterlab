@@ -110,7 +110,7 @@
     "label": "Show Left Sidebar",
     "caption": "",
     "shortcuts": [
-      "Cmd B"
+      "Ctrl B"
     ]
   },
   {
@@ -118,7 +118,7 @@
     "label": "Simple Interface",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd D"
+      "Shift Ctrl D"
     ]
   },
   {
@@ -132,7 +132,7 @@
     "label": "Show Right Sidebar",
     "caption": "",
     "shortcuts": [
-      "Cmd J"
+      "Ctrl J"
     ]
   },
   {
@@ -192,7 +192,7 @@
     "label": "Activate Command Palette",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd C"
+      "Shift Ctrl C"
     ]
   },
   {
@@ -248,7 +248,7 @@
     "label": "Show Keyboard Shortcuts…",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
-      "Shift Cmd H"
+      "Shift Ctrl H"
     ]
   },
   {
@@ -292,7 +292,7 @@
     "label": "Print…",
     "caption": "",
     "shortcuts": [
-      "Cmd P"
+      "Ctrl P"
     ]
   },
   {
@@ -348,7 +348,7 @@
     "label": "Delete the current line",
     "caption": "",
     "shortcuts": [
-      "Cmd D"
+      "Ctrl D"
     ]
   },
   {
@@ -356,7 +356,7 @@
     "label": "Select Next Occurrence",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd D"
+      "Shift Ctrl D"
     ]
   },
   {
@@ -372,7 +372,7 @@
     "label": "Toggle Comment",
     "caption": "",
     "shortcuts": [
-      "Cmd /"
+      "Ctrl /"
     ]
   },
   {
@@ -482,7 +482,7 @@
     "label": "Insert Line Break",
     "caption": "",
     "shortcuts": [
-      "Cmd Enter"
+      "Ctrl Enter"
     ]
   },
   {
@@ -647,7 +647,7 @@
     "label": "Debugger Panel",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd E"
+      "Shift Ctrl E"
     ]
   },
   {
@@ -751,7 +751,7 @@
     "label": "Save ",
     "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
     "shortcuts": [
-      "Cmd S"
+      "Ctrl S"
     ]
   },
   {
@@ -765,7 +765,7 @@
     "label": "Save  As…",
     "caption": "Save with new path",
     "shortcuts": [
-      "Shift Cmd S"
+      "Shift Ctrl S"
     ]
   },
   {
@@ -793,7 +793,7 @@
     "label": "Find Next",
     "caption": "",
     "shortcuts": [
-      "Cmd G"
+      "Ctrl G"
     ]
   },
   {
@@ -801,7 +801,7 @@
     "label": "Find Previous",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd G"
+      "Shift Ctrl G"
     ]
   },
   {
@@ -809,7 +809,7 @@
     "label": "Find…",
     "caption": "",
     "shortcuts": [
-      "Cmd F"
+      "Ctrl F"
     ]
   },
   {
@@ -855,7 +855,7 @@
     "label": "Redo",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd Z"
+      "Shift Ctrl Z"
     ]
   },
   {
@@ -863,7 +863,7 @@
     "label": "Undo",
     "caption": "",
     "shortcuts": [
-      "Cmd Z"
+      "Ctrl Z"
     ]
   },
   {
@@ -871,7 +871,7 @@
     "label": "Extension Manager",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd X"
+      "Shift Ctrl X"
     ]
   },
   {
@@ -891,7 +891,7 @@
     "label": "Copy",
     "caption": "",
     "shortcuts": [
-      "Cmd C"
+      "Ctrl C"
     ]
   },
   {
@@ -929,7 +929,7 @@
     "label": "Cut",
     "caption": "",
     "shortcuts": [
-      "Cmd X"
+      "Ctrl X"
     ]
   },
   {
@@ -951,7 +951,7 @@
     "label": "Duplicate",
     "caption": "",
     "shortcuts": [
-      "Cmd D"
+      "Ctrl D"
     ]
   },
   {
@@ -1003,7 +1003,7 @@
     "label": "Paste",
     "caption": "",
     "shortcuts": [
-      "Cmd V"
+      "Ctrl V"
     ]
   },
   {
@@ -1073,7 +1073,7 @@
     "label": "File Browser",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd F"
+      "Shift Ctrl F"
     ]
   },
   {
@@ -1455,7 +1455,7 @@
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
     "shortcuts": [
-      "Cmd I"
+      "Ctrl I"
     ]
   },
   {
@@ -1463,7 +1463,7 @@
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
     "shortcuts": [
-      "Cmd I"
+      "Ctrl I"
     ]
   },
   {
@@ -1537,7 +1537,7 @@
     "label": "New Launcher",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd L"
+      "Shift Ctrl L"
     ]
   },
   {
@@ -2130,7 +2130,7 @@
     "label": "Select All Cells",
     "caption": "",
     "shortcuts": [
-      "Cmd A"
+      "Ctrl A"
     ]
   },
   {
@@ -2258,7 +2258,7 @@
     "label": "Property Inspector",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd U"
+      "Shift Ctrl U"
     ]
   },
   {
@@ -2272,7 +2272,7 @@
     "label": "Reopen Closed Document",
     "caption": "Reopen recently closed file or notebook.",
     "shortcuts": [
-      "Shift Cmd T"
+      "Shift Ctrl T"
     ]
   },
   {
@@ -2342,7 +2342,7 @@
     "label": "Search Tabs and Running Sessions",
     "caption": "",
     "shortcuts": [
-      "Alt Cmd A"
+      "Alt Ctrl A"
     ]
   },
   {
@@ -2350,7 +2350,7 @@
     "label": "Sessions and Tabs",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd B"
+      "Shift Ctrl B"
     ]
   },
   {
@@ -2370,7 +2370,7 @@
     "label": "Settings Editor",
     "caption": "",
     "shortcuts": [
-      "Cmd ,"
+      "Ctrl ,"
     ]
   },
   {
@@ -2390,7 +2390,7 @@
     "label": "Save User Settings",
     "caption": "",
     "shortcuts": [
-      "Cmd S"
+      "Ctrl S"
     ]
   },
   {
@@ -2452,7 +2452,7 @@
     "label": "Activate Previously Used Tab",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd '"
+      "Shift Ctrl '"
     ]
   },
   {
@@ -2544,7 +2544,7 @@
     "label": "Table of Contents",
     "caption": "",
     "shortcuts": [
-      "Shift Cmd K"
+      "Shift Ctrl K"
     ]
   },
   {
