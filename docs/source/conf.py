@@ -197,14 +197,14 @@ TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.rst"
 
 
-def document_commands_list(temp_folder: Path) -> None:
+def document_commands_list(temp_folder: Path) -> None:  # noqa: C901
     """Generate the command list documentation page from application extraction."""
     list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
 
     commands_list = json.loads(list_path.read_text())
 
-    template = """| Command id | Label | Shortcuts |
-| ---------- | ----- | --------- |
+    template = """| Command id | Label | Shortcuts | Args |
+| ---------- | ----- | --------- | ---- |
 """
 
     for command in sorted(commands_list, key=lambda c: c["id"]):
@@ -218,7 +218,41 @@ def document_commands_list(temp_folder: Path) -> None:
             "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>" if len(shortcuts) else ""
         )
 
-        template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
+        # Format arguments if they exist
+        args_text = ""
+        if "args" in command:
+            args_schema = command["args"]
+            if "properties" in args_schema:
+                args_list = []
+                required_args = set(args_schema.get("required", []))
+
+                for arg_name, arg_info in args_schema["properties"].items():
+                    arg_desc = arg_info.get("description", "")
+                    arg_type = arg_info.get("type", "")
+
+                    type_info = ""
+                    if isinstance(arg_type, list):
+                        type_info = f" ({', '.join(arg_type)})"
+                    elif arg_type:
+                        type_info = f" ({arg_type})"
+
+                    if "enum" in arg_info:
+                        enum_values = ", ".join(f'"{v}"' for v in arg_info["enum"])
+                        type_info += f" - options: {enum_values}"
+
+                    required_marker = " (required)" if arg_name in required_args else ""
+
+                    arg_line = f"**{arg_name}**{type_info}{required_marker}"
+                    if arg_desc:
+                        arg_line += f": {arg_desc}"
+
+                    args_list.append(arg_line)
+
+                args_text = "<br/>".join(args_list)
+
+        command["args"] = args_text
+
+        template += "| `{id}` | {label} | {shortcuts} | {args} |\n".format(**command)
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
 
