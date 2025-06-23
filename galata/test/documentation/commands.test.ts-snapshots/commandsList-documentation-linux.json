@@ -118,7 +118,7 @@
     "label": "Simple Interface",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl D"
+      "Ctrl Shift D"
     ]
   },
   {
@@ -192,7 +192,7 @@
     "label": "Activate Command Palette",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl C"
+      "Ctrl Shift C"
     ]
   },
   {
@@ -248,7 +248,7 @@
     "label": "Show Keyboard Shortcuts…",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
-      "Shift Ctrl H"
+      "Ctrl Shift H"
     ]
   },
   {
@@ -356,7 +356,7 @@
     "label": "Select Next Occurrence",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl D"
+      "Ctrl Shift D"
     ]
   },
   {
@@ -647,7 +647,7 @@
     "label": "Debugger Panel",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl E"
+      "Ctrl Shift E"
     ]
   },
   {
@@ -765,7 +765,7 @@
     "label": "Save  As…",
     "caption": "Save with new path",
     "shortcuts": [
-      "Shift Ctrl S"
+      "Ctrl Shift S"
     ]
   },
   {
@@ -801,7 +801,7 @@
     "label": "Find Previous",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl G"
+      "Ctrl Shift G"
     ]
   },
   {
@@ -855,7 +855,7 @@
     "label": "Redo",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl Z"
+      "Ctrl Shift Z"
     ]
   },
   {
@@ -871,7 +871,7 @@
     "label": "Extension Manager",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl X"
+      "Ctrl Shift X"
     ]
   },
   {
@@ -1073,7 +1073,7 @@
     "label": "File Browser",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl F"
+      "Ctrl Shift F"
     ]
   },
   {
@@ -1537,7 +1537,7 @@
     "label": "New Launcher",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl L"
+      "Ctrl Shift L"
     ]
   },
   {
@@ -2258,7 +2258,7 @@
     "label": "Property Inspector",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl U"
+      "Ctrl Shift U"
     ]
   },
   {
@@ -2272,7 +2272,7 @@
     "label": "Reopen Closed Document",
     "caption": "Reopen recently closed file or notebook.",
     "shortcuts": [
-      "Shift Ctrl T"
+      "Ctrl Shift T"
     ]
   },
   {
@@ -2342,7 +2342,7 @@
     "label": "Search Tabs and Running Sessions",
     "caption": "",
     "shortcuts": [
-      "Alt Ctrl A"
+      "Ctrl Alt A"
     ]
   },
   {
@@ -2350,7 +2350,7 @@
     "label": "Sessions and Tabs",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl B"
+      "Ctrl Shift B"
     ]
   },
   {
@@ -2452,7 +2452,7 @@
     "label": "Activate Previously Used Tab",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl '"
+      "Ctrl Shift '"
     ]
   },
   {
@@ -2544,7 +2544,7 @@
     "label": "Table of Contents",
     "caption": "",
     "shortcuts": [
-      "Shift Ctrl K"
+      "Ctrl Shift K"
     ]
   },
   {
