@@ -245,7 +245,7 @@ def _format_command_arguments(args_schema: dict) -> str:
     return template + "\n"
 
 
-def _format_single_command(command: dict) -> str:
+def _format_single_command(command: dict, is_last: bool = False) -> str:
     """Format a single command entry."""
     _clean_command_data(command)
 
@@ -261,7 +261,8 @@ def _format_single_command(command: dict) -> str:
     if "args" in command:
         template += _format_command_arguments(command["args"])
 
-    template += "---\n\n"
+    if not is_last:
+        template += "---\n\n"
 
     return template
 
@@ -273,8 +274,8 @@ def document_commands_list(temp_folder: Path) -> None:
     sorted_commands = sorted(commands_list, key=lambda c: c.get("id", ""))
 
     template = ""
-    for command in sorted_commands:
-        template += _format_single_command(command)
+    for i, command in enumerate(sorted_commands):
+        template += _format_single_command(command, is_last=(i == len(sorted_commands) - 1))
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
 
