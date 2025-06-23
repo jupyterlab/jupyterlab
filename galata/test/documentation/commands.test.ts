@@ -16,33 +16,46 @@ test('All commands must have a default label', async ({ page }, testInfo) => {
       label: string;
       caption: string;
       shortcuts?: string[];
-    }[] = commandIds
+      args?: any;
+    }[] = [];
+
+    for (const id of commandIds
       .filter(id => !id.startsWith('_') && !id.startsWith('@jupyter-widgets'))
-      .sort()
-      .map(id => {
+      .sort()) {
+      try {
+        let args: any = undefined;
         try {
-          return {
-            id,
-            label: registry.label(id),
-            caption: registry.caption(id),
-            shortcuts: [
-              ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ??
-                [])
-            ]
-          };
-        } catch (reason) {
-          console.error(reason);
-          return {
-            id,
-            label: '',
-            caption: '',
-            shortcuts: [
-              ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ??
-                [])
-            ]
-          };
+          // Try to get the describedBy information (command arguments schema)
+          const description = await registry.describedBy(id);
+          if (description && description.args) {
+            args = description.args;
+          }
+        } catch (error) {
+          // If describedBy fails or returns nothing, args remains undefined
+          console.debug(`No args description for ${id}:`, error);
         }
-      });
+
+        commands.push({
+          id,
+          label: registry.label(id),
+          caption: registry.caption(id),
+          shortcuts: [
+            ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ?? [])
+          ],
+          args
+        });
+      } catch (reason) {
+        console.error(reason);
+        commands.push({
+          id,
+          label: '',
+          caption: '',
+          shortcuts: [
+            ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ?? [])
+          ]
+        });
+      }
+    }
 
     return Promise.resolve(commands);
   });
