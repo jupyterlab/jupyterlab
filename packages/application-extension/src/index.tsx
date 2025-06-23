@@ -390,6 +390,23 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 'Toggle Element %1 in Left Sidebar',
                 parseInt(args.index as string, 10) + 1
               ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              side: {
+                type: 'string',
+                enum: ['left', 'right'],
+                description: 'The sidebar side'
+              },
+              index: {
+                type: ['string', 'number'],
+                description: 'The index of the sidebar widget'
+              }
+            },
+            required: ['side', 'index']
+          }
+        },
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -424,6 +441,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.side === 'right'
             ? trans.__('Show Right Activity Bar')
             : trans.__('Show Left Activity Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              side: {
+                type: 'string',
+                enum: ['left', 'right'],
+                description: 'The sidebar side'
+              }
+            },
+            required: ['side']
+          }
+        },
         execute: args => {
           if (args.side === 'right') {
             labShell.toggleSideTabBarVisibility('right');
@@ -477,6 +507,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         caption: trans.__(
           'The layout `mode` can be "single-document" or "multiple-document".'
         ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              mode: {
+                type: 'string',
+                enum: ['single-document', 'multiple-document'],
+                description: 'The layout mode'
+              }
+            },
+            required: ['mode']
+          }
+        },
         isVisible: args => {
           const mode = args['mode'] as string;
           return mode === 'single-document' || mode === 'multiple-document';
@@ -984,6 +1027,17 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
     set.add(
       commands.addCommand(CommandIDs.tree, {
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              search: {
+                type: 'string',
+                description: 'The URL search string containing query parameters'
+              }
+            }
+          }
+        },
         execute: async (args: IRouter.ILocation) => {
           if (set.isDisposed) {
             return;
