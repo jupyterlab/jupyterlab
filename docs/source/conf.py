@@ -250,7 +250,7 @@ def _format_single_command(command: dict) -> str:
     _clean_command_data(command)
 
     shortcuts_text = _format_shortcuts(command.get("shortcuts", []))
-    template = f"### `{command['id']}`\n\n"
+    template = f"# `{command['id']}`\n\n"
 
     if command.get("label"):
         template += f"**Label:** {command['label']}\n\n"
