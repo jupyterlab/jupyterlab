@@ -197,62 +197,84 @@ TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.rst"
 
 
-def document_commands_list(temp_folder: Path) -> None:  # noqa: C901
+def _clean_command_data(command: dict) -> None:
+    """Clean up command data by ensuring required keys exist and formatting values."""
+    for key in ("id", "label", "caption"):
+        if key not in command:
+            command[key] = ""
+        else:
+            command[key] = command[key].replace("\n", " ")
+
+
+def _format_shortcuts(shortcuts: list) -> str:
+    """Format shortcuts as HTML kbd elements."""
+    return " ".join(f"<kbd>{shortcut}</kbd>" for shortcut in shortcuts) if shortcuts else ""
+
+
+def _format_command_arguments(args_schema: dict) -> str:
+    """Format command arguments section."""
+    if "properties" not in args_schema:
+        return ""
+
+    template = "**Arguments:**\n\n"
+    required_args = set(args_schema.get("required", []))
+
+    for arg_name, arg_info in args_schema["properties"].items():
+        arg_desc = arg_info.get("description", "")
+        arg_type = arg_info.get("type", "")
+
+        template += f"- **{arg_name}**"
+
+        if isinstance(arg_type, list):
+            template += f" (`{', '.join(arg_type)}`)"
+        elif arg_type:
+            template += f" (`{arg_type}`)"
+
+        if arg_name in required_args:
+            template += " *(required)*"
+
+        if "enum" in arg_info:
+            enum_values = ", ".join(f'`"{v}"`' for v in arg_info["enum"])
+            template += f" - Options: {enum_values}"
+
+        if arg_desc:
+            template += f": {arg_desc}"
+
+        template += "\n"
+
+    return template + "\n"
+
+
+def _format_single_command(command: dict) -> str:
+    """Format a single command entry."""
+    _clean_command_data(command)
+
+    shortcuts_text = _format_shortcuts(command.get("shortcuts", []))
+    template = f"### `{command['id']}`\n\n"
+
+    if command.get("label"):
+        template += f"**Label:** {command['label']}\n\n"
+
+    if shortcuts_text:
+        template += f"**Shortcuts:** {shortcuts_text}\n\n"
+
+    if "args" in command:
+        template += _format_command_arguments(command["args"])
+
+    template += "---\n\n"
+
+    return template
+
+
+def document_commands_list(temp_folder: Path) -> None:
     """Generate the command list documentation page from application extraction."""
     list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
-
     commands_list = json.loads(list_path.read_text())
+    sorted_commands = sorted(commands_list, key=lambda c: c.get("id", ""))
 
-    template = """| Command id | Label | Shortcuts | Args |
-| ---------- | ----- | --------- | ---- |
-"""
-
-    for command in sorted(commands_list, key=lambda c: c["id"]):
-        for key in ("id", "label", "caption"):
-            if key not in command:
-                command[key] = ""
-            else:
-                command[key] = command[key].replace("\n", " ")
-        shortcuts = command.get("shortcuts", [])
-        command["shortcuts"] = (
-            "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>" if len(shortcuts) else ""
-        )
-
-        # Format arguments if they exist
-        args_text = ""
-        if "args" in command:
-            args_schema = command["args"]
-            if "properties" in args_schema:
-                args_list = []
-                required_args = set(args_schema.get("required", []))
-
-                for arg_name, arg_info in args_schema["properties"].items():
-                    arg_desc = arg_info.get("description", "")
-                    arg_type = arg_info.get("type", "")
-
-                    type_info = ""
-                    if isinstance(arg_type, list):
-                        type_info = f" ({', '.join(arg_type)})"
-                    elif arg_type:
-                        type_info = f" ({arg_type})"
-
-                    if "enum" in arg_info:
-                        enum_values = ", ".join(f'"{v}"' for v in arg_info["enum"])
-                        type_info += f" - options: {enum_values}"
-
-                    required_marker = " (required)" if arg_name in required_args else ""
-
-                    arg_line = f"**{arg_name}**{type_info}{required_marker}"
-                    if arg_desc:
-                        arg_line += f": {arg_desc}"
-
-                    args_list.append(arg_line)
-
-                args_text = "<br/>".join(args_list)
-
-        command["args"] = args_text
-
-        template += "| `{id}` | {label} | {shortcuts} | {args} |\n".format(**command)
+    template = ""
+    for command in sorted_commands:
+        template += _format_single_command(command)
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
 
