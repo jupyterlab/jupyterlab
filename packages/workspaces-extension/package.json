@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/workspaces-extension",
-  "version": "4.3.7",
+  "version": "4.3.8",
   "description": "JupyterLab Extension providing UI for workspace management",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,16 +35,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.7",
-    "@jupyterlab/apputils": "^4.4.7",
-    "@jupyterlab/coreutils": "^6.3.7",
-    "@jupyterlab/filebrowser": "^4.3.7",
-    "@jupyterlab/running": "^4.3.7",
-    "@jupyterlab/services": "^7.3.7",
-    "@jupyterlab/statedb": "^4.3.7",
-    "@jupyterlab/translation": "^4.3.7",
-    "@jupyterlab/ui-components": "^4.3.7",
-    "@jupyterlab/workspaces": "^4.3.7"
+    "@jupyterlab/application": "^4.3.8",
+    "@jupyterlab/apputils": "^4.4.8",
+    "@jupyterlab/coreutils": "^6.3.8",
+    "@jupyterlab/filebrowser": "^4.3.8",
+    "@jupyterlab/running": "^4.3.8",
+    "@jupyterlab/services": "^7.3.8",
+    "@jupyterlab/statedb": "^4.3.8",
+    "@jupyterlab/translation": "^4.3.8",
+    "@jupyterlab/ui-components": "^4.3.8",
+    "@jupyterlab/workspaces": "^4.3.8"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
