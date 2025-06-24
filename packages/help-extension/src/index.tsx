@@ -85,6 +85,12 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
     const apputilsLicencesCommand = 'apputils:licenses';
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         console.warn(
           `The command ${CommandIDs.licenses} is deprecated, use ${apputilsLicencesCommand} instead.`
@@ -96,6 +102,12 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
     const apputilsLicenseReportCommand = 'apputils:license-report';
     commands.addCommand(CommandIDs.licenseReport, {
       label: downloadAsText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         console.warn(
           `The command ${CommandIDs.licenseReport} is deprecated, use ${apputilsLicenseReportCommand} instead.`
@@ -107,6 +119,12 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
     const apputilsRefreshLicensesCommand = 'apputils:licenses-refresh';
     commands.addCommand(CommandIDs.refreshLicenses, {
       label: refreshLicenses,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         console.warn(
           `The command ${CommandIDs.refreshLicenses} is deprecated, use ${apputilsRefreshLicensesCommand} instead.`
@@ -137,6 +155,12 @@ const about: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.about, {
       label: trans.__('About %1', app.name),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Create the header of the about dialog
         const versionNumber = trans.__('Version %1', app.version);
@@ -229,6 +253,12 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.jupyterForum, {
       label: trans.__('Jupyter Forum'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         window.open('https://discourse.jupyter.org/c/jupyterlab');
       }
@@ -287,6 +317,26 @@ const open: JupyterFrontEndPlugin<void> = {
       label: args =>
         (args['text'] as string) ??
         trans.__('Open the provided `url` in a tab.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The URL to open'
+            },
+            text: {
+              type: 'string',
+              description: 'The text label for the tab'
+            },
+            newBrowserTab: {
+              type: 'boolean',
+              description: 'Whether to open in a new browser tab'
+            }
+          },
+          required: ['url']
+        }
+      },
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;

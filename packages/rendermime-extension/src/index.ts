@@ -100,6 +100,27 @@ function activate(
               widget.setFragment(id);
             }
           });
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: 'The file path to open'
+            },
+            id: {
+              type: 'string',
+              description: 'Fragment identifier to navigate to'
+            },
+            scope: {
+              type: 'string',
+              enum: ['kernel', 'server'],
+              description: 'Scope of the file location'
+            }
+          },
+          required: ['path']
+        }
       }
     });
   }

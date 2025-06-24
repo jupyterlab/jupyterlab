@@ -643,6 +643,22 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.open, {
     label: trans.__('Open a console for the provided `path`.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the session to open'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the console widget'
+          }
+        },
+        required: ['path']
+      }
+    },
     execute: (args: IOpenOptions) => {
       const path = args['path'];
       const widget = tracker.find(value => {
@@ -684,6 +700,45 @@ async function activateConsole(
       return trans.__('Console');
     },
     icon: args => (args['isPalette'] ? undefined : consoleIcon),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          isPalette: {
+            type: 'boolean',
+            description: 'Whether the command is executed from the palette'
+          },
+          isLauncher: {
+            type: 'boolean',
+            description: 'Whether the command is executed from the launcher'
+          },
+          kernelPreference: {
+            type: 'object',
+            description: 'The kernel preference for the console'
+          },
+          basePath: {
+            type: 'string',
+            description: 'The base path for the console'
+          },
+          cwd: {
+            type: 'string',
+            description: 'The current working directory'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          },
+          ref: {
+            type: 'string',
+            description: 'The reference widget id for the insert location'
+          },
+          insertMode: {
+            type: 'string',
+            description: 'The tab insert mode'
+          }
+        }
+      }
+    },
     execute: args => {
       const basePath =
         ((args['basePath'] as string) ||
@@ -810,6 +865,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
     icon: args => (args.toolbar ? clearIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -823,6 +893,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.runUnforced, {
     label: trans.__('Run Cell (unforced)'),
     icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -836,6 +921,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.runForced, {
     label: trans.__('Run Cell (forced)'),
     icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -848,6 +948,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.linebreak, {
     label: trans.__('Insert Line Break'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -860,6 +971,21 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Console'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: 'The text to replace the selection with'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -873,6 +999,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -889,6 +1026,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
     icon: args => (args.toolbar ? refreshIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -901,6 +1053,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -950,6 +1113,30 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.inject, {
     label: trans.__('Inject some code in a console.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the console session'
+          },
+          code: {
+            type: 'string',
+            description: 'The code to inject'
+          },
+          metadata: {
+            type: 'object',
+            description: 'The metadata for the code'
+          },
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        },
+        required: ['path', 'code']
+      }
+    },
     execute: args => {
       const path = args['path'];
       tracker.find(widget => {
@@ -971,6 +1158,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -983,6 +1181,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.getKernel, {
     label: trans.__('Get Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: 'Whether to activate the widget'
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent({ activate: false, ...args });
       if (!current) {

@@ -485,6 +485,12 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Download'),
       caption: trans.__('Download the file to your computer'),
       isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {
@@ -554,7 +560,23 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
         });
       },
       iconClass: args => (args['icon'] as string) || '',
-      label: () => trans.__('Open in New Browser Tab')
+      label: () => trans.__('Open in New Browser Tab'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: 'The path of the file to open in browser tab'
+            },
+            icon: {
+              type: 'string',
+              description: 'The icon class for the command'
+            }
+          },
+          required: ['path']
+        }
+      }
     });
   }
 };
@@ -676,6 +698,18 @@ function addCommands(
 
   commands.addCommand(CommandIDs.deleteFile, {
     label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the file to delete'
+          }
+        },
+        required: ['path']
+      }
+    },
     execute: args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -706,7 +740,35 @@ function addCommands(
         .newUntitled(options)
         .catch(error => showErrorMessage(errorTitle, error));
     },
-    label: args => (args['label'] as string) || `New ${args['type'] as string}`
+    label: args => (args['label'] as string) || `New ${args['type'] as string}`,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          error: {
+            type: 'string',
+            description: 'The error title to display'
+          },
+          path: {
+            type: 'string',
+            description: 'The path where to create the file'
+          },
+          type: {
+            type: 'string',
+            description: 'The type of content to create',
+            enum: ['file', 'directory', 'notebook']
+          },
+          ext: {
+            type: 'string',
+            description: 'The file extension (for file type)'
+          },
+          label: {
+            type: 'string',
+            description: 'The label for the command'
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.open, {
@@ -725,7 +787,42 @@ function addCommands(
     label: args =>
       ((args['label'] || args['factory']) ??
         trans.__('Open the provided `path`.')) as string,
-    mnemonic: args => (args['mnemonic'] as number) || -1
+    mnemonic: args => (args['mnemonic'] as number) || -1,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the file to open'
+          },
+          factory: {
+            type: 'string',
+            description: 'The widget factory name'
+          },
+          kernel: {
+            type: 'object',
+            description: 'The kernel model to use'
+          },
+          options: {
+            type: 'object',
+            description: 'Additional options for opening'
+          },
+          icon: {
+            type: 'string',
+            description: 'The icon class for the command'
+          },
+          label: {
+            type: 'string',
+            description: 'The label for the command'
+          },
+          mnemonic: {
+            type: 'number',
+            description: 'The mnemonic index for the command'
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.reload, {
@@ -736,6 +833,12 @@ function addCommands(
       ),
     caption: trans.__('Reload contents from disk'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
@@ -782,6 +885,12 @@ function addCommands(
       ),
     caption: trans.__('Revert contents to previous checkpoint'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
@@ -865,6 +974,21 @@ function addCommands(
           : isWritable();
       } else {
         return isWritable();
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          _luminoEvent: {
+            type: 'object',
+            description: 'The lumino event object'
+          }
+        }
       }
     },
     execute: async args => {
@@ -978,6 +1102,12 @@ function addCommands(
         w => docManager.contextForWidget(w)?.contentsModel?.writable ?? false
       );
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
@@ -1001,6 +1131,12 @@ function addCommands(
       trans.__('Save %1 As…', fileType(shell.currentWidget, docManager)),
     caption: trans.__('Save with new path'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {

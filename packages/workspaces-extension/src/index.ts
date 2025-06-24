@@ -123,6 +123,12 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
             updatedToolbar
           );
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
   }

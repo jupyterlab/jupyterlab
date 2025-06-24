@@ -192,41 +192,95 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     commands.addCommand(CommandIDs.openEdit, {
       label: trans.__('Open Edit Menu'),
-      execute: () => activateMenu(menu.editMenu)
+      execute: () => activateMenu(menu.editMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openFile, {
       label: trans.__('Open File Menu'),
-      execute: () => activateMenu(menu.fileMenu)
+      execute: () => activateMenu(menu.fileMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openKernel, {
       label: trans.__('Open Kernel Menu'),
-      execute: () => activateMenu(menu.kernelMenu)
+      execute: () => activateMenu(menu.kernelMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openRun, {
       label: trans.__('Open Run Menu'),
-      execute: () => activateMenu(menu.runMenu)
+      execute: () => activateMenu(menu.runMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openView, {
       label: trans.__('Open View Menu'),
-      execute: () => activateMenu(menu.viewMenu)
+      execute: () => activateMenu(menu.viewMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openSettings, {
       label: trans.__('Open Settings Menu'),
-      execute: () => activateMenu(menu.settingsMenu)
+      execute: () => activateMenu(menu.settingsMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openTabs, {
       label: trans.__('Open Tabs Menu'),
-      execute: () => activateMenu(menu.tabsMenu)
+      execute: () => activateMenu(menu.tabsMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openHelp, {
       label: trans.__('Open Help Menu'),
-      execute: () => activateMenu(menu.helpMenu)
+      execute: () => activateMenu(menu.helpMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openFirst, {
       label: trans.__('Open First Menu'),
       execute: () => {
         menu.activeIndex = 0;
         menu.openActiveMenu();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -372,6 +426,12 @@ function createFileMenu(
     caption: trans.__('Shut down %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
@@ -441,6 +501,12 @@ function createFileMenu(
     caption: trans.__('Log out of %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       router.navigate('/logout', { hard: true });
     }
@@ -536,6 +602,12 @@ function createKernelMenu(
     label: trans.__('Shut Down All Kernels…'),
     isEnabled: () => {
       return !app.serviceManager.sessions.running().next().done;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     },
     execute: () => {
       return showDialog({
@@ -685,6 +757,18 @@ function createTabsMenu(
       const id = args['id'] || '';
       return !!app.shell.currentWidget && app.shell.currentWidget.id === id;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The widget id to activate'
+          }
+        },
+        required: ['id']
+      }
+    },
     execute: args => app.shell.activateById((args['id'] as string) || '')
   });
 
@@ -694,6 +778,12 @@ function createTabsMenu(
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
     label: trans.__('Activate Previously Used Tab'),
     isEnabled: () => !!previousId,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
 

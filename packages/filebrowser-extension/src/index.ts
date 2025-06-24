@@ -419,7 +419,13 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Download')
+      label: trans.__('Download'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.copyDownloadLink, {
@@ -442,7 +448,13 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
         Array.from(tracker.currentWidget.selectedItems()).length === 1,
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Download Link'),
-      mnemonic: 0
+      mnemonic: 0,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
   }
 };
@@ -505,6 +517,12 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.toggleBrowser, {
       label: trans.__('File Browser'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         if (browser.isHidden) {
           return commands.execute(CommandIDs.showBrowser, void 0);
@@ -516,6 +534,17 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.showBrowser, {
       label: trans.__('Open the file browser for the provided `path`.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: 'The path to open in the file browser'
+            }
+          }
+        }
+      },
       execute: args => {
         const path = (args.path as string) || '';
         const browserForPath = Private.getBrowserForPath(
@@ -548,6 +577,12 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.hideBrowser, {
       label: trans.__('Hide the file browser.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         const widget = tracker.currentWidget;
         if (widget && !widget.isHidden) {
@@ -1063,7 +1098,13 @@ function addCommands(
     },
     icon: closeIcon.bindprops({ stylesheet: 'menuItem' }),
     label: deleteToTrash ? trans.__('Move to Trash') : trans.__('Delete'),
-    mnemonic: 0
+    mnemonic: 0,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.copy, {
@@ -1076,7 +1117,13 @@ function addCommands(
     },
     icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Copy'),
-    mnemonic: 0
+    mnemonic: 0,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.cut, {
@@ -1088,7 +1135,13 @@ function addCommands(
       }
     },
     icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Cut')
+    label: trans.__('Cut'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.duplicate, {
@@ -1100,11 +1153,32 @@ function addCommands(
       }
     },
     icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Duplicate')
+    label: trans.__('Duplicate'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.goToPath, {
     label: trans.__('Update the file browser to display the provided `path`.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path to navigate to'
+          },
+          dontShowBrowser: {
+            type: 'boolean',
+            description: 'Whether to avoid showing the browser'
+          }
+        }
+      }
+    },
     execute: async args => {
       const path = (args.path as string) || '';
       const showBrowser = !(args?.dontShowBrowser ?? false);

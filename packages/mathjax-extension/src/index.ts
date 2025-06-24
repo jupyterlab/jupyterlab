@@ -88,7 +88,13 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         const oJax: any = md.outputJax;
         await navigator.clipboard.writeText(oJax.math.math);
       },
-      label: 'MathJax Copy Latex'
+      label: 'MathJax Copy Latex',
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     app.commands.addCommand(CommandIDs.scale, {
@@ -99,7 +105,18 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         md.rerender();
       },
       label: args =>
-        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')
+        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            scale: {
+              type: 'number',
+              description: 'The scale factor for MathJax rendering'
+            }
+          }
+        }
+      }
     });
 
     return typesetter;

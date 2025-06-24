@@ -192,6 +192,12 @@ function activateHTMLViewer(
       const sandbox = current.content.sandbox;
       return sandbox.indexOf('allow-scripts') !== -1;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       const current = tracker.currentWidget;
       if (!current) {

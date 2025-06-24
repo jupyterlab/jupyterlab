@@ -129,6 +129,21 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
           void tracker.save(main);
         });
         return main;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'The search query for plugins'
+            },
+            isDisclaimed: {
+              type: 'boolean',
+              description: 'Whether the disclaimer has been accepted'
+            }
+          }
+        }
       }
     });
 
@@ -144,6 +159,17 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
               `Failed to refresh the available plugins list:\n${reason}`
             );
           });
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            noLabel: {
+              type: 'boolean',
+              description: 'Whether to hide the label'
+            }
+          }
+        }
       }
     });
 

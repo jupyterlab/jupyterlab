@@ -200,49 +200,97 @@ function addCommands(
   commands.addCommand(CommandIDs.zoomIn, {
     execute: zoomIn,
     label: trans.__('Zoom In'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.zoomOut, {
     execute: zoomOut,
     label: trans.__('Zoom Out'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.resetImage, {
     execute: resetImage,
     label: trans.__('Reset Image'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.rotateClockwise, {
     execute: rotateClockwise,
     label: trans.__('Rotate Clockwise'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.rotateCounterclockwise, {
     execute: rotateCounterclockwise,
     label: trans.__('Rotate Counterclockwise'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.flipHorizontal, {
     execute: flipHorizontal,
     label: trans.__('Flip image horizontally'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.flipVertical, {
     execute: flipVertical,
     label: trans.__('Flip image vertically'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.invertColors, {
     execute: invertColors,
     label: trans.__('Invert Colors'),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   const notify = () => {

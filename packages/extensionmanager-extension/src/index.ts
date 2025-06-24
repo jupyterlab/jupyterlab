@@ -134,7 +134,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
           shell.activateById(view.id);
         }
       },
-      isVisible: () => model.isEnabled
+      isVisible: () => model.isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.toggle, {
@@ -144,7 +150,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
           void registry.set(plugin.id, 'enabled', !model.isEnabled);
         }
       },
-      isToggled: () => model.isEnabled
+      isToggled: () => model.isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     if (palette) {

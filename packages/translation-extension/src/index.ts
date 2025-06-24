@@ -169,6 +169,12 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                   );
                 }
               }
+            },
+            describedBy: {
+              args: {
+                type: 'object',
+                properties: {}
+              }
             }
           });
 

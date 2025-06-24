@@ -228,6 +228,12 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
       isEnabled: () => service.isStarted,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         const state = service.getDebuggerState();
         await service.stop();
@@ -393,6 +399,21 @@ const variables: JupyterFrontEndPlugin<void> = {
             service.model.variables.selectedVariable?.variablesReference ??
             0
         ) > 0,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            variableReference: {
+              type: 'number',
+              description: 'The variable reference to inspect'
+            },
+            name: {
+              type: 'string',
+              description: 'The name of the variable to inspect'
+            }
+          }
+        }
+      },
       execute: async args => {
         let { variableReference, name } = args as {
           variableReference?: number;
@@ -457,6 +478,21 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         service.model.hasRichVariableRendering &&
         (rendermime !== null || handler.activeWidget instanceof NotebookPanel),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            frameId: {
+              type: 'number',
+              description: 'The frame ID'
+            },
+            name: {
+              type: 'string',
+              description: 'The name of the variable to render'
+            }
+          }
+        }
+      },
       execute: args => {
         let { name, frameId } = args as {
           frameId?: number;
@@ -538,6 +574,12 @@ const variables: JupyterFrontEndPlugin<void> = {
         );
       },
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
         if (value) {
@@ -553,6 +595,12 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         handler.activeWidget instanceof NotebookPanel &&
         service.model.supportCopyToGlobals,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async args => {
         const name = service.model.variables.selectedVariable!.name;
         await service.copyToGlobals(name);
