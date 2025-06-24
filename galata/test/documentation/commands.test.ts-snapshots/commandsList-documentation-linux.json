@@ -199,43 +199,146 @@
     "id": "apputils:adaptive-theme",
     "label": "Synchronize with System Settings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      }
+    }
   },
   {
     "id": "apputils:change-dark-theme",
     "label": "Switch to the provided dark `theme`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The preferred dark theme name"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "apputils:change-font",
     "label": "waiting for fonts",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the font is available and enabled"
+        },
+        "font": {
+          "type": "string",
+          "description": "The font name"
+        },
+        "key": {
+          "type": "string",
+          "description": "The CSS property key to modify"
+        }
+      },
+      "required": [
+        "enabled",
+        "font",
+        "key"
+      ]
+    }
   },
   {
     "id": "apputils:change-light-theme",
     "label": "Switch to the provided light `theme`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The preferred light theme name"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "apputils:change-theme",
     "label": "Switch to the provided `theme`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The theme name to switch to"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "apputils:decr-font-size",
     "label": "Decrease Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The font size key to decrease (e.g., \"code-font-size\", \"content-font-size1\", \"ui-font-size1\")"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
   },
   {
     "id": "apputils:dismiss-notification",
     "label": "Dismiss a notification",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The notification ID to dismiss"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
   },
   {
     "id": "apputils:display-notifications",
@@ -255,13 +358,48 @@
     "id": "apputils:incr-font-size",
     "label": "Increase Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The font size key to increase (e.g., \"code-font-size\", \"content-font-size1\", \"ui-font-size1\")"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
   },
   {
     "id": "apputils:license-report",
     "label": "Download All Licenses as Markdown",
     "caption": "Download All Licenses as Markdown",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "The report format to use for download"
+        },
+        "noLabel": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "Whether to hide the label (truthy values hide label)"
+        }
+      },
+      "required": [
+        "format"
+      ]
+    }
   },
   {
     "id": "apputils:licenses",
@@ -273,19 +411,120 @@
     "id": "apputils:licenses-refresh",
     "label": "Refresh Licenses",
     "caption": "Refresh Licenses",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "noLabel": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "Whether to hide the label (truthy values hide label)"
+        }
+      }
+    }
   },
   {
     "id": "apputils:load-statedb",
     "label": "Load state for the current workspace.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "description": "The URL hash"
+        },
+        "path": {
+          "type": "string",
+          "description": "The URL path"
+        },
+        "search": {
+          "type": "string",
+          "description": "The URL search string containing query parameters"
+        }
+      }
+    }
   },
   {
     "id": "apputils:notify",
     "label": "Emit a notification",
     "caption": "Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The notification message text"
+        },
+        "type": {
+          "type": "string",
+          "description": "The notification type (e.g., \"default\", \"info\", \"warning\", \"error\")"
+        },
+        "options": {
+          "type": "object",
+          "description": "Additional notification options",
+          "properties": {
+            "autoClose": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ],
+              "description": "Auto-close timeout in milliseconds, or false to disable"
+            },
+            "actions": {
+              "type": "array",
+              "description": "Array of action buttons for the notification",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "The action button label"
+                  },
+                  "commandId": {
+                    "type": "string",
+                    "description": "The command ID to execute when clicked"
+                  },
+                  "args": {
+                    "description": "Arguments to pass to the command"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "The action button caption/tooltip"
+                  },
+                  "className": {
+                    "type": "string",
+                    "description": "CSS class name for the action button"
+                  }
+                },
+                "required": [
+                  "label",
+                  "commandId"
+                ]
+              }
+            },
+            "data": {
+              "description": "Additional data associated with the notification"
+            }
+          }
+        }
+      },
+      "required": [
+        "message"
+      ]
+    }
   },
   {
     "id": "apputils:print",
@@ -299,25 +538,88 @@
     "id": "apputils:reset",
     "label": "Reset Application State",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "reload": {
+          "type": "boolean",
+          "description": "Whether to reload the page after resetting"
+        }
+      }
+    }
   },
   {
     "id": "apputils:reset-on-load",
     "label": "Reset state when loading for the workspace.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "description": "The URL hash"
+        },
+        "path": {
+          "type": "string",
+          "description": "The URL path"
+        },
+        "search": {
+          "type": "string",
+          "description": "The URL search string containing query parameters"
+        }
+      }
+    }
   },
   {
     "id": "apputils:run-all-enabled",
     "label": "Run All Enabled Commands Passed as Args",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of command IDs to run"
+        },
+        "args": {
+          "description": "Arguments to pass to the commands"
+        },
+        "errorIfNotEnabled": {
+          "type": "boolean",
+          "description": "Whether to log an error if a command is not enabled"
+        }
+      }
+    }
   },
   {
     "id": "apputils:run-first-enabled",
     "label": "Run First Enabled Command",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of command IDs to attempt to run"
+        },
+        "args": {
+          "description": "Arguments to pass to the commands"
+        }
+      },
+      "required": [
+        "commands"
+      ]
+    }
   },
   {
     "id": "apputils:theme-scrollbars",
@@ -335,7 +637,80 @@
     "id": "apputils:update-notification",
     "label": "Update a notification",
     "caption": "Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The notification ID to update"
+        },
+        "message": {
+          "type": "string",
+          "description": "The notification message text"
+        },
+        "type": {
+          "type": "string",
+          "description": "The notification type (e.g., \"default\", \"info\", \"warning\", \"error\")"
+        },
+        "options": {
+          "type": "object",
+          "description": "Additional notification options",
+          "properties": {
+            "autoClose": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ],
+              "description": "Auto-close timeout in milliseconds, or false to disable"
+            },
+            "actions": {
+              "type": "array",
+              "description": "Array of action buttons for the notification",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "The action button label"
+                  },
+                  "commandId": {
+                    "type": "string",
+                    "description": "The command ID to execute when clicked"
+                  },
+                  "args": {
+                    "description": "Arguments to pass to the command"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "The action button caption/tooltip"
+                  },
+                  "className": {
+                    "type": "string",
+                    "description": "CSS class name for the action button"
+                  }
+                },
+                "required": [
+                  "label",
+                  "commandId"
+                ]
+              }
+            },
+            "data": {
+              "description": "Additional data associated with the notification"
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "message"
+      ]
+    }
   },
   {
     "id": "code-viewer:open",

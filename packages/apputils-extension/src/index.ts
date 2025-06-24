@@ -436,6 +436,25 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.loadState, {
       label: trans.__('Load state for the current workspace.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            hash: {
+              type: 'string',
+              description: 'The URL hash'
+            },
+            path: {
+              type: 'string',
+              description: 'The URL path'
+            },
+            search: {
+              type: 'string',
+              description: 'The URL search string containing query parameters'
+            }
+          }
+        }
+      },
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
@@ -500,6 +519,17 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.reset, {
       label: trans.__('Reset Application State'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            reload: {
+              type: 'boolean',
+              description: 'Whether to reload the page after resetting'
+            }
+          }
+        }
+      },
       execute: async ({ reload }: { reload: boolean }) => {
         await db.clear();
         await save.invoke();
@@ -511,6 +541,25 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.resetOnLoad, {
       label: trans.__('Reset state when loading for the workspace.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            hash: {
+              type: 'string',
+              description: 'The URL hash'
+            },
+            path: {
+              type: 'string',
+              description: 'The URL path'
+            },
+            search: {
+              type: 'string',
+              description: 'The URL search string containing query parameters'
+            }
+          }
+        }
+      },
       execute: (args: IRouter.ILocation) => {
         const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
@@ -607,6 +656,24 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     commands.addCommand(CommandIDs.runFirstEnabled, {
       label: trans.__('Run First Enabled Command'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            commands: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Array of command IDs to attempt to run'
+            },
+            args: {
+              description: 'Arguments to pass to the commands'
+            }
+          },
+          required: ['commands']
+        }
+      },
       execute: args => {
         const commands: string[] = args.commands as string[];
         const commandArgs: any = args.args;
@@ -625,6 +692,27 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     // and running all the enabled commands.
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            commands: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Array of command IDs to run'
+            },
+            args: {
+              description: 'Arguments to pass to the commands'
+            },
+            errorIfNotEnabled: {
+              type: 'boolean',
+              description: 'Whether to log an error if a command is not enabled'
+            }
+          }
+        }
+      },
       execute: async args => {
         const commands: string[] = (args.commands as string[]) ?? [];
         const commandArgs: any = args.args;
