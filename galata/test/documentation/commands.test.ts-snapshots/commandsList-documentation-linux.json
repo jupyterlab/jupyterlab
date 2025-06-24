@@ -5,7 +5,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ]"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:activate-next-tab-bar",
@@ -13,7 +17,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ."
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:activate-previous-tab",
@@ -21,7 +29,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ["
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:activate-previous-tab-bar",
@@ -29,7 +41,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ,"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close",
@@ -37,31 +53,51 @@
     "caption": "",
     "shortcuts": [
       "Alt W"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close-all",
     "label": "Close All Tabs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close-other-tabs",
     "label": "Close All Other Tabs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close-right-tabs",
     "label": "Close Tabs to Right",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:reset-layout",
     "label": "Reset Default Layout",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:set-mode",
@@ -89,7 +125,11 @@
     "id": "application:toggle-context-menu",
     "label": "Enable Context Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-fullscreen-mode",
@@ -97,13 +137,21 @@
     "caption": "",
     "shortcuts": [
       "F11"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-header",
     "label": "Show Header",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-left-area",
@@ -111,7 +159,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl B"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-mode",
@@ -119,13 +171,21 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift D"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-presentation-mode",
     "label": "Presentation Mode",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-right-area",
@@ -133,7 +193,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl J"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-side-tabbar",
@@ -193,7 +257,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift C"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:adaptive-theme",
@@ -344,15 +412,23 @@
     "id": "apputils:display-notifications",
     "label": "Show Notifications",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:display-shortcuts",
-    "label": "Show Keyboard Shortcuts…",
+    "label": "Show Keyboard Shortcuts\u2026",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:incr-font-size",
@@ -405,7 +481,11 @@
     "id": "apputils:licenses",
     "label": "Licenses",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:licenses-refresh",
@@ -528,11 +608,15 @@
   },
   {
     "id": "apputils:print",
-    "label": "Print…",
+    "label": "Print\u2026",
     "caption": "",
     "shortcuts": [
       "Ctrl P"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:reset",
@@ -625,13 +709,21 @@
     "id": "apputils:theme-scrollbars",
     "label": "Theme Scrollbars",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:toggle-header",
     "label": "Show Header Above Content",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:update-notification",
@@ -806,7 +898,7 @@
   },
   {
     "id": "console:change-kernel",
-    "label": "Change Kernel…",
+    "label": "Change Kernel\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -818,7 +910,7 @@
   },
   {
     "id": "console:close-and-shutdown",
-    "label": "Close and Shut Down…",
+    "label": "Close and Shut Down\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -904,7 +996,7 @@
   },
   {
     "id": "console:restart-kernel",
-    "label": "Restart Kernel…",
+    "label": "Restart Kernel\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -1013,8 +1105,8 @@
   },
   {
     "id": "debugger:restart-debug",
-    "label": "Restart Kernel and Debug…",
-    "caption": "Restart Kernel and Debug…",
+    "label": "Restart Kernel and Debug\u2026",
+    "caption": "Restart Kernel and Debug\u2026",
     "shortcuts": []
   },
   {
@@ -1111,20 +1203,20 @@
   },
   {
     "id": "docmanager:rename",
-    "label": "Rename…",
+    "label": "Rename\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "docmanager:restore-checkpoint",
-    "label": "Revert  to Checkpoint…",
+    "label": "Revert  to Checkpoint\u2026",
     "caption": "Revert contents to previous checkpoint",
     "shortcuts": []
   },
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
+    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as\u2026\" instead",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -1137,7 +1229,7 @@
   },
   {
     "id": "docmanager:save-as",
-    "label": "Save  As…",
+    "label": "Save  As\u2026",
     "caption": "Save with new path",
     "shortcuts": [
       "Ctrl Shift S"
@@ -1181,7 +1273,7 @@
   },
   {
     "id": "documentsearch:start",
-    "label": "Find…",
+    "label": "Find\u2026",
     "caption": "",
     "shortcuts": [
       "Ctrl F"
@@ -1189,7 +1281,7 @@
   },
   {
     "id": "documentsearch:startWithReplace",
-    "label": "Find and Replace…",
+    "label": "Find and Replace\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -1215,7 +1307,7 @@
   },
   {
     "id": "editmenu:go-to-line",
-    "label": "Go to Line…",
+    "label": "Go to Line\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -1363,13 +1455,13 @@
   },
   {
     "id": "filebrowser:open-path",
-    "label": "Open from Path…",
+    "label": "Open from Path\u2026",
     "caption": "Open from path",
     "shortcuts": []
   },
   {
     "id": "filebrowser:open-url",
-    "label": "Open from URL…",
+    "label": "Open from URL\u2026",
     "caption": "Open from URL",
     "shortcuts": []
   },
@@ -1531,13 +1623,13 @@
   },
   {
     "id": "fileeditor:find",
-    "label": "Find…",
+    "label": "Find\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "fileeditor:go-to-line",
-    "label": "Go to Line…",
+    "label": "Go to Line\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -1855,7 +1947,7 @@
   },
   {
     "id": "kernelmenu:change",
-    "label": "Change Kernel…",
+    "label": "Change Kernel\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -1882,7 +1974,7 @@
   },
   {
     "id": "kernelmenu:restart",
-    "label": "Restart Kernel…",
+    "label": "Restart Kernel\u2026",
     "caption": "Restart the kernel",
     "shortcuts": [
       "0",
@@ -1891,7 +1983,7 @@
   },
   {
     "id": "kernelmenu:restart-and-clear",
-    "label": "Restart Kernel and Clear…",
+    "label": "Restart Kernel and Clear\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -1903,7 +1995,7 @@
   },
   {
     "id": "kernelmenu:shutdownAll",
-    "label": "Shut Down All Kernels…",
+    "label": "Shut Down All Kernels\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -2065,7 +2157,7 @@
   },
   {
     "id": "notebook:change-kernel",
-    "label": "Change Kernel…",
+    "label": "Change Kernel\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -2083,7 +2175,7 @@
   },
   {
     "id": "notebook:close-and-shutdown",
-    "label": "Close and Shut Down Notebook…",
+    "label": "Close and Shut Down Notebook\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -2430,25 +2522,25 @@
   },
   {
     "id": "notebook:restart-and-run-to-selected",
-    "label": "Restart Kernel and Run up to Selected Cell…",
+    "label": "Restart Kernel and Run up to Selected Cell\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "notebook:restart-clear-output",
-    "label": "Restart Kernel and Clear Outputs of All Cells…",
+    "label": "Restart Kernel and Clear Outputs of All Cells\u2026",
     "caption": "Restart the kernel and clear all outputs of all cells",
     "shortcuts": []
   },
   {
     "id": "notebook:restart-kernel",
-    "label": "Restart Kernel…",
+    "label": "Restart Kernel\u2026",
     "caption": "Restart the kernel",
     "shortcuts": []
   },
   {
     "id": "notebook:restart-run-all",
-    "label": "Restart Kernel and Run All Cells…",
+    "label": "Restart Kernel and Run All Cells\u2026",
     "caption": "Restart the kernel and run all cells",
     "shortcuts": []
   },
@@ -2634,7 +2726,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift U"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "recentmenu:open-recent",
@@ -2808,7 +2904,11 @@
     "id": "sidebar:switch",
     "label": "Switch Sidebar Side",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "statusbar:toggle",
@@ -3000,49 +3100,49 @@
   },
   {
     "id": "workspace-ui:clone",
-    "label": "Clone Workspace…",
+    "label": "Clone Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:create-new",
-    "label": "Create New Workspace…",
+    "label": "Create New Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:delete",
-    "label": "Delete Workspace…",
+    "label": "Delete Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:export",
-    "label": "Export Workspace…",
+    "label": "Export Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:import",
-    "label": "Import Workspace…",
+    "label": "Import Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:open",
-    "label": "Open Workspace…",
+    "label": "Open Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:rename",
-    "label": "Rename Workspace…",
+    "label": "Rename Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "workspace-ui:reset",
-    "label": "Reset Workspace…",
+    "label": "Reset Workspace\u2026",
     "caption": "",
     "shortcuts": []
   },
@@ -3054,7 +3154,7 @@
   },
   {
     "id": "workspace-ui:save-as",
-    "label": "Save Current Workspace As…",
+    "label": "Save Current Workspace As\u2026",
     "caption": "",
     "shortcuts": []
   }

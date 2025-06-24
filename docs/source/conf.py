@@ -213,8 +213,8 @@ def _format_shortcuts(shortcuts: list) -> str:
 
 def _format_command_arguments(args_schema: dict) -> str:
     """Format command arguments section."""
-    if "properties" not in args_schema:
-        return ""
+    if "properties" not in args_schema or not args_schema["properties"]:
+        return "**Arguments:** None\n\n"
 
     template = "**Arguments:**\n\n"
     required_args = set(args_schema.get("required", []))
