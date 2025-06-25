@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
 
 #
 # JupyterLab documentation build configuration file, created by
@@ -45,6 +43,7 @@ HERE = Path(__file__).parent.resolve()
 # ones.
 extensions = [
     "myst_parser",
+    "sphinx.ext.copybuttons"
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
