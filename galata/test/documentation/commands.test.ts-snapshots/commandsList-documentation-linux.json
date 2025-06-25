@@ -204,6 +204,24 @@
     "shortcuts": []
   },
   {
+    "id": "apputils:license-report",
+    "label": "Download All Licenses as Markdown",
+    "caption": "Download All Licenses as Markdown",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:licenses",
+    "label": "Licenses",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:licenses-refresh",
+    "label": "Refresh Licenses",
+    "caption": "Refresh Licenses",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:load-statedb",
     "label": "Load state for the current workspace.",
     "caption": "",
@@ -862,7 +880,7 @@
   },
   {
     "id": "filebrowser:delete",
-    "label": "Delete",
+    "label": "Move to Trash",
     "caption": "",
     "shortcuts": [
       "Delete"
@@ -1242,8 +1260,8 @@
   },
   {
     "id": "help:license-report",
-    "label": "Download All Licenses as Markdown",
-    "caption": "Download All Licenses as Markdown",
+    "label": "Download All Licenses",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -1255,7 +1273,7 @@
   {
     "id": "help:licenses-refresh",
     "label": "Refresh Licenses",
-    "caption": "Refresh Licenses",
+    "caption": "",
     "shortcuts": []
   },
   {
