@@ -15,7 +15,7 @@
   height: 100%;
 }
 
-.jp-RenderedVideo video {
+.jp-RenderedVideo > video {
   width: 100%;
   height: auto;
   object-fit: contain;

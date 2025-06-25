@@ -17,7 +17,7 @@
   box-sizing: border-box;
 }
 
-.jp-AudioViewer audio {
+.jp-AudioViewer > audio {
   width: 100%;
   object-fit: contain;
 }
