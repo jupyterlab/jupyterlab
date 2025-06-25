@@ -33,6 +33,7 @@ def configure_jupyter_server(c):
 
     c.LabApp.workspaces_dir = mkdtemp(prefix="galata-workspaces-")
 
+    c.ServerApp.terminado_settings='{"shell_command": ["PS1=\'$ \'", "/bin/bash"]}'
     c.ServerApp.root_dir = os.environ.get(
         "JUPYTERLAB_GALATA_ROOT_DIR", mkdtemp(prefix="galata-test-")
     )
