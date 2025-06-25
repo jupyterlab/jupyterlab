@@ -16,6 +16,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from jupyterlab.browser_check import run_async_process, run_test
 from jupyterlab.labapp import get_app_dir
@@ -34,6 +35,10 @@ def main():
     spec.loader.exec_module(mod)
     sys.modules[__name__] = mod
 
+    with NamedTemporaryFile(mode="w", delete=False) as tmp:
+        tmp.write('PS1="$ "\n')
+        rcfile_path = tmp.name
+
     class App(mod.ExampleApp):
         """An app that launches an example and waits for it to start up, checking for
         JS console errors, JS errors, and Python logged errors.
@@ -46,6 +51,7 @@ def main():
             "base_url": "/foo/",
             "root_dir": str(example_dir.resolve()),
             "preferred_dir": str(example_dir.resolve()),
+            "terminado_settings": {"shell_command": ["/bin/bash", "--rcfile", rcfile_path]},
         }
         ip = "127.0.0.1"
 
