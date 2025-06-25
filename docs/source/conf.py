@@ -43,8 +43,7 @@ HERE = Path(__file__).parent.resolve()
 # ones.
 extensions = [
     "myst_parser",
-    "sphinx.ext.copybuttons"
-    "sphinx.ext.intersphinx",
+    "sphinx.ext.copybuttonssphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
 ]
