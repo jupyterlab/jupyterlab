@@ -119,7 +119,7 @@ async function activateTOC(
         properties: {
           toolbar: {
             type: 'boolean',
-            description: 'Whether the command is called from toolbar'
+            description: trans.__('Whether the command is called from toolbar')
           }
         }
       }
@@ -190,7 +190,7 @@ async function activateTOC(
         properties: {
           toolbar: {
             type: 'boolean',
-            description: 'Whether the command is called from toolbar'
+            description: trans.__('Whether the command is called from toolbar')
           }
         }
       }

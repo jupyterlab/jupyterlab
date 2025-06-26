@@ -136,11 +136,11 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
           properties: {
             query: {
               type: 'string',
-              description: 'The search query for plugins'
+              description: trans.__('The search query for plugins')
             },
             isDisclaimed: {
               type: 'boolean',
-              description: 'Whether the disclaimer has been accepted'
+              description: trans.__('Whether the disclaimer has been accepted')
             }
           }
         }
@@ -166,7 +166,7 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
           properties: {
             noLabel: {
               type: 'boolean',
-              description: 'Whether to hide the label'
+              description: trans.__('Whether to hide the label')
             }
           }
         }

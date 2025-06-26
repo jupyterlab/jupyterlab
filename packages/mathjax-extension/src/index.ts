@@ -14,6 +14,8 @@ import {
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
 
 namespace CommandIDs {
@@ -79,7 +81,9 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax-extension:plugin',
   description: 'Provides the LaTeX mathematical expression interpreter.',
   provides: ILatexTypesetter,
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const typesetter = new MathJaxTypesetter();
 
     app.commands.addCommand(CommandIDs.copy, {
@@ -112,7 +116,7 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
           properties: {
             scale: {
               type: 'number',
-              description: 'The scale factor for MathJax rendering'
+              description: trans.__('The scale factor for MathJax rendering')
             }
           }
         }

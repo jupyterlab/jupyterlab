@@ -296,12 +296,15 @@ export namespace Commands {
           properties: {
             delta: {
               type: 'number',
-              description:
+              description: trans.__(
                 'The font size change delta (positive to increase, negative to decrease)'
+              )
             },
             isMenu: {
               type: 'boolean',
-              description: 'Whether the command is called from a menu context'
+              description: trans.__(
+                'Whether the command is called from a menu context'
+              )
             }
           },
           required: ['delta']
@@ -390,7 +393,7 @@ export namespace Commands {
           properties: {
             mode: {
               type: 'boolean',
-              description: 'Whether to enable word wrap'
+              description: trans.__('Whether to enable word wrap')
             }
           }
         }
@@ -460,8 +463,9 @@ export namespace Commands {
           properties: {
             size: {
               type: 'string',
-              description:
+              description: trans.__(
                 'The number of spaces for indentation (or Tab for tab indentation)'
+              )
             }
           }
         }

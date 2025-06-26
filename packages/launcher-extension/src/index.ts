@@ -67,19 +67,21 @@ function activate(
         properties: {
           cwd: {
             type: 'string',
-            description: 'The current working directory'
+            description: trans.__('The current working directory')
           },
           toolbar: {
             type: 'boolean',
-            description: 'Whether the command is executed from a toolbar'
+            description: trans.__(
+              'Whether the command is executed from a toolbar'
+            )
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           },
           ref: {
             type: 'string',
-            description: 'The reference widget id'
+            description: trans.__('The reference widget id')
           }
         }
       }

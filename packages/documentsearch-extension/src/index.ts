@@ -331,7 +331,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           properties: {
             searchText: {
               type: 'string',
-              description: 'The text to search for'
+              description: trans.__('The text to search for')
             }
           }
         }
@@ -379,11 +379,11 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           properties: {
             searchText: {
               type: 'string',
-              description: 'The text to search for'
+              description: trans.__('The text to search for')
             },
             replaceText: {
               type: 'string',
-              description: 'The text to replace with'
+              description: trans.__('The text to replace with')
             }
           }
         }

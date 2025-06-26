@@ -540,7 +540,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           properties: {
             path: {
               type: 'string',
-              description: 'The path to open in the file browser'
+              description: trans.__('The path to open in the file browser')
             }
           }
         }

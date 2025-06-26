@@ -454,15 +454,17 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           properties: {
             hash: {
               type: 'string',
-              description: 'The URL hash'
+              description: trans.__('The URL hash')
             },
             path: {
               type: 'string',
-              description: 'The URL path'
+              description: trans.__('The URL path')
             },
             search: {
               type: 'string',
-              description: 'The URL search string containing query parameters'
+              description: trans.__(
+                'The URL search string containing query parameters'
+              )
             }
           }
         }
@@ -537,7 +539,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           properties: {
             reload: {
               type: 'boolean',
-              description: 'Whether to reload the page after resetting'
+              description: trans.__(
+                'Whether to reload the page after resetting'
+              )
             }
           }
         }
@@ -559,15 +563,17 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           properties: {
             hash: {
               type: 'string',
-              description: 'The URL hash'
+              description: trans.__('The URL hash')
             },
             path: {
               type: 'string',
-              description: 'The URL path'
+              description: trans.__('The URL path')
             },
             search: {
               type: 'string',
-              description: 'The URL search string containing query parameters'
+              description: trans.__(
+                'The URL search string containing query parameters'
+              )
             }
           }
         }

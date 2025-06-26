@@ -398,16 +398,17 @@ function addCommands(
         properties: {
           name: {
             type: 'string',
-            description: 'Terminal session name'
+            description: trans.__('Terminal session name')
           },
           cwd: {
             type: 'string',
-            description: 'Current working directory for the terminal'
+            description: trans.__('Current working directory for the terminal')
           },
           isPalette: {
             type: 'boolean',
-            description:
+            description: trans.__(
               'Whether the command is called from the command palette'
+            )
           }
         }
       }
@@ -436,7 +437,7 @@ function addCommands(
         properties: {
           name: {
             type: 'string',
-            description: 'Terminal session name to open'
+            description: trans.__('Terminal session name to open')
           }
         },
         required: ['name']
@@ -473,8 +474,9 @@ function addCommands(
         properties: {
           isPalette: {
             type: 'boolean',
-            description:
+            description: trans.__(
               'Whether the command is called from the command palette'
+            )
           }
         }
       }

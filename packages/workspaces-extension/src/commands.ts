@@ -169,7 +169,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier to open'
+              description: trans.__('Workspace identifier to open')
             }
           }
         }
@@ -222,7 +222,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier to delete'
+              description: trans.__('Workspace identifier to delete')
             }
           }
         }
@@ -255,7 +255,9 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier for the new workspace'
+              description: trans.__(
+                'Workspace identifier for the new workspace'
+              )
             }
           }
         }
@@ -306,7 +308,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier to clone'
+              description: trans.__('Workspace identifier to clone')
             }
           }
         }
@@ -348,7 +350,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier to rename'
+              description: trans.__('Workspace identifier to rename')
             }
           }
         }
@@ -405,7 +407,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier to reset'
+              description: trans.__('Workspace identifier to reset')
             }
           }
         }
@@ -521,7 +523,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           properties: {
             workspace: {
               type: 'string',
-              description: 'Workspace identifier to export'
+              description: trans.__('Workspace identifier to export')
             }
           }
         }

@@ -107,16 +107,16 @@ function activate(
           properties: {
             path: {
               type: 'string',
-              description: 'The file path to open'
+              description: trans.__('The file path to open')
             },
             id: {
               type: 'string',
-              description: 'Fragment identifier to navigate to'
+              description: trans.__('Fragment identifier to navigate to')
             },
             scope: {
               type: 'string',
               enum: ['kernel', 'server'],
-              description: 'Scope of the file location'
+              description: trans.__('Scope of the file location')
             }
           },
           required: ['path']

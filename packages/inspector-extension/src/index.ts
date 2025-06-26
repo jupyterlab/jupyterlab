@@ -118,15 +118,15 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
           properties: {
             text: {
               type: 'string',
-              description: 'Text to display in the inspector'
+              description: trans.__('Text to display in the inspector')
             },
             refresh: {
               type: 'boolean',
-              description: 'Whether to refresh the inspector'
+              description: trans.__('Whether to refresh the inspector')
             },
             isLauncher: {
               type: 'boolean',
-              description: 'Whether command is called from launcher'
+              description: trans.__('Whether command is called from launcher')
             }
           }
         }
@@ -154,7 +154,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
           properties: {
             isLauncher: {
               type: 'boolean',
-              description: 'Whether command is called from launcher'
+              description: trans.__('Whether command is called from launcher')
             }
           }
         }
@@ -174,7 +174,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
           properties: {
             text: {
               type: 'string',
-              description: 'Text to display in the inspector'
+              description: trans.__('Text to display in the inspector')
             }
           }
         }

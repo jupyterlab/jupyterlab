@@ -227,15 +227,15 @@ function activateLogConsole(
         properties: {
           source: {
             type: 'string',
-            description: 'The source for the log console'
+            description: trans.__('The source for the log console')
           },
           insertMode: {
             type: 'string',
-            description: 'The insert mode for the dock layout'
+            description: trans.__('The insert mode for the dock layout')
           },
           ref: {
             type: 'string',
-            description: 'The reference widget'
+            description: trans.__('The reference widget')
           }
         }
       }
@@ -295,7 +295,7 @@ function activateLogConsole(
           level: {
             type: 'string',
             enum: ['Critical', 'Error', 'Warning', 'Info', 'Debug'],
-            description: 'The log level to set'
+            description: trans.__('The log level to set')
           }
         },
         required: ['level']

@@ -405,11 +405,11 @@ const variables: JupyterFrontEndPlugin<void> = {
           properties: {
             variableReference: {
               type: 'number',
-              description: 'The variable reference to inspect'
+              description: trans.__('The variable reference to inspect')
             },
             name: {
               type: 'string',
-              description: 'The name of the variable to inspect'
+              description: trans.__('The name of the variable to inspect')
             }
           }
         }

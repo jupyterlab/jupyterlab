@@ -567,11 +567,13 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
           properties: {
             path: {
               type: 'string',
-              description: 'The path of the file to open in browser tab'
+              description: trans.__(
+                'The path of the file to open in browser tab'
+              )
             },
             icon: {
               type: 'string',
-              description: 'The icon class for the command'
+              description: trans.__('The icon class for the command')
             }
           },
           required: ['path']

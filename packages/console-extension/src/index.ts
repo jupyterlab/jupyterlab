@@ -649,11 +649,11 @@ async function activateConsole(
         properties: {
           path: {
             type: 'string',
-            description: 'The path of the session to open'
+            description: trans.__('The path of the session to open')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the console widget'
+            description: trans.__('Whether to activate the console widget')
           }
         },
         required: ['path']
@@ -706,35 +706,41 @@ async function activateConsole(
         properties: {
           isPalette: {
             type: 'boolean',
-            description: 'Whether the command is executed from the palette'
+            description: trans.__(
+              'Whether the command is executed from the palette'
+            )
           },
           isLauncher: {
             type: 'boolean',
-            description: 'Whether the command is executed from the launcher'
+            description: trans.__(
+              'Whether the command is executed from the launcher'
+            )
           },
           kernelPreference: {
             type: 'object',
-            description: 'The kernel preference for the console'
+            description: trans.__('The kernel preference for the console')
           },
           basePath: {
             type: 'string',
-            description: 'The base path for the console'
+            description: trans.__('The base path for the console')
           },
           cwd: {
             type: 'string',
-            description: 'The current working directory'
+            description: trans.__('The current working directory')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           },
           ref: {
             type: 'string',
-            description: 'The reference widget id for the insert location'
+            description: trans.__(
+              'The reference widget id for the insert location'
+            )
           },
           insertMode: {
             type: 'string',
-            description: 'The tab insert mode'
+            description: trans.__('The tab insert mode')
           }
         }
       }

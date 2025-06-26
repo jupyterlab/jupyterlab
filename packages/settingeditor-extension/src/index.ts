@@ -245,16 +245,16 @@ function activate(
         properties: {
           query: {
             type: 'string',
-            description: 'Search query to filter settings'
+            description: trans.__('Search query to filter settings')
           },
           settingEditorType: {
             type: 'string',
             enum: ['ui', 'json'],
-            description: 'Type of settings editor to open'
+            description: trans.__('Type of settings editor to open')
           },
           label: {
             type: 'string',
-            description: 'Custom label for the command'
+            description: trans.__('Custom label for the command')
           }
         }
       }

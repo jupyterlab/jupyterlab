@@ -165,11 +165,11 @@ function activate(
         properties: {
           path: {
             type: 'string',
-            description: 'The path to the markdown file to preview'
+            description: trans.__('The path to the markdown file to preview')
           },
           options: {
             type: 'object',
-            description: 'Options for opening the preview'
+            description: trans.__('Options for opening the preview')
           }
         },
         required: ['path']

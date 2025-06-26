@@ -469,11 +469,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               side: {
                 type: 'string',
                 enum: ['left', 'right'],
-                description: 'The sidebar side'
+                description: trans.__('The sidebar side')
               },
               index: {
                 type: ['string', 'number'],
-                description: 'The index of the sidebar widget'
+                description: trans.__('The index of the sidebar widget')
               }
             },
             required: ['side', 'index']
@@ -520,7 +520,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               side: {
                 type: 'string',
                 enum: ['left', 'right'],
-                description: 'The sidebar side'
+                description: trans.__('The sidebar side')
               }
             },
             required: ['side']
@@ -598,7 +598,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               mode: {
                 type: 'string',
                 enum: ['single-document', 'multiple-document'],
-                description: 'The layout mode'
+                description: trans.__('The layout mode')
               }
             },
             required: ['mode']
@@ -1107,12 +1107,14 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   id: '@jupyterlab/application-extension:tree-resolver',
   description: 'Provides the tree route resolver',
   autoStart: true,
-  requires: [IRouter],
+  requires: [IRouter, ITranslator],
   provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
-    router: IRouter
+    router: IRouter,
+    translator: ITranslator
   ): JupyterFrontEnd.ITreeResolver => {
+    const trans = translator.load('jupyterlab');
     const { commands } = app;
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
@@ -1129,7 +1131,9 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
             properties: {
               search: {
                 type: 'string',
-                description: 'The URL search string containing query parameters'
+                description: trans.__(
+                  'The URL search string containing query parameters'
+                )
               }
             }
           }

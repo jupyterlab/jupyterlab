@@ -633,16 +633,19 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
           properties: {
             format: {
               type: 'string',
-              description: 'The export format (e.g., pdf, html, latex)'
+              description: trans.__(
+                'The export format (e.g., pdf, html, latex)'
+              )
             },
             label: {
               type: 'string',
-              description: 'The label to display for this format'
+              description: trans.__('The label to display for this format')
             },
             isPalette: {
               type: 'boolean',
-              description:
+              description: trans.__(
                 'Whether the command is called from the command palette'
+              )
             }
           },
           required: ['format']
