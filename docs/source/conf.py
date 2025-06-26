@@ -252,7 +252,7 @@ def _format_scope_name(scope: str) -> str:
 
     compound_suffixes = ["browser", "manager", "menu", "editor", "console", "viewer", "search"]
     for suffix in compound_suffixes:
-        if scope.endswith(suffix):
+        if scope.endswith(suffix) and scope != suffix:
             prefix = scope[: -len(suffix)]
             scope = f"{prefix}-{suffix}"
             break
@@ -261,7 +261,7 @@ def _format_scope_name(scope: str) -> str:
     formatted_words = []
 
     for word in words:
-        if word.lower() in ["ui", "css", "html", "pdf", "csv", "toc", "lsp"]:
+        if word.lower() in ["ui", "css", "html", "pdf", "csv", "tsv", "toc", "lsp"]:
             formatted_words.append(word.upper())
         elif word.lower() == "javascript":
             formatted_words.append("JavaScript")
@@ -313,7 +313,7 @@ def document_commands_list(temp_folder: Path) -> None:
             commands_by_scope[display_scope] = []
         commands_by_scope[display_scope].append(command)
 
-    sorted_scopes = sorted(commands_by_scope.keys())
+        sorted_scopes = sorted(commands_by_scope.keys(), key=str.lower)
 
     template = ""
     for scope_idx, scope in enumerate(sorted_scopes):
