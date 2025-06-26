@@ -157,6 +157,29 @@ describe('jupyter.services - Comm', () => {
         expect(before).toEqual(after);
       });
 
+      it('should spawn a subshell per-comm-target per kernel', async () => {
+        // Issue #17633
+        await kernel.info;
+        await echoKernel.info;
+
+        expect(kernel.supportsSubshells).toBeTruthy();
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        kernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
+
+        // First kernel
+        const comm = kernel.createComm('testTarget2') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        // Second kernel
+        const comm2 = echoKernel.createComm('testTarget2') as CommHandler;
+        await comm2.subshellStarted;
+        expect(comm2.subshellId).not.toBeNull();
+
+        expect(comm.subshellId).not.toEqual(comm2.subshellId);
+      });
+
       it('should use the given id', () => {
         const comm = kernel.createComm('test', '1234');
         expect(comm.targetName).toBe('test');
