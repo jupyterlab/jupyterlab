@@ -208,8 +208,8 @@ describe('@jupyterlab/cell-toolbar', () => {
         const context = await NBTestUtils.createMockContext();
         const notebookA = NBTestUtils.createNotebookPanel(context);
         const notebookB = NBTestUtils.createNotebookPanel(context);
-        notebookTracker.add(notebookA);
-        notebookTracker.add(notebookB);
+        await notebookTracker.add(notebookA);
+        await notebookTracker.add(notebookB);
         NBTestUtils.populateNotebook(notebookA.content);
         NBTestUtils.populateNotebook(notebookB.content);
 
