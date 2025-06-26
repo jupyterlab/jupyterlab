@@ -7,13 +7,39 @@ import {
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
 import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
-import { NotebookPanel } from '@jupyterlab/notebook';
+import { ToolbarRegistry } from '@jupyterlab/apputils';
+import { NotebookPanel, NotebookTracker } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
+import { framePromise } from '@jupyterlab/testing';
+
+class CellBarExtensionWithCustomItemFactory extends CellBarExtension {
+  protected createItemFactory(commands: CommandRegistry) {
+    return (
+      _widgetFactory: string,
+      _widget: Widget,
+      toolbarItem: ToolbarRegistry.IWidget
+    ) => {
+      const itemWidget = new Widget();
+      if (toolbarItem.command) {
+        const button = document.createElement('button');
+        button.dataset.command = toolbarItem.command;
+        button.disabled = !commands.isEnabled(
+          toolbarItem.command,
+          toolbarItem.args
+        );
+        itemWidget.node.appendChild(button);
+      }
+      return itemWidget;
+    };
+  }
+}
+
+const CELL_TOOLBAR_SELECTOR = '[aria-label="Cell toolbar"]';
 
 function testToolbarFactory() {
   const pluginId = '@jupyterlab/cell-toolbar';
@@ -130,15 +156,28 @@ describe('@jupyterlab/cell-toolbar', () => {
     let commands: CommandRegistry;
     let panel: NotebookPanel;
     let extension: CellBarExtension;
+    let notebookTracker: NotebookTracker;
 
     beforeAll(() => {
       commands = new CommandRegistry();
+      const getPanel = (args: any) => {
+        return (
+          notebookTracker.find(
+            panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]
+          ) ?? null
+        );
+      };
       commands.addCommand('notebook:move-cell-up', {
-        execute: args => null
+        execute: args => null,
+        isEnabled: args => {
+          const widget = getPanel(args)!;
+          return widget.content.activeCellIndex != 0;
+        }
       });
       commands.addCommand('notebook:move-cell-down', {
         execute: args => null
       });
+      notebookTracker = new NotebookTracker({ namespace: 'notebook' });
 
       extension = new CellBarExtension(commands, testToolbarFactory());
     });
@@ -160,36 +199,48 @@ describe('@jupyterlab/cell-toolbar', () => {
         expect(tracker).toBeInstanceOf(CellToolbarTracker);
       });
 
-      it('should create toolbar commands with panel ID in args', async () => {
+      it('should track the panel for which it was created', async () => {
+        // Create an cell toolbar extension with custom item factory,
+        // but using the default toolbar factory so that we can
+        // test the panel logic in the default toolbar factory.
+        extension = new CellBarExtensionWithCustomItemFactory(commands);
+
         const context = await NBTestUtils.createMockContext();
-        panel = NBTestUtils.createNotebookPanel(context);
+        const notebookA = NBTestUtils.createNotebookPanel(context);
+        const notebookB = NBTestUtils.createNotebookPanel(context);
+        notebookTracker.add(notebookA);
+        notebookTracker.add(notebookB);
+        NBTestUtils.populateNotebook(notebookA.content);
+        NBTestUtils.populateNotebook(notebookB.content);
 
-        await panel.revealed;
+        notebookA.content.activeCellIndex = 0;
+        notebookB.content.activeCellIndex = 1;
 
-        // Mock the command execution to capture args
-        const executeArgs: any[] = [];
-        commands.addCommand('test:move-cell-up', {
-          execute: args => {
-            executeArgs.push(args);
-            return null;
-          },
-          isEnabled: args => {
-            // This should receive the panelId in args
-            return args.widgetId === panel.id;
-          }
-        });
+        await notebookA.revealed;
+        await notebookB.revealed;
 
-        // Create the tracker which should set up toolbar with panel ID
-        extension.createNew(panel);
+        extension.createNew(notebookA);
+        extension.createNew(notebookB);
 
-        // Verify that the panel ID is included in command args
-        // This tests the fix for issue #17426
-        const isEnabledResult = commands.isEnabled('test:move-cell-up', {
-          toolbar: true,
-          panelId: panel.id
-        });
+        await framePromise();
+        await framePromise();
 
-        expect(isEnabledResult).toBe(true);
+        const toolbarA = notebookA.content.activeCell!.node.querySelector(
+          CELL_TOOLBAR_SELECTOR
+        )!;
+        const toolbarB = notebookB.content.activeCell!.node.querySelector(
+          CELL_TOOLBAR_SELECTOR
+        )!;
+
+        const buttonUpA = toolbarA.querySelector(
+          '[data-command="notebook:move-cell-up"]'
+        ) as HTMLButtonElement;
+        const buttonUpB = toolbarB.querySelector(
+          '[data-command="notebook:move-cell-up"]'
+        ) as HTMLButtonElement;
+
+        expect(buttonUpA.disabled).toBe(true);
+        expect(buttonUpB.disabled).toBe(false);
       });
     });
   });

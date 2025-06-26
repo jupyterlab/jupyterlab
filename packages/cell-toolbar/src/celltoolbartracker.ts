@@ -534,11 +534,15 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     this._toolbarFactory = toolbarFactory ?? this.defaultToolbarFactory;
   }
 
+  protected createItemFactory(commands: CommandRegistry) {
+    return createDefaultFactory(commands);
+  }
+
   protected get defaultToolbarFactory(): (
     widget: Widget,
     commandArgs?: Record<string, any>
   ) => IObservableList<ToolbarRegistry.IToolbarItem> {
-    const itemFactory = createDefaultFactory(this._commands);
+    const itemFactory = this.createItemFactory(this._commands);
     return (widget: Widget, commandArgs?: Record<string, any>) =>
       new ObservableList({
         values: defaultToolbarItems.map(item => {
