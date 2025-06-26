@@ -20,7 +20,6 @@ import '@jupyterlab/toc/style/index.js';
 import '@jupyterlab/cells/style/index.js';
 import '@jupyterlab/lsp/style/index.js';
 import '@jupyterlab/notebook/style/index.js';
-import '@jupyterlab/cell-toolbar/style/index.js';
 import '@jupyterlab/completer/style/index.js';
 import '@jupyterlab/docmanager-extension/style/index.js';
 import '@jupyterlab/launcher/style/index.js';
