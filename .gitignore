@@ -159,4 +159,5 @@ untitled*.txt
 # pixi environments
 .pixi
 
+# temporary files, useful for testing
 tmp
