@@ -225,7 +225,9 @@
     "id": "application:toggle-sidebar-widget",
     "label": "Toggle Sidebar Element",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt 1"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -420,7 +422,7 @@
   },
   {
     "id": "apputils:display-shortcuts",
-    "label": "Show Keyboard Shortcuts\u2026",
+    "label": "Show Keyboard Shortcuts…",
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
@@ -608,7 +610,7 @@
   },
   {
     "id": "apputils:print",
-    "label": "Print\u2026",
+    "label": "Print…",
     "caption": "",
     "shortcuts": [
       "Ctrl P"
@@ -954,7 +956,7 @@
   },
   {
     "id": "console:change-kernel",
-    "label": "Change Kernel\u2026",
+    "label": "Change Kernel…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -988,7 +990,7 @@
   },
   {
     "id": "console:close-and-shutdown",
-    "label": "Close and Shut Down\u2026",
+    "label": "Close and Shut Down…",
     "caption": "",
     "shortcuts": []
   },
@@ -1192,7 +1194,7 @@
   },
   {
     "id": "console:restart-kernel",
-    "label": "Restart Kernel\u2026",
+    "label": "Restart Kernel…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -1387,8 +1389,8 @@
   },
   {
     "id": "debugger:restart-debug",
-    "label": "Restart Kernel and Debug\u2026",
-    "caption": "Restart Kernel and Debug\u2026",
+    "label": "Restart Kernel and Debug…",
+    "caption": "Restart Kernel and Debug…",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -1588,13 +1590,13 @@
   },
   {
     "id": "docmanager:rename",
-    "label": "Rename\u2026",
+    "label": "Rename…",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "docmanager:restore-checkpoint",
-    "label": "Revert  to Checkpoint\u2026",
+    "label": "Revert  to Checkpoint…",
     "caption": "Revert contents to previous checkpoint",
     "shortcuts": [],
     "args": {
@@ -1605,7 +1607,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as\u2026\" instead",
+    "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
     "shortcuts": [
       "Ctrl S"
     ],
@@ -1635,7 +1637,7 @@
   },
   {
     "id": "docmanager:save-as",
-    "label": "Save  As\u2026",
+    "label": "Save  As…",
     "caption": "Save with new path",
     "shortcuts": [
       "Ctrl Shift S"
@@ -1695,7 +1697,7 @@
   },
   {
     "id": "documentsearch:start",
-    "label": "Find\u2026",
+    "label": "Find…",
     "caption": "",
     "shortcuts": [
       "Ctrl F"
@@ -1712,7 +1714,7 @@
   },
   {
     "id": "documentsearch:startWithReplace",
-    "label": "Find and Replace\u2026",
+    "label": "Find and Replace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -1755,7 +1757,7 @@
   },
   {
     "id": "editmenu:go-to-line",
-    "label": "Go to Line\u2026",
+    "label": "Go to Line…",
     "caption": "",
     "shortcuts": []
   },
@@ -1965,13 +1967,13 @@
   },
   {
     "id": "filebrowser:open-path",
-    "label": "Open from Path\u2026",
+    "label": "Open from Path…",
     "caption": "Open from path",
     "shortcuts": []
   },
   {
     "id": "filebrowser:open-url",
-    "label": "Open from URL\u2026",
+    "label": "Open from URL…",
     "caption": "Open from URL",
     "shortcuts": []
   },
@@ -2246,7 +2248,7 @@
   },
   {
     "id": "fileeditor:find",
-    "label": "Find\u2026",
+    "label": "Find…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -2256,7 +2258,7 @@
   },
   {
     "id": "fileeditor:go-to-line",
-    "label": "Go to Line\u2026",
+    "label": "Go to Line…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -2816,8 +2818,18 @@
     }
   },
   {
+    "id": "jupyterlab-translation:zh_CN",
+    "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "caption": "Change interface language to Chinese (Simplified, China) - 中文 (简体, 中国)",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "kernelmenu:change",
-    "label": "Change Kernel\u2026",
+    "label": "Change Kernel…",
     "caption": "",
     "shortcuts": []
   },
@@ -2848,7 +2860,7 @@
   },
   {
     "id": "kernelmenu:restart",
-    "label": "Restart Kernel\u2026",
+    "label": "Restart Kernel…",
     "caption": "Restart the kernel",
     "shortcuts": [
       "0",
@@ -2857,7 +2869,7 @@
   },
   {
     "id": "kernelmenu:restart-and-clear",
-    "label": "Restart Kernel and Clear\u2026",
+    "label": "Restart Kernel and Clear…",
     "caption": "",
     "shortcuts": []
   },
@@ -2869,7 +2881,7 @@
   },
   {
     "id": "kernelmenu:shutdownAll",
-    "label": "Shut Down All Kernels\u2026",
+    "label": "Shut Down All Kernels…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3185,7 +3197,7 @@
   },
   {
     "id": "notebook:change-kernel",
-    "label": "Change Kernel\u2026",
+    "label": "Change Kernel…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3215,7 +3227,7 @@
   },
   {
     "id": "notebook:close-and-shutdown",
-    "label": "Close and Shut Down Notebook\u2026",
+    "label": "Close and Shut Down Notebook…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3887,7 +3899,7 @@
   },
   {
     "id": "notebook:restart-and-run-to-selected",
-    "label": "Restart Kernel and Run up to Selected Cell\u2026",
+    "label": "Restart Kernel and Run up to Selected Cell…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -3902,7 +3914,7 @@
   },
   {
     "id": "notebook:restart-clear-output",
-    "label": "Restart Kernel and Clear Outputs of All Cells\u2026",
+    "label": "Restart Kernel and Clear Outputs of All Cells…",
     "caption": "Restart the kernel and clear all outputs of all cells",
     "shortcuts": [],
     "args": {
@@ -3912,7 +3924,7 @@
   },
   {
     "id": "notebook:restart-kernel",
-    "label": "Restart Kernel\u2026",
+    "label": "Restart Kernel…",
     "caption": "Restart the kernel",
     "shortcuts": [],
     "args": {
@@ -3927,7 +3939,7 @@
   },
   {
     "id": "notebook:restart-run-all",
-    "label": "Restart Kernel and Run All Cells\u2026",
+    "label": "Restart Kernel and Run All Cells…",
     "caption": "Restart the kernel and run all cells",
     "shortcuts": [],
     "args": {
@@ -4932,7 +4944,7 @@
   },
   {
     "id": "workspace-ui:clone",
-    "label": "Clone Workspace\u2026",
+    "label": "Clone Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -4947,7 +4959,7 @@
   },
   {
     "id": "workspace-ui:create-new",
-    "label": "Create New Workspace\u2026",
+    "label": "Create New Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -4962,7 +4974,7 @@
   },
   {
     "id": "workspace-ui:delete",
-    "label": "Delete Workspace\u2026",
+    "label": "Delete Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -4977,7 +4989,7 @@
   },
   {
     "id": "workspace-ui:export",
-    "label": "Export Workspace\u2026",
+    "label": "Export Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -4992,7 +5004,7 @@
   },
   {
     "id": "workspace-ui:import",
-    "label": "Import Workspace\u2026",
+    "label": "Import Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -5002,7 +5014,7 @@
   },
   {
     "id": "workspace-ui:open",
-    "label": "Open Workspace\u2026",
+    "label": "Open Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -5017,7 +5029,7 @@
   },
   {
     "id": "workspace-ui:rename",
-    "label": "Rename Workspace\u2026",
+    "label": "Rename Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -5032,7 +5044,7 @@
   },
   {
     "id": "workspace-ui:reset",
-    "label": "Reset Workspace\u2026",
+    "label": "Reset Workspace…",
     "caption": "",
     "shortcuts": [],
     "args": {
@@ -5057,7 +5069,7 @@
   },
   {
     "id": "workspace-ui:save-as",
-    "label": "Save Current Workspace As\u2026",
+    "label": "Save Current Workspace As…",
     "caption": "",
     "shortcuts": [],
     "args": {
