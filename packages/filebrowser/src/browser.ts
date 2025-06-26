@@ -436,8 +436,8 @@ export class FileBrowser extends SidePanel {
   /**
    * Select all listing items.
    */
-  selectAll(): void {
-    this.listing.selectAll();
+  selectAll(): Promise<void> {
+    return this.listing.selectAll();
   }
 
   /**

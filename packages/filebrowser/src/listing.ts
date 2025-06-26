@@ -524,7 +524,7 @@ export class DirListing extends Widget {
   /**
    * Select all listing items in the current directory.
    */
-  selectAll(): void {
+  async selectAll(): Promise<void> {
     const items = this._model.items();
     const newSelection: { [key: string]: boolean } = {};
 
