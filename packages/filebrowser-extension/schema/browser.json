@@ -180,6 +180,11 @@
       "command": "filebrowser:duplicate",
       "keys": ["Accel D"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:select-all",
+      "keys": ["Accel A"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {
