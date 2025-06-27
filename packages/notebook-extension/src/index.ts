@@ -130,6 +130,7 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
+import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
@@ -2173,9 +2174,21 @@ function getCurrent(
   shell: JupyterFrontEnd.IShell,
   args: ReadonlyPartialJSONObject
 ): NotebookPanel | null {
-  const widget = args[SemanticCommand.WIDGET]
-    ? tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null
-    : tracker.currentWidget;
+  let widget: NotebookPanel | null = null;
+
+  // Check for panelId in args (used by cell toolbars)
+  if (args[CellBarExtension.WIDGET_ID_ARG]) {
+    widget =
+      tracker.find(
+        panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]
+      ) ?? null;
+  } else if (args[SemanticCommand.WIDGET]) {
+    widget =
+      tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null;
+  } else {
+    widget = tracker.currentWidget;
+  }
+
   const activate = args['activate'] !== false;
 
   if (activate && widget) {

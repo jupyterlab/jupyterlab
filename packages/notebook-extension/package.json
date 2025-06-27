@@ -39,6 +39,7 @@
     "@jupyter/ydoc": "^3.0.4",
     "@jupyterlab/application": "^4.5.0-alpha.1",
     "@jupyterlab/apputils": "^4.6.0-alpha.1",
+    "@jupyterlab/cell-toolbar": "^4.5.0-alpha.1",
     "@jupyterlab/cells": "^4.5.0-alpha.1",
     "@jupyterlab/codeeditor": "^4.5.0-alpha.1",
     "@jupyterlab/codemirror": "^4.5.0-alpha.1",
