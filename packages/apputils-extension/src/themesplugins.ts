@@ -132,12 +132,13 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             theme: {
               type: 'string',
-              description: 'The theme name to switch to'
+              description: trans.__('The theme name to switch to')
             },
             isPalette: {
               type: 'boolean',
-              description:
+              description: trans.__(
                 'Whether the command is being called from the palette'
+              )
             }
           },
           required: ['theme']
@@ -174,12 +175,13 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             theme: {
               type: 'string',
-              description: 'The preferred light theme name'
+              description: trans.__('The preferred light theme name')
             },
             isPalette: {
               type: 'boolean',
-              description:
+              description: trans.__(
                 'Whether the command is being called from the palette'
+              )
             }
           },
           required: ['theme']
@@ -212,12 +214,13 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             theme: {
               type: 'string',
-              description: 'The preferred dark theme name'
+              description: trans.__('The preferred dark theme name')
             },
             isPalette: {
               type: 'boolean',
-              description:
+              description: trans.__(
                 'Whether the command is being called from the palette'
+              )
             }
           },
           required: ['theme']
@@ -245,8 +248,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             isPalette: {
               type: 'boolean',
-              description:
+              description: trans.__(
                 'Whether the command is being called from the palette'
+              )
             }
           }
         }
@@ -278,15 +282,15 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             enabled: {
               type: 'boolean',
-              description: 'Whether the font is available and enabled'
+              description: trans.__('Whether the font is available and enabled')
             },
             font: {
               type: 'string',
-              description: 'The font name'
+              description: trans.__('The font name')
             },
             key: {
               type: 'string',
-              description: 'The CSS property key to modify'
+              description: trans.__('The CSS property key to modify')
             }
           },
           required: ['enabled', 'font', 'key']
@@ -317,8 +321,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             key: {
               type: 'string',
-              description:
+              description: trans.__(
                 'The font size key to increase (e.g., "code-font-size", "content-font-size1", "ui-font-size1")'
+              )
             }
           },
           required: ['key']
@@ -346,8 +351,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           properties: {
             key: {
               type: 'string',
-              description:
+              description: trans.__(
                 'The font size key to decrease (e.g., "code-font-size", "content-font-size1", "ui-font-size1")'
+              )
             }
           },
           required: ['key']

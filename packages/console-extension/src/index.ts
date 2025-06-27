@@ -877,11 +877,11 @@ async function activateConsole(
         properties: {
           toolbar: {
             type: 'boolean',
-            description: 'Whether executed from toolbar'
+            description: trans.__('Whether executed from toolbar')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -905,11 +905,11 @@ async function activateConsole(
         properties: {
           toolbar: {
             type: 'boolean',
-            description: 'Whether executed from toolbar'
+            description: trans.__('Whether executed from toolbar')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -933,11 +933,11 @@ async function activateConsole(
         properties: {
           toolbar: {
             type: 'boolean',
-            description: 'Whether executed from toolbar'
+            description: trans.__('Whether executed from toolbar')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -960,7 +960,7 @@ async function activateConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -983,7 +983,7 @@ async function activateConsole(
         properties: {
           text: {
             type: 'string',
-            description: 'The text to replace the selection with'
+            description: trans.__('The text to replace the selection with')
           },
           activate: {
             type: 'boolean',
@@ -1011,7 +1011,7 @@ async function activateConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -1038,11 +1038,11 @@ async function activateConsole(
         properties: {
           toolbar: {
             type: 'boolean',
-            description: 'Whether executed from toolbar'
+            description: trans.__('Whether executed from toolbar')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }

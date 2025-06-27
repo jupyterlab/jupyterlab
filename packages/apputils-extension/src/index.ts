@@ -683,10 +683,10 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
               items: {
                 type: 'string'
               },
-              description: 'Array of command IDs to attempt to run'
+              description: trans.__('Array of command IDs to attempt to run')
             },
             args: {
-              description: 'Arguments to pass to the commands'
+              description: trans.__('Arguments to pass to the commands')
             }
           },
           required: ['commands']
@@ -719,14 +719,16 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
               items: {
                 type: 'string'
               },
-              description: 'Array of command IDs to run'
+              description: trans.__('Array of command IDs to run')
             },
             args: {
-              description: 'Arguments to pass to the commands'
+              description: trans.__('Arguments to pass to the commands')
             },
             errorIfNotEnabled: {
               type: 'boolean',
-              description: 'Whether to log an error if a command is not enabled'
+              description: trans.__(
+                'Whether to log an error if a command is not enabled'
+              )
             }
           }
         }

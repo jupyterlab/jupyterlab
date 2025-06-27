@@ -1174,7 +1174,7 @@ function addCommands(
           },
           dontShowBrowser: {
             type: 'boolean',
-            description: 'Whether to avoid showing the browser'
+            description: trans.__('Whether to avoid showing the browser')
           }
         }
       }

@@ -554,7 +554,9 @@ export namespace Commands {
           properties: {
             force: {
               type: 'boolean',
-              description: 'Force enable/disable auto closing brackets'
+              description: trans.__(
+                'Force enable/disable auto closing brackets'
+              )
             }
           }
         }
@@ -622,11 +624,11 @@ export namespace Commands {
           properties: {
             theme: {
               type: 'string',
-              description: 'The theme name to change to'
+              description: trans.__('The theme name to change to')
             },
             displayName: {
               type: 'string',
-              description: 'The display name of the theme'
+              description: trans.__('The display name of the theme')
             }
           }
         }
