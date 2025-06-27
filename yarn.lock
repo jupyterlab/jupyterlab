@@ -4312,6 +4312,7 @@ __metadata:
     "@jupyter/ydoc": ^3.0.4
     "@jupyterlab/application": ^4.4.3
     "@jupyterlab/apputils": ^4.5.3
+    "@jupyterlab/cell-toolbar": ^4.4.3
     "@jupyterlab/cells": ^4.4.3
     "@jupyterlab/codeeditor": ^4.4.3
     "@jupyterlab/codemirror": ^4.4.3
