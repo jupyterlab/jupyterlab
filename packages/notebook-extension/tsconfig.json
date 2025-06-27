@@ -13,6 +13,9 @@
       "path": "../apputils"
     },
     {
+      "path": "../cell-toolbar"
+    },
+    {
       "path": "../cells"
     },
     {
