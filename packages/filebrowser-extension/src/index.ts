@@ -1113,7 +1113,6 @@ function addCommands(
         return widget.selectAll();
       }
     },
-    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Select All')
   });
 
