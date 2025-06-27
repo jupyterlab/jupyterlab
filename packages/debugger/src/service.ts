@@ -752,8 +752,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get the current thread from the model.
    */
   private _currentThread(): number {
-    // TODO: ask the model for the current thread ID
-    return 1;
+    return this._model.stoppedThreads.values().next().value ?? 1;
   }
 
   /**
