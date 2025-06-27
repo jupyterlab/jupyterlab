@@ -104,6 +104,39 @@ describe('@jupyterlab/hub-extension', () => {
       await commandPromise;
     });
 
+    it('should open the spawn URL in a new window if there is an error from the iframe', async () => {
+      const createElement = document.createElement;
+      jest.spyOn(document, 'createElement').mockImplementation(elementType => {
+        let element = createElement.call(document, elementType);
+        if (elementType === 'iframe') {
+          jest.spyOn(element, 'contentWindow', 'get').mockImplementation(() => {
+            throw new Error('Mocked iframe navigation error');
+          });
+        }
+        return element;
+      });
+
+      let commands = new CommandRegistry();
+      void activateHubExtension(commands, {
+        hubPrefix,
+        hubUser
+      });
+
+      const commandPromise = commands.execute(CommandIDs.restart);
+      await waitForDialog(); // So that we can get the iframe
+      const dialog = document.getElementsByClassName('jp-Dialog')[0];
+      const iframe = dialog.querySelector('iframe');
+      iframe?.dispatchEvent(new Event('load')); // Triggers an error
+      await commandPromise; // Wait for dialog to close and navigation
+
+      expect(windowOpenSpy).toHaveBeenCalledWith(
+        `${hubPrefix}/spawn`,
+        '_blank'
+      );
+
+      document.createElement = createElement;
+    });
+
     it('should set correct hub home URL', async () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {

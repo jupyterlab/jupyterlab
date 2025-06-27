@@ -95,10 +95,13 @@ function activateHubExtension(
               dialog?.close();
             }
           } else {
-            console.log('Could not get location of iframe');
+            throw Error('Could not get location of iframe');
           }
         } catch (e) {
-          console.log('Error checking on iframe navigation:', e);
+          console.warn('Error checking on iframe navigation:', e);
+          console.warn('Falling back to spawning in new window.');
+          window.open(restartUrl, '_blank');
+          dialog?.close();
         }
       };
       iframe.addEventListener('load', onIframeNavigate);
