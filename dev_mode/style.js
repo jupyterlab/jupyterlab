@@ -3,6 +3,7 @@
 
 import '@jupyterlab/application-extension/style/index.js';
 import '@jupyterlab/apputils-extension/style/index.js';
+import '@jupyterlab/audio-extension/style/index.js';
 import '@jupyterlab/cell-toolbar-extension/style/index.js';
 import '@jupyterlab/celltags-extension/style/index.js';
 import '@jupyterlab/codemirror-extension/style/index.js';
@@ -45,4 +46,5 @@ import '@jupyterlab/tooltip-extension/style/index.js';
 import '@jupyterlab/translation-extension/style/index.js';
 import '@jupyterlab/ui-components-extension/style/index.js';
 import '@jupyterlab/vega5-extension/style/index.js';
+import '@jupyterlab/video-extension/style/index.js';
 import '@jupyterlab/workspaces-extension/style/index.js';
