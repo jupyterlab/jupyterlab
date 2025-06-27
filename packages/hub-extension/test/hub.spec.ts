@@ -2,9 +2,17 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { acceptDialog, waitForDialog } from '@jupyterlab/testing';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import extensions, { CommandIDs } from '@jupyterlab/hub-extension';
+
+async function getDialogIframeURL() {
+  await waitForDialog();
+  const dialog = document.getElementsByClassName('jp-Dialog')[0];
+  const iframe = dialog.querySelector('iframe');
+  return new URL(iframe?.src || '');
+}
 
 describe('@jupyterlab/hub-extension', () => {
   // Mock path parameters
@@ -73,11 +81,12 @@ describe('@jupyterlab/hub-extension', () => {
         hubServerName
       });
 
-      await commands.execute(CommandIDs.restart);
-      expect(windowOpenSpy).toHaveBeenCalledWith(
-        `${hubPrefix}/spawn/${hubUser}/${hubServerName}`,
-        '_blank'
+      commands.execute(CommandIDs.restart);
+      const url = await getDialogIframeURL();
+      expect(url.pathname).toBe(
+        `${hubPrefix}/spawn/${hubUser}/${hubServerName}`
       );
+      await acceptDialog();
     });
 
     it('should set spawn URL for default server when hubServerName is empty', async () => {
@@ -87,11 +96,10 @@ describe('@jupyterlab/hub-extension', () => {
         hubUser
       });
 
-      await commands.execute(CommandIDs.restart);
-      expect(windowOpenSpy).toHaveBeenCalledWith(
-        `${hubPrefix}/spawn`,
-        '_blank'
-      );
+      commands.execute(CommandIDs.restart);
+      const url = await getDialogIframeURL();
+      expect(url.pathname).toBe(`${hubPrefix}/spawn`);
+      await acceptDialog();
     });
 
     it('should set correct hub home URL', async () => {
