@@ -8,12 +8,15 @@
  */
 
 import {
+  ConfigSection,
+  ConfigSectionManager,
   ConnectionStatus,
   Contents,
   ContentsManager,
   Drive,
   Event,
   EventManager,
+  IConfigSectionManager,
   IConnectionStatus,
   IContentsManager,
   IDefaultDrive,
@@ -52,9 +55,29 @@ import {
 import type { IPlugin } from '@lumino/coreutils';
 
 /**
+ * Config section manager plugin.
+ */
+const configSectionManager: IPlugin<null, ConfigSection.IManager> = {
+  id: '@jupyterlab/services-extension:config-section-manager',
+  autoStart: true,
+  provides: IConfigSectionManager,
+  optional: [IServerSettings],
+  description: 'Provides the config section manager.',
+  activate: (
+    _: null,
+    serverSettings: ServerConnection.ISettings | undefined
+  ) => {
+    const manager = new ConfigSectionManager({ serverSettings });
+    // Set the config section manager for the global ConfigSection.
+    ConfigSection._setConfigSectionManager(manager);
+    return manager;
+  }
+};
+
+/**
  * The default connection status provider.
  */
-export const connectionStatus: IPlugin<null, IConnectionStatus> = {
+const connectionStatusPlugin: IPlugin<null, IConnectionStatus> = {
   id: '@jupyterlab/services-extension:connection-status',
   autoStart: true,
   provides: IConnectionStatus,
@@ -110,12 +133,18 @@ const eventManagerPlugin: ServiceManagerPlugin<Event.IManager> = {
   description: 'The event manager plugin.',
   autoStart: true,
   provides: IEventManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Event.IManager => {
-    return new EventManager({ serverSettings });
+    return new EventManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -127,12 +156,18 @@ const kernelManagerPlugin: ServiceManagerPlugin<Kernel.IManager> = {
   description: 'The kernel manager plugin.',
   autoStart: true,
   provides: IKernelManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Kernel.IManager => {
-    return new KernelManager({ serverSettings });
+    return new KernelManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -144,12 +179,18 @@ const kernelSpecManagerPlugin: ServiceManagerPlugin<KernelSpec.IManager> = {
   description: 'The kernel spec manager plugin.',
   autoStart: true,
   provides: IKernelSpecManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): KernelSpec.IManager => {
-    return new KernelSpecManager({ serverSettings });
+    return new KernelSpecManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -179,13 +220,20 @@ const sessionManagerPlugin: ServiceManagerPlugin<Session.IManager> = {
   autoStart: true,
   provides: ISessionManager,
   requires: [IKernelManager],
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
     kernelManager: Kernel.IManager,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Session.IManager => {
-    return new SessionManager({ kernelManager, serverSettings });
+    return new SessionManager({
+      kernelManager,
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -214,12 +262,18 @@ const terminalManagerPlugin: ServiceManagerPlugin<Terminal.IManager> = {
   description: 'The terminal manager plugin.',
   autoStart: true,
   provides: ITerminalManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Terminal.IManager => {
-    return new TerminalManager({ serverSettings });
+    return new TerminalManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -231,12 +285,18 @@ const userManagerPlugin: ServiceManagerPlugin<User.IManager> = {
   description: 'The user manager plugin.',
   autoStart: true,
   provides: IUserManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): User.IManager => {
-    return new UserManager({ serverSettings });
+    return new UserManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -331,6 +391,8 @@ const serviceManagerPlugin: ServiceManagerPlugin<ServiceManager.IManager> = {
 };
 
 export default [
+  configSectionManager,
+  connectionStatusPlugin,
   contentsManagerPlugin,
   defaultDrivePlugin,
   eventManagerPlugin,

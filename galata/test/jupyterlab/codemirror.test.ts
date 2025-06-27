@@ -35,7 +35,7 @@ test.describe('CodeMirror extensions', () => {
 
     await page.getByRole('tab', { name: DEFAULT_NAME }).waitFor();
 
-    const editor = page.getByRole('region', { name: 'notebook content' });
+    const editor = page.getByRole('region', { name: 'main area content' });
     await editor.getByRole('textbox').fill(RULERS_CONTENT);
 
     expect(await editor.screenshot()).toMatchSnapshot('codemirror-rulers.png');

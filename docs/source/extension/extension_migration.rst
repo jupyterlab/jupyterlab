@@ -6,6 +6,35 @@
 Extension Migration Guide
 =========================
 
+JupyterLab 4.4 to 4.5
+---------------------
+
+File Browser updates
+^^^^^^^^^^^^^^^^^^^^
+
+The file browser now emits a ``selectionChanged`` signal when the selected files and folders change.
+
+If you maintain an extension which implements a subclass of ``DirListing`` that changes selection, it is recommended to
+emit the ``selectionChanged`` signal when the selection changes. This will ensure that any listeners to the
+``selectionChanged`` signal are notified of the change.
+
+API updates
+^^^^^^^^^^^
+
+- The ``NbConvert.IManager`` interface was fixed to not require classes implementing the interface to provide a
+  concrete ``NbConvertManager`` class. In addition, this interface now includes an optional ``exportAs`` method
+  to export (and optionally download) a notebook to a specific format.
+- The ``NbConvertManager.IExportFormats`` interface was moved to the ``NbConvert`` namespace. You should now use ``NbConvert.IExportFormats`` instead of ``NbConvertManager.IExportFormats``.
+  ``NbConvertManager.IExportFormats`` was however kept for backward compatibility.
+
+
+``extra_labextensions_path`` ordering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The default labextension paths now take precedence over those found in ``extra_labextensions_path``. In other words,
+``BaseExtensionApp.labextensions_path`` now lists the extensions from ``LabApp.labextensions_path``
+before those found in ``extra_labextensions_path``.
+
 JupyterLab 4.3 to 4.4
 ---------------------
 
@@ -97,11 +126,40 @@ the updated rendering logic.
 This change improves both the rendering performance and the maintainability of extensions
 using the ``GroupItem`` component.
 
+API updates
+^^^^^^^^^^^
+
+- The ``ConfigSection.create(options: ConfigSection.IOptions)`` function has been deprecated.
+   This was previously exposed as a helper function to create config sections on the Jupyter Server.
+   Instead, require the ``IConfigSectionManager`` token in a plugin, and use then ``create`` method to create a config section:
+
+.. code-block:: ts
+
+   const plugin: JupyterFrontEndPlugin<void> = {
+     id: 'example',
+     requires: [IConfigSectionManager],
+     activate: (
+       app: JupyterFrontEnd,
+       configSectionManager: ConfigSection.IManager
+     ): void => {
+        const section = configSectionManager.create({ name: 'notebook' });
+     }
+   };
+
 Plugins
 ^^^^^^^
 
+- ``@jupyterlab/application-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/application:mimedocument`` plugin id has been renamed to ``@jupyterlab/application-extension:mimedocument``
+- ``@jupyterlab/help-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/help-extension:licences`` plugin id has been moved to the ``@jupyterlab/apputils-extension`` extension,
+     and is now split between ``@jupyterlab/apputils-extension:licenses-client`` and ``@jupyterlab/apputils-extension:licenses-plugin``
+- ``@jupyterlab/lsp-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/lsp:ILSPCodeExtractorsManager`` plugin id has been renamed to ``@jupyterlab/lsp-extension:code-extractor-manager``
 - ``@jupyterlab/translation-extension`` from 4.3 to 4.4
    * The ``@jupyterlab/translation:translator`` plugin id has been renamed to ``@jupyterlab/translation-extension:translator``
+- ``@jupyterlab/workspaces-extension`` from 4.3 to 4.4
+   * The ``@jupyterlab/workspaces:commands`` plugin id has been renamed to ``@jupyterlab/workspaces-extension:commands``
 
 JupyterLab 4.2 to 4.3
 ---------------------

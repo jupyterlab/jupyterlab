@@ -135,8 +135,8 @@ export namespace ToolbarItems {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: cutIcon,
-      onClick: () => {
-        NotebookActions.cut(panel.content);
+      onClick: async (): Promise<void> => {
+        await NotebookActions.cutToSystemClipboard(panel.content);
       },
       tooltip: trans.__('Cut the selected cells')
     });
@@ -155,8 +155,8 @@ export namespace ToolbarItems {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: copyIcon,
-      onClick: () => {
-        NotebookActions.copy(panel.content);
+      onClick: async (): Promise<void> => {
+        await NotebookActions.copyToSystemClipboard(panel.content);
       },
       tooltip: trans.__('Copy the selected cells')
     });
@@ -175,8 +175,8 @@ export namespace ToolbarItems {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: pasteIcon,
-      onClick: () => {
-        NotebookActions.paste(panel.content);
+      onClick: async (): Promise<void> => {
+        await NotebookActions.pasteFromSystemClipboard(panel.content);
       },
       tooltip: trans.__('Paste cells from the clipboard')
     });

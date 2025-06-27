@@ -841,12 +841,6 @@ function addCommands(
 
   const caption = () => {
     if (shell.currentWidget) {
-      const context = docManager.contextForWidget(shell.currentWidget);
-      if (context?.model.collaborative) {
-        return trans.__(
-          'In collaborative mode, the document is saved automatically after every change'
-        );
-      }
       if (!isWritable()) {
         return trans.__(
           `Document is read-only. "Save" is disabled; use "Save as…" instead`
@@ -888,10 +882,7 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-          if (
-            !context.contentsModel?.writable &&
-            !context.model.collaborative
-          ) {
+          if (!context.contentsModel?.writable) {
             let type = (args._luminoEvent as ReadonlyPartialJSONObject)?.type;
             if (args._luminoEvent && type === 'keybinding') {
               readonlyNotification(context.path);
@@ -916,12 +907,12 @@ function addCommands(
           ) {
             const result = await InputDialog.getText({
               title: trans.__('Rename file'),
-              okLabel: trans.__('Rename'),
+              okLabel: trans.__('Rename and Save'),
               placeholder: trans.__('File name'),
               text: oldName,
               selectionRange: oldName.length - PathExt.extname(oldName).length,
               checkbox: {
-                label: trans.__('Do not ask me again.'),
+                label: trans.__('Do not ask for rename on first save.'),
                 caption: trans.__(
                   'If checked, you will not be asked to rename future untitled files when saving them.'
                 )

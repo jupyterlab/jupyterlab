@@ -1180,7 +1180,7 @@ class _AppHandler:
         # copy disabled onto lockedExtensions, ensuring the mapping format
         disabled = page_config.get("disabledExtensions", {})
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
         page_config["lockedExtensions"] = disabled
         write_page_config(page_config, level=level)
         return True
@@ -1310,13 +1310,13 @@ class _AppHandler:
         # handle disabledExtensions specified as a list (jupyterlab_server < 2.10)
         # see https://github.com/jupyterlab/jupyterlab_server/pull/192 for more info
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
 
         info["disabled"] = disabled
 
         locked = page_config.get("lockedExtensions", {})
         if isinstance(locked, list):
-            locked = {extension: True for extension in locked}
+            locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
         disabled_core = []
@@ -1738,7 +1738,7 @@ class _AppHandler:
 
         error_accumulator = {}
 
-        ext_dirs = {p: False for p in self.labextensions_path}
+        ext_dirs = dict.fromkeys(self.labextensions_path, False)
         for value in info["federated_extensions"].values():
             ext_dirs[value["ext_dir"]] = True
 

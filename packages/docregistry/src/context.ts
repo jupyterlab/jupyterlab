@@ -227,7 +227,7 @@ export class Context<
   /**
    * Whether the document can be saved via the Contents API.
    */
-  protected get canSave(): boolean {
+  get canSave(): boolean {
     return !!(this._contentsModel?.writable && !this._model.collaborative);
   }
 
@@ -418,6 +418,11 @@ export class Context<
     change: Contents.IChangedArgs
   ): void {
     if (change.type === 'save' && this._model.collaborative) {
+      // Skip if the change isn't related to current file.
+      if (this._contentsModel?.path !== change.newValue?.path) {
+        return;
+      }
+
       // Update the contents model with the new values provided on save.
       // This is needed for save operations performed on the server-side
       // by the collaborative drive which needs to update the `hash`
@@ -481,12 +486,11 @@ export class Context<
   private _updateContentsModel(
     model: Contents.IModel | Omit<Contents.IModel, 'content'>
   ): void {
-    const writable = model.writable && !this._model.collaborative;
     const newModel: Omit<Contents.IModel, 'content'> = {
       path: model.path,
       name: model.name,
       type: model.type,
-      writable,
+      writable: model.writable,
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
@@ -600,13 +604,6 @@ export class Context<
 
     try {
       await this._manager.ready;
-      if (this._model.collaborative) {
-        // Files cannot be saved in collaborative mode. The "save" command
-        // is disabled in the UI, but if the user tries to save anyway, act
-        // as though it succeeded.
-        this._saveState.emit('completed');
-        return Promise.resolve();
-      }
 
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
@@ -758,9 +755,11 @@ export class Context<
           );
           return this._raiseConflict(model, options);
         }
-
         return this._manager.contents
-          .save(path, options)
+          .save(path, {
+            ...options,
+            contentProviderId: this._contentProviderId
+          })
           .then(async contentsModel => {
             const model = await this._manager.contents.get(path, {
               content: false,

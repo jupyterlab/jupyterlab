@@ -15,6 +15,9 @@ import { IModel, isAvailable } from './restapi';
 export { IModel, isAvailable };
 
 export namespace ITerminal {
+  /**
+   * The instantiation options for a terminal session.
+   */
   export interface IOptions {
     /**
      * The terminal name.
@@ -90,6 +93,11 @@ export namespace ITerminalConnection {
      * The server settings.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The Terminal API client.
+     */
+    terminalAPIClient?: ITerminalAPIClient;
   }
 }
 
@@ -216,3 +224,43 @@ export interface IManager extends IBaseManager {
  *   trying to reconnect.
  */
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
+
+/**
+ * Interface for making requests to the Terminal API.
+ */
+export interface ITerminalAPIClient {
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Whether terminals are available.
+   */
+  readonly isAvailable: boolean;
+
+  /**
+   * Start a new terminal session.
+   *
+   * @param options - The options used to create the terminal.
+   *
+   * @returns A promise that resolves with the session model.
+   */
+  startNew(options?: ITerminal.IOptions): Promise<IModel>;
+
+  /**
+   * List the running terminal sessions.
+   *
+   * @returns A promise that resolves with the list of running session models.
+   */
+  listRunning(): Promise<IModel[]>;
+
+  /**
+   * Shut down a terminal session by name.
+   *
+   * @param name - The name of the target session.
+   *
+   * @returns A promise that resolves when the session is shut down.
+   */
+  shutdown(name: string): Promise<void>;
+}

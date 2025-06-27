@@ -4,8 +4,11 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
 import {
+  DEFAULT_LANGUAGE_CODE,
+  DomainData,
   ITranslator,
   ITranslatorConnector,
+  Language,
   TranslationBundle,
   TranslatorConnector
 } from './tokens';
@@ -33,10 +36,13 @@ export class TranslationManager implements ITranslator {
       connector ?? new TranslatorConnector(translationsUrl, serverSettings);
     this._stringsPrefix = stringsPrefix || '';
     this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });
+    this._currentLocale = DEFAULT_LANGUAGE_CODE;
   }
 
   /**
-   * Get the language code of the current locale.
+   * Get the language code (tag) of the current locale.
+   *
+   * It respects BCP47 (RFC5646): https://datatracker.ietf.org/doc/html/rfc5646
    */
   get languageCode(): string {
     return this._currentLocale;
@@ -49,26 +55,29 @@ export class TranslationManager implements ITranslator {
    */
   async fetch(locale: string): Promise<void> {
     this._languageData = await this._connector.fetch({ language: locale });
+    let serverLocale: string | undefined;
     if (this._languageData && locale === 'default') {
       try {
         for (const lang of Object.values(this._languageData.data ?? {})) {
-          this._currentLocale =
+          serverLocale =
             // If the language is provided by the system set up, we need to retrieve the final
             // language. This is done through the `""` entry in `_languageData` that contains
             // language metadata.
-            ((lang as any)['']['language'] as string).replace('_', '-');
+            lang['']['language'];
           break;
         }
       } catch (reason) {
-        this._currentLocale = 'en';
+        // no-op
       }
-    } else {
-      this._currentLocale = locale;
     }
 
+    this._currentLocale = (
+      locale !== 'default' ? locale : serverLocale ?? DEFAULT_LANGUAGE_CODE
+    ).replace('_', '-');
+
     this._domainData = this._languageData?.data ?? {};
-    const message: string = this._languageData?.message;
-    if (message && locale !== 'en') {
+    const message = this._languageData?.message;
+    if (message && this._currentLocale !== DEFAULT_LANGUAGE_CODE) {
       console.warn(message);
     }
   }
@@ -80,7 +89,7 @@ export class TranslationManager implements ITranslator {
    */
   load(domain: string): TranslationBundle {
     if (this._domainData) {
-      if (this._currentLocale == 'en') {
+      if (this._currentLocale == DEFAULT_LANGUAGE_CODE) {
         return this._englishBundle;
       } else {
         domain = normalizeDomain(domain);
@@ -91,13 +100,15 @@ export class TranslationManager implements ITranslator {
             stringsPrefix: this._stringsPrefix
           });
           if (domain in this._domainData) {
-            let metadata = this._domainData[domain][''];
-            if ('plural_forms' in metadata) {
-              metadata.pluralForms = metadata.plural_forms;
-              delete metadata.plural_forms;
-              this._domainData[domain][''] = metadata;
-            }
-            translationBundle.loadJSON(this._domainData[domain], domain);
+            const metadata = this._domainData[domain][''];
+            const harmonizedData = {
+              ...this._domainData[domain],
+              '': {
+                ...metadata,
+                pluralForms: metadata.plural_forms
+              }
+            };
+            translationBundle.loadJSON(harmonizedData, domain);
           }
           this._translationBundles[domain] = translationBundle;
         }
@@ -110,9 +121,9 @@ export class TranslationManager implements ITranslator {
 
   private _connector: ITranslatorConnector;
   private _currentLocale: string;
-  private _domainData: any = {};
+  private _domainData: Record<string, DomainData> = {};
   private _englishBundle: Gettext;
-  private _languageData: any;
+  private _languageData: Language | undefined;
   private _stringsPrefix: string;
-  private _translationBundles: any = {};
+  private _translationBundles: Record<string, TranslationBundle> = {};
 }

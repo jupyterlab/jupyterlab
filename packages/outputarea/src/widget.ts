@@ -119,6 +119,17 @@ export class OutputArea extends Widget {
     ) {
       const output = model.get(i);
       this._insertOutput(i, output);
+      if (output.type === 'stream') {
+        // This is a stream output, follow changes to the text.
+        output.streamText!.changed.connect(
+          (
+            sender: IObservableString,
+            event: IObservableString.IChangedArgs
+          ) => {
+            this._setOutput(i, output);
+          }
+        );
+      }
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
@@ -1177,6 +1188,8 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: KeyboardEvent): void {
+    // Stop bubbling
+    event.stopPropagation();
     if (this._resolved) {
       // Do not handle any more key events if the promise was resolved.
       event.preventDefault();
