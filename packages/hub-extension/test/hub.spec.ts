@@ -81,12 +81,13 @@ describe('@jupyterlab/hub-extension', () => {
         hubServerName
       });
 
-      commands.execute(CommandIDs.restart);
+      const commandPromise = commands.execute(CommandIDs.restart);
       const url = await getDialogIframeURL();
       expect(url.pathname).toBe(
         `${hubPrefix}/spawn/${hubUser}/${hubServerName}`
       );
       await acceptDialog();
+      await commandPromise;
     });
 
     it('should set spawn URL for default server when hubServerName is empty', async () => {
@@ -96,10 +97,11 @@ describe('@jupyterlab/hub-extension', () => {
         hubUser
       });
 
-      commands.execute(CommandIDs.restart);
+      const commandPromise = commands.execute(CommandIDs.restart);
       const url = await getDialogIframeURL();
       expect(url.pathname).toBe(`${hubPrefix}/spawn`);
       await acceptDialog();
+      await commandPromise;
     });
 
     it('should set correct hub home URL', async () => {
