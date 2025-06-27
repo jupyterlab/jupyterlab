@@ -1107,14 +1107,15 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   id: '@jupyterlab/application-extension:tree-resolver',
   description: 'Provides the tree route resolver',
   autoStart: true,
-  requires: [IRouter, ITranslator],
+  requires: [IRouter],
+  optional: [ITranslator],
   provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
-    translator: ITranslator
+    translator: ITranslator | null
   ): JupyterFrontEnd.ITreeResolver => {
-    const trans = translator.load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const { commands } = app;
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
