@@ -1170,7 +1170,7 @@ function addCommands(
         properties: {
           path: {
             type: 'string',
-            description: 'The path to navigate to'
+            description: trans.__('The path to navigate to')
           },
           dontShowBrowser: {
             type: 'boolean',

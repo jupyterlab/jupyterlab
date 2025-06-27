@@ -681,11 +681,11 @@ export namespace Commands {
           properties: {
             line: {
               type: 'number',
-              description: 'The line number to go to (1-indexed)'
+              description: trans.__('The line number to go to (1-indexed)')
             },
             column: {
               type: 'number',
-              description: 'The column number to go to (1-indexed)'
+              description: trans.__('The column number to go to (1-indexed)')
             }
           }
         }
@@ -729,11 +729,11 @@ export namespace Commands {
           properties: {
             name: {
               type: 'string',
-              description: 'The language name to change to'
+              description: trans.__('The language name to change to')
             },
             displayName: {
               type: 'string',
-              description: 'The display name of the language'
+              description: trans.__('The display name of the language')
             }
           }
         }
@@ -761,7 +761,9 @@ export namespace Commands {
           properties: {
             text: {
               type: 'string',
-              description: 'The text to replace the current selection with'
+              description: trans.__(
+                'The text to replace the current selection with'
+              )
             }
           }
         }
@@ -1001,11 +1003,11 @@ export namespace Commands {
           properties: {
             cwd: {
               type: 'string',
-              description: 'The current working directory path'
+              description: trans.__('The current working directory path')
             },
             fileExt: {
               type: 'string',
-              description: 'The file extension for the new file'
+              description: trans.__('The file extension for the new file')
             },
             isPalette: {
               type: 'boolean',
@@ -1014,19 +1016,19 @@ export namespace Commands {
             },
             paletteLabel: {
               type: 'string',
-              description: 'The label to show in the command palette'
+              description: trans.__('The label to show in the command palette')
             },
             launcherLabel: {
               type: 'string',
-              description: 'The label to show in the launcher'
+              description: trans.__('The label to show in the launcher')
             },
             caption: {
               type: 'string',
-              description: 'The caption for the command'
+              description: trans.__('The caption for the command')
             },
             iconName: {
               type: 'string',
-              description: 'The name of the icon to use'
+              description: trans.__('The name of the icon to use')
             }
           }
         }
@@ -1053,7 +1055,7 @@ export namespace Commands {
           properties: {
             cwd: {
               type: 'string',
-              description: 'The current working directory path'
+              description: trans.__('The current working directory path')
             },
             isPalette: {
               type: 'boolean',
@@ -1732,23 +1734,25 @@ export namespace Commands {
           properties: {
             content: {
               type: 'string',
-              description: 'The content to display in the code viewer'
+              description: trans.__('The content to display in the code viewer')
             },
             label: {
               type: 'string',
-              description: 'The label for the code viewer'
+              description: trans.__('The label for the code viewer')
             },
             mimeType: {
               type: 'string',
-              description: 'The MIME type of the content'
+              description: trans.__('The MIME type of the content')
             },
             extension: {
               type: 'string',
-              description: 'The file extension to derive MIME type from'
+              description: trans.__(
+                'The file extension to derive MIME type from'
+              )
             },
             widgetId: {
               type: 'string',
-              description: 'The ID to assign to the widget'
+              description: trans.__('The ID to assign to the widget')
             }
           },
           required: ['content']

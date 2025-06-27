@@ -987,7 +987,7 @@ async function activateConsole(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -1065,7 +1065,7 @@ async function activateConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -1125,19 +1125,19 @@ async function activateConsole(
         properties: {
           path: {
             type: 'string',
-            description: 'The path of the console session'
+            description: trans.__('The path of the console session')
           },
           code: {
             type: 'string',
-            description: 'The code to inject'
+            description: trans.__('The code to inject')
           },
           metadata: {
             type: 'object',
-            description: 'The metadata for the code'
+            description: trans.__('The metadata for the code')
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         },
         required: ['path', 'code']
@@ -1170,7 +1170,7 @@ async function activateConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }
@@ -1193,7 +1193,7 @@ async function activateConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the widget'
+            description: trans.__('Whether to activate the widget')
           }
         }
       }

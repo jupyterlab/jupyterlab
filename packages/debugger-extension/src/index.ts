@@ -484,11 +484,11 @@ const variables: JupyterFrontEndPlugin<void> = {
           properties: {
             frameId: {
               type: 'number',
-              description: 'The frame ID'
+              description: trans.__('The frame ID')
             },
             name: {
               type: 'string',
-              description: 'The name of the variable to render'
+              description: trans.__('The name of the variable to render')
             }
           }
         }

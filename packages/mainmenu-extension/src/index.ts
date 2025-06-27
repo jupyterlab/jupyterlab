@@ -763,7 +763,7 @@ function createTabsMenu(
         properties: {
           id: {
             type: 'string',
-            description: 'The widget id to activate'
+            description: trans.__('The widget id to activate')
           }
         },
         required: ['id']

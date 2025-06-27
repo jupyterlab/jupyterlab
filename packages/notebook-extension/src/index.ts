@@ -1394,11 +1394,15 @@ function activateClonedOutputs(
         properties: {
           path: {
             type: 'string',
-            description: 'The path to the notebook containing the cell'
+            description: trans.__(
+              'The path to the notebook containing the cell'
+            )
           },
           index: {
             type: 'number',
-            description: 'The index of the cell to create an output view for'
+            description: trans.__(
+              'The index of the cell to create an output view for'
+            )
           }
         }
       }
@@ -1441,7 +1445,9 @@ function activateCodeConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the console after creation'
+            description: trans.__(
+              'Whether to activate the console after creation'
+            )
           }
         }
       }
@@ -1476,7 +1482,9 @@ function activateCodeConsole(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the console after creation'
+            description: trans.__(
+              'Whether to activate the console after creation'
+            )
           }
         }
       }
@@ -1834,7 +1842,9 @@ function activateNotebookHandler(
             properties: {
               force: {
                 type: 'boolean',
-                description: 'Force toggling the auto closing brackets setting'
+                description: trans.__(
+                  'Force toggling the auto closing brackets setting'
+                )
               }
             }
           }
@@ -2393,7 +2403,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -2429,7 +2441,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -2465,7 +2479,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -2718,7 +2734,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -2761,7 +2779,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -2934,7 +2954,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -2977,7 +2999,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3023,7 +3047,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3063,7 +3089,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3106,7 +3134,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3138,7 +3168,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3181,7 +3213,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3559,7 +3593,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3614,7 +3650,9 @@ function addCommands(
           },
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3649,7 +3687,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -3796,7 +3836,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -4114,7 +4156,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
@@ -4205,7 +4249,7 @@ function addCommands(
         properties: {
           text: {
             type: 'string',
-            description: 'Text to replace the selection with'
+            description: trans.__('Text to replace the selection with')
           }
         }
       }
@@ -4304,7 +4348,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: 'Whether to activate the notebook after execution'
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }

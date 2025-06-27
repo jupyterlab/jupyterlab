@@ -213,7 +213,7 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
           properties: {
             format: {
               type: 'string',
-              description: 'The report format to use for download'
+              description: trans.__('The report format to use for download')
             },
             noLabel: {
               oneOf: [{ type: 'boolean' }, { type: 'number' }],

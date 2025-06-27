@@ -661,7 +661,7 @@ function addCommands(
           theme: {
             type: 'string',
             enum: ['inherit', 'light', 'dark'],
-            description: 'Terminal theme to set'
+            description: trans.__('Terminal theme to set')
           },
           isPalette: {
             type: 'boolean',
