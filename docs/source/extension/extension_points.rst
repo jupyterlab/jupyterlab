@@ -1110,11 +1110,11 @@ Extension developers can use subshell functionality through the kernel service A
 
 **Communication Settings**
 
-Configure how widget communications use subshells via Settings → Advanced Settings → Kernel:
+Configure how widget `comms <https://jupyter-client.readthedocs.io/en/stable/messaging.html#custom-messages>`__ use subshells via Settings → Advanced Settings → Kernel:
 
-- ``disabled``: No subshells for communications
-- ``perCommTarget``: One subshell per communication target (default)
-- ``perComm``: One subshell per communication (can create many subshells)
+- ``disabled``: No subshells for comms
+- ``perCommTarget``: One subshell per comm target (default)
+- ``perComm``: One subshell per comm (can create many subshells)
 
 For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
 
