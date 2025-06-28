@@ -484,6 +484,37 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.4
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.3...3d687a5e0435ca1df6c85c534ab8f7a6429948ff))
+
+### Bugs fixed
+
+- Fix colors for CodeMirror panels [#17666](https://github.com/jupyterlab/jupyterlab/pull/17666) ([@krassowski](https://github.com/krassowski))
+- Fix cell toolbar enabled status with multiple notebooks [#17625](https://github.com/jupyterlab/jupyterlab/pull/17625) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Create a subshell per target and kernel when using `CommsOverSubshells.PerCommTarget` [#17634](https://github.com/jupyterlab/jupyterlab/pull/17634) ([@ianthomas23](https://github.com/ianthomas23))
+- Prevent memory leak when rendering text stream [#17628](https://github.com/jupyterlab/jupyterlab/pull/17628) ([@krassowski](https://github.com/krassowski))
+- Backport PR #17602 on branch 4.3.x (Fix setting allowed schemes on runtime using `Sanitizer.setAllowedSchemes`) [#17640](https://github.com/jupyterlab/jupyterlab/pull/17640) ([@jtpio](https://github.com/jtpio))
+- Add layout containment on viewport in windowed mode [#17620](https://github.com/jupyterlab/jupyterlab/pull/17620) ([@krassowski](https://github.com/krassowski))
+- Fix selection visibility in terminal while using Dark High Contrast theme [#17618](https://github.com/jupyterlab/jupyterlab/pull/17618) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+
+### Maintenance and upkeep improvements
+
+- [4.4.x] Update documentation snapshots [#17658](https://github.com/jupyterlab/jupyterlab/pull/17658) ([@jtpio](https://github.com/jtpio))
+- Fix terminal visual regression snapshots test failures [#17656](https://github.com/jupyterlab/jupyterlab/pull/17656) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Fix link to zulip and icon in docs [#17639](https://github.com/jupyterlab/jupyterlab/pull/17639) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-05-26&to=2025-06-28&type=c))
+
+[@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-05-26..2025-06-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-05-26..2025-06-28&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-05-26..2025-06-28&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-05-26..2025-06-28&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-05-26..2025-06-28&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-05-26..2025-06-28&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.2...763903ff99eed3bd50f0c9a9081b4f226138d634))
@@ -508,8 +539,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-05-06&to=2025-05-26&type=c))
 
 [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-05-06..2025-05-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-05-06..2025-05-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-05-06..2025-05-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-05-06..2025-05-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-05-06..2025-05-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.2
 
