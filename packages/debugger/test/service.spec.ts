@@ -129,6 +129,31 @@ describe('DebuggerService', () => {
     });
   });
 
+  describe('#pause()', () => {
+    it('should send a pause request including a threadId', async () => {
+      service.session = session;
+      await service.start();
+      const sendRequest = jest.spyOn(service.session, 'sendRequest');
+      await service.pause();
+      expect(sendRequest).toHaveBeenCalledWith(
+        'pause',
+        expect.objectContaining({ threadId: 1 })
+      );
+    });
+
+    it('should use one of the stopped threads for pause if set', async () => {
+      service.session = session;
+      await service.start();
+      service.model.stoppedThreads = new Set([42]);
+      const sendRequest = jest.spyOn(service.session, 'sendRequest');
+      await service.pause();
+      expect(sendRequest).toHaveBeenCalledWith(
+        'pause',
+        expect.objectContaining({ threadId: 42 })
+      );
+    });
+  });
+
   describe('#session', () => {
     it('should emit the sessionChanged signal when setting the session', () => {
       const sessionChangedEvents: (IDebugger.ISession | null)[] = [];
