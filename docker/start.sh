@@ -47,15 +47,15 @@ if [[ $CMD == 'build' ]]; then
     echo "Building docker image"
     build_image
 
-    elif [[ $CMD == 'clean' ]]; then
+elif [[ $CMD == 'clean' ]]; then
     # Stop the dev container if it's running
     stop_contaniner
     docker rmi $IMAGE_TAG --force
 
-    elif [[ $CMD == 'stop' ]]; then
+elif [[ $CMD == 'stop' ]]; then
     stop_contaniner
 
-    elif [[ $CMD == 'dev' || $CMD == 'dev-detach' || $CMD == 'shell' || $CMD == '' ]]; then
+elif [[ $CMD == 'dev' || $CMD == 'dev-detach' || $CMD == 'shell' || $CMD == '' ]]; then
     if test -z "$(docker images -q $IMAGE_TAG)"; then
         echo "Image does not exist, start building!"
         build_image
