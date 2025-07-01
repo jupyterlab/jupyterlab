@@ -811,6 +811,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
             'silent-change'
           );
           break;
+        case 'clear':
+          codeCell.clearOutputs();
+          break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
       }
