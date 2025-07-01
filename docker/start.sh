@@ -35,6 +35,12 @@ ROOT_DIR_MD5=$(stringmd5 $ROOT_DIR)
 IMAGE_TAG="jupyterlab_dev:$ROOT_DIR_MD5"
 DEV_CONTAINER="jupyterlab_dev_container_$ROOT_DIR_MD5"
 
+DOCKER_MAJOR_VERSION=$(docker version --format '{{.Server.Version}}' | cut -d '.' -f 1)
+if [[ "$DOCKER_MAJOR_VERSION" -lt 23 ]]; then
+    echo "Docker major version must be 23 or higher. Current version: $DOCKER_MAJOR_VERSION"
+    exit 1
+fi
+
 build_image () {
     docker build  --build-arg NEW_MAMBA_USER_ID=$USER_ID --build-arg NEW_MAMBA_USER_GID=$GID $ROOT_DIR -f $SCRIPT_DIR/Dockerfile -t $IMAGE_TAG
 }
