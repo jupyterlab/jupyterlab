@@ -38,6 +38,7 @@ function LogConsoleStatusComponent(
   return (
     <GroupItem
       role="button"
+      tabIndex={0}
       spacing={0}
       onClick={props.handleClick}
       onKeyDown={(event: React.KeyboardEvent): void => {

@@ -49,6 +49,8 @@ function EditorSyntaxComponent(
   return (
     <TextItem
       role="button"
+      aria-haspopup
+      tabIndex={0}
       source={props.language}
       onClick={props.handleClick}
       onKeyDown={(event: React.KeyboardEvent): void => {

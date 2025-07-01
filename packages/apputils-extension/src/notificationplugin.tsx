@@ -346,6 +346,8 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
   return (
     <GroupItem
       role="button"
+      tabIndex={0}
+      aria-haspopup
       spacing={HALF_SPACING}
       onClick={() => {
         props.onClick();

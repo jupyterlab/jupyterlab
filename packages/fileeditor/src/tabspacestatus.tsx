@@ -50,6 +50,8 @@ function TabSpaceComponent(
   return (
     <TextItem
       role="button"
+      aria-haspopup
+      tabIndex={0}
       onClick={props.handleClick}
       onKeyDown={(event: React.KeyboardEvent): void => {
         if (event.key === 'Enter' || event.key === ' ') {

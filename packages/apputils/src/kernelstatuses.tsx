@@ -58,6 +58,7 @@ function KernelStatusComponent(
   return (
     <TextItem
       role="button"
+      aria-haspopup
       onClick={props.handleClick}
       onKeyDown={props.handleKeyDown}
       source={`${props.kernelName}${statusText}`}
