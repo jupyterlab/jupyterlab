@@ -681,6 +681,23 @@ describe('cells/model', () => {
         model['onOutputsChange'](null as any, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
       });
+
+      it('should clear the outputs', () => {
+        const model = new CodeCellModel({
+          sharedModel: createStandaloneCell(cell) as ISharedCodeCell
+        });
+        const sharedModel = model.sharedModel as YCodeCell;
+        expect(sharedModel.getOutputs().length).toBe(2);
+        const clearEvent = {
+          type: 'clear',
+          newValues: [],
+          oldValues: [],
+          oldIndex: 0,
+          newIndex: 0
+        } as any;
+        model['onOutputsChange'](null as any, clearEvent);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(0);
+      });
     });
 
     describe('.metadata', () => {
