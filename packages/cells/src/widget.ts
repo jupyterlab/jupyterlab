@@ -2188,6 +2188,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
+
+    this._cachedHeadingText = this.model.sharedModel.getSource();
   }
 
   /**
