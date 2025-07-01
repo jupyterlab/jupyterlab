@@ -320,7 +320,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Cell headings
    *
-   * @deprecated In favour of async {@link getHeadings}
+   * @deprecated Use the asynchronous {@link getHeadings} method instead.
+   * This getter only returns the last cached value.
    */
   get headings(): Cell.IHeading[] {
     return new Array<Cell.IHeading>();
@@ -2230,6 +2231,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
+      this.renderCollapseButtons();
     }
 
     return [...this._headingsCache!];
@@ -2440,7 +2442,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected onContentChanged(): void {
     super.onContentChanged();
-    this._headingsCache = null;
+    const model = this.model;
+    const text = model && model.sharedModel.getSource();
+    // Do not set headingCache to null, if the text has not changed.
+    if (text !== this._cachedHeadingText) {
+      this._cachedHeadingText = text;
+      this._headingsCache = null;
+    }
   }
 
   /**
@@ -2448,7 +2456,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * and for collapsed heading cells render the "expand hidden cells"
    * button.
    */
-  protected renderCollapseButtons(widget: Widget): void {
+  protected renderCollapseButtons(widget?: Widget): void {
     this.node.classList.toggle(
       MARKDOWN_HEADING_COLLAPSED,
       this._headingCollapsed
@@ -2573,6 +2581,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _monitor: ActivityMonitor<ICellModel, void>;
   private _numberChildNodes: number;
   private _prevText = '';
+  private _cachedHeadingText = '';
   private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
