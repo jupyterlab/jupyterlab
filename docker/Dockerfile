@@ -32,7 +32,9 @@ ENV PATH="/home/${MAMBA_USER}/.local/bin:${PATH}"
 
 # Install base dev tools with conda
 RUN --mount=type=cache,target=/jupyterlab/conda-cache,uid=${NEW_MAMBA_USER_ID},gid=${NEW_MAMBA_USER_GID} \
-    CONDA_PKGS_DIRS="/jupyterlab/conda-cache" micromamba install -c nodefaults -c conda-forge -yn base nodejs=20.1 yarn=3 git python=3
+    CONDA_PKGS_DIRS="/jupyterlab/conda-cache" micromamba install -c nodefaults -c conda-forge -yn base nodejs=20.1 yarn=3 git python=3 less vim nano
+
+ENV EDITOR=nano
 
 WORKDIR /home/$MAMBA_USER/jupyterlab_cache
 
