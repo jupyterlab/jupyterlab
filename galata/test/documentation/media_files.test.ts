@@ -20,8 +20,6 @@ test.describe('Media Files', () => {
       }`
     });
 
-    await page.sidebar.setWidth();
-
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
     await page.locator('text=rocket.wav').waitFor();
@@ -45,8 +43,6 @@ test.describe('Media Files', () => {
         border-top: none;
       }`
     });
-
-    await page.sidebar.setWidth();
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
