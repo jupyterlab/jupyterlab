@@ -2233,6 +2233,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
+      this._headingResolved = true;
       this.renderCollapseButtons();
     }
 
@@ -2450,6 +2451,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (text !== this._cachedHeadingText) {
       this._cachedHeadingText = text;
       this._headingsCache = null;
+      this._headingResolved = false;
     }
   }
 
@@ -2577,18 +2579,23 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  get headingsResolved(): boolean {
+    return this._headingResolved;
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _headingCollapsed: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
   private _monitor: ActivityMonitor<ICellModel, void>;
   private _numberChildNodes: number;
   private _prevText = '';
-  private _cachedHeadingText = '';
   private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
   private _showEditorForReadOnlyMarkdown = true;
+  private _cachedHeadingText = '';
+  private _headingResolved: boolean = false;
 }
 
 /**
