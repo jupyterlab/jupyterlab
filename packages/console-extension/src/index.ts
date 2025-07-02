@@ -788,7 +788,24 @@ async function activateConsole(
       },
       isEnabled: isEnabled,
       label: trans.__(`Prompt to ${position}`),
-      icon: args => (args['isPalette'] ? undefined : iconMap[position])
+      icon: args => (args['isPalette'] ? undefined : iconMap[position]),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            activate: {
+              type: 'boolean',
+              description: trans.__('Whether to activate the widget')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is executed from palette'
+              )
+            }
+          }
+        }
+      }
     });
 
     if (palette) {
@@ -831,7 +848,18 @@ async function activateConsole(
       return editor.model.sharedModel.canUndo();
     },
     icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Undo')
+    label: trans.__('Undo'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   /**
@@ -865,7 +893,18 @@ async function activateConsole(
       return editor.model.sharedModel.canRedo();
     },
     icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Redo')
+    label: trans.__('Redo'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.clear, {
@@ -1114,7 +1153,18 @@ async function activateConsole(
         }
       });
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.inject, {
@@ -1321,7 +1371,19 @@ async function activateConsole(
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       }
     },
-    isToggled: args => args['interactionMode'] === interactionMode
+    isToggled: args => args['interactionMode'] === interactionMode,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          interactionMode: {
+            type: 'string',
+            enum: ['notebook', 'terminal'],
+            description: trans.__('The interaction mode for the console')
+          }
+        }
+      }
+    }
   });
 
   return tracker;
@@ -1352,6 +1414,12 @@ function activateConsoleCompleterService(
       if (id) {
         return manager.invoke(id);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1362,6 +1430,12 @@ function activateConsoleCompleterService(
 
       if (id) {
         return manager.select(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });

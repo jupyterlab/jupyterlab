@@ -118,7 +118,18 @@ export async function addKernelRunningSessionManager(
         ]);
       }
     },
-    isEnabled: () => shutdownUnusedEnabled
+    isEnabled: () => shutdownUnusedEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          }
+        }
+      }
+    }
   });
 
   // Add the kernels pane to the running sidebar.
@@ -192,6 +203,17 @@ export async function addKernelRunningSessionManager(
       if (id) {
         return commands.execute('console:create', { kernelPreference: { id } });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('Kernel ID to create console for')
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.kernelNewNotebook, {
@@ -202,6 +224,17 @@ export async function addKernelRunningSessionManager(
       const id = (args.id as string) ?? node?.dataset['context'];
       if (id) {
         return commands.execute('notebook:create-new', { kernelId: id });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('Kernel ID to create notebook for')
+          }
+        }
       }
     }
   });
@@ -222,6 +255,25 @@ export async function addKernelRunningSessionManager(
       }
       const command = type === 'console' ? 'console:open' : 'docmanager:open';
       return commands.execute(command, { path });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('Path to the session to open')
+          },
+          type: {
+            type: 'string',
+            description: trans.__('Type of session (console or notebook)')
+          },
+          name: {
+            type: 'string',
+            description: trans.__('Name of the session')
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.kernelShutDown, {
@@ -232,6 +284,17 @@ export async function addKernelRunningSessionManager(
       const id = (args.id as string) ?? node?.dataset['context'];
       if (id) {
         return kernels.shutdown(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('Kernel ID to shut down')
+          }
+        }
       }
     }
   });

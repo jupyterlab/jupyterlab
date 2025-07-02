@@ -1201,6 +1201,12 @@ function addCommands(
             `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
           );
         });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1265,6 +1271,17 @@ function addLabCommands(
       if (child) {
         widgetOpener.open(child, options);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          options: {
+            type: 'object',
+            description: trans.__('Options for opening the cloned document')
+          }
+        }
+      }
     }
   });
 
@@ -1282,6 +1299,12 @@ function addLabCommands(
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1327,6 +1350,12 @@ function addLabCommands(
           });
         }
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1343,6 +1372,12 @@ function addLabCommands(
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 

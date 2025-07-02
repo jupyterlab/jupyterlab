@@ -809,6 +809,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           path
         });
         return openSource(source);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__('Path to the source file to open')
+            }
+          }
+        }
       }
     });
 
@@ -922,6 +933,12 @@ const main: JupyterFrontEndPlugin<void> = {
             console.debug(data);
           }
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -949,6 +966,12 @@ const main: JupyterFrontEndPlugin<void> = {
           await service.pause();
         }
         commands.notifyCommandChanged(CommandIDs.debugContinue);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -960,6 +983,12 @@ const main: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         await service.restart();
         updateState(app.commands, service);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -970,6 +999,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.next();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -980,6 +1015,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepIn();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -990,6 +1031,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepOut();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -1019,6 +1066,21 @@ const main: JupyterFrontEndPlugin<void> = {
           let filters = result.button.accept ? result.value : null;
           if (filters !== null) {
             await service.pauseOnExceptions(filters);
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'string',
+              description: trans.__('Exception filter to pause on')
+            },
+            description: {
+              type: 'string',
+              description: trans.__('Description of the exception filter')
+            }
           }
         }
       }
@@ -1069,6 +1131,12 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Debugger Panel'),
       execute: () => {
         shell.activateById(sidebar.id);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 

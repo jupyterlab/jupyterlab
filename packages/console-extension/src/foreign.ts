@@ -94,7 +94,18 @@ function activateForeign(
         ?.enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      tracker.currentWidget === shell.currentWidget,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   const notify = () => {

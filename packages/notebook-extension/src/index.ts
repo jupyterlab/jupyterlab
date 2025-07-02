@@ -2112,6 +2112,45 @@ function activateNotebookHandler(
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelId, kernelName);
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          cwd: {
+            type: 'string',
+            description: trans.__(
+              'Current working directory for the new notebook'
+            )
+          },
+          kernelId: {
+            type: 'string',
+            description: trans.__('Kernel ID to use for the new notebook')
+          },
+          kernelName: {
+            type: 'string',
+            description: trans.__('Kernel name to use for the new notebook')
+          },
+          isLauncher: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from launcher'
+            )
+          },
+          isPalette: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from palette'
+            )
+          },
+          isContextMenu: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from context menu'
+            )
+          }
+        }
+      }
     }
   });
 
@@ -2181,6 +2220,17 @@ function activateNotebookCompleterService(
       if (panel && panel.content.activeCell?.model.type === 'code') {
         manager.invoke(panel.id);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
     }
   });
 
@@ -2191,6 +2241,17 @@ function activateNotebookCompleterService(
 
       if (id) {
         return manager.select(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
       }
     }
   });

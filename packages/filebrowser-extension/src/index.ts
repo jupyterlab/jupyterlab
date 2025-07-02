@@ -602,6 +602,12 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
           .catch((reason: Error) => {
             console.error(`Failed to set navigateToCurrentDirectory setting`);
           });
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -815,7 +821,20 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
         args['mode'] === 'single-document'
           ? trans.__('Open in Simple Mode')
           : trans.__('Open in New Browser Tab'),
-      mnemonic: 0
+      mnemonic: 0,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            mode: {
+              type: 'string',
+              description: trans.__(
+                'Mode for opening files (e.g., single-document)'
+              )
+            }
+          }
+        }
+      }
     });
   }
 };
@@ -928,6 +947,17 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
             error
           );
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: trans.__('URL of the file to open')
+            }
+          }
+        }
       }
     });
 
@@ -1011,7 +1041,7 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
                 void showErrorMessage(`Opening ${file.name} failed`, err);
               });
           } else {
-            // notify and offer an “Open” button
+            // notify and offer an "Open" button
             Notification.emit(
               trans.__(
                 'Uploaded %1%2',
@@ -1223,6 +1253,12 @@ function addCommands(
       const { model } = browserForPath;
       await model.restored;
       void browserForPath.goUp();
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1281,6 +1317,21 @@ function addCommands(
         }
         return showErrorMessage(trans.__('Cannot open'), reason);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('Path to the file or directory to open')
+          },
+          dontShowBrowser: {
+            type: 'boolean',
+            description: trans.__('Whether to avoid showing the file browser')
+          }
+        }
+      }
     }
   });
 
@@ -1332,7 +1383,22 @@ function addCommands(
     },
     label: args =>
       (args['label'] || args['factory'] || trans.__('Open')) as string,
-    mnemonic: 0
+    mnemonic: 0,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          factory: {
+            type: 'string',
+            description: trans.__('The name of the widget factory to use')
+          },
+          label: {
+            type: 'string',
+            description: trans.__('The label to display for the command')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.paste, {
@@ -1345,7 +1411,13 @@ function addCommands(
     },
     icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Paste'),
-    mnemonic: 0
+    mnemonic: 0,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.createNewDirectory, {
@@ -1357,7 +1429,13 @@ function addCommands(
       }
     },
     icon: newFolderIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('New Folder')
+    label: trans.__('New Folder'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.createNewFile, {
@@ -1369,7 +1447,13 @@ function addCommands(
       }
     },
     icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('New File')
+    label: trans.__('New File'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.createNewMarkdownFile, {
@@ -1381,7 +1465,13 @@ function addCommands(
       }
     },
     icon: markdownIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('New Markdown File')
+    label: trans.__('New Markdown File'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.refresh, {
@@ -1394,7 +1484,13 @@ function addCommands(
     },
     icon: refreshIcon.bindprops({ stylesheet: 'menuItem' }),
     caption: trans.__('Refresh the file browser.'),
-    label: trans.__('Refresh File List')
+    label: trans.__('Refresh File List'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.rename, {
@@ -1412,7 +1508,13 @@ function addCommands(
       Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Rename'),
-    mnemonic: 0
+    mnemonic: 0,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.copyPath, {
@@ -1442,7 +1544,13 @@ function addCommands(
       !!tracker.currentWidget &&
       Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Copy Path')
+    label: trans.__('Copy Path'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.shutdown, {
@@ -1454,7 +1562,13 @@ function addCommands(
       }
     },
     icon: stopIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Shut Down Kernel')
+    label: trans.__('Shut Down Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.toggleFileFilter, {
@@ -1468,7 +1582,13 @@ function addCommands(
       return toggled;
     },
     icon: filterIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Toggle File Filter')
+    label: trans.__('Toggle File Filter'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.toggleLastModified, {
@@ -1483,6 +1603,12 @@ function addCommands(
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
           });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1500,6 +1626,12 @@ function addCommands(
             console.error(`Failed to set ${key} setting`);
           });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1516,6 +1648,12 @@ function addCommands(
             console.error(`Failed to set ${key} setting`);
           });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1531,6 +1669,12 @@ function addCommands(
           .catch((reason: Error) => {
             console.error(`Failed to set ${key} setting`);
           });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1549,6 +1693,12 @@ function addCommands(
             console.error(`Failed to set singleClickNavigation setting`);
           });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1566,6 +1716,12 @@ function addCommands(
             console.error(`Failed to set showHiddenFiles setting`);
           });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1582,12 +1738,24 @@ function addCommands(
             console.error(`Failed to set showFileCheckboxes setting`);
           });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
   commands.addCommand(CommandIDs.search, {
     label: trans.__('Search on File Names'),
-    execute: () => alert('search')
+    execute: () => alert('search'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 }
 

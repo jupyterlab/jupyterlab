@@ -330,6 +330,14 @@ function createEditMenu(
     default: {
       label: trans.__('Undo')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
   addSemanticCommand({
@@ -339,6 +347,14 @@ function createEditMenu(
     semanticCommands: menu.undoers.redo,
     default: {
       label: trans.__('Redo')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -352,6 +368,14 @@ function createEditMenu(
     default: {
       label: trans.__('Clear')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
   addSemanticCommand({
@@ -361,6 +385,14 @@ function createEditMenu(
     semanticCommands: menu.clearers.clearAll,
     default: {
       label: trans.__('Clear All')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -372,6 +404,14 @@ function createEditMenu(
     semanticCommands: menu.goToLiners,
     default: {
       label: trans.__('Go to Line…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -404,7 +444,13 @@ function createFileMenu(
     },
     overrides: {
       isEnabled: () =>
-        !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable
+        !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -417,6 +463,14 @@ function createFileMenu(
     semanticCommands: menu.consoleCreators,
     default: {
       label: trans.__('New Console for Activity')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -532,7 +586,15 @@ function createKernelMenu(
       label: trans.__('Interrupt Kernel'),
       caption: trans.__('Interrupt the kernel')
     },
-    overrides: { icon: args => (args.toolbar ? stopIcon : undefined) },
+    overrides: {
+      icon: args => (args.toolbar ? stopIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -544,6 +606,14 @@ function createKernelMenu(
     semanticCommands: menu.kernelUsers.reconnectToKernel,
     default: {
       label: trans.__('Reconnect to Kernel')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -557,7 +627,15 @@ function createKernelMenu(
       label: trans.__('Restart Kernel…'),
       caption: trans.__('Restart the kernel')
     },
-    overrides: { icon: args => (args.toolbar ? refreshIcon : undefined) },
+    overrides: {
+      icon: args => (args.toolbar ? refreshIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -572,6 +650,14 @@ function createKernelMenu(
     default: {
       label: trans.__('Restart Kernel and Clear…')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -582,6 +668,14 @@ function createKernelMenu(
     semanticCommands: menu.kernelUsers.changeKernel,
     default: {
       label: trans.__('Change Kernel…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -594,6 +688,14 @@ function createKernelMenu(
     default: {
       label: trans.__('Shut Down Kernel'),
       caption: trans.__('Shut down kernel')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -648,6 +750,14 @@ function createViewMenu(
     default: {
       label: trans.__('Show Line Numbers')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -659,6 +769,14 @@ function createViewMenu(
     default: {
       label: trans.__('Match Brackets')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -669,6 +787,14 @@ function createViewMenu(
     semanticCommands: menu.editorViewers.toggleWordWrap,
     default: {
       label: trans.__('Wrap Words')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -694,7 +820,13 @@ function createRunMenu(
       caption: trans.__('Run Selected')
     },
     overrides: {
-      icon: args => (args.toolbar ? runIcon : undefined)
+      icon: args => (args.toolbar ? runIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -707,6 +839,14 @@ function createRunMenu(
     default: {
       label: trans.__('Run All'),
       caption: trans.__('Run All')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -721,7 +861,13 @@ function createRunMenu(
       caption: trans.__('Restart Kernel and Run All')
     },
     overrides: {
-      icon: args => (args.toolbar ? fastForwardIcon : undefined)
+      icon: args => (args.toolbar ? fastForwardIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -845,6 +991,14 @@ function createHelpMenu(
     default: {
       label: trans.__('Get Kernel'),
       isVisible: false
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
