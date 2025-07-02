@@ -4,7 +4,9 @@
 import { expect, test } from '@jupyterlab/galata';
 import * as fs from 'fs-extra';
 
-test('All commands must have a default label', async ({ page }, testInfo) => {
+test('All commands must have a default label and describedBy', async ({
+  page
+}, testInfo) => {
   const commands = await page.evaluate(async () => {
     const registry = window.jupyterapp.commands;
     const shortcuts = registry.keyBindings;
@@ -72,4 +74,17 @@ test('All commands must have a default label', async ({ page }, testInfo) => {
   const missingLabel = commands.filter(command => !command.label);
 
   expect(missingLabel).toEqual([]);
+
+  // Check for commands missing describedBy information
+  const missingDescribedBy = commands.filter(command => !command.args);
+
+  // Log commands without describedBy for debugging
+  if (missingDescribedBy.length > 0) {
+    console.log(
+      'Commands missing describedBy information:',
+      missingDescribedBy.map(cmd => cmd.id)
+    );
+  }
+
+  expect(missingDescribedBy).toEqual([]);
 });
