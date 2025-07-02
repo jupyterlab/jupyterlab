@@ -19,6 +19,7 @@ describe('@jupyterlab/hub-extension', () => {
   const hubPrefix = '/hub';
   const hubUser = 'test_user';
   const hubServerName = 'test_server';
+  const app = '/lab';
 
   // Extension in test
   const hubExtension = extensions[0];
@@ -54,7 +55,8 @@ describe('@jupyterlab/hub-extension', () => {
     it('should add hub commands to registry', async () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
-        hubPrefix
+        hubPrefix,
+        app
       });
 
       expect(commands.hasCommand(CommandIDs.controlPanel)).toBeTruthy();
@@ -65,7 +67,8 @@ describe('@jupyterlab/hub-extension', () => {
     it('should not add hub commands when hubPrefix is empty', async () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
-        hubPrefix: ''
+        hubPrefix: '',
+        app
       });
 
       expect(commands.hasCommand(CommandIDs.controlPanel)).toBeFalsy();
@@ -78,7 +81,8 @@ describe('@jupyterlab/hub-extension', () => {
       void activateHubExtension(commands, {
         hubPrefix,
         hubUser,
-        hubServerName
+        hubServerName,
+        app
       });
 
       const commandPromise = commands.execute(CommandIDs.restart);
@@ -94,7 +98,8 @@ describe('@jupyterlab/hub-extension', () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
         hubPrefix,
-        hubUser
+        hubUser,
+        app
       });
 
       const commandPromise = commands.execute(CommandIDs.restart);
@@ -119,7 +124,8 @@ describe('@jupyterlab/hub-extension', () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
         hubPrefix,
-        hubUser
+        hubUser,
+        app
       });
 
       const commandPromise = commands.execute(CommandIDs.restart);
@@ -142,7 +148,8 @@ describe('@jupyterlab/hub-extension', () => {
       void activateHubExtension(commands, {
         hubPrefix,
         hubUser,
-        hubServerName
+        hubServerName,
+        app
       });
 
       await commands.execute(CommandIDs.controlPanel);
@@ -155,7 +162,8 @@ describe('@jupyterlab/hub-extension', () => {
         await activateHubExtension(commands, {
           hubPrefix,
           hubUser: '../',
-          hubServerName
+          hubServerName,
+          app
         });
       };
       await expect(callback).rejects.toThrow();
@@ -167,7 +175,8 @@ describe('@jupyterlab/hub-extension', () => {
         await activateHubExtension(commands, {
           hubPrefix,
           hubUser,
-          hubServerName: '../../'
+          hubServerName: '../../',
+          app
         });
       };
       await expect(callback).rejects.toThrow();
