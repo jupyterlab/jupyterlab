@@ -1321,6 +1321,12 @@ function addLabCommands(
         }
         return docManager.duplicate(context.path);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 

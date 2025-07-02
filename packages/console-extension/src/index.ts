@@ -618,7 +618,18 @@ async function activateConsole(
       await settingRegistry.set(pluginId, 'promptCellConfig', promptCellConfig);
     },
     label: trans.__('Auto Close Brackets for Code Console Prompt'),
-    isToggled: () => promptCellConfig.autoClosingBrackets as boolean
+    isToggled: () => promptCellConfig.autoClosingBrackets as boolean,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          force: {
+            type: 'boolean',
+            description: trans.__('Whether to force the toggle state')
+          }
+        }
+      }
+    }
   });
 
   /**

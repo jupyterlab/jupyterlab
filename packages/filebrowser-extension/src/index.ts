@@ -695,7 +695,13 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         !!tracker.currentWidget &&
         Array.from(tracker.currentWidget.selectedItems()).length === 1,
       icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: trans.__('Copy Shareable Link')
+      label: trans.__('Copy Shareable Link'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
   }
 };
