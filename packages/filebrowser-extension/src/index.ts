@@ -89,6 +89,8 @@ namespace CommandIDs {
 
   export const duplicate = 'filebrowser:duplicate';
 
+  export const selectAll = 'filebrowser:select-all';
+
   // For main browser only.
   export const hideBrowser = 'filebrowser:hide-main';
 
@@ -1101,6 +1103,17 @@ function addCommands(
     },
     icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Duplicate')
+  });
+
+  commands.addCommand(CommandIDs.selectAll, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.selectAll();
+      }
+    },
+    label: trans.__('Select All')
   });
 
   commands.addCommand(CommandIDs.goToPath, {
