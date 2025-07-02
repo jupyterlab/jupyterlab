@@ -1655,7 +1655,7 @@ export namespace DocumentRegistry {
         name: 'm4v',
         displayName: trans.__('Video'),
         extensions: ['.m4v'],
-        mimeTypes: ['video/x-m4v'],
+        mimeTypes: ['video/mp4', 'video/x-m4v'],
         fileFormat: 'base64',
         icon: videoIcon
       },

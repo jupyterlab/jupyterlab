@@ -144,7 +144,7 @@ export namespace AudioViewer {
 }
 
 /**
- * A document widget for audios.
+ * A document widget for audio.
  */
 export class AudioDocumentWidget extends DocumentWidget<AudioViewer> {
   constructor(options: AudioDocumentWidget.IOptions) {
