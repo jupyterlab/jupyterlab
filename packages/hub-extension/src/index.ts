@@ -67,6 +67,7 @@ function activateHubExtension(
     }
     restartUrl = hubHost + suffix;
   }
+  const labUrl = hubHost + URLExt.join('/user', hubUser, paths.urls.app);
 
   const { commands } = app;
 
@@ -90,8 +91,8 @@ function activateHubExtension(
       const onIframeNavigate = () => {
         try {
           if (iframe.contentWindow?.location) {
-            const currentUrl = iframe.contentWindow.location.href;
-            if (currentUrl.search(/lab/) > -1) {
+            const currentUrl = new URL(iframe.contentWindow.location.href);
+            if (currentUrl.pathname.startsWith(labUrl)) {
               dialog?.close();
             }
           } else {
