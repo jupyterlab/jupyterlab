@@ -249,7 +249,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
-          showFullPath: false
+          showFullPath: false,
+          allowDragDropUpload: true
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
