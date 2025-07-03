@@ -9,6 +9,15 @@ import {
   toggleComment,
   toggleTabFocusMode
 } from '@codemirror/commands';
+import {
+  foldable,
+  foldAll,
+  foldCode,
+  foldEffect,
+  unfoldAll,
+  unfoldCode,
+  unfoldEffect
+} from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
 import {
@@ -16,6 +25,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 /**
  * Identifiers of commands.
@@ -26,6 +36,12 @@ namespace CommandIDs {
   export const toggleComment = 'codemirror:toggle-comment';
   export const selectNextOccurrence = 'codemirror:select-next-occurrence';
   export const toggleTabFocusMode = 'codemirror:toggle-tab-focus-mode';
+  export const foldCurrent = 'codemirror:fold-current';
+  export const unfoldCurrent = 'codemirror:unfold-current';
+  export const foldSubregions = 'codemirror:fold-subregions';
+  export const unfoldSubregions = 'codemirror:unfold-subregions';
+  export const foldAll = 'codemirror:fold-all';
+  export const unfoldAll = 'codemirror:unfold-all';
 }
 
 /**
@@ -41,8 +57,13 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
   description:
     'Registers commands acting on selected/active CodeMirror editor.',
   autoStart: true,
+  requires: [IEditorTracker],
   optional: [ITranslator],
-  activate: (app: JupyterFrontEnd, translator: ITranslator | null): void => {
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: IEditorTracker,
+    translator: ITranslator | null
+  ): void => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
 
@@ -130,6 +151,104 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         selectNextOccurrence(view);
       },
       isEnabled
+    });
+
+    app.commands.addCommand(CommandIDs.foldCurrent, {
+      label: trans.__('Fold Current Region'),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        const { state } = view;
+        const pos = state.selection.main.head;
+        const line = state.doc.lineAt(pos);
+        const range = foldable(state, line.from, line.to);
+        if (range) {
+          foldCode(view);
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.unfoldCurrent, {
+      label: trans.__('Unfold Current Region'),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        const { state } = view;
+        const pos = state.selection.main.head;
+        const line = state.doc.lineAt(pos);
+        const range = foldable(state, line.from, line.to);
+        if (range) {
+          unfoldCode(view);
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.foldSubregions, {
+      label: trans.__('Fold All Subregions'),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          foldAll(view);
+        } catch (e) {
+          // ignore
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.unfoldSubregions, {
+      label: trans.__('Unfold All Subregions'),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          unfoldAll(view);
+        } catch (e) {
+          // ignore
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.foldAll, {
+      label: trans.__('Fold All Regions'),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          view.dispatch({
+            effects: foldEffect.of({ from: 0, to: view.state.doc.length })
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.unfoldAll, {
+      label: trans.__('Unfold All Regions'),
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          view.dispatch({
+            effects: unfoldEffect.of({ from: 0, to: view.state.doc.length })
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
     });
   }
 };
