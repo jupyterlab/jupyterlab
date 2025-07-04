@@ -253,24 +253,13 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   let match = line.match(/^([#]{1,6}) (.*)/);
   if (match) {
     return {
-      text: cleanTitle(match[2]),
+      text: removeHTMLTags(cleanTitle(match[2])),
       level: match[1].length,
       raw: line,
       skip: skipHeading.test(match[0])
     };
   }
-  // Case: Markdown heading (alternative style)
-  if (nextLine) {
-    match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
-    if (match) {
-      return {
-        text: cleanTitle(line),
-        level: match[1][0] === '=' ? 1 : 2,
-        raw: [line, nextLine].join('\n'),
-        skip: skipHeading.test(line)
-      };
-    }
-  }
+
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
   match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i);
   if (match) {
@@ -280,6 +269,19 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
       skip: skipHeading.test(match[0]),
       raw: line
     };
+  }
+
+  // Case: Markdown heading (alternative style)
+  if (nextLine) {
+    match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
+    if (match) {
+      return {
+        text: removeHTMLTags(cleanTitle(line)),
+        level: match[1][0] === '=' ? 1 : 2,
+        raw: [line, nextLine].join('\n'),
+        skip: skipHeading.test(line)
+      };
+    }
   }
 
   return null;
@@ -295,3 +297,7 @@ function cleanTitle(heading: string): string {
  */
 const skipHeading =
   /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;
+
+function removeHTMLTags(input: string): string {
+  return input.replace(/<[^>]*>/g, '');
+}
