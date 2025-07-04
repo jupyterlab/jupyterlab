@@ -127,6 +127,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Move Cell Up');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await page.waitForTimeout(1000);
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
