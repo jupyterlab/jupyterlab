@@ -46,7 +46,20 @@ namespace EditorSyntaxComponent {
 function EditorSyntaxComponent(
   props: EditorSyntaxComponent.IProps
 ): React.ReactElement<EditorSyntaxComponent.IProps> {
-  return <TextItem source={props.language} onClick={props.handleClick} />;
+  return (
+    <TextItem
+      role="button"
+      aria-haspopup
+      tabIndex={0}
+      source={props.language}
+      onClick={props.handleClick}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.handleClick();
+        }
+      }}
+    />
+  );
 }
 
 /**

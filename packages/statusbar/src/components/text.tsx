@@ -32,7 +32,11 @@ export function TextItem(
   const { title, source, className, ...rest } = props;
   return (
     <span
-      className={`jp-StatusBar-TextItem ${className}`}
+      className={
+        className
+          ? `jp-StatusBar-TextItem ${className}`
+          : 'jp-StatusBar-TextItem'
+      }
       title={title}
       {...rest}
     >

@@ -18,6 +18,10 @@ export class Switch extends Widget {
 
     this._button.className = 'jp-switch';
     this._button.setAttribute('role', 'switch');
+    this._button.setAttribute(
+      'aria-checked',
+      this._value ? this._value.toString() : 'false'
+    );
 
     this._label.className = 'jp-switch-label';
 

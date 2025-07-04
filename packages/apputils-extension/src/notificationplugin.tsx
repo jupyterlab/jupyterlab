@@ -345,9 +345,17 @@ interface INotificationStatusProps {
 function NotificationStatus(props: INotificationStatusProps): JSX.Element {
   return (
     <GroupItem
+      role="button"
+      tabIndex={0}
+      aria-haspopup
       spacing={HALF_SPACING}
       onClick={() => {
         props.onClick();
+      }}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.onClick();
+        }
       }}
       title={
         props.count > 0
