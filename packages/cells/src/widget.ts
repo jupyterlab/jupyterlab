@@ -1302,6 +1302,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
       const headings: Cell.IHeading[] = [];
 
@@ -1339,27 +1343,22 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
-          TableOfContentsUtils.Markdown.parseHeadings(
+          const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
             m.data[mdType] as string,
             this._rendermime.markdownParser
-          )
-            .then(renderedHTML => {
-              headings.push(
-                ...renderedHTML.map(heading => {
-                  return {
-                    ...heading,
-                    outputIndex: j,
-                    type: Cell.HeadingType.Markdown
-                  };
-                })
-              );
+          );
+
+          headings.push(
+            ...mdHeading.map(heading => {
+              return {
+                ...heading,
+                outputIndex: j,
+                type: Cell.HeadingType.Markdown
+              };
             })
-            .catch(error => {
-              console.warn('Failed to parse markdown headings:', error);
-            });
+          );
         }
       }
-
       this._headingsCache = headings;
     }
 
