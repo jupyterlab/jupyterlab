@@ -26,6 +26,36 @@
       "command": "codemirror:select-next-occurrence",
       "keys": ["Accel Shift D"],
       "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:fold-current",
+      "keys": ["Accel Shift ["],
+      "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:unfold-current",
+      "keys": ["Accel Shift ]"],
+      "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:fold-subregions",
+      "keys": ["Accel K", "Accel F"],
+      "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:unfold-subregions",
+      "keys": ["Accel K", "Accel U"],
+      "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:fold-all",
+      "keys": ["Accel K", "Accel 0"],
+      "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:unfold-all",
+      "keys": ["Accel K", "Accel J"],
+      "selector": ".cm-content"
     }
   ],
   "title": "CodeMirror",
