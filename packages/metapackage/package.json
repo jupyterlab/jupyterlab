@@ -142,7 +142,7 @@
     "jest": "^29.2.0",
     "json-to-html": "~0.1.2",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.6.3"
   },
   "publishConfig": {
     "access": "public"
