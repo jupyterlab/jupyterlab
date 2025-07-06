@@ -1792,9 +1792,35 @@ export class RestContentProvider implements IContentProvider {
   ): Promise<Contents.IModel> {
     const settings = this._options.serverSettings;
     const url = this._getUrl(localPath);
+    // requires http2 in tornado!
+    /*
+    function createJSONStreamFromString(str: string, chunkSize = 65536) {
+      let offset = 0;
+      return new ReadableStream({
+        pull(controller) {
+          if (offset >= str.length) {
+            controller.close();
+            return;
+          }
+          const chunk = str.slice(offset, offset + chunkSize);
+          controller.enqueue(new TextEncoder().encode(chunk));
+          offset += chunkSize;
+        }
+      });
+    }
+    const stream = createJSONStreamFromString(JSON.stringify(options));
     const init = {
       method: 'PUT',
-      body: JSON.stringify(options)
+      body: stream,
+      duplex: 'half'
+    };
+    */
+    const file = new File([JSON.stringify(options)], 'data.json', {
+      type: 'application/json'
+    });
+    const init = {
+      method: 'PUT',
+      body: file
     };
     const response = await ServerConnection.makeRequest(url, init, settings);
     // will return 200 for an existing file and 201 for a new file
