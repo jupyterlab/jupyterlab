@@ -33,7 +33,6 @@ test.describe('Collapsible Headings; showHCB', () => {
 
   test('Show Collapser Selected; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.waitForTimeout(1000);
     expect(
       await (await page.notebook.getCellLocator(0))!.screenshot()
     ).toMatchSnapshot('showHCB_heading_selected.png');
@@ -41,7 +40,6 @@ test.describe('Collapsible Headings; showHCB', () => {
 
   test('Collapse Heading; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.waitForTimeout(1000);
     await page.click(
       'text=# Heading 1Heading 1¶ >> button.jp-collapseHeadingButton'
     );
@@ -83,7 +81,6 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
 
   test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
-    await page.waitForTimeout(1000);
     expect(
       await (await page.notebook.getCellLocator(0))!.screenshot()
     ).toMatchSnapshot('no_showHCB_heading_unselected.png');
@@ -91,7 +88,6 @@ test.describe('Collapsible Headings; no_showHCB', () => {
 
   test('Show Collapser Selected; no_showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.waitForTimeout(1000);
     expect(
       await (await page.notebook.getCellLocator(0))!.screenshot()
     ).toMatchSnapshot('no_showHCB_heading_selected.png');
@@ -236,10 +232,9 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+B');
     await page.waitForTimeout(200);
     await page.keyboard.type('Heading 3');
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(500);
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
-    await page.waitForTimeout(1000);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_01.png');
@@ -257,7 +252,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(0);
-    await page.waitForTimeout(1000);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_02.png');
@@ -283,7 +277,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   test('Add Header Above 01', async ({ page }) => {
     await page.notebook.selectCells(6);
     await page.keyboard.press('Shift+A');
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(200);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_01.png');
@@ -293,7 +287,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   test('Add Header Above 02', async ({ page }) => {
     await page.notebook.selectCells(4);
     await page.keyboard.press('Shift+A');
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(200);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_02.png');
@@ -303,7 +297,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   test('Add Header Above 03', async ({ page }) => {
     await page.notebook.selectCells(3);
     await page.keyboard.press('Shift+A');
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(200);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_03.png');
