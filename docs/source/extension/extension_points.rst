@@ -1055,19 +1055,7 @@ Subshells are supported by:
 
 **User Interface**
 
-Users can create subshell consoles in two ways:
-
-1. **Command Palette**: Press ``Ctrl+Shift+C`` and search for "New Subshell Console for Notebook"
-2. **Context Menu**: Right-click in a notebook (only visible when kernel supports subshells)
-
-To verify subshell functionality, use the ``%subshell`` magic command in Python kernels:
-
-.. code:: python
-
-  %subshell
-  # Output shows:
-  # subshell id: None (main shell) or unique ID (subshell)
-  # subshell list: ['id1', 'id2', ...] (active subshells)
+For user interface details, see :ref:`subshell-console`.
 
 **Extension Development**
 
@@ -1108,13 +1096,7 @@ Extension developers can use subshell functionality through the kernel service A
     console.log(`Deleted subshell: ${subshellId}`);
   }
 
-**Communication Settings**
 
-Configure how widget `comms <https://jupyter-client.readthedocs.io/en/stable/messaging.html#custom-messages>`__ use subshells via Settings → Advanced Settings → Kernel:
-
-- ``disabled``: No subshells for comms
-- ``perCommTarget``: One subshell per comm target (default)
-- ``perComm``: One subshell per comm (can create many subshells)
 
 For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
 

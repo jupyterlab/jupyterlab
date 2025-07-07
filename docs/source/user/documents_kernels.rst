@@ -93,3 +93,11 @@ This displays:
      %subshell  # Shows this subshell's ID
 
 3. The subshell executes immediately without waiting for the main shell to finish.
+
+**Communication Settings**
+
+Configure how widget communications use subshells via Settings → Advanced Settings → Kernel:
+
+- ``disabled``: No subshells for communications
+- ``perCommTarget``: One subshell per communication target (default)
+- ``perComm``: One subshell per communication (can create many subshells)
