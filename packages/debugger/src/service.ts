@@ -109,6 +109,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
+        this._model.stoppedThreads.clear();
         this._model.stoppedThreads.add(event.body.threadId);
         void this._getAllFrames();
       } else if (event.event === 'continued') {
@@ -752,8 +753,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get the current thread from the model.
    */
   private _currentThread(): number {
-    // TODO: ask the model for the current thread ID
-    return 1;
+    return this._model.stoppedThreads.values().next().value ?? 1;
   }
 
   /**

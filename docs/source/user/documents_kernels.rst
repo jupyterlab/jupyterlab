@@ -48,3 +48,56 @@ selection:
 
 *Any* text file (Markdown, Python, R, LaTeX, C++, etc.) in a text file
 editor can be connected to a code console and kernel in this manner.
+
+.. _subshell-console:
+
+Subshell Consoles
+-----------------
+
+For kernels that support subshells (such as Python kernels with ipykernel 7.0.0+), you can create a subshell console to run code concurrently with the main notebook execution.
+
+**Creating a Subshell Console:**
+
+1. **Command Palette**: Press ``Ctrl+Shift+C`` (``Cmd+Shift+C`` on Mac) and search for "New Subshell Console for Notebook"
+2. **Context Menu**: Right-click in a notebook and select "New Subshell Console for Notebook" (only appears if kernel supports subshells)
+
+**Verifying Subshell Functionality:**
+
+Use the ``%subshell`` magic command in Python kernels:
+
+.. code:: python
+
+  %subshell
+
+This displays:
+
+- **subshell id**: ``None`` for main shell, or a unique ID for subshells
+- **subshell list**: Array of active subshell IDs
+
+**Practical Example:**
+
+1. In your main notebook, start a long-running computation:
+
+   .. code:: python
+
+     import time
+     for i in range(100):
+         print(f"Main shell: {i}")
+         time.sleep(1)
+
+2. While this runs, create a subshell console and execute:
+
+   .. code:: python
+
+     print("This runs concurrently!")
+     %subshell  # Shows this subshell's ID
+
+3. The subshell executes immediately without waiting for the main shell to finish.
+
+**Communication Settings**
+
+Configure how widget communications use subshells via Settings → Advanced Settings → Kernel:
+
+- ``disabled``: No subshells for communications
+- ``perCommTarget``: One subshell per communication target (default)
+- ``perComm``: One subshell per communication (can create many subshells)

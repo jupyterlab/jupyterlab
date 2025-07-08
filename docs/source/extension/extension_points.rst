@@ -1041,6 +1041,65 @@ a plugin:
       }
     };
 
+Kernel Subshells
+----------------
+
+Kernel subshells enable concurrent code execution within kernels that support them. Subshells are separate threads of execution that allow interaction with a kernel while it's busy executing long-running code, enabling non-blocking communication and parallel execution.
+
+**Kernel Support**
+
+Subshells are supported by:
+
+- **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via ``supported_features: ['kernel subshells']`` in kernel info replies
+- Other kernels implementing `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__
+
+**User Interface**
+
+For user interface details, see :ref:`subshell-console`.
+
+**Extension Development**
+
+Extension developers can use subshell functionality through the kernel service API:
+
+.. code:: typescript
+
+  import { INotebookTracker } from '@jupyterlab/notebook';
+
+  // Get the current kernel from a notebook
+  const current = tracker.currentWidget;
+  if (!current) return;
+
+  const kernel = current.sessionContext.session?.kernel;
+  if (!kernel) return;
+
+  // Check if kernel supports subshells
+  if (kernel.supportsSubshells) {
+    // Create a new subshell
+    const reply = await kernel.requestCreateSubshell({}).done;
+    const subshellId = reply.content.subshell_id;
+    console.log(`Created subshell: ${subshellId}`);
+
+    // List existing subshells
+    const listReply = await kernel.requestListSubshell({}).done;
+    console.log(`Active subshells: ${listReply.content.subshell_id}`);
+
+    // Execute code in a specific subshell
+    const future = kernel.requestExecute(
+      { code: 'print("Hello from subshell!")' },
+      false, // disposeOnDone
+      { subshell_id: subshellId } // metadata
+    );
+    await future.done;
+
+    // Delete a subshell when done
+    await kernel.requestDeleteSubshell({ subshell_id: subshellId }).done;
+    console.log(`Deleted subshell: ${subshellId}`);
+  }
+
+
+
+For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
+
 LSP Features
 --------------
 

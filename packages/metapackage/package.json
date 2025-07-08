@@ -22,7 +22,9 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "src/**/*.{ts,tsx}"
+    "src/**/*.{ts,tsx}",
+    "style/index.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -41,6 +43,7 @@
     "@jupyterlab/apputils": "^4.6.0-alpha.1",
     "@jupyterlab/apputils-extension": "^4.5.0-alpha.1",
     "@jupyterlab/attachments": "^4.5.0-alpha.1",
+    "@jupyterlab/audio-extension": "^4.5.0-alpha.1",
     "@jupyterlab/cell-toolbar": "^4.5.0-alpha.1",
     "@jupyterlab/cell-toolbar-extension": "^4.5.0-alpha.1",
     "@jupyterlab/cells": "^4.5.0-alpha.1",
@@ -132,6 +135,7 @@
     "@jupyterlab/ui-components": "^4.5.0-alpha.1",
     "@jupyterlab/ui-components-extension": "^4.5.0-alpha.1",
     "@jupyterlab/vega5-extension": "^4.5.0-alpha.1",
+    "@jupyterlab/video-extension": "^4.5.0-alpha.1",
     "@jupyterlab/workspaces": "^4.5.0-alpha.1",
     "@jupyterlab/workspaces-extension": "^4.5.0-alpha.1"
   },

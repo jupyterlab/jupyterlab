@@ -1819,12 +1819,22 @@ export class RestContentProvider implements IContentProvider {
   private _options: RestContentProvider.IOptions;
 }
 
+/**
+ * The namespace for RestContentProvider statics.
+ */
 export namespace RestContentProvider {
   /**
    * Initialization options for the REST content provider.
    */
   export interface IOptions {
+    /**
+     * The API endpoint for the content provider.
+     */
     apiEndpoint: string;
+
+    /**
+     * The server settings for the content provider.
+     */
     serverSettings: ServerConnection.ISettings;
   }
 }
