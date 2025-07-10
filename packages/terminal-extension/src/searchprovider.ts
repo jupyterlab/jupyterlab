@@ -103,13 +103,7 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
    * @returns The next match if available
    */
   async highlightNext(): Promise<undefined> {
-    if (this._query !== undefined) {
-      const { flags, source } = this._query;
-      this.widget.content.searchAddon.findNext(
-        source,
-        this._searchOptions(flags)
-      );
-    }
+    this._next();
     return Promise.resolve(undefined);
   }
 
@@ -119,13 +113,7 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
    * @returns The previous match if available.
    */
   async highlightPrevious(): Promise<undefined> {
-    if (this._query !== undefined) {
-      const { flags, source } = this._query;
-      this.widget.content.searchAddon.findPrevious(
-        source,
-        this._searchOptions(flags)
-      );
-    }
+    this._previous();
     return Promise.resolve(undefined);
   }
 
@@ -170,7 +158,7 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
    */
   async startQuery(query: RegExp): Promise<void> {
     this._query = query;
-    await this.highlightNext();
+    this._next();
     return Promise.resolve();
   }
 
@@ -198,6 +186,16 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
       converted = converted.mix(Color(backgroundColor), alpha);
     }
     return converted.hex();
+  }
+
+  private _next(): void {
+    if (this._query !== undefined) {
+      const { flags, source } = this._query;
+      this.widget.content.searchAddon.findNext(
+        source,
+        this._searchOptions(flags)
+      );
+    }
   }
 
   /**
@@ -229,7 +227,17 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
     if (this._query !== undefined) {
       // To update the displayed search colors, need to remove colors and rerun the search.
       this.widget.content.searchAddon.clearDecorations();
-      this.highlightNext();
+      this._next();
+    }
+  }
+
+  private _previous(): void {
+    if (this._query !== undefined) {
+      const { flags, source } = this._query;
+      this.widget.content.searchAddon.findPrevious(
+        source,
+        this._searchOptions(flags)
+      );
     }
   }
 
