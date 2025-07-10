@@ -1091,12 +1091,18 @@ export class DirListing extends Widget {
         checkbox.checked = false;
       }
 
-      // Handle `tabIndex`
+      // Handle `tabIndex` & `role`
       const nameNode = renderer.getNameNode(node);
       if (nameNode) {
         // Must check if the name node is there because it gets replaced by the
         // edit node when editing the name of the file or directory.
-        nameNode.tabIndex = i === this._focusIndex ? 0 : -1;
+        if (i === this._focusIndex) {
+          nameNode.setAttribute('tabIndex', '0');
+          nameNode.setAttribute('role', 'button');
+        } else {
+          nameNode.setAttribute('tabIndex', '-1');
+          nameNode.removeAttribute('role');
+        }
       }
     });
 
