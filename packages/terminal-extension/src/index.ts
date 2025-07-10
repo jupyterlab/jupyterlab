@@ -36,6 +36,7 @@ import {
   terminalIcon
 } from '@jupyterlab/ui-components';
 import { Menu, Widget } from '@lumino/widgets';
+import { TerminalSearchProvider } from './searchprovider';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -282,10 +283,7 @@ function activate(
   }
 
   if (searchRegistry) {
-    import('./searchprovider').then(module => {
-      const { TerminalSearchProvider } = module;
-      searchRegistry.add('terminal', TerminalSearchProvider);
-    });
+    searchRegistry.add('terminal', TerminalSearchProvider);
   }
 
   return tracker;
