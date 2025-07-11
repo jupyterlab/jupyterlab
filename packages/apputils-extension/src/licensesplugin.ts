@@ -146,6 +146,12 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
     // register license-related commands
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: (args: any) => {
         // bail if no license API is available from the server
         if (!PageConfig.getOption('licensesUrl')) {
@@ -168,6 +174,18 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
       label: args => (args.noLabel ? '' : refreshLicenses),
       caption: refreshLicenses,
       icon: refreshIcon,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            noLabel: {
+              oneOf: [{ type: 'boolean' }, { type: 'number' }],
+              description:
+                'Whether to hide the label (truthy values hide label)'
+            }
+          }
+        }
+      },
       execute: async () => {
         return licensesTracker.currentWidget?.content.model.initLicenses();
       }
@@ -188,6 +206,23 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
       icon: args => {
         const format = formatOrDefault(`${args.format}`);
         return format.icon;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            format: {
+              type: 'string',
+              description: trans.__('The report format to use for download')
+            },
+            noLabel: {
+              oneOf: [{ type: 'boolean' }, { type: 'number' }],
+              description:
+                'Whether to hide the label (truthy values hide label)'
+            }
+          },
+          required: ['format']
+        }
       },
       execute: async args => {
         const format = formatOrDefault(`${args.format}`);

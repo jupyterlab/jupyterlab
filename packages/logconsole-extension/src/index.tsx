@@ -220,6 +220,25 @@ function activateLogConsole(
     },
     isToggled: () => {
       return logConsoleWidget !== null;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          source: {
+            type: 'string',
+            description: trans.__('The source for the log console')
+          },
+          insertMode: {
+            type: 'string',
+            description: trans.__('The insert mode for the dock layout')
+          },
+          ref: {
+            type: 'string',
+            description: trans.__('The reference widget')
+          }
+        }
+      }
     }
   });
 
@@ -229,7 +248,13 @@ function activateLogConsole(
     },
     icon: addIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    label: trans.__('Add Checkpoint')
+    label: trans.__('Add Checkpoint'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.clear, {
@@ -238,7 +263,13 @@ function activateLogConsole(
     },
     icon: clearIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    label: trans.__('Clear Log')
+    label: trans.__('Clear Log'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   function toTitleCase(value: string) {
@@ -256,7 +287,20 @@ function activateLogConsole(
     label: args =>
       args['level']
         ? trans.__('Set Log Level to %1', toTitleCase(args.level as string))
-        : trans.__('Set log level to `level`.')
+        : trans.__('Set log level to `level`.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          level: {
+            type: 'string',
+            enum: ['Critical', 'Error', 'Warning', 'Info', 'Debug'],
+            description: trans.__('The log level to set')
+          }
+        },
+        required: ['level']
+      }
+    }
   });
 
   if (palette) {
