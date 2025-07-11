@@ -15,6 +15,7 @@ import {
 } from './tokens';
 import { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 // Shorthand for readability.
 export type InlineResult =
@@ -199,6 +200,15 @@ export class ProviderReconciliator implements IProviderReconciliator {
     completerIsVisible: boolean,
     changed: SourceChange
   ): Promise<boolean> {
+    // If the widget is not a code cell, do not show continuous hint.
+    const nbWidget = this._context.widget;
+    const isCodeCell =
+      nbWidget instanceof NotebookPanel &&
+      nbWidget.content.activeCell?.model.type === 'code';
+    if (!isCodeCell) {
+      return false;
+    }
+
     const applicableProviders = await this.applicableProviders();
     if (applicableProviders.length === 0) {
       return false;
