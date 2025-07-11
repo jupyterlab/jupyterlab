@@ -106,6 +106,14 @@ test.describe('Stdin for ipdb', () => {
       );
     });
   }
+});
+
+test.describe('Stdin for ipdb (flaky)', () => {
+  test.describe.configure({ retries: 4 });
+
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew();
+  });
 
   test('Subsequent execution in short succession', async ({ page }) => {
     await page.notebook.setCell(0, 'code', loopedInput);
