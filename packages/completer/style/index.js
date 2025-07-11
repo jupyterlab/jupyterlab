@@ -9,5 +9,6 @@ import '@jupyterlab/ui-components/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/codemirror/style/index.js';
 import '@jupyterlab/rendermime/style/index.js';
+import '@jupyterlab/notebook/style/index.js';
 
 import './base.css';
