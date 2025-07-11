@@ -17,6 +17,7 @@ import {
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
@@ -35,6 +36,7 @@ import {
   terminalIcon
 } from '@jupyterlab/ui-components';
 import { Menu, Widget } from '@lumino/widgets';
+import { TerminalSearchProvider } from './searchprovider';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -74,7 +76,8 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
     ILayoutRestorer,
     IMainMenu,
     IThemeManager,
-    IRunningSessionManagers
+    IRunningSessionManagers,
+    ISearchProviderRegistry
   ],
   autoStart: true
 };
@@ -96,7 +99,8 @@ function activate(
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
   themeManager: IThemeManager | null,
-  runningSessionManagers: IRunningSessionManagers | null
+  runningSessionManagers: IRunningSessionManagers | null,
+  searchRegistry: ISearchProviderRegistry | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
   const { serviceManager, commands } = app;
@@ -276,6 +280,10 @@ function activate(
   // Add a sessions manager if the running extension is available
   if (runningSessionManagers) {
     addRunningSessionManager(runningSessionManagers, app, translator);
+  }
+
+  if (searchRegistry) {
+    searchRegistry.add('terminal', TerminalSearchProvider);
   }
 
   return tracker;
