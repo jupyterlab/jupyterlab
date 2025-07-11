@@ -254,6 +254,12 @@
       "title": "Max auto-open size",
       "description": "Maximum file size (MB) to auto-open files on upload",
       "default": 50
+    },
+    "allowDragDropUpload": {
+      "type": "boolean",
+      "title": "Allow drag and drop file uploads",
+      "description": "Whether to allow uploading files by dragging and dropping them onto the file browser",
+      "default": true
     }
   },
   "additionalProperties": false,
