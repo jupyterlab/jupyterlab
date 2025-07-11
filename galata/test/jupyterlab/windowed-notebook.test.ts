@@ -82,7 +82,7 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   // Wait to ensure the rendering logic is stable.
   do {
     previousHeight = initialHeight;
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(600);
 
     initialHeight = await getInnerHeight(notebook!);
   } while (previousHeight !== initialHeight && counter++ < 10);

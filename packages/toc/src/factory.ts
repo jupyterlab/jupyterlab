@@ -13,7 +13,7 @@ import { TableOfContents } from './tokens';
  *
  * @private
  */
-const RENDER_TIMEOUT = 1000;
+const RENDER_TIMEOUT = 200;
 
 /**
  * Abstract table of contents model factory for IDocumentWidget.

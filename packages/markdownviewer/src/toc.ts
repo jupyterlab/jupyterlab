@@ -70,17 +70,18 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
+  protected async getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const headings = TableOfContentsUtils.filterHeadings(
-      TableOfContentsUtils.Markdown.getHeadings(content),
-      {
-        ...this.configuration,
-        // Force base number to be equal to 1
-        baseNumbering: 1
-      }
+    const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+      content,
+      this.parser
     );
-    return Promise.resolve(headings);
+    const filteredHeadings = TableOfContentsUtils.filterHeadings(headings, {
+      ...this.configuration,
+      // Force base number to be equal to 1
+      baseNumbering: 1
+    });
+    return Promise.resolve(filteredHeadings);
   }
 }
 

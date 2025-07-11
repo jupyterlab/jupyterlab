@@ -232,6 +232,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+B');
     await page.waitForTimeout(200);
     await page.keyboard.type('Heading 3');
+    await page.waitForTimeout(500);
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
     expect(
