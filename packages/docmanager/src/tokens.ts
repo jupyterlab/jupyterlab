@@ -349,3 +349,96 @@ export type RecentDocument = {
    */
   factory?: string;
 };
+
+/**
+ * The token that indicates the default document manager commands are loaded.
+ */
+export const IDocManagerCommands = new Token<IDocManagerCommands>(
+  '@jupyterlab/docmanager:IDocManagerCommands',
+  'A token to ensure document manager commands are loaded and provide access to their disposables.'
+);
+
+/**
+ * The identifiers and disposables of loaded document manager commands exposed for reuse.
+ */
+export interface IDocManagerCommands {
+  clone: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  deleteFile: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  newUntitled: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  open: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  openBrowserTab: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  reload: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  rename: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  del: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  duplicate: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  restoreCheckpoint: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  save: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  saveAll: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  saveAs: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  download: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  toggleAutosave: {
+    id: string;
+    disposable: IDisposable;
+  };
+
+  showInFileBrowser: {
+    id: string;
+    disposable: IDisposable;
+  };
+}
