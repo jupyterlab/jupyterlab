@@ -225,6 +225,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
   return (
     <Search
+      role="search"
       className="jp-FilterBox"
       ref={props.inputRef as React.Ref<any>}
       value={filter}
