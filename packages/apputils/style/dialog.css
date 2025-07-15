@@ -116,10 +116,11 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-footer {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: flex-end;
   align-items: center;
   flex: 0 0 auto;
+  gap: 5px;
   margin-left: -12px;
   margin-right: -12px;
   padding: 12px;
