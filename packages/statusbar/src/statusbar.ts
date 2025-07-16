@@ -80,7 +80,6 @@ export class StatusBar extends Widget implements IStatusBar {
         this._leftSide.insertWidget(insertIndex, item);
       }
     } else if (align === 'right') {
-      
       const insertIndex = ArrayExt.findFirstIndex(
         this._rightRankItems,
         item => item.rank < rankItem.rank
