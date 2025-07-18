@@ -67,7 +67,10 @@ test.describe('Run Cells', () => {
     await expect(inputPrompt).toHaveText('[2]:');
 
     // Input prompt should be reset when an empty cell is executed.
-    await page.notebook.setCell(0, 'code', '');
+    const cell = await page.notebook.getCellLocator(0);
+    await cell?.getByRole('textbox').press('Control+A');
+    await cell?.getByRole('textbox').press('Delete');
+
     await page.notebook.runCell(0);
     await expect(inputPrompt).toHaveText('[ ]:');
   });

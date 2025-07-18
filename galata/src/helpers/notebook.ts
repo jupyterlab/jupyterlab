@@ -1260,9 +1260,6 @@ export class NotebookHelper {
 
     await this._setCellMode(cell, 'Edit');
     await cell.getByRole('textbox').press('Control+A');
-    if (!source.length) {
-      await cell.getByRole('textbox').press('Delete');
-    }
     await cell.getByRole('textbox').pressSequentially(source);
     await this._setCellMode(cell, 'Command');
 
