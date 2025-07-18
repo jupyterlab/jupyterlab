@@ -15,9 +15,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../notebook"
-    },
-    {
       "path": "../rendermime"
     },
     {

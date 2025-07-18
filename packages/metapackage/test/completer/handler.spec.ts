@@ -13,18 +13,11 @@ import {
   ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
+import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
-import { ServiceManager } from '@jupyterlab/services';
-import {
-  INotebookModel,
-  NotebookModelFactory,
-  NotebookPanel
-} from '@jupyterlab/notebook';
-import { Context } from '@jupyterlab/docregistry';
 
 class TestCompleterModel extends CompleterModel {
   methods: string[] = [];
@@ -80,30 +73,12 @@ class FooCompletionProvider implements ICompletionProvider {
     changed: SourceChange,
     context?: ICompletionContext
   ) {
-    const nbWidget = context?.widget;
-    const isCodeCell =
-      nbWidget instanceof NotebookPanel &&
-      nbWidget.content.activeCell?.model.type === 'code';
-
-    return this._continuousHint && isCodeCell;
-  }
-}
-
-function contextFactory(): Context<INotebookModel> {
-  const serviceManager = new ServiceManager({ standby: 'never' });
-  const factory = new NotebookModelFactory();
-  const context = new Context({
-    manager: serviceManager,
-    factory,
-    path: 'foo.ipynb',
-    kernelPreference: {
-      shouldStart: false,
-      canStart: false,
-      shutdownOnDispose: true,
-      name: 'default'
+    const mimeType = context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
     }
-  });
-  return context;
+    return this._continuousHint;
+  }
 }
 
 describe('@jupyterlab/completer', () => {
@@ -372,24 +347,17 @@ describe('@jupyterlab/completer', () => {
       let anchor: CodeEditorWrapper;
       let provider: FooCompletionProvider;
       let handler: CompletionHandler;
-      let completerContext: symbol;
+      let context: symbol;
 
       beforeAll(async () => {
         anchor = createEditorWidget();
         Widget.attach(anchor, document.body);
-
-        const context = contextFactory();
-        const widget = NBTestUtils.createNotebookPanel(context);
-        widget.model!.sharedModel.insertCells(1, [
-          { cell_type: 'markdown', source: 'test1 test2' }
-        ]);
-        widget.content.activeCellIndex = 0;
-        completerContext = { widget } as any;
+        context = Symbol();
 
         provider = new FooCompletionProvider(true);
         handler = new CompletionHandler({
           reconciliator: new ProviderReconciliator({
-            context: completerContext as any,
+            context: context as any,
             providers: [provider],
             timeout: 0
           }),
@@ -411,7 +379,6 @@ describe('@jupyterlab/completer', () => {
 
       it('should use Invoked for invoke()', async () => {
         expect(provider.triggers.length).toEqual(0);
-
         handler.editor!.model.sharedModel.setSource('foo.');
         anchor.node.focus();
         await new Promise(process.nextTick);
@@ -464,7 +431,7 @@ describe('@jupyterlab/completer', () => {
           {
             sourceChange: [{ retain: 4 }, { insert: 'a' }]
           } as SourceChange,
-          completerContext
+          context
         );
         spy.mockRestore();
       });
@@ -509,26 +476,17 @@ describe('@jupyterlab/completer', () => {
       let anchor: CodeEditorWrapper;
       let provider: FooCompletionProvider;
       let handler: CompletionHandler;
-      let completerContext: symbol;
-      let widget;
+      let context: symbol;
 
       beforeEach(() => {
         anchor = createEditorWidget();
         Widget.attach(anchor, document.body);
 
-        const context = contextFactory();
-        widget = NBTestUtils.createNotebookPanel(context);
-        widget.model!.sharedModel.insertCells(0, [
-          { cell_type: 'markdown', source: 'markdown1 markdown2' },
-          { cell_type: 'raw', source: 'raw1 raw1' }
-        ]);
-        widget.content.activeCellIndex = 1;
-        completerContext = { widget } as any;
-
+        context = { editor: anchor.editor } as any;
         provider = new FooCompletionProvider(true);
         handler = new CompletionHandler({
           reconciliator: new ProviderReconciliator({
-            context: completerContext as any,
+            context: context as any,
             providers: [provider],
             timeout: 0
           }),
@@ -548,9 +506,8 @@ describe('@jupyterlab/completer', () => {
         anchor.dispose();
       });
 
-      it('should NOT trigger automcompletion in a markdown cell', async () => {
-        // set the markdown cell as active
-        widget!.content.activeCellIndex = 0;
+      it('should NOT trigger automcompletion for markdown mimeType', async () => {
+        handler.editor!.model.mimeType = 'text/x-ipythongfm';
 
         anchor.node.focus();
         handler.editor!.model.sharedModel.setSource('foo.');
@@ -562,9 +519,8 @@ describe('@jupyterlab/completer', () => {
         expect(provider.triggers).toHaveLength(0);
       });
 
-      it('should NOT trigger automcompletion in a raw cell', async () => {
-        // set the raw cell as active
-        widget!.content.activeCellIndex = 1;
+      it('should NOT trigger automcompletion for text mimeType', async () => {
+        handler.editor!.model.mimeType = 'text/plain';
 
         anchor.node.focus();
         handler.editor!.model.sharedModel.setSource('foo.');
