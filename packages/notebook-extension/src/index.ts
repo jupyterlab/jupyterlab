@@ -3611,9 +3611,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Show Minimap'),
-    caption: trans.__(
-      'Show Minimap (virtual scrollbar, enabled with windowing mode: full)'
-    ),
+    caption: trans.__('Show Minimap'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -3623,20 +3621,14 @@ function addCommands(
     },
     icon: args => (args.toolbar ? tableRowsIcon : undefined),
     isEnabled: args => {
-      const enabled =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return enabled;
+      return args.toolbar ? true : isEnabled();
     },
     isToggled: () => {
       const current = tracker.currentWidget;
       return current?.content.scrollbar ?? false;
     },
     isVisible: args => {
-      const visible =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return visible;
+      return args.toolbar ? true : isEnabled();
     }
   });
 
