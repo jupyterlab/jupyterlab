@@ -1756,13 +1756,9 @@ export namespace CodeCell {
     const model = cell.model;
     const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
-      model.sharedModel.transact(
-        () => {
-          model.clearExecution();
-        },
-        false,
-        'silent-change'
-      );
+      model.sharedModel.transact(() => {
+        model.clearExecution();
+      }, false);
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
