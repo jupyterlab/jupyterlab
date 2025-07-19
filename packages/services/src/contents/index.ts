@@ -1792,9 +1792,12 @@ export class RestContentProvider implements IContentProvider {
   ): Promise<Contents.IModel> {
     const settings = this._options.serverSettings;
     const url = this._getUrl(localPath);
+    const file = new File([JSON.stringify(options)], 'data.json', {
+      type: 'application/json'
+    });
     const init = {
       method: 'PUT',
-      body: JSON.stringify(options)
+      body: file
     };
     const response = await ServerConnection.makeRequest(url, init, settings);
     // will return 200 for an existing file and 201 for a new file
