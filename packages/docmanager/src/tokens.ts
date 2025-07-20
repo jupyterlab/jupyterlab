@@ -359,86 +359,23 @@ export const IDocManagerCommands = new Token<IDocManagerCommands>(
 );
 
 /**
+ * Disposable command interface with identifier.
+ */
+export interface ICommandDisposable extends IDisposable {
+  id: string;
+}
+
+/**
  * The identifiers and disposables of loaded document manager commands exposed for reuse.
  */
 export interface IDocManagerCommands {
-  clone: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  deleteFile: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  newUntitled: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  open: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  openBrowserTab: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  reload: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  rename: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  del: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  duplicate: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  restoreCheckpoint: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  save: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  saveAll: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  saveAs: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  download: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  toggleAutosave: {
-    id: string;
-    disposable: IDisposable;
-  };
-
-  showInFileBrowser: {
-    id: string;
-    disposable: IDisposable;
-  };
+  deleteFile: ICommandDisposable;
+  newUntitled: ICommandDisposable;
+  open: ICommandDisposable;
+  reload: ICommandDisposable;
+  restoreCheckpoint: ICommandDisposable;
+  save: ICommandDisposable;
+  saveAll: ICommandDisposable;
+  saveAs: ICommandDisposable;
+  toggleAutosave: ICommandDisposable;
 }

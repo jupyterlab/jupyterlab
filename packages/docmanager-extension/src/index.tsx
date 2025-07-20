@@ -29,6 +29,7 @@ import {
 import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  ICommandDisposable,
   IDocManagerCommands,
   IDocumentManager,
   IDocumentWidgetOpener,
@@ -1105,14 +1106,22 @@ function addCommands(
     });
   }
   // Return commands with their disposables
-  return Object.keys(CommandIDs).reduce((acc, key) => {
-    const id = (CommandIDs as any)[key];
-    acc[key as keyof typeof CommandIDs] = {
-      id,
-      disposable: commandDisposables[id]
-    };
+  type PartialCmds = Partial<
+    Record<keyof typeof CommandIDs, ICommandDisposable>
+  >;
+
+  const partial = (
+    Object.keys(CommandIDs) as Array<keyof typeof CommandIDs>
+  ).reduce((acc, key) => {
+    const id = CommandIDs[key];
+    const disp = commandDisposables[id];
+    if (disp) {
+      acc[key] = Object.assign(disp, { id });
+    }
     return acc;
-  }, {} as IDocManagerCommands);
+  }, {} as PartialCmds);
+
+  return partial as IDocManagerCommands;
 }
 
 function addLabCommands(
