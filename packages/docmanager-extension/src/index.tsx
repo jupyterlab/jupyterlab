@@ -29,6 +29,8 @@ import {
 import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  ICommandDisposable,
+  IDocManagerCommands,
   IDocumentManager,
   IDocumentWidgetOpener,
   IRecentsManager,
@@ -216,12 +218,13 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
 /**
  * The default document manager provider commands and settings.
  */
-const docManagerPlugin: JupyterFrontEndPlugin<void> = {
+const docManagerPlugin: JupyterFrontEndPlugin<IDocManagerCommands> = {
   id: docManagerPluginId,
   description: 'Adds commands and settings to the document manager.',
   autoStart: true,
   requires: [IDocumentManager, IDocumentWidgetOpener, ISettingRegistry],
   optional: [ITranslator, ICommandPalette, ILabShell],
+  provides: IDocManagerCommands,
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
@@ -230,13 +233,13 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     translator: ITranslator | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null
-  ): void => {
+  ): IDocManagerCommands => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
     const registry = app.docRegistry;
 
     // Register the file operations commands.
-    addCommands(
+    const commandDisposables = addCommands(
       app,
       docManager,
       widgetOpener,
@@ -382,6 +385,7 @@ Available file types:
     registry.changed.connect(() =>
       settingRegistry.load(docManagerPluginId, true)
     );
+    return commandDisposables;
   }
 };
 
@@ -644,10 +648,11 @@ function addCommands(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null
-): void {
+): IDocManagerCommands {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const category = trans.__('File Operations');
+  const commandDisposables: { [key: string]: IDisposable } = {};
   const isEnabled = () => {
     const { currentWidget } = shell;
     return !!(currentWidget && docManager.contextForWidget(currentWidget));
@@ -674,42 +679,49 @@ function addCommands(
     addLabCommands(app, docManager, labShell, widgetOpener, translator);
   }
 
-  commands.addCommand(CommandIDs.deleteFile, {
-    label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
-    execute: args => {
-      const path =
-        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+  commandDisposables[CommandIDs.deleteFile] = commands.addCommand(
+    CommandIDs.deleteFile,
+    {
+      label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
+      execute: args => {
+        const path =
+          typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
 
-      if (!path) {
-        const command = CommandIDs.deleteFile;
-        throw new Error(`A non-empty path is required for ${command}.`);
+        if (!path) {
+          const command = CommandIDs.deleteFile;
+          throw new Error(`A non-empty path is required for ${command}.`);
+        }
+        return docManager.deleteFile(path);
       }
-      return docManager.deleteFile(path);
     }
-  });
+  );
 
-  commands.addCommand(CommandIDs.newUntitled, {
-    execute: async args => {
-      const errorTitle = (args['error'] as string) || trans.__('Error');
-      const path =
-        typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
-      const options: Partial<Contents.ICreateOptions> = {
-        type: args['type'] as Contents.ContentType,
-        path
-      };
+  commandDisposables[CommandIDs.newUntitled] = commands.addCommand(
+    CommandIDs.newUntitled,
+    {
+      execute: async args => {
+        const errorTitle = (args['error'] as string) || trans.__('Error');
+        const path =
+          typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
+        const options: Partial<Contents.ICreateOptions> = {
+          type: args['type'] as Contents.ContentType,
+          path
+        };
 
-      if (args['type'] === 'file') {
-        options.ext = (args['ext'] as string) || '.txt';
-      }
+        if (args['type'] === 'file') {
+          options.ext = (args['ext'] as string) || '.txt';
+        }
 
-      return docManager.services.contents
-        .newUntitled(options)
-        .catch(error => showErrorMessage(errorTitle, error));
-    },
-    label: args => (args['label'] as string) || `New ${args['type'] as string}`
-  });
+        return docManager.services.contents
+          .newUntitled(options)
+          .catch(error => showErrorMessage(errorTitle, error));
+      },
+      label: args =>
+        (args['label'] as string) || `New ${args['type'] as string}`
+    }
+  );
 
-  commands.addCommand(CommandIDs.open, {
+  commandDisposables[CommandIDs.open] = commands.addCommand(CommandIDs.open, {
     execute: async args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -728,116 +740,122 @@ function addCommands(
     mnemonic: args => (args['mnemonic'] as number) || -1
   });
 
-  commands.addCommand(CommandIDs.reload, {
-    label: () =>
-      trans.__(
-        'Reload %1 from Disk',
-        fileType(shell.currentWidget, docManager)
-      ),
-    caption: trans.__('Reload contents from disk'),
-    isEnabled,
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (!isEnabled()) {
-        return;
-      }
-      const context = docManager.contextForWidget(shell.currentWidget!);
-      const type = fileType(shell.currentWidget!, docManager);
-      if (!context) {
-        return showDialog({
-          title: trans.__('Cannot Reload'),
-          body: trans.__('No context found for current widget!'),
-          buttons: [Dialog.okButton()]
-        });
-      }
-      if (context.model.dirty) {
-        return showDialog({
-          title: trans.__('Reload %1 from Disk', type),
-          body: trans.__(
-            'Are you sure you want to reload the %1 from the disk?',
-            type
-          ),
-          buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({ label: trans.__('Reload') })
-          ]
-        }).then(result => {
-          if (result.button.accept && !context.isDisposed) {
-            return context.revert();
-          }
-        });
-      } else {
-        if (!context.isDisposed) {
-          return context.revert();
-        }
-      }
-    }
-  });
-
-  commands.addCommand(CommandIDs.restoreCheckpoint, {
-    label: () =>
-      trans.__(
-        'Revert %1 to Checkpoint…',
-        fileType(shell.currentWidget, docManager)
-      ),
-    caption: trans.__('Revert contents to previous checkpoint'),
-    isEnabled,
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (!isEnabled()) {
-        return;
-      }
-      const context = docManager.contextForWidget(shell.currentWidget!);
-      if (!context) {
-        return showDialog({
-          title: trans.__('Cannot Revert'),
-          body: trans.__('No context found for current widget!'),
-          buttons: [Dialog.okButton()]
-        });
-      }
-      return context.listCheckpoints().then(async checkpoints => {
-        const type = fileType(shell.currentWidget, docManager);
-        if (checkpoints.length < 1) {
-          await showErrorMessage(
-            trans.__('No checkpoints'),
-            trans.__('No checkpoints are available for this %1.', type)
-          );
+  commandDisposables[CommandIDs.reload] = commands.addCommand(
+    CommandIDs.reload,
+    {
+      label: () =>
+        trans.__(
+          'Reload %1 from Disk',
+          fileType(shell.currentWidget, docManager)
+        ),
+      caption: trans.__('Reload contents from disk'),
+      isEnabled,
+      execute: () => {
+        // Checks that shell.currentWidget is valid:
+        if (!isEnabled()) {
           return;
         }
-        const targetCheckpoint =
-          checkpoints.length === 1
-            ? checkpoints[0]
-            : await Private.getTargetCheckpoint(checkpoints.reverse(), trans);
-
-        if (!targetCheckpoint) {
-          return;
+        const context = docManager.contextForWidget(shell.currentWidget!);
+        const type = fileType(shell.currentWidget!, docManager);
+        if (!context) {
+          return showDialog({
+            title: trans.__('Cannot Reload'),
+            body: trans.__('No context found for current widget!'),
+            buttons: [Dialog.okButton()]
+          });
         }
-        return showDialog({
-          title: trans.__('Revert %1 to checkpoint', type),
-          body: new RevertConfirmWidget(targetCheckpoint, trans, type),
-          buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({
-              label: trans.__('Revert'),
-              ariaLabel: trans.__('Revert to Checkpoint')
-            })
-          ]
-        }).then(result => {
-          if (context.isDisposed) {
-            return;
-          }
-          if (result.button.accept) {
-            if (context.model.readOnly) {
+        if (context.model.dirty) {
+          return showDialog({
+            title: trans.__('Reload %1 from Disk', type),
+            body: trans.__(
+              'Are you sure you want to reload the %1 from the disk?',
+              type
+            ),
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.warnButton({ label: trans.__('Reload') })
+            ]
+          }).then(result => {
+            if (result.button.accept && !context.isDisposed) {
               return context.revert();
             }
-            return context
-              .restoreCheckpoint(targetCheckpoint.id)
-              .then(() => context.revert());
+          });
+        } else {
+          if (!context.isDisposed) {
+            return context.revert();
           }
-        });
-      });
+        }
+      }
     }
-  });
+  );
+
+  commandDisposables[CommandIDs.restoreCheckpoint] = commands.addCommand(
+    CommandIDs.restoreCheckpoint,
+    {
+      label: () =>
+        trans.__(
+          'Revert %1 to Checkpoint…',
+          fileType(shell.currentWidget, docManager)
+        ),
+      caption: trans.__('Revert contents to previous checkpoint'),
+      isEnabled,
+      execute: () => {
+        // Checks that shell.currentWidget is valid:
+        if (!isEnabled()) {
+          return;
+        }
+        const context = docManager.contextForWidget(shell.currentWidget!);
+        if (!context) {
+          return showDialog({
+            title: trans.__('Cannot Revert'),
+            body: trans.__('No context found for current widget!'),
+            buttons: [Dialog.okButton()]
+          });
+        }
+        return context.listCheckpoints().then(async checkpoints => {
+          const type = fileType(shell.currentWidget, docManager);
+          if (checkpoints.length < 1) {
+            await showErrorMessage(
+              trans.__('No checkpoints'),
+              trans.__('No checkpoints are available for this %1.', type)
+            );
+            return;
+          }
+          const targetCheckpoint =
+            checkpoints.length === 1
+              ? checkpoints[0]
+              : await Private.getTargetCheckpoint(checkpoints.reverse(), trans);
+
+          if (!targetCheckpoint) {
+            return;
+          }
+          return showDialog({
+            title: trans.__('Revert %1 to checkpoint', type),
+            body: new RevertConfirmWidget(targetCheckpoint, trans, type),
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.warnButton({
+                label: trans.__('Revert'),
+                ariaLabel: trans.__('Revert to Checkpoint')
+              })
+            ]
+          }).then(result => {
+            if (context.isDisposed) {
+              return;
+            }
+            if (result.button.accept) {
+              if (context.model.readOnly) {
+                return context.revert();
+              }
+              return context
+                .restoreCheckpoint(targetCheckpoint.id)
+                .then(() => context.revert());
+            }
+          });
+        });
+      }
+    }
+  );
 
   const caption = () => {
     if (shell.currentWidget) {
@@ -853,7 +871,7 @@ function addCommands(
 
   const saveInProgress = new WeakSet<DocumentRegistry.Context>();
 
-  commands.addCommand(CommandIDs.save, {
+  commandDisposables[CommandIDs.save] = commands.addCommand(CommandIDs.save, {
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
@@ -969,74 +987,80 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.saveAll, {
-    label: () => trans.__('Save All'),
-    caption: trans.__('Save all open documents'),
-    isEnabled: () => {
-      return some(
-        shell.widgets('main'),
-        w => docManager.contextForWidget(w)?.contentsModel?.writable ?? false
-      );
-    },
-    execute: () => {
-      const promises: Promise<void>[] = [];
-      const paths = new Set<string>(); // Cache so we don't double save files.
-      for (const widget of shell.widgets('main')) {
-        const context = docManager.contextForWidget(widget);
-        if (context && !paths.has(context.path)) {
-          if (context.contentsModel?.writable) {
-            paths.add(context.path);
-            promises.push(context.save());
-          } else {
-            readonlyNotification(context.path);
+  commandDisposables[CommandIDs.saveAll] = commands.addCommand(
+    CommandIDs.saveAll,
+    {
+      label: () => trans.__('Save All'),
+      caption: trans.__('Save all open documents'),
+      isEnabled: () => {
+        return some(
+          shell.widgets('main'),
+          w => docManager.contextForWidget(w)?.contentsModel?.writable ?? false
+        );
+      },
+      execute: () => {
+        const promises: Promise<void>[] = [];
+        const paths = new Set<string>(); // Cache so we don't double save files.
+        for (const widget of shell.widgets('main')) {
+          const context = docManager.contextForWidget(widget);
+          if (context && !paths.has(context.path)) {
+            if (context.contentsModel?.writable) {
+              paths.add(context.path);
+              promises.push(context.save());
+            } else {
+              readonlyNotification(context.path);
+            }
           }
         }
+        return Promise.all(promises);
       }
-      return Promise.all(promises);
     }
-  });
+  );
 
-  commands.addCommand(CommandIDs.saveAs, {
-    label: () =>
-      trans.__('Save %1 As…', fileType(shell.currentWidget, docManager)),
-    caption: trans.__('Save with new path'),
-    isEnabled,
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (isEnabled()) {
-        const context = docManager.contextForWidget(shell.currentWidget!);
-        if (!context) {
-          return showDialog({
-            title: trans.__('Cannot Save'),
-            body: trans.__('No context found for current widget!'),
-            buttons: [Dialog.okButton()]
-          });
-        }
-
-        const onChange = (
-          sender: Contents.IManager,
-          args: Contents.IChangedArgs
-        ) => {
-          if (
-            args.type === 'save' &&
-            args.newValue &&
-            args.newValue.path !== context.path
-          ) {
-            void docManager.closeFile(context.path);
-            void commands.execute(CommandIDs.open, {
-              path: args.newValue.path
+  commandDisposables[CommandIDs.saveAs] = commands.addCommand(
+    CommandIDs.saveAs,
+    {
+      label: () =>
+        trans.__('Save %1 As…', fileType(shell.currentWidget, docManager)),
+      caption: trans.__('Save with new path'),
+      isEnabled,
+      execute: () => {
+        // Checks that shell.currentWidget is valid:
+        if (isEnabled()) {
+          const context = docManager.contextForWidget(shell.currentWidget!);
+          if (!context) {
+            return showDialog({
+              title: trans.__('Cannot Save'),
+              body: trans.__('No context found for current widget!'),
+              buttons: [Dialog.okButton()]
             });
           }
-        };
-        docManager.services.contents.fileChanged.connect(onChange);
-        void context
-          .saveAs()
-          .finally(() =>
-            docManager.services.contents.fileChanged.disconnect(onChange)
-          );
+
+          const onChange = (
+            sender: Contents.IManager,
+            args: Contents.IChangedArgs
+          ) => {
+            if (
+              args.type === 'save' &&
+              args.newValue &&
+              args.newValue.path !== context.path
+            ) {
+              void docManager.closeFile(context.path);
+              void commands.execute(CommandIDs.open, {
+                path: args.newValue.path
+              });
+            }
+          };
+          docManager.services.contents.fileChanged.connect(onChange);
+          void context
+            .saveAs()
+            .finally(() =>
+              docManager.services.contents.fileChanged.disconnect(onChange)
+            );
+        }
       }
     }
-  });
+  );
 
   app.shell.currentChanged?.connect(() => {
     [
@@ -1050,21 +1074,24 @@ function addCommands(
     });
   });
 
-  commands.addCommand(CommandIDs.toggleAutosave, {
-    label: trans.__('Autosave Documents'),
-    isToggled: () => docManager.autosave,
-    execute: () => {
-      const value = !docManager.autosave;
-      const key = 'autosave';
-      return settingRegistry
-        .set(docManagerPluginId, key, value)
-        .catch((reason: Error) => {
-          console.error(
-            `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
-          );
-        });
+  commandDisposables[CommandIDs.toggleAutosave] = commands.addCommand(
+    CommandIDs.toggleAutosave,
+    {
+      label: trans.__('Autosave Documents'),
+      isToggled: () => docManager.autosave,
+      execute: () => {
+        const value = !docManager.autosave;
+        const key = 'autosave';
+        return settingRegistry
+          .set(docManagerPluginId, key, value)
+          .catch((reason: Error) => {
+            console.error(
+              `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
+            );
+          });
+      }
     }
-  });
+  );
 
   if (palette) {
     [
@@ -1078,6 +1105,23 @@ function addCommands(
       palette.addItem({ command, category });
     });
   }
+  // Return commands with their disposables
+  type PartialCmds = Partial<
+    Record<keyof typeof CommandIDs, ICommandDisposable>
+  >;
+
+  const partial = (
+    Object.keys(CommandIDs) as Array<keyof typeof CommandIDs>
+  ).reduce((acc, key) => {
+    const id = CommandIDs[key];
+    const disp = commandDisposables[id];
+    if (disp) {
+      acc[key] = Object.assign(disp, { id });
+    }
+    return acc;
+  }, {} as PartialCmds);
+
+  return partial as IDocManagerCommands;
 }
 
 function addLabCommands(

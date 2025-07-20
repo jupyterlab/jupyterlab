@@ -349,3 +349,33 @@ export type RecentDocument = {
    */
   factory?: string;
 };
+
+/**
+ * The token that indicates the default document manager commands are loaded.
+ */
+export const IDocManagerCommands = new Token<IDocManagerCommands>(
+  '@jupyterlab/docmanager:IDocManagerCommands',
+  'A token to ensure document manager commands are loaded and provide access to their disposables.'
+);
+
+/**
+ * Disposable command interface with identifier.
+ */
+export interface ICommandDisposable extends IDisposable {
+  id: string;
+}
+
+/**
+ * The identifiers and disposables of loaded document manager commands exposed for reuse.
+ */
+export interface IDocManagerCommands {
+  deleteFile: ICommandDisposable;
+  newUntitled: ICommandDisposable;
+  open: ICommandDisposable;
+  reload: ICommandDisposable;
+  restoreCheckpoint: ICommandDisposable;
+  save: ICommandDisposable;
+  saveAll: ICommandDisposable;
+  saveAs: ICommandDisposable;
+  toggleAutosave: ICommandDisposable;
+}
