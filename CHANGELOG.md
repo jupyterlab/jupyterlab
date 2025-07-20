@@ -484,6 +484,37 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.5
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.4...5c433d7b6dc090db623e70b9cedc7b85f1b13eae))
+
+### Bugs fixed
+
+- Fix scrollbar behaviour when scrolling past long cell in full windowing mode [#17705](https://github.com/jupyterlab/jupyterlab/pull/17705) ([@krassowski](https://github.com/krassowski))
+- Update `@codemirror/view` to `v6.38.1`, fixing `lineWrap` in `defer` mode [#17698](https://github.com/jupyterlab/jupyterlab/pull/17698) ([@krassowski](https://github.com/krassowski))
+- Fix auto completion on irrelevant cell types [#17693](https://github.com/jupyterlab/jupyterlab/pull/17693) ([@itsmevichu](https://github.com/itsmevichu))
+- Do not change silently when executing an empty cell [#17701](https://github.com/jupyterlab/jupyterlab/pull/17701) ([@brichet](https://github.com/brichet))
+- Reduce UI blocking time when saving large notebooks by using file stream [#17707](https://github.com/jupyterlab/jupyterlab/pull/17707) ([@krassowski](https://github.com/krassowski))
+- Normalize `ToolbarButtonComponent` dataset attributes with the `data-` prefix [#17703](https://github.com/jupyterlab/jupyterlab/pull/17703) ([@RRosio](https://github.com/RRosio))
+- Fixes for accessibility issues reported on missing ARIA roles [#17591](https://github.com/jupyterlab/jupyterlab/pull/17591) ([@nkn2022](https://github.com/nkn2022))
+- Fix `threadId` being passed to the debugger [#17667](https://github.com/jupyterlab/jupyterlab/pull/17667) ([@kr-2003](https://github.com/kr-2003))
+
+### Maintenance and upkeep improvements
+
+- Bump brace-expansion from 1.1.11 to 1.1.12 [#17699](https://github.com/jupyterlab/jupyterlab/pull/17699) ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+### Documentation improvements
+
+- Documentation for Kernel Subshells [#17623](https://github.com/jupyterlab/jupyterlab/pull/17623) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-06-28&to=2025-07-20&type=c))
+
+[@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-06-28..2025-07-20&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-06-28..2025-07-20&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2025-06-28..2025-07-20&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-06-28..2025-07-20&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-06-28..2025-07-20&type=Issues) | [@kr-2003](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akr-2003+updated%3A2025-06-28..2025-07-20&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-06-28..2025-07-20&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-06-28..2025-07-20&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-06-28..2025-07-20&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-06-28..2025-07-20&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.4
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.3...3d687a5e0435ca1df6c85c534ab8f7a6429948ff))
@@ -512,8 +543,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-05-26&to=2025-06-28&type=c))
 
 [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-05-26..2025-06-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-05-26..2025-06-28&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-05-26..2025-06-28&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-05-26..2025-06-28&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-05-26..2025-06-28&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-05-26..2025-06-28&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.3
 
