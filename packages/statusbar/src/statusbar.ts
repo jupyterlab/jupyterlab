@@ -29,6 +29,8 @@ export class StatusBar extends Widget implements IStatusBar {
     middlePanel.addClass('jp-StatusBar-Middle');
     rightPanel.addClass('jp-StatusBar-Right');
 
+    rightPanel.node.style.flexDirection = 'row';
+
     rootLayout.addWidget(leftPanel);
     rootLayout.addWidget(middlePanel);
     rootLayout.addWidget(rightPanel);
@@ -78,7 +80,10 @@ export class StatusBar extends Widget implements IStatusBar {
         this._leftSide.insertWidget(insertIndex, item);
       }
     } else if (align === 'right') {
-      const insertIndex = this._findInsertIndex(this._rightRankItems, rankItem);
+      const insertIndex = ArrayExt.findFirstIndex(
+        this._rightRankItems,
+        item => item.rank < rankItem.rank
+      );
       if (insertIndex === -1) {
         this._rightSide.addWidget(item);
         this._rightRankItems.push(rankItem);
