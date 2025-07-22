@@ -13,6 +13,7 @@ import {
   ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
+import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
@@ -72,6 +73,10 @@ class FooCompletionProvider implements ICompletionProvider {
     changed: SourceChange,
     context?: ICompletionContext
   ) {
+    const mimeType = context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
+    }
     return this._continuousHint;
   }
 }
@@ -374,7 +379,6 @@ describe('@jupyterlab/completer', () => {
 
       it('should use Invoked for invoke()', async () => {
         expect(provider.triggers.length).toEqual(0);
-
         handler.editor!.model.sharedModel.setSource('foo.');
         anchor.node.focus();
         await new Promise(process.nextTick);
@@ -465,6 +469,67 @@ describe('@jupyterlab/completer', () => {
       expect(editor.getCursorPosition()).toEqual({
         line,
         column: column + 6
+      });
+    });
+
+    describe('#autoCompletion (non-code cells)', () => {
+      let anchor: CodeEditorWrapper;
+      let provider: FooCompletionProvider;
+      let handler: CompletionHandler;
+      let context: symbol;
+
+      beforeEach(() => {
+        anchor = createEditorWidget();
+        Widget.attach(anchor, document.body);
+
+        context = { editor: anchor.editor } as any;
+        provider = new FooCompletionProvider(true);
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: context as any,
+            providers: [provider],
+            timeout: 0
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+
+        handler.editor = anchor.editor;
+        handler.autoCompletion = true;
+      });
+
+      afterEach(() => {
+        handler.completer.dispose();
+        handler.dispose();
+        anchor.dispose();
+      });
+
+      it('should NOT trigger automcompletion for markdown mimeType', async () => {
+        handler.editor!.model.mimeType = 'text/x-ipythongfm';
+
+        anchor.node.focus();
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers).toHaveLength(0);
+      });
+
+      it('should NOT trigger automcompletion for text mimeType', async () => {
+        handler.editor!.model.mimeType = 'text/plain';
+
+        anchor.node.focus();
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers).toHaveLength(0);
       });
     });
   });
