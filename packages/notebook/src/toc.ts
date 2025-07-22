@@ -289,6 +289,9 @@ export class NotebookToCModel extends TableOfContentsModel<
 
       if (headings.length > 0) {
         this._cellToHeadingIndex.set(cell, headings.length - 1);
+      } else {
+        // If no headings were found, remove the cell from the map
+        this._cellToHeadingIndex.delete(cell);
       }
     }
     this.updateRunningStatus(headings);
