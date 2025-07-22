@@ -177,6 +177,20 @@ def get_app_dir():
     ):
         app_dir = "/usr/local/share/jupyter/lab"
 
+    # Check for a path relative to the site-packages directory, e.g.,
+    # `<prefix>/lib/python3.13/site-packages/jupyterlab/../../../..` This is
+    # useful for cases where the the `jupyterlab` module is outside the current
+    # Python environment, which can occur via various Python path manipulations.
+    elif not osp.exists(app_dir):
+        maybe_app_dir = pjoin(
+            osp.dirname(osp.dirname(osp.dirname(osp.dirname(HERE)))),
+            "share",
+            "jupyter",
+            "lab",
+        )
+        if osp.exists(maybe_app_dir):
+            app_dir = maybe_app_dir
+
     # We must resolve the path to get the canonical case of the path for
     # case-sensitive systems
     return str(Path(app_dir).resolve())
