@@ -2481,6 +2481,10 @@ export class DirListing extends Widget {
         this.selection[path] = true;
       }
     }
+    // Emit the signal once for all items that were selected.
+    if (existing.length > 0) {
+      this._selectionChanged.emit();
+    }
     if (this.isVisible) {
       // Update the sorted items.
       this.sort(this.sortState);
