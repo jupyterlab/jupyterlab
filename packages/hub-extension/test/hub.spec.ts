@@ -2,15 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { acceptDialog, waitForDialog } from '@jupyterlab/testing';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import extensions, { CommandIDs } from '@jupyterlab/hub-extension';
+
+async function getDialogIframeURL() {
+  await waitForDialog();
+  const dialog = document.getElementsByClassName('jp-Dialog')[0];
+  const iframe = dialog.querySelector('iframe');
+  return new URL(iframe?.src || '');
+}
 
 describe('@jupyterlab/hub-extension', () => {
   // Mock path parameters
   const hubPrefix = '/hub';
   const hubUser = 'test_user';
   const hubServerName = 'test_server';
+  const app = '/lab';
 
   // Extension in test
   const hubExtension = extensions[0];
@@ -46,7 +55,8 @@ describe('@jupyterlab/hub-extension', () => {
     it('should add hub commands to registry', async () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
-        hubPrefix
+        hubPrefix,
+        app
       });
 
       expect(commands.hasCommand(CommandIDs.controlPanel)).toBeTruthy();
@@ -57,7 +67,8 @@ describe('@jupyterlab/hub-extension', () => {
     it('should not add hub commands when hubPrefix is empty', async () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
-        hubPrefix: ''
+        hubPrefix: '',
+        app
       });
 
       expect(commands.hasCommand(CommandIDs.controlPanel)).toBeFalsy();
@@ -70,28 +81,66 @@ describe('@jupyterlab/hub-extension', () => {
       void activateHubExtension(commands, {
         hubPrefix,
         hubUser,
-        hubServerName
+        hubServerName,
+        app
       });
 
-      await commands.execute(CommandIDs.restart);
-      expect(windowOpenSpy).toHaveBeenCalledWith(
-        `${hubPrefix}/spawn/${hubUser}/${hubServerName}`,
-        '_blank'
+      const commandPromise = commands.execute(CommandIDs.restart);
+      const url = await getDialogIframeURL();
+      expect(url.pathname).toBe(
+        `${hubPrefix}/spawn/${hubUser}/${hubServerName}`
       );
+      await acceptDialog();
+      await commandPromise;
     });
 
     it('should set spawn URL for default server when hubServerName is empty', async () => {
       let commands = new CommandRegistry();
       void activateHubExtension(commands, {
         hubPrefix,
-        hubUser
+        hubUser,
+        app
       });
 
-      await commands.execute(CommandIDs.restart);
+      const commandPromise = commands.execute(CommandIDs.restart);
+      const url = await getDialogIframeURL();
+      expect(url.pathname).toBe(`${hubPrefix}/spawn`);
+      await acceptDialog();
+      await commandPromise;
+    });
+
+    it('should open the spawn URL in a new window if there is an error from the iframe', async () => {
+      const createElement = document.createElement;
+      jest.spyOn(document, 'createElement').mockImplementation(elementType => {
+        let element = createElement.call(document, elementType);
+        if (elementType === 'iframe') {
+          jest.spyOn(element, 'contentWindow', 'get').mockImplementation(() => {
+            throw new Error('Mocked iframe navigation error');
+          });
+        }
+        return element;
+      });
+
+      let commands = new CommandRegistry();
+      void activateHubExtension(commands, {
+        hubPrefix,
+        hubUser,
+        app
+      });
+
+      const commandPromise = commands.execute(CommandIDs.restart);
+      await waitForDialog(); // So that we can get the iframe
+      const dialog = document.getElementsByClassName('jp-Dialog')[0];
+      const iframe = dialog.querySelector('iframe');
+      iframe?.dispatchEvent(new Event('load')); // Triggers an error
+      await commandPromise; // Wait for dialog to close and navigation
+
       expect(windowOpenSpy).toHaveBeenCalledWith(
         `${hubPrefix}/spawn`,
         '_blank'
       );
+
+      document.createElement = createElement;
     });
 
     it('should set correct hub home URL', async () => {
@@ -99,7 +148,8 @@ describe('@jupyterlab/hub-extension', () => {
       void activateHubExtension(commands, {
         hubPrefix,
         hubUser,
-        hubServerName
+        hubServerName,
+        app
       });
 
       await commands.execute(CommandIDs.controlPanel);
@@ -112,7 +162,8 @@ describe('@jupyterlab/hub-extension', () => {
         await activateHubExtension(commands, {
           hubPrefix,
           hubUser: '../',
-          hubServerName
+          hubServerName,
+          app
         });
       };
       await expect(callback).rejects.toThrow();
@@ -124,7 +175,8 @@ describe('@jupyterlab/hub-extension', () => {
         await activateHubExtension(commands, {
           hubPrefix,
           hubUser,
-          hubServerName: '../../'
+          hubServerName: '../../',
+          app
         });
       };
       await expect(callback).rejects.toThrow();
