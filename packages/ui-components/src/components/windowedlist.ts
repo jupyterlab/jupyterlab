@@ -421,8 +421,6 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         return currentOffset;
       } else if (alignPreference !== undefined) {
         align = alignPreference;
-      } else if (crossingBottomEdge || bottomEdge <= itemBottom) {
-        align = 'end';
       } else {
         align = 'start';
       }
