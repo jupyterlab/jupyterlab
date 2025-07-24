@@ -1355,6 +1355,8 @@ namespace Private {
       if (hash === href) {
         anchor.target = '_self';
 
+        // Add a listener on the anchor to scroll to the target, even if its id
+        // attribute has been removed by the sanitizer.
         anchor.onclick = event => {
           const target = event.target as HTMLAnchorElement;
           const anchorTargetId = target.href.split('#').slice(-1)[0];
