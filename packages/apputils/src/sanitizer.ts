@@ -741,6 +741,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       allowedAttributes: {
         '*': [
           'class',
+          'data-jupyter-id',
           'dir',
           'draggable',
           'hidden',

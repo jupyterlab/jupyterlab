@@ -1354,6 +1354,16 @@ namespace Private {
       // Handle internal link in the file.
       if (hash === href) {
         anchor.target = '_self';
+
+        anchor.onclick = event => {
+          const target = event.target as HTMLAnchorElement;
+          const anchorTargetId = target.href.split('#').slice(-1)[0];
+          const anchorTarget = document.querySelector(
+            `[data-jupyter-id="${anchorTargetId}"]`
+          );
+          anchorTarget?.scrollIntoView();
+        };
+
         return;
       }
       // For external links, remove the hash until we have hash handling.
