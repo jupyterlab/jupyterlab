@@ -337,6 +337,9 @@ export class OutputArea extends Widget {
           }
         }
         break;
+      case 'clear':
+        this._clear();
+        break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
         break;
