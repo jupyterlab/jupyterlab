@@ -16,6 +16,9 @@
       "path": "../codemirror"
     },
     {
+      "path": "../fileeditor"
+    },
+    {
       "path": "../settingregistry"
     },
     {
@@ -26,9 +29,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../fileeditor"
     }
   ]
 }

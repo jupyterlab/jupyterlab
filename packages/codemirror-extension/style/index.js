@@ -10,3 +10,4 @@ import '@jupyterlab/statusbar/style/index.js';
 import '@jupyterlab/codeeditor/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/codemirror/style/index.js';
+import '@jupyterlab/fileeditor/style/index.js';

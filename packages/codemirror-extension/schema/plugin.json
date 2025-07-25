@@ -26,38 +26,51 @@
       "command": "codemirror:select-next-occurrence",
       "keys": ["Accel Shift D"],
       "selector": ".cm-content"
-    },
-    {
-      "command": "codemirror:fold-current",
-      "keys": ["Accel Shift ["],
-      "selector": ".cm-content"
-    },
-    {
-      "command": "codemirror:unfold-current",
-      "keys": ["Accel Shift ]"],
-      "selector": ".cm-content"
-    },
-    {
-      "command": "codemirror:fold-subregions",
-      "keys": ["Accel K", "Accel F"],
-      "selector": ".cm-content"
-    },
-    {
-      "command": "codemirror:unfold-subregions",
-      "keys": ["Accel K", "Accel U"],
-      "selector": ".cm-content"
-    },
-    {
-      "command": "codemirror:fold-all",
-      "keys": ["Accel K", "Accel 0"],
-      "selector": ".cm-content"
-    },
-    {
-      "command": "codemirror:unfold-all",
-      "keys": ["Accel K", "Accel J"],
-      "selector": ".cm-content"
     }
   ],
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "submenu",
+            "rank": 10,
+            "submenu": {
+              "id": "jp-mainmenu-codefold",
+              "label": "Code fold",
+              "items": [
+                {
+                  "command": "codemirror:fold-current",
+                  "rank": 1
+                },
+                {
+                  "command": "codemirror:unfold-current",
+                  "rank": 2
+                },
+                {
+                  "command": "codemirror:fold-subregions",
+                  "rank": 3
+                },
+                {
+                  "command": "codemirror:unfold-subregions",
+                  "rank": 4
+                },
+                {
+                  "command": "codemirror:fold-all",
+                  "rank": 5
+                },
+                {
+                  "command": "codemirror:unfold-all",
+                  "rank": 6
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {

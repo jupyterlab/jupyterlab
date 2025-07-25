@@ -14,6 +14,7 @@ import {
   foldAll,
   foldCode,
   foldEffect,
+  foldState,
   unfoldAll,
   unfoldCode,
   unfoldEffect
@@ -25,7 +26,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * Identifiers of commands.
@@ -57,11 +58,11 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
   description:
     'Registers commands acting on selected/active CodeMirror editor.',
   autoStart: true,
-  requires: [IEditorTracker],
+  requires: [INotebookTracker],
   optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
-    tracker: IEditorTracker,
+    tracker: INotebookTracker,
     translator: ITranslator | null
   ): void => {
     translator = translator ?? nullTranslator;
@@ -156,6 +157,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.foldCurrent, {
       label: trans.__('Fold Current Region'),
       execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        if (!notebook || !notebook.activeCell) {
+          return;
+        }
+        notebook.mode = 'edit';
+        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -173,6 +180,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.unfoldCurrent, {
       label: trans.__('Unfold Current Region'),
       execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        if (!notebook || !notebook.activeCell) {
+          return;
+        }
+        notebook.mode = 'edit';
+        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -186,33 +199,87 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
     app.commands.addCommand(CommandIDs.foldSubregions, {
       label: trans.__('Fold All Subregions'),
       execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        if (!notebook || !notebook.activeCell) {
+          return;
+        }
+        notebook.mode = 'edit';
+        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
         }
         try {
-          foldAll(view);
+          const { state } = view;
+          const pos = state.selection.main.head;
+          const line = state.doc.lineAt(pos);
+          const topRegion = foldable(state, line.from, line.to);
+          if (!topRegion) {
+            return;
+          }
+          const effects: Array<ReturnType<typeof foldEffect.of>> = [];
+          let subPos = topRegion.from + 1;
+          while (subPos < topRegion.to) {
+            const subLine = state.doc.lineAt(subPos);
+            const subRange = foldable(state, subLine.from, subLine.to);
+            if (
+              subRange &&
+              subRange.from > topRegion.from &&
+              subRange.to <= topRegion.to
+            ) {
+              effects.push(foldEffect.of(subRange));
+              subPos = subRange.to;
+            } else {
+              subPos = subLine.to + 1;
+            }
+          }
+          if (effects.length > 0) {
+            view.dispatch({ effects });
+          }
         } catch (e) {
-          // ignore
+          // Silent fail
         }
       }
     });
-
     app.commands.addCommand(CommandIDs.unfoldSubregions, {
       label: trans.__('Unfold All Subregions'),
       execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        if (!notebook || !notebook.activeCell) {
+          return;
+        }
+        notebook.mode = 'edit';
+        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
         }
         try {
-          unfoldAll(view);
+          const { state } = view;
+          const pos = state.selection.main.head;
+          const line = state.doc.lineAt(pos);
+          const topRegion = foldable(state, line.from, line.to);
+          if (!topRegion) {
+            return;
+          }
+          const foldedRanges = state.field(foldState, false);
+          if (!foldedRanges) {
+            return;
+          }
+          const effects: Array<ReturnType<typeof unfoldEffect.of>> = [];
+          foldedRanges.between(topRegion.from + 1, topRegion.to, (from, to) => {
+            if (from > topRegion.from && to <= topRegion.to) {
+              effects.push(unfoldEffect.of({ from, to }));
+            }
+          });
+          if (effects.length > 0) {
+            view.dispatch({ effects });
+          }
         } catch (e) {
-          // ignore
+          // Silent fail
         }
       }
     });
@@ -220,16 +287,20 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.foldAll, {
       label: trans.__('Fold All Regions'),
       execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        if (!notebook || !notebook.activeCell) {
+          return;
+        }
+        notebook.mode = 'edit';
+        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
         }
         try {
-          view.dispatch({
-            effects: foldEffect.of({ from: 0, to: view.state.doc.length })
-          });
+          foldAll(view);
         } catch (e) {
-          // ignore
+          // Silent fail
         }
       }
     });
@@ -237,16 +308,20 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.unfoldAll, {
       label: trans.__('Unfold All Regions'),
       execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        if (!notebook || !notebook.activeCell) {
+          return;
+        }
+        notebook.mode = 'edit';
+        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
         }
         try {
-          view.dispatch({
-            effects: unfoldEffect.of({ from: 0, to: view.state.doc.length })
-          });
+          unfoldAll(view);
         } catch (e) {
-          // ignore
+          // Silent fail
         }
       }
     });
