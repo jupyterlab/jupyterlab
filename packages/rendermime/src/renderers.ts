@@ -82,7 +82,12 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
 
   // Patch the urls if a resolver is available.
   if (resolver) {
-    await Private.handleUrls(host, resolver, linkHandler);
+    await Private.handleUrls(
+      host,
+      resolver,
+      linkHandler,
+      sanitizer.allowNamedProperties
+    );
   }
 
   if (shouldTypeset && latexTypesetter) {
@@ -1229,7 +1234,8 @@ namespace Private {
   export async function handleUrls(
     node: HTMLElement,
     resolver: IRenderMime.IResolver,
-    linkHandler: IRenderMime.ILinkHandler | null
+    linkHandler: IRenderMime.ILinkHandler | null,
+    allowNamedProperties: boolean
   ): Promise<unknown> {
     const promises = [];
 
@@ -1242,7 +1248,9 @@ namespace Private {
     // Handle anchor elements.
     const anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
-      promises.push(handleAnchor(anchors[i], resolver, linkHandler));
+      promises.push(
+        handleAnchor(anchors[i], resolver, linkHandler, allowNamedProperties)
+      );
     }
 
     // Handle link elements.
@@ -1336,7 +1344,8 @@ namespace Private {
   async function handleAnchor(
     anchor: HTMLAnchorElement,
     resolver: IRenderMime.IResolver,
-    linkHandler: IRenderMime.ILinkHandler | null
+    linkHandler: IRenderMime.ILinkHandler | null,
+    allowNamedProperties: boolean
   ): Promise<void> {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
@@ -1355,16 +1364,27 @@ namespace Private {
       if (hash === href) {
         anchor.target = '_self';
 
-        // Add a listener on the anchor to scroll to the target, even if its id
-        // attribute has been removed by the sanitizer.
-        anchor.onclick = event => {
-          const target = event.target as HTMLAnchorElement;
-          const anchorTargetId = target.href.split('#').slice(-1)[0];
-          const anchorTarget = document.querySelector(
-            `[data-jupyter-id="${anchorTargetId}"]`
-          );
-          anchorTarget?.scrollIntoView();
-        };
+        if (!allowNamedProperties) {
+          const anchorTargetId = anchor.href.split('#').slice(-1)[0];
+          if (!anchorTargetId) {
+            return;
+          }
+          anchor.setAttribute('data-jupyter-href', anchorTargetId);
+          anchor.href = '#';
+          // Add a listener on the anchor to scroll to the target, even if its id
+          // attribute has been removed by the sanitizer.
+          anchor.onclick = event => {
+            const target = event.target as HTMLAnchorElement;
+            const anchorTargetId = target.getAttribute('data-jupyter-href');
+            if (!anchorTargetId) {
+              return;
+            }
+            const anchorTarget = document.querySelector(
+              `[data-jupyter-id="${anchorTargetId}"]`
+            );
+            anchorTarget?.scrollIntoView();
+          };
+        }
 
         return;
       }
