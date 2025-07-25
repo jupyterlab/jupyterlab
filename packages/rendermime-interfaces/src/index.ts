@@ -425,7 +425,7 @@ export namespace IRenderMime {
     /**
      * @returns Whether to allow name and id properties.
      */
-    readonly allowNamedProperties: boolean;
+    readonly allowNamedProperties?: boolean;
   }
 
   /**

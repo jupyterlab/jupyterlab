@@ -86,7 +86,7 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
       host,
       resolver,
       linkHandler,
-      sanitizer.allowNamedProperties
+      sanitizer.allowNamedProperties ?? false
     );
   }
 
