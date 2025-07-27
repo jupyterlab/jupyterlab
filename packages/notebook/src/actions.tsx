@@ -2781,6 +2781,7 @@ namespace Private {
             raw.metadata.trusted = undefined;
           }
           const newCell = notebookSharedModel.insertCell(index, {
+            id: raw.id,
             cell_type: value,
             source: raw.source,
             metadata: raw.metadata
