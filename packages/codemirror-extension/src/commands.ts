@@ -153,16 +153,31 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       },
       isEnabled
     });
-
     app.commands.addCommand(CommandIDs.foldCurrent, {
       label: trans.__('Fold Current Region'),
       execute: () => {
+        // Try notebook first
         const notebook = tracker.currentWidget?.content;
-        if (!notebook || !notebook.activeCell) {
-          return;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
         }
-        notebook.mode = 'edit';
-        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -181,11 +196,26 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Unfold Current Region'),
       execute: () => {
         const notebook = tracker.currentWidget?.content;
-        if (!notebook || !notebook.activeCell) {
-          return;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
         }
-        notebook.mode = 'edit';
-        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -199,15 +229,31 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
     app.commands.addCommand(CommandIDs.foldSubregions, {
       label: trans.__('Fold All Subregions'),
       execute: () => {
         const notebook = tracker.currentWidget?.content;
-        if (!notebook || !notebook.activeCell) {
-          return;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
         }
-        notebook.mode = 'edit';
-        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -244,15 +290,31 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
     app.commands.addCommand(CommandIDs.unfoldSubregions, {
       label: trans.__('Unfold All Subregions'),
       execute: () => {
         const notebook = tracker.currentWidget?.content;
-        if (!notebook || !notebook.activeCell) {
-          return;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
         }
-        notebook.mode = 'edit';
-        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -288,11 +350,26 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Fold All Regions'),
       execute: () => {
         const notebook = tracker.currentWidget?.content;
-        if (!notebook || !notebook.activeCell) {
-          return;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
         }
-        notebook.mode = 'edit';
-        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
@@ -309,11 +386,26 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Unfold All Regions'),
       execute: () => {
         const notebook = tracker.currentWidget?.content;
-        if (!notebook || !notebook.activeCell) {
-          return;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
         }
-        notebook.mode = 'edit';
-        notebook.activeCell.editor?.focus();
         const view = findEditorView();
         if (!view) {
           return;
