@@ -19,6 +19,9 @@
       "path": "../fileeditor"
     },
     {
+      "path": "../notebook"
+    },
+    {
       "path": "../settingregistry"
     },
     {
@@ -29,9 +32,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../notebook"
     }
   ]
 }

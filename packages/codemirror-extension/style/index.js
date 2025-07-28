@@ -11,3 +11,4 @@ import '@jupyterlab/codeeditor/style/index.js';
 import '@jupyterlab/application/style/index.js';
 import '@jupyterlab/codemirror/style/index.js';
 import '@jupyterlab/fileeditor/style/index.js';
+import '@jupyterlab/notebook/style/index.js';
