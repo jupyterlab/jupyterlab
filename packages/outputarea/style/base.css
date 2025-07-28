@@ -10,6 +10,11 @@
 
 .jp-OutputArea {
   overflow-y: auto;
+
+  /* Lazy rendering for entire output areas */
+  content-visibility: auto;
+  contain: layout style paint;
+  contain-intrinsic-size: 300px;
 }
 
 .jp-OutputArea-child {
@@ -320,4 +325,11 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 .jp-TrimmedOutputs > a:hover {
   text-decoration: none;
+}
+
+/* Additional rule for heavy outputs like DataFrames */
+.jp-OutputArea-output .dataframe {
+  content-visibility: auto;
+  contain: layout paint style;
+  contain-intrinsic-size: 300px 300px;
 }

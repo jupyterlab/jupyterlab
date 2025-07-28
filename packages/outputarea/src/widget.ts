@@ -802,6 +802,28 @@ export class OutputArea extends Widget {
     return panel;
   }
 
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+
+    requestAnimationFrame(() => {
+      this._updateIntrinsicSize();
+    });
+  }
+
+  // Dynamically set the intrinsic size to the real height of the node
+  private _updateIntrinsicSize(): void {
+    const node = this.node;
+
+    if (this.widgets.length > 0) {
+      const outputNode = this.widgets[0].node;
+      const rect = outputNode.getBoundingClientRect();
+
+      // Apply the real measured height to avoid layout shift
+      console.log('applying real height: ', rect.height);
+      node.style.containIntrinsicSize = `${rect.height}px`;
+    }
+  }
+
   private _displayIdMap = new Map<string, number[]>();
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
