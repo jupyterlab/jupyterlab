@@ -16,9 +16,6 @@
       "path": "../codemirror"
     },
     {
-      "path": "../fileeditor"
-    },
-    {
       "path": "../notebook"
     },
     {
