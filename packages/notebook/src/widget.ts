@@ -968,6 +968,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     cellIdx: number
   ): Promise<void> {
     cell.dataset.windowedListIndex = `${cellIdx}`;
+
+    // Apply content visibility to this newly created cell
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      this._applyContentVisibility(cell);
+    }
+
     this.layout.insertWidget(cellIdx, cell);
     await cell.ready;
   }
@@ -1000,6 +1006,51 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     this.viewModel.windowingActive =
       this._notebookConfig.windowingMode === 'full';
+
+    // Apply content visibility when notebook settings update (without reload)
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      this._applyContentVisibilityToAllCells();
+    }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+
+    // Apply content visibility when notebook widget is attached to the DOM
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      // Apply content visibility to all cells initially
+      this._applyContentVisibilityToAllCells();
+
+      // watch for newly added cells
+      this.model?.cells.changed.connect(() => {
+        this._applyContentVisibilityToAllCells();
+      });
+    }
+  }
+
+  private _applyContentVisibilityToAllCells(): void {
+    requestAnimationFrame(() => {
+      for (const cell of this.cellsArray) {
+        this._applyContentVisibility(cell);
+      }
+    });
+  }
+
+  private _applyContentVisibility(cell: Cell<ICellModel>): void {
+    const isContentVisibility =
+      this._notebookConfig.windowingMode === 'contentVisibility';
+
+    cell.toggleClass('jp-content-visibility', isContentVisibility);
+
+    if (cell.model.type === 'code') {
+      const codeCell = cell as CodeCell;
+      if (codeCell.outputArea) {
+        codeCell.outputArea.toggleClass(
+          'jp-content-visibility',
+          isContentVisibility
+        );
+      }
+    }
   }
 
   protected cellsArray: Array<Cell>;
@@ -1238,7 +1289,7 @@ export namespace StaticNotebook {
      * - 'full': Attach to the DOM only cells in viewport
      * - 'none': Attach all cells to the viewport
      */
-    windowingMode: 'defer' | 'full' | 'none';
+    windowingMode: 'defer' | 'full' | 'none' | 'contentVisibility';
     accessKernelHistory?: boolean;
   }
 
