@@ -263,6 +263,19 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           const pos = state.selection.main.head;
           const line = state.doc.lineAt(pos);
           const topRegion = foldable(state, line.from, line.to);
+          let hasFoldState = false;
+          try {
+            const currentFoldState = state.field(foldState, false);
+            hasFoldState = currentFoldState !== undefined;
+          } catch (e) {
+            hasFoldState = false;
+          }
+
+          if (!hasFoldState) {
+            // Prime the folding system with a dummy fold/unfold
+            foldCode(view);
+            unfoldCode(view);
+          }
           if (!topRegion) {
             return;
           }
