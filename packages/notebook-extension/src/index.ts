@@ -2097,7 +2097,8 @@ function activateNotebookHandler(
       windowingMode: settings.get('windowingMode').composite as
         | 'defer'
         | 'full'
-        | 'none',
+        | 'none'
+        | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
         .composite as boolean
     };
