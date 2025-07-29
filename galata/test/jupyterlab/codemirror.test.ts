@@ -45,32 +45,32 @@ test.describe('CodeMirror extensions', () => {
 
 test.describe('Code Folding Menu', () => {
   const nestedCode = [
-  'class Test:',
-  '  def __init__(self):',
-  '    self.data = []',
-  '',
-  '  def test_data(self):',
-  '    for i in range(5):',
-  '      if i % 2 == 0:',
-  '        for j in range(3):',
-  '          if j > 0:',
-  '            self.data.append(i * j)',
-  '          else:',
-  '            self.data.append(0)',
-  '      else:',
-  '        try:',
-  '          result = i ** 2',
-  '          self.data.append(result)',
-  '        except Exception as e:',
-  '          print(f"Error: {e}")',
-  '    return self.data',
-  '',
-  'class Test_2:',
-  '  def __init__(self):',
-  '    self.data = 1',
-  '',
-  'obj = Test()'
-].join('\n');
+    'class Test:',
+    '  def __init__(self):',
+    '    self.data = []',
+    '',
+    '  def test_data(self):',
+    '    for i in range(5):',
+    '      if i % 2 == 0:',
+    '        for j in range(3):',
+    '          if j > 0:',
+    '            self.data.append(i * j)',
+    '          else:',
+    '            self.data.append(0)',
+    '      else:',
+    '        try:',
+    '          result = i ** 2',
+    '          self.data.append(result)',
+    '        except Exception as e:',
+    '          print(f"Error: {e}")',
+    '    return self.data',
+    '',
+    'class Test_2:',
+    '  def __init__(self):',
+    '    self.data = 1',
+    '',
+    'obj = Test()'
+  ].join('\n');
 
   async function selectKernelIfDialog(page: Page) {
     const dialogButton = page.locator(
