@@ -852,6 +852,7 @@ export class DirListing extends Widget {
     content.addEventListener('lm-dragleave', this);
     content.addEventListener('lm-dragover', this);
     content.addEventListener('lm-drop', this);
+    this._updateColumnSizes();
   }
 
   /**
@@ -889,6 +890,8 @@ export class DirListing extends Widget {
       this.sort(this.sortState);
       this.update();
     }
+
+    this._updateColumnSizes();
   }
 
   private _onContentResize(): void {
