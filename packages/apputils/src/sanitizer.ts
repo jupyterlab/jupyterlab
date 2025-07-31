@@ -591,7 +591,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
-   * @returns Whether to allow name and id properties.
+   * @returns Whether to allow name and id attributes.
    */
   get allowNamedProperties(): boolean {
     return this._allowNamedProperties;
