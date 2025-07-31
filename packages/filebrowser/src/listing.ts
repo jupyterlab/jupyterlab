@@ -890,8 +890,6 @@ export class DirListing extends Widget {
       this.sort(this.sortState);
       this.update();
     }
-
-    this._updateColumnSizes();
   }
 
   private _onContentResize(): void {
