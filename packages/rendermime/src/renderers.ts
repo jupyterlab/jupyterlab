@@ -329,7 +329,7 @@ export async function renderMarkdown(
   });
 
   // Apply ids to the header nodes.
-  Private.headerAnchors(host);
+  Private.headerAnchors(host, options.sanitizer.allowNamedProperties ?? false);
 }
 
 /**
@@ -1281,17 +1281,25 @@ namespace Private {
   /**
    * Apply ids to headers.
    */
-  export function headerAnchors(node: HTMLElement): void {
+  export function headerAnchors(
+    node: HTMLElement,
+    allowNamedProperties: boolean
+  ): void {
     const headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     for (const headerType of headerNames) {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = renderMarkdown.createHeaderId(header);
+        const headerId = renderMarkdown.createHeaderId(header);
+        if (allowNamedProperties) {
+          header.id = headerId;
+        } else {
+          header.setAttribute('data-jupyter-id', headerId);
+        }
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
-        anchor.href = '#' + header.id;
+        anchor.href = '#' + headerId;
         anchor.classList.add('jp-InternalAnchorLink');
         header.appendChild(anchor);
       }

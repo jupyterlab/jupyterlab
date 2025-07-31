@@ -421,6 +421,11 @@ export namespace IRenderMime {
      * @returns The sanitized string.
      */
     sanitize(dirty: string, options?: ISanitizerOptions): string;
+
+    /**
+     * @returns Whether to allow name and id properties.
+     */
+    readonly allowNamedProperties?: boolean;
   }
 
   /**

@@ -483,7 +483,9 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
-    const heading = page.locator('h2[id="Open-a-CSV-file-using-Pandas"]');
+    const heading = page.locator(
+      'h2[data-jupyter-id="Open-a-CSV-file-using-Pandas"]'
+    );
     await heading.waitFor();
     const anchor = heading.locator('text=¶');
     await heading.hover();
