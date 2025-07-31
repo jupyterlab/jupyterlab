@@ -82,12 +82,7 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
 
   // Patch the urls if a resolver is available.
   if (resolver) {
-    await Private.handleUrls(
-      host,
-      resolver,
-      linkHandler,
-      sanitizer.allowNamedProperties ?? false
-    );
+    await Private.handleUrls(host, resolver, linkHandler);
   }
 
   if (shouldTypeset && latexTypesetter) {
@@ -334,7 +329,7 @@ export async function renderMarkdown(
   });
 
   // Apply ids to the header nodes.
-  Private.headerAnchors(host);
+  Private.headerAnchors(host, options.sanitizer.allowNamedProperties ?? false);
 }
 
 /**
@@ -1234,8 +1229,7 @@ namespace Private {
   export async function handleUrls(
     node: HTMLElement,
     resolver: IRenderMime.IResolver,
-    linkHandler: IRenderMime.ILinkHandler | null,
-    allowNamedProperties: boolean
+    linkHandler: IRenderMime.ILinkHandler | null
   ): Promise<unknown> {
     const promises = [];
 
@@ -1248,9 +1242,7 @@ namespace Private {
     // Handle anchor elements.
     const anchors = node.getElementsByTagName('a');
     for (let i = 0; i < anchors.length; i++) {
-      promises.push(
-        handleAnchor(anchors[i], resolver, linkHandler, allowNamedProperties)
-      );
+      promises.push(handleAnchor(anchors[i], resolver, linkHandler));
     }
 
     // Handle link elements.
@@ -1289,17 +1281,25 @@ namespace Private {
   /**
    * Apply ids to headers.
    */
-  export function headerAnchors(node: HTMLElement): void {
+  export function headerAnchors(
+    node: HTMLElement,
+    allowNamedProperties: boolean
+  ): void {
     const headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     for (const headerType of headerNames) {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = renderMarkdown.createHeaderId(header);
+        const headerId = renderMarkdown.createHeaderId(header);
+        if (allowNamedProperties) {
+          header.id = headerId;
+        } else {
+          header.setAttribute('data-jupyter-id', headerId);
+        }
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
-        anchor.href = '#' + header.id;
+        anchor.href = '#' + headerId;
         anchor.classList.add('jp-InternalAnchorLink');
         header.appendChild(anchor);
       }
@@ -1344,8 +1344,7 @@ namespace Private {
   async function handleAnchor(
     anchor: HTMLAnchorElement,
     resolver: IRenderMime.IResolver,
-    linkHandler: IRenderMime.ILinkHandler | null,
-    allowNamedProperties: boolean
+    linkHandler: IRenderMime.ILinkHandler | null
   ): Promise<void> {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
@@ -1363,29 +1362,6 @@ namespace Private {
       // Handle internal link in the file.
       if (hash === href) {
         anchor.target = '_self';
-
-        if (!allowNamedProperties) {
-          const anchorTargetId = anchor.href.split('#').slice(-1)[0];
-          if (!anchorTargetId) {
-            return;
-          }
-          anchor.setAttribute('data-jupyter-href', anchorTargetId);
-          anchor.href = '#';
-          // Add a listener on the anchor to scroll to the target, even if its id
-          // attribute has been removed by the sanitizer.
-          anchor.onclick = event => {
-            const target = event.target as HTMLAnchorElement;
-            const anchorTargetId = target.getAttribute('data-jupyter-href');
-            if (!anchorTargetId) {
-              return;
-            }
-            const anchorTarget = document.querySelector(
-              `[data-jupyter-id="${anchorTargetId}"]`
-            );
-            anchorTarget?.scrollIntoView();
-          };
-        }
-
         return;
       }
       // For external links, remove the hash until we have hash handling.
