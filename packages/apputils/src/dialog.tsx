@@ -978,6 +978,7 @@ export namespace Dialog {
         );
       }
       const footerButton = document.createElement('div');
+      footerButton.classList.add('jp-Dialog-footerButtons');
       for (const button of buttons) {
         footerButton.appendChild(button);
       }

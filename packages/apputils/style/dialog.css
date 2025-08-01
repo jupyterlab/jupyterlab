@@ -116,13 +116,19 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-footer {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: flex-end;
-  align-items: center;
+  align-items: start;
   flex: 0 0 auto;
+  gap: 5px;
   margin-left: -12px;
   margin-right: -12px;
   padding: 12px;
+}
+
+.jp-Dialog-footerButtons {
+  width: 100%;
+  text-align: end;
 }
 
 .jp-Dialog-checkbox {
