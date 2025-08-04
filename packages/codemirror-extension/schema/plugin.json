@@ -38,7 +38,7 @@
             "rank": 10,
             "submenu": {
               "id": "jp-mainmenu-codefold",
-              "label": "Code fold",
+              "label": "Code Folding",
               "items": [
                 {
                   "command": "codemirror:fold-current",

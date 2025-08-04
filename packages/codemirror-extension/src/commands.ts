@@ -27,6 +27,7 @@ import {
 } from '@jupyterlab/application';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { ICommandPalette } from '@jupyterlab/apputils';
 
 /**
  * Identifiers of commands.
@@ -59,11 +60,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     'Registers commands acting on selected/active CodeMirror editor.',
   autoStart: true,
   requires: [INotebookTracker],
-  optional: [ITranslator],
+  optional: [ITranslator, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    palette: ICommandPalette | null
   ): void => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
@@ -153,6 +155,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       },
       isEnabled
     });
+
     app.commands.addCommand(CommandIDs.foldCurrent, {
       label: trans.__('Fold Current Region'),
       execute: () => {
@@ -430,5 +433,19 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    if (palette) {
+      const category = trans.__('File Operations');
+      [
+        CommandIDs.foldCurrent,
+        CommandIDs.unfoldCurrent,
+        CommandIDs.foldSubregions,
+        CommandIDs.unfoldSubregions,
+        CommandIDs.foldAll,
+        CommandIDs.unfoldAll
+      ].forEach(command => {
+        palette.addItem({ command, category });
+      });
+    }
   }
 };
