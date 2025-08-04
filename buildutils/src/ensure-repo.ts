@@ -287,7 +287,10 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/vega5-extension',
     '@jupyterlab/workspaces-extension'
   ],
-  '@jupyterlab/notebook': ['@jupyterlab/application'],
+  '@jupyterlab/notebook': [
+    '@jupyterlab/application',
+    '@jupyterlab/markedparser-extension' // only used in tests
+  ],
   '@jupyterlab/notebook-extension': [
     '@jupyterlab/cell-toolbar' // Only used for CellBarExtension.WIDGET_ID_ARG
   ],

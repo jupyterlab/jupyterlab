@@ -33,7 +33,7 @@ test.describe('Cells', () => {
   });
 });
 
-test.describe('Run Cells With Keyboard', () => {
+test.describe('Run Cells', () => {
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew();
   });
@@ -52,5 +52,26 @@ test.describe('Run Cells With Keyboard', () => {
     // Expect the input to NOT include an extra line;
     const text = await page.notebook.getCellTextInput(0);
     expect(text).toBe('2**32');
+  });
+
+  test('Should update the cell execution counter', async ({ page }) => {
+    await page.notebook.setCell(0, 'code', '2**32');
+    const inputPrompt = (await page.notebook.getCellLocator(0))!.locator(
+      '.jp-InputPrompt'
+    );
+
+    // Input prompt should be updated when the cell is executed.
+    await page.notebook.runCell(0);
+    await expect(inputPrompt).toHaveText('[1]:');
+    await page.notebook.runCell(0);
+    await expect(inputPrompt).toHaveText('[2]:');
+
+    // Input prompt should be reset when an empty cell is executed.
+    const cell = await page.notebook.getCellLocator(0);
+    await cell?.getByRole('textbox').press('Control+A');
+    await cell?.getByRole('textbox').press('Delete');
+
+    await page.notebook.runCell(0);
+    await expect(inputPrompt).toHaveText('[ ]:');
   });
 });
