@@ -99,7 +99,7 @@ test.describe('Code Folding Menu', () => {
     await page.keyboard.press('End');
 
     // Trigger folding current region
-    await page.menu.clickMenuItem('View>Code fold>Fold Current Region');
+    await page.menu.clickMenuItem('View>Code Folding>Fold Current Region');
 
     // Verify exactly one unfold span appears
     await cellEditor
@@ -116,7 +116,7 @@ test.describe('Code Folding Menu', () => {
     expect(currentLineCount).toBeLessThan(initialLineCount);
 
     // Unfold current region
-    await page.menu.clickMenuItem('View>Code fold>Unfold Current Region');
+    await page.menu.clickMenuItem('View>Code Folding>Unfold Current Region');
     await cellEditor
       .locator('span[title="unfold"]')
       .waitFor({ state: 'detached', timeout: 5000 });
@@ -145,7 +145,7 @@ test.describe('Code Folding Menu', () => {
     }
 
     // Trigger folding all subregions
-    await page.menu.clickMenuItem('View>Code fold>Fold All Subregions');
+    await page.menu.clickMenuItem('View>Code Folding>Fold All Subregions');
 
     await cellEditor
       .locator('span[title="unfold"]')
@@ -159,7 +159,7 @@ test.describe('Code Folding Menu', () => {
     expect(unfoldCount).toBe(2);
 
     // Unfold all subregions
-    await page.menu.clickMenuItem('View>Code fold>Unfold All Subregions');
+    await page.menu.clickMenuItem('View>Code Folding>Unfold All Subregions');
     const unfoldCountAfter = await cellEditor
       .locator('span[title="unfold"]')
       .count();
@@ -180,7 +180,7 @@ test.describe('Code Folding Menu', () => {
     await page.keyboard.press('Control+Home');
 
     // Trigger folding all regions
-    await page.menu.clickMenuItem('View>Code fold>Fold All Regions');
+    await page.menu.clickMenuItem('View>Code Folding>Fold All Regions');
 
     await cellEditor
       .locator('span[title="unfold"]')
@@ -197,7 +197,7 @@ test.describe('Code Folding Menu', () => {
     expect(unfoldCount).toBe(2);
 
     // Unfold all
-    await page.menu.clickMenuItem('View>Code fold>Unfold All Regions');
+    await page.menu.clickMenuItem('View>Code Folding>Unfold All Regions');
     const unfoldCountAfter = await cellEditor
       .locator('span[title="unfold"]')
       .count();
