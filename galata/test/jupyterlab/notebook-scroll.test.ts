@@ -373,3 +373,39 @@ test.describe('Notebook scroll over long outputs (with windowing)', () => {
     }
   });
 });
+
+test.describe('Notebook scroll beyond a cell with long output (with windowing)', () => {
+  const outputAndHeading = 'single_long_output.ipynb';
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${outputAndHeading}`),
+      `${tmpPath}/${outputAndHeading}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${outputAndHeading}`);
+    await page.notebook.activate(outputAndHeading);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('should not change height of the scrollbar when scrolling beyond the cell long', async ({
+    page
+  }) => {
+    // Make the first cell active
+    await page.notebook.selectCells(0);
+
+    // Get the outer window
+    const outer = page.locator('.jp-WindowedPanel-outer');
+    const scrollHeightBefore = await outer.evaluate(node => node.scrollHeight);
+
+    // Scroll to the last cell
+    const lastCell = await page.notebook.getCellLocator(30);
+    await lastCell!.scrollIntoViewIfNeeded();
+
+    const scrollHeightAfter = await outer.evaluate(node => node.scrollHeight);
+
+    expect(scrollHeightBefore).toBeCloseTo(scrollHeightAfter);
+  });
+});

@@ -806,8 +806,15 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
    * @param collapsed New collapsed status
    */
   private _onCellCollapsed(cell: Cell, collapsed: boolean): void {
-    NotebookActions.setHeadingCollapse(cell, collapsed, this);
-    this._cellCollapsed.emit(cell);
+    cell
+      .getHeadings()
+      .then(() => {
+        NotebookActions.setHeadingCollapse(cell, collapsed, this);
+        this._cellCollapsed.emit(cell);
+      })
+      .catch(error => {
+        console.warn('Failed to resolve headings: ', error);
+      });
   }
 
   /**

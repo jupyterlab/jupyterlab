@@ -224,7 +224,7 @@ export class NotebookToCModel extends TableOfContentsModel<
    *
    * @returns The list of new headings or `null` if nothing needs to be updated.
    */
-  protected getHeadings(): Promise<INotebookHeading[] | null> {
+  protected async getHeadings(): Promise<INotebookHeading[] | null> {
     const cells = this.widget.content.widgets;
     const headings: INotebookHeading[] = [];
     const documentLevels = new Array<number>();
@@ -243,7 +243,7 @@ export class NotebookToCModel extends TableOfContentsModel<
           ) {
             headings.push(
               ...TableOfContentsUtils.filterHeadings(
-                cell.headings,
+                await cell.getHeadings(),
                 this.configuration,
                 documentLevels
               ).map(heading => {
@@ -261,7 +261,7 @@ export class NotebookToCModel extends TableOfContentsModel<
         }
         case 'markdown': {
           const cellHeadings = TableOfContentsUtils.filterHeadings(
-            cell.headings,
+            await cell.getHeadings(),
             this.configuration,
             documentLevels
           ).map((heading, index) => {
