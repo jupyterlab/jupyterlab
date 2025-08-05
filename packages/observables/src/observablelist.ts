@@ -241,7 +241,12 @@ export namespace IObservableList {
     /**
      * An item was set in the list.
      */
-    | 'set';
+    | 'set'
+
+    /**
+     * The list was cleared.
+     */
+    | 'clear';
 
   /**
    * The changed args object which is emitted by an observable list.
@@ -538,7 +543,7 @@ export class ObservableList<T> implements IObservableList<T> {
     const copy = this._array.slice();
     this._array.length = 0;
     this._changed.emit({
-      type: 'remove',
+      type: 'clear',
       oldIndex: 0,
       newIndex: 0,
       newValues: [],

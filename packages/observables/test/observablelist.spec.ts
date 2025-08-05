@@ -267,7 +267,7 @@ describe('@jupyterlab/observables', () => {
         const value = new ObservableList<number>({ values });
         value.changed.connect((sender, args) => {
           expect(sender).toBe(value);
-          expect(args.type).toBe('remove');
+          expect(args.type).toBe('clear');
           expect(args.newIndex).toBe(0);
           expect(args.oldIndex).toBe(0);
           expect(Array.from(args.oldValues)).toEqual(values);

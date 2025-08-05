@@ -43,7 +43,7 @@
     "@codemirror/legacy-modes": "^6.5.1",
     "@codemirror/search": "^6.5.10",
     "@codemirror/view": "^6.38.1",
-    "@jupyter/ydoc": "^3.0.4",
+    "@jupyter/ydoc": "^3.1.0",
     "@jupyterlab/application": "^4.4.5",
     "@jupyterlab/codeeditor": "^4.4.5",
     "@jupyterlab/codemirror": "^4.4.5",
