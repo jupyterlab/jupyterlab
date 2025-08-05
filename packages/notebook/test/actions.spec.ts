@@ -619,6 +619,14 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeNull();
       });
 
+      it('should preserve the cell id', () => {
+        const original = widget.activeCell?.model.id || null;
+        NotebookActions.changeCellType(widget, 'code');
+        expect(widget.activeCell?.model.id).toBe(original);
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell?.model.id).toBe(original);
+      });
+
       it('should preserve the widget mode', () => {
         NotebookActions.changeCellType(widget, 'code');
         expect(widget.mode).toBe('command');
