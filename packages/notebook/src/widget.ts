@@ -2163,15 +2163,9 @@ export class Notebook extends StaticNotebook {
     if (element == null) {
       element = cell.node;
     }
-    const widgetBox = this.node.getBoundingClientRect();
-    const elementBox = element.getBoundingClientRect();
 
-    if (
-      elementBox.top > widgetBox.bottom ||
-      elementBox.bottom < widgetBox.top
-    ) {
-      element.scrollIntoView({ block: 'center' });
-    }
+    // Scroll notebook to set the target on top.
+    element.scrollIntoView();
   }
 
   /**
@@ -2663,7 +2657,7 @@ export class Notebook extends StaticNotebook {
    * Find anchor target by any ID in any of the cell.
    */
   async _findLegacy(queryId: string): Promise<Private.IScrollTarget | null> {
-    // Loop on cells, get headings and search for first matching id.
+    // Loop on cells, search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
       if (
