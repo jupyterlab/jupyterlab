@@ -9,6 +9,16 @@ import {
   toggleComment,
   toggleTabFocusMode
 } from '@codemirror/commands';
+import {
+  foldable,
+  foldAll,
+  foldCode,
+  foldEffect,
+  foldState,
+  unfoldAll,
+  unfoldCode,
+  unfoldEffect
+} from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
 import {
@@ -16,6 +26,8 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { ICommandPalette } from '@jupyterlab/apputils';
 
 /**
  * Identifiers of commands.
@@ -26,6 +38,12 @@ namespace CommandIDs {
   export const toggleComment = 'codemirror:toggle-comment';
   export const selectNextOccurrence = 'codemirror:select-next-occurrence';
   export const toggleTabFocusMode = 'codemirror:toggle-tab-focus-mode';
+  export const foldCurrent = 'codemirror:fold-current';
+  export const unfoldCurrent = 'codemirror:unfold-current';
+  export const foldSubregions = 'codemirror:fold-subregions';
+  export const unfoldSubregions = 'codemirror:unfold-subregions';
+  export const foldAll = 'codemirror:fold-all';
+  export const unfoldAll = 'codemirror:unfold-all';
 }
 
 /**
@@ -41,8 +59,14 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
   description:
     'Registers commands acting on selected/active CodeMirror editor.',
   autoStart: true,
-  optional: [ITranslator],
-  activate: (app: JupyterFrontEnd, translator: ITranslator | null): void => {
+  requires: [INotebookTracker],
+  optional: [ITranslator, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    translator: ITranslator | null,
+    palette: ICommandPalette | null
+  ): void => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
 
@@ -161,5 +185,297 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       },
       isEnabled
     });
+
+    app.commands.addCommand(CommandIDs.foldCurrent, {
+      label: trans.__('Fold Current Region'),
+      execute: () => {
+        // Try notebook first
+        const notebook = tracker.currentWidget?.content;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
+        }
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        const { state } = view;
+        const pos = state.selection.main.head;
+        const line = state.doc.lineAt(pos);
+        const range = foldable(state, line.from, line.to);
+        if (range) {
+          foldCode(view);
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.unfoldCurrent, {
+      label: trans.__('Unfold Current Region'),
+      execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
+        }
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        const { state } = view;
+        const pos = state.selection.main.head;
+        const line = state.doc.lineAt(pos);
+        const range = foldable(state, line.from, line.to);
+        if (range) {
+          unfoldCode(view);
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.foldSubregions, {
+      label: trans.__('Fold All Subregions'),
+      execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
+        }
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          const { state } = view;
+          const pos = state.selection.main.head;
+          const line = state.doc.lineAt(pos);
+          const topRegion = foldable(state, line.from, line.to);
+          let hasFoldState = false;
+          try {
+            const currentFoldState = state.field(foldState, false);
+            hasFoldState = currentFoldState !== undefined;
+          } catch (e) {
+            hasFoldState = false;
+          }
+
+          if (!hasFoldState) {
+            // Prime the folding system with a dummy fold/unfold
+            foldCode(view);
+            unfoldCode(view);
+          }
+          if (!topRegion) {
+            return;
+          }
+          const effects: Array<ReturnType<typeof foldEffect.of>> = [];
+          let subPos = topRegion.from + 1;
+          while (subPos < topRegion.to) {
+            const subLine = state.doc.lineAt(subPos);
+            const subRange = foldable(state, subLine.from, subLine.to);
+            if (
+              subRange &&
+              subRange.from > topRegion.from &&
+              subRange.to <= topRegion.to
+            ) {
+              effects.push(foldEffect.of(subRange));
+              subPos = subRange.to;
+            } else {
+              subPos = subLine.to + 1;
+            }
+          }
+          if (effects.length > 0) {
+            view.dispatch({ effects });
+          }
+        } catch (e) {
+          // Silent fail
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.unfoldSubregions, {
+      label: trans.__('Unfold All Subregions'),
+      execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
+        }
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          const { state } = view;
+          const pos = state.selection.main.head;
+          const line = state.doc.lineAt(pos);
+          const topRegion = foldable(state, line.from, line.to);
+          if (!topRegion) {
+            return;
+          }
+          const foldedRanges = state.field(foldState, false);
+          if (!foldedRanges) {
+            return;
+          }
+          const effects: Array<ReturnType<typeof unfoldEffect.of>> = [];
+          foldedRanges.between(topRegion.from + 1, topRegion.to, (from, to) => {
+            if (from > topRegion.from && to <= topRegion.to) {
+              effects.push(unfoldEffect.of({ from, to }));
+            }
+          });
+          if (effects.length > 0) {
+            view.dispatch({ effects });
+          }
+        } catch (e) {
+          // Silent fail
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.foldAll, {
+      label: trans.__('Fold All Regions'),
+      execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
+        }
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          foldAll(view);
+        } catch (e) {
+          // Silent fail
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.unfoldAll, {
+      label: trans.__('Unfold All Regions'),
+      execute: () => {
+        const notebook = tracker.currentWidget?.content;
+        const currentWidget = app.shell.currentWidget;
+        if (
+          notebook &&
+          notebook.activeCell &&
+          currentWidget &&
+          currentWidget === tracker.currentWidget
+        ) {
+          notebook.mode = 'edit';
+          notebook.activeCell.editor?.focus();
+        } else {
+          // Try file editor
+          const fileEditorWidget = currentWidget as any;
+          if (
+            fileEditorWidget &&
+            fileEditorWidget.content &&
+            typeof fileEditorWidget.content.editor?.focus === 'function'
+          ) {
+            fileEditorWidget.content.editor.focus();
+          }
+        }
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        try {
+          unfoldAll(view);
+        } catch (e) {
+          // Silent fail
+        }
+      }
+    });
+
+    if (palette) {
+      const category = trans.__('File Operations');
+      [
+        CommandIDs.foldCurrent,
+        CommandIDs.unfoldCurrent,
+        CommandIDs.foldSubregions,
+        CommandIDs.unfoldSubregions,
+        CommandIDs.foldAll,
+        CommandIDs.unfoldAll
+      ].forEach(command => {
+        palette.addItem({ command, category });
+      });
+    }
   }
 };

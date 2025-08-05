@@ -2069,6 +2069,17 @@ export namespace NotebookActions {
     for (cellNum = which + 1; cellNum < notebook.widgets.length; cellNum++) {
       let subCell = notebook.widgets[cellNum];
       let subCellHeadingInfo = NotebookActions.getHeadingInfo(subCell);
+      const isHeadingResolved = (subCell as unknown as MarkdownCell)
+        .headingsResolved;
+
+      // Defer until subCell's asynchronous heading parsing is complete
+      if (subCellHeadingInfo.headingLevel === -1 && !isHeadingResolved) {
+        requestAnimationFrame(() => {
+          setHeadingCollapse(cell, collapsing, notebook);
+        });
+        break;
+      }
+
       if (
         subCellHeadingInfo.isHeading &&
         subCellHeadingInfo.headingLevel <= selectedHeadingInfo.headingLevel
@@ -2770,6 +2781,7 @@ namespace Private {
             raw.metadata.trusted = undefined;
           }
           const newCell = notebookSharedModel.insertCell(index, {
+            id: raw.id,
             cell_type: value,
             source: raw.source,
             metadata: raw.metadata

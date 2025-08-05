@@ -853,6 +853,24 @@
     }
   },
   {
+    "id": "codemirror:fold-all",
+    "label": "Fold All Regions",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:fold-current",
+    "label": "Fold Current Region",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:fold-subregions",
+    "label": "Fold All Subregions",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "codemirror:select-next-occurrence",
     "label": "Select Next Occurrence",
     "caption": "",
@@ -897,6 +915,24 @@
       "type": "object",
       "properties": {}
     }
+  },
+  {
+    "id": "codemirror:unfold-all",
+    "label": "Unfold All Regions",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:unfold-current",
+    "label": "Unfold Current Region",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:unfold-subregions",
+    "label": "Unfold All Subregions",
+    "caption": "",
+    "shortcuts": []
   },
   {
     "id": "completer:invoke-console",

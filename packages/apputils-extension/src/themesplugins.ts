@@ -362,6 +362,26 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       execute: args => manager.decrFontSize(args['key'] as string)
     });
 
+    const darkModeMediaQuery = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    );
+
+    const syncThemeOnSystemChange = (event: MediaQueryListEvent) => {
+      // Only act if the "Synchronize with System Settings" option is enabled.
+      if (manager.isToggledAdaptiveTheme()) {
+        const newTheme = event.matches
+          ? manager.preferredDarkTheme
+          : manager.preferredLightTheme;
+
+        // Switch the theme if it's not already the correct one.
+        if (manager.theme !== newTheme) {
+          void manager.setTheme(newTheme);
+        }
+      }
+    };
+
+    darkModeMediaQuery.addEventListener('change', syncThemeOnSystemChange);
+
     return manager;
   },
   autoStart: true,

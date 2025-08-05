@@ -8,6 +8,7 @@ import { JSONObject } from '@lumino/coreutils';
 import { CompletionHandler } from '../handler';
 import { ICompletionContext, ICompletionProvider } from '../tokens';
 import { Completer } from '../widget';
+import { isHintableMimeType } from '../utils';
 
 export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 /**
@@ -124,7 +125,16 @@ export class KernelCompleterProvider implements ICompletionProvider {
    * Kernel provider will activate the completer in continuous mode after
    * the `.` character.
    */
-  shouldShowContinuousHint(visible: boolean, changed: SourceChange): boolean {
+  shouldShowContinuousHint(
+    visible: boolean,
+    changed: SourceChange,
+    context?: ICompletionContext
+  ): boolean {
+    const mimeType = context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
+    }
+
     const sourceChange = changed.sourceChange;
     if (sourceChange == null) {
       return true;

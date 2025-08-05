@@ -39,7 +39,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^3.0.4",
+    "@jupyter/ydoc": "^3.1.0",
     "@jupyterlab/apputils": "^4.6.0-alpha.1",
     "@jupyterlab/codeeditor": "^4.5.0-alpha.1",
     "@jupyterlab/codemirror": "^4.5.0-alpha.1",
@@ -47,6 +47,7 @@
     "@jupyterlab/docregistry": "^4.5.0-alpha.1",
     "@jupyterlab/documentsearch": "^4.5.0-alpha.1",
     "@jupyterlab/lsp": "^4.5.0-alpha.1",
+    "@jupyterlab/rendermime": "^4.5.0-alpha.1",
     "@jupyterlab/statusbar": "^4.5.0-alpha.1",
     "@jupyterlab/toc": "^6.5.0-alpha.1",
     "@jupyterlab/translation": "^4.5.0-alpha.1",

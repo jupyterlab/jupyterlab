@@ -24,6 +24,9 @@
       "path": "../lsp"
     },
     {
+      "path": "../rendermime"
+    },
+    {
       "path": "../statusbar"
     },
     {
