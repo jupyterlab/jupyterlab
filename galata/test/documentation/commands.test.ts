@@ -29,8 +29,9 @@ test('All commands must have a default label and describedBy', async ({
         try {
           // Try to get the describedBy information (command arguments schema)
           const description = await registry.describedBy(id);
-          if (description && description.args) {
-            args = description.args;
+          if (description !== undefined) {
+            // Command has describedBy defined (even if empty)
+            args = description.args || {};
           }
         } catch (error) {
           // If describedBy fails or returns nothing, args remains undefined
@@ -76,7 +77,9 @@ test('All commands must have a default label and describedBy', async ({
   expect(missingLabel).toEqual([]);
 
   // Check for commands missing describedBy information
-  const missingDescribedBy = commands.filter(command => !command.args);
+  const missingDescribedBy = commands.filter(
+    command => command.args === undefined
+  );
 
   // Log commands without describedBy for debugging
   if (missingDescribedBy.length > 0) {
