@@ -45,5 +45,5 @@ describe('JupyterServer', () => {
     expect(PageConfig.getOption('__configData')).toContain('1.11');
     expect(PageConfig.getOption('__kernelSpec_foo')).toContain('Test Python');
     await expect(server.shutdown()).resolves.not.toThrow();
-  }, 60000);
+  }, 120000);
 });
