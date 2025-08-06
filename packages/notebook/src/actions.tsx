@@ -13,7 +13,6 @@ import {
   Cell,
   CodeCell,
   CodeCellModel,
-  // CodeCellModel,
   ICellModel,
   ICodeCellModel,
   isMarkdownCellModel,
@@ -237,12 +236,7 @@ export namespace NotebookActions {
       }
 
       // Update the original cell with the last piece of content
-      // This preserves the cell's identity and any active kernel connections
-      child.model.sharedModel.updateSource(
-        offsets[0],
-        offsets[offsets.length - 1],
-        lastPieceContent
-      );
+      child.model.sharedModel.setSource(lastPieceContent);
       if (child.model instanceof CodeCellModel) {
         child.model.isDirty = true;
       }
