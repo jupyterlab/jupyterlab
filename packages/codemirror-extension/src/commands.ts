@@ -163,6 +163,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.foldCurrent, {
       label: trans.__('Fold Current Region'),
+      describedBy: {},
       execute: () => {
         // Try notebook first
         const notebook = tracker.currentWidget?.content;
@@ -202,6 +203,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.unfoldCurrent, {
       label: trans.__('Unfold Current Region'),
+      describedBy: {},
       execute: () => {
         const notebook = tracker.currentWidget?.content;
         const currentWidget = app.shell.currentWidget;
@@ -240,6 +242,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.foldSubregions, {
       label: trans.__('Fold All Subregions'),
+      describedBy: {},
       execute: () => {
         const notebook = tracker.currentWidget?.content;
         const currentWidget = app.shell.currentWidget;
@@ -314,6 +317,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.unfoldSubregions, {
       label: trans.__('Unfold All Subregions'),
+      describedBy: {},
       execute: () => {
         const notebook = tracker.currentWidget?.content;
         const currentWidget = app.shell.currentWidget;
@@ -369,6 +373,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.foldAll, {
       label: trans.__('Fold All Regions'),
+      describedBy: {},
       execute: () => {
         const notebook = tracker.currentWidget?.content;
         const currentWidget = app.shell.currentWidget;
@@ -405,6 +410,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.unfoldAll, {
       label: trans.__('Unfold All Regions'),
+      describedBy: {},
       execute: () => {
         const notebook = tracker.currentWidget?.content;
         const currentWidget = app.shell.currentWidget;

@@ -856,19 +856,31 @@
     "id": "codemirror:fold-all",
     "label": "Fold All Regions",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:fold-current",
     "label": "Fold Current Region",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:fold-subregions",
     "label": "Fold All Subregions",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:select-next-occurrence",
@@ -920,19 +932,31 @@
     "id": "codemirror:unfold-all",
     "label": "Unfold All Regions",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:unfold-current",
     "label": "Unfold Current Region",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:unfold-subregions",
     "label": "Unfold All Subregions",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "completer:invoke-console",
