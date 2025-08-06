@@ -60,12 +60,7 @@ const manager: JupyterFrontEndPlugin<ITooltipManager> = {
           tooltip = null;
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     return {
@@ -129,12 +124,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
           return manager.invoke({ anchor, editor, kernel, rendermime });
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
   }
 };
@@ -177,12 +167,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
           return manager.invoke({ anchor, editor, kernel, rendermime });
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
   }
 };
@@ -280,12 +265,7 @@ const files: JupyterFrontEndPlugin<void> = {
           return manager.invoke({ anchor, editor, kernel, rendermime });
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
   }
 };

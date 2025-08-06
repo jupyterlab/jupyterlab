@@ -330,12 +330,7 @@ export namespace Commands {
       isToggled: () =>
         config.lineNumbers ?? extensions.baseConfiguration.lineNumbers,
       label: trans.__('Show Line Numbers'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.currentLineNumbers, {
@@ -358,12 +353,7 @@ export namespace Commands {
             | undefined) ?? false
         );
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -418,12 +408,7 @@ export namespace Commands {
           (widget?.content.editor.getOption('lineWrap') as boolean) ?? false
         );
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -490,12 +475,7 @@ export namespace Commands {
       isEnabled,
       isToggled: () =>
         config.matchBrackets ?? extensions.baseConfiguration.matchBrackets,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.currentMatchBrackets, {
@@ -518,12 +498,7 @@ export namespace Commands {
             | undefined) ?? false
         );
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -590,12 +565,7 @@ export namespace Commands {
         commands.isToggled(CommandIDs.autoClosingBrackets) ||
         commands.isToggled(autoClosingBracketsNotebook) ||
         commands.isToggled(autoClosingBracketsConsole),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -646,12 +616,7 @@ export namespace Commands {
         editor.execCommand(findNext);
       },
       isEnabled,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.goToLine, {
@@ -786,12 +751,7 @@ export namespace Commands {
       isEnabled,
       icon: consoleIcon,
       label: trans.__('Create Console for Editor'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -814,12 +774,7 @@ export namespace Commands {
       },
       label: trans.__('Restart Kernel'),
       isEnabled: () => consoleTracker !== null && isEnabled(),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -884,12 +839,7 @@ export namespace Commands {
       },
       isEnabled,
       label: trans.__('Run Selected Code'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -928,12 +878,7 @@ export namespace Commands {
       },
       isEnabled,
       label: trans.__('Run All Code'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -961,12 +906,7 @@ export namespace Commands {
       },
       icon: markdownIcon,
       label: trans.__('Show Markdown Preview'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -1095,12 +1035,7 @@ export namespace Commands {
       },
       icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Undo'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -1131,12 +1066,7 @@ export namespace Commands {
       },
       icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Redo'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -1172,12 +1102,7 @@ export namespace Commands {
       },
       icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Cut'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -1212,12 +1137,7 @@ export namespace Commands {
       },
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -1245,12 +1165,7 @@ export namespace Commands {
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Paste'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     /**
@@ -1269,12 +1184,7 @@ export namespace Commands {
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: trans.__('Select All'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     // All commands with isEnabled defined directly or in a semantic commands
@@ -1325,12 +1235,7 @@ export namespace Commands {
           return manager.invoke(id);
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.selectCompleter, {
@@ -1342,12 +1247,7 @@ export namespace Commands {
           return manager.select(id);
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addKeyBinding({

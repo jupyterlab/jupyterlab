@@ -414,12 +414,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () =>
         !!app.shell.currentWidget &&
         searchViews.has(app.shell.currentWidget.id),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
@@ -435,12 +430,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () =>
         !!app.shell.currentWidget &&
         searchViews.has(app.shell.currentWidget.id),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
@@ -456,12 +446,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () =>
         !!app.shell.currentWidget &&
         searchViews.has(app.shell.currentWidget.id),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
@@ -478,12 +463,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         searchViews.has(app.shell.currentWidget.id) &&
         'selection' in
           searchViews.get(app.shell.currentWidget.id)!.model.filtersDefinition,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {

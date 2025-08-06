@@ -420,12 +420,7 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
       },
       icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Download'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.copyDownloadLink, {
@@ -449,12 +444,7 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Download Link'),
       mnemonic: 0,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
   }
 };
@@ -517,12 +507,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.toggleBrowser, {
       label: trans.__('File Browser'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         if (browser.isHidden) {
           return commands.execute(CommandIDs.showBrowser, void 0);
@@ -577,12 +562,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.hideBrowser, {
       label: trans.__('Hide the file browser.'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         const widget = tracker.currentWidget;
         if (widget && !widget.isHidden) {
@@ -603,12 +583,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
             console.error(`Failed to set navigateToCurrentDirectory setting`);
           });
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     if (commandPalette) {
@@ -696,12 +671,7 @@ const shareFile: JupyterFrontEndPlugin<void> = {
         Array.from(tracker.currentWidget.selectedItems()).length === 1,
       icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Shareable Link'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
   }
 };

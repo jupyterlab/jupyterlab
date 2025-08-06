@@ -72,12 +72,7 @@ export const recentsManagerPlugin: JupyterFrontEndPlugin<IRecentsManager> = {
         recentsManager.recentlyClosed.length != 0,
       label: trans.__('Clear Recent Documents'),
       caption: trans.__('Clear the list of recently opened items.'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     return recentsManager;

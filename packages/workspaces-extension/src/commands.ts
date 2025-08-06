@@ -452,12 +452,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           await model.refresh();
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     app.commands.addCommand(CommandIDs.exportWorkspace, {
@@ -537,12 +532,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         await Private.saveAs(fileBrowser, contents, data, state, translator);
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     app.commands.addCommand(CommandIDs.save, {
@@ -557,12 +547,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           await Private.save(lastSave, contents, data, state);
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     if (palette) {

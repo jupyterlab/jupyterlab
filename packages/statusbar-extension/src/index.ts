@@ -61,12 +61,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
         }
       },
       isToggled: () => statusBar.isVisible,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     app.commands.commandExecuted.connect((registry, executed) => {

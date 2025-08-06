@@ -228,12 +228,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
       isEnabled: () => service.isStarted,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async () => {
         const state = service.getDebuggerState();
         await service.stop();
@@ -574,12 +569,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         );
       },
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
         if (value) {
@@ -595,12 +585,7 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         handler.activeWidget instanceof NotebookPanel &&
         service.model.supportCopyToGlobals,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: async args => {
         const name = service.model.variables.selectedVariable!.name;
         await service.copyToGlobals(name);
@@ -934,12 +919,7 @@ const main: JupyterFrontEndPlugin<void> = {
           }
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.debugContinue, {
@@ -967,12 +947,7 @@ const main: JupyterFrontEndPlugin<void> = {
         }
         commands.notifyCommandChanged(CommandIDs.debugContinue);
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.terminate, {
@@ -984,12 +959,7 @@ const main: JupyterFrontEndPlugin<void> = {
         await service.restart();
         updateState(app.commands, service);
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.next, {
@@ -1000,12 +970,7 @@ const main: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         await service.next();
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.stepIn, {
@@ -1016,12 +981,7 @@ const main: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         await service.stepIn();
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.stepOut, {
@@ -1032,12 +992,7 @@ const main: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         await service.stepOut();
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
@@ -1132,12 +1087,7 @@ const main: JupyterFrontEndPlugin<void> = {
       execute: () => {
         shell.activateById(sidebar.id);
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     if (palette) {

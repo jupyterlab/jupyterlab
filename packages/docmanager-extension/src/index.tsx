@@ -485,12 +485,7 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Download'),
       caption: trans.__('Download the file to your computer'),
       isEnabled,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {

@@ -214,12 +214,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
       },
       label: trans.__('Next Inline Completion'),
       isEnabled,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     app.commands.addCommand(CommandIDs.previousInline, {
       execute: () => {
@@ -230,12 +225,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
       },
       label: trans.__('Previous Inline Completion'),
       isEnabled,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     app.commands.addCommand(CommandIDs.acceptInline, {
       execute: () => {
@@ -248,12 +238,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
           completionManager.inline!.isActive(app.shell.currentWidget!.id!)
         );
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     app.commands.addCommand(CommandIDs.invokeInline, {
       execute: () => {
@@ -261,12 +246,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
       },
       label: trans.__('Invoke Inline Completer'),
       isEnabled,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     const updateSettings = (settings: ISettingRegistry.ISettings) => {

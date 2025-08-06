@@ -149,12 +149,7 @@ export namespace Palette {
     });
 
     commands.addCommand(CommandIDs.activate, {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         if (modal) {
           modalPalette.activate();

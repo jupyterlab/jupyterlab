@@ -92,12 +92,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.deleteLine, {
       label: trans.__('Delete the current line'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         const view = findEditorView();
         if (!view) {
@@ -113,12 +108,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Toggles block comments in languages which support it (e.g. C, JavaScript)'
       ),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         const view = findEditorView();
         if (!view) {
@@ -131,12 +121,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.toggleComment, {
       label: trans.__('Toggle Comment'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         const view = findEditorView();
         if (!view) {
@@ -152,12 +137,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Toggles behavior of Tab key between inserting indentation and moving to next focusable element'
       ),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         const view = findEditorView();
         if (!view) {
@@ -170,12 +150,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.selectNextOccurrence, {
       label: trans.__('Select Next Occurrence'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: () => {
         const view = findEditorView();
         if (!view) {

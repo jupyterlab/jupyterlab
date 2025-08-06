@@ -193,82 +193,42 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     commands.addCommand(CommandIDs.openEdit, {
       label: trans.__('Open Edit Menu'),
       execute: () => activateMenu(menu.editMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openFile, {
       label: trans.__('Open File Menu'),
       execute: () => activateMenu(menu.fileMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openKernel, {
       label: trans.__('Open Kernel Menu'),
       execute: () => activateMenu(menu.kernelMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openRun, {
       label: trans.__('Open Run Menu'),
       execute: () => activateMenu(menu.runMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openView, {
       label: trans.__('Open View Menu'),
       execute: () => activateMenu(menu.viewMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openSettings, {
       label: trans.__('Open Settings Menu'),
       execute: () => activateMenu(menu.settingsMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openTabs, {
       label: trans.__('Open Tabs Menu'),
       execute: () => activateMenu(menu.tabsMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openHelp, {
       label: trans.__('Open Help Menu'),
       execute: () => activateMenu(menu.helpMenu),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
     commands.addCommand(CommandIDs.openFirst, {
       label: trans.__('Open First Menu'),
@@ -276,12 +236,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
         menu.activeIndex = 0;
         menu.openActiveMenu();
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     if (palette) {
@@ -331,12 +286,7 @@ function createEditMenu(
       label: trans.__('Undo')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -349,12 +299,7 @@ function createEditMenu(
       label: trans.__('Redo')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -369,12 +314,7 @@ function createEditMenu(
       label: trans.__('Clear')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -387,12 +327,7 @@ function createEditMenu(
       label: trans.__('Clear All')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -406,12 +341,7 @@ function createEditMenu(
       label: trans.__('Go to Line…')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -445,12 +375,7 @@ function createFileMenu(
     overrides: {
       isEnabled: () =>
         !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -465,12 +390,7 @@ function createFileMenu(
       label: trans.__('New Console for Activity')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -588,12 +508,7 @@ function createKernelMenu(
     },
     overrides: {
       icon: args => (args.toolbar ? stopIcon : undefined),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -608,12 +523,7 @@ function createKernelMenu(
       label: trans.__('Reconnect to Kernel')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -629,12 +539,7 @@ function createKernelMenu(
     },
     overrides: {
       icon: args => (args.toolbar ? refreshIcon : undefined),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -651,12 +556,7 @@ function createKernelMenu(
       label: trans.__('Restart Kernel and Clear…')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -670,12 +570,7 @@ function createKernelMenu(
       label: trans.__('Change Kernel…')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -690,12 +585,7 @@ function createKernelMenu(
       caption: trans.__('Shut down kernel')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -751,12 +641,7 @@ function createViewMenu(
       label: trans.__('Show Line Numbers')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -770,12 +655,7 @@ function createViewMenu(
       label: trans.__('Match Brackets')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -789,12 +669,7 @@ function createViewMenu(
       label: trans.__('Wrap Words')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -821,12 +696,7 @@ function createRunMenu(
     },
     overrides: {
       icon: args => (args.toolbar ? runIcon : undefined),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -841,12 +711,7 @@ function createRunMenu(
       caption: trans.__('Run All')
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -862,12 +727,7 @@ function createRunMenu(
     },
     overrides: {
       icon: args => (args.toolbar ? fastForwardIcon : undefined),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });
@@ -993,12 +853,7 @@ function createHelpMenu(
       isVisible: false
     },
     overrides: {
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     },
     trans
   });

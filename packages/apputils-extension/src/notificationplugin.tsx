@@ -745,12 +745,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.display, {
       label: trans.__('Show Notifications'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      },
+      describedBy: {},
       execute: displayNotifications
     });
 

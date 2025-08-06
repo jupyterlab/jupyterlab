@@ -93,12 +93,7 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         await navigator.clipboard.writeText(oJax.math.math);
       },
       label: trans.__('MathJax Copy Latex'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     app.commands.addCommand(CommandIDs.scale, {

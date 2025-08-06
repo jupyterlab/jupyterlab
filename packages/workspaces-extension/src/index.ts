@@ -124,12 +124,7 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
           );
         }
       },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
   }
 };

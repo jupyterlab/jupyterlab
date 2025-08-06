@@ -232,12 +232,7 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
         return recentsManager.recentlyClosed.length !== 0;
       },
       caption: trans.__('Reopen recently closed file or notebook.'),
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
+      describedBy: {}
     });
 
     // Menu
