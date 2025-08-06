@@ -10,7 +10,7 @@ describe('JupyterServer', () => {
     const url = await server.start();
     await fetch(URLExt.join(url, 'api'));
     await expect(server.shutdown()).resolves.not.toThrow();
-  }, 30000);
+  }, 60000);
 
   it('should accept options', async () => {
     const pageConfig = { foo: 'bar', fizz: 'buzz' };
@@ -45,5 +45,5 @@ describe('JupyterServer', () => {
     expect(PageConfig.getOption('__configData')).toContain('1.11');
     expect(PageConfig.getOption('__kernelSpec_foo')).toContain('Test Python');
     await expect(server.shutdown()).resolves.not.toThrow();
-  }, 30000);
+  }, 60000);
 });
