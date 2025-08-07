@@ -146,7 +146,12 @@ export const licensesPlugin: JupyterFrontEndPlugin<void> = {
     // register license-related commands
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: (args: any) => {
         // bail if no license API is available from the server
         if (!PageConfig.getOption('licensesUrl')) {

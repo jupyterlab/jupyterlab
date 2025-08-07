@@ -290,7 +290,12 @@ const print: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(CommandIDs.print, {
       label: trans.__('Print…'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         const widget = app.shell.currentWidget;
         return Printing.getPrintFunction(widget) !== null;
@@ -326,7 +331,12 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
     const category: string = trans.__('Main Area');
     app.commands.addCommand(CommandIDs.toggleHeader, {
       label: trans.__('Show Header Above Content'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () =>
         app.shell.currentWidget instanceof MainAreaWidget &&
         !app.shell.currentWidget.contentHeader.isDisposed &&
@@ -757,7 +767,12 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Show relevant keyboard shortcuts for the current active widget'
       ),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         const currentWidget = app.shell.currentWidget;
         const included = currentWidget?.node.contains(document.activeElement);

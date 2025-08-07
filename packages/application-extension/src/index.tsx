@@ -142,7 +142,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     // Add Command to override the JLab context menu.
     commands.addCommand(JupyterFrontEndContextMenu.contextMenu, {
       label: trans.__('Shift+Right Click for Browser Menu'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => false,
       execute: () => void 0
     });
@@ -243,7 +248,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         const widget = contextMenuWidget();
         return !!widget && widget.title.closable;
@@ -258,7 +268,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.closeOtherTabs, {
       label: () => trans.__('Close All Other Tabs'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         // Ensure there are at least two widgets.
         return some(shell.widgets('main'), (_, i) => i === 1);
@@ -279,7 +294,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.closeRightTabs, {
       label: () => trans.__('Close Tabs to Right'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () =>
         !!contextMenuWidget() &&
         widgetsRightOf(contextMenuWidget()!).length > 0,
@@ -1341,7 +1361,12 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
 
     app.commands.addCommand(CommandIDs.showPropertyPanel, {
       label: trans.__('Property Inspector'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         labshell.activateById(widget.id);
       }
@@ -1669,7 +1694,12 @@ namespace Private {
     setDisabled(settings);
     commands.addCommand(CommandIDs.toggleContextMenu, {
       label: trans.__('Enable Context Menu'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isToggleable: true,
       isToggled: () => !settings.get('disabled').composite,
       execute: () =>
@@ -1686,7 +1716,12 @@ namespace Private {
     // Add a command to switch a side panels's side
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: trans.__('Switch Sidebar Side'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // First, try to find the correct panel based on the application
         // context menu click. Bail if we don't find a sidebar for the widget.

@@ -114,7 +114,12 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
 
     app.commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('Sessions and Tabs'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         app.shell.activateById(running.id);
       }
@@ -179,7 +184,12 @@ const searchPlugin: JupyterFrontEndPlugin<void> = {
         return dialog.launch();
       },
       label: trans.__('Search Tabs and Running Sessions'),
-      describedBy: {}
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     if (palette) {
       palette.addItem({

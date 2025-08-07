@@ -135,7 +135,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
       },
       isVisible: () => model.isEnabled,
-      describedBy: {}
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     commands.addCommand(CommandIDs.toggle, {
@@ -146,7 +151,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
       },
       isToggled: () => model.isEnabled,
-      describedBy: {}
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     if (palette) {

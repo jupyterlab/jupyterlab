@@ -85,7 +85,12 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
     const apputilsLicencesCommand = 'apputils:licenses';
     commands.addCommand(CommandIDs.licenses, {
       label: licensesText,
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         console.warn(
           `The command ${CommandIDs.licenses} is deprecated, use ${apputilsLicencesCommand} instead.`
@@ -97,7 +102,12 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
     const apputilsLicenseReportCommand = 'apputils:license-report';
     commands.addCommand(CommandIDs.licenseReport, {
       label: downloadAsText,
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         console.warn(
           `The command ${CommandIDs.licenseReport} is deprecated, use ${apputilsLicenseReportCommand} instead.`
@@ -109,7 +119,12 @@ const licensesCommands: JupyterFrontEndPlugin<void> = {
     const apputilsRefreshLicensesCommand = 'apputils:licenses-refresh';
     commands.addCommand(CommandIDs.refreshLicenses, {
       label: refreshLicenses,
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         console.warn(
           `The command ${CommandIDs.refreshLicenses} is deprecated, use ${apputilsRefreshLicensesCommand} instead.`
@@ -140,7 +155,12 @@ const about: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.about, {
       label: trans.__('About %1', app.name),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Create the header of the about dialog
         const versionNumber = trans.__('Version %1', app.version);
@@ -233,7 +253,12 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.jupyterForum, {
       label: trans.__('Jupyter Forum'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         window.open('https://discourse.jupyter.org/c/jupyterlab');
       }

@@ -90,7 +90,12 @@ const contextCommands: JupyterFrontEndPlugin<void> = {
         }
         await navigator.clipboard.writeText(code.textContent);
       },
-      describedBy: {}
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     const options = { selector: `.${MERMAID_CLASS}`, rank: 13 };

@@ -263,7 +263,12 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.themeScrollbars, {
       label: trans.__('Theme Scrollbars'),
-      describedBy: {},
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isToggled: () => manager.isToggledThemeScrollbars(),
       execute: () => manager.toggleThemeScrollbars()
     });
