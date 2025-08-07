@@ -298,6 +298,24 @@
     ]
   },
   {
+    "id": "codemirror:fold-all",
+    "label": "Fold All Regions",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:fold-current",
+    "label": "Fold Current Region",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:fold-subregions",
+    "label": "Fold All Subregions",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "codemirror:select-next-occurrence",
     "label": "Select Next Occurrence",
     "caption": "",
@@ -325,6 +343,24 @@
     "id": "codemirror:toggle-tab-focus-mode",
     "label": "Toggle Tab Focus Mode",
     "caption": "Toggles behavior of Tab key between inserting indentation and moving to next focusable element",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:unfold-all",
+    "label": "Unfold All Regions",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:unfold-current",
+    "label": "Unfold Current Region",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "codemirror:unfold-subregions",
+    "label": "Unfold All Subregions",
+    "caption": "",
     "shortcuts": []
   },
   {

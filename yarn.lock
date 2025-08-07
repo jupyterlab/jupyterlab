@@ -2181,9 +2181,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/ydoc@npm:^3.0.4":
-  version: 3.0.4
-  resolution: "@jupyter/ydoc@npm:3.0.4"
+"@jupyter/ydoc@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@jupyter/ydoc@npm:3.1.0"
   dependencies:
     "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0
     "@lumino/coreutils": ^1.11.0 || ^2.0.0
@@ -2191,7 +2191,7 @@ __metadata:
     "@lumino/signaling": ^1.10.0 || ^2.0.0
     y-protocols: ^1.0.5
     yjs: ^13.5.40
-  checksum: 85ca033a51c0f26080bcea7c0aac7cbd4ef66bc745fd48786aa1a2f9bdf06b99b67f40d8775ff04bb700e78782fbfdc6c97d2e94b45bd65ad5288c44ca158e19
+  checksum: 7f2423752395ec590ed46754c10c87db4f5b804aa9608ef2869f52872e9a29cb5f9e32908325efb221d9ce4fad642a1f7e0dbb8f2ee40c352b8380e46ccba93d
   languageName: node
   linkType: hard
 
@@ -2537,7 +2537,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/cell-toolbar@workspace:packages/cell-toolbar"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/cells": ^4.5.0-alpha.1
     "@jupyterlab/docregistry": ^4.5.0-alpha.1
@@ -2564,7 +2564,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.5.2
     "@codemirror/view": ^6.38.1
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/attachments": ^4.5.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
@@ -2620,7 +2620,7 @@ __metadata:
   resolution: "@jupyterlab/codeeditor@workspace:packages/codeeditor"
   dependencies:
     "@codemirror/state": ^6.5.2
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/coreutils": ^6.5.0-alpha.1
     "@jupyterlab/nbformat": ^4.5.0-alpha.1
@@ -2653,10 +2653,12 @@ __metadata:
     "@codemirror/legacy-modes": ^6.5.1
     "@codemirror/search": ^6.5.10
     "@codemirror/view": ^6.38.1
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.0-alpha.1
+    "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
     "@jupyterlab/codemirror": ^4.5.0-alpha.1
+    "@jupyterlab/notebook": ^4.5.0-alpha.1
     "@jupyterlab/settingregistry": ^4.5.0-alpha.1
     "@jupyterlab/statusbar": ^4.5.0-alpha.1
     "@jupyterlab/translation": ^4.5.0-alpha.1
@@ -2696,7 +2698,7 @@ __metadata:
     "@codemirror/search": ^6.5.10
     "@codemirror/state": ^6.5.2
     "@codemirror/view": ^6.38.1
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
     "@jupyterlab/coreutils": ^6.5.0-alpha.1
     "@jupyterlab/documentsearch": ^4.5.0-alpha.1
@@ -2744,7 +2746,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.5.2
     "@codemirror/view": ^6.38.1
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
     "@jupyterlab/codemirror": ^4.5.0-alpha.1
@@ -2800,7 +2802,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/console@workspace:packages/console"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/cells": ^4.5.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
@@ -2929,7 +2931,7 @@ __metadata:
     "@codemirror/state": ^6.5.2
     "@codemirror/view": ^6.38.1
     "@jupyter/react-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.0-alpha.1
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/cells": ^4.5.0-alpha.1
@@ -3025,7 +3027,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docregistry@workspace:packages/docregistry"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
     "@jupyterlab/coreutils": ^6.5.0-alpha.1
@@ -3146,7 +3148,7 @@ __metadata:
   resolution: "@jupyterlab/example-cell@workspace:examples/cell"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.0-alpha.1
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/cells": ^4.5.0-alpha.1
@@ -3175,7 +3177,7 @@ __metadata:
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.0-alpha.1
     "@jupyterlab/codemirror": ^4.5.0-alpha.1
     "@jupyterlab/console": ^4.5.0-alpha.1
@@ -3321,7 +3323,7 @@ __metadata:
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
     "@jupyter/web-components": ^0.16.6
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.0-alpha.1
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/codemirror": ^4.5.0-alpha.1
@@ -3565,7 +3567,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor@workspace:packages/fileeditor"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
     "@jupyterlab/codemirror": ^4.5.0-alpha.1
@@ -4345,7 +4347,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook-extension@workspace:packages/notebook-extension"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/application": ^4.5.0-alpha.1
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/cell-toolbar": ^4.5.0-alpha.1
@@ -4394,7 +4396,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/apputils": ^4.6.0-alpha.1
     "@jupyterlab/cells": ^4.5.0-alpha.1
     "@jupyterlab/codeeditor": ^4.5.0-alpha.1
@@ -4682,7 +4684,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/services@workspace:packages/services"
   dependencies:
-    "@jupyter/ydoc": ^3.0.4
+    "@jupyter/ydoc": ^3.1.0
     "@jupyterlab/coreutils": ^6.5.0-alpha.1
     "@jupyterlab/nbformat": ^4.5.0-alpha.1
     "@jupyterlab/settingregistry": ^4.5.0-alpha.1
@@ -12349,6 +12351,7 @@ __metadata:
     asynckit: ^0.4.0
     combined-stream: ^1.0.8
     es-set-tostringtag: ^2.1.0
+    hasown: ^2.0.2
     mime-types: ^2.1.12
   checksum: 9b7788836df9fa5a6999e0c02515b001946b2a868cfe53f026c69e2c537a2ff9fbfb8e9d2b678744628f3dc7a2d6e14e4e45dfaf68aa6239727f0bdb8ce0abf2
   languageName: node
