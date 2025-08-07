@@ -716,9 +716,11 @@ export class DirListing extends Widget {
   /**
    * Clear the selected items.
    */
-  clearSelectedItems(): void {
+  clearSelectedItems(emit = true): void {
     this.selection = Object.create(null);
-    this._selectionChanged.emit();
+    if (emit) {
+      this._selectionChanged.emit();
+    }
   }
 
   /**
@@ -856,6 +858,7 @@ export class DirListing extends Widget {
     content.addEventListener('lm-dragleave', this);
     content.addEventListener('lm-dragover', this);
     content.addEventListener('lm-drop', this);
+    this._updateColumnSizes();
   }
 
   /**
@@ -1069,6 +1072,8 @@ export class DirListing extends Widget {
     // Fetch common variables.
     const items = this._sortedItems;
     const nodes = this._items;
+    // If we didn't get any item yet, we'll need to resize once items are added
+    const needsResize = nodes.length === 0;
     const content = DOMUtils.findElement(this.node, CONTENT_CLASS);
     const renderer = this._renderer;
 
@@ -1103,12 +1108,18 @@ export class DirListing extends Widget {
         checkbox.checked = false;
       }
 
-      // Handle `tabIndex`
+      // Handle `tabIndex` & `role`
       const nameNode = renderer.getNameNode(node);
       if (nameNode) {
         // Must check if the name node is there because it gets replaced by the
         // edit node when editing the name of the file or directory.
-        nameNode.tabIndex = i === this._focusIndex ? 0 : -1;
+        if (i === this._focusIndex) {
+          nameNode.setAttribute('tabIndex', '0');
+          nameNode.setAttribute('role', 'button');
+        } else {
+          nameNode.setAttribute('tabIndex', '-1');
+          nameNode.removeAttribute('role');
+        }
       }
     });
 
@@ -1137,6 +1148,11 @@ export class DirListing extends Widget {
     }
 
     this.updateNodes(items, nodes);
+
+    if (needsResize) {
+      this._width = this._computeContentWidth();
+      this._updateColumnSizes();
+    }
 
     this._prevPath = this._model.path;
   }
@@ -2485,7 +2501,7 @@ export class DirListing extends Widget {
   private _onModelRefreshed(): void {
     // Update the selection.
     const existing = Object.keys(this.selection);
-    this.clearSelectedItems();
+    this.clearSelectedItems(false);
     for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
