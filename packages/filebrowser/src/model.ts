@@ -408,7 +408,7 @@ export class FileBrowserModel implements IDisposable {
   async upload(file: File, path?: string): Promise<Contents.IModel> {
     // Check if upload is allowed
     if (!this._allowFileUploads) {
-      throw new Error('File uploads are disabled');
+      throw new Error(this._trans.__('File uploads are disabled'));
     }
 
     // We do not support Jupyter Notebook version less than 4, and Jupyter
