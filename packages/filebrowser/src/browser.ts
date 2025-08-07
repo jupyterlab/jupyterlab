@@ -297,18 +297,19 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
-   * Whether to allow drag and drop upload of files.
+   * Whether to allow upload of files.
    */
-  get allowDragDropUpload(): boolean {
-    return this._allowDragDropUpload;
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
   }
 
-  set allowDragDropUpload(value: boolean) {
+  set allowFileUploads(value: boolean) {
+    this.model.allowFileUploads = value;
     if (this.listing.setAllowDragDropUpload) {
       this.listing.setAllowDragDropUpload(value);
-      this._allowDragDropUpload = value;
+      this._allowFileUploads = value;
     } else {
-      console.warn('Listing does not support setting drag and drop upload');
+      console.warn('Listing does not support setting upload');
     }
   }
 
@@ -566,7 +567,7 @@ export class FileBrowser extends SidePanel {
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
-  private _allowDragDropUpload: boolean = true;
+  private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
 }
 
