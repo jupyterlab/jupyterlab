@@ -2589,7 +2589,9 @@ export class Notebook extends StaticNotebook {
   /**
    * Find heading with given ID in any of the cells.
    */
-  async _findHeading(queryId: string): Promise<Private.IScrollTarget | null> {
+  private async _findHeading(
+    queryId: string
+  ): Promise<Private.IScrollTarget | null> {
     // Loop on cells, get headings and search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
@@ -2641,7 +2643,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Find cell by its unique ID.
    */
-  _findCellById(queryId: string): Private.IScrollTarget | null {
+  private _findCellById(queryId: string): Private.IScrollTarget | null {
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
       if (cell.model.id === queryId) {
@@ -2656,7 +2658,9 @@ export class Notebook extends StaticNotebook {
   /**
    * Find anchor target by any ID in any of the cell.
    */
-  async _findLegacy(queryId: string): Promise<Private.IScrollTarget | null> {
+  private async _findLegacy(
+    queryId: string
+  ): Promise<Private.IScrollTarget | null> {
     // Loop on cells, search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
