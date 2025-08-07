@@ -2061,9 +2061,9 @@ export class Notebook extends StaticNotebook {
 
     const parts = cleanedFragment.split('=');
     if (parts.length === 1) {
-      // Default to heading if no prefix is given.
+      // Default to legacy if no prefix is given.
       return {
-        kind: 'heading',
+        kind: 'legacy',
         value: cleanedFragment
       };
     }
@@ -2093,11 +2093,14 @@ export class Notebook extends StaticNotebook {
       case 'cell-id':
         result = this._findCellById(parsedFragment.value);
         break;
+      case 'legacy':
+        result = await this._findLegacy(parsedFragment.value);
+        break;
       default:
         console.warn(
           `Unknown target type for URI fragment ${fragment}, interpreting as a heading`
         );
-        result = await this._findHeading(
+        result = await this._findLegacy(
           parsedFragment.kind + '=' + parsedFragment.value
         );
         break;
@@ -2115,15 +2118,9 @@ export class Notebook extends StaticNotebook {
     if (element == null) {
       element = cell.node;
     }
-    const widgetBox = this.node.getBoundingClientRect();
-    const elementBox = element.getBoundingClientRect();
 
-    if (
-      elementBox.top > widgetBox.bottom ||
-      elementBox.bottom < widgetBox.top
-    ) {
-      element.scrollIntoView({ block: 'center' });
-    }
+    // Scroll notebook to set the target on top.
+    element.scrollIntoView();
   }
 
   /**
@@ -2547,7 +2544,9 @@ export class Notebook extends StaticNotebook {
   /**
    * Find heading with given ID in any of the cells.
    */
-  async _findHeading(queryId: string): Promise<Private.IScrollTarget | null> {
+  private async _findHeading(
+    queryId: string
+  ): Promise<Private.IScrollTarget | null> {
     // Loop on cells, get headings and search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
@@ -2578,8 +2577,12 @@ export class Notebook extends StaticNotebook {
             break;
         }
         if (id === queryId) {
+          const attribute =
+            this.rendermime.sanitizer.allowNamedProperties ?? false
+              ? 'id'
+              : 'data-jupyter-id';
           const element = this.node.querySelector(
-            `h${heading.level}[id="${CSS.escape(id)}"]`
+            `h${heading.level}[${attribute}="${CSS.escape(id)}"]`
           ) as HTMLElement;
 
           return {
@@ -2595,12 +2598,46 @@ export class Notebook extends StaticNotebook {
   /**
    * Find cell by its unique ID.
    */
-  _findCellById(queryId: string): Private.IScrollTarget | null {
+  private _findCellById(queryId: string): Private.IScrollTarget | null {
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
       if (cell.model.id === queryId) {
         return {
           cell
+        };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Find anchor target by any ID in any of the cell.
+   */
+  private async _findLegacy(
+    queryId: string
+  ): Promise<Private.IScrollTarget | null> {
+    // Loop on cells, search for first matching id.
+    for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
+      const cell = this.widgets[cellIdx];
+      if (
+        cell.model.type === 'raw' ||
+        (cell.model.type === 'markdown' && !(cell as MarkdownCell).rendered)
+      ) {
+        // Bail early
+        continue;
+      }
+
+      const attribute =
+        this.rendermime.sanitizer.allowNamedProperties ?? false
+          ? 'id'
+          : 'data-jupyter-id';
+      const element = cell.node.querySelector(
+        `[${attribute}="${CSS.escape(queryId)}"]`
+      );
+      if (element !== null) {
+        return {
+          cell,
+          element: element as HTMLElement
         };
       }
     }
@@ -3375,7 +3412,7 @@ namespace Private {
     /**
      * The kind of notebook element targeted by the fragment identifier.
      */
-    kind: 'heading' | 'cell-id';
+    kind: 'legacy' | 'heading' | 'cell-id';
     /*
      * The value of the fragment query.
      */
