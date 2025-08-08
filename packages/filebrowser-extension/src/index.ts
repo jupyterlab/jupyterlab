@@ -1113,7 +1113,13 @@ function addCommands(
         return widget.selectAll();
       }
     },
-    label: trans.__('Select All')
+    label: trans.__('Select All'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.goToPath, {
