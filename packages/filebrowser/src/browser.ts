@@ -297,6 +297,23 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to allow upload of files.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this.model.allowFileUploads = value;
+    if (this.listing.setAllowDragDropUpload) {
+      this.listing.setAllowDragDropUpload(value);
+      this._allowFileUploads = value;
+    } else {
+      console.warn('Listing does not support setting upload');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -550,6 +567,7 @@ export class FileBrowser extends SidePanel {
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _allowFileUploads: boolean = true;
   private _selectionChanged = new Signal<this, void>(this);
 }
 

@@ -249,7 +249,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
-          showFullPath: false
+          showFullPath: false,
+          allowFileUploads: true
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
@@ -310,7 +311,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
           }
           return 'when-hidden';
         },
-        state
+        state,
+        allowFileUploads: options.allowFileUploads ?? true
       });
       const restore = options.restore;
       const widget = new FileBrowser({ id, model, restore, translator, state });
