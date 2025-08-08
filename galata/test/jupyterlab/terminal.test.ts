@@ -87,6 +87,31 @@ test.describe('Terminal', () => {
       expect(await terminal.screenshot()).toMatchSnapshot('dark-term-dark.png');
     });
   });
+
+  test.describe('Search', () => {
+    test('should highlight matches', async ({ page }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await terminal.waitFor();
+
+      // Display some content in terminal.
+      await page.locator('div.xterm-screen').click();
+      await page.keyboard.type('seq 1006 2 1024');
+      await page.keyboard.press('Enter');
+
+      // Perform search.
+      const searchText = '101';
+      await page.evaluate(async searchText => {
+        await window.jupyterapp.commands.execute('documentsearch:start', {
+          searchText
+        });
+      }, searchText);
+
+      // Wait for search to be performed and terminal canvas rerendered.
+      await page.waitForTimeout(500);
+
+      expect(await terminal.screenshot()).toMatchSnapshot('search.png');
+    });
+  });
 });
 
 test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
