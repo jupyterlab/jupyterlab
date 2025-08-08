@@ -71,9 +71,29 @@ Here is a sample block of code that adds a command to the application (given by 
       isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
-      execute: () => {
-        console.log(`Executed ${commandID}`);
-        toggled = !toggled;
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'Optional text to log',
+              default: ''
+            },
+            count: {
+              type: 'number',
+              description: 'Optional number of times to log the text',
+              default: 1
+            }
+          }
+        }
+      },
+      execute: (args) => {
+        const text = args?.text || '';
+        const count = args?.count || 1;
+        for (let i = 0; i < count; i++) {
+          console.log(`Executed ${commandID} with text: ${text}`);
+        }
       }
     });
 
@@ -82,6 +102,7 @@ This example adds a new command, which, when triggered, calls the ``execute`` fu
 ``isToggled`` indicates whether to render a check mark next to the command.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
+``describedBy`` is an optional but recommended property that provides a JSON schema describing the command's arguments, which is useful for documentation, tooling, and ensuring consistency in how the command is invoked.
 
 Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
@@ -801,6 +822,13 @@ providing a different rank or adding ``"disabled": true`` to remove the item).
 
    You need to set ``jupyter.lab.transform`` to ``true`` in the plugin id that will gather all items.
 
+**What are transforms?** The ``jupyter.lab.transform`` flag tells JupyterLab to wait for 
+a transform function before loading the plugin. This allows dynamic modification of settings 
+schemas, commonly used to merge toolbar/menu definitions from multiple extensions.
+
+**Loading order pitfall**: Extensions providing transforms must register them early in 
+activation, before dependent plugins load, otherwise those plugins will timeout waiting 
+for the transform.
 
 The current widget factories supporting the toolbar customization are:
 
@@ -1040,6 +1068,65 @@ a plugin:
         return foo;
       }
     };
+
+Kernel Subshells
+----------------
+
+Kernel subshells enable concurrent code execution within kernels that support them. Subshells are separate threads of execution that allow interaction with a kernel while it's busy executing long-running code, enabling non-blocking communication and parallel execution.
+
+**Kernel Support**
+
+Subshells are supported by:
+
+- **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via ``supported_features: ['kernel subshells']`` in kernel info replies
+- Other kernels implementing `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__
+
+**User Interface**
+
+For user interface details, see :ref:`subshell-console`.
+
+**Extension Development**
+
+Extension developers can use subshell functionality through the kernel service API:
+
+.. code:: typescript
+
+  import { INotebookTracker } from '@jupyterlab/notebook';
+
+  // Get the current kernel from a notebook
+  const current = tracker.currentWidget;
+  if (!current) return;
+
+  const kernel = current.sessionContext.session?.kernel;
+  if (!kernel) return;
+
+  // Check if kernel supports subshells
+  if (kernel.supportsSubshells) {
+    // Create a new subshell
+    const reply = await kernel.requestCreateSubshell({}).done;
+    const subshellId = reply.content.subshell_id;
+    console.log(`Created subshell: ${subshellId}`);
+
+    // List existing subshells
+    const listReply = await kernel.requestListSubshell({}).done;
+    console.log(`Active subshells: ${listReply.content.subshell_id}`);
+
+    // Execute code in a specific subshell
+    const future = kernel.requestExecute(
+      { code: 'print("Hello from subshell!")' },
+      false, // disposeOnDone
+      { subshell_id: subshellId } // metadata
+    );
+    await future.done;
+
+    // Delete a subshell when done
+    await kernel.requestDeleteSubshell({ subshell_id: subshellId }).done;
+    console.log(`Deleted subshell: ${subshellId}`);
+  }
+
+
+
+For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
 
 LSP Features
 --------------

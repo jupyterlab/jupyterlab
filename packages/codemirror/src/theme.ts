@@ -23,6 +23,40 @@ export const jupyterEditorTheme = EditorView.theme({
     color: 'var(--jp-content-font-color1)'
   },
 
+  /* Panels and buttons used by the native CodeMirror search function
+     (rarely used in JupyterLab, but still accessible)
+     and by the vim extension (among others).
+  */
+  '.cm-panels': {
+    color: 'var(--jp-ui-font-color2)',
+    backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-panels.cm-panels-bottom': {
+    borderTop: '1px solid var(--jp-border-color2)'
+  },
+
+  '.cm-button': {
+    background: 'var(--jp-layout-color2)',
+    border: 'var(--jp-border-width) solid var(--jp-border-color1)',
+    color: 'var(--jp-ui-font-color1)',
+    borderRadius: 'var(--jp-border-radius)'
+  },
+
+  '.cm-button:hover': {
+    background: 'var(--jp-layout-color1)'
+  },
+
+  '.cm-panel.cm-search > label': {
+    color: 'var(--jp-ui-font-color1)'
+  },
+
+  '.cm-textfield': {
+    backgroundColor: 'var(--jp-layout-color2)',
+    color: 'var(--jp-ui-font-color1)',
+    border: 'var(--jp-border-width) solid var(--jp-border-color1)'
+  },
+
   /* In the notebook, we want this styling to be handled by its container */
   '.jp-CodeConsole &, .jp-Notebook &': {
     background: 'transparent'

@@ -41,6 +41,7 @@ function RunningSessionsComponent(
   const showTerminals = props.showTerminals ?? props.terminals > 0;
   return (
     <GroupItem
+      role="button"
       tabIndex={0}
       spacing={HALF_SPACING}
       onClick={props.handleClick}

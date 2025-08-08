@@ -26,7 +26,8 @@ export class Uploader extends ToolbarButton {
       onClick: () => {
         this._input.click();
       },
-      tooltip: Private.translateToolTip(options.translator)
+      tooltip: Private.translateToolTip(options.translator),
+      enabled: options.model.allowFileUploads
     });
     this.fileBrowserModel = options.model;
     this.translator = options.translator || nullTranslator;

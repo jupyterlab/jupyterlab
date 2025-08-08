@@ -63,6 +63,60 @@ test.describe('Notebook scroll on navigation (with windowing)', () => {
   }
 });
 
+test.describe('Notebook scroll on navigation (with windowing), named properties allowed', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'full'
+      },
+      '@jupyterlab/apputils-extension:sanitizer': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/apputils-extension:sanitizer'],
+        allowNamedProperties: true
+      }
+    }
+  });
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  const cellLinks = {
+    'penultimate cell using heading, legacy format': 18,
+    'penultimate cell using heading, explicit fragment': 18,
+    'last cell using heading, legacy format': 19,
+    'last cell using heading, explicit fragment': 19,
+    'last cell using cell identifier': 19
+  };
+  for (const [link, cellIdx] of Object.entries(cellLinks)) {
+    test(`Scroll to ${link}`, async ({ page }) => {
+      const firstCellLocator = page.locator(
+        '.jp-Cell[data-windowed-list-index="0"]'
+      );
+      const lastCellLocator = page.locator(
+        `.jp-Cell[data-windowed-list-index="${cellIdx}"]`
+      );
+      await firstCellLocator.scrollIntoViewIfNeeded();
+
+      await page.click(`a:has-text("${link}")`);
+
+      await expect(firstCellLocator).not.toBeInViewport();
+      await expect(lastCellLocator).toBeInViewport();
+    });
+  }
+});
+
 test.describe('Notebook scroll on dragging cells (with windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
@@ -317,5 +371,41 @@ test.describe('Notebook scroll over long outputs (with windowing)', () => {
       expect(diff).toBeGreaterThan(75);
       previousOffset = offset;
     }
+  });
+});
+
+test.describe('Notebook scroll beyond a cell with long output (with windowing)', () => {
+  const outputAndHeading = 'single_long_output.ipynb';
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${outputAndHeading}`),
+      `${tmpPath}/${outputAndHeading}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${outputAndHeading}`);
+    await page.notebook.activate(outputAndHeading);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('should not change height of the scrollbar when scrolling beyond the cell long', async ({
+    page
+  }) => {
+    // Make the first cell active
+    await page.notebook.selectCells(0);
+
+    // Get the outer window
+    const outer = page.locator('.jp-WindowedPanel-outer');
+    const scrollHeightBefore = await outer.evaluate(node => node.scrollHeight);
+
+    // Scroll to the last cell
+    const lastCell = await page.notebook.getCellLocator(30);
+    await lastCell!.scrollIntoViewIfNeeded();
+
+    const scrollHeightAfter = await outer.evaluate(node => node.scrollHeight);
+
+    expect(scrollHeightBefore).toBeCloseTo(scrollHeightAfter);
   });
 });

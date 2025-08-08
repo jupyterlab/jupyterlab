@@ -319,11 +319,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Cell headings
+   *
+   * @deprecated Use the asynchronous {@link getHeadings} method instead.
+   * This getter only returns the last cached value.
    */
   get headings(): Cell.IHeading[] {
     return new Array<Cell.IHeading>();
   }
 
+  /**
+   * Async Cell headings
+   *
+   */
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
+    return [];
+  }
   /**
    * Get the model used by the cell.
    */
@@ -1291,6 +1302,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
       const headings: Cell.IHeading[] = [];
 
@@ -1328,10 +1343,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
+          const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
+            m.data[mdType] as string,
+            this._rendermime.markdownParser
+          );
+
           headings.push(
-            ...TableOfContentsUtils.Markdown.getHeadings(
-              m.data[mdType] as string
-            ).map(heading => {
+            ...mdHeading.map(heading => {
               return {
                 ...heading,
                 outputIndex: j,
@@ -1341,7 +1359,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
           );
         }
       }
-
       this._headingsCache = headings;
     }
 
@@ -1739,13 +1756,9 @@ export namespace CodeCell {
     const model = cell.model;
     const code = model.sharedModel.getSource();
     if (!code.trim() || !sessionContext.session?.kernel) {
-      model.sharedModel.transact(
-        () => {
-          model.clearExecution();
-        },
-        false,
-        'silent-change'
-      );
+      model.sharedModel.transact(() => {
+        model.clearExecution();
+      }, false);
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
@@ -2170,6 +2183,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
+
+    this._cachedHeadingText = this.model.sharedModel.getSource();
   }
 
   /**
@@ -2193,14 +2208,28 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  /**
+   * Parses and returns the list of Markdown headings in the cell.
+   *
+   * @returns A promise that resolves to an array of cell headings.
+   *
+   * @remarks
+   * This method caches the result after the first call to avoid redundant parsing.
+   **/
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      // Use table of content algorithm for consistency
-      const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.sharedModel.getSource()
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+        this.model.sharedModel.getSource(),
+        this._rendermime.markdownParser
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
+      this._headingResolved = true;
+      this.renderCollapseButtons();
     }
 
     return [...this._headingsCache!];
@@ -2411,7 +2440,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected onContentChanged(): void {
     super.onContentChanged();
-    this._headingsCache = null;
+    const model = this.model;
+    const text = model && model.sharedModel.getSource();
+    // Do not set headingCache to null, if the text has not changed.
+    if (text !== this._cachedHeadingText) {
+      this._cachedHeadingText = text;
+      this._headingsCache = null;
+      this._headingResolved = false;
+    }
   }
 
   /**
@@ -2419,7 +2455,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * and for collapsed heading cells render the "expand hidden cells"
    * button.
    */
-  protected renderCollapseButtons(widget: Widget): void {
+  protected renderCollapseButtons(widget?: Widget): void {
     this.node.classList.toggle(
       MARKDOWN_HEADING_COLLAPSED,
       this._headingCollapsed
@@ -2538,6 +2574,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  get headingsResolved(): boolean {
+    return this._headingResolved;
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _headingCollapsed: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
@@ -2549,6 +2589,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
   private _showEditorForReadOnlyMarkdown = true;
+  private _cachedHeadingText = '';
+  private _headingResolved: boolean = false;
 }
 
 /**
