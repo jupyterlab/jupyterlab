@@ -523,6 +523,22 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Select all listing items in the current directory.
+   */
+  async selectAll(): Promise<void> {
+    const items = this._model.items();
+    const newSelection: { [key: string]: boolean } = {};
+
+    for (const item of items) {
+      newSelection[item.path] = true;
+    }
+
+    this.selection = newSelection;
+    this._selectionChanged.emit();
+    this.update();
+  }
+
+  /**
    * Download the currently selected item(s).
    */
   async download(): Promise<void> {

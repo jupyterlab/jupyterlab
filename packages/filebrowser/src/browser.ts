@@ -451,6 +451,13 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Select all listing items.
+   */
+  selectAll(): Promise<void> {
+    return this.listing.selectAll();
+  }
+
+  /**
    * Download the currently selected item(s).
    */
   download(): Promise<void> {
