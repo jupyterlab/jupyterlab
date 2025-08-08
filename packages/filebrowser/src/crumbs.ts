@@ -186,8 +186,10 @@ export class BreadCrumbs extends Widget {
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
       if (node.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+        const preferredPath = PageConfig.getOption('preferredPath');
+        const path = preferredPath ? '/' + preferredPath : preferredPath;
         this._model
-          .cd(PageConfig.getOption('preferredPath'))
+          .cd(path)
           .catch(error =>
             showErrorMessage(this._trans.__('Open Error'), error)
           );
@@ -467,10 +469,12 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
+    const preferredPath = PageConfig.getOption('preferredPath');
+    const path = preferredPath ? '/' + preferredPath : preferredPath;
     const preferred = preferredIcon.element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
-      title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
+      title: path || 'Jupyter Preferred Path',
       stylesheet: 'breadCrumb'
     });
     return [home, ellipsis, parent, current, preferred];
