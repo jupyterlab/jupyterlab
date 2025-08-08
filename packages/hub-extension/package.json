@@ -43,7 +43,8 @@
     "@jupyterlab/apputils": "^4.6.0-alpha.2",
     "@jupyterlab/coreutils": "^6.5.0-alpha.2",
     "@jupyterlab/services": "^7.5.0-alpha.2",
-    "@jupyterlab/translation": "^4.5.0-alpha.2"
+    "@jupyterlab/translation": "^4.5.0-alpha.2",
+    "@lumino/widgets": "^2.7.1"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
