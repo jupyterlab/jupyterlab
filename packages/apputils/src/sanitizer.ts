@@ -458,6 +458,13 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * @returns Whether to allow name and id attributes.
+   */
+  get allowNamedProperties(): boolean {
+    return this._allowNamedProperties;
+  }
+
+  /**
    * Set the allowed schemes
    *
    * @param scheme Allowed schemes.
@@ -608,10 +615,11 @@ export class Sanitizer implements IRenderMime.ISanitizer {
       allowedAttributes: {
         '*': [
           'class',
+          'data-jupyter-id',
           'dir',
           'draggable',
           'hidden',
-          ...(this._allowNamedProperties ? ['id'] : []),
+          'id',
           'inert',
           'itemprop',
           'itemref',
@@ -991,7 +999,24 @@ export class Sanitizer implements IRenderMime.ISanitizer {
         // Set the "rel" attribute for <a> tags to "nofollow".
         a: sanitize.simpleTransform('a', { rel: 'nofollow' }),
         // Set the "disabled" attribute for <input> tags.
-        input: sanitize.simpleTransform('input', { disabled: 'disabled' })
+        input: sanitize.simpleTransform('input', { disabled: 'disabled' }),
+        // Replace "id" attribute by "data-jupyter-id" if "id" is not allowed.
+        ...(this._allowNamedProperties
+          ? {}
+          : {
+              '*': function (tagName: string, attribs: sanitize.Attributes) {
+                if (attribs.id !== undefined) {
+                  attribs['data-jupyter-id'] = attribs.id;
+                  delete attribs.id;
+                }
+                return {
+                  tagName,
+                  attribs: {
+                    ...attribs
+                  }
+                };
+              }
+            })
       },
       allowedSchemes: schemesToAllow,
       allowedSchemesByTag: {

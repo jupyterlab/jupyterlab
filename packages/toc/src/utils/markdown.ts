@@ -53,8 +53,9 @@ export async function getHeadingId(
     if (!header) {
       return null;
     }
-
-    return header.id;
+    return sanitizer?.allowNamedProperties
+      ? header.id
+      : header.getAttribute('data-jupyter-id');
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
