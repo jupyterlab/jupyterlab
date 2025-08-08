@@ -238,6 +238,26 @@ function activate(
         return args.label as string;
       }
       return trans.__('Settings Editor');
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: trans.__('Search query to filter settings')
+          },
+          settingEditorType: {
+            type: 'string',
+            enum: ['ui', 'json'],
+            description: trans.__('Type of settings editor to open')
+          },
+          label: {
+            type: 'string',
+            description: trans.__('Custom label for the command')
+          }
+        }
+      }
     }
   });
 
@@ -371,7 +391,13 @@ function activateJSON(
       void tracker.add(container);
       shell.add(container, 'main', { type: 'Advanced Settings' });
     },
-    label: trans.__('Advanced Settings Editor')
+    label: trans.__('Advanced Settings Editor'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   if (palette) {
     palette.addItem({
@@ -386,14 +412,26 @@ function activateJSON(
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.exportSettings, {
@@ -403,7 +441,13 @@ function activateJSON(
       downloadSettings(jsonContent, 'overrides.json');
     },
     label: trans.__('Export Settings'),
-    icon: downloadIcon
+    icon: downloadIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.importSettings, {
@@ -509,7 +553,13 @@ function activateJSON(
       fileInput.click();
     },
     label: trans.__('Import Settings'),
-    icon: fileUploadIcon
+    icon: fileUploadIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   /**

@@ -132,7 +132,7 @@ export function handleRequest(item: IService, status: number, body: any): void {
     (item.serverSettings as any).fetch = oldFetch;
 
     // Normalize the body.
-    if (typeof body !== 'string') {
+    if (typeof body !== 'string' && !(body instanceof File)) {
       body = JSON.stringify(body);
     }
     // Body should be null for these status codes

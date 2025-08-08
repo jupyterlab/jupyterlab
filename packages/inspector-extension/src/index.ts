@@ -112,6 +112,25 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         !inspector.isVisible,
       label: showLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: trans.__('Text to display in the inspector')
+            },
+            refresh: {
+              type: 'boolean',
+              description: trans.__('Whether to refresh the inspector')
+            },
+            isLauncher: {
+              type: 'boolean',
+              description: trans.__('Whether command is called from launcher')
+            }
+          }
+        }
+      },
       execute: args => {
         const text = args && (args.text as string);
         const refresh = args && (args.refresh as boolean);
@@ -129,6 +148,17 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       isEnabled: () => isInspectorOpen(),
       label: closeLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            isLauncher: {
+              type: 'boolean',
+              description: trans.__('Whether command is called from launcher')
+            }
+          }
+        }
+      },
       execute: () => closeInspector()
     });
 
@@ -138,6 +168,17 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       caption,
       label: toggleLabel,
       isToggled: () => isInspectorOpen(),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: trans.__('Text to display in the inspector')
+            }
+          }
+        }
+      },
       execute: args => {
         if (isInspectorOpen()) {
           closeInspector();
