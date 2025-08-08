@@ -126,6 +126,24 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           ? trans.__('Use Theme: %1', displayName)
           : displayName;
       },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            theme: {
+              type: 'string',
+              description: trans.__('The theme name to switch to')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is being called from the palette'
+              )
+            }
+          },
+          required: ['theme']
+        }
+      },
       isToggled: args => args['theme'] === currentTheme,
       execute: args => {
         const theme = args['theme'] as string;
@@ -151,6 +169,24 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           ? trans.__('Set Preferred Light Theme: %1', displayName)
           : displayName;
       },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            theme: {
+              type: 'string',
+              description: trans.__('The preferred light theme name')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is being called from the palette'
+              )
+            }
+          },
+          required: ['theme']
+        }
+      },
       isToggled: args => args['theme'] === manager.preferredLightTheme,
       execute: args => {
         const theme = args['theme'] as string;
@@ -172,6 +208,24 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
           ? trans.__('Set Preferred Dark Theme: %1', displayName)
           : displayName;
       },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            theme: {
+              type: 'string',
+              description: trans.__('The preferred dark theme name')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is being called from the palette'
+              )
+            }
+          },
+          required: ['theme']
+        }
+      },
       isToggled: args => args['theme'] === manager.preferredDarkTheme,
       execute: args => {
         const theme = args['theme'] as string;
@@ -188,6 +242,19 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         args['isPalette']
           ? trans.__('Synchronize Styling Theme with System Settings')
           : trans.__('Synchronize with System Settings'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is being called from the palette'
+              )
+            }
+          }
+        }
+      },
       isToggled: () => manager.isToggledAdaptiveTheme(),
       execute: () => {
         manager.toggleAdaptiveTheme().catch(console.warn);
@@ -196,6 +263,12 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.themeScrollbars, {
       label: trans.__('Theme Scrollbars'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isToggled: () => manager.isToggledThemeScrollbars(),
       execute: () => manager.toggleThemeScrollbars()
     });
@@ -203,6 +276,26 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     commands.addCommand(CommandIDs.changeFont, {
       label: args =>
         args['enabled'] ? `${args['font']}` : trans.__('waiting for fonts'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            enabled: {
+              type: 'boolean',
+              description: trans.__('Whether the font is available and enabled')
+            },
+            font: {
+              type: 'string',
+              description: trans.__('The font name')
+            },
+            key: {
+              type: 'string',
+              description: trans.__('The CSS property key to modify')
+            }
+          },
+          required: ['enabled', 'font', 'key']
+        }
+      },
       isEnabled: args => args['enabled'] as boolean,
       isToggled: args => manager.getCSS(args['key'] as string) === args['font'],
       execute: args =>
@@ -222,6 +315,20 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
             return trans.__('Increase Font Size');
         }
       },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            key: {
+              type: 'string',
+              description: trans.__(
+                'The font size key to increase (e.g., "code-font-size", "content-font-size1", "ui-font-size1")'
+              )
+            }
+          },
+          required: ['key']
+        }
+      },
       execute: args => manager.incrFontSize(args['key'] as string)
     });
 
@@ -236,6 +343,20 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
             return trans.__('Decrease UI Font Size');
           default:
             return trans.__('Decrease Font Size');
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            key: {
+              type: 'string',
+              description: trans.__(
+                'The font size key to decrease (e.g., "code-font-size", "content-font-size1", "ui-font-size1")'
+              )
+            }
+          },
+          required: ['key']
         }
       },
       execute: args => manager.decrFontSize(args['key'] as string)
