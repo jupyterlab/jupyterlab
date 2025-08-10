@@ -89,6 +89,12 @@ const contextCommands: JupyterFrontEndPlugin<void> = {
           return;
         }
         await navigator.clipboard.writeText(code.textContent);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 

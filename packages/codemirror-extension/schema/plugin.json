@@ -28,6 +28,49 @@
       "selector": ".cm-content"
     }
   ],
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "submenu",
+            "rank": 10,
+            "submenu": {
+              "id": "jp-mainmenu-codefold",
+              "label": "Code Folding",
+              "items": [
+                {
+                  "command": "codemirror:fold-current",
+                  "rank": 1
+                },
+                {
+                  "command": "codemirror:unfold-current",
+                  "rank": 2
+                },
+                {
+                  "command": "codemirror:fold-subregions",
+                  "rank": 3
+                },
+                {
+                  "command": "codemirror:unfold-subregions",
+                  "rank": 4
+                },
+                {
+                  "command": "codemirror:fold-all",
+                  "rank": 5
+                },
+                {
+                  "command": "codemirror:unfold-all",
+                  "rank": 6
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {

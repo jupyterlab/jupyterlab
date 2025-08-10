@@ -36,9 +36,9 @@ classifiers = [
 ]
 dependencies = [
     "async_lru>=1.0.0",
-    "httpx>=0.25.0",
+    "httpx>=0.25.0,<1",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
-    "ipykernel>=6.5.0",
+    "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
     "jupyter_server>=2.4.0,<3",

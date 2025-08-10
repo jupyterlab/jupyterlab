@@ -71,9 +71,29 @@ Here is a sample block of code that adds a command to the application (given by 
       isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
-      execute: () => {
-        console.log(`Executed ${commandID}`);
-        toggled = !toggled;
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'Optional text to log',
+              default: ''
+            },
+            count: {
+              type: 'number',
+              description: 'Optional number of times to log the text',
+              default: 1
+            }
+          }
+        }
+      },
+      execute: (args) => {
+        const text = args?.text || '';
+        const count = args?.count || 1;
+        for (let i = 0; i < count; i++) {
+          console.log(`Executed ${commandID} with text: ${text}`);
+        }
       }
     });
 
@@ -82,6 +102,7 @@ This example adds a new command, which, when triggered, calls the ``execute`` fu
 ``isToggled`` indicates whether to render a check mark next to the command.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
+``describedBy`` is an optional but recommended property that provides a JSON schema describing the command's arguments, which is useful for documentation, tooling, and ensuring consistency in how the command is invoked.
 
 Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
@@ -801,6 +822,13 @@ providing a different rank or adding ``"disabled": true`` to remove the item).
 
    You need to set ``jupyter.lab.transform`` to ``true`` in the plugin id that will gather all items.
 
+**What are transforms?** The ``jupyter.lab.transform`` flag tells JupyterLab to wait for 
+a transform function before loading the plugin. This allows dynamic modification of settings 
+schemas, commonly used to merge toolbar/menu definitions from multiple extensions.
+
+**Loading order pitfall**: Extensions providing transforms must register them early in 
+activation, before dependent plugins load, otherwise those plugins will timeout waiting 
+for the transform.
 
 The current widget factories supporting the toolbar customization are:
 

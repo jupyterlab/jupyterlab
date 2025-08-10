@@ -32,6 +32,7 @@ import {
 } from '@jupyterlab/testing';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
 import * as utils from './utils';
+import uncoalescedOp from './uncoalesced_op.json';
 
 const ERROR_INPUT = 'a = foo';
 
@@ -616,6 +617,14 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         NotebookActions.changeCellType(widget, 'code');
         expect(widget.activeCell).toBeNull();
+      });
+
+      it('should preserve the cell id', () => {
+        const original = widget.activeCell?.model.id || null;
+        NotebookActions.changeCellType(widget, 'code');
+        expect(widget.activeCell?.model.id).toBe(original);
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell?.model.id).toBe(original);
       });
 
       it('should preserve the widget mode', () => {
@@ -1958,6 +1967,25 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         NotebookActions.clearOutputs(widget);
         expect(widget.activeCellIndex).toBe(-1);
+      });
+
+      it('should clear all the uncoalesced outputs', () => {
+        const model = new NotebookModel();
+        model.fromJSON(uncoalescedOp);
+        widget.model = model;
+
+        const cell = widget.widgets[0] as CodeCell;
+
+        const outputsBefore = cell.model.toJSON().outputs;
+        expect(Array.isArray(outputsBefore)).toBe(true);
+        expect(outputsBefore.length).toBeGreaterThan(1);
+
+        widget.select(cell);
+        NotebookActions.clearOutputs(widget);
+
+        const outputsAfter = cell.model.toJSON().outputs;
+        expect(cell.model.outputs.length).toBe(0);
+        expect(outputsAfter.length).toBe(0);
       });
     });
 

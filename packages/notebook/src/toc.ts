@@ -289,6 +289,9 @@ export class NotebookToCModel extends TableOfContentsModel<
 
       if (headings.length > 0) {
         this._cellToHeadingIndex.set(cell, headings.length - 1);
+      } else {
+        // If no headings were found, remove the cell from the map
+        this._cellToHeadingIndex.delete(cell);
       }
     }
     this.updateRunningStatus(headings);
@@ -608,7 +611,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           }
 
           const el = headingToElement.get(heading);
-
           if (el) {
             if (this.scrollToTop) {
               el.scrollIntoView({ block: 'start' });
@@ -673,8 +675,12 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           this.sanitizer
         );
 
+        const attribute =
+          this.sanitizer.allowNamedProperties ?? false
+            ? 'id'
+            : 'data-jupyter-id';
         const selector = elementId
-          ? `h${heading.level}[id="${CSS.escape(elementId)}"]`
+          ? `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`
           : `h${heading.level}`;
 
         if (heading.outputIndex !== undefined) {
