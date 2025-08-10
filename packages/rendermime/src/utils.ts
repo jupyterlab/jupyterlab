@@ -4,7 +4,8 @@
 |----------------------------------------------------------------------------*/
 
 /**
- * * Convert a base64 encoded string to a Blob.
+ * Convert a base64 encoded string to a Blob.
+ *
  * @param base64 - The base64 encoded string.
  * @param mime - The MIME type of the data.
  * @returns A Blob object representing the data.
@@ -20,7 +21,8 @@ export function b64toBlob(base64: string, mime: string): Blob {
 }
 
 /**
- * * Calculate the size of a base64 encoded string in MB.
+ * Calculates the size of a Base64-encoded media string in megabytes.
+ *
  * @param base64 - The base64 encoded string.
  * @returns The size in MB.
  */

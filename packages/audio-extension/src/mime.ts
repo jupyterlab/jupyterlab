@@ -15,7 +15,8 @@ export class AudioMimeRenderer extends RenderedCommon {
    */
   MAX_RENDER_SIZE_MB = 20;
 
-  /** * Construct a new audio mime renderer.
+  /**
+   * Construct a new audio mime renderer.
    *
    * @param options - The options for initializing the widget.
    */
