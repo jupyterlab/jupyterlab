@@ -40,6 +40,8 @@
     "@jupyterlab/application": "^4.5.0-alpha.1",
     "@jupyterlab/apputils": "^4.6.0-alpha.1",
     "@jupyterlab/docregistry": "^4.5.0-alpha.1",
+    "@jupyterlab/rendermime": "^4.5.0-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^3.13.0-alpha.1",
     "@jupyterlab/services": "^7.5.0-alpha.1",
     "@jupyterlab/translation": "^4.5.0-alpha.1",
     "@lumino/widgets": "^2.7.1"
@@ -56,7 +58,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "mimeExtension": "lib/mime.js"
   },
   "styleModule": "style/index.js"
 }
