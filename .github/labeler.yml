@@ -64,7 +64,7 @@ pkg:attachments:
     - packages/attachments/**/*
     - packages/attachments/*
 
-pkg:audio-extension:
+pkg:audio:
 - changed-files:
   - any-glob-to-any-file:
     - packages/audio-extension/**/*
@@ -452,7 +452,7 @@ pkg:vega:
     - packages/vega5-extension/**/*
     - packages/vega5-extension/*
 
-pkg:video-extension:
+pkg:video:
 - changed-files:
   - any-glob-to-any-file:
     - packages/video-extension/**/*
