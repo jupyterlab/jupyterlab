@@ -68,9 +68,15 @@
 
 .jp-InputArea-prompt-run {
   position: absolute;
-  top: calc(-1 * var(--jp-code-padding));
-  right: 0;
+  top: var(--jp-code-padding);
+  right: var(--jp-code-padding);
   z-index: 20;
+  display: flex;
+  height: 1.5em;
+}
+
+.jp-InputArea-prompt-run > jp-button {
+  height: 1.5em;
 }
 
 /*-----------------------------------------------------------------------------
