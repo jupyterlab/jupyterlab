@@ -27,6 +27,7 @@ import {
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -34,6 +35,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
@@ -369,7 +371,12 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
  * Update the browser title based on the workspace and the current
  * active item.
  */
-async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
+async function updateTabTitle(
+  workspace: string,
+  db: IStateDB,
+  name: string,
+  currentWidget?: Widget
+) {
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (
@@ -381,9 +388,15 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     }`;
   } else {
     // File name from current path
-    let currentFile: string = PathExt.basename(
-      decodeURIComponent(window.location.href)
-    );
+    let currentFile: string;
+    // If we have a DocumentWidget, use its context.path for more reliable file name
+    // rather than parsing the URL which may not always reflect the actual file, or may be formatted
+    // in a different way in other lab-based applications (for example ?path=example.ipynb)
+    if (currentWidget instanceof DocumentWidget) {
+      currentFile = PathExt.basename(currentWidget.context.path);
+    } else {
+      currentFile = PathExt.basename(decodeURIComponent(window.location.href));
+    }
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
@@ -444,7 +457,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
-    db.changed.connect(() => updateTabTitle(workspace, db, name));
+    db.changed.connect(() =>
+      updateTabTitle(workspace, db, name, app.shell.currentWidget ?? undefined)
+    );
 
     commands.addCommand(CommandIDs.loadState, {
       label: trans.__('Load state for the current workspace.'),
