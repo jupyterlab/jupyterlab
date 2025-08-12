@@ -3,15 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { ICellModel } from './model';
-import { runIcon, ToolbarButton } from '@jupyterlab/ui-components';
+import { ToolbarButton } from '@jupyterlab/ui-components';
+
 import { Message } from '@lumino/messaging';
+
+import { PanelLayout, Widget } from '@lumino/widgets';
+
+import { ICellModel } from './model';
 
 /**
  * The class name added to input area widgets.
@@ -106,6 +106,13 @@ export class InputArea extends Widget {
    */
   get editor(): CodeEditor.IEditor {
     return this._editor.editor;
+  }
+
+  /**
+   * Get the prompt widget of the cell.
+   */
+  get prompt(): IInputPrompt {
+    return this._prompt;
   }
 
   /**
@@ -270,13 +277,23 @@ export namespace InputArea {
  ******************************************************************************/
 
 /**
- * The interface for the input prompt.
+ * The interface for the input prompt indicator.
  */
-export interface IInputPrompt extends Widget {
+export interface IInputPromptIndicator extends Widget {
   /**
    * The execution count of the prompt.
    */
   executionCount: string | null;
+}
+
+/**
+ * The interface for the input prompt.
+ */
+export interface IInputPrompt extends IInputPromptIndicator {
+  /**
+   * The run button.
+   */
+  runButton?: ToolbarButton;
 }
 
 export class InputPrompt extends Widget implements IInputPrompt {
@@ -291,17 +308,18 @@ export class InputPrompt extends Widget implements IInputPrompt {
     const promptIndicator = (this._promptIndicator =
       new InputPromptIndicator());
     layout.addWidget(promptIndicator);
-    // TODO: Localization, run command
-    // TODO: Use CommandToolbarButtonComponent (requires CommandRegistry)
-    const runButton = (this._runButton = new ToolbarButton({
-      icon: runIcon,
-      onClick: () => {
-        console.log('Run this cell');
-      },
-      tooltip: 'Run this cell'
-    }));
-    runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
-    layout.addWidget(runButton);
+  }
+
+  /**
+   * The run button.
+   */
+  get runButton(): ToolbarButton {
+    return this._runButton;
+  }
+  set runButton(button: ToolbarButton) {
+    this._runButton = button;
+    this._runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
+    (this.layout as PanelLayout).addWidget(this._runButton);
     this.updateRunButtonVisibility();
   }
 
@@ -326,12 +344,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'mouseover':
-        console.log('Detected mouseover!');
         this._isHovered = true;
         this.updateRunButtonVisibility();
         break;
       case 'mouseout':
-        console.log('Moused out of button!');
         this._isHovered = false;
         this.updateRunButtonVisibility();
         break;
@@ -349,6 +365,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   private updateRunButtonVisibility() {
+    if (!this._runButton) {
+      return;
+    }
+
     // Show the run button if we're hovered and if we're in the active cell
     if (this._isHovered) {
       this._runButton.show();
@@ -372,7 +392,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   private _runButton: ToolbarButton;
 }
 
-export class InputPromptIndicator extends Widget implements IInputPrompt {
+export class InputPromptIndicator
+  extends Widget
+  implements IInputPromptIndicator
+{
   /*
    * Create an input prompt widget.
    */

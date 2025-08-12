@@ -37,8 +37,10 @@
     "@jupyterlab/application": "^4.5.0-alpha.3",
     "@jupyterlab/apputils": "^4.6.0-alpha.3",
     "@jupyterlab/cell-toolbar": "^4.5.0-alpha.3",
+    "@jupyterlab/notebook": "^4.5.0-alpha.3",
     "@jupyterlab/settingregistry": "^4.5.0-alpha.3",
-    "@jupyterlab/translation": "^4.5.0-alpha.3"
+    "@jupyterlab/translation": "^4.5.0-alpha.3",
+    "@jupyterlab/ui-components": "^4.5.0-alpha.3"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
