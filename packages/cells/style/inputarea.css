@@ -66,19 +66,11 @@
   display: none;
 }
 
-/* The run button should only be visible on the active cell. */
-.jp-CodeCell.jp-mod-active .jp-InputArea-prompt-run {
-  display: block;
-}
-
 .jp-InputArea-prompt-run {
   position: absolute;
   top: calc(-1 * var(--jp-code-padding));
   right: 0;
   z-index: 20;
-
-  /* Only display this when the cell is active. */
-  display: none;
 }
 
 /*-----------------------------------------------------------------------------
