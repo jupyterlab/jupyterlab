@@ -27,6 +27,7 @@ import {
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -34,6 +35,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
@@ -369,7 +371,13 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
  * Update the browser title based on the workspace and the current
  * active item.
  */
-async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
+async function updateTabTitle(options: {
+  workspace: string;
+  db: IStateDB;
+  name: string;
+  currentWidget?: Widget;
+}) {
+  const { workspace, db, name, currentWidget } = options;
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (
@@ -380,23 +388,30 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       workspace === 'default' ? '' : ` (${workspace})`
     }`;
   } else {
-    // File name from current path
-    let currentFile: string = PathExt.basename(
-      decodeURIComponent(window.location.href)
-    );
+    let currentFile: string;
+    // If we have a DocumentWidget, use its context.path for more reliable file name
+    // rather than parsing the URL which may not always reflect the actual file,
+    // may be missing, or may be formatted in a different way in other lab-based
+    // applications (for example with a query string parameter such as ?path=example.ipynb)
+    if (currentWidget instanceof DocumentWidget) {
+      currentFile = PathExt.basename(currentWidget.context.path);
+    } else {
+      // File name from current path
+      currentFile = PathExt.basename(decodeURIComponent(window.location.href));
+    }
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
-    workspace =
+    const truncatedWorkspace =
       workspace.length > 15 ? workspace.slice(0, 12).concat(`…`) : workspace;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
     document.title = `${currentFile}${count > 1 ? ` (${count})` : ``} - ${
-      workspace === 'default' ? name : workspace
+      workspace === 'default' ? name : truncatedWorkspace
     }`;
   }
 }
@@ -444,7 +459,14 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
-    db.changed.connect(() => updateTabTitle(workspace, db, name));
+    db.changed.connect(() =>
+      updateTabTitle({
+        workspace,
+        db,
+        name,
+        currentWidget: app.shell.currentWidget ?? undefined
+      })
+    );
 
     commands.addCommand(CommandIDs.loadState, {
       label: trans.__('Load state for the current workspace.'),
