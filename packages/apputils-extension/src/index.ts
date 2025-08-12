@@ -371,12 +371,13 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
  * Update the browser title based on the workspace and the current
  * active item.
  */
-async function updateTabTitle(
-  workspace: string,
-  db: IStateDB,
-  name: string,
-  currentWidget?: Widget
-) {
+async function updateTabTitle(options: {
+  workspace: string;
+  db: IStateDB;
+  name: string;
+  currentWidget?: Widget;
+}) {
+  const { workspace, db, name, currentWidget } = options;
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (
@@ -403,14 +404,14 @@ async function updateTabTitle(
       currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
-    workspace =
+    const truncatedWorkspace =
       workspace.length > 15 ? workspace.slice(0, 12).concat(`…`) : workspace;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
     document.title = `${currentFile}${count > 1 ? ` (${count})` : ``} - ${
-      workspace === 'default' ? name : workspace
+      workspace === 'default' ? name : truncatedWorkspace
     }`;
   }
 }
@@ -459,7 +460,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
     db.changed.connect(() =>
-      updateTabTitle(workspace, db, name, app.shell.currentWidget ?? undefined)
+      updateTabTitle({
+        workspace,
+        db,
+        name,
+        currentWidget: app.shell.currentWidget ?? undefined
+      })
     );
 
     commands.addCommand(CommandIDs.loadState, {
