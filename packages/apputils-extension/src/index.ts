@@ -390,8 +390,9 @@ async function updateTabTitle(
     // File name from current path
     let currentFile: string;
     // If we have a DocumentWidget, use its context.path for more reliable file name
-    // rather than parsing the URL which may not always reflect the actual file, or may be formatted
-    // in a different way in other lab-based applications (for example ?path=example.ipynb)
+    // rather than parsing the URL which may not always reflect the actual file,
+    // may be missing, or may be formatted in a different way in other lab-based
+    // applications (for example with a query string parameter such as ?path=example.ipynb)
     if (currentWidget instanceof DocumentWidget) {
       currentFile = PathExt.basename(currentWidget.context.path);
     } else {
