@@ -487,32 +487,7 @@ describe('cells/model', () => {
         expect(called).toBe(1);
       });
 
-      it('should set dirty flag and signal (old)', () => {
-        const model = new CodeCellModel();
-        let called = 0;
-        model.stateChanged.connect((model, args) => {
-          if (args.name == 'isDirty') {
-            called++;
-          }
-        });
-        expect(model.executionCount).toBe(null);
-        expect(model.isDirty).toBe(false);
-        expect(called).toBe(0);
-
-        model.executionCount = 1;
-        expect(model.isDirty).toBe(false);
-        expect(called).toBe(0);
-
-        model.sharedModel.setSource('foo');
-        expect(model.isDirty).toBe(true);
-        expect(called).toBe(1);
-
-        model.executionCount = 2;
-        expect(model.isDirty).toBe(false);
-        expect(called).toBe(2);
-      });
-
-      it('should set dirty flag and signal (new)', () => {
+      it('should set dirty flag and signal', () => {
         const model = new CodeCellModel();
         let called = 0;
         model.stateChanged.connect((model, args) => {
