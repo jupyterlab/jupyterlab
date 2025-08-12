@@ -388,7 +388,6 @@ async function updateTabTitle(options: {
       workspace === 'default' ? '' : ` (${workspace})`
     }`;
   } else {
-    // File name from current path
     let currentFile: string;
     // If we have a DocumentWidget, use its context.path for more reliable file name
     // rather than parsing the URL which may not always reflect the actual file,
@@ -397,6 +396,7 @@ async function updateTabTitle(options: {
     if (currentWidget instanceof DocumentWidget) {
       currentFile = PathExt.basename(currentWidget.context.path);
     } else {
+      // File name from current path
       currentFile = PathExt.basename(decodeURIComponent(window.location.href));
     }
     // Truncate to first 12 characters of current document name + ... if length > 15
