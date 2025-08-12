@@ -487,7 +487,7 @@ describe('cells/model', () => {
         expect(called).toBe(1);
       });
 
-      it('should set dirty flag and signal', () => {
+      it('should set dirty flag and signal (old)', () => {
         const model = new CodeCellModel();
         let called = 0;
         model.stateChanged.connect((model, args) => {
@@ -510,6 +510,42 @@ describe('cells/model', () => {
         model.executionCount = 2;
         expect(model.isDirty).toBe(false);
         expect(called).toBe(2);
+      });
+
+      it('should set dirty flag and signal (new)', () => {
+        const model = new CodeCellModel();
+        let called = 0;
+        model.stateChanged.connect((model, args) => {
+          if (args.name == 'isDirty') {
+            called++;
+          }
+        });
+        expect(model.executionCount).toBe(null);
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(0);
+
+        // Not executed or running: source change does not set dirty
+        model.sharedModel.setSource('foo');
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(0);
+
+        // Dirty set when running and source changes
+        model.executionState = 'running';
+        model.sharedModel.setSource('bar');
+        expect(model.isDirty).toBe(true);
+        expect(called).toBe(1);
+
+        // Dirty cleared when source is restored
+        model.sharedModel.setSource('foo');
+        expect(model.isDirty).toBe(false);
+        expect(called).toBe(2);
+
+        // Dirty set again after idle and source changes
+        model.executionState = 'idle';
+        model.executionCount = 1;
+        model.sharedModel.setSource('bar');
+        expect(model.isDirty).toBe(true);
+        expect(called).toBe(3);
       });
     });
 
