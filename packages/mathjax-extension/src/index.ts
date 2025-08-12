@@ -14,6 +14,8 @@ import {
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
 
 namespace CommandIDs {
@@ -79,7 +81,9 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax-extension:plugin',
   description: 'Provides the LaTeX mathematical expression interpreter.',
   provides: ILatexTypesetter,
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const typesetter = new MathJaxTypesetter();
 
     app.commands.addCommand(CommandIDs.copy, {
@@ -88,7 +92,13 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         const oJax: any = md.outputJax;
         await navigator.clipboard.writeText(oJax.math.math);
       },
-      label: 'MathJax Copy Latex'
+      label: trans.__('MathJax Copy Latex'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     app.commands.addCommand(CommandIDs.scale, {
@@ -99,7 +109,19 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         md.rerender();
       },
       label: args =>
-        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')
+        trans.__('Mathjax Scale ') +
+        (args['scale'] ? `x${args['scale']}` : trans.__('Reset')),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            scale: {
+              type: 'number',
+              description: trans.__('The scale factor for MathJax rendering')
+            }
+          }
+        }
+      }
     });
 
     return typesetter;
