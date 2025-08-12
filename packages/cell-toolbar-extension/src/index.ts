@@ -116,11 +116,15 @@ const runCellButton: JupyterFrontEndPlugin<void> = {
     tracker.widgetAdded.connect((_, panel) => {
       const cellListChanged = () => {
         panel.content.widgets.forEach(cell => {
-          cell.ready.then(() => {
-            if (cell.inputArea) {
-              cell.inputArea.prompt.runButton = runButtonFactory(panel);
-            }
-          });
+          cell.ready
+            .then(() => {
+              if (cell.inputArea) {
+                cell.inputArea.prompt.runButton = runButtonFactory(panel);
+              }
+            })
+            .catch(() => {
+              // no-op
+            });
         });
       };
       panel.content.model?.cells.changed.connect(cellListChanged);
