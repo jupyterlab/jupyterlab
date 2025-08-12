@@ -3,8 +3,10 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import { Page } from '@playwright/test';
+import * as path from 'path';
 
 const DEFAULT_NAME = 'untitled.txt';
+const fileName = 'nested_code.ipynb';
 
 const RULERS_CONTENT = `0123456789
           0123456789
@@ -44,48 +46,21 @@ test.describe('CodeMirror extensions', () => {
 });
 
 test.describe('Code Folding Menu', () => {
-  const nestedCode = [
-    'class Test:',
-    '  def __init__(self):',
-    '    self.data = []',
-    '',
-    '  def test_data(self):',
-    '    for i in range(5):',
-    '      if i % 2 == 0:',
-    '        for j in range(3):',
-    '          if j > 0:',
-    '            self.data.append(i * j)',
-    '          else:',
-    '            self.data.append(0)',
-    '      else:',
-    '        try:',
-    '          result = i ** 2',
-    '          self.data.append(result)',
-    '        except Exception as e:',
-    '          print(f"Error: {e}")',
-    '    return self.data',
-    '',
-    'class Test_2:',
-    '  def __init__(self):',
-    '    self.data = 1',
-    '',
-    'obj = Test()'
-  ].join('\n');
-
-  async function selectKernelIfDialog(page: Page) {
-    const dialogButton = page.locator(
-      '.jp-Dialog-buttonLabel:has-text("Select")'
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
     );
-    await dialogButton.click({ timeout: 20000 });
-  }
+
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
 
   test('Should fold and unfold current region', async ({ page }) => {
-    // Create a new notebook
-    await page.menu.clickMenuItem('File>New>Notebook');
-    await page.getByRole('tab', { name: /Untitled.*/ }).waitFor();
-    await selectKernelIfDialog(page);
-
-    await page.notebook.setCell(0, 'code', nestedCode);
     await page.notebook.enterCellEditingMode(0);
 
     const cellEditor = (await page.notebook.getCellLocator(0))!;
@@ -129,11 +104,6 @@ test.describe('Code Folding Menu', () => {
   });
 
   test('Should fold and unfold all subregions', async ({ page }) => {
-    await page.menu.clickMenuItem('File>New>Notebook');
-    await page.getByRole('tab', { name: /Untitled.*/ }).waitFor();
-    await selectKernelIfDialog(page);
-
-    await page.notebook.setCell(0, 'code', nestedCode);
     await page.notebook.enterCellEditingMode(0);
 
     const cellEditor = (await page.notebook.getCellLocator(0))!;
@@ -167,11 +137,6 @@ test.describe('Code Folding Menu', () => {
   });
 
   test('Should fold and unfold all Regions', async ({ page }) => {
-    await page.menu.clickMenuItem('File>New>Notebook');
-    await page.getByRole('tab', { name: /Untitled.*/ }).waitFor();
-    await selectKernelIfDialog(page);
-
-    await page.notebook.setCell(0, 'code', nestedCode);
     await page.notebook.enterCellEditingMode(0);
 
     const cellEditor = (await page.notebook.getCellLocator(0))!;

@@ -822,12 +822,12 @@ providing a different rank or adding ``"disabled": true`` to remove the item).
 
    You need to set ``jupyter.lab.transform`` to ``true`` in the plugin id that will gather all items.
 
-**What are transforms?** The ``jupyter.lab.transform`` flag tells JupyterLab to wait for 
-a transform function before loading the plugin. This allows dynamic modification of settings 
+**What are transforms?** The ``jupyter.lab.transform`` flag tells JupyterLab to wait for
+a transform function before loading the plugin. This allows dynamic modification of settings
 schemas, commonly used to merge toolbar/menu definitions from multiple extensions.
 
-**Loading order pitfall**: Extensions providing transforms must register them early in 
-activation, before dependent plugins load, otherwise those plugins will timeout waiting 
+**Loading order pitfall**: Extensions providing transforms must register them early in
+activation, before dependent plugins load, otherwise those plugins will timeout waiting
 for the transform.
 
 The current widget factories supporting the toolbar customization are:
