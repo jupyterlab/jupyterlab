@@ -868,12 +868,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
 
     if (change.executionCountChange) {
-      if (
-        change.executionCountChange.newValue &&
-        (this.isDirty || !change.executionCountChange.oldValue)
-      ) {
-        this._setDirty(false);
-      }
       this.stateChanged.emit({
         name: 'executionCount',
         oldValue: change.executionCountChange.oldValue,
@@ -882,6 +876,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
 
     if (change.executionStateChange) {
+      if (change.executionStateChange.newValue === 'running') {
+        this._setDirty(false);
+      }
       this.stateChanged.emit({
         name: 'executionState',
         oldValue: change.executionStateChange.oldValue,
@@ -889,7 +886,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       });
     }
 
-    if (change.sourceChange && this.executionCount !== null) {
+    if (
+      change.sourceChange &&
+      (this.executionCount !== null || this.executionState === 'running')
+    ) {
       this._setDirty(
         this._executedCode !== this.sharedModel.getSource().trim()
       );
