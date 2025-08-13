@@ -37,6 +37,18 @@ jobs:
           if [[ -n "$DISALLOWED" ]]; then
             echo "Disallowed changes detected in jupyterlab/staging:" >&2
             echo "$DISALLOWED" >&2
+
+            # Output to GitHub step summary
+            echo "## ❌ Disallowed Changes in Staging Directory" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following files in \`jupyterlab/staging/\` are not allowed to be modified:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$DISALLOWED" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Only \`yarn.js\` and \`.yarnrc\` files are allowed to be modified in this directory." >> $GITHUB_STEP_SUMMARY
+
             exit 1
           else
             echo "No disallowed changes in jupyterlab/staging."
