@@ -35,11 +35,19 @@ test('All plugins and tokens must have a description', async ({
       const plugin = (
         (window.jupyterapp as any).pluginRegistry._plugins as Map<
           string,
-          { provides: Token<any> | null }
+          {
+            optional?: Token<any>[];
+            provides?: Token<any>;
+            requires: Token<any>[];
+          }
         >
       ).get(id);
-      if (plugin?.provides) {
-        const token = plugin.provides;
+      const referencedTokens = [
+        ...(plugin?.provides ? [plugin?.provides] : []),
+        ...(plugin?.optional ?? []),
+        ...(plugin?.requires ?? [])
+      ];
+      for (const token of referencedTokens) {
         tokens[token.name] = token.description;
       }
     });

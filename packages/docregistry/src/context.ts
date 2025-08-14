@@ -10,7 +10,10 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IUrlResolverFactory,
+  RenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
   Contents,
@@ -92,7 +95,15 @@ export class Context<
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
+    const urlResolverFactory = options.urlResolverFactory
+      ? options.urlResolverFactory
+      : {
+          createResolver: (
+            resolverOptions: RenderMimeRegistry.IUrlResolverOptions
+          ) => new RenderMimeRegistry.UrlResolver(resolverOptions)
+        };
+
+    this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
       contents: manager.contents
     });
@@ -234,7 +245,9 @@ export class Context<
   /**
    * The url resolver for the context.
    */
-  readonly urlResolver: IRenderMime.IResolver;
+  get urlResolver(): IRenderMime.IResolver {
+    return this._urlResolver;
+  }
 
   /**
    * Initialize the context.
@@ -527,8 +540,8 @@ export class Context<
     if (this.sessionContext.session?.name !== name) {
       void this.sessionContext.session?.setName(name);
     }
-    if ((this.urlResolver as RenderMimeRegistry.UrlResolver).path !== newPath) {
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    if (this._urlResolver.path !== newPath) {
+      this._urlResolver.path = newPath;
     }
     if (
       this._contentsModel &&
@@ -994,6 +1007,7 @@ or load the version on disk (revert)?`,
     this
   );
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
+  private _urlResolver: RenderMimeRegistry.IUrlResolver;
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
@@ -1049,7 +1063,7 @@ export namespace Context {
     translator?: ITranslator;
 
     /**
-     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client.
      */
     lastModifiedCheckMargin?: number;
 
@@ -1058,6 +1072,11 @@ export namespace Context {
      * @experimental
      */
     contentProviderId?: string;
+
+    /**
+     * A factory for the URL resolver.
+     */
+    urlResolverFactory?: IUrlResolverFactory;
   }
 }
 

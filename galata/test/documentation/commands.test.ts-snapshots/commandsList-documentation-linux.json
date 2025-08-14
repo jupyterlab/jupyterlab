@@ -2385,6 +2385,18 @@
     }
   },
   {
+    "id": "filebrowser:select-all",
+    "label": "Select All",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl A"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "filebrowser:share-main",
     "label": "Copy Shareable Link",
     "caption": "",
