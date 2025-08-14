@@ -1925,6 +1925,7 @@ function activateNotebookHandler(
 
   const registry = app.docRegistry;
   const modelFactory = new NotebookModelFactory({
+    allowEmptyNotebook: factory.notebookConfig.allowEmptyNotebook,
     disableDocumentWideUndoRedo:
       factory.notebookConfig.disableDocumentWideUndoRedo,
     collaborative: true
@@ -2001,6 +2002,8 @@ function activateNotebookHandler(
       showHiddenCellsButton: settings.get('showHiddenCellsButton')
         .composite as boolean,
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
+      allowEmptyNotebook: settings.get('allowEmptyNotebook')
+        .composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
       overscanCount: settings.get('overscanCount').composite as number,
@@ -2053,6 +2056,9 @@ function activateNotebookHandler(
     modelFactory.disableDocumentWideUndoRedo = !settings.get(
       'documentWideUndoRedo'
     ).composite as boolean;
+
+    modelFactory.allowEmptyNotebook = settings.get('allowEmptyNotebook')
+      .composite as boolean;
 
     updateTracker({
       editorConfig: factory.editorConfig,
