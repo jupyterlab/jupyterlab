@@ -50,6 +50,39 @@ describe('@jupyterlab/ui-components', () => {
       await framePromise();
 
       expect(button.hasClass('jp-CommandToolbarButton')).toBe(true);
+      simulate(button.node.firstElementChild!, 'click');
+      expect(options.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not trigger command on mousedown', async () => {
+      options.execute = jest.fn();
+      commands.addCommand(id, options);
+      const button = new CommandToolbarButton({
+        commands,
+        id
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      expect(button.hasClass('jp-CommandToolbarButton')).toBe(true);
+      simulate(button.node.firstElementChild!, 'mousedown');
+      expect(options.execute).toHaveBeenCalledTimes(0);
+    });
+
+    it('should trigger command on mousedown', async () => {
+      options.execute = jest.fn();
+      commands.addCommand(id, options);
+      const button = new CommandToolbarButton({
+        commands,
+        id,
+        noFocusOnClick: true
+      });
+
+      Widget.attach(button, document.body);
+      await framePromise();
+
+      expect(button.hasClass('jp-CommandToolbarButton')).toBe(true);
       simulate(button.node.firstElementChild!, 'mousedown');
       expect(options.execute).toHaveBeenCalledTimes(1);
     });
@@ -515,6 +548,37 @@ describe('@jupyterlab/ui-components', () => {
           Widget.attach(button, document.body);
           await framePromise();
           await button.renderPromise;
+          simulate(button.node.firstChild as HTMLElement, 'click');
+          expect(called).toBe(true);
+          button.dispose();
+        });
+      });
+      describe('mousedown', () => {
+        it('should not activate the callback on mouse down', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            }
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          await button.renderPromise;
+          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          expect(called).toBe(false);
+          button.dispose();
+        });
+        it('should activate the callback on mouse down', async () => {
+          let called = false;
+          const button = new ToolbarButton({
+            onClick: () => {
+              called = true;
+            },
+            noFocusOnClick: true
+          });
+          Widget.attach(button, document.body);
+          await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(called).toBe(true);
           button.dispose();
@@ -676,7 +740,7 @@ describe('@jupyterlab/ui-components', () => {
         });
         Widget.attach(widget, document.body);
         await framePromise();
-        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        simulate(widget.node.firstChild as HTMLElement, 'click');
         expect(mockCalled).toBe(true);
 
         mockCalled = false;
@@ -687,7 +751,7 @@ describe('@jupyterlab/ui-components', () => {
         widget.onClick = mockOnClickUpdated;
         await framePromise();
         await widget.renderPromise;
-        simulate(widget.node.firstChild as HTMLElement, 'mousedown');
+        simulate(widget.node.firstChild as HTMLElement, 'click');
         expect(mockCalled).toBe(false);
         expect(mockUpdatedCalled).toBe(true);
         widget.dispose();

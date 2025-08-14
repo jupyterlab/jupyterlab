@@ -31,7 +31,6 @@ from collections import ChainMap
 from functools import partial
 from pathlib import Path
 from subprocess import check_call
-from typing import List
 
 HERE = Path(__file__).parent.resolve()
 
@@ -98,7 +97,9 @@ gettext_compact = False
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = [
+    "api/media/*.md",
+]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -127,6 +128,7 @@ def build_api_docs(out_dir: Path):
     dest_dir = out_dir / "api"
     if dest_dir.exists():
         shutil.rmtree(str(dest_dir))
+
     shutil.copytree(str(docs_api), str(dest_dir))
 
 
@@ -165,7 +167,7 @@ IMAGES_FOLDER = "images"
 AUTOMATED_SCREENSHOTS_FOLDER = "galata/test/documentation"
 
 
-def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
+def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
     """Copy PlayWright automated screenshots in documentation folder.
 
     Args:
@@ -195,28 +197,138 @@ TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.rst"
 
 
+def _clean_command_data(command: dict) -> None:
+    """Clean up command data by ensuring required keys exist and formatting values."""
+    for key in ("id", "label", "caption"):
+        if key not in command:
+            command[key] = ""
+        else:
+            command[key] = command[key].replace("\n", " ")
+
+
+def _format_shortcuts(shortcuts: list) -> str:
+    """Format shortcuts as HTML kbd elements."""
+    return " ".join(f"<kbd>{shortcut}</kbd>" for shortcut in shortcuts) if shortcuts else ""
+
+
+def _format_command_arguments(args_schema: dict) -> str:
+    """Format command arguments section."""
+    if "properties" not in args_schema or not args_schema["properties"]:
+        return "**Arguments:** None\n\n"
+
+    template = "**Arguments:**\n\n"
+    required_args = set(args_schema.get("required", []))
+
+    for arg_name, arg_info in args_schema["properties"].items():
+        arg_desc = arg_info.get("description", "")
+        arg_type = arg_info.get("type", "")
+
+        template += f"- **{arg_name}**"
+
+        if isinstance(arg_type, list):
+            template += f" (`{', '.join(arg_type)}`)"
+        elif arg_type:
+            template += f" (`{arg_type}`)"
+
+        if arg_name in required_args:
+            template += " *(required)*"
+
+        if "enum" in arg_info:
+            enum_values = ", ".join(f'`"{v}"`' for v in arg_info["enum"])
+            template += f" - Options: {enum_values}"
+
+        if arg_desc:
+            template += f": {arg_desc}"
+
+        template += "\n"
+
+    return template + "\n"
+
+
+def _format_scope_name(scope: str) -> str:
+    """Format scope name for display."""
+    if scope.endswith("-extension"):
+        scope = scope[: -len("-extension")]
+
+    compound_suffixes = ["browser", "manager", "menu", "editor", "console", "viewer", "search"]
+    for suffix in compound_suffixes:
+        if scope.endswith(suffix) and scope != suffix:
+            prefix = scope[: -len(suffix)]
+            scope = f"{prefix}-{suffix}"
+            break
+
+    words = scope.split("-")
+    formatted_words = []
+
+    for word in words:
+        if word.lower() in ["ui", "css", "html", "pdf", "csv", "tsv", "toc", "lsp"]:
+            formatted_words.append(word.upper())
+        elif word.lower() == "javascript":
+            formatted_words.append("JavaScript")
+        elif word.lower() == "markdown":
+            formatted_words.append("Markdown")
+        else:
+            formatted_words.append(word.capitalize())
+
+    return " ".join(formatted_words)
+
+
+def _format_single_command(command: dict, is_last: bool = False) -> str:
+    """Format a single command entry."""
+    _clean_command_data(command)
+
+    shortcuts_text = _format_shortcuts(command.get("shortcuts", []))
+    template = f"## `{command['id']}`\n\n"
+
+    if command.get("label"):
+        template += f"**Label:** {command['label']}\n\n"
+
+    if shortcuts_text:
+        template += f"**Shortcuts:** {shortcuts_text}\n\n"
+
+    if "args" in command:
+        template += _format_command_arguments(command["args"])
+    else:
+        template += "**Arguments:** None\n\n"
+
+    if not is_last:
+        template += "---\n\n"
+
+    return template
+
+
 def document_commands_list(temp_folder: Path) -> None:
     """Generate the command list documentation page from application extraction."""
     list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
-
     commands_list = json.loads(list_path.read_text())
 
-    template = """| Command id | Label | Shortcuts |
-| ---------- | ----- | --------- |
-"""
+    commands_by_scope = {}
+    for command in commands_list:
+        command_id = command.get("id", "")
+        scope = command_id.split(":")[0] if ":" in command_id else "Other"
 
-    for command in sorted(commands_list, key=lambda c: c["id"]):
-        for key in ("id", "label", "caption"):
-            if key not in command:
-                command[key] = ""
-            else:
-                command[key] = command[key].replace("\n", " ")
-        shortcuts = command.get("shortcuts", [])
-        command["shortcuts"] = (
-            "<kbd>" + "</kbd>, <kbd>".join(shortcuts) + "</kbd>" if len(shortcuts) else ""
-        )
+        display_scope = _format_scope_name(scope)
 
-        template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
+        if display_scope not in commands_by_scope:
+            commands_by_scope[display_scope] = []
+        commands_by_scope[display_scope].append(command)
+
+        sorted_scopes = sorted(commands_by_scope.keys(), key=str.lower)
+
+    template = ""
+    for scope_idx, scope in enumerate(sorted_scopes):
+        commands = sorted(commands_by_scope[scope], key=lambda c: c.get("id", ""))
+
+        template += f"# {scope}\n\n"
+
+        for i, command in enumerate(commands):
+            is_last_command_in_scope = i == len(commands) - 1
+            is_last_scope = scope_idx == len(sorted_scopes) - 1
+            is_last_overall = is_last_command_in_scope and is_last_scope
+            template += _format_single_command(command, is_last=is_last_overall)
+
+        if scope_idx != len(sorted_scopes) - 1:
+            template += "\n"
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
 
@@ -264,9 +376,9 @@ html_theme_options = {
             "icon": "fab fa-discourse",
         },
         {
-            "name": "Gitter",
-            "url": "https://gitter.im/jupyterlab/jupyterlab",
-            "icon": "fab fa-gitter",
+            "name": "Zulip",
+            "url": "https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab",
+            "icon": "fa-solid fa-comments",
         },
     ],
     "logo": {

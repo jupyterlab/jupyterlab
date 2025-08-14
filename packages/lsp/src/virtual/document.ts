@@ -633,7 +633,7 @@ export class VirtualDocument implements IDisposable {
       this.virtualLines.set(this.lastVirtualLine + i, {
         skipInspect: [],
         editor: ceEditor,
-        // TODO this is incorrect, wont work if something was extracted
+        // TODO this is incorrect, won't work if something was extracted
         sourceLine: this.lastSourceLine + i
       });
     }
@@ -647,7 +647,7 @@ export class VirtualDocument implements IDisposable {
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: ceEditor,
         foreignDocumentsMap,
-        // TODO this is incorrect, wont work if something was extracted
+        // TODO this is incorrect, won't work if something was extracted
         virtualLine: this.lastVirtualLine + i
       });
     }

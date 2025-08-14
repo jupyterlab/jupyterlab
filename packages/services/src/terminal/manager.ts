@@ -9,12 +9,7 @@ import { ServerConnection } from '..';
 
 import * as Terminal from './terminal';
 import { BaseManager } from '../basemanager';
-import {
-  isAvailable,
-  listRunning,
-  shutdownTerminal,
-  startNew
-} from './restapi';
+import { TerminalAPIClient } from './restapi';
 import { TerminalConnection } from './default';
 
 /**
@@ -26,6 +21,10 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    */
   constructor(options: TerminalManager.IOptions = {}) {
     super(options);
+
+    this._terminalAPIClient =
+      options.terminalAPIClient ??
+      new TerminalAPIClient({ serverSettings: this.serverSettings });
 
     // Check if terminals are available
     if (!this.isAvailable()) {
@@ -105,7 +104,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * Whether the terminal service is available.
    */
   isAvailable(): boolean {
-    return isAvailable();
+    return this._terminalAPIClient.isAvailable;
   }
 
   /*
@@ -123,7 +122,8 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   ): Terminal.ITerminalConnection {
     const terminalConnection = new TerminalConnection({
       ...options,
-      serverSettings: this.serverSettings
+      serverSettings: this.serverSettings,
+      terminalAPIClient: this._terminalAPIClient
     });
     this._onStarted(terminalConnection);
     if (!this._names.includes(options.model.name)) {
@@ -171,13 +171,13 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * options.
    */
   async startNew(
-    options?: Terminal.ITerminal.IOptions
+    options: Terminal.ITerminal.IOptions = {}
   ): Promise<Terminal.ITerminalConnection> {
-    const model = await startNew(
-      this.serverSettings,
-      options?.name,
-      options?.cwd
-    );
+    const { name, cwd } = options;
+    const model = await this._terminalAPIClient.startNew({
+      name,
+      cwd
+    });
     await this.refreshRunning();
     return this.connectTo({ model });
   }
@@ -186,7 +186,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
    * Shut down a terminal session by name.
    */
   async shutdown(name: string): Promise<void> {
-    await shutdownTerminal(name, this.serverSettings);
+    await this._terminalAPIClient.shutdown(name);
     await this.refreshRunning();
   }
 
@@ -201,7 +201,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
 
     // Shut down all models.
     await Promise.all(
-      this._names.map(name => shutdownTerminal(name, this.serverSettings))
+      this._names.map(name => this._terminalAPIClient.shutdown(name))
     );
 
     // Update the list of models to clear out our state.
@@ -214,7 +214,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Terminal.IModel[];
     try {
-      models = await listRunning(this.serverSettings);
+      models = await this._terminalAPIClient.listRunning();
     } catch (err) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
@@ -282,6 +282,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   private _ready: Promise<void>;
   private _runningChanged = new Signal<this, Terminal.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
+  private _terminalAPIClient: Terminal.ITerminalAPIClient;
 }
 
 /**
@@ -296,6 +297,11 @@ export namespace TerminalManager {
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
     standby?: Poll.Standby | (() => boolean | Poll.Standby);
+
+    /**
+     * The Terminal API client.
+     */
+    terminalAPIClient?: Terminal.ITerminalAPIClient;
   }
 
   /**

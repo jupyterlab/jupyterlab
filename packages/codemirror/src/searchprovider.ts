@@ -210,7 +210,7 @@ export abstract class EditorSearchProvider<
   }
 
   /**
-   * Set whether search should be limitted to specified text selection.
+   * Set whether search should be limited to specified text selection.
    */
   async setSearchSelection(selection: CodeEditor.IRange | null): Promise<void> {
     if (this._inSelection === selection) {

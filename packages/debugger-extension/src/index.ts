@@ -52,13 +52,24 @@ import {
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
 
-function notifyCommands(app: JupyterFrontEnd): void {
+function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
-    if (app.commands.hasCommand(command)) {
-      app.commands.notifyCommandChanged(command);
+    if (commands.hasCommand(command)) {
+      commands.notifyCommandChanged(command);
     }
   });
+}
+
+function updateState(commands: CommandRegistry, debug: IDebugger): void {
+  const hasStoppedThreads = debug.hasStoppedThreads();
+  if (hasStoppedThreads) {
+    document.body.dataset.jpDebuggerStoppedThreads = 'true';
+  } else {
+    delete document.body.dataset.jpDebuggerStoppedThreads;
+  }
+  notifyCommands(commands);
 }
 
 /**
@@ -89,7 +100,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
-      notifyCommands(app);
+      updateState(app.commands, debug);
     };
 
     if (labShell) {
@@ -154,7 +165,7 @@ const files: JupyterFrontEndPlugin<void> = {
           activeSessions[model.id] = session;
         }
         await handler.update(widget, session);
-        notifyCommands(app);
+        updateState(app.commands, debug);
       } catch {
         return;
       }
@@ -217,6 +228,12 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
       isEnabled: () => service.isStarted,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         const state = service.getDebuggerState();
         await service.stop();
@@ -251,7 +268,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
       }
-      notifyCommands(app);
+      updateState(app.commands, service);
     };
 
     if (labShell) {
@@ -382,6 +399,21 @@ const variables: JupyterFrontEndPlugin<void> = {
             service.model.variables.selectedVariable?.variablesReference ??
             0
         ) > 0,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            variableReference: {
+              type: 'number',
+              description: trans.__('The variable reference to inspect')
+            },
+            name: {
+              type: 'string',
+              description: trans.__('The name of the variable to inspect')
+            }
+          }
+        }
+      },
       execute: async args => {
         let { variableReference, name } = args as {
           variableReference?: number;
@@ -446,6 +478,21 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         service.model.hasRichVariableRendering &&
         (rendermime !== null || handler.activeWidget instanceof NotebookPanel),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            frameId: {
+              type: 'number',
+              description: trans.__('The frame ID')
+            },
+            name: {
+              type: 'string',
+              description: trans.__('The name of the variable to render')
+            }
+          }
+        }
+      },
       execute: args => {
         let { name, frameId } = args as {
           frameId?: number;
@@ -527,6 +574,12 @@ const variables: JupyterFrontEndPlugin<void> = {
         );
       },
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
         if (value) {
@@ -542,6 +595,12 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         handler.activeWidget instanceof NotebookPanel &&
         service.model.supportCopyToGlobals,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async args => {
         const name = service.model.variables.selectedVariable!.name;
         await service.copyToGlobals(name);
@@ -750,6 +809,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           path
         });
         return openSource(source);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__('Path to the source file to open')
+            }
+          }
+        }
       }
     });
 
@@ -863,6 +933,12 @@ const main: JupyterFrontEndPlugin<void> = {
             console.debug(data);
           }
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -890,6 +966,12 @@ const main: JupyterFrontEndPlugin<void> = {
           await service.pause();
         }
         commands.notifyCommandChanged(CommandIDs.debugContinue);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -900,7 +982,13 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.restart();
-        notifyCommands(app);
+        updateState(app.commands, service);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -911,6 +999,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.next();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -921,6 +1015,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepIn();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -931,6 +1031,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepOut();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -962,6 +1068,21 @@ const main: JupyterFrontEndPlugin<void> = {
             await service.pauseOnExceptions(filters);
           }
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'string',
+              description: trans.__('Exception filter to pause on')
+            },
+            description: {
+              type: 'string',
+              description: trans.__('Description of the exception filter')
+            }
+          }
+        }
       }
     });
 
@@ -978,7 +1099,7 @@ const main: JupyterFrontEndPlugin<void> = {
     }
 
     service.eventMessage.connect((_, event): void => {
-      notifyCommands(app);
+      updateState(app.commands, service);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
       } else if (
@@ -992,7 +1113,7 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     service.sessionChanged.connect(_ => {
-      notifyCommands(app);
+      updateState(app.commands, service);
     });
 
     if (restorer) {
@@ -1010,6 +1131,12 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Debugger Panel'),
       execute: () => {
         shell.activateById(sidebar.id);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 

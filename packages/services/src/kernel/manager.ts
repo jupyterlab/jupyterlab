@@ -3,16 +3,12 @@
 
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { ServerConnection } from '..';
+import { CommsOverSubshells, KernelSpec, ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
-import {
-  IKernelOptions,
-  listRunning,
-  shutdownKernel,
-  startNew
-} from './restapi';
+import { IKernelOptions, KernelAPIClient } from './restapi';
 import { KernelConnection } from './default';
+import { KernelSpecAPIClient } from '../kernelspec/restapi';
 
 /**
  * An implementation of a kernel manager.
@@ -25,6 +21,16 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   constructor(options: KernelManager.IOptions = {}) {
     super(options);
+
+    this._kernelAPIClient =
+      options.kernelAPIClient ??
+      new KernelAPIClient({ serverSettings: this.serverSettings });
+
+    this._kernelSpecAPIClient =
+      options.kernelSpecAPIClient ??
+      new KernelSpecAPIClient({
+        serverSettings: this.serverSettings
+      });
 
     // Start model and specs polling with exponential backoff.
     this._pollModels = new Poll({
@@ -117,10 +123,15 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         }
       }
     }
+
+    options.commsOverSubshells = this._commsOverSubshells;
+
     const kernelConnection = new KernelConnection({
       handleComms,
       ...options,
-      serverSettings: this.serverSettings
+      serverSettings: this.serverSettings,
+      kernelAPIClient: this._kernelAPIClient,
+      kernelSpecAPIClient: this._kernelSpecAPIClient
     });
     this._onStarted(kernelConnection);
     if (!this._models.has(id)) {
@@ -140,6 +151,28 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   running(): IterableIterator<Kernel.IModel> {
     return this._models.values();
+  }
+
+  /**
+   * The number of running kernels.
+   */
+  get runningCount(): number {
+    return this._models.size;
+  }
+
+  /**
+   * Whether comms are running on subshell or not.
+   */
+  get commsOverSubshells(): CommsOverSubshells {
+    return this._commsOverSubshells;
+  }
+
+  set commsOverSubshells(value: CommsOverSubshells) {
+    this._commsOverSubshells = value;
+
+    for (const connection of this._kernelConnections) {
+      connection.commsOverSubshells = value;
+    }
   }
 
   /**
@@ -175,7 +208,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       'model' | 'serverSettings'
     > = {}
   ): Promise<Kernel.IKernelConnection> {
-    const model = await startNew(createOptions, this.serverSettings);
+    const model = await this._kernelAPIClient.startNew(createOptions);
     return this.connectTo({
       ...connectOptions,
       model
@@ -190,7 +223,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * @returns A promise that resolves when the operation is complete.
    */
   async shutdown(id: string): Promise<void> {
-    await shutdownKernel(id, this.serverSettings);
+    await this._kernelAPIClient.shutdown(id);
     await this.refreshRunning();
   }
 
@@ -205,9 +238,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     // Shut down all models.
     await Promise.all(
-      [...this._models.keys()].map(id =>
-        shutdownKernel(id, this.serverSettings)
-      )
+      [...this._models.keys()].map(id => this._kernelAPIClient.shutdown(id))
     );
 
     // Update the list of models to clear out our state.
@@ -235,7 +266,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Kernel.IModel[];
     try {
-      models = await listRunning(this.serverSettings);
+      models = await this._kernelAPIClient.listRunning();
     } catch (err) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
@@ -324,6 +355,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     }
   }
 
+  private _commsOverSubshells: CommsOverSubshells =
+    CommsOverSubshells.PerCommTarget;
   private _isReady = false;
   private _ready: Promise<void>;
   private _kernelConnections = new Set<KernelConnection>();
@@ -331,6 +364,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _pollModels: Poll;
   private _runningChanged = new Signal<this, Kernel.IModel[]>(this);
   private _connectionFailure = new Signal<this, Error>(this);
+  private _kernelAPIClient: Kernel.IKernelAPIClient;
+  private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
 }
 
 /**
@@ -345,6 +380,16 @@ export namespace KernelManager {
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
     standby?: Poll.Standby | (() => boolean | Poll.Standby);
+
+    /**
+     * The kernel API client.
+     */
+    kernelAPIClient?: Kernel.IKernelAPIClient;
+
+    /**
+     * The kernel spec API client.
+     */
+    kernelSpecAPIClient?: KernelSpec.IKernelSpecAPIClient;
   }
 
   /**

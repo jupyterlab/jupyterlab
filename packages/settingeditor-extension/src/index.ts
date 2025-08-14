@@ -14,8 +14,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  Dialog,
   ICommandPalette,
   MainAreaWidget,
+  showDialog,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
@@ -31,16 +34,23 @@ import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
 } from '@jupyterlab/settingeditor/lib/tokens';
-import type {
-  JsonSettingEditor,
-  SettingsEditor
-} from '@jupyterlab/settingeditor';
+import { JsonSettingEditor, SettingsEditor } from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
-import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
+import {
+  downloadIcon,
+  fileUploadIcon,
+  saveIcon,
+  settingsIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
+import {
+  ImportSettingsDialogBodyWidget,
+  ImportSettingsWidget
+} from './importSettingsWidget';
 
 /**
  * The command IDs used by the setting editor.
@@ -53,6 +63,10 @@ namespace CommandIDs {
   export const revert = 'settingeditor:revert';
 
   export const save = 'settingeditor:save';
+
+  export const exportSettings = 'settingeditor:export';
+
+  export const importSettings = 'settingeditor:import';
 }
 
 type SettingEditorType = 'ui' | 'json';
@@ -112,12 +126,15 @@ function activate(
     });
   }
 
-  const openUi = async (args: { query: string }) => {
+  const openUi = async (args: { query?: string }) => {
     if (tracker.currentWidget && !tracker.currentWidget.isDisposed) {
       if (!tracker.currentWidget.isAttached) {
         shell.add(tracker.currentWidget, 'main', { type: 'Settings' });
       }
       shell.activateById(tracker.currentWidget.id);
+      if (args.query) {
+        tracker.currentWidget.content.updateQuery(args.query);
+      }
       return;
     }
 
@@ -141,6 +158,28 @@ function activate(
         query: args.query as string
       })
     });
+
+    editor.toolbar.addItem(
+      'export-settings',
+      new CommandToolbarButton({
+        commands,
+        id: CommandIDs.exportSettings,
+        icon: downloadIcon,
+        label: trans.__('Export'),
+        caption: trans.__('Export settings to a JSON file')
+      })
+    );
+
+    editor.toolbar.addItem(
+      'import-settings',
+      new CommandToolbarButton({
+        commands,
+        id: CommandIDs.importSettings,
+        icon: fileUploadIcon,
+        label: trans.__('Import'),
+        caption: trans.__('Import settings from a JSON file')
+      })
+    );
 
     editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
     if (pluginManager) {
@@ -199,6 +238,26 @@ function activate(
         return args.label as string;
       }
       return trans.__('Settings Editor');
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: trans.__('Search query to filter settings')
+          },
+          settingEditorType: {
+            type: 'string',
+            enum: ['ui', 'json'],
+            description: trans.__('Type of settings editor to open')
+          },
+          label: {
+            type: 'string',
+            description: trans.__('Custom label for the command')
+          }
+        }
+      }
     }
   });
 
@@ -332,7 +391,13 @@ function activateJSON(
       void tracker.add(container);
       shell.add(container, 'main', { type: 'Advanced Settings' });
     },
-    label: trans.__('Advanced Settings Editor')
+    label: trans.__('Advanced Settings Editor'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   if (palette) {
     palette.addItem({
@@ -347,15 +412,206 @@ function activateJSON(
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
+
+  commands.addCommand(CommandIDs.exportSettings, {
+    execute: () => {
+      const userSettings = collectUserSettings(registry);
+      const jsonContent = JSON.stringify(userSettings, null, 2);
+      downloadSettings(jsonContent, 'overrides.json');
+    },
+    label: trans.__('Export Settings'),
+    icon: downloadIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.importSettings, {
+    execute: () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json'; // Accept only JSON files
+      const JSON_INDENTATION = 4; // Indentation for the JSON file to be uploaded
+
+      fileInput.addEventListener('change', async event => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) {
+          return;
+        }
+
+        try {
+          const fileContent = await file.text();
+          const importedSettings = JSON.parse(fileContent);
+
+          // Validate the JSON structure
+          if (
+            typeof importedSettings !== 'object' ||
+            Array.isArray(importedSettings)
+          ) {
+            throw new Error('Invalid settings file format');
+          }
+          const errorUploading: string[] = [];
+          const applySettings = async (settings: string[]) => {
+            const settingsEntries = Object.entries(importedSettings);
+            for (const [pluginId, pluginSettings] of settingsEntries) {
+              if (
+                typeof pluginSettings === 'object' &&
+                !Array.isArray(pluginSettings)
+              ) {
+                try {
+                  await registry.upload(
+                    pluginId,
+                    JSON.stringify(pluginSettings, undefined, JSON_INDENTATION)
+                  );
+                } catch (error) {
+                  console.warn(
+                    `Failed to save settings for ${pluginId}:`,
+                    error
+                  );
+                  errorUploading.push(pluginId);
+                }
+              } else {
+                console.warn(
+                  `Invalid settings for plugin ${pluginId}. Skipping.`
+                );
+              }
+            }
+
+            app.shell.currentWidget?.close();
+
+            if (settingsEntries.length) {
+              const successCount =
+                settingsEntries.length - errorUploading.length;
+              const successMessage = trans.__(
+                `Imported settings across ${successCount} ${
+                  successCount === 1 ? 'category' : 'categories'
+                } successfully.`
+              );
+              const failureMessage = errorUploading.length
+                ? trans.__(
+                    `Failed to upload settings for the following ${
+                      errorUploading.length
+                    } ${errorUploading.length === 1 ? 'plugin' : 'plugins'}`
+                  )
+                : '';
+
+              const body = new ImportSettingsDialogBodyWidget({
+                successMessage,
+                failureMessage,
+                failedSettings: errorUploading
+              });
+
+              await showDialog({
+                title: trans.__('Settings Imported'),
+                body,
+                buttons: [Dialog.okButton()]
+              });
+            }
+          };
+
+          const settingsKeys = Object.keys(importedSettings);
+          const content = new ImportSettingsWidget({
+            importedSettings: settingsKeys,
+            handleImport: applySettings,
+            translator: translator
+          });
+          const widget = new MainAreaWidget<ImportSettingsWidget>({ content });
+          widget.title.label = trans.__('Import Settings');
+          widget.title.icon = fileUploadIcon;
+          app.shell.add(widget, 'main');
+          app.shell.activateById(widget.id);
+        } catch (error) {
+          await showErrorMessage('Failed to import settings', error);
+        }
+      });
+
+      // Trigger the file input
+      fileInput.click();
+    },
+    label: trans.__('Import Settings'),
+    icon: fileUploadIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  /**
+   * Collect user settings from the registry.
+   */
+  function collectUserSettings(
+    registry: ISettingRegistry
+  ): Record<string, any> {
+    const userSettings: Record<string, any> = {};
+    for (const [pluginId, plugin] of Object.entries(registry.plugins)) {
+      if (plugin) {
+        try {
+          if (plugin.raw) {
+            const withoutSingleLineComments = plugin.raw.replace(
+              /\/\/.*$/gm,
+              ''
+            );
+            const withoutComments = withoutSingleLineComments.replace(
+              /\/\*[\s\S]*?\*\//g,
+              ''
+            );
+            const preferredSettings = JSON.parse(withoutComments);
+            if (Object.keys(preferredSettings).length > 0) {
+              userSettings[pluginId] = preferredSettings;
+            }
+          }
+        } catch (error) {
+          console.error(
+            `Error loading settings for plugin ${pluginId}:`,
+            error
+          );
+        }
+      }
+    }
+    return userSettings;
+  }
+
+  /**
+   * Trigger a download of the settings as a JSON file.
+   */
+  function downloadSettings(jsonContent: string, filename: string): void {
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   return tracker;
 }

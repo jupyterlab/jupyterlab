@@ -7,7 +7,20 @@
 
 /* global globalThis */
 
-globalThis.DragEvent = class DragEvent {} as any;
+import { DataTransferMock } from './jest-data-transfer-mock';
+
+globalThis.DragEvent = class DragEvent extends Event {
+  dataTransfer: DataTransfer;
+  constructor(
+    type: string,
+    dragEventInit: {
+      dataTransfer: DataTransfer;
+    }
+  ) {
+    super(type);
+    this.dataTransfer = dragEventInit.dataTransfer;
+  }
+} as any;
 
 if (
   typeof globalThis.TextDecoder === 'undefined' ||
@@ -64,13 +77,13 @@ window.Element.prototype.scrollTo = (
 
 // https://github.com/jsdom/jsdom/issues/3368
 class ResizeObserverMock {
-  constructor(_callback: any) {
+  constructor(_callback: ResizeObserverCallback) {
     // no-op
   }
-  observe(_target: any, _options?: any) {
+  observe(_target: Element, _options?: ResizeObserverOptions) {
     // no-op
   }
-  unobserve(_target: any) {
+  unobserve(_target: Element) {
     // no-op
   }
   disconnect() {
@@ -78,60 +91,34 @@ class ResizeObserverMock {
   }
 }
 
-window.ResizeObserver = ResizeObserverMock;
-
-// https://github.com/jsdom/jsdom/issues/2913
-class DataTransferItemMock implements DataTransferItem {
+// https://github.com/jsdom/jsdom/issues/2032
+class IntersectionObserverMock {
   constructor(
-    protected format: string,
-    protected value: string
+    _callback: IntersectionObserverCallback,
+    _options?: IntersectionObserverInit
   ) {
     // no-op
   }
-  get kind() {
-    return 'string';
-  }
-  get type() {
-    return this.format;
-  }
-  getAsString(callback: (v: string) => undefined): undefined {
-    callback(this.value);
-  }
-  getAsFile() {
-    return null as any;
-  }
-  webkitGetAsEntry() {
-    return null as any;
-  }
-}
-
-// https://github.com/jsdom/jsdom/issues/2913
-class DataTransferMock implements DataTransfer {
-  dropEffect: DataTransfer['dropEffect'] = 'none';
-  effectAllowed: DataTransfer['dropEffect'] = 'none';
-  files: DataTransfer['files'];
-  get items(): DataTransfer['items'] {
-    return [
-      ...Object.entries(this._data).map(
-        ([k, v]) => new DataTransferItemMock(k, v)
-      )
-    ] as unknown as DataTransferItemList;
-  }
-  readonly types: DataTransfer['types'] = [];
-  getData(format: string) {
-    return this._data[format];
-  }
-  setData(format: string, data: string) {
-    this._data[format] = data;
-  }
-  clearData() {
-    this._data = {};
-  }
-  setDragImage(imgElement: Element, xOffset: number, yOffset: number) {
+  observe(_target: Element) {
     // no-op
   }
-  private _data: Record<string, string> = {};
+  unobserve(_target: Element) {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+  takeRecords() {
+    return [];
+  }
+  root = document;
+  rootMargin = '0px 0px 0px 0px';
+  thresholds = [0];
 }
+
+window.IntersectionObserver = IntersectionObserverMock;
+
+window.ResizeObserver = ResizeObserverMock;
 
 window.DataTransfer = DataTransferMock;
 

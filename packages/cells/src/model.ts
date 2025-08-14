@@ -13,7 +13,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import { ObservableValue } from '@jupyterlab/observables';
+import { IObservableString, ObservableValue } from '@jupyterlab/observables';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -21,6 +21,7 @@ import {
   CellChange,
   createMutex,
   createStandaloneCell,
+  IExecutionState,
   IMapChange,
   ISharedAttachmentsCell,
   ISharedCell,
@@ -156,7 +157,7 @@ export interface ICodeCellModel extends ICellModel {
   /**
    * The code cell's state.
    */
-  executionState: 'running' | 'idle';
+  executionState: IExecutionState;
 
   /**
    * The cell outputs.
@@ -649,19 +650,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   /**
    * The execution state of the cell.
    */
-  get executionState(): 'idle' | 'running' {
-    return this._executionState;
+  get executionState(): IExecutionState {
+    return this.sharedModel.executionState;
   }
-  set executionState(newValue: 'idle' | 'running') {
-    const oldValue = this._executionState;
-    if (oldValue != newValue) {
-      this._executionState = newValue;
-      this.stateChanged.emit({
-        name: 'executionState',
-        oldValue,
-        newValue
-      });
-    }
+  set executionState(newValue: IExecutionState) {
+    this.sharedModel.executionState = newValue;
   }
 
   /**
@@ -759,8 +752,45 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     globalModelDBMutex(() => {
       switch (event.type) {
         case 'add': {
+          for (const output of event.newValues) {
+            if (output.type === 'stream') {
+              output.streamText!.changed.connect(
+                (
+                  sender: IObservableString,
+                  textEvent: IObservableString.IChangedArgs
+                ) => {
+                  if (
+                    textEvent.options !== undefined &&
+                    (textEvent.options as { [key: string]: any })['silent']
+                  ) {
+                    return;
+                  }
+                  const codeCell = this.sharedModel as YCodeCell;
+                  if (textEvent.type === 'remove') {
+                    codeCell.removeStreamOutput(
+                      event.newIndex,
+                      textEvent.start,
+                      'silent-change'
+                    );
+                  } else {
+                    codeCell.appendStreamOutput(
+                      event.newIndex,
+                      textEvent.value,
+                      'silent-change'
+                    );
+                  }
+                },
+                this
+              );
+            }
+          }
           const outputs = event.newValues.map(output => output.toJSON());
-          codeCell.updateOutputs(event.newIndex, event.newIndex, outputs);
+          codeCell.updateOutputs(
+            event.newIndex,
+            event.newIndex,
+            outputs,
+            'silent-change'
+          );
           break;
         }
         case 'set': {
@@ -768,12 +798,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,
-            newValues
+            newValues,
+            'silent-change'
           );
           break;
         }
         case 'remove':
-          codeCell.updateOutputs(event.oldIndex, event.oldValues.length);
+          codeCell.updateOutputs(
+            event.oldIndex,
+            event.oldValues.length,
+            [],
+            'silent-change'
+          );
+          break;
+        case 'clear':
+          codeCell.clearOutputs();
           break;
         default:
           throw new Error(`Invalid event type: ${event.type}`);
@@ -788,20 +827,47 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     slot: ISharedCodeCell,
     change: CellChange
   ): void {
+    if (change.streamOutputChange) {
+      globalModelDBMutex(() => {
+        for (const streamOutputChange of change.streamOutputChange!) {
+          if ('delete' in streamOutputChange) {
+            this._outputs.removeStreamOutput(streamOutputChange.delete!);
+          }
+          if ('insert' in streamOutputChange) {
+            this._outputs.appendStreamOutput(
+              streamOutputChange.insert!.toString()
+            );
+          }
+        }
+      });
+    }
+
     if (change.outputsChange) {
       globalModelDBMutex(() => {
-        this.outputs.clear();
-        slot.getOutputs().forEach(output => this._outputs.add(output));
+        let retain = 0;
+        for (const outputsChange of change.outputsChange!) {
+          if ('retain' in outputsChange) {
+            retain += outputsChange.retain!;
+          }
+          if ('delete' in outputsChange) {
+            for (let i = 0; i < outputsChange.delete!; i++) {
+              this._outputs.remove(retain);
+            }
+          }
+          if ('insert' in outputsChange) {
+            // Inserting an output always results in appending it.
+            for (const output of outputsChange.insert!) {
+              // For compatibility with older ydoc where a plain object,
+              // (rather than a Map instance) could be provided.
+              // In a future major release the use of Map will be required.
+              this._outputs.add('toJSON' in output ? output.toJSON() : output);
+            }
+          }
+        }
       });
     }
 
     if (change.executionCountChange) {
-      if (
-        change.executionCountChange.newValue &&
-        (this.isDirty || !change.executionCountChange.oldValue)
-      ) {
-        this._setDirty(false);
-      }
       this.stateChanged.emit({
         name: 'executionCount',
         oldValue: change.executionCountChange.oldValue,
@@ -809,7 +875,21 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       });
     }
 
-    if (change.sourceChange && this.executionCount !== null) {
+    if (change.executionStateChange) {
+      if (change.executionStateChange.newValue === 'running') {
+        this._setDirty(false);
+      }
+      this.stateChanged.emit({
+        name: 'executionState',
+        oldValue: change.executionStateChange.oldValue,
+        newValue: change.executionStateChange.newValue
+      });
+    }
+
+    if (
+      change.sourceChange &&
+      (this.executionCount !== null || this.executionState === 'running')
+    ) {
       this._setDirty(
         this._executedCode !== this.sharedModel.getSource().trim()
       );
@@ -833,7 +913,6 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     }
   }
 
-  private _executionState: 'idle' | 'running' = 'idle';
   private _executedCode = '';
   private _isDirty = false;
   private _outputs: IOutputAreaModel;

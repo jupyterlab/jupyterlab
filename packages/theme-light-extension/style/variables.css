@@ -94,6 +94,14 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inverse-border-color: var(--md-grey-600, #757575);
   --jp-border-radius: 2px;
 
+  /* shortcut buttons
+   *
+   * The following css variables are used to specify the visual
+   * styling of the keyboard shortcut buttons
+   */
+  --jp-shortcuts-button-background: var(--jp-brand-color3);
+  --jp-shortcuts-button-hover-background: var(--jp-brand-color2);
+
   /* UI Fonts
    *
    * The UI font CSS variables are used for the typography all of the JupyterLab
@@ -342,7 +350,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-variable-3-color: #085;
   --jp-mirror-editor-punctuation-color: #05a;
   --jp-mirror-editor-property-color: #05a;
-  --jp-mirror-editor-operator-color: #a2f;
+  --jp-mirror-editor-operator-color: #7800c2;
   --jp-mirror-editor-comment-color: #408080;
   --jp-mirror-editor-string-color: #ba2121;
   --jp-mirror-editor-string-2-color: #708;
@@ -421,4 +429,20 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-700, #616161);
   --jp-switch-color: var(--md-grey-400, #bdbdbd);
   --jp-switch-true-position-color: var(--md-orange-900, #e65100);
+}
+
+/* Completer specific styles */
+
+.jp-Completer {
+  --jp-completer-type-background0: transparent;
+  --jp-completer-type-background1: #1f77b4;
+  --jp-completer-type-background2: #ff7f0e;
+  --jp-completer-type-background3: #2ca02c;
+  --jp-completer-type-background4: #d62728;
+  --jp-completer-type-background5: #9467bd;
+  --jp-completer-type-background6: #8c564b;
+  --jp-completer-type-background7: #e377c2;
+  --jp-completer-type-background8: #7f7f7f;
+  --jp-completer-type-background9: #bcbd22;
+  --jp-completer-type-background10: #17becf;
 }

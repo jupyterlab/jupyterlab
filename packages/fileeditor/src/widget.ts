@@ -301,4 +301,15 @@ export namespace FileEditorFactory {
       IDocumentWidget<FileEditor>
     >;
   }
+
+  /**
+   * The interface for a file editor widget factory.
+   */
+  export interface IFactory
+    extends DocumentRegistry.IWidgetFactory<
+      IDocumentWidget<FileEditor>,
+      DocumentRegistry.ICodeModel
+    > {
+    // no extra options.
+  }
 }

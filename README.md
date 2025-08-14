@@ -17,7 +17,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jupyterlab/jupyterlab/badge)](https://scorecard.dev/viewer/?uri=github.com/jupyterlab/jupyterlab)
 [![GitHub](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/jupyterlab/jupyterlab/issues)
 [![Discourse](https://img.shields.io/badge/help_forum-discourse-blue.svg)](https://discourse.jupyter.org/c/jupyterlab)
-[![Gitter](https://img.shields.io/badge/social_chat-gitter-blue.svg)](https://gitter.im/jupyterlab/jupyterlab)
+[![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg)](https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab)
 [![Gitpod](https://img.shields.io/badge/gitpod_editor-open-blue.svg)](https://gitpod.io/#https://github.com/jupyterlab/jupyterlab)
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/HEAD?urlpath=lab/tree/demo)
@@ -63,7 +63,7 @@ If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.read
   ```shell
   pip install jupyterlab
   ```
-  If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (e.g., FreeBSD, GNU/Linux, macOS), you can do this by running `export PATH="$HOME/.local/bin:$PATH"`. If you are using a macOS version that comes with Python 2, run `pip3` instead of `pip`.
+  If installing using `pip install --user`, you must add the user-level `bin` directory to your `PATH` environment variable in order to launch `jupyter lab`. If you are using a Unix derivative (e.g., FreeBSD, GNU/Linux, macOS), you can do this by running `export PATH="$HOME/.local/bin:$PATH"`.
 
 For more detailed instructions, consult the [installation guide](http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html). Project installation instructions from the git sources are available in the [contributor documentation](CONTRIBUTING.md).
 
@@ -179,7 +179,7 @@ We have videoconference meetings every week where we discuss what we have been w
 Anyone is welcome to attend, if they would like to discuss a topic or just listen in.
 
 - When: Wednesdays 9:00 AM Pacific Time (USA)
-- Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
+- Where: [`jovyan` Zoom](https://zoom.us/j/95228013874?pwd=Ep7HIk8t9JP6VToxt1Wj4P7K5PshC0.1)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 
 > Notes are archived on [GitHub Jupyter Frontends team compass](https://github.com/jupyterlab/frontends-team-compass/issues).

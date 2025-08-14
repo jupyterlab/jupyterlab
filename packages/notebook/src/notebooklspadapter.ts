@@ -33,6 +33,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     this._editorToCell = new Map();
     this.editor = editorWidget.content;
     this._cellToEditor = new WeakMap();
+    this.isReady = this.isReady.bind(this);
     Promise.all([
       this.widget.context.sessionContext.ready,
       this.connectionManager.ready
@@ -200,7 +201,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
         this.reloadConnection();
       } else {
         console.log(
-          'Keeping old LSP connection as the new kernel uses the same langauge'
+          'Keeping old LSP connection as the new kernel uses the same language'
         );
       }
     } catch (err) {
@@ -301,7 +302,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       change.type === 'remove'
     ) {
       // in contrast to the file editor document which can be only changed by the modification of the editor content,
-      // the notebook document cna also get modified by a change in the number or arrangement of editors themselves;
+      // the notebook document can also get modified by a change in the number or arrangement of editors themselves;
       // for this reason each change has to trigger documents update (so that LSP mirror is in sync).
       await this.updateDocuments();
     }

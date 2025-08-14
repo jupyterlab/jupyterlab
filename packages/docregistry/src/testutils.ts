@@ -4,7 +4,7 @@
 // We explicitly reference the jest typings since the jest.d.ts file shipped
 // with jest 26 masks the @types/jest typings
 
-/// <reference types="jest" />
+/// <reference types="jest" preserve="true"/>
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import {
@@ -123,7 +123,7 @@ export function emitIopubMessage(
 }
 
 /**
- * Forceably change the status of a session context.
+ * Forcibly change the status of a session context.
  * An iopub message is emitted for the change.
  *
  * @param sessionContext The session context of interest.

@@ -15,6 +15,7 @@ import {
 } from './tokens';
 import { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
+import { isHintableMimeType } from './utils';
 
 // Shorthand for readability.
 export type InlineResult =
@@ -50,7 +51,8 @@ export class ProviderReconciliator implements IProviderReconciliator {
 
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger: InlineCompletionTriggerKind
+    trigger: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<InlineResult>[] {
     let promises: Promise<
       IInlineCompletionList<CompletionHandler.IInlineItem>
@@ -58,7 +60,14 @@ export class ProviderReconciliator implements IProviderReconciliator {
     const current = ++this._inlineFetching;
     for (const provider of this._inlineProviders) {
       const settings = this._inlineProvidersSettings[provider.identifier];
-
+      if (
+        trigger !== InlineCompletionTriggerKind.Invoke &&
+        isMiddleOfLine &&
+        !settings.autoFillInMiddle
+      ) {
+        // Skip if FIM is disabled
+        continue;
+      }
       let delay = 0;
       if (trigger === InlineCompletionTriggerKind.Automatic) {
         delay = settings.debouncerDelay;
@@ -220,13 +229,16 @@ export class ProviderReconciliator implements IProviderReconciliator {
       if (!line) {
         return replies;
       }
+      const lineOffset = editor.getOffsetAt({ line: cursor.line, column: 0 });
 
       return replies.map(reply => {
+        const prefixStart = Math.max(reply.start - lineOffset, 0);
+        const prefixEnd = Math.max(maxStart - lineOffset, 0);
         // No prefix to strip, return as-is.
-        if (reply.start == maxStart) {
+        if (prefixStart == prefixEnd) {
           return reply;
         }
-        let prefix = line.substring(reply.start, maxStart);
+        const prefix = line.substring(prefixStart, prefixEnd);
         return {
           ...reply,
           items: reply.items.map(item => {
@@ -303,6 +315,11 @@ export class ProviderReconciliator implements IProviderReconciliator {
     completerIsVisible: boolean,
     changed: SourceChange
   ): boolean {
+    const mimeType = this._context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
+    }
+
     return (
       !completerIsVisible &&
       (changed.sourceChange == null ||

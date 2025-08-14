@@ -37,6 +37,12 @@
       "description": "Autocompletion setting.",
       "type": "boolean",
       "default": false
+    },
+    "suppressIfInlineCompleterActive": {
+      "title": "Suppress when the inline completer is active",
+      "description": "Whether to suppress the tab completer when inline completions are presented.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,

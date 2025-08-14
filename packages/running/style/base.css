@@ -3,14 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-/*-----------------------------------------------------------------------------
-| Variables
-|----------------------------------------------------------------------------*/
-
-:root {
-  --jp-private-running-item-height: 24px;
-}
-
 .jp-RunningSessions {
   display: flex;
   flex-direction: column;
@@ -45,44 +37,32 @@
   padding-left: 14px;
 }
 
-.jp-RunningSessions-item {
-  display: flex;
-  flex-direction: row;
-  color: var(--jp-ui-font-color1);
-  height: var(--jp-private-running-item-height);
-  line-height: var(--jp-private-running-item-height);
-  padding: 0 8px;
-}
-
-.jp-RunningSessions-item:hover {
-  background-color: var(--jp-layout-color2);
-  cursor: pointer;
-}
-
-.jp-mod-running-leaf {
-  /** Account for lack of collapser */
-  margin-left: 16px;
-}
-
-.jp-RunningSessions-sectionContainer > .jp-RunningSessions-sectionList {
-  padding-left: 0;
-}
-
 .jp-RunningSessions-viewButton[aria-pressed='true'] {
   box-shadow: none;
 }
 
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
 .jp-mod-running-list-view .jp-RunningSessions-sectionList {
   padding-left: 0;
 }
 
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
 .jp-mod-running-list-view .jp-mod-running-leaf {
   margin-left: 0;
 }
 
-.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernel,
-.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernelspec {
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
+.jp-mod-running-list-view
+  .jp-RunningSessions-item.jp-mod-kernelspec::part(positioning-region),
+.jp-mod-running-list-view
+  .jp-RunningSessions-item.jp-mod-kernel::part(positioning-region) {
   display: none;
+}
+
+/* @deprecated For backward compatibility when sessions manager does not specify supportsMultipleViews */
+.jp-mod-running-list-view
+  .jp-RunningSessions-item.jp-mod-kernel-widget::part(content-region) {
+  margin-inline-start: -2.6em;
 }
 
 .jp-RunningSessions-item.jp-mod-kernelspec,
@@ -96,10 +76,6 @@
 
 .jp-RunningSessions-collapseButton[aria-pressed='true'] {
   box-shadow: none;
-}
-
-.jp-RunningSessions-icon {
-  margin: 0 4px;
 }
 
 .jp-RunningSessions-toolbar {
@@ -130,14 +106,9 @@ span.jp-RunningSessions-icon > svg {
 .jp-RunningSessions-itemLabel {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 55%;
-  padding: 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}
-
-.jp-RunningSessions-itemLabel:focus {
-  background-color: var(--jp-layout-color2);
 }
 
 .jp-RunningSessions-itemDetail {
@@ -149,30 +120,13 @@ span.jp-RunningSessions-icon > svg {
   white-space: nowrap;
 }
 
-.jp-RunningSessions-caret {
-  align-items: center;
-  display: flex;
-  padding-right: 4px;
-}
-
-.jp-RunningSessions-caret > svg {
-  height: 16px;
-  width: 16px;
-}
-
-.jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
-  border-radius: 0;
-  margin: 0;
-}
-
-.jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
+.jp-RunningSessions-itemShutdown {
   visibility: hidden;
 }
 
-.jp-RunningSessions-sectionList
-  .jp-RunningSessions-item
-  .jp-Button.jp-RunningSessions-itemShutdown:hover {
-  background: var(--jp-layout-color3);
+.jp-RunningSessions-item:focus-visible > .jp-RunningSessions-itemShutdown,
+.jp-RunningSessions-item:hover > .jp-RunningSessions-itemShutdown {
+  visibility: visible;
 }
 
 .jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent {
@@ -191,6 +145,10 @@ span.jp-RunningSessions-icon > svg {
   background-color: var(--jp-layout-color2);
   outline: 1px solid var(--jp-brand-color1);
   outline-offset: -2px;
+}
+
+.jp-RunningSessions-item.jp-mod-active.jp-TreeItem::part(positioning-region) {
+  background-color: transparent;
 }
 
 .jp-SearchableSessions-list > .jp-RunningSessions-section {

@@ -15,7 +15,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip jupyterlab-translate~=1.0
+          python -m pip install -U pip jupyterlab-translate~=1.0 hatch
 
       - name: Compute hash
         id: currentHash
@@ -42,7 +42,7 @@ jobs:
             # Set job status as failed if
             # - branch is not "main"
             # - and current version is not a pre release of a zeroed patch version
-            if [[ "${GITHUB_BASE_REF}" != "main" && ! ( $(python setup.py --version) =~ ^[0-9]+\.[0-9]+\.0(\.dev|a|b|rc)[0-9]+$ ) ]]; then
+            if [[ "${GITHUB_BASE_REF}" != "main" && ! ( $(hatch version) =~ ^[0-9]+\.[0-9]+\.0(\.dev|a|b|rc)[0-9]+$ ) ]]; then
               exit 1
             fi
           fi

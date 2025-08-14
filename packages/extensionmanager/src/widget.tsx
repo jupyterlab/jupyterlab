@@ -645,6 +645,10 @@ export class ExtensionsPanel extends SidePanel {
 
     const installed = new PanelWithToolbar();
     installed.addClass('jp-extensionmanager-installedlist');
+    installed.toolbar.node.setAttribute(
+      'aria-label',
+      this.trans.__('Extensions panel toolbar')
+    );
     installed.title.label = this.trans.__('Installed');
 
     installed.toolbar.addItem(
@@ -752,8 +756,14 @@ export class ExtensionsPanel extends SidePanel {
     if (this.isAttached) {
       const input = this._searchInputRef.current;
       if (input) {
-        input.focus();
-        input.select();
+        // Cover the cases, mainly on initial startup, where the input ref is not an input element
+        if (input.focus) {
+          input.focus();
+        }
+
+        if (input.select) {
+          input.select();
+        }
       }
     }
     super.onActivateRequest(msg);

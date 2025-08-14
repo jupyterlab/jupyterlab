@@ -1,6 +1,6 @@
-<svg viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
-  <g class="jp-icon3 jp-icon-selectable" fill="#616161">
-    <path d="M26,28H6a2.0027,2.0027,0,0,1-2-2V6A2.0027,2.0027,0,0,1,6,4H16V6H6V26H26V16h2V26A2.0027,2.0027,0,0,1,26,28Z"/>
-    <polygon points="20 2 20 4 26.586 4 18 12.586 19.414 14 28 5.414 28 12 30 12 30 2 20 2"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" viewBox="0 0 32 32">
+  <g fill="#616161" class="jp-icon3 jp-icon-selectable">
+    <path d="M26 28H6a2.003 2.003 0 0 1-2-2V6a2.003 2.003 0 0 1 2-2h10v2H6v20h20V16h2v10a2.003 2.003 0 0 1-2 2"/>
+    <path d="M20 2v2h6.586L18 12.586 19.414 14 28 5.414V12h2V2z"/>
   </g>
 </svg>

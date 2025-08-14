@@ -22,13 +22,59 @@ import {
   testEmission
 } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import * as fs from 'fs-extra';
+
+const MOCK_KERNEL = {
+  transport: 'tcp',
+  ip: '127.0.0.1',
+  // eslint-disable-next-line camelcase
+  control_port: 63607,
+  // eslint-disable-next-line camelcase
+  shell_port: 49458,
+  // eslint-disable-next-line camelcase
+  stdin_port: 54582,
+  // eslint-disable-next-line camelcase
+  iopub_port: 50266,
+  // eslint-disable-next-line camelcase
+  hb_port: 59840,
+  // eslint-disable-next-line camelcase
+  signature_scheme: 'hmac-sha256',
+  key: '883965661293433ea9c07538beeb8451',
+  // eslint-disable-next-line camelcase
+  kernel_name: 'mock-kernel'
+};
+
+function mktempDir(suffix: string): string {
+  const pathPrefix = '/tmp/jupyterlab-apputils-sessioncontext-test';
+  if (!fs.existsSync(pathPrefix)) {
+    fs.mkdirSync(pathPrefix);
+  }
+  return fs.mkdtempSync(`${pathPrefix}/${suffix}`);
+}
 
 describe('@jupyterlab/apputils', () => {
   let server: JupyterServer;
+  let external: string;
 
   beforeAll(async () => {
     server = new JupyterServer();
-    await server.start();
+    external = mktempDir('external_kernels');
+
+    if (!(await fs.pathExists(`${external}/kernel.json`))) {
+      const data = JSON.stringify(MOCK_KERNEL);
+      await fs.writeFile(`${external}/kernel.json`, data);
+    }
+
+    await server.start({
+      configData: {
+        ServerApp: {
+          // eslint-disable-next-line camelcase
+          allow_external_kernels: true,
+          // eslint-disable-next-line camelcase
+          external_connection_dir: external
+        }
+      }
+    });
   }, 30000);
 
   afterAll(async () => {
@@ -59,6 +105,7 @@ describe('@jupyterlab/apputils', () => {
       Dialog.flush();
       path = UUID.uuid4();
       sessionContext = new SessionContext({
+        kernelManager,
         path,
         sessionManager,
         specsManager,
@@ -265,6 +312,7 @@ describe('@jupyterlab/apputils', () => {
         const kernelPreference = { id: other.kernel!.id };
 
         sessionContext = new SessionContext({
+          kernelManager,
           sessionManager,
           specsManager,
           kernelPreference
@@ -303,6 +351,7 @@ describe('@jupyterlab/apputils', () => {
         const mockManager = new SessionManager({ kernelManager });
 
         sessionContext = new SessionContext({
+          kernelManager,
           path,
           sessionManager: mockManager,
           specsManager,
@@ -569,6 +618,7 @@ describe('@jupyterlab/apputils', () => {
       Dialog.flush();
       path = UUID.uuid4();
       sessionContext = new SessionContext({
+        kernelManager,
         path,
         sessionManager,
         specsManager,
@@ -590,8 +640,22 @@ describe('@jupyterlab/apputils', () => {
       sessionContext.dispose();
     });
 
+    describe('#kernelOptions', () => {
+      it('should return externally connected kernels', async () => {
+        await sessionContext.initialize();
+        const { groups } = SessionContextDialogs.kernelOptions(sessionContext);
+        const options = groups.reduce(
+          (acc, group) => acc.concat(group.options),
+          [] as { text: string }[]
+        );
+        expect(options[options.length - 1].text).toContain(
+          MOCK_KERNEL['kernel_name']
+        );
+      });
+    });
+
     describe('#selectKernel()', () => {
-      it('should select a kernel for the session', async () => {
+      it('should select the currently running kernel by default', async () => {
         await sessionContext.initialize();
 
         const { id, name } = sessionContext!.session!.kernel!;
@@ -601,7 +665,7 @@ describe('@jupyterlab/apputils', () => {
         await accept;
 
         const session = sessionContext?.session;
-        expect(session!.kernel!.id).not.toBe(id);
+        expect(session!.kernel!.id).toBe(id);
         expect(session!.kernel!.name).toBe(name);
       });
 

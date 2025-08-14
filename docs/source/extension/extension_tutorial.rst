@@ -66,7 +66,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=20 git copier=9 jinja2-time
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=20 git copier=9 jinja2-time --yes
 
 Now activate the new environment so that all further commands you run
 work out of that environment.

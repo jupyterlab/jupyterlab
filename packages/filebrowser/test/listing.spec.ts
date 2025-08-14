@@ -7,7 +7,11 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import {
+  framePromise,
+  IFileSystemDirectoryEntryOptions,
+  signalToPromise
+} from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -33,6 +37,9 @@ class TestDirListing extends DirListing {
     super.onUpdateRequest.apply(this, args);
     // Allows us to spy on onUpdateRequest.
     this.updated.emit();
+  }
+  public get allUploaded() {
+    return super.allUploaded;
   }
 }
 
@@ -98,6 +105,47 @@ describe('filebrowser/listing', () => {
         expect(
           dirListing.node.querySelector('[data-lm-dragscroll]')
         ).toBeDefined();
+      });
+    });
+
+    describe('#handleEvent()', () => {
+      it('should upload a nested folder on drag', async () => {
+        const dt = new DataTransfer();
+        const directoryMock: IFileSystemDirectoryEntryOptions = {
+          name: 'test-dir',
+          files: [
+            {
+              name: 'empty-dir',
+              files: []
+            },
+            {
+              name: 'file.txt',
+              file: {
+                bits: ['content']
+              }
+            },
+            {
+              name: 'code.py',
+              file: {
+                bits: ['print(1)']
+              }
+            }
+          ]
+        };
+        dt.setData('directory', JSON.stringify(directoryMock));
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        const topLevel = getItemTitles(dirListing);
+        expect(topLevel).toStrictEqual(['test-dir']);
+        await dirListing.model.cd('test-dir');
+        const testDir = getItemTitles(dirListing);
+        expect(testDir).toEqual(
+          expect.arrayContaining(['empty-dir', 'file.txt', 'code.py'])
+        );
       });
     });
 
@@ -839,7 +887,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -855,7 +902,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',
@@ -876,7 +922,6 @@ describe('filebrowser/listing', () => {
           await signalToPromise(dirListing.updated);
           dirListing.setNotebooksFirstSorting(true);
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -894,7 +939,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',

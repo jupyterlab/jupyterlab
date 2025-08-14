@@ -8,6 +8,7 @@
  */
 import {
   ILayoutRestorer,
+  JupyterFrontEnd,
   JupyterFrontEndPlugin,
   JupyterLab
 } from '@jupyterlab/application';
@@ -47,11 +48,12 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   id: PLUGIN_ID,
   description: 'Enable or disable individual plugins.',
   autoStart: true,
-  requires: [],
+  requires: [JupyterLab.IInfo],
   optional: [ITranslator, ICommandPalette, ILayoutRestorer],
   provides: IPluginManager,
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
+    appInfo: JupyterLab.IInfo,
     translator: ITranslator | null,
     palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
@@ -77,11 +79,13 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       const model = new PluginListModel({
         ...args,
         pluginData: {
-          availablePlugins: app.info.availablePlugins
+          availablePlugins: appInfo.availablePlugins
         },
         serverSettings: app.serviceManager.serverSettings,
         extraLockedPlugins: [
           PLUGIN_ID,
+          // The app needs a service manager to function
+          '@jupyterlab/services-extension:service-manager',
           // UI will not proceed beyond splash without `layout` plugin
           '@jupyterlab/application-extension:layout',
           // State restoration does not work well without resolver,
@@ -125,6 +129,21 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
           void tracker.save(main);
         });
         return main;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: trans.__('The search query for plugins')
+            },
+            isDisclaimed: {
+              type: 'boolean',
+              description: trans.__('Whether the disclaimer has been accepted')
+            }
+          }
+        }
       }
     });
 
@@ -140,6 +159,17 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
               `Failed to refresh the available plugins list:\n${reason}`
             );
           });
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            noLabel: {
+              type: 'boolean',
+              description: trans.__('Whether to hide the label')
+            }
+          }
+        }
       }
     });
 

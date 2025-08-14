@@ -42,6 +42,17 @@ test.describe('Completer', () => {
       await page.keyboard.press('Enter');
       const textAfter = await page.notebook.getCellTextInput(1);
       expect(textAfter).toBe('option_1');
+      // Completer shouldn't show up, but Completer should be enabled
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('Tab');
+      let locator = page.locator(
+        '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+      );
+      await expect(locator).toHaveCount(1);
+      await expect(locator).toHaveClass(/jp-mod-completer-enabled/);
+      completer = page.locator(COMPLETER_SELECTOR);
+
+      await expect(completer).toBeHidden();
     });
 
     test('Show documentation panel', async ({ page, tmpPath }) => {

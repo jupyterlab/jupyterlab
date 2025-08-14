@@ -5,6 +5,7 @@ import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
 import {
   filterContent,
+  freeezeKernelIds,
   generateArrow,
   positionMouse,
   positionMouseOver
@@ -482,7 +483,9 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
-    const heading = page.locator('h2[id="Open-a-CSV-file-using-Pandas"]');
+    const heading = page.locator(
+      'h2[data-jupyter-id="Open-a-CSV-file-using-Pandas"]'
+    );
     await heading.waitFor();
     const anchor = heading.locator('text=¶');
     await heading.hover();
@@ -580,17 +583,13 @@ test.describe('General', () => {
       .soft(page.locator('.jp-RunningSessions-item.jp-mod-kernel'))
       .toHaveCount(2, { timeout: 5000 });
 
-    const freeezeKernelIds = async () => {
-      return page.evaluate(() => {
-        const mockedKernelIds = ['abcd1234', 'wxyz5678'];
-        document
-          .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
-          .forEach((span, i) => {
-            span.innerText = `(${mockedKernelIds[i]})`;
-          });
-      });
+    const sessionsSidebar = page.locator('.jp-SidePanel.jp-RunningSessions');
+    const mockedKernelIds = {
+      'Data.ipynb': 'abcd1234',
+      'Julia.ipynb': 'wxyz5678'
     };
-    await freeezeKernelIds();
+
+    await freeezeKernelIds(sessionsSidebar, mockedKernelIds);
 
     expect
       .soft(
@@ -601,18 +600,18 @@ test.describe('General', () => {
       .toMatchSnapshot('running_layout.png');
 
     await page.click('jp-button[data-command="running:show-modal"]');
-    await freeezeKernelIds();
 
     // Playwright uses shadow-piercing selectors so this works with webcomponents too
     await expect
       .soft(page.locator('.jp-SearchableSessions-modal input'))
       .toBeFocused();
 
-    expect(
-      await page
-        .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
-        .screenshot()
-    ).toMatchSnapshot('running_modal.png');
+    const dialog = page.locator(
+      '.jp-SearchableSessions-modal .jp-Dialog-content'
+    );
+    await freeezeKernelIds(dialog, mockedKernelIds);
+
+    expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');
   });
 
   test('Command Palette', async ({ page }) => {

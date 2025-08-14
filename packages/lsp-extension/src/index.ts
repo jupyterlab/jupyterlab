@@ -71,8 +71,10 @@ const settingsPlugin: JupyterFrontEndPlugin<void> = {
 
 const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
   {
-    id: ILSPCodeExtractorsManager.name,
+    id: '@jupyterlab/lsp-extension:code-extractor-manager',
+    autoStart: true,
     description: 'Provides the code extractor manager.',
+    provides: ILSPCodeExtractorsManager,
     activate: app => {
       const extractorManager = new CodeExtractorsManager();
 
@@ -91,9 +93,7 @@ const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManage
       });
       extractorManager.register(rawCellExtractor, null);
       return extractorManager;
-    },
-    provides: ILSPCodeExtractorsManager,
-    autoStart: true
+    }
   };
 
 /**
@@ -283,6 +283,7 @@ function addRunningSessionManager(
   let currentRunning: RunningLanguageServer[] = [];
   managers.add({
     name: trans.__('Language servers'),
+    supportsMultipleViews: false,
     running: () => {
       const connections = new Set([...lsManager.connections.values()]);
 

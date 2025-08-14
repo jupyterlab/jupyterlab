@@ -7,6 +7,7 @@ import path from 'path';
 
 const esModules = [
   '@codemirror',
+  '@marijn',
   '@microsoft',
   '@jupyter/react-components',
   '@jupyter/web-components',

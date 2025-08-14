@@ -119,3 +119,26 @@ export async function stubGitHubUserIcons(page: Page): Promise<void> {
     });
   });
 }
+
+export async function freeezeKernelIds(
+  node: Locator,
+  mockMap: Record<string, string>
+): Promise<void> {
+  const KERNEL_ID_SELECTOR = '.jp-RunningSessions-item-label-kernel-id';
+  // wait for the kernel IDs to be rendered.
+  await node.locator(KERNEL_ID_SELECTOR).first().waitFor();
+
+  return node.evaluate(
+    (node, [KERNEL_ID_SELECTOR, mockMap]) => {
+      const isTree = node.querySelector('.jp-TreeView');
+      for (const [notebook, kernelId] of Object.entries(mockMap)) {
+        const selector = isTree
+          ? `[title*='${notebook}'] ${KERNEL_ID_SELECTOR}`
+          : `${KERNEL_ID_SELECTOR}[title='${notebook}']`;
+        const element = node.querySelector(selector) as HTMLElement;
+        element.innerText = `(${kernelId})`;
+      }
+    },
+    [KERNEL_ID_SELECTOR, mockMap]
+  );
+}

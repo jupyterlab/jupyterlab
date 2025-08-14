@@ -314,6 +314,7 @@ function addRunningSessionManager(
 
   managers.add({
     name: trans.__('Terminals'),
+    supportsMultipleViews: false,
     running: () =>
       Array.from(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),
@@ -359,7 +360,9 @@ function addCommands(
 
       let session;
       if (name) {
-        const models = await TerminalAPI.listRunning();
+        const models = await TerminalAPI.listRunning(
+          serviceManager.serverSettings
+        );
         if (models.map(d => d.name).includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
@@ -388,6 +391,27 @@ function addCommands(
       void tracker.add(main);
       app.shell.activateById(main.id);
       return main;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            description: trans.__('Terminal session name')
+          },
+          cwd: {
+            type: 'string',
+            description: trans.__('Current working directory for the terminal')
+          },
+          isPalette: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is called from the command palette'
+            )
+          }
+        }
+      }
     }
   });
 
@@ -405,6 +429,18 @@ function addCommands(
       } else {
         // Otherwise, create a new terminal with a given name.
         return commands.execute(CommandIDs.createNew, { name });
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            description: trans.__('Terminal session name to open')
+          }
+        },
+        required: ['name']
       }
     }
   });
@@ -431,7 +467,20 @@ function addCommands(
       args['isPalette']
         ? undefined
         : refreshIcon.bindprops({ stylesheet: 'menuItem' }),
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          isPalette: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is called from the command palette'
+            )
+          }
+        }
+      }
+    }
   });
 
   /**
@@ -449,6 +498,8 @@ function addCommands(
 
       if (text) {
         Clipboard.copyToSystem(text);
+        // Focus the widget to ensure user can continue typing
+        widget.activate();
       }
     },
     isEnabled: () => {
@@ -466,7 +517,13 @@ function addCommands(
       return widget.hasSelection();
     },
     icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Copy')
+    label: trans.__('Copy'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   /**
@@ -487,11 +544,19 @@ function addCommands(
       if (clipboardData) {
         // Paste data to the terminal
         widget.paste(clipboardData);
+        // Focus the widget to ensure user can continue typing
+        widget.activate();
       }
     },
     isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
     icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Paste')
+    label: trans.__('Paste'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.shutdown, {
@@ -505,7 +570,13 @@ function addCommands(
       // The widget is automatically disposed upon session shutdown.
       return current.content.session.shutdown();
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.increaseFont, {
@@ -518,6 +589,12 @@ function addCommands(
         } catch (err) {
           Private.showErrorMessage(err);
         }
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -532,6 +609,12 @@ function addCommands(
         } catch (err) {
           Private.showErrorMessage(err);
         }
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -569,6 +652,24 @@ function addCommands(
       } catch (err) {
         console.log(err);
         Private.showErrorMessage(err);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          theme: {
+            type: 'string',
+            enum: ['inherit', 'light', 'dark'],
+            description: trans.__('Terminal theme to set')
+          },
+          isPalette: {
+            type: 'boolean',
+            description:
+              'Whether the command is called from the command palette'
+          }
+        },
+        required: ['theme']
       }
     }
   });

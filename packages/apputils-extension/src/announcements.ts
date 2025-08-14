@@ -9,7 +9,11 @@ import {
 } from '@jupyterlab/application';
 import { Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import { ConfigSection, ServerConnection } from '@jupyterlab/services';
+import {
+  ConfigSection,
+  IConfigSectionManager,
+  ServerConnection
+} from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -55,9 +59,10 @@ export const announcements: JupyterFrontEndPlugin<void> = {
   description:
     'Add the announcement feature. It will fetch news on the internet and check for application updates.',
   autoStart: true,
-  optional: [ISettingRegistry, ITranslator],
+  optional: [IConfigSectionManager, ISettingRegistry, ITranslator],
   activate: (
     app: JupyterFrontEnd,
+    configSectionManager: ConfigSection.IManager | null,
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
@@ -69,9 +74,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         Promise.resolve(null),
       // Use config instead of state to store independently of the workspace
       // if a news has been displayed or not.
-      ConfigSection.create({
+      configSectionManager?.create({
         name: CONFIG_SECTION_NAME
-      })
+      }) ?? Promise.resolve(null)
     ]).then(async ([_, settings, config]) => {
       const trans = (translator ?? nullTranslator).load('jupyterlab');
 
@@ -85,7 +90,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
           const update: { [k: string]: INewsState } = {};
           update[id] = { seen: true, dismissed: true };
-          config.update(update as any).catch(reason => {
+          config?.update(update as any).catch(reason => {
             console.error(
               `Failed to update the announcements config:\n${reason}`
             );
@@ -127,7 +132,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 callback: () => {
                   Notification.dismiss(notificationId);
                   config
-                    .update({})
+                    ?.update({})
                     .then(() => fetchNews())
                     .catch(reason => {
                       console.error(`Failed to get the news:\n${reason}`);
@@ -170,7 +175,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               // @ts-expect-error data has no index
               const id = options.data!['id'] as string;
               // Filter those notifications
-              const state = (config.data[id] as INewsState) ?? {
+              const state = (config?.data[id] as INewsState) ?? {
                 seen: false,
                 dismissed: false
               };
@@ -182,7 +187,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
-                      config.update(update as any).catch(reason => {
+                      config?.update(update as any).catch(reason => {
                         console.error(
                           `Failed to update the announcements config:\n${reason}`
                         );
@@ -204,7 +209,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
                   update[id] = { seen: true };
-                  config.update(update as any).catch(reason => {
+                  config?.update(update as any).catch(reason => {
                     console.error(
                       `Failed to update the announcements config:\n${reason}`
                     );
@@ -232,7 +237,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
             const { link, message, type, options } = response.notification;
             // @ts-expect-error data has no index
             const id = options.data!['id'] as string;
-            const state = (config.data[id] as INewsState) ?? {
+            const state = (config?.data[id] as INewsState) ?? {
               seen: false,
               dismissed: false
             };
@@ -240,9 +245,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               let notificationId: string;
               options.actions = [
                 {
-                  label: trans.__('Do not check for updates'),
+                  label: trans.__('Ignore all updates'),
                   caption: trans.__(
-                    'If pressed, you will not be prompted if a new JupyterLab version is found.'
+                    'Do not prompt me if a new JupyterLab version is available.'
                   ),
                   callback: () => {
                     settings
@@ -266,14 +271,16 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   callback: () => {
                     window.open(link[1], '_blank', 'noreferrer');
                   },
-                  displayType: 'link'
+                  // Because the link to the changelog is the primary option,
+                  // display it in an accent color.
+                  displayType: 'accent'
                 });
               }
               if (!state.seen) {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};
                 update[id] = { seen: true };
-                config.update(update as any).catch(reason => {
+                config?.update(update as any).catch(reason => {
                   console.error(
                     `Failed to update the announcements config:\n${reason}`
                   );

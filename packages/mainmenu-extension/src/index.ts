@@ -192,41 +192,95 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     commands.addCommand(CommandIDs.openEdit, {
       label: trans.__('Open Edit Menu'),
-      execute: () => activateMenu(menu.editMenu)
+      execute: () => activateMenu(menu.editMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openFile, {
       label: trans.__('Open File Menu'),
-      execute: () => activateMenu(menu.fileMenu)
+      execute: () => activateMenu(menu.fileMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openKernel, {
       label: trans.__('Open Kernel Menu'),
-      execute: () => activateMenu(menu.kernelMenu)
+      execute: () => activateMenu(menu.kernelMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openRun, {
       label: trans.__('Open Run Menu'),
-      execute: () => activateMenu(menu.runMenu)
+      execute: () => activateMenu(menu.runMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openView, {
       label: trans.__('Open View Menu'),
-      execute: () => activateMenu(menu.viewMenu)
+      execute: () => activateMenu(menu.viewMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openSettings, {
       label: trans.__('Open Settings Menu'),
-      execute: () => activateMenu(menu.settingsMenu)
+      execute: () => activateMenu(menu.settingsMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openTabs, {
       label: trans.__('Open Tabs Menu'),
-      execute: () => activateMenu(menu.tabsMenu)
+      execute: () => activateMenu(menu.tabsMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openHelp, {
       label: trans.__('Open Help Menu'),
-      execute: () => activateMenu(menu.helpMenu)
+      execute: () => activateMenu(menu.helpMenu),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     commands.addCommand(CommandIDs.openFirst, {
       label: trans.__('Open First Menu'),
       execute: () => {
         menu.activeIndex = 0;
         menu.openActiveMenu();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -276,6 +330,14 @@ function createEditMenu(
     default: {
       label: trans.__('Undo')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
   addSemanticCommand({
@@ -285,6 +347,14 @@ function createEditMenu(
     semanticCommands: menu.undoers.redo,
     default: {
       label: trans.__('Redo')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -298,6 +368,14 @@ function createEditMenu(
     default: {
       label: trans.__('Clear')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
   addSemanticCommand({
@@ -307,6 +385,14 @@ function createEditMenu(
     semanticCommands: menu.clearers.clearAll,
     default: {
       label: trans.__('Clear All')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -318,6 +404,14 @@ function createEditMenu(
     semanticCommands: menu.goToLiners,
     default: {
       label: trans.__('Go to Line…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -350,7 +444,13 @@ function createFileMenu(
     },
     overrides: {
       isEnabled: () =>
-        !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable
+        !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -364,6 +464,14 @@ function createFileMenu(
     default: {
       label: trans.__('New Console for Activity')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -372,6 +480,12 @@ function createFileMenu(
     caption: trans.__('Shut down %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
@@ -441,6 +555,12 @@ function createFileMenu(
     caption: trans.__('Log out of %1', app.name),
     isVisible: () => menu.quitEntry,
     isEnabled: () => menu.quitEntry,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       router.navigate('/logout', { hard: true });
     }
@@ -466,7 +586,15 @@ function createKernelMenu(
       label: trans.__('Interrupt Kernel'),
       caption: trans.__('Interrupt the kernel')
     },
-    overrides: { icon: args => (args.toolbar ? stopIcon : undefined) },
+    overrides: {
+      icon: args => (args.toolbar ? stopIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -478,6 +606,14 @@ function createKernelMenu(
     semanticCommands: menu.kernelUsers.reconnectToKernel,
     default: {
       label: trans.__('Reconnect to Kernel')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -491,7 +627,15 @@ function createKernelMenu(
       label: trans.__('Restart Kernel…'),
       caption: trans.__('Restart the kernel')
     },
-    overrides: { icon: args => (args.toolbar ? refreshIcon : undefined) },
+    overrides: {
+      icon: args => (args.toolbar ? refreshIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -506,6 +650,14 @@ function createKernelMenu(
     default: {
       label: trans.__('Restart Kernel and Clear…')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -516,6 +668,14 @@ function createKernelMenu(
     semanticCommands: menu.kernelUsers.changeKernel,
     default: {
       label: trans.__('Change Kernel…')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -529,6 +689,14 @@ function createKernelMenu(
       label: trans.__('Shut Down Kernel'),
       caption: trans.__('Shut down kernel')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -537,12 +705,22 @@ function createKernelMenu(
     isEnabled: () => {
       return !app.serviceManager.sessions.running().next().done;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       return showDialog({
         title: trans.__('Shut Down All?'),
-        body: trans.__('Shut down all kernels?'),
+        body: trans._n(
+          'Are you sure you want to permanently shut down the running kernel?',
+          'Are you sure you want to permanently shut down the %1 running kernels?',
+          app.serviceManager.kernels.runningCount
+        ),
         buttons: [
-          Dialog.cancelButton({ label: trans.__('Dismiss') }),
+          Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down All') })
         ]
       }).then(result => {
@@ -572,6 +750,14 @@ function createViewMenu(
     default: {
       label: trans.__('Show Line Numbers')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -583,6 +769,14 @@ function createViewMenu(
     default: {
       label: trans.__('Match Brackets')
     },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
     trans
   });
 
@@ -593,6 +787,14 @@ function createViewMenu(
     semanticCommands: menu.editorViewers.toggleWordWrap,
     default: {
       label: trans.__('Wrap Words')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -618,7 +820,13 @@ function createRunMenu(
       caption: trans.__('Run Selected')
     },
     overrides: {
-      icon: args => (args.toolbar ? runIcon : undefined)
+      icon: args => (args.toolbar ? runIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -631,6 +839,14 @@ function createRunMenu(
     default: {
       label: trans.__('Run All'),
       caption: trans.__('Run All')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -645,7 +861,13 @@ function createRunMenu(
       caption: trans.__('Restart Kernel and Run All')
     },
     overrides: {
-      icon: args => (args.toolbar ? fastForwardIcon : undefined)
+      icon: args => (args.toolbar ? fastForwardIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });
@@ -681,6 +903,18 @@ function createTabsMenu(
       const id = args['id'] || '';
       return !!app.shell.currentWidget && app.shell.currentWidget.id === id;
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('The widget id to activate')
+          }
+        },
+        required: ['id']
+      }
+    },
     execute: args => app.shell.activateById((args['id'] as string) || '')
   });
 
@@ -690,6 +924,12 @@ function createTabsMenu(
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
     label: trans.__('Activate Previously Used Tab'),
     isEnabled: () => !!previousId,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
 
@@ -751,6 +991,14 @@ function createHelpMenu(
     default: {
       label: trans.__('Get Kernel'),
       isVisible: false
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     },
     trans
   });

@@ -62,6 +62,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext = this._sessionContext =
       sessionContext ??
       new SessionContext({
+        kernelManager: manager.kernels,
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
         path: manager.contents.localPath(path),

@@ -90,7 +90,13 @@ async function activateTOC(
     },
     isEnabled: () =>
       toc.model?.supportedOptions.includes('numberingH1') ?? false,
-    isToggled: () => toc.model?.configuration.numberingH1 ?? false
+    isToggled: () => toc.model?.configuration.numberingH1 ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.displayNumbering, {
@@ -106,7 +112,18 @@ async function activateTOC(
     },
     isEnabled: () =>
       toc.model?.supportedOptions.includes('numberHeaders') ?? false,
-    isToggled: () => toc.model?.configuration.numberHeaders ?? false
+    isToggled: () => toc.model?.configuration.numberHeaders ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from toolbar')
+          }
+        }
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.displayOutputNumbering, {
@@ -120,13 +137,25 @@ async function activateTOC(
     },
     isEnabled: () =>
       toc.model?.supportedOptions.includes('includeOutput') ?? false,
-    isToggled: () => toc.model?.configuration.includeOutput ?? false
+    isToggled: () => toc.model?.configuration.includeOutput ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.showPanel, {
     label: trans.__('Table of Contents'),
     execute: () => {
       app.shell.activateById(toc.id);
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -154,7 +183,18 @@ async function activateTOC(
         }
       }
     },
-    isEnabled: () => toc.model !== null
+    isEnabled: () => toc.model !== null,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from toolbar')
+          }
+        }
+      }
+    }
   });
 
   const tracker = new TableOfContentsTracker();
@@ -215,6 +255,10 @@ async function activateTOC(
     label: ''
   });
   numbering.addClass('jp-toc-numberingButton');
+  toc.toolbar.node.setAttribute(
+    'aria-label',
+    trans.__('Table of contents sidepanel toolbar')
+  );
   toc.toolbar.addItem('display-numbering', numbering);
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
@@ -241,7 +285,7 @@ async function activateTOC(
   const menuButton = new ToolbarButton({
     tooltip: trans.__('More actions…'),
     icon: ellipsesIcon,
-    actualOnClick: true,
+    noFocusOnClick: false,
     onClick: () => {
       const bbox = menuButton.node.getBoundingClientRect();
       toolbarMenu.open(bbox.x, bbox.bottom);

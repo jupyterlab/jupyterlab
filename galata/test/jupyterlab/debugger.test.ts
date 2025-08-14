@@ -95,22 +95,22 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
-    expect(await variablesPanel.screenshot()).toMatchSnapshot(
-      'image-debug-session-global-variables.png'
-    );
+    expect
+      .soft(await variablesPanel.screenshot())
+      .toMatchSnapshot('image-debug-session-global-variables.png');
 
     await page.debugger.renderVariable(globalVar);
     let richVariableTab = await page.activity.getPanelLocator(
       `${globalVar} - ${notebookName}`
     );
-    expect(await richVariableTab?.screenshot()).toMatchSnapshot(
-      'image-debug-session-global-rich-variable.png'
-    );
+    expect
+      .soft(await richVariableTab?.screenshot())
+      .toMatchSnapshot('image-debug-session-global-rich-variable.png');
 
     await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
-    await page.locator('jp-button[title="Continue (F9)"]').click();
-    await expect(variablesPanel).not.toContain('ul');
+    await page.getByRole('button', { name: 'Continue (F9)' }).click();
+    await expect.soft(variablesPanel.getByRole('tree')).toHaveCount(1);
     await page.debugger.waitForVariables();
 
     await page.debugger.renderVariable(localVar);
@@ -130,13 +130,14 @@ test.describe('Debugger Tests', () => {
     });
 
     const menu = await page.menu.getOpenMenuLocator();
-    await menu?.locator('[data-command="fileeditor:create-console"]')?.click();
+    await menu
+      ?.getByRole('menuitem', { name: 'Create Console for Editor' })
+      .click();
 
-    await page.locator('.jp-Dialog-body').waitFor();
-    const select = page.locator('.jp-Dialog-body >> select');
-    const option = select.locator('option:has-text("ipykernel")');
-    await select.selectOption(await option.textContent());
-    await page.click('div.jp-Dialog-content >> button:has-text("Select")');
+    await page.getByRole('dialog').waitFor();
+    const select = page.getByRole('dialog').getByRole('combobox');
+    await select.selectOption('Python 3 (ipykernel)');
+    await page.getByRole('button', { name: 'Select Kernel' }).click();
 
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
@@ -177,9 +178,23 @@ test.describe('Debugger Tests', () => {
 test.describe('Debugger Variables', () => {
   test.use({ autoGoto: false });
 
-  const copyToGlobalsRequest = new PromiseDelegate<void>();
+  async function init({ page, tmpPath }) {
+    // Initialize the debugger.
+    await page.goto(`tree/${tmpPath}`);
+    await createNotebook(page);
 
-  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.debugger.switchOn();
+    await page.waitForCondition(() => page.debugger.isOpen());
+
+    await setBreakpoint(page);
+  }
+
+  test('Copy to globals should work only for local variables', async ({
+    page,
+    tmpPath
+  }) => {
+    const copyToGlobalsRequest = new PromiseDelegate<void>();
+
     // Listener to the websocket, to catch the 'copyToGlobals' request.
     page.on('websocket', ws => {
       ws.on('framesent', event => {
@@ -193,19 +208,8 @@ test.describe('Debugger Variables', () => {
       });
     });
 
-    // Initialize the debugger.
-    await page.goto(`tree/${tmpPath}`);
-    await createNotebook(page);
+    await init({ page, tmpPath });
 
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
-
-    await setBreakpoint(page);
-  });
-
-  test('Copy to globals should work only for local variables', async ({
-    page
-  }) => {
     // Kernel supports copyToGlobals.
     await page.evaluate(async () => {
       const debuggerService = await window.galata.getPlugin(
@@ -221,38 +225,39 @@ test.describe('Debugger Variables', () => {
     await page.debugger.waitForCallStack();
 
     // Expect the copy entry to be in the menu.
-    await page.locator('select[aria-label="Scope"]').selectOption('Locals');
-    await page.click('.jp-DebuggerVariables-body li span:text("local_var")', {
+    await page.getByLabel('Scope').selectOption('Locals');
+    await page.getByRole('treeitem', { name: 'local_var:' }).click({
       button: 'right'
     });
-    await expect(
-      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
-    ).toHaveCount(1);
-
-    await expect(
-      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
-    ).toBeVisible();
 
     // Request the copy of the local variable to globals scope.
-    await page.click(
-      '.lm-Menu-content li[data-command="debugger:copy-to-globals"]'
-    );
+    await page
+      .getByRole('menuitem', { name: 'Copy Variable to Globals' })
+      .click();
 
     // Wait for the request to be sent.
     await copyToGlobalsRequest.promise;
 
     // Expect the context menu for global variables to not have the 'copy' entry.
-    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
-    await page.click(`.jp-DebuggerVariables-body li span:text("global_var")`, {
+    await page.getByLabel('Scope').selectOption('Globals');
+    await page.getByRole('treeitem', { name: 'global_var:' }).click({
       button: 'right'
     });
-    await expect(page.locator('.lm-Menu-content')).toBeVisible();
+    await expect.soft(page.getByRole('menu')).toBeVisible();
     await expect(
-      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
+      page.getByRole('menuitem', { name: 'Copy Variable to Globals' })
     ).toHaveCount(0);
+
+    await page.getByRole('menu').press('Escape');
+    await page.click('jp-button[title^=Continue]');
   });
 
-  test('Copy to globals not available from kernel', async ({ page }) => {
+  test('Copy to globals not available from kernel', async ({
+    page,
+    tmpPath
+  }) => {
+    await init({ page, tmpPath });
+
     // Kernel doesn't support copyToGlobals.
     await page.evaluate(async () => {
       const debuggerService = await window.galata.getPlugin(
@@ -267,24 +272,28 @@ test.describe('Debugger Variables', () => {
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
 
-    await page.locator('select[aria-label="Scope"]').selectOption('Locals');
+    await page.getByLabel('Scope').selectOption('Locals');
 
     // Expect the menu entry not to be visible.
-    await page.click('.jp-DebuggerVariables-body li span:text("local_var")', {
+    await page.getByRole('treeitem', { name: 'local_var:' }).click({
       button: 'right'
     });
-    await expect(
-      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
-    ).not.toBeVisible();
+    await expect
+      .soft(page.getByRole('menuitem', { name: 'Copy Variable to Globals' }))
+      .not.toBeVisible();
 
     // Close the contextual menu
     await page.keyboard.press('Escape');
     await expect(
-      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+      page.getByRole('menuitem', { name: 'Copy to Clipboard' })
     ).toHaveCount(0);
+
+    await page.click('jp-button[title^=Continue]');
   });
 
-  test('Copy to clipboard', async ({ page }) => {
+  test('Copy to clipboard', async ({ page, tmpPath }) => {
+    await init({ page, tmpPath });
+
     // Don't wait as it will be blocked.
     void page.notebook.runCell(1);
 
@@ -292,27 +301,29 @@ test.describe('Debugger Variables', () => {
     await page.debugger.waitForCallStack();
 
     // Copy value to clipboard
-    await page.locator('select[aria-label="Scope"]').selectOption('Locals');
-    await page.click('.jp-DebuggerVariables-body li span:text("local_var")', {
+    await page.getByLabel('Scope').selectOption('Locals');
+    await page.getByRole('treeitem', { name: 'local_var:' }).click({
       button: 'right'
     });
-    await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
+    await page.getByRole('menuitem', { name: 'Copy to Clipboard' }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('3');
 
     // Copy to clipboard disabled for variables with empty value
-    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
+    await page.getByLabel('Scope').selectOption('Globals');
     await page
-      .locator('.jp-DebuggerVariables-body :text("special variables")')
+      .getByRole('treeitem', { name: 'special variables:' })
       .click({ button: 'right' });
     await expect(
-      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
-    ).toHaveAttribute('aria-disabled', 'true');
+      page.getByRole('menuitem', { name: 'Copy to Clipboard' })
+    ).toBeDisabled();
 
     // Close the contextual menu
     await page.keyboard.press('Escape');
     await expect(
-      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+      page.getByRole('menuitem', { name: 'Copy to Clipboard' })
     ).toHaveCount(0);
+
+    await page.click('jp-button[title^=Continue]');
   });
 });
 

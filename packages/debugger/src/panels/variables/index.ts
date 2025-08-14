@@ -32,6 +32,7 @@ export class Variables extends PanelWithToolbar {
     const trans = translator.load('jupyterlab');
     this.title.label = trans.__('Variables');
     this.toolbar.addClass('jp-DebuggerVariables-toolbar');
+    this.toolbar.node.setAttribute('aria-label', trans.__('Variables toolbar'));
     this._tree = new VariablesBodyTree({
       model,
       service,
@@ -73,14 +74,14 @@ export class Variables extends PanelWithToolbar {
 
     const treeViewButton = new ToolbarButton({
       icon: treeViewIcon,
-      className: 'jp-TreeView',
+      className: 'jp-TreeView-Button',
       onClick: onViewChange,
       tooltip: trans.__('Tree View')
     });
 
     const tableViewButton = new ToolbarButton({
       icon: tableRowsIcon,
-      className: 'jp-TableView',
+      className: 'jp-TableView-Button',
       onClick: onViewChange,
       tooltip: trans.__('Table View')
     });

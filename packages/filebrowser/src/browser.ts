@@ -5,6 +5,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
+import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   FilenameSearcher,
@@ -12,6 +13,7 @@ import {
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
@@ -102,25 +104,34 @@ export class FileBrowser extends SidePanel {
           return filterFn(value.name.toLowerCase());
         });
       },
-      useFuzzyFilter: true,
+      useFuzzyFilter: this.model.useFuzzyFilter,
       placeholder: this._trans.__('Filter files by name'),
       forceRefresh: false,
       showIcon: false,
-      inputRef: this._fileFilterRef
+      inputRef: this._fileFilterRef,
+      filterSettingsChanged: this.model.filterSettingsChanged
     });
     searcher.addClass(FILTERBOX_CLASS);
 
     this.filterToolbar = new Toolbar();
     this.filterToolbar.addClass(FILTER_TOOLBAR_CLASS);
+    this.filterToolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('File browser toolbar')
+    );
     this.filterToolbar.addItem('fileNameSearcher', searcher);
     this.filterToolbar.setHidden(!this.showFileFilter);
 
     this.listing = this.createDirListing({
       model,
       renderer,
-      translator
+      translator,
+      state: options.state
     });
     this.listing.addClass(LISTING_CLASS);
+    this.listing.selectionChanged.connect(() => {
+      this._selectionChanged.emit();
+    });
 
     this.mainPanel.addWidget(this.crumbs);
     this.mainPanel.addWidget(this.filterToolbar);
@@ -131,6 +142,8 @@ export class FileBrowser extends SidePanel {
     if (options.restore !== false) {
       void model.restore(this.id);
     }
+    // restore listing regardless of the restore option
+    void this.listing.restore(this.id);
   }
 
   /**
@@ -268,12 +281,52 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to allow single click files and directories
+   */
+  get singleClickNavigation(): boolean {
+    return this._allowSingleClick;
+  }
+
+  set singleClickNavigation(value: boolean) {
+    if (this.listing.setAllowSingleClickNavigation) {
+      this.listing.setAllowSingleClickNavigation(value);
+      this._allowSingleClick = value;
+    } else {
+      console.warn('Listing does not support single click navigation');
+    }
+  }
+
+  /**
+   * Whether to allow upload of files.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this.model.allowFileUploads = value;
+    if (this.listing.setAllowDragDropUpload) {
+      this.listing.setAllowDragDropUpload(value);
+      this._allowFileUploads = value;
+    } else {
+      console.warn('Listing does not support setting upload');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
    */
   selectedItems(): IterableIterator<Contents.IModel> {
     return this.listing.selectedItems();
+  }
+
+  /**
+   * A signal emitted when the selection changes in the file browser.
+   */
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
   }
 
   /**
@@ -398,6 +451,13 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Select all listing items.
+   */
+  selectAll(): Promise<void> {
+    return this.listing.selectAll();
+  }
+
+  /**
    * Download the currently selected item(s).
    */
   download(): Promise<void> {
@@ -507,12 +567,15 @@ export class FileBrowser extends SidePanel {
   private _fileFilterRef = createRef<HTMLInputElement>();
   private _manager: IDocumentManager;
   private _navigateToCurrentDirectory: boolean;
+  private _allowSingleClick: boolean = false;
   private _showFileCheckboxes: boolean = false;
   private _showFileFilter: boolean = false;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _allowFileUploads: boolean = true;
+  private _selectionChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -554,6 +617,12 @@ export namespace FileBrowser {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * An optional state database. If provided, the widget will restore
+     * the columns sizes
+     */
+    state?: IStateDB;
   }
 
   /**

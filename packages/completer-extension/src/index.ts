@@ -9,6 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { COMPLETER_ACTIVE_CLASS } from '@jupyterlab/codeeditor';
 import { CommandToolbarButton } from '@jupyterlab/ui-components';
 import {
   CompletionProviderManager,
@@ -122,8 +123,14 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
           ) => {
             const command = change.binding.command;
             if (labelCache.hasOwnProperty(command)) {
-              labelCache[command as keyof typeof labelCache] =
-                describeShortcut(command);
+              const cached = labelCache[command as keyof typeof labelCache];
+              const newLabel = describeShortcut(command);
+              if (newLabel !== cached) {
+                // Update cache
+                labelCache[command as keyof typeof labelCache] = newLabel;
+                // Re-render any UI elements using this command
+                app.commands.notifyCommandChanged(command);
+              }
             }
           }
         );
@@ -158,6 +165,20 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             caption: trans.__('Accept')
           })
         );
+        inlineCompleter.model!.suggestionsChanged.connect(() => {
+          // Enabled state of these commands depends on whether
+          // there are any suggestions (or whether there is more
+          // than one suggestion) so the UI needs to be modified
+          // when the suggestions change to reflect the enabled
+          // state in the buttons state.
+          for (const command of [
+            CommandIDs.previousInline,
+            CommandIDs.nextInline,
+            CommandIDs.acceptInline
+          ]) {
+            app.commands.notifyCommandChanged(command);
+          }
+        });
         return inlineCompleter;
       }
     };
@@ -186,12 +207,19 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
     const trans = (translator || nullTranslator).load('jupyterlab');
     const isEnabled = () =>
       !!app.shell.currentWidget && !!completionManager.inline;
+    let inlineCompleterSettings: IInlineCompleterSettings | undefined;
     app.commands.addCommand(CommandIDs.nextInline, {
       execute: () => {
         completionManager.inline?.cycle(app.shell.currentWidget!.id!, 'next');
       },
       label: trans.__('Next Inline Completion'),
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     app.commands.addCommand(CommandIDs.previousInline, {
       execute: () => {
@@ -201,27 +229,50 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         );
       },
       label: trans.__('Previous Inline Completion'),
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     app.commands.addCommand(CommandIDs.acceptInline, {
       execute: () => {
         completionManager.inline?.accept(app.shell.currentWidget!.id!);
       },
       label: trans.__('Accept Inline Completion'),
-      isEnabled
+      isEnabled: () => {
+        return (
+          isEnabled() &&
+          completionManager.inline!.isActive(app.shell.currentWidget!.id!)
+        );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
     app.commands.addCommand(CommandIDs.invokeInline, {
       execute: () => {
         completionManager.inline?.invoke(app.shell.currentWidget!.id!);
       },
       label: trans.__('Invoke Inline Completer'),
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
-      completionManager.inline?.configure(
-        settings.composite as unknown as IInlineCompleterSettings
-      );
+      inlineCompleterSettings =
+        settings.composite as unknown as IInlineCompleterSettings;
+      completionManager.inline?.configure(inlineCompleterSettings);
     };
 
     app.restored
@@ -232,6 +283,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
             // By default all providers are opt-out, but
             // any provider can configure itself to be opt-in.
             enabled: true,
+            autoFillInMiddle: false,
             timeout: 5000,
             debouncerDelay: 0,
             ...((provider.schema?.default as object) ?? {})
@@ -286,6 +338,14 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
                     title: trans.__('Enabled'),
                     description: trans.__(
                       'Whether to fetch completions %1 provider.',
+                      provider.name
+                    ),
+                    type: 'boolean'
+                  },
+                  autoFillInMiddle: {
+                    title: trans.__('Fill in middle on typing'),
+                    description: trans.__(
+                      'Whether to show completions in the middle of the code line from %1 provider on typing.',
                       provider.name
                     ),
                     type: 'boolean'
@@ -358,8 +418,18 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
               binding &&
               binding.keys.length === 1 &&
               binding.keys[0] === 'Tab' &&
-              target.closest(binding.selector)
+              target.closest(binding.selector) &&
+              app.commands.isEnabled(binding.command)
             ) {
+              const tabCompleterActive = target.closest(
+                '.' + COMPLETER_ACTIVE_CLASS
+              );
+              if (
+                inlineCompleterSettings?.suppressIfTabCompleterActive &&
+                tabCompleterActive
+              ) {
+                return;
+              }
               app.commands.execute(binding.command).catch(console.error);
               event.preventDefault();
               event.stopPropagation();
@@ -390,21 +460,21 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
     editorRegistry: IFormRendererRegistry | null
   ): ICompletionProviderManager => {
     const AVAILABLE_PROVIDERS = 'availableProviders';
-    const PROVIDER_TIMEOUT = 'providerTimeout';
-    const SHOW_DOCUMENT_PANEL = 'showDocumentationPanel';
-    const CONTINUOUS_HINTING = 'autoCompletion';
     const manager = new CompletionProviderManager();
     const updateSetting = (
       settingValues: ISettingRegistry.ISettings,
       availableProviders: string[]
     ): void => {
       const providersData = settingValues.get(AVAILABLE_PROVIDERS);
-      const timeout = settingValues.get(PROVIDER_TIMEOUT);
-      const showDoc = settingValues.get(SHOW_DOCUMENT_PANEL);
-      const continuousHinting = settingValues.get(CONTINUOUS_HINTING);
-      manager.setTimeout(timeout.composite as number);
-      manager.setShowDocumentationPanel(showDoc.composite as boolean);
-      manager.setContinuousHinting(continuousHinting.composite as boolean);
+      const composite = settingValues.composite;
+      manager.setTimeout(composite.providerTimeout as number);
+      manager.setShowDocumentationPanel(
+        composite.showDocumentationPanel as boolean
+      );
+      manager.setContinuousHinting(composite.autoCompletion as boolean);
+      manager.setSuppressIfInlineCompleterActive(
+        composite.suppressIfInlineCompleterActive as boolean
+      );
       const selectedProviders = providersData.user ?? providersData.composite;
       const sortedProviders = Object.entries(selectedProviders ?? {})
         .filter(val => val[1] >= 0 && availableProviders.includes(val[0]))

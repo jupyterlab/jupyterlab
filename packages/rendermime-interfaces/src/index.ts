@@ -421,6 +421,11 @@ export namespace IRenderMime {
      * @returns The sanitized string.
      */
     sanitize(dirty: string, options?: ISanitizerOptions): string;
+
+    /**
+     * @returns Whether to allow name and id properties.
+     */
+    readonly allowNamedProperties?: boolean;
   }
 
   /**
@@ -499,7 +504,7 @@ export namespace IRenderMime {
 
     /**
      * Resolve a path from Jupyter kernel to a path:
-     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - relative to `root_dir` (preferably) this is in jupyter-server scope,
      * - path understood and known by kernel (if such a path exists).
      * Returns `null` if there is no file matching provided path in neither
      * kernel nor jupyter-server contents manager.

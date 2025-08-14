@@ -160,14 +160,19 @@ You can iterate through the kernel history in a document cell using ``Alt Up-Arr
 Cell Toolbar
 ^^^^^^^^^^^^
 
-If there is enough room for it, each cell has a toolbar that provides quick access to
-commonly-used functions. If you would like to disable the cell toolbar, run:
+In each cell, there is a toolbar that provides quick access to
+commonly-used functions, if there is enough room to display it on the first line.
+
+If you would like to disable the cell toolbar, open the Settings Editor, choose the
+Cell Toolbar in the left panel, and uncheck "Show cell toolbar".
+
+Administrators can turn off the cell toolbar by disabling its extension, by running:
 
 .. code:: bash
 
     jupyter labextension disable @jupyterlab/cell-toolbar-extension
 
-on the command line. You can enable it again by running:
+on the command line. Administrators can turn it back on by running:
 
 .. code:: bash
 

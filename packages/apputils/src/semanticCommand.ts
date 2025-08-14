@@ -38,6 +38,11 @@ export class SemanticCommand {
   static readonly DEFAULT_RANK = 500;
 
   /**
+   * The `args` key for a semantic command's current widget ID.
+   */
+  static readonly WIDGET = 'semanticWidget';
+
+  /**
    * The command IDs used by this semantic command.
    */
   get ids(): string[] {

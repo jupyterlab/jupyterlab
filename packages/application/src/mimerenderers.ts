@@ -58,7 +58,7 @@ export function createRendermimePlugins(
   // Also add a meta-plugin handling state restoration
   // and exposing the mime document widget tracker.
   plugins.push({
-    id: '@jupyterlab/application:mimedocument',
+    id: '@jupyterlab/application-extension:mimedocument',
     description: 'Provides a mime document widget tracker.',
     optional: [ILayoutRestorer],
     provides: IMimeDocumentTracker,

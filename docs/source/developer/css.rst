@@ -241,6 +241,7 @@ intended to be used for adding context menu items and keyboard shortcuts.
 -  ``jp-mod-editMode``: applied to a notebook in edit mode
 -  ``jp-mod-has-primary-selection``: applied to editors that have a primary selection
 -  ``jp-mod-in-leading-whitespace``: applied to editors that have a selection within the beginning whitespace of a line
+-  ``jp-mod-at-line-beginning``: applied to editors that can host a completer and have a selection within the beginning whitespace of a line
 -  ``jp-mod-tooltip``: applied to the body when a tooltip exists on the page
 
 **CSS selectors that target data attributes**

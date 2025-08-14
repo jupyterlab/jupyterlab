@@ -3,6 +3,8 @@
 
 import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -23,15 +25,27 @@ test('Open the settings editor with a specific search query', async ({
 
   const pluginList = page.locator('.jp-PluginList');
 
-  expect(await pluginList.screenshot()).toMatchSnapshot(
-    'settings-plugin-list.png'
-  );
+  expect
+    .soft(await pluginList.screenshot())
+    .toMatchSnapshot('settings-plugin-list.png');
 
   const settingsPanel = page.locator('.jp-SettingsPanel');
 
-  expect(await settingsPanel.screenshot()).toMatchSnapshot(
-    'settings-panel.png'
-  );
+  expect
+    .soft(await settingsPanel.screenshot())
+    .toMatchSnapshot('settings-panel.png');
+  // Test that new query takes effect
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'CodeMirror'
+    });
+  });
+  // wait for command to be executed
+  const fistListEntry = page.locator('.jp-PluginList-entry-label-text').first();
+
+  await expect(fistListEntry).toHaveText('CodeMirror');
 });
 
 test.describe('change font-size', () => {
@@ -249,4 +263,230 @@ test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async
     .locator('.jp-SettingsRawEditor-user .cm-line')
     .count();
   expect(userPanelLines).toBeLessThan(10);
+});
+
+test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
+  page
+}) => {
+  // Settings are wide, hide the sidebar to increase available space
+  await page.sidebar.close();
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('merge cell below');
+
+  const addShortcutButton = shortcutsForm.locator('.jp-Shortcuts-Plus');
+  await expect(addShortcutButton).toHaveCount(1);
+
+  const conflict = shortcutsForm.locator('.jp-Shortcuts-Conflict');
+  await expect(conflict).toHaveCount(0);
+
+  await addShortcutButton.click();
+
+  const newShortcutInput = shortcutsForm.locator('.jp-Shortcuts-InputBoxNew');
+  await newShortcutInput.press('Shift+M');
+
+  await expect(conflict).toHaveCount(1);
+
+  expect(await conflict.screenshot()).toMatchSnapshot(
+    'settings-shortcuts-conflict.png'
+  );
+  const cancelButton = conflict.locator('button >> text=Cancel');
+  await cancelButton.click();
+
+  await expect(conflict).toHaveCount(0);
+});
+
+test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('merge cell below');
+
+  const shortcutsContainer = page.locator(
+    '.jp-Shortcuts-ShortcutListContainer'
+  );
+  const firstRow = shortcutsContainer.locator('.jp-Shortcuts-Row').first();
+
+  const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
+  await shortcutKey.click();
+  await page.waitForTimeout(300);
+  await firstRow.hover();
+  expect(await firstRow.screenshot()).toMatchSnapshot(
+    'settings-shortcuts-edit.png'
+  );
+});
+
+test('Settings Export: Clicking the export button triggers a download and matches content', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
+  });
+  await page
+    .locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_adaptive-theme'
+    )
+    .click();
+  // Wait for the settings to be loaded
+  await page.waitForTimeout(500);
+
+  const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
+  await page.locator('.jp-ToolbarButtonComponent:has-text("Export")').click();
+  const download = await downloadPromise;
+  // path where the file will be saved
+  const downloadDir = 'temporary/downloads';
+  const downloadPath = path.join(downloadDir, download.suggestedFilename());
+
+  // Ensure the download directory exists
+  if (!fs.existsSync(downloadDir)) {
+    fs.mkdirSync(downloadDir, { recursive: true });
+  }
+  await download.saveAs(downloadPath);
+
+  const fileContent = fs.readFileSync(downloadPath, 'utf-8');
+  const expectedContent = `"adaptive-theme": true,`;
+  expect(fileContent).toContain(expectedContent);
+  fs.unlinkSync(downloadPath);
+});
+
+test('Settings Changes Are Reflected in Form Editor"', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Theme'
+    });
+  });
+  await page.menu.clickMenuItem('Settings>Theme>Theme Scrollbars');
+  await expect(
+    page.locator(
+      '#jp-SettingsEditor-\\@jupyterlab\\/apputils-extension\\:themes_theme-scrollbars'
+    )
+  ).toBeChecked();
+});
+
+test('Settings Import: Importing a JSON file applies the correct settings', async ({
+  page
+}) => {
+  const settingsToImport = {
+    '@jupyterlab/apputils-extension:themes': {
+      theme: 'JupyterLab Dark'
+    }
+  };
+  const importDirectory = 'temporary/imports';
+  const importFilePath = path.join(
+    importDirectory,
+    'overrides_settings_test.json'
+  );
+
+  // Create directory and write the JSON file
+  fs.mkdirSync(importDirectory, { recursive: true });
+  fs.writeFileSync(importFilePath, JSON.stringify(settingsToImport, null, 2));
+
+  await page.sidebar.close();
+
+  await page.evaluate(() => {
+    return window.jupyterapp.commands.execute('settingeditor:open');
+  });
+
+  // Set up the file chooser listener
+  const [fileChooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.locator('.jp-ToolbarButtonComponent:has-text("Import")').click()
+  ]);
+  await fileChooser.setFiles(importFilePath);
+  await page.locator('.jp-Button:has-text("Import")').click();
+
+  // Fetch and verify the applied settings
+  const appliedSettings = await page.evaluate(() => {
+    return window.jupyterapp.serviceManager.settings.fetch(
+      '@jupyterlab/apputils-extension:themes'
+    );
+  });
+
+  expect(appliedSettings.raw).toContain('"theme": "JupyterLab Dark"');
+
+  fs.unlinkSync(importFilePath);
+});
+
+test('Ensure that fuzzy filter works properly', async ({ page }) => {
+  // Helper function to rename a notebook
+  const renameFile = async (oldName: string, newName: string) => {
+    await page
+      .locator(`.jp-DirListing-itemName:has-text("${oldName}")`)
+      .click();
+    await page.keyboard.press('F2');
+    await page.keyboard.type(newName);
+    await page.keyboard.press('Enter');
+  };
+
+  // Create and rename the first file
+  await page.menu.clickMenuItem('File>New>Text File');
+  await renameFile('untitled.txt', 'test');
+
+  // Create and rename the second file
+  await page.menu.clickMenuItem('File>New>Text File');
+  await renameFile('untitled.txt', 'tst');
+
+  // Enable file filter and apply a filter for "tst"
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('filebrowser:toggle-file-filter')
+  );
+  await page.locator('input[placeholder="Filter files by name"]').fill('tst');
+
+  // Both files should be visible
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(2);
+
+  // Change fuzzy filter setting
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'File Browser'
+    })
+  );
+  await page
+    .locator('label:has-text("Filter on file name with a fuzzy search")')
+    .click();
+
+  // Only one file should be visible
+  await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
+});
+
+test('Read-only cells should remain read-only after changing settings', async ({
+  page
+}) => {
+  await page.notebook.createNew();
+  await page.sidebar.close();
+  await page.notebook.setCell(0, 'code', '"test"');
+
+  // Set the cell to read-only using the Property Inspector
+  await page.menu.clickMenuItem('View>Property Inspector');
+  await page.locator('.jp-Collapse:has-text("Common Tools")').click();
+  await page
+    .locator('select:has-text("Editable")')
+    .selectOption({ label: 'Read-Only' });
+
+  // Change a notebook setting (kernel preference)
+  await page.notebook
+    .getToolbarItemLocator('kernelName')
+    .then(item => item?.click());
+  await page.locator('.jp-Dialog-checkbox').click();
+  await page.locator('.jp-Dialog-button:has-text("Select")').click();
+
+  // Assert the first cell is still read-only
+  const cell = page.locator('.jp-Notebook-cell').nth(0);
+  await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
 });

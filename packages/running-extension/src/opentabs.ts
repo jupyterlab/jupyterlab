@@ -68,6 +68,7 @@ export function addOpenTabsSessionManager(
 
   managers.add({
     name: trans.__('Open Tabs'),
+    supportsMultipleViews: false,
     running: () => {
       return Array.from(labShell.widgets('main')).map((widget: Widget) => {
         signaler.addWidget(widget);
@@ -75,7 +76,8 @@ export function addOpenTabsSessionManager(
       });
     },
     shutdownAll: () => {
-      for (const widget of labShell.widgets('main')) {
+      const widgets = Array.from(labShell.widgets('main'));
+      for (const widget of widgets) {
         widget.close();
       }
     },

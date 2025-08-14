@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer-extension",
-  "version": "4.3.0-alpha.2",
+  "version": "4.5.0-alpha.2",
   "description": "JupyterLab - Completer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,19 +37,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-alpha.2",
-    "@jupyterlab/completer": "^4.3.0-alpha.2",
-    "@jupyterlab/settingregistry": "^4.3.0-alpha.2",
-    "@jupyterlab/translation": "^4.3.0-alpha.2",
-    "@jupyterlab/ui-components": "^4.3.0-alpha.2",
-    "@lumino/commands": "^2.3.0",
-    "@lumino/coreutils": "^2.1.2",
+    "@jupyterlab/application": "^4.5.0-alpha.2",
+    "@jupyterlab/codeeditor": "^4.5.0-alpha.2",
+    "@jupyterlab/completer": "^4.5.0-alpha.2",
+    "@jupyterlab/settingregistry": "^4.5.0-alpha.2",
+    "@jupyterlab/translation": "^4.5.0-alpha.2",
+    "@jupyterlab/ui-components": "^4.5.0-alpha.2",
+    "@lumino/commands": "^2.3.2",
+    "@lumino/coreutils": "^2.2.1",
     "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

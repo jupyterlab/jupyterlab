@@ -1118,7 +1118,7 @@ export const IDebuggerHandler = new Token<IDebugger.IHandler>(
 );
 
 /**
- * The source viwer token.
+ * The source viewer token.
  */
 export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
   '@jupyterlab/debugger:IDebuggerSourceViewer',

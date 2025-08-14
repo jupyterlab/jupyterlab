@@ -37,6 +37,10 @@ jobs:
           # Build dev-mode
           jlpm run build
 
+      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
+        run: |
+          pip install --upgrade --pre ipykernel!=7.0.0a2
+
       - name: Launch JupyterLab
         run: |
           cd galata
@@ -45,6 +49,7 @@ jobs:
       - name: Install browser
         run: |
           cd galata
+          jlpm playwright install-deps
           # Install only Chromium browser
           jlpm playwright install chromium
           jlpm run build
@@ -154,6 +159,7 @@ jobs:
         run: |
           set -ex
           cd galata
+          jlpm playwright install-deps
           # Install only Chromium browser
           jlpm playwright install chromium
           jlpm run build

@@ -10,7 +10,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '..';
 
 import * as Terminal from './terminal';
-import { shutdownTerminal, TERMINAL_SERVICE_URL } from './restapi';
+import { TerminalAPIClient } from './restapi';
 
 /**
  * An implementation of a terminal interface.
@@ -23,6 +23,9 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     this._name = options.model.name;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this._terminalAPIClient =
+      options.terminalAPIClient ??
+      new TerminalAPIClient({ serverSettings: this.serverSettings });
     this._createSocket();
   }
 
@@ -229,7 +232,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
    * Shut down the terminal session.
    */
   async shutdown(): Promise<void> {
-    await shutdownTerminal(this.name, this.serverSettings);
+    await this._terminalAPIClient.shutdown(this.name);
     this.dispose();
   }
 
@@ -237,7 +240,11 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
    * Clone the current terminal connection.
    */
   clone(): Terminal.ITerminalConnection {
-    return new TerminalConnection(this);
+    return new TerminalConnection({
+      model: this.model,
+      serverSettings: this.serverSettings,
+      terminalAPIClient: this._terminalAPIClient
+    });
   }
 
   /**
@@ -381,16 +388,10 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _pendingMessages: Terminal.IMessage[] = [];
+  private _terminalAPIClient: Terminal.ITerminalAPIClient;
 }
 
 namespace Private {
-  /**
-   * Get the url for a terminal.
-   */
-  export function getTermUrl(baseUrl: string, name: string): string {
-    return URLExt.join(baseUrl, TERMINAL_SERVICE_URL, encodeURIComponent(name));
-  }
-
   /**
    * Get a random integer between min and max, inclusive of both.
    *

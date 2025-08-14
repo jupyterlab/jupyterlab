@@ -222,7 +222,7 @@ print()
 print("-" * 40)
 print()
 
-if len(notfound):
+if notfound:
     print(
         """The following commits are not included in any PR on this milestone.
 This probably means the commit's PR needs to be assigned to this milestone,

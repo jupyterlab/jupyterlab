@@ -13,6 +13,7 @@ export interface IOptions<T extends Message> {
   metadata?: JSONObject;
   msgId?: string;
   username?: string;
+  subshellId?: string | null;
   parentHeader?: T['parent_header'];
 }
 export function createMessage<T extends IClearOutputMsg>(
@@ -86,6 +87,12 @@ export function createMessage<T extends IInspectReplyMsg>(
 export function createMessage<T extends IInspectRequestMsg>(
   options: IOptions<T>
 ): T;
+export function createMessage<T extends IInterruptReplyMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IInterruptRequestMsg>(
+  options: IOptions<T>
+): T;
 export function createMessage<T extends IIsCompleteReplyMsg>(
   options: IOptions<T>
 ): T;
@@ -131,6 +138,25 @@ export function createMessage<T extends IDebugEventMsg>(
   options: IOptions<T>
 ): T;
 
+export function createMessage<T extends ICreateSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends ICreateSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IDeleteSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IDeleteSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IListSubshellRequestMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IListSubshellReplyMsg>(
+  options: IOptions<T>
+): T;
+
 export function createMessage<T extends Message>(options: IOptions<T>): T {
   return {
     buffers: options.buffers ?? [],
@@ -142,6 +168,7 @@ export function createMessage<T extends Message>(options: IOptions<T>): T {
       msg_type: options.msgType,
       session: options.session,
       username: options.username ?? '',
+      subshell_id: options.subshellId ?? null,
       version: '5.2'
     },
     metadata: options.metadata ?? {},
@@ -166,8 +193,6 @@ export type ShellMessageType =
   | 'history_request'
   | 'inspect_reply'
   | 'inspect_request'
-  | 'interrupt_reply'
-  | 'interrupt_request'
   | 'is_complete_reply'
   | 'is_complete_request'
   | 'kernel_info_reply'
@@ -183,7 +208,17 @@ export type ShellMessageType =
  * kernel message specification. As such, debug message types are *NOT*
  * considered part of the public API, and may change without notice.
  */
-export type ControlMessageType = 'debug_request' | 'debug_reply';
+export type ControlMessageType =
+  | 'interrupt_reply'
+  | 'interrupt_request'
+  | 'debug_request'
+  | 'debug_reply'
+  | 'create_subshell_request'
+  | 'create_subshell_reply'
+  | 'delete_subshell_request'
+  | 'delete_subshell_reply'
+  | 'list_subshell_request'
+  | 'list_subshell_reply';
 
 /**
  * IOPub message types.
@@ -259,6 +294,11 @@ export interface IHeader<T extends MessageType = MessageType> {
    * The user sending the message
    */
   username: string;
+
+  /**
+   * Subshell id identifying a subshell if not in main shell
+   */
+  subshell_id?: string;
 
   /**
    * The message protocol version, should be 5.1, 5.2, 5.3, etc.
@@ -378,6 +418,8 @@ export type Message =
   | IInputRequestMsg
   | IInspectReplyMsg
   | IInspectRequestMsg
+  | IInterruptReplyMsg
+  | IInterruptRequestMsg
   | IIsCompleteReplyMsg
   | IIsCompleteRequestMsg
   | IStatusMsg
@@ -385,7 +427,13 @@ export type Message =
   | IUpdateDisplayDataMsg
   | IDebugRequestMsg
   | IDebugReplyMsg
-  | IDebugEventMsg;
+  | IDebugEventMsg
+  | ICreateSubshellRequestMsg
+  | ICreateSubshellReplyMsg
+  | IDeleteSubshellRequestMsg
+  | IDeleteSubshellReplyMsg
+  | IListSubshellRequestMsg
+  | IListSubshellReplyMsg;
 
 // ////////////////////////////////////////////////
 // IOPub Messages
@@ -763,6 +811,7 @@ export interface IInfoReply extends IReplyOkContent {
   language_info: ILanguageInfo;
   banner: string;
   help_links: { text: string; url: string }[];
+  supported_features?: string[]; // https://github.com/jupyter/enhancement-proposals/pull/92
 }
 
 /**
@@ -864,6 +913,43 @@ export interface IInspectReply extends IReplyOkContent {
 export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
   parent_header: IHeader<'inspect_request'>;
   content: ReplyContent<IInspectReply>;
+}
+
+/**
+ * An `'interrupt_request'` message.
+ *
+ * The interrupt messages can only be used for kernels which specify `interrupt_mode: 'message'`.
+ * By default JupyterLab interrupts kernels via jupyter-server Kernels REST API instead.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
+ *
+ * **See also:** [[IInterruptReplyMsg]], [[[IKernel.interrupt]]]
+ */
+export interface IInterruptRequestMsg
+  extends IControlMessage<'interrupt_request'> {
+  content: Record<string, never>;
+}
+
+/**
+ * A `'interrupt_reply'` message content.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
+ *
+ * **See also:** [[IInterruptRequestMsg]], [[IKernel.interrupt]]
+ */
+
+export interface IInterruptReply extends IReplyOkContent {}
+
+/**
+ * A `'interrupt_reply'` message on the `'control'` channel.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
+ *
+ * **See also:** [[IInterruptRequestMsg]], [[IKernel.interrupt]]
+ */
+export interface IInterruptReplyMsg extends IControlMessage<'interrupt_reply'> {
+  parent_header: IHeader<'interrupt_request'>;
+  content: ReplyContent<IInterruptReply>;
 }
 
 /**
@@ -1198,6 +1284,60 @@ export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
  */
 export function isDebugReplyMsg(msg: IMessage): msg is IDebugReplyMsg {
   return msg.header.msg_type === 'debug_reply';
+}
+
+/**
+ * A `'create_subshell_request'` message on the `'control'` channel.
+ */
+export interface ICreateSubshellRequestMsg
+  extends IControlMessage<'create_subshell_request'> {
+  content: Record<string, unknown>;
+}
+
+/**
+ * A `'create_subshell_reply'` message on the `'control'` channel.
+ */
+export interface ICreateSubshellReplyMsg
+  extends IControlMessage<'create_subshell_reply'> {
+  content: {
+    subshell_id: string;
+  };
+}
+
+/**
+ * A `'delete_subshell_request'` message on the `'control'` channel.
+ */
+export interface IDeleteSubshellRequestMsg
+  extends IControlMessage<'delete_subshell_request'> {
+  content: {
+    subshell_id: string;
+  };
+}
+
+/**
+ * A `'delete_subshell_reply'` message on the `'control'` channel.
+ */
+export interface IDeleteSubshellReplyMsg
+  extends IControlMessage<'delete_subshell_reply'> {
+  content: Record<string, unknown>;
+}
+
+/**
+ * A `'list_subshell_request'` message on the `'control'` channel.
+ */
+export interface IListSubshellRequestMsg
+  extends IControlMessage<'list_subshell_request'> {
+  content: Record<string, unknown>;
+}
+
+/**
+ * A `'list_subshell_reply'` message on the `'control'` channel.
+ */
+export interface IListSubshellReplyMsg
+  extends IControlMessage<'list_subshell_reply'> {
+  content: {
+    subshell_id: string[];
+  };
 }
 
 // ////////////////////////////////////////////////

@@ -137,47 +137,47 @@
 }
 
 .jp-Completer-type[data-color-index='0'] {
-  background: transparent;
+  background: var(--jp-completer-type-background0, transparent);
 }
 
 .jp-Completer-type[data-color-index='1'] {
-  background: #1f77b4;
+  background: var(--jp-completer-type-background1, #1f77b4);
 }
 
 .jp-Completer-type[data-color-index='2'] {
-  background: #ff7f0e;
+  background: var(--jp-completer-type-background2, #ff7f0e);
 }
 
 .jp-Completer-type[data-color-index='3'] {
-  background: #2ca02c;
+  background: var(--jp-completer-type-background3, #2ca02c);
 }
 
 .jp-Completer-type[data-color-index='4'] {
-  background: #d62728;
+  background: var(--jp-completer-type-background4, #d62728);
 }
 
 .jp-Completer-type[data-color-index='5'] {
-  background: #9467bd;
+  background: var(--jp-completer-type-background5, #9467bd);
 }
 
 .jp-Completer-type[data-color-index='6'] {
-  background: #8c564b;
+  background: var(--jp-completer-type-background6, #8c564b);
 }
 
 .jp-Completer-type[data-color-index='7'] {
-  background: #e377c2;
+  background: var(--jp-completer-type-background7, #e377c2);
 }
 
 .jp-Completer-type[data-color-index='8'] {
-  background: #7f7f7f;
+  background: var(--jp-completer-type-background8, #7f7f7f);
 }
 
 .jp-Completer-type[data-color-index='9'] {
-  background: #bcbd22;
+  background: var(--jp-completer-type-background9, #bcbd22);
 }
 
 .jp-Completer-type[data-color-index='10'] {
-  background: #17becf;
+  background: var(--jp-completer-type-background10, #17becf);
 }
 
 .jp-Completer-loading-bar-container {

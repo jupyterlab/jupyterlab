@@ -3,14 +3,19 @@
 
 import { Token } from '@lumino/coreutils';
 import type MermaidType from 'mermaid';
+import type { MermaidConfig } from 'mermaid/dist/config.type';
 
 // documented upstream constants
 export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';
 export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
+// layout sniffing
+export const RE_DEFAULT_RENDERER =
+  /\bdefaultRenderer["']?\s*:\s*(["']?)(\b[^"'\s]+\b)(\1)/gm;
+
 // mermaid themes
-export const MERMAID_DEFAULT_THEME = 'default';
-export const MERMAID_DARK_THEME = 'dark';
+export const MERMAID_DEFAULT_THEME: MermaidConfig['theme'] = 'default';
+export const MERMAID_DARK_THEME: MermaidConfig['theme'] = 'dark';
 
 // DOM
 export const MERMAID_CLASS = 'jp-RenderedMermaid';
@@ -42,7 +47,7 @@ export interface IMermaidManager {
   getMermaidVersion(): string | null;
 
   /**
-   * Render mermaid source to an SVG string with extraced metadata.
+   * Render mermaid source to an SVG string with extracted metadata.
    */
   renderSvg(text: string): Promise<IMermaidManager.IRenderInfo>;
 

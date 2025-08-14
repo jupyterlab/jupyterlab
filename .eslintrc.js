@@ -104,6 +104,7 @@ module.exports = {
           'display_id',
           'display_name',
           'embed_options',
+          'en_US',
           'execute_input',
           'execute_result',
           'execution_count',
@@ -111,6 +112,7 @@ module.exports = {
           'extension_data',
           'extension_name',
           'file_extension',
+          'file_size',
           'hash_algorithm',
           'help_links',
           'hist_access_type',
@@ -118,6 +120,7 @@ module.exports = {
           'implementation_version',
           'installed_version',
           'is_allowed',
+          'is_selected',
           'jlab_core',
           'jupyterlab_extensions',
           'jupyterlab_mime_extensions',
@@ -140,6 +143,7 @@ module.exports = {
           'parent_header',
           'per_page',
           'plugin_name',
+          'plural_forms',
           'pf_re',
           'pkg_type',
           'protocol_version',
@@ -150,11 +154,13 @@ module.exports = {
           'shutdown_reply',
           'stop_on_error',
           'store_history',
+          'subshell_id',
           'target_name',
           'target_module',
           'UNSAFE_componentWillUpdate',
           'UNSAFE_componentWillReceiveProps',
-          'user_expressions'
+          'user_expressions',
+          'zh_CN'
         ]
       }
     ],

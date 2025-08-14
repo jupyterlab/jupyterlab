@@ -26,6 +26,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();
 
@@ -807,6 +809,31 @@ describe('@jupyter/notebook', () => {
         widget.activeCellIndex = 1;
         expect(widget.activeCell).toBe(widget.widgets[1]);
       });
+
+      it('should render a markdown cell when moving active cells if autoRenderMarkdownCells is true', () => {
+        const widget = createActiveWidget();
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '# Hello'
+        }); // Should be rendered with content.
+        const child = widget.widgets[0] as MarkdownCell;
+        expect(child.rendered).toBe(true);
+        widget.activeCellIndex = 0;
+        widget.mode = 'edit';
+        expect(child.rendered).toBe(false);
+
+        // Turn on rendering of markdown cells when exiting
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          autoRenderMarkdownCells: true
+        };
+
+        // Exiting should trigger rendering of the old cell
+        widget.activeCellIndex = 1;
+        expect(child.rendered).toBe(true);
+      });
     });
 
     describe('#activeCell', () => {
@@ -1233,6 +1260,21 @@ describe('@jupyter/notebook', () => {
         it('should extend selection if invoked with shift', () => {
           widget.activeCellIndex = 3;
 
+          // shift click no-op
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+          // test that selecting mode handler does not prevent default
+          // if no cells were selected; in the selecting mode we listen
+          // to the `mouseup` event to stop selecting when the mouse button gets
+          // released; this event gets default prevented as handled by the notebook.
+          const mouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true
+          });
+          widget.widgets[3].node.dispatchEvent(mouseUpEvent);
+          expect(mouseUpEvent.defaultPrevented).toBe(false);
+
           // shift click below
           simulate(widget.widgets[4].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(4);
@@ -1252,6 +1294,27 @@ describe('@jupyter/notebook', () => {
           simulate(widget.widgets[2].node, 'mousedown', { shiftKey: true });
           expect(widget.activeCellIndex).toBe(2);
           expect(selected(widget)).toEqual([2, 3]);
+
+          // shift click deselect
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          expect(selected(widget)).toEqual([]);
+
+          // shift click select by dragging from active cell
+          expect(widget.activeCellIndex).toBe(3);
+          simulate(widget.widgets[3].node, 'mousedown', { shiftKey: true });
+          expect(widget.activeCellIndex).toBe(3);
+          simulate(widget.widgets[4].node, 'mousemove', { shiftKey: true });
+          expect(selected(widget)).toEqual([3, 4]);
+          // test that selecting mode mouse up handler prevents default;
+          // in selecting mode we listen to the `mouseup` event to stop
+          // selecting when the mouse button gets released
+          const blockedMouseUpEvent = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true
+          });
+          widget.widgets[4].node.dispatchEvent(blockedMouseUpEvent);
+          expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
         it('should not extend a selection if there is text selected in the output', () => {
@@ -1567,6 +1630,24 @@ describe('@jupyter/notebook', () => {
         widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
         expect(widget.activeCell).toBe(widget.widgets[2]);
       });
+
+      it.each(['full', 'defer', 'none'])(
+        'should connect undoManager to the cell editor in %s windowing mode',
+        async mode => {
+          const widget = createActiveWidget();
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            windowingMode: mode as 'full' | 'defer' | 'none'
+          };
+          Widget.attach(widget, document.body);
+          widget.model!.sharedModel.insertCell(0, { cell_type: 'code' });
+          const child = widget.widgets[0];
+          await child.ready;
+          const editor = child.editorWidget!.editor as CodeMirrorEditor;
+          const conf = editor.editor.state.facet(yUndoManagerFacet);
+          expect(conf.undoManager).toBeTruthy();
+        }
+      );
 
       describe('`edgeRequested` signal', () => {
         it('should activate the previous cell if top is requested', async () => {

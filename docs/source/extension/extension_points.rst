@@ -71,9 +71,30 @@ Here is a sample block of code that adds a command to the application (given by 
       isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
-      execute: () => {
-        console.log(`Executed ${commandID}`);
-        toggled = !toggled;
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'Optional text to log',
+              default: ''
+            },
+            count: {
+              type: 'number',
+              description: 'Optional number of times to log the text',
+              default: 1
+            }
+          }
+        }
+      },
+      execute: (args) => {
+        const text = args?.text || '';
+        const count = args?.count || 1;
+        for (let i = 0; i < count; i++) {
+          console.log(`Executed ${commandID} with text: ${text}`);
+        }
+      }
     });
 
 This example adds a new command, which, when triggered, calls the ``execute`` function.
@@ -81,6 +102,7 @@ This example adds a new command, which, when triggered, calls the ``execute`` fu
 ``isToggled`` indicates whether to render a check mark next to the command.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
+``describedBy`` is an optional but recommended property that provides a JSON schema describing the command's arguments, which is useful for documentation, tooling, and ensuring consistency in how the command is invoked.
 
 Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
@@ -153,13 +175,14 @@ menu using the settings.
 
     {
       "jupyter.lab.menus": {
-      "context": [
-        {
-          "command": "my-command",
-          "selector": ".jp-Notebook",
-          "rank": 500
-        }
-      ]
+        "context": [
+          {
+            "command": "my-command",
+            "selector": ".jp-Notebook",
+            "rank": 500
+          }
+        ]
+      }
     }
 
 In this example, the command with id ``my-command`` is shown whenever the user
@@ -342,15 +365,15 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
       "command": "apputils:run-all-enabled",
       "keys": ["Accel T"],
       "args": {
-          "commands": [
-              "my-command-1",
-              "my-command-2"
-          ],
-          "args": [
-              {},
-              {}
-            ]
-        },
+        "commands": [
+          "my-command-1",
+          "my-command-2"
+        ],
+        "args": [
+          {},
+          {}
+        ]
+      },
       "selector": "body"
     }
 
@@ -469,19 +492,20 @@ To add a new menu with your extension command:
 
     {
       "jupyter.lab.menus": {
-      "main": [
-        {
-          "id": "jp-mainmenu-myextension",
-          "label": "My Menu",
-          "items": [
-            {
-              "command": "my-command",
-              "rank": 500
-            }
-          ],
-          "rank": 100
-        }
-      ]
+        "main": [
+          {
+            "id": "jp-mainmenu-myextension",
+            "label": "My Menu",
+            "items": [
+              {
+                "command": "my-command",
+                "rank": 500
+              }
+            ],
+            "rank": 100
+          }
+        ]
+      }
     }
 
 The menu item label will be set with the command label. For menus (and
@@ -497,17 +521,18 @@ To add a new entry in an existing menu:
 
     {
       "jupyter.lab.menus": {
-      "main": [
-        {
-          "id": "jp-mainmenu-file",
-          "items": [
-            {
-              "command": "my-command",
-              "rank": 500
-            }
-          ]
-        }
-      ]
+        "main": [
+          {
+            "id": "jp-mainmenu-file",
+            "items": [
+              {
+                "command": "my-command",
+                "rank": 500
+              }
+            ]
+          }
+        ]
+      }
     }
 
 Here is the list of default menu ids:
@@ -797,6 +822,13 @@ providing a different rank or adding ``"disabled": true`` to remove the item).
 
    You need to set ``jupyter.lab.transform`` to ``true`` in the plugin id that will gather all items.
 
+**What are transforms?** The ``jupyter.lab.transform`` flag tells JupyterLab to wait for
+a transform function before loading the plugin. This allows dynamic modification of settings
+schemas, commonly used to merge toolbar/menu definitions from multiple extensions.
+
+**Loading order pitfall**: Extensions providing transforms must register them early in
+activation, before dependent plugins load, otherwise those plugins will timeout waiting
+for the transform.
 
 The current widget factories supporting the toolbar customization are:
 
@@ -1037,6 +1069,65 @@ a plugin:
       }
     };
 
+Kernel Subshells
+----------------
+
+Kernel subshells enable concurrent code execution within kernels that support them. Subshells are separate threads of execution that allow interaction with a kernel while it's busy executing long-running code, enabling non-blocking communication and parallel execution.
+
+**Kernel Support**
+
+Subshells are supported by:
+
+- **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via ``supported_features: ['kernel subshells']`` in kernel info replies
+- Other kernels implementing `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__
+
+**User Interface**
+
+For user interface details, see :ref:`subshell-console`.
+
+**Extension Development**
+
+Extension developers can use subshell functionality through the kernel service API:
+
+.. code:: typescript
+
+  import { INotebookTracker } from '@jupyterlab/notebook';
+
+  // Get the current kernel from a notebook
+  const current = tracker.currentWidget;
+  if (!current) return;
+
+  const kernel = current.sessionContext.session?.kernel;
+  if (!kernel) return;
+
+  // Check if kernel supports subshells
+  if (kernel.supportsSubshells) {
+    // Create a new subshell
+    const reply = await kernel.requestCreateSubshell({}).done;
+    const subshellId = reply.content.subshell_id;
+    console.log(`Created subshell: ${subshellId}`);
+
+    // List existing subshells
+    const listReply = await kernel.requestListSubshell({}).done;
+    console.log(`Active subshells: ${listReply.content.subshell_id}`);
+
+    // Execute code in a specific subshell
+    const future = kernel.requestExecute(
+      { code: 'print("Hello from subshell!")' },
+      false, // disposeOnDone
+      { subshell_id: subshellId } // metadata
+    );
+    await future.done;
+
+    // Delete a subshell when done
+    await kernel.requestDeleteSubshell({ subshell_id: subshellId }).done;
+    console.log(`Deleted subshell: ${subshellId}`);
+  }
+
+
+
+For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
+
 LSP Features
 --------------
 
@@ -1131,3 +1222,181 @@ Occasionally, LSP extensions include a CodeMirror extension to modify the code e
       });
     }
   };
+
+
+Content Provisioning
+--------------------
+
+The file system interactions can be customized by adding:
+
+* a content provider, selectively replacing the way in which content is fetched and synchronized
+* a drive, adding a new source of content, analogous to a physical hard drive
+
+While both the content provider and drive are meant to provide custom implementations of
+the Contents API methods such as ``get()`` and ``save()``, and optionally a custom ``sharedModelFactory``,
+the intended use cases, and the way these are exposed in the user interface are different:
+
+* Drive:
+
+  * Use case: provision of additional content, not available on the default drive.
+
+  * UI: paths of files and directories from the drive are prefixed with the drive name and colon.
+
+* Content Provider:
+
+  * Use case: modification of the protocol used for data retrieval
+    (e.g., streaming of the content, real-time collaboration),
+    by extending the Contents API methods for files which already
+    exist on one of the drives.
+
+  * UI: users will choose a widget factory with an associated content provider
+    when selecting how to open a file using the "Open with" dropdown.
+
+To register a custom drive, use the contents manager's ``addDrive`` method.
+The drive needs to follow the ``IDrive`` interface. For drives that use
+a jupyter-server compliant REST API you may wish to extend or re-use
+the built-in ``Drive`` class, as demonstrated below:
+
+.. code:: typescript
+
+  import { Drive, ServerConnection } from '@jupyterlab/services';
+
+  const customDrivePlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-drive',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+      const myDrive = new Drive({
+        apiEndpoint: 'api/contents',
+        name: 'MyNetworkDrive',
+        serverSettings: {
+          baseUrl: 'https://your-jupyter-server.com',
+          // ...
+        } as ServerConnection.ISettings,
+      });
+      app.serviceManager.contents.addDrive(myDrive);
+    }
+  };
+
+To use a content provider, first register it on a drive (or multiple drives):
+
+.. code:: typescript
+
+  import { Contents, ContentsManager, RestContentProvider } from '@jupyterlab/services';
+
+  interface IMyContentChunk {
+    /** URL allowing to fetch the content chunk */
+    url: string;
+  }
+
+  interface CustomContentsModel extends Contents.IModel {
+    /**
+     * Specializes the content (which in `Contents.IModel` is just `any`).
+     */
+    content: IMyContentChunk[];
+  }
+
+  class CustomContentProvider extends RestContentProvider {
+    async get(
+      localPath: string,
+      options?: Contents.IFetchOptions,
+    ): Promise<CustomContentsModel> {
+      // Customize the behaviour of the `get` action to fetch a list of
+      // content chunks from a custom API endpoint instead of the `get`
+
+      try {
+        return getChunks();    // this method needs to be implemented
+      }
+      catch {
+        // fall back to the REST API on errors:
+        const model = await super.get(localPath, options);
+        return {
+          ...model,
+          content: []
+        };
+      }
+    }
+
+    // ...
+  }
+
+  const customContentProviderPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-content-provider',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+      const drive = (app.serviceManager.contents as ContentsManager).defaultDrive;
+      const registry = drive?.contentProviderRegistry;
+      if (!registry) {
+        // If content provider is a non-essential feature and support for JupyterLab <4.4 is desired:
+        console.error('Cannot initialize content provider: no content provider registry.');
+        return;
+      }
+      const customContentProvider = new CustomContentProvider({
+        // These options are only required if extending the `RestContentProvider`.
+        apiEndpoint: '/api/contents',
+        serverSettings: app.serviceManager.serverSettings,
+      });
+      registry.register('my-custom-provider', customContentProvider);
+    }
+  };
+
+and then create and register a widget factory which will understand how to make use of your custom content provider:
+
+.. code:: typescript
+
+  class ExampleWidgetFactory extends ABCWidgetFactory<ExampleDocWidget, ExampleDocModel> {
+    protected createNewWidget(
+      context: DocumentRegistry.IContext<ExampleDocModel>
+    ): ExampleDocWidget {
+
+      return new ExampleDocWidget({
+        context,
+        content: new ExamplePanel(context)
+      });
+    }
+  }
+
+  const widgetFactoryPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-widget-factory',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+
+      const widgetFactory = new ExampleWidgetFactory({
+        name: FACTORY,
+        modelName: 'example-model',
+        fileTypes: ['example'],
+        defaultFor: ['example'],
+        // Instructs the document registry to use the custom provider
+        // for context of widgets created with `ExampleWidgetFactory`.
+        contentProviderId: 'my-custom-provider'
+      });
+      app.docRegistry.addWidgetFactory(widgetFactory);
+    }
+  };
+
+
+Where ``ExampleDocModel`` can now expect the ``CustomContentsModel`` rather than ``Contents.IModel``:
+
+.. code:: typescript
+
+  class ExampleDocModel implements DocumentRegistry.IModel {
+    // ...
+
+    fromJSON(chunks: IMyContentChunk[]): void {
+      this.sharedModel.transact(() => {
+        let i = 0;
+        for (const chunk of chunks) {
+          const chunk = fetch(chunk.url);
+          this.sharedModel.set(`chunk-${i}`, chunk);
+          i += 1;
+        }
+      });
+    }
+
+    fromString(data: string): void {
+      const chunks = JSON.parse(data) as IMyContentChunk[];
+      return this.fromJSON(chunks);
+    }
+  }
+
+
+For a complete example of a widget factory (although not using a content provider), see the `documents extension example <https://github.com/jupyterlab/extension-examples/tree/main/documents>`__.

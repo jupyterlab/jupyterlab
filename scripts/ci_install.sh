@@ -34,6 +34,12 @@ pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
 node -p process.versions
 jlpm config
 
+if [[ $GROUP == js-services ]]; then
+    # Install ipykernel pre-release that supports subshells for ikernel.spec.ts
+    # Remove when ipykernel 7 is released
+    pip install --upgrade --pre ipykernel!=7.0.0a2
+fi
+
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
     pip install build

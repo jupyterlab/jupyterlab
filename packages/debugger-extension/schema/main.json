@@ -55,22 +55,22 @@
     {
       "command": "debugger:terminate",
       "keys": ["Shift F9"],
-      "selector": "body"
+      "selector": "[data-jp-debugger-stopped-threads='true']"
     },
     {
       "command": "debugger:next",
       "keys": ["F10"],
-      "selector": "body"
+      "selector": "[data-jp-debugger-stopped-threads='true']"
     },
     {
       "command": "debugger:stepIn",
       "keys": ["F11"],
-      "selector": "body"
+      "selector": "[data-jp-debugger-stopped-threads='true']"
     },
     {
       "command": "debugger:stepOut",
       "keys": ["Shift F11"],
-      "selector": "body"
+      "selector": "[data-jp-debugger-stopped-threads='true']"
     }
   ],
   "definitions": {

@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
+import {
+  IObservableList,
+  IObservableString,
+  ObservableList
+} from '@jupyterlab/observables';
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
@@ -45,6 +49,10 @@ export interface IOutputAreaModel extends IDisposable {
    */
   get(index: number): IOutputModel;
 
+  removeStreamOutput(number: number): void;
+
+  appendStreamOutput(text: string): void;
+
   /**
    * Add an output, which may be combined with previous output.
    *
@@ -55,6 +63,11 @@ export interface IOutputAreaModel extends IDisposable {
    * Contiguous stream outputs of the same `name` are combined.
    */
   add(output: nbformat.IOutput): number;
+
+  /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void;
 
   /**
    * Set the value at the specified index.
@@ -236,6 +249,22 @@ export class OutputAreaModel implements IOutputAreaModel {
     this.list.set(index, item);
   }
 
+  removeStreamOutput(number: number): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.remove(length - number, length, options);
+  }
+
+  appendStreamOutput(text: string): void {
+    const prev = this.list.get(this.length - 1) as IOutputModel;
+    const curText = prev.streamText!;
+    const length = curText.text.length;
+    const options = { silent: true };
+    curText.insert(length, text, options);
+  }
+
   /**
    * Add an output, which may be combined with previous output.
    *
@@ -256,12 +285,19 @@ export class OutputAreaModel implements IOutputAreaModel {
   }
 
   /**
+   * Remove an output at a given index.
+   */
+  remove(index: number): void {
+    this.list.remove(index)?.dispose();
+  }
+
+  /**
    * Clear all of the output.
    *
    * @param wait Delay clearing the output until the next message is added.
    */
   clear(wait: boolean = false): void {
-    this._lastStream = '';
+    this._lastStreamName = '';
     if (wait) {
       this.clearNext = true;
       return;
@@ -309,44 +345,46 @@ export class OutputAreaModel implements IOutputAreaModel {
     // Consolidate outputs if they are stream outputs of the same kind.
     if (
       nbformat.isStream(value) &&
-      this._lastStream &&
-      value.name === this._lastName &&
+      value.name === this._lastStreamName &&
+      this.length > 0 &&
       this.shouldCombine({
         value,
         lastModel: this.list.get(this.length - 1)
       })
     ) {
-      // In order to get a list change event, we add the previous
-      // text to the current item and replace the previous item.
-      // This also replaces the metadata of the last item.
-      this._lastStream += value.text as string;
-      this._lastStream = Private.removeOverwrittenChars(this._lastStream);
-      value.text = this._lastStream;
-      const item = this._createItem({ value, trusted });
-      const index = this.length - 1;
-      const prev = this.list.get(index);
-      this.list.set(index, item);
-      prev.dispose();
+      // We append the new text to the current text.
+      // This creates a text change event.
+      const prev = this.list.get(this.length - 1) as IOutputModel;
+      const curText = prev.streamText!;
+      const newText =
+        typeof value.text === 'string' ? value.text : value.text.join('');
+      this._streamIndex = Private.addText(this._streamIndex, curText, newText);
       return this.length;
     }
 
     if (nbformat.isStream(value)) {
-      value.text = Private.removeOverwrittenChars(value.text as string);
+      if (typeof value.text !== 'string') {
+        value.text = value.text.join('');
+      }
+      const { text, index } = Private.processText(0, value.text);
+      this._streamIndex = index;
+      value.text = text;
     }
 
     // Create the new item.
     const item = this._createItem({ value, trusted });
 
+    // Add the item to our list and return the new length.
+    const length = this.list.push(item);
+
     // Update the stream information.
     if (nbformat.isStream(value)) {
-      this._lastStream = value.text as string;
-      this._lastName = value.name;
+      this._lastStreamName = value.name;
     } else {
-      this._lastStream = '';
+      this._lastStreamName = '';
     }
 
-    // Add the item to our list and return the new length.
-    return this.list.push(item);
+    return length;
   }
 
   /**
@@ -437,14 +475,14 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
   }
 
-  private _lastStream = '';
-  private _lastName: 'stdout' | 'stderr';
+  private _lastStreamName: '' | 'stdout' | 'stderr' = '';
   private _trusted = false;
   private _isDisposed = false;
   private _stateChanged = new Signal<OutputAreaModel, number>(this);
   private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
     this
   );
+  private _streamIndex = 0;
 }
 
 /**
@@ -485,37 +523,131 @@ namespace Private {
   }
 
   /**
-   * Remove characters that are overridden by backspace characters.
+   * Like `indexOf` but allowing to use a regular expression.
    */
-  function fixBackspace(txt: string): string {
-    let tmp = txt;
-    do {
-      txt = tmp;
-      // Cancel out anything-but-newline followed by backspace
-      tmp = txt.replace(/[^\n]\x08/gm, ''); // eslint-disable-line no-control-regex
-    } while (tmp.length < txt.length);
-    return txt;
-  }
-
-  /**
-   * Remove chunks that should be overridden by the effect of
-   * carriage return characters.
-   */
-  function fixCarriageReturn(txt: string): string {
-    txt = txt.replace(/\r+\n/gm, '\n'); // \r followed by \n --> newline
-    while (txt.search(/\r[^$]/g) > -1) {
-      const base = txt.match(/^(.*)\r+/m)![1];
-      let insert = txt.match(/\r+(.*)$/m)![1];
-      insert = insert + base.slice(insert.length, base.length);
-      txt = txt.replace(/\r+.*$/m, '\r').replace(/^.*\r/m, insert);
-    }
-    return txt;
+  function indexOfAny(text: string, re: RegExp, i: number): number {
+    const index = text.slice(i).search(re);
+    return index >= 0 ? index + i : index;
   }
 
   /*
-   * Remove characters overridden by backspaces and carriage returns
+   * Handle backspaces in `newText` and concatenates to `text`, if any.
    */
-  export function removeOverwrittenChars(text: string): string {
-    return fixCarriageReturn(fixBackspace(text));
+  export function processText(
+    index: number,
+    newText: string,
+    text?: string
+  ): { text: string; index: number } {
+    if (text === undefined) {
+      text = '';
+    }
+    if (
+      !(
+        newText.includes('\b') ||
+        newText.includes('\r') ||
+        newText.includes('\n')
+      )
+    ) {
+      text =
+        text.slice(0, index) + newText + text.slice(index + newText.length);
+      return { text, index: index + newText.length };
+    }
+    let idx0 = index;
+    let idx1: number = -1;
+    let lastEnd: number = 0;
+    const regex = /[\n\b\r]/;
+    // TODO: once we upgrade eslint to 9.1.0 we can toggle `allExceptWhileTrue`
+    // option and remove the ignore rule below.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      idx1 = indexOfAny(newText, regex, lastEnd);
+
+      // Insert characters at current position.
+      const prefix = newText.slice(
+        lastEnd,
+        idx1 === -1 ? newText.length : idx1
+      );
+      text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
+      lastEnd = idx1 + 1;
+      idx0 += prefix.length;
+
+      if (idx1 === -1) {
+        break;
+      }
+
+      const newChar = newText[idx1];
+      if (newChar === '\b') {
+        // Backspace: delete previous character if there is one and if it's not a line feed.
+        if (idx0 > 0 && text[idx0 - 1] !== '\n') {
+          text = text.slice(0, idx0 - 1) + text.slice(idx0 + 1);
+          idx0--;
+        }
+      } else if (newChar === '\r') {
+        // Carriage return: go back to beginning of line.
+        let done = false;
+        while (!done) {
+          if (idx0 === 0) {
+            done = true;
+          } else if (text[idx0 - 1] === '\n') {
+            done = true;
+          } else {
+            idx0--;
+          }
+        }
+      } else if (newChar === '\n') {
+        // Insert new line at end of text.
+        text = text + '\n';
+        idx0 = text.length;
+      } else {
+        throw Error(`This should not happen`);
+      }
+    }
+    return { text, index: idx0 };
+  }
+
+  /**
+   * Reallocate the string to prevent memory leak,
+   * workaround for issue in Chrome and Firefox:
+   * - https://issues.chromium.org/issues/41480525
+   * - https://bugzilla.mozilla.org/show_bug.cgi?id=727615
+   */
+  function unleakString(s: string) {
+    return JSON.parse(JSON.stringify(s));
+  }
+
+  /*
+   * Concatenate a string to an observable string, handling backspaces.
+   */
+  export function addText(
+    prevIndex: number,
+    curText: IObservableString,
+    newText: string
+  ): number {
+    const { text, index } = processText(prevIndex, newText, curText.text);
+    // Compute the difference between current text and new text.
+    let done = false;
+    let idx = 0;
+    while (!done) {
+      if (idx === text.length) {
+        if (idx === curText.text.length) {
+          done = true;
+        } else {
+          curText.remove(idx, curText.text.length);
+          done = true;
+        }
+      } else if (idx === curText.text.length) {
+        if (idx !== text.length) {
+          curText.insert(curText.text.length, unleakString(text.slice(idx)));
+          done = true;
+        }
+      } else if (text[idx] !== curText.text[idx]) {
+        curText.remove(idx, curText.text.length);
+        curText.insert(idx, unleakString(text.slice(idx)));
+        done = true;
+      } else {
+        idx++;
+      }
+    }
+    return index;
   }
 }

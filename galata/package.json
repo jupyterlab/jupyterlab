@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata",
-  "version": "5.3.0-alpha.2",
+  "version": "5.5.0-alpha.2",
   "description": "JupyterLab UI Testing Framework",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,17 +44,17 @@
     "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-alpha.2",
-    "@jupyterlab/apputils": "^4.4.0-alpha.2",
-    "@jupyterlab/coreutils": "^6.3.0-alpha.2",
-    "@jupyterlab/debugger": "^4.3.0-alpha.2",
-    "@jupyterlab/docmanager": "^4.3.0-alpha.2",
-    "@jupyterlab/nbformat": "^4.3.0-alpha.2",
-    "@jupyterlab/notebook": "^4.3.0-alpha.2",
-    "@jupyterlab/services": "^7.3.0-alpha.2",
-    "@jupyterlab/settingregistry": "^4.3.0-alpha.2",
-    "@lumino/coreutils": "^2.1.2",
-    "@playwright/test": "^1.45.0",
+    "@jupyterlab/application": "^4.5.0-alpha.2",
+    "@jupyterlab/apputils": "^4.6.0-alpha.2",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.2",
+    "@jupyterlab/debugger": "^4.5.0-alpha.2",
+    "@jupyterlab/docmanager": "^4.5.0-alpha.2",
+    "@jupyterlab/nbformat": "^4.5.0-alpha.2",
+    "@jupyterlab/notebook": "^4.5.0-alpha.2",
+    "@jupyterlab/services": "^7.5.0-alpha.2",
+    "@jupyterlab/settingregistry": "^4.5.0-alpha.2",
+    "@lumino/coreutils": "^2.2.1",
+    "@playwright/test": "^1.54.2",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
     "json5": "^2.2.3",
@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

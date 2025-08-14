@@ -854,7 +854,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       textMode = false;
     } else {
       // When search in selection is off we either search in full cells
-      // (toggling off isActive flag on search enginges of non-selected cells)
+      // (toggling off isActive flag on search engines of non-selected cells)
       // or in selected text of the active cell.
       textMode = this._selectionSearchMode === 'text';
     }

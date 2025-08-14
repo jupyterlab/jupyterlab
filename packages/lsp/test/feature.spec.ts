@@ -33,7 +33,7 @@ describe('@jupyterlab/lsp', () => {
         manager.register(feature1);
         expect(manager.features.length).toEqual(1);
       });
-      it('should merge capabilites of features', async () => {
+      it('should merge capabilities of features', async () => {
         manager.register(feature1);
         manager.register(feature2);
         expect(manager.features.length).toEqual(2);

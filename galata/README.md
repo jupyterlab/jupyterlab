@@ -454,6 +454,36 @@ Possible values are:
 
 By default the user is stored in-memory.
 
+### kernels
+
+- type: \<Map\<string, Kernel.IModel> | null>
+
+Kernels created during the test.
+Possible values are:
+
+- null: The kernels API won't be mocked
+- Map\<string, Kernel.IModel>: The kernels created during a test.
+  By default the kernels created during a test will be tracked and disposed at the end.
+
+Example:
+
+```ts
+test('should return the active kernels', async ({ page, kernels }) => {
+  await page.notebook.createNew();
+
+  // Wait for the poll to tick
+  await page.waitForResponse(
+    async response =>
+      response.url().includes('api/kernels') &&
+      response.request().method() === 'GET' &&
+      ((await response.json()) as any[]).length === 1
+  );
+
+  expect(kernels.size).toEqual(1);
+  // You can introspect the kernels.values()[0] if needed
+});
+```
+
 ### sessions
 
 - type: \<Map\<string, Session.IModel> | null>

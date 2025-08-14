@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/workspaces-extension",
-  "version": "4.3.0-alpha.2",
+  "version": "4.5.0-alpha.2",
   "description": "JupyterLab Extension providing UI for workspace management",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,21 +35,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.3.0-alpha.2",
-    "@jupyterlab/apputils": "^4.4.0-alpha.2",
-    "@jupyterlab/coreutils": "^6.3.0-alpha.2",
-    "@jupyterlab/filebrowser": "^4.3.0-alpha.2",
-    "@jupyterlab/running": "^4.3.0-alpha.2",
-    "@jupyterlab/services": "^7.3.0-alpha.2",
-    "@jupyterlab/statedb": "^4.3.0-alpha.2",
-    "@jupyterlab/translation": "^4.3.0-alpha.2",
-    "@jupyterlab/ui-components": "^4.3.0-alpha.2",
-    "@jupyterlab/workspaces": "^4.3.0-alpha.2"
+    "@jupyterlab/application": "^4.5.0-alpha.2",
+    "@jupyterlab/apputils": "^4.6.0-alpha.2",
+    "@jupyterlab/coreutils": "^6.5.0-alpha.2",
+    "@jupyterlab/filebrowser": "^4.5.0-alpha.2",
+    "@jupyterlab/running": "^4.5.0-alpha.2",
+    "@jupyterlab/services": "^7.5.0-alpha.2",
+    "@jupyterlab/settingregistry": "^4.5.0-alpha.2",
+    "@jupyterlab/statedb": "^4.5.0-alpha.2",
+    "@jupyterlab/translation": "^4.5.0-alpha.2",
+    "@jupyterlab/ui-components": "^4.5.0-alpha.2",
+    "@jupyterlab/workspaces": "^4.5.0-alpha.2",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

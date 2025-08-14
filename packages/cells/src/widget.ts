@@ -319,11 +319,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Cell headings
+   *
+   * @deprecated Use the asynchronous {@link getHeadings} method instead.
+   * This getter only returns the last cached value.
    */
   get headings(): Cell.IHeading[] {
     return new Array<Cell.IHeading>();
   }
 
+  /**
+   * Async Cell headings
+   *
+   */
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
+    return [];
+  }
   /**
    * Get the model used by the cell.
    */
@@ -567,7 +578,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   updateEditorConfig(v: Record<string, any>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
-      this.editor.setOptions(this._editorConfig);
+      this.editor.setBaseOptions(this._editorConfig);
     }
   }
 
@@ -807,6 +818,11 @@ export namespace Cell {
      * The maximum number of output items to display in cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Show placeholder text for standard input
+     */
+    showInputPlaceholder?: boolean;
 
     /**
      * Whether to split stdin line history by kernel session or keep globally accessible.
@@ -1094,7 +1110,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
       promptOverlay: true,
-      inputHistoryScope: options.inputHistoryScope
+      inputHistoryScope: options.inputHistoryScope,
+      showInputPlaceholder: options.showInputPlaceholder
     }));
     output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
 
@@ -1285,6 +1302,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
       const headings: Cell.IHeading[] = [];
 
@@ -1306,9 +1327,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
         // Parse HTML output
         if (htmlType) {
+          let htmlData = m.data[htmlType] as string | string[];
+          if (typeof htmlData !== 'string') {
+            htmlData = htmlData.join('\n');
+          }
           headings.push(
             ...TableOfContentsUtils.getHTMLHeadings(
-              this._rendermime.sanitizer.sanitize(m.data[htmlType] as string)
+              this._rendermime.sanitizer.sanitize(htmlData)
             ).map(heading => {
               return {
                 ...heading,
@@ -1318,10 +1343,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
             })
           );
         } else if (mdType) {
+          const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
+            m.data[mdType] as string,
+            this._rendermime.markdownParser
+          );
+
           headings.push(
-            ...TableOfContentsUtils.Markdown.getHeadings(
-              m.data[mdType] as string
-            ).map(heading => {
+            ...mdHeading.map(heading => {
               return {
                 ...heading,
                 outputIndex: j,
@@ -1331,7 +1359,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
           );
         }
       }
-
       this._headingsCache = headings;
     }
 
@@ -1390,26 +1417,30 @@ export class CodeCell extends Cell<ICodeCellModel> {
     // to changes in metadata until we have fully committed our changes.
     // Otherwise setting one key can trigger a write to the other key to
     // maintain the synced consistency.
-    this.model.sharedModel.transact(() => {
-      super.saveCollapseState();
+    this.model.sharedModel.transact(
+      () => {
+        super.saveCollapseState();
 
-      const collapsed = this.model.getMetadata('collapsed');
+        const collapsed = this.model.getMetadata('collapsed');
 
-      if (
-        (this.outputHidden && collapsed === true) ||
-        (!this.outputHidden && collapsed === undefined)
-      ) {
-        return;
-      }
+        if (
+          (this.outputHidden && collapsed === true) ||
+          (!this.outputHidden && collapsed === undefined)
+        ) {
+          return;
+        }
 
-      // Do not set jupyter.outputs_hidden since it is redundant. See
-      // and https://github.com/jupyter/nbformat/issues/137
-      if (this.outputHidden) {
-        this.model.setMetadata('collapsed', true);
-      } else {
-        this.model.deleteMetadata('collapsed');
-      }
-    }, false);
+        // Do not set jupyter.outputs_hidden since it is redundant. See
+        // and https://github.com/jupyter/nbformat/issues/137
+        if (this.outputHidden) {
+          this.model.setMetadata('collapsed', true);
+        } else {
+          this.model.deleteMetadata('collapsed');
+        }
+      },
+      false,
+      'silent-change'
+    );
   }
 
   /**
@@ -1590,7 +1621,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
       case 'executionCount':
-        this.model.executionState = 'idle';
+        if (args.newValue !== null) {
+          // Mark execution state if execution count was set.
+          this.model.executionState = 'idle';
+        }
         this._updatePrompt();
         break;
       case 'executionState':
@@ -1734,10 +1768,14 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.sharedModel.transact(() => {
-      model.clearExecution();
-      cell.outputHidden = false;
-    }, false);
+    model.sharedModel.transact(
+      () => {
+        model.clearExecution();
+        cell.outputHidden = false;
+      },
+      false,
+      'silent-change'
+    );
     // note: in future we would like to distinguish running from scheduled
     model.executionState = 'running';
     model.trusted = true;
@@ -1936,7 +1974,8 @@ export abstract class AttachmentsCell<
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    if (event.clipboardData) {
+    const isEditable = this.model.getMetadata('editable') ?? true;
+    if (event.clipboardData && isEditable) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         if (items[i].type === 'text/plain') {
@@ -2144,6 +2183,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       .catch(reason => {
         console.error('Failed to be ready', reason);
       });
+
+    this._cachedHeadingText = this.model.sharedModel.getSource();
   }
 
   /**
@@ -2167,14 +2208,28 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   get headings(): Cell.IHeading[] {
+    return this._headingsCache ?? [];
+  }
+
+  /**
+   * Parses and returns the list of Markdown headings in the cell.
+   *
+   * @returns A promise that resolves to an array of cell headings.
+   *
+   * @remarks
+   * This method caches the result after the first call to avoid redundant parsing.
+   **/
+  async getHeadings(): Promise<Cell.IHeading[]> {
     if (!this._headingsCache) {
-      // Use table of content algorithm for consistency
-      const headings = TableOfContentsUtils.Markdown.getHeadings(
-        this.model.sharedModel.getSource()
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+        this.model.sharedModel.getSource(),
+        this._rendermime.markdownParser
       );
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
+      this._headingResolved = true;
+      this.renderCollapseButtons();
     }
 
     return [...this._headingsCache!];
@@ -2385,7 +2440,14 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   protected onContentChanged(): void {
     super.onContentChanged();
-    this._headingsCache = null;
+    const model = this.model;
+    const text = model && model.sharedModel.getSource();
+    // Do not set headingCache to null, if the text has not changed.
+    if (text !== this._cachedHeadingText) {
+      this._cachedHeadingText = text;
+      this._headingsCache = null;
+      this._headingResolved = false;
+    }
   }
 
   /**
@@ -2393,7 +2455,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * and for collapsed heading cells render the "expand hidden cells"
    * button.
    */
-  protected renderCollapseButtons(widget: Widget): void {
+  protected renderCollapseButtons(widget?: Widget): void {
     this.node.classList.toggle(
       MARKDOWN_HEADING_COLLAPSED,
       this._headingCollapsed
@@ -2512,6 +2574,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  get headingsResolved(): boolean {
+    return this._headingResolved;
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _headingCollapsed: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
@@ -2523,6 +2589,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
   private _showEditorForReadOnlyMarkdown = true;
+  private _cachedHeadingText = '';
+  private _headingResolved: boolean = false;
 }
 
 /**

@@ -78,6 +78,16 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
+   * Whether to suppress the tab completer when inline completions are presented.
+   */
+  setSuppressIfInlineCompleterActive(suppress: boolean): void {
+    this._panelHandlers.forEach(
+      handler => (handler.completer.suppressIfInlineCompleterActive = suppress)
+    );
+    this._suppressIfInlineCompleterActive = suppress;
+  }
+
+  /**
    * Enable/disable continuous hinting mode.
    */
   setContinuousHinting(value: boolean): void {
@@ -198,6 +208,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       completer.model = options.model;
       completer.renderer = options.renderer;
       completer.showDocsPanel = options.showDoc;
+      completer.suppressIfInlineCompleterActive =
+        this._suppressIfInlineCompleterActive;
 
       // Update other handler attributes.
       handler.autoCompletion = this._autoCompletion;
@@ -251,6 +263,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
         if (handler && handler.inlineCompleter) {
           handler.invokeInline();
         }
+      },
+      isActive: (id: string) => {
+        const handler = this._panelHandlers.get(id);
+        if (handler && handler.inlineCompleter) {
+          return handler.inlineCompleter.isActive;
+        }
+        return false;
       },
       cycle: (id: string, direction: 'next' | 'previous') => {
         const handler = this._panelHandlers.get(id);
@@ -425,4 +444,5 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _selected: Signal<ICompletionProviderManager, ICompleterSelection>;
   private _inlineCompleterFactory: IInlineCompleterFactory | null;
   private _inlineCompleterSettings = InlineCompleter.defaultSettings;
+  private _suppressIfInlineCompleterActive: boolean;
 }

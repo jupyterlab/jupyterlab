@@ -356,6 +356,11 @@
         "rank": 41
       },
       {
+        "command": "notebook:create-subshell-console",
+        "selector": ".jp-Notebook",
+        "rank": 42
+      },
+      {
         "command": "notebook:create-new",
         "selector": ".jp-DirListing-content",
         "rank": 52,
@@ -699,6 +704,12 @@
       "type": "boolean",
       "default": false
     },
+    "showInputPlaceholder": {
+      "title": "Show input placeholder",
+      "description": "Show placeholder text for standard input fields (requires reload)",
+      "type": "boolean",
+      "default": true
+    },
     "inputHistoryScope": {
       "type": "string",
       "default": "global",
@@ -720,6 +731,12 @@
         "lineNumbers": false,
         "matchBrackets": false
       }
+    },
+    "autoRenderMarkdownCells": {
+      "title": "Automatically render markdown when cursor leaves markdown cells",
+      "description": "Whether to render markdown cells when the cursor moves out of them.",
+      "type": "boolean",
+      "default": false
     },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
@@ -743,7 +760,7 @@
       "default": false
     },
     "overscanCount": {
-      "title": "Number of cells to render outside de the viewport",
+      "title": "Number of cells to render outside the viewport",
       "description": "In 'full' windowing mode, this is the number of cells above and below the viewport.",
       "type": "number",
       "default": 1,

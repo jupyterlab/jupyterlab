@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { filterContent } from './utils';
 import fs from 'fs';
 import path from 'path';
 
@@ -19,7 +20,7 @@ test.describe('Use custom CSS layout', () => {
         encoding: 'utf-8'
       })
     );
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {

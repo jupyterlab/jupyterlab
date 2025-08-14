@@ -4,6 +4,7 @@
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type {
+  Kernel,
   Session,
   TerminalAPI,
   User,
@@ -151,6 +152,12 @@ export namespace galata {
      */
     mockUser?: boolean | Partial<User.IUser>;
     /**
+     * Whether to store kernels in memory or not.
+     *
+     * Default true
+     */
+    mockKernels?: boolean;
+    /**
      * Whether to store sessions in memory or not.
      *
      * Default true
@@ -216,7 +223,8 @@ export namespace galata {
     sessions: Map<string, Session.IModel> | null,
     terminals: Map<string, TerminalAPI.IModel> | null,
     tmpPath: string,
-    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
+    kernels?: Map<string, Kernel.IModel> | null
   ): Promise<IJupyterLabPageFixture> {
     // Hook the helpers
     const jlabWithPage = addHelpersToPage(
@@ -273,9 +281,12 @@ export namespace galata {
       await Mock.mockUser(page, user);
     }
 
-    // Add sessions and terminals trackers
+    // Add kernels, sessions and terminals trackers
+    if (kernels) {
+      await Mock.mockRunners(page, kernels, 'kernels');
+    }
     if (sessions) {
-      await Mock.mockRunners(page, sessions, 'sessions');
+      await Mock.mockRunners(page, sessions, 'sessions', kernels ?? undefined);
     }
     if (terminals) {
       await Mock.mockRunners(page, terminals, 'terminals');
@@ -310,6 +321,7 @@ export namespace galata {
    */
   export async function newPage(options: INewPageOption): Promise<{
     page: IJupyterLabPageFixture;
+    kernels: Map<string, Kernel.IModel> | null;
     sessions: Map<string, Session.IModel> | null;
     terminals: Map<string, TerminalAPI.IModel> | null;
   }> {
@@ -320,6 +332,7 @@ export namespace galata {
       browser,
       waitForApplication,
       mockConfig,
+      mockKernels,
       mockSessions,
       mockSettings,
       mockState,
@@ -330,6 +343,7 @@ export namespace galata {
       appPath: '/lab',
       autoGoto: true,
       mockConfig: true,
+      mockKernels: true,
       mockSessions: true,
       mockSettings: galata.DEFAULT_SETTINGS,
       mockState: true,
@@ -341,6 +355,7 @@ export namespace galata {
     const context = await browser.newContext();
     const page = await context.newPage();
 
+    const kernels = mockKernels ? new Map<string, Kernel.IModel>() : null;
     const sessions = mockSessions ? new Map<string, Session.IModel>() : null;
     const terminals = mockTerminals
       ? new Map<string, TerminalAPI.IModel>()
@@ -359,8 +374,10 @@ export namespace galata {
         sessions,
         terminals,
         tmpPath,
-        waitForApplication
+        waitForApplication,
+        kernels
       ),
+      kernels,
       sessions,
       terminals
     };
@@ -406,6 +423,15 @@ export namespace galata {
      * Extensions API
      */
     export const extensions = /.*\/lab\/api\/extensions.*/;
+
+    /**
+     * Kernels API
+     *
+     * The kernel id can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     */
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:-\w]+)?/;
 
     /**
      * Sessions API
@@ -703,7 +729,7 @@ export namespace galata {
     export async function clearRunners(
       request: APIRequestContext,
       runners: string[],
-      type: 'sessions' | 'terminals'
+      type: 'kernels' | 'sessions' | 'terminals'
     ): Promise<boolean> {
       const responses = await Promise.all(
         [...new Set(runners)].map(id =>
@@ -780,6 +806,12 @@ export namespace galata {
       });
     }
 
+    const routes = {
+      kernels: Routes.kernels,
+      sessions: Routes.sessions,
+      terminals: Routes.terminals
+    };
+
     /**
      * Mock the runners API to display only those created during a test
      *
@@ -790,10 +822,10 @@ export namespace galata {
     export function mockRunners(
       page: Page,
       runners: Map<string, any>,
-      type: 'sessions' | 'terminals'
+      type: 'kernels' | 'sessions' | 'terminals',
+      kernels?: Map<string, Kernel.IModel>
     ): Promise<void> {
-      const routeRegex =
-        type === 'sessions' ? Routes.sessions : Routes.terminals;
+      const routeRegex = routes[type];
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
@@ -836,7 +868,7 @@ export namespace galata {
                 }
                 const data = await response.json();
                 // Update stored runners
-                runners.set(type === 'sessions' ? data.id : data.name, data);
+                runners.set(type === 'terminals' ? data.name : data.id, data);
 
                 if (!page.isClosed() && !isClosed) {
                   return route.fulfill({
@@ -870,7 +902,7 @@ export namespace galata {
               const updated = new Set<string>();
               data.forEach(item => {
                 const itemID: string =
-                  type === 'sessions' ? item.id : item.name;
+                  type === 'terminals' ? item.name : item.id;
                 if (runners.has(itemID)) {
                   updated.add(itemID);
                   runners.set(itemID, item);
@@ -909,7 +941,11 @@ export namespace galata {
             }
             const data = await response.json();
             // Update stored runners
-            runners.set(type === 'sessions' ? data.id : data.name, data);
+            runners.set(type === 'terminals' ? data.name : data.id, data);
+            // Update kernels
+            if (kernels && type === 'sessions' && data.kernel.id) {
+              kernels.set(data.kernel.id, data.kernel);
+            }
 
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
@@ -933,11 +969,15 @@ export namespace galata {
               break;
             }
             const data = await response.json();
-            const id = type === 'sessions' ? data.id : data.name;
+            const id = type === 'terminals' ? data.name : data.id;
             runners.set(id, data);
+            // Update kernels
+            if (kernels && type === 'sessions' && data.kernel.id) {
+              kernels.set(data.kernel.id, data.kernel);
+            }
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
-                status: type === 'sessions' ? 201 : 200,
+                status: type === 'terminals' ? 200 : 201,
                 body: JSON.stringify(data),
                 contentType: 'application/json',
                 headers: response.headers as any

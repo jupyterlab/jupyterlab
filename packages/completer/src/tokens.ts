@@ -216,7 +216,11 @@ export interface IInlineCompletionError {
  * @alpha
  */
 export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
+  /**
+   * Token passed to identify the completion when streaming updates.
+   */
   token?: string;
+
   /**
    * Whether generation of `insertText` is still ongoing. If your provider supports streaming,
    * you can set this to true, which will result in the provider's `stream()` method being called
@@ -433,6 +437,14 @@ export interface IInlineCompleterActions {
   accept(id: string): void;
 
   /**
+   * Check if the inline compelter is active (showing ghost text)
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  isActive(id: string): boolean;
+
+  /**
    * Configure the inline completer.
    * @experimental
    *
@@ -458,6 +470,10 @@ export interface IInlineCompleterSettings {
    */
   streamingAnimation: 'none' | 'uncover';
   /**
+   * Whether to suppress the inline completer when tab completer is active.
+   */
+  suppressIfTabCompleterActive: boolean;
+  /**
    * Minimum lines to show.
    */
   minLines: number;
@@ -479,6 +495,7 @@ export interface IInlineCompleterSettings {
   providers: {
     [providerId: string]: {
       enabled: boolean;
+      autoFillInMiddle: boolean;
       debouncerDelay: number;
       timeout: number;
       [property: string]: JSONValue;
@@ -508,7 +525,8 @@ export interface IProviderReconciliator {
    */
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger?: InlineCompletionTriggerKind
+    trigger?: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[];
 
   /**

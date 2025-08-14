@@ -80,11 +80,37 @@ export function getReactAttrs(
     .reduce<{ [key: string]: string | null }>((d, name) => {
       if (name === 'style' || ignore.includes(name)) {
         void 0;
-      } else if (name.startsWith('data')) {
+      } else if (name.startsWith('data') || name.startsWith('aria')) {
         d[name] = elem.getAttribute(name);
       } else {
         d[Text.camelCase(name)] = elem.getAttribute(name);
       }
       return d;
     }, {});
+}
+
+// Toolkit helpers
+
+/**
+ * Test whether an object is a tree item or not.
+ * @param el Element to test
+ * @returns Result
+ */
+function isTreeItemElement(el: HTMLElement | null): boolean {
+  return el instanceof HTMLElement && el.getAttribute('role') === 'treeitem';
+}
+
+/**
+ * Find the tree item encapsulating the element.
+ *
+ * @param el Starting element
+ * @returns The tree item
+ */
+export function getTreeItemElement(el: HTMLElement): HTMLElement | null {
+  let item = el as HTMLElement | null;
+  while (item && !isTreeItemElement(item)) {
+    item = item.parentElement;
+  }
+
+  return isTreeItemElement(item) ? item : null;
 }

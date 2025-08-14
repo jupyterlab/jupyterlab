@@ -31,7 +31,7 @@ export interface IObservableString extends IDisposable, IObservable {
    *
    * @param text - The substring to insert.
    */
-  insert(index: number, text: string): void;
+  insert(index: number, text: string, options?: unknown): void;
 
   /**
    * Remove a substring.
@@ -40,7 +40,7 @@ export interface IObservableString extends IDisposable, IObservable {
    *
    * @param end - The ending index.
    */
-  remove(start: number, end: number): void;
+  remove(start: number, end: number, options?: unknown): void;
 
   /**
    * Set the ObservableString to an empty string.
@@ -109,6 +109,8 @@ export namespace IObservableString {
      * value of the removed substring.
      */
     value: string;
+
+    options?: unknown;
   }
 }
 
@@ -167,13 +169,14 @@ export class ObservableString implements IObservableString {
    *
    * @param text - The substring to insert.
    */
-  insert(index: number, text: string): void {
+  insert(index: number, text: string, options?: unknown): void {
     this._text = this._text.slice(0, index) + text + this._text.slice(index);
     this._changed.emit({
       type: 'insert',
       start: index,
       end: index + text.length,
-      value: text
+      value: text,
+      options
     });
   }
 
@@ -184,14 +187,15 @@ export class ObservableString implements IObservableString {
    *
    * @param end - The ending index.
    */
-  remove(start: number, end: number): void {
+  remove(start: number, end: number, options?: unknown): void {
     const oldValue: string = this._text.slice(start, end);
     this._text = this._text.slice(0, start) + this._text.slice(end);
     this._changed.emit({
       type: 'remove',
       start: start,
       end: end,
-      value: oldValue
+      value: oldValue,
+      options
     });
   }
 

@@ -174,3 +174,12 @@ Command Names
 Commands used in the application command registry should be formatted as
 follows: ``package-name:verb-noun``. They are typically grouped into a
 ``CommandIDs`` namespace in the extension that is not exported.
+
+Dialogs
+-------
+
+Buttons in dialogs with a single, dismissal button (e.g., *About JupyterLab*)
+should have the following attributes:
+
+-  Button variant: Cancel (``Dialog.cancelButton()``)
+-  Label: ``Close``

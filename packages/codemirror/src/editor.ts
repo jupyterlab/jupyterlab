@@ -221,6 +221,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Set a base config options for the editor.
+   */
+  setBaseOptions(options: Record<string, any>): void {
+    this._configurator.setBaseOptions(options);
+  }
+
+  /**
    * Inject an extension into the editor
    *
    * @alpha
@@ -527,10 +534,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           }
           // If the relevant leaf token has been found, stop iterating.
           if (offset >= ref.from && offset <= ref.to) {
+            let currentNode = ref;
+            // The syntax tree of the code lines ending with an incomplete string creates an erronous
+            // child of the last node, in this case the parent should be considered for the token.
+            if (ref.name === '⚠' && ref.from === ref.to && ref.node.parent) {
+              currentNode = ref.node.parent;
+            }
             token = {
-              value: this.state.sliceDoc(ref.from, ref.to),
-              offset: ref.from,
-              type: ref.name
+              value: this.state.sliceDoc(currentNode.from, currentNode.to),
+              offset: currentNode.from,
+              type: currentNode.name
             };
             return false;
           }
@@ -571,7 +584,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     configurator: IExtensionsHandler,
     changes: Record<string, any>
   ): void {
-    configurator.reconfigureExtensions(this._editor, changes);
+    const definedChanges = Object.keys(changes).reduce<Record<string, any>>(
+      (agg, key) => {
+        if (changes[key] != undefined) {
+          agg[key] = changes[key];
+        }
+        return agg;
+      },
+      {}
+    );
+    configurator.reconfigureExtensions(this._editor, definedChanges);
     // when customStyles change and the editor is not initialized
     if (changes['customStyles'] && !changes['fontSize']) {
       // update the state to change the gutter height

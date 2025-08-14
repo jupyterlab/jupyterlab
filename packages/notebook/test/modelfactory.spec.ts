@@ -1,7 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { NotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
+import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
+import { Cell, CodeCellModel, ICodeCellModel } from '@jupyterlab/cells';
+import {
+  NotebookModel,
+  NotebookModelFactory,
+  NotebookViewModel
+} from '@jupyterlab/notebook';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModelFactory', () => {
@@ -79,4 +85,81 @@ describe('@jupyterlab/notebook', () => {
       });
     });
   });
+
+  describe('NotebookViewModel', () => {
+    let notebook: NotebookViewModelTest;
+
+    beforeEach(() => {
+      notebook = new NotebookViewModelTest([]);
+    });
+
+    test('should not throw if requested for cell out of bonds', () => {
+      const height = notebook.estimateWidgetSize(100);
+      expect(height).toBe(0);
+    });
+
+    test('should calculate height based on number of lines in source and output (string output)', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': '15',
+            'text/html': ['<div>\n', ' <p>15</p>\n', '</div>']
+          },
+          execution_count: 2,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['sum([1, 2, 3, 4, 5])'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      expect(model.executionCount).toBe(1);
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      expect(height).toBe(56); // (1 source_line + 1 output_line) * 17 (line_height) + 22 (cell_margin)
+    });
+
+    test('should calculate height based on number of lines in source and output (string[] output)', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': [
+              'Output line 1\n',
+              'Output line 2\n',
+              'Output line 3\n'
+            ],
+            'text/html': []
+          },
+          execution_count: 4,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(3):\n', '    print(f"Output line {i+1}")'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      expect(model.executionCount).toBe(1);
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      expect(height).toBe(124); // (2 source_line + 4 output_line) * 17 (line_height) + 22 (cell_margin)
+    });
+  });
 });
+
+class NotebookViewModelTest extends NotebookViewModel {
+  public cells: Cell[] = [];
+}

@@ -350,7 +350,9 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         Widget.attach(w, document.body);
 
-        const node = document.getElementById('Title-third-level')!;
+        const node = document.querySelector(
+          '[data-jupyter-id="Title-third-level"]'
+        )!;
         expect(node.localName).toBe('h3');
         const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;
         expect(anchor.href).toContain('#Title-third-level');
@@ -438,7 +440,7 @@ describe('rendermime/factories', () => {
     it('should sanitize html', async () => {
       const model = createModel(
         'text/html',
-        '<h1>foo <script>window.x=1></scrip></h1>'
+        '<h1>foo <script>window.x=1></script></h1>'
       );
       const f = htmlRendererFactory;
       const mimeType = 'text/html';
@@ -538,6 +540,25 @@ describe('rendermime/factories', () => {
     };
 
     describe('#createRenderer()', () => {
+      // Mock creation of DOM nodes to distinguish cached
+      /// (cloned) nodes from nodes created from scratch.
+      beforeEach(() => {
+        const originalCloneNode = Node.prototype.cloneNode;
+
+        Node.prototype.cloneNode = function (...args: any) {
+          const clonedNode = originalCloneNode.apply(this, args);
+
+          // Annotate as a node created by cloning.
+          clonedNode.wasCloned = true;
+
+          return clonedNode;
+        };
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
       it('should output the correct HTML', async () => {
         const f = errorRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
@@ -568,6 +589,215 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe(
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
+      });
+
+      it.each([
+        // Note: timeouts are set to 3.5 times more the local performance to allow for slower runs on CI
+        //
+        // Local benchmarks:
+        // - without linkify cache: 12.5s
+        // - with cache: 1.1s
+        [
+          'when new content arrives line by line',
+          '\n' + 'X'.repeat(5000),
+          1100 * 3.5
+        ],
+        // Local benchmarks:
+        // - without cache: 3.8s
+        // - with cache: 0.8s
+        [
+          'when new content is added to the same line',
+          'test.com ' + 'X'.repeat(2500) + ' www.',
+          800 * 3.5
+        ]
+      ])('should be fast %s', async (_, newContent, timeout) => {
+        let source = '';
+        const mimeType = 'application/vnd.jupyter.stderr';
+
+        const model = createModel(mimeType, source);
+        const w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+        const start = performance.now();
+        for (let i = 0; i < 25; i++) {
+          source += newContent;
+          model.setData({
+            data: {
+              [mimeType]: source
+            }
+          });
+          await w.renderModel(model);
+        }
+        const end = performance.now();
+
+        expect(end - start).toBeLessThan(timeout);
+      });
+
+      it('should use a fast path when no ANSI codes are present', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+
+        const ansiEscape = '\x1b[01;41;32mtext\x1b[00m';
+        const notAnsiEscape = '\x1a[01;41;32mtext\x1a[00m';
+
+        // We cannot just compare times here because:
+        // a) tests are run in jsdom thus "native" sanitizer is not much faster
+        // b) `Private.ansiSpan` has much higher cost when ANSI escapes are present
+
+        const testSource = '<script>window.x = 1</script>';
+        const spy = jest.spyOn(sanitizer, 'sanitize');
+
+        // Initialize slow path scenario
+        let model = createModel(mimeType, testSource + ansiEscape);
+        let w = errorRendererFactory.createRenderer({ mimeType, ...options });
+        expect(spy).toHaveBeenCalledTimes(0);
+
+        // Test slow path
+        await w.renderModel(model);
+        // Sanitizer.sanitize should have been called
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        const escapedSlow = w.node.querySelector('pre')!.innerHTML;
+
+        // Initialize fast path scenario.
+        model = createModel(mimeType, testSource + notAnsiEscape);
+        w = errorRendererFactory.createRenderer({ mimeType, ...options });
+
+        // Test fast path
+        await w.renderModel(model);
+        // Sanitizer.sanitize should not have been called
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        const escapedFast = w.node.querySelector('pre')!.innerHTML;
+
+        // Disregarding the suffix the escaped code should be the same.
+        expect(escapedFast.slice(0, testSource.length)).toEqual(
+          escapedSlow.slice(0, testSource.length)
+        );
+      });
+
+      it.each([
+        ['arrives in a new line', 'www.example.com', '\n a new line of text'],
+        ['arrives after a new line', 'www.example.com\n', 'a new line of text'],
+        ['arrives after a text node', 'www.example.com next line', ' of text'],
+        ['arrives after a text node', 'www.example.com\nnext line', ' of text']
+      ])(
+        'should use cached links if new content %s',
+        async (_, oldSource, addition) => {
+          const mimeType = 'application/vnd.jupyter.stderr';
+          let source = oldSource;
+          const model = createModel(mimeType, source);
+          const w = errorRendererFactory.createRenderer({
+            mimeType,
+            ...defaultOptions
+          });
+          // Perform an initial render to populate the cache.
+          await w.renderModel(model);
+          const before = w.node.innerHTML;
+          const cachedLink = w.node.querySelector('a');
+          expect(cachedLink).toBe(w.node.childNodes[0].childNodes[0]);
+
+          // Update the source.
+          source += addition;
+          model.setData({
+            data: {
+              [mimeType]: source
+            }
+          });
+
+          // Perform a second render which should use the cache.
+          await w.renderModel(model);
+          const after = w.node.innerHTML;
+          const linkAfter = w.node.querySelector('a');
+
+          // The contents of the node should be updated with the new line.
+          expect(before).not.toEqual(after);
+          expect(after).toContain('line of text');
+
+          expect(cachedLink).not.toBe(null);
+          expect(cachedLink).not.toHaveProperty('wasCloned');
+
+          // If cached links were reused those would be cloned
+          expect(linkAfter).not.toBe(null);
+          expect(linkAfter).toEqual(cachedLink);
+          expect(linkAfter).toHaveProperty('wasCloned', true);
+        }
+      );
+
+      it('should not use cached links if the new content appends to the link', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+        let source = 'www.example.co';
+        const model = createModel(mimeType, source);
+        const w = errorRendererFactory.createRenderer({
+          mimeType,
+          ...defaultOptions
+        });
+        // Perform an initial render to populate the cache.
+        await w.renderModel(model);
+        const before = w.node.innerHTML;
+        const cachedLink = w.node.querySelector('a');
+
+        // Update the source.
+        source += 'm';
+        model.setData({
+          data: {
+            [mimeType]: source
+          }
+        });
+
+        // Perform a second render.
+        await w.renderModel(model);
+        const after = w.node.innerHTML;
+        const linkAfter = w.node.querySelector('a');
+
+        // The contents of the node should be updated with the new line.
+        expect(before).not.toEqual(after);
+
+        expect(cachedLink).not.toBe(null);
+        expect(cachedLink!.textContent).toEqual('www.example.co');
+        expect(cachedLink).not.toHaveProperty('wasCloned');
+
+        // If cached links were reused those would be cloned
+        expect(linkAfter).not.toBe(null);
+        expect(linkAfter!.textContent).toEqual('www.example.com');
+        expect(linkAfter).not.toHaveProperty('wasCloned');
+      });
+
+      it('should use partial cache if a link is created by addition of a new fragment', async () => {
+        const mimeType = 'application/vnd.jupyter.stderr';
+        let source = 'aaa www.one.com bbb www.';
+        const model = createModel(mimeType, source);
+        const w = errorRendererFactory.createRenderer({
+          mimeType,
+          ...defaultOptions
+        });
+        // Perform an initial render to populate the cache.
+        await w.renderModel(model);
+        const cachedTextNode = w.node.childNodes[0].childNodes[0];
+        const linksBefore = w.node.querySelectorAll('a');
+        expect(linksBefore).toHaveLength(1);
+
+        // Update the source.
+        source += 'two.com';
+        model.setData({
+          data: {
+            [mimeType]: source
+          }
+        });
+
+        // Perform a second render.
+        await w.renderModel(model);
+        const textNodeAfter = w.node.childNodes[0].childNodes[0];
+        const linksAfter = w.node.querySelectorAll('a');
+
+        // It should not use the second text node (`bbb www.`) from cache and instead
+        // it should fragment properly linkify the second link
+        expect(linksAfter).toHaveLength(2);
+
+        expect(cachedTextNode).toBeInstanceOf(Text);
+        expect(cachedTextNode).not.toHaveProperty('wasCloned');
+
+        // If cached nodes were reused those would be cloned
+        expect(textNodeAfter).toEqual(cachedTextNode);
+        expect(textNodeAfter).toHaveProperty('wasCloned', true);
       });
 
       it('should autolink a single known file path', async () => {
@@ -642,12 +872,24 @@ describe('rendermime/factories', () => {
         const source = 'www.example.com';
         const expected =
           '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>';
-        const f = textRendererFactory;
+        const f = errorRendererFactory;
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(expected);
+      });
+
+      it('should autolink mixed content with URLs and files', async () => {
+        const f = errorRendererFactory;
+        const source = 'URL www.example.com File ~/jupyterlab/a_file.py:1';
         const mimeType = 'application/vnd.jupyter.stderr';
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
-        expect(w.node.innerHTML).toBe(expected);
+        expect(w.node.innerHTML).toBe(
+          '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
+        );
       });
     });
   });

@@ -173,7 +173,7 @@
 }
 
 .jp-dragImage {
-  display: block;
+  display: flex;
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);
@@ -204,6 +204,7 @@
   flex: 0 0 auto;
   min-width: 36px;
   color: var(--jp-cell-inprompt-font-color);
+  opacity: 0.5;
   padding: var(--jp-code-padding);
   padding-left: 12px;
   font-family: var(--jp-cell-prompt-font-family);
@@ -221,7 +222,13 @@
   top: 8px;
   left: 8px;
   background: var(--jp-layout-color2);
-  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-width: var(--jp-border-width);
+  border-style: solid;
+  border-color: color-mix(
+    in srgb,
+    var(--jp-input-border-color) 20%,
+    transparent
+  );
   box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 

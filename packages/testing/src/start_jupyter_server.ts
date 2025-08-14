@@ -327,13 +327,19 @@ namespace Private {
    */
   export function handleStartup(output: string): string | null {
     let baseUrl: string | null = null;
+    console.debug('Parsing Jupyter server output for URL:', output);
     output.split('\n').forEach(line => {
       const baseUrlMatch = line.match(/(http:\/\/localhost:\d+\/[^?]*)/);
       if (baseUrlMatch) {
+        console.debug('Found URL match:', baseUrlMatch[1]);
         baseUrl = baseUrlMatch[1].replace('/lab', '');
+        console.debug('Setting baseUrl to:', baseUrl);
         PageConfig.setOption('baseUrl', baseUrl);
       }
     });
+    if (!baseUrl) {
+      console.debug('No URL found in server output');
+    }
     return baseUrl;
   }
 

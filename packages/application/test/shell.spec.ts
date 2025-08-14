@@ -555,7 +555,7 @@ describe('LabShell', () => {
       );
     });
 
-    it('right handler should have a role of complementary and aria label of altenate sidebar', () => {
+    it('right handler should have a role of complementary and aria label of alternate sidebar', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');

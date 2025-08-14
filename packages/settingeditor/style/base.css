@@ -129,6 +129,7 @@
   overflow: hidden;
   padding: 4px 0 4px 4px;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .jp-PluginList-entry:hover {
@@ -283,4 +284,45 @@
 
 .jp-SettingsEditor-placeholderContent > h3 {
   margin-bottom: var(--jp-content-heading-margin-bottom);
+}
+
+/** Import Settings Widget **/
+.jp-SettingsImport-container {
+  padding: 20px;
+}
+
+.jp-SettingsImport-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jp-SettingsImport-title {
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 10px 15px;
+}
+
+.jp-SettingsImport-list {
+  margin-top: 30px;
+  max-height: 400px; /* Limit height for scrollable list */
+  overflow-y: auto;
+}
+
+.jp-SettingsImport-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--jp-border-color2);
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.jp-SettingsImport-itemKey {
+  flex: 1;
+}
+
+.jp-SettingsImport-checkbox {
+  flex-shrink: 0;
 }

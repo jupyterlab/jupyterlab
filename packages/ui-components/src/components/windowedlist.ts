@@ -233,7 +233,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       this._windowingActive = newValue;
 
       this._currentWindow = [-1, -1, -1, -1];
-      this._lastMeasuredIndex = -1;
+      this._measuredAllUntilIndex = -1;
       this._widgetSizers = [];
 
       this._stateChanged.emit({ name: 'windowingActive', newValue, oldValue });
@@ -277,23 +277,28 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns Total estimated size
    */
   getEstimatedTotalSize(): number {
-    let totalSizeOfMeasuredItems = 0;
+    let totalSizeOfInitialItems = 0;
 
-    if (this._lastMeasuredIndex >= this.widgetCount) {
-      this._lastMeasuredIndex = this.widgetCount - 1;
+    if (this._measuredAllUntilIndex >= this.widgetCount) {
+      this._measuredAllUntilIndex = this.widgetCount - 1;
     }
 
-    if (this._lastMeasuredIndex >= 0) {
-      const itemMetadata = this._widgetSizers[this._lastMeasuredIndex];
-      totalSizeOfMeasuredItems = itemMetadata.offset + itemMetadata.size;
+    // These items are all measured already
+    if (this._measuredAllUntilIndex >= 0) {
+      const itemMetadata = this._widgetSizers[this._measuredAllUntilIndex];
+      totalSizeOfInitialItems = itemMetadata.offset + itemMetadata.size;
     }
 
-    let totalSizeOfUnmeasuredItems = 0;
-    for (let i = this._lastMeasuredIndex + 1; i < this.widgetCount; i++) {
-      totalSizeOfUnmeasuredItems += this.estimateWidgetSize(i);
+    // These items might have measurements, but some will be missing
+    let totalSizeOfRemainingItems = 0;
+    for (let i = this._measuredAllUntilIndex + 1; i < this.widgetCount; i++) {
+      const sizer = this._widgetSizers[i];
+      totalSizeOfRemainingItems += sizer?.measured
+        ? sizer.size
+        : this.estimateWidgetSize(i);
     }
 
-    return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
+    return totalSizeOfInitialItems + totalSizeOfRemainingItems;
   }
 
   /**
@@ -454,7 +459,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       Math.max(this.widgetCount - 1, -1)
     ];
 
-    const previousLastMeasuredIndex = this._lastMeasuredIndex;
+    const previousLastMeasuredIndex = this._measuredAllUntilIndex;
     if (this.windowingActive) {
       newWindowIndex = this._getRangeToRender();
     }
@@ -481,10 +486,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns The viewport top position and its height
    */
   getSpan(startIndex: number, stopIndex: number): [number, number] {
-    const startSize = this._getItemMetadata(startIndex);
-    const top = startSize.offset;
-    const stopSize = this._getItemMetadata(stopIndex);
-    const height = stopSize.offset - startSize.offset + stopSize.size;
+    const startSizer = this._getItemMetadata(startIndex);
+    const top = startSizer.offset;
+    const stopSizer = this._getItemMetadata(stopIndex);
+    const height = stopSizer.offset - startSizer.offset + stopSizer.size;
     return [top, height];
   }
 
@@ -497,9 +502,20 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @param index
    */
   resetAfterIndex(index: number): void {
-    const oldValue = this._lastMeasuredIndex;
-    this._lastMeasuredIndex = Math.min(index, this._lastMeasuredIndex);
-    if (this._lastMeasuredIndex !== oldValue) {
+    const oldValue = this._measuredAllUntilIndex;
+    this._measuredAllUntilIndex = Math.min(index, this._measuredAllUntilIndex);
+    // Because `resetAfterIndex` is always called after an operation modifying
+    // the list of widget sizers, we need to ensure that offsets are correct;
+    // e.g. removing a cell would make the offsets of all following cells too high.
+    // The simplest way to "heal" the offsets is to recompute them all.
+    for (const [i, sizer] of this._widgetSizers.entries()) {
+      if (i === 0) {
+        continue;
+      }
+      const previous = this._widgetSizers[i - 1];
+      sizer.offset = previous.offset + previous.size;
+    }
+    if (this._measuredAllUntilIndex !== oldValue) {
       this._stateChanged.emit({ name: 'index', newValue: index, oldValue });
     }
   }
@@ -514,24 +530,76 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @returns Whether some sizes changed or not
    */
   setWidgetSize(sizes: { index: number; size: number }[]): boolean {
-    if (this._currentWindow[0] >= 0) {
+    if (this._windowingActive || this._currentWindow[0] >= 0) {
       let minIndex = Infinity;
-      for (const item of sizes) {
-        const key = item.index;
-        const size = item.size;
+      let measuredAllItemsUntil = -1;
+      let offsetDelta = 0;
+      let allPreviousMeasured = true;
+      const sizesMap = new Map(sizes.map(i => [i.index, i.size]));
 
-        if (this._widgetSizers[key].size != size) {
-          this._widgetSizers[key].size = size;
-          minIndex = Math.min(minIndex, key);
+      const highestIndex = Math.max(...sizesMap.keys());
+
+      // add sizers at the end if needed
+      const entries: [number, WindowedList.ItemMetadata | null][] = [
+        ...this._widgetSizers.entries()
+      ];
+      for (let i = this._widgetSizers.length; i <= highestIndex; i++) {
+        entries.push([i, null]);
+      }
+
+      for (let [index, sizer] of entries) {
+        const measuredSize = sizesMap.get(index);
+        let itemDelta = 0;
+        const hadSizer = !!sizer;
+
+        if (!sizer) {
+          const previous: WindowedList.ItemMetadata | undefined =
+            this._widgetSizers[index - 1];
+          const newSizer = {
+            offset: previous ? previous.offset + previous.size : 0,
+            size:
+              measuredSize !== undefined
+                ? measuredSize
+                : this.estimateWidgetSize(index),
+            measured: measuredSize !== undefined
+          };
+          this._widgetSizers[index] = newSizer;
+          sizer = newSizer;
         }
-        // Always set the flag in case the size estimator provides perfect result
-        this._widgetSizers[key].measured = true;
+        if (measuredSize !== undefined) {
+          // If the we learned about the size, update it and compute atomic offset for following item (`itemDelta`)
+          if (sizer.size != measuredSize) {
+            itemDelta = measuredSize - sizer.size;
+            sizer.size = measuredSize;
+            minIndex = Math.min(minIndex, index);
+          }
+          // Always set the flag in case the size estimator provides perfect result
+          sizer.measured = true;
+        }
+        // If all items so far have actual size measurements...
+        if (allPreviousMeasured) {
+          if (sizer.measured) {
+            // and this item has a size measurement, we can say that
+            // all items until now have measurements:
+            measuredAllItemsUntil = index;
+          } else {
+            allPreviousMeasured = false;
+          }
+        }
+        if (hadSizer && offsetDelta !== 0) {
+          // Adjust offsets for all items where it is needed
+          sizer.offset += offsetDelta;
+        }
+        // Keep track of the overall change in offset that will need to be applied to following items
+        offsetDelta += itemDelta;
+      }
+
+      if (measuredAllItemsUntil !== -1) {
+        this._measuredAllUntilIndex = measuredAllItemsUntil;
       }
 
       // If some sizes changed
-      if (minIndex != Infinity) {
-        // Invalid follow-up index
-        this._lastMeasuredIndex = Math.min(this._lastMeasuredIndex, minIndex);
+      if (minIndex !== Infinity) {
         return true;
       }
     }
@@ -554,7 +622,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         this._widgetSizers.splice(
           changes.newIndex,
           0,
-          ...new Array(changes.newValues.length).map((_, i) => {
+          ...new Array(changes.newValues.length).fill(undefined).map((_, i) => {
             return { offset: 0, size: this.estimateWidgetSize(i) };
           })
         );
@@ -575,14 +643,14 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   }
 
   private _getItemMetadata(index: number): WindowedList.ItemMetadata {
-    if (index > this._lastMeasuredIndex) {
+    if (index > this._measuredAllUntilIndex) {
       let offset = 0;
-      if (this._lastMeasuredIndex >= 0) {
-        const itemMetadata = this._widgetSizers[this._lastMeasuredIndex];
+      if (this._measuredAllUntilIndex >= 0) {
+        const itemMetadata = this._widgetSizers[this._measuredAllUntilIndex];
         offset = itemMetadata.offset + itemMetadata.size;
       }
 
-      for (let i = this._lastMeasuredIndex + 1; i <= index; i++) {
+      for (let i = this._measuredAllUntilIndex + 1; i <= index; i++) {
         let size = this._widgetSizers[i]?.measured
           ? this._widgetSizers[i].size
           : this.estimateWidgetSize(i);
@@ -595,11 +663,16 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
         offset += size;
       }
-
-      this._lastMeasuredIndex = index;
+      // Because the loop above updates estimated sizes,
+      // we need to fix (heal) offsets of the remaining items.
+      for (let i = index + 1; i < this._widgetSizers.length; i++) {
+        const sizer = this._widgetSizers[i];
+        const previous = this._widgetSizers[i - 1];
+        sizer.offset = previous.offset + previous.size;
+      }
     }
 
-    for (let i = 0; i <= this._lastMeasuredIndex; i++) {
+    for (let i = 0; i <= this._measuredAllUntilIndex; i++) {
       const sizer = this._widgetSizers[i];
       if (i === 0) {
         if (sizer.offset !== 0) {
@@ -617,15 +690,15 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   }
 
   private _findNearestItem(offset: number): number {
-    const lastMeasuredItemOffset =
-      this._lastMeasuredIndex > 0
-        ? this._widgetSizers[this._lastMeasuredIndex].offset
+    const lastContinouslyMeasuredItemOffset =
+      this._measuredAllUntilIndex > 0
+        ? this._widgetSizers[this._measuredAllUntilIndex].offset
         : 0;
 
-    if (lastMeasuredItemOffset >= offset) {
+    if (lastContinouslyMeasuredItemOffset >= offset) {
       // If we've already measured items within this range just use a binary search as it's faster.
       return this._findNearestItemBinarySearch(
-        this._lastMeasuredIndex,
+        this._measuredAllUntilIndex,
         0,
         offset
       );
@@ -634,7 +707,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       // The exponential search avoids pre-computing sizes for the full set of items as a binary search would.
       // The overall complexity for this approach is O(log n).
       return this._findNearestItemExponentialSearch(
-        Math.max(0, this._lastMeasuredIndex),
+        Math.max(0, this._measuredAllUntilIndex),
         offset
       );
     }
@@ -758,7 +831,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   private _height: number = 0;
   private _isDisposed = false;
   private _itemsList: ISimpleObservableList | null = null;
-  private _lastMeasuredIndex: number = -1;
+  private _measuredAllUntilIndex: number = -1;
   private _overscanCount = 1;
   private _scrollOffset: number = 0;
   private _widgetCount = 0;
@@ -916,9 +989,14 @@ export class WindowedList<
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'pointerdown':
-        event.preventDefault();
-        event.stopPropagation();
         this._evtPointerDown(event as PointerEvent);
+        // Stop propagation of this event; a `mousedown` event will still
+        // be automatically dispatched and handled by the parent notebook
+        // (which will close any open context menu, etc.)
+        event.stopPropagation();
+        break;
+      case 'scrollend':
+        this._onScrollEnd();
         break;
       case 'scroll':
         this.onScroll(event);
@@ -1047,6 +1125,7 @@ export class WindowedList<
     this._viewportPaddingTop = this.viewModel.paddingTop;
     this._viewportPaddingBottom = parseFloat(viewportStyle.paddingBottom);
     this._scrollbarElement.addEventListener('pointerdown', this);
+    this._outerElement.addEventListener('scrollend', this);
   }
 
   /**
@@ -1055,6 +1134,7 @@ export class WindowedList<
   protected onBeforeDetach(msg: Message): void {
     this._removeListeners();
     this._scrollbarElement.removeEventListener('pointerdown', this);
+    this._outerElement.removeEventListener('scrollend', this);
     super.onBeforeDetach(msg);
   }
 
@@ -1086,6 +1166,17 @@ export class WindowedList<
       this.viewModel.scrollOffset = scrollOffset;
       this._scrollUpdateWasRequested = false;
 
+      if (this._viewport.dataset.isScrolling != 'true') {
+        this._viewport.dataset.isScrolling = 'true';
+      }
+
+      if (this._timerToClearScrollStatus) {
+        window.clearTimeout(this._timerToClearScrollStatus);
+      }
+      // TODO: remove once `scrollend` event is supported by Safari
+      this._timerToClearScrollStatus = window.setTimeout(() => {
+        this._onScrollEnd();
+      }, 750);
       this.update();
       // }
     }
@@ -1246,7 +1337,9 @@ export class WindowedList<
    */
   private _applyNoWindowingStyles() {
     this._viewport.style.position = 'relative';
+    this._viewport.style.contain = '';
     this._viewport.style.top = '0px';
+    this._viewport.style.minHeight = '';
     this._innerElement.style.height = '';
   }
   /**
@@ -1254,6 +1347,7 @@ export class WindowedList<
    */
   private _applyWindowingStyles() {
     this._viewport.style.position = 'absolute';
+    this._viewport.style.contain = 'layout';
   }
 
   /**
@@ -1331,12 +1425,9 @@ export class WindowedList<
           this._updateTotalSize();
 
           // Update position of window container
-          const [top, minHeight] = this.viewModel.getSpan(
-            startIndex,
-            stopIndex
-          );
-          this._viewport.style.top = `${top}px`;
-          this._viewport.style.minHeight = `${minHeight}px`;
+          let [top, _minHeight] = this.viewModel.getSpan(startIndex, stopIndex);
+
+          this._viewport.style.transform = `translateY(${top}px)`;
         } else {
           // Update inner container height
           this._innerElement.style.height = `0px`;
@@ -1538,10 +1629,29 @@ export class WindowedList<
   }
 
   /**
+   * Handle `scrollend` events on the scroller.
+   */
+  private _onScrollEnd() {
+    if (this._timerToClearScrollStatus) {
+      window.clearTimeout(this._timerToClearScrollStatus);
+    }
+    this._viewport.dataset.isScrolling = 'false';
+    if (this._requiresTotalSizeUpdate) {
+      this._updateTotalSize();
+    }
+    this._requiresTotalSizeUpdate = false;
+  }
+
+  /**
    * Update the total size
    */
   private _updateTotalSize(): void {
     if (this.viewModel.windowingActive) {
+      if (this._viewport.dataset.isScrolling == 'true') {
+        // Do not update while scrolling, delay until later
+        this._requiresTotalSizeUpdate = true;
+        return;
+      }
       const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
       const heightWithPadding =
         estimatedTotalHeight +
@@ -1561,8 +1671,10 @@ export class WindowedList<
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
+  private _requiresTotalSizeUpdate: boolean = false;
   private _areaResizeObserver: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
+  private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
   private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;

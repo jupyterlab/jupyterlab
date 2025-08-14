@@ -5,7 +5,7 @@ Frequently Asked Questions (FAQ)
 ================================
 
 Below are some frequently asked questions. Click on a question to be directed to
-relevant information in our documentation or our GitHub repo.
+relevant information in our documentation or our GitHub repository.
 
 General
 -------
@@ -40,6 +40,22 @@ My notebook injects customized CSS that results in unexpected scrolling issues (
     If you can not avoid changing the margins, you can set the settings *Notebook* => *Windowing mode* to ``defer`` or ``none``.
     It will negatively impact the performance of JupyterLab when opening long notebooks and/or lots of files.
 
+Attributes Sanitization
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Why are ``id`` and ``name`` attributes removed from Markdown?
+
+    JupyterLab sanitizes these attributes to prevent security risks like DOM clobbering attacks. For more details, see the `DOM Clobbering Prevention <https://cheatsheetseries.owasp.org/cheatsheets/DOM_Clobbering_Prevention_Cheat_Sheet.html>`_ guide. Additionally, see the related security advisory `CVE-2024-43805 <https://github.com/jupyterlab/jupyterlab/security/advisories/GHSA-9q39-rmj3-p4r2>`_.
+
+    Workarounds:
+    - Use headings in Markdown cells to create anchor points safely.
+    - Optionally, enable the "Allow named properties" setting in **Settings** -> **Settings Editor** -> **Sanitizer** (not recommended for untrusted sources).
+
+How Jupyterlab handles anchor navigation?
+
+    During sanitization, the id attributes of the DOM elements are replaced with `data-jupyter-id` attributes.
+    When resolving an URL, if a fragment exists (e.g. `#my-id`), it will find and scroll to the element with the corresponding `data-jupyter-id`.
+
 Tips and Tricks
 ---------------
 
@@ -68,3 +84,45 @@ Development
    For more discussion and potential alternative solutions, please see issues
    `#4623 <https://github.com/jupyterlab/jupyterlab/issues/4623>`__ and
    `#5789 <https://github.com/jupyterlab/jupyterlab/issues/5789>`__.
+
+
+Nightly releases
+----------------
+
+The JupyterLab project does not publish nightly releases to PyPI.
+
+However JupyterLab is built on CI for every commit on the ``main`` branch, and generates the wheel and source distributions as GitHub Action artifacts.
+These artifacts can be downloaded and installed locally.
+
+To download the JupyterLab wheels from the latest commits on ``main``:
+
+- Go to `Check Release GitHub Action page <https://github.com/jupyterlab/jupyterlab/actions/workflows/check-release.yml?query=branch%3Amain+is%3Asuccess>`__
+- Click on one of the workflow runs
+- Under the "Artifacts" section, click on ``jupyterlab-releaser-dist-<build-number>`` to download the archive
+- Locally, extract the archive
+- Install with ``python -m pip install ./jupyterlab-x.y.z.whl``
+
+.. note::
+
+    Downloading artifacts requires signing in to GitHub.
+
+OS X Specific Issues
+--------------------
+
+Holding down buttons does not produce repeated key press events
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Recent version of OS X change the default behavior for holding down buttons: instead of giving a repeated key press, a Character Accents Popup occurs.
+For example, when in vim mode in the editor, holding down any of the navigation keys ``h j k l`` does not cause repeated movement as it normally does in a desktop terminal application.
+
+To change this behavior *globally* (including browsers like Safari, Firefox and Google Chrome) enter the following command into a terminal, then log out and back in:
+
+.. code-block:: bash
+
+    defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+To change this behavior back to standard use the following command, then log out and back in:
+
+.. code-block:: bash
+
+    defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true

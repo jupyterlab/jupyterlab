@@ -177,6 +177,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     super({ node: document.createElement('jp-toolbar') });
     this.addClass(TOOLBAR_CLASS);
     this.layout = options.layout ?? new ToolbarLayout();
+    this.noFocusOnClick = options.noFocusOnClick ?? false;
   }
 
   /**
@@ -238,6 +239,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
 
     Private.nameProperty.set(widget, name);
     widget.node.dataset['jpItemName'] = name;
+    if (this.noFocusOnClick) {
+      widget.node.dataset['noFocusOnClick'] = 'true';
+    }
     return true;
   }
 
@@ -360,6 +364,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
   }
+
+  noFocusOnClick: boolean;
 }
 
 /**
@@ -369,8 +375,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   /**
    * Construct a new toolbar widget.
    */
-  constructor() {
-    super();
+  constructor(options: Toolbar.IOptions = {}) {
+    super(options);
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
     this._resizer = new Throttler(async (callTwice = false) => {
@@ -452,7 +458,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (widget instanceof ToolbarPopupOpener) {
       status = super.insertItem(index, name, widget);
     } else {
-      // Insert the widget in the toolbar at axpected index if possible, otherwise
+      // Insert the widget in the toolbar at expected index if possible, otherwise
       // before the popup opener. This position may change when invoking the resizer
       // at the end of this function.
       const j = Math.max(
@@ -730,6 +736,10 @@ export namespace Toolbar {
      * Toolbar widget layout.
      */
     layout?: Layout;
+    /**
+     * Do not give the focus to the button on click.
+     */
+    noFocusOnClick?: boolean;
   }
 
   /**
@@ -780,12 +790,10 @@ export namespace ToolbarButtonComponent {
     disabledTooltip?: string;
 
     /**
-     * Trigger the button on the actual onClick event rather than onMouseDown.
-     *
-     * See note in ToolbarButtonComponent below as to why the default is to
-     * trigger on onMouseDown.
+     * Trigger the button on onMouseDown event rather than onClick, to avoid giving
+     * the focus on the button.
      */
-    actualOnClick?: boolean;
+    noFocusOnClick?: boolean;
 
     /**
      * The application language translator.
@@ -802,29 +810,34 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(
   props: ToolbarButtonComponent.IProps
 ): JSX.Element {
-  const actualOnClick = props.actualOnClick ?? false;
-
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
-  // We avoid a click event by calling preventDefault in mousedown, and
-  // we bind the button action to `mousedown`.
-  const handleMouseDown = actualOnClick
-    ? undefined
-    : (event: React.MouseEvent) => {
-        // Fire action only when left button is pressed.
-        if (event.button === 0) {
-          event.preventDefault();
-          props.onClick?.();
-        }
-      };
+  const handleClick =
+    props.noFocusOnClick ?? false
+      ? undefined
+      : (event: React.MouseEvent) => {
+          if (event.button === 0) {
+            props.onClick?.();
+            // In safari, the focus do not move to the button on click (see
+            // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
+            (event.target as HTMLElement).focus();
+          }
+        };
 
-  const handleClick = actualOnClick
-    ? (event: React.MouseEvent) => {
-        if (event.button === 0) {
-          props.onClick?.();
+  // To avoid focusing the button, we avoid a click event by calling preventDefault in
+  // mousedown, and we bind the button action to `mousedown`.
+  // Currently this is mostly useful for the notebook panel, to retrieve the focused
+  // cell before the click event.
+  const handleMouseDown =
+    props.noFocusOnClick ?? false
+      ? (event: React.MouseEvent) => {
+          // Fire action only when left button is pressed.
+          if (event.button === 0) {
+            event.preventDefault();
+            props.onClick?.();
+          }
         }
-      }
-    : undefined;
+      : undefined;
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
@@ -857,13 +870,12 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
-      {...props.dataset}
+      {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={title}
-      scale="xsmall"
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
@@ -968,6 +980,7 @@ export class ToolbarButton extends ReactWidget {
     return (
       <ToolbarButtonComponent
         {...this.props}
+        noFocusOnClick={this.props.noFocusOnClick}
         pressed={this.pressed}
         enabled={this.enabled}
         onClick={this.onClick}
@@ -1012,6 +1025,11 @@ export namespace CommandToolbarButtonComponent {
      * Overrides command caption
      */
     caption?: string;
+    /**
+     * Trigger the button on onMouseDown event rather than onClick, to avoid giving
+     * the focus on the button.
+     */
+    noFocusOnClick?: boolean;
   }
 }
 
@@ -1051,7 +1069,7 @@ export function addCommandToolbarButtonClass(w: Widget): Widget {
 }
 
 /**
- * Phosphor Widget version of CommandToolbarButtonComponent.
+ * Lumino widget version of CommandToolbarButtonComponent.
  */
 export class CommandToolbarButton extends ReactWidget {
   /**
@@ -1097,6 +1115,12 @@ export class CommandToolbarButton extends ReactWidget {
   render(): JSX.Element {
     return <CommandToolbarButtonComponent {...this.props} />;
   }
+  /**
+   * Identifier of the underlying command.
+   */
+  get commandId(): string {
+    return this.props.id;
+  }
 }
 
 /**
@@ -1112,6 +1136,7 @@ class ToolbarPopup extends Widget {
    */
   constructor() {
     super({ node: document.createElement('jp-toolbar') });
+    this.node.setAttribute('aria-label', 'Responsive popup toolbar');
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
     this.addClass('jp-ThemedContainer');
@@ -1285,6 +1310,25 @@ class ToolbarPopupOpener extends ToolbarButton {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Ensures all dataset keys have the 'data-' prefix.
+   * @param dataset object
+   */
+  export function normalizeDataset(
+    dataset?: DOMStringMap
+  ): DOMStringMap | undefined {
+    if (!dataset) {
+      return undefined;
+    }
+
+    const normalized: DOMStringMap = {};
+    for (const [key, value] of Object.entries(dataset)) {
+      const normalizedKey = key.startsWith('data-') ? key : `data-${key}`;
+      normalized[normalizedKey] = value;
+    }
+    return normalized;
+  }
+
   export function propsFromCommand(
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
@@ -1328,6 +1372,7 @@ namespace Private {
     return {
       className,
       dataset: { 'data-command': options.id },
+      noFocusOnClick: options.noFocusOnClick,
       icon,
       iconClass,
       tooltip: options.caption ?? tooltip,

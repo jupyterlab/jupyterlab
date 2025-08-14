@@ -17,6 +17,9 @@
   width: 100%;
   height: 100%;
   background: var(--jp-dialog-background);
+  /* stylelint-disable */
+  container-type: inline-size;
+  /* stylelint-enable */
 }
 
 .jp-Dialog-content {
@@ -40,6 +43,7 @@
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   resize: both;
+  overflow: hidden;
 }
 
 .jp-Dialog-content.jp-Dialog-content-small {
@@ -112,17 +116,25 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-footer {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: flex-end;
-  align-items: center;
+  align-items: start;
   flex: 0 0 auto;
+  gap: 5px;
   margin-left: -12px;
   margin-right: -12px;
   padding: 12px;
 }
 
+.jp-Dialog-footerButtons {
+  width: 100%;
+  text-align: end;
+}
+
 .jp-Dialog-checkbox {
   padding-right: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .jp-Dialog-spacer {
@@ -150,4 +162,14 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-button.jp-mod-styled:not(:last-child) {
   margin-right: 12px;
+}
+
+/* stylelint-disable */
+@container (max-width: 560px) {
+  /* stylelint-enable */
+  .jp-Dialog-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
 }

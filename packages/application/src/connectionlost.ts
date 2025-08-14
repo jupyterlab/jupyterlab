@@ -42,7 +42,7 @@ export const ConnectionLost: IConnectionLost = async function (
         'If checked, you will not see a dialog informing you about an issue with server connection in this session.'
       )
     },
-    buttons: [Dialog.okButton({ label: trans.__('Dismiss') })]
+    buttons: [Dialog.cancelButton({ label: trans.__('Close') })]
   })
     .then(result => {
       if (result.isChecked) {

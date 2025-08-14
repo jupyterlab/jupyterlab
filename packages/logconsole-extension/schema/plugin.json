@@ -39,6 +39,19 @@
       "title": "Status Bar Item flash",
       "description": "Whether to flash on new log message or not",
       "default": true
+    },
+    "defaultLogLevel": {
+      "type": "string",
+      "title": "Default Log Level",
+      "description": "Default log level for loggers",
+      "oneOf": [
+        { "const": "critical", "title": "Critical" },
+        { "const": "error", "title": "Error" },
+        { "const": "warning", "title": "Warning" },
+        { "const": "info", "title": "Info" },
+        { "const": "debug", "title": "Debug" }
+      ],
+      "default": "warning"
     }
   },
   "additionalProperties": false,

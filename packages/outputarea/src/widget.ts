@@ -3,6 +3,7 @@
 
 import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
 import * as nbformat from '@jupyterlab/nbformat';
+import { IObservableString } from '@jupyterlab/observables';
 import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -108,6 +109,7 @@ export class OutputArea extends Widget {
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
+    this._showInputPlaceholder = options.showInputPlaceholder ?? true;
 
     const model = (this.model = options.model);
     for (
@@ -117,6 +119,17 @@ export class OutputArea extends Widget {
     ) {
       const output = model.get(i);
       this._insertOutput(i, output);
+      if (output.type === 'stream') {
+        // This is a stream output, follow changes to the text.
+        output.streamText!.changed.connect(
+          (
+            sender: IObservableString,
+            event: IObservableString.IChangedArgs
+          ) => {
+            this._setOutput(i, output);
+          }
+        );
+      }
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
@@ -283,7 +296,19 @@ export class OutputArea extends Widget {
   ): void {
     switch (args.type) {
       case 'add':
-        this._insertOutput(args.newIndex, args.newValues[0]);
+        const output = args.newValues[0];
+        this._insertOutput(args.newIndex, output);
+        if (output.type === 'stream') {
+          // A stream output has been added, follow changes to the text.
+          output.streamText!.changed.connect(
+            (
+              sender: IObservableString,
+              event: IObservableString.IChangedArgs
+            ) => {
+              this._setOutput(args.newIndex, output);
+            }
+          );
+        }
         break;
       case 'remove':
         if (this.widgets.length) {
@@ -311,6 +336,9 @@ export class OutputArea extends Widget {
             this._preventHeightChangeJitter();
           }
         }
+        break;
+      case 'clear':
+        this._clear();
         break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
@@ -469,7 +497,8 @@ export class OutputArea extends Widget {
       password,
       future,
       translator: this._translator,
-      inputHistoryScope: this._inputHistoryScope
+      inputHistoryScope: this._inputHistoryScope,
+      showInputPlaceholder: this._showInputPlaceholder
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -796,6 +825,7 @@ export class OutputArea extends Widget {
   private _translator: ITranslator;
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
+  private _showInputPlaceholder: boolean = true;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -870,6 +900,11 @@ export namespace OutputArea {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Whether to show placeholder text in standard input
+     */
+    showInputPlaceholder?: boolean;
   }
 
   /**
@@ -1124,7 +1159,7 @@ export class Stdin extends Widget implements IStdin {
 
     this._input = this.node.getElementsByTagName('input')[0];
     // make users aware of the line history feature
-    if (!this._password) {
+    if (options.showInputPlaceholder && !this._password) {
       this._input.placeholder = this._trans.__(
         '↑↓ for history. Search history with c-↑/c-↓'
       );
@@ -1156,6 +1191,8 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: KeyboardEvent): void {
+    // Stop bubbling
+    event.stopPropagation();
     if (this._resolved) {
       // Do not handle any more key events if the promise was resolved.
       event.preventDefault();
@@ -1333,6 +1370,11 @@ export namespace Stdin {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Show placeholder text
+     */
+    showInputPlaceholder?: boolean;
   }
 }
 
