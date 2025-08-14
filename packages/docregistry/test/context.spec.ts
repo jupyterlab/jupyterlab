@@ -673,10 +673,25 @@ describe('docregistry/context', () => {
     });
 
     describe('#urlResolver', () => {
+      class TestResolver extends RenderMimeRegistry.UrlResolver {
+        // no-op
+      }
       it('should be a url resolver', () => {
         expect(context.urlResolver).toBeInstanceOf(
           RenderMimeRegistry.UrlResolver
         );
+        expect(context.urlResolver).not.toBeInstanceOf(TestResolver);
+      });
+      it('should use preferred url resolver', () => {
+        context = new Context({
+          manager,
+          factory,
+          path: UUID.uuid4() + '.txt',
+          urlResolverFactory: {
+            createResolver: options => new TestResolver(options)
+          }
+        });
+        expect(context.urlResolver).toBeInstanceOf(TestResolver);
       });
     });
 

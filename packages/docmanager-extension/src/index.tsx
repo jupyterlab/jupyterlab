@@ -37,6 +37,7 @@ import {
   SavingStatus
 } from '@jupyterlab/docmanager';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -175,7 +176,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     ILabStatus,
     ISessionContextDialogs,
     JupyterLab.IInfo,
-    IRecentsManager
+    IRecentsManager,
+    IUrlResolverFactory
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -184,7 +186,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     status: ILabStatus | null,
     sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null,
-    recentsManager: IRecentsManager | null
+    recentsManager: IRecentsManager | null,
+    urlResolverFactory: IUrlResolverFactory | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
@@ -206,7 +209,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         }
         return true;
       },
-      recentsManager: recentsManager ?? undefined
+      recentsManager: recentsManager ?? undefined,
+      urlResolverFactory: urlResolverFactory ?? undefined
     });
 
     return docManager;
