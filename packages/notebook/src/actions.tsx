@@ -237,24 +237,11 @@ export namespace NotebookActions {
 
       // Update the original cell with the last piece of content
       child.model.sharedModel.setSource(lastPieceContent);
-      // Mark cell as dirty if it is running, and also after it finishes running
+      // Mark cell as dirty if it is running
       if (child.model instanceof CodeCellModel) {
         const codeCellModel = child.model as CodeCellModel;
         if (codeCellModel.executionState === 'running') {
           codeCellModel.isDirty = true;
-          const onStateChanged = (
-            sender: CodeCellModel,
-            args: { name: string }
-          ) => {
-            if (
-              args.name === 'executionState' &&
-              codeCellModel.executionState !== 'running'
-            ) {
-              codeCellModel.isDirty = true;
-              codeCellModel.stateChanged.disconnect(onStateChanged);
-            }
-          };
-          codeCellModel.stateChanged.connect(onStateChanged);
         }
       }
     });
