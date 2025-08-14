@@ -71,6 +71,7 @@
   "@jupyterlab/rendermime:ILatexTypesetter": "A service for the LaTeX typesetter for the application. Use this if you want to typeset math in your extension.",
   "@jupyterlab/rendermime:IMarkdownParser": "A service for rendering markdown syntax as HTML content.",
   "@jupyterlab/rendermime:IRenderMimeRegistry": "A service for the rendermime registry for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a \"mime renderer extension\" rather than using this service directly.",
+  "@jupyterlab/rendermime:IUrlResolverFactory": "A factory for resolver of asset URLs.",
   "@jupyterlab/running:IRunningSessionManagers": "A service to add running session managers.",
   "@jupyterlab/running:IRunningSessionsSidebar": "A token allowing to modify the running sessions sidebar.",
   "@jupyterlab/services:IConfigSectionManager": "A service providing the config section manager.",

@@ -8,6 +8,8 @@ import {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { IUrlResolverFactory } from '@jupyterlab/rendermime';
+
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
@@ -59,6 +61,7 @@ export class DocumentManager implements IDocumentManager {
     widgetManager.stateChanged.connect(this._onWidgetStateChanged, this);
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
+    this._urlResolverFactory = options.urlResolverFactory;
   }
 
   /**
@@ -578,7 +581,8 @@ export class DocumentManager implements IDocumentManager {
       sessionDialogs: this._dialogs,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator,
-      contentProviderId
+      contentProviderId,
+      urlResolverFactory: this._urlResolverFactory
     });
     const handler = new SaveHandler({
       context,
@@ -730,6 +734,7 @@ export class DocumentManager implements IDocumentManager {
   private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
+  private _urlResolverFactory?: IUrlResolverFactory;
   private _dialogs: ISessionContext.IDialogs;
   private _isConnectedCallback: () => boolean;
   private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
@@ -788,6 +793,11 @@ export namespace DocumentManager {
      * The manager for recent documents.
      */
     recentsManager?: IRecentsManager;
+
+    /**
+     * A factory for the URL resolver.
+     */
+    urlResolverFactory?: IUrlResolverFactory;
   }
 }
 
