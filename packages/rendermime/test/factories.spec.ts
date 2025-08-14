@@ -350,7 +350,9 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         Widget.attach(w, document.body);
 
-        const node = document.getElementById('Title-third-level')!;
+        const node = document.querySelector(
+          '[data-jupyter-id="Title-third-level"]'
+        )!;
         expect(node.localName).toBe('h3');
         const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;
         expect(anchor.href).toContain('#Title-third-level');

@@ -60,6 +60,7 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
+    this._allowFileUploads = options.allowFileUploads ?? true;
     this._model = {
       path: this.rootPath,
       name: PathExt.basename(this.rootPath),
@@ -380,6 +381,17 @@ export class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Whether uploads are allowed.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this._allowFileUploads = value;
+  }
+
+  /**
    * Upload a `File` object.
    *
    * @param file - The `File` object to upload.
@@ -394,6 +406,11 @@ export class FileBrowserModel implements IDisposable {
    * chunks.
    */
   async upload(file: File, path?: string): Promise<Contents.IModel> {
+    // Check if upload is allowed
+    if (!this._allowFileUploads) {
+      throw new Error(this._trans.__('File uploads are disabled'));
+    }
+
     // We do not support Jupyter Notebook version less than 4, and Jupyter
     // Server advertises itself as version 1 and supports chunked
     // uploading. We assume any version less than 4.0.0 to be Jupyter Server
@@ -657,6 +674,7 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
+  private _allowFileUploads: boolean;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
@@ -713,6 +731,11 @@ export namespace FileBrowserModel {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Whether to allow file uploads. Defaults to `true`.
+     */
+    allowFileUploads?: boolean;
   }
 }
 

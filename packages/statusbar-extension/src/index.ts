@@ -60,7 +60,13 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
           );
         }
       },
-      isToggled: () => statusBar.isVisible
+      isToggled: () => statusBar.isVisible,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     app.commands.commandExecuted.connect((registry, executed) => {

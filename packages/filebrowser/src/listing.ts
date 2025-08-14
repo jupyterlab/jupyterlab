@@ -238,6 +238,7 @@ export class DirListing extends Widget {
     this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
     this._state = options.state || null;
+    this._allowDragDropUpload = options.allowDragDropUpload ?? true;
 
     // Get the width of the "modified" column
     this._updateModifiedSize(this.node);
@@ -522,6 +523,22 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Select all listing items in the current directory.
+   */
+  async selectAll(): Promise<void> {
+    const items = this._model.items();
+    const newSelection: { [key: string]: boolean } = {};
+
+    for (const item of items) {
+      newSelection[item.path] = true;
+    }
+
+    this.selection = newSelection;
+    this._selectionChanged.emit();
+    this.update();
+  }
+
+  /**
    * Download the currently selected item(s).
    */
   async download(): Promise<void> {
@@ -715,9 +732,11 @@ export class DirListing extends Widget {
   /**
    * Clear the selected items.
    */
-  clearSelectedItems(): void {
+  clearSelectedItems(emit = true): void {
     this.selection = Object.create(null);
-    this._selectionChanged.emit();
+    if (emit) {
+      this._selectionChanged.emit();
+    }
   }
 
   /**
@@ -798,7 +817,10 @@ export class DirListing extends Widget {
         break;
       case 'dragenter':
       case 'dragover':
-        this.addClass('jp-mod-native-drop');
+        // Only show visual feedback if drag and drop upload is enabled
+        if (this._allowDragDropUpload) {
+          this.addClass('jp-mod-native-drop');
+        }
         event.preventDefault();
         break;
       case 'dragleave':
@@ -1343,6 +1365,14 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Update the setting to allow drag and drop upload.
+   * This enables uploading files via drag and drop.
+   */
+  setAllowDragDropUpload(isEnabled: boolean) {
+    this._allowDragDropUpload = isEnabled;
+  }
+
+  /**
    * Would this click (or other event type) hit the checkbox by default?
    */
   protected isWithinCheckboxHitArea(event: Event): boolean {
@@ -1847,6 +1877,11 @@ export class DirListing extends Widget {
   protected evtNativeDrop(event: DragEvent): void {
     // Prevent navigation
     event.preventDefault();
+
+    // Check if drag and drop upload is disabled
+    if (!this._allowDragDropUpload) {
+      return;
+    }
 
     const items = event.dataTransfer?.items;
     if (!items) {
@@ -2482,7 +2517,7 @@ export class DirListing extends Widget {
   private _onModelRefreshed(): void {
     // Update the selection.
     const existing = Object.keys(this.selection);
-    this.clearSelectedItems();
+    this.clearSelectedItems(false);
     for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
@@ -2605,6 +2640,7 @@ export class DirListing extends Widget {
   };
   private _sortNotebooksFirst = false;
   private _allowSingleClick = false;
+  private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
@@ -2652,6 +2688,12 @@ export namespace DirListing {
      * the columns sizes
      */
     state?: IStateDB;
+
+    /**
+     * Whether to allow drag and drop upload of files.
+     * The default is `true`.
+     */
+    allowDragDropUpload?: boolean;
   }
 
   /**
