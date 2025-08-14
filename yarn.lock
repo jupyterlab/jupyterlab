@@ -2976,6 +2976,7 @@ __metadata:
     "@jupyterlab/coreutils": ^6.5.0-alpha.2
     "@jupyterlab/docmanager": ^4.5.0-alpha.2
     "@jupyterlab/docregistry": ^4.5.0-alpha.2
+    "@jupyterlab/rendermime": ^4.5.0-alpha.2
     "@jupyterlab/services": ^7.5.0-alpha.2
     "@jupyterlab/settingregistry": ^4.5.0-alpha.2
     "@jupyterlab/statedb": ^4.5.0-alpha.2
@@ -3001,6 +3002,7 @@ __metadata:
     "@jupyterlab/apputils": ^4.6.0-alpha.2
     "@jupyterlab/coreutils": ^6.5.0-alpha.2
     "@jupyterlab/docregistry": ^4.5.0-alpha.2
+    "@jupyterlab/rendermime": ^4.5.0-alpha.2
     "@jupyterlab/services": ^7.5.0-alpha.2
     "@jupyterlab/statedb": ^4.5.0-alpha.2
     "@jupyterlab/statusbar": ^4.5.0-alpha.2
