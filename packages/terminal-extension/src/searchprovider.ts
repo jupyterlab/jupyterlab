@@ -180,12 +180,17 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
    * @returns Color string of form '#rrggbb'
    */
   private _colorToRRGGBB(color: string, backgroundColor: string): string {
-    let converted = Color(color);
-    const alpha = converted.alpha();
-    if (alpha < 1) {
-      converted = converted.mix(Color(backgroundColor), alpha);
+    try {
+      let converted = Color(color);
+      const alpha = converted.alpha();
+      if (alpha < 1) {
+        converted = converted.mix(Color(backgroundColor), alpha);
+      }
+      return converted.hex();
+    } catch (e) {
+      // Return a valid color rather than propagate exception.
+      return '#888888';
     }
-    return converted.hex();
   }
 
   private _next(): void {

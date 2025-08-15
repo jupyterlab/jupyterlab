@@ -549,9 +549,16 @@ namespace Private {
   export const inheritTheme = (): ITerminal.IThemeObject => {
     const bodyStyle = getComputedStyle(document.body);
     const background = bodyStyle.getPropertyValue('--jp-layout-color0').trim();
-    const activeMatchBackground = Color(background).isDark()
-      ? '#F57F17' // md-yellow-900
-      : '#ffee58'; // md-yellow-400
+
+    let activeMatchBackground = '#ffee58'; // md-yellow-400 for light mode background
+    try {
+      if (Color(background).isDark()) {
+        activeMatchBackground = '#F57F17'; // md-yellow-900 for dark mode background
+      }
+    } catch (e) {
+      // Use the light mode default.
+    }
+
     return {
       foreground: bodyStyle.getPropertyValue('--jp-ui-font-color0').trim(),
       background,
