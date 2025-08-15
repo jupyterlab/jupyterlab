@@ -12,6 +12,7 @@ import {
 import {
   Cell,
   CodeCell,
+  CodeCellModel,
   ICellModel,
   ICodeCellModel,
   isMarkdownCellModel,
@@ -155,6 +156,7 @@ export namespace NotebookActions {
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
    * This action can be undone.
+   * The original cell is preserved to maintain kernel connections.
    */
   export function splitCell(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -203,9 +205,10 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
-    const cellCountAfterSplit = offsets.length - 1;
-    const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
+    // Create new cells for all content pieces EXCEPT the last one
+    // The last piece will remain in the original cell to preserve kernel connection
+    const newCells = offsets.slice(0, -2).map((offset, offsetIdx) => {
+      const { cell_type, metadata } = child.model.sharedModel.toJSON();
 
       return {
         cell_type,
@@ -214,21 +217,54 @@ export namespace NotebookActions {
           .slice(offset, offsets[offsetIdx + 1])
           .replace(/^\n+/, '')
           .replace(/\n+$/, ''),
-        outputs:
-          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
-            ? outputs
-            : undefined
+        outputs: undefined
       };
     });
 
+    // Prepare the content for the original cell (last piece)
+    const lastPieceStart = offsets[offsets.length - 2];
+    const lastPieceEnd = offsets[offsets.length - 1];
+    const lastPieceContent = orig
+      .slice(lastPieceStart, lastPieceEnd)
+      .replace(/^\n+/, '')
+      .replace(/\n+$/, '');
+
     nbModel.sharedModel.transact(() => {
-      nbModel.sharedModel.deleteCell(index);
-      nbModel.sharedModel.insertCells(index, clones);
+      // Insert new cells above the current cell (if any)
+      if (newCells.length > 0) {
+        nbModel.sharedModel.insertCells(index, newCells);
+      }
+
+      // Update the original cell with the last piece of content
+      child.model.sharedModel.setSource(lastPieceContent);
+      // Mark cell as dirty if it is running
+      if (child.model instanceof CodeCellModel) {
+        const codeCellModel = child.model as CodeCellModel;
+        if (codeCellModel.executionState === 'running') {
+          codeCellModel.isDirty = true;
+        }
+      }
     });
 
-    // If there is a selection the selected cell will be activated
-    const activeCellDelta = start !== end ? 2 : 1;
-    notebook.activeCellIndex = index + clones.length - activeCellDelta;
+    // If there was a selection, activate the cell containing the selection
+    let targetCellIndex: number;
+
+    if (start !== end) {
+      // Find which piece contains the selection
+      let selectionPieceIndex = 0;
+      for (let i = 0; i < offsets.length - 1; i++) {
+        if (start >= offsets[i] && start < offsets[i + 1]) {
+          selectionPieceIndex = i;
+          break;
+        }
+      }
+      targetCellIndex = index + selectionPieceIndex;
+    } else {
+      // No selection, activate the original cell (now at the end)
+      targetCellIndex = index + newCells.length;
+    }
+
+    notebook.activeCellIndex = targetCellIndex;
     notebook
       .scrollToItem(notebook.activeCellIndex)
       .then(() => {

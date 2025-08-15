@@ -283,6 +283,24 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[0];
         expect(cell.model.sharedModel.getSource()).toBe(source);
       });
+
+      it('should preserve original cell identity in the last cell after split', () => {
+        const cell = widget.activeCell!;
+        const originalCellCount = widget.model!.cells.length;
+        const originalCellId = cell.model.id;
+        const source = 'line1\nline2\nline3';
+        cell.model.sharedModel.setSource(source);
+        const index = widget.activeCellIndex;
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(12)!);
+        NotebookActions.splitCell(widget);
+        const cells = widget.model!.cells;
+        expect(cells.length).toBe(originalCellCount + 1);
+        const firstCell = cells.get(index);
+        const secondCell = cells.get(index + 1);
+        expect(secondCell.id).toBe(originalCellId);
+        expect(firstCell.id).not.toBe(originalCellId);
+      });
     });
 
     describe('#mergeCells', () => {
