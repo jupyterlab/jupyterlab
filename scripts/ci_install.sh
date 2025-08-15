@@ -37,7 +37,7 @@ jlpm config
 if [[ $GROUP == js-services ]]; then
     # Install ipykernel pre-release that supports subshells for ikernel.spec.ts
     # Remove when ipykernel 7 is released
-    pip install --upgrade --pre ipykernel!=7.0.0a2
+    pip install --upgrade git+https://github.com/ianthomas23/ipykernel@parent_ident_shim
 fi
 
 if [[ $GROUP == nonode ]]; then
