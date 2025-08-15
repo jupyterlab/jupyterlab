@@ -177,7 +177,6 @@ export namespace ITerminal {
     cursorAccent: string;
     selectionBackground: string;
     selectionInactiveBackground: string;
-    selectionForeground: string;
     activeMatchBackground: string;
   }
 }

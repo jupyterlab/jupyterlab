@@ -22,6 +22,7 @@ import type { FitAddon } from '@xterm/addon-fit';
 import type { SearchAddon } from '@xterm/addon-search';
 import type { WebLinksAddon } from '@xterm/addon-web-links';
 import type { WebglAddon } from '@xterm/addon-webgl';
+import Color from 'color';
 import { ITerminal } from '.';
 
 /**
@@ -526,8 +527,7 @@ namespace Private {
     cursorAccent: '#F5F5F5', // md-grey-100
     selectionBackground: 'rgba(97, 97, 97, 0.3)', // md-grey-700
     selectionInactiveBackground: 'rgba(189, 189, 189, 0.3)', // md-grey-400
-    selectionForeground: '#000',
-    activeMatchBackground: '#fbc02d' // md-yellow-700
+    activeMatchBackground: '#ffee58' // md-yellow-400
   };
 
   /**
@@ -540,39 +540,34 @@ namespace Private {
     cursorAccent: '#000',
     selectionBackground: 'rgba(255, 255, 255, 0.3)',
     selectionInactiveBackground: 'rgba(238, 238, 238, 0.3)', // md-grey-200
-    selectionForeground: '#000',
-    activeMatchBackground: '#ffee58' // md-yellow-400
+    activeMatchBackground: '#F57F17' // md-yellow-900
   };
 
   /**
    * The current theme.
    */
-  export const inheritTheme = (): ITerminal.IThemeObject => ({
-    foreground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-font-color0')
-      .trim(),
-    background: getComputedStyle(document.body)
-      .getPropertyValue('--jp-layout-color0')
-      .trim(),
-    cursor: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-font-color1')
-      .trim(),
-    cursorAccent: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-inverse-font-color0')
-      .trim(),
-    selectionBackground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-layout-color3')
-      .trim(),
-    selectionInactiveBackground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-layout-color2')
-      .trim(),
-    selectionForeground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-search-selected-match-color')
-      .trim(),
-    activeMatchBackground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-search-selected-match-background-color')
-      .trim()
-  });
+  export const inheritTheme = (): ITerminal.IThemeObject => {
+    const bodyStyle = getComputedStyle(document.body);
+    const background = bodyStyle.getPropertyValue('--jp-layout-color0').trim();
+    const activeMatchBackground = Color(background).isDark()
+      ? '#F57F17' // md-yellow-900
+      : '#ffee58'; // md-yellow-400
+    return {
+      foreground: bodyStyle.getPropertyValue('--jp-ui-font-color0').trim(),
+      background,
+      cursor: bodyStyle.getPropertyValue('--jp-ui-font-color1').trim(),
+      cursorAccent: bodyStyle
+        .getPropertyValue('--jp-ui-inverse-font-color0')
+        .trim(),
+      selectionBackground: bodyStyle
+        .getPropertyValue('--jp-layout-color3')
+        .trim(),
+      selectionInactiveBackground: bodyStyle
+        .getPropertyValue('--jp-layout-color2')
+        .trim(),
+      activeMatchBackground
+    };
+  };
 
   export function getXTermTheme(
     theme: ITerminal.Theme
