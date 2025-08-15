@@ -12,6 +12,7 @@ const esModules = [
   '@jupyter/react-components',
   '@jupyter/web-components',
   '@jupyter/ydoc',
+  'color',
   'exenv-es6',
   'lib0',
   'nanoid',

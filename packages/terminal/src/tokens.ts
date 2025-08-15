@@ -4,6 +4,7 @@
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { Terminal } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -62,6 +63,12 @@ export namespace ITerminal {
      * Get selected text from terminal.
      */
     getSelection(): string | null;
+
+    /**
+     * A signal emitted when the terminal theme changes, this includes the when the lab theme
+     * changes if the terminal theme is 'inherit'.
+     */
+    themeChanged: ISignal<this, void>;
   }
   /**
    * Options for the terminal widget.
@@ -170,5 +177,6 @@ export namespace ITerminal {
     cursorAccent: string;
     selectionBackground: string;
     selectionInactiveBackground: string;
+    activeMatchBackground: string;
   }
 }
