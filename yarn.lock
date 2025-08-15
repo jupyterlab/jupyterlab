@@ -2526,8 +2526,10 @@ __metadata:
     "@jupyterlab/application": ^4.5.0-alpha.2
     "@jupyterlab/apputils": ^4.6.0-alpha.2
     "@jupyterlab/cell-toolbar": ^4.5.0-alpha.2
+    "@jupyterlab/notebook": ^4.5.0-alpha.2
     "@jupyterlab/settingregistry": ^4.5.0-alpha.2
     "@jupyterlab/translation": ^4.5.0-alpha.2
+    "@jupyterlab/ui-components": ^4.5.0-alpha.2
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown

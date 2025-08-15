@@ -50,6 +50,35 @@
   user-select: none;
 }
 
+.jp-InputArea-prompt-indicator {
+  position: absolute;
+  top: var(--jp-code-padding);
+  right: var(--jp-code-padding);
+  z-index: 10;
+}
+
+/**
+ * The prompt indicator on the active cell, with no executions,
+ * should not be visible.
+ */
+.jp-mod-active
+  .jp-InputArea-prompt-indicator.jp-InputArea-prompt-indicator-empty {
+  display: none;
+}
+
+.jp-InputArea-prompt-run {
+  position: absolute;
+  top: var(--jp-code-padding);
+  right: var(--jp-code-padding);
+  z-index: 20;
+  display: flex;
+  height: 1.5em;
+}
+
+.jp-InputArea-prompt-run > jp-button {
+  height: 1.5em;
+}
+
 /*-----------------------------------------------------------------------------
 | Print
 |----------------------------------------------------------------------------*/
