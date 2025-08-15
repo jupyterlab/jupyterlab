@@ -484,6 +484,43 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.5...44286551eb1acd17dff1e61c41a24b0e7847e448))
+
+### Bugs fixed
+
+- Preserve original cell during split to maintain kernel connections [#17755](https://github.com/jupyterlab/jupyterlab/pull/17755) ([@Darshan808](https://github.com/Darshan808))
+- Fix file browser navigation with `preferredDir` [#17723](https://github.com/jupyterlab/jupyterlab/pull/17723) ([@Darshan808](https://github.com/Darshan808))
+- Fix anchor navigation on sanitized HTML [#17727](https://github.com/jupyterlab/jupyterlab/pull/17727) ([@brichet](https://github.com/brichet))
+- Fix tab order for status bar items [#17700](https://github.com/jupyterlab/jupyterlab/pull/17700) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+- Fix uncoalesced cell stream outputs clearing [#17672](https://github.com/jupyterlab/jupyterlab/pull/17672) ([@Darshan808](https://github.com/Darshan808))
+- Fix error when deleting a markdown cell with heading [#17720](https://github.com/jupyterlab/jupyterlab/pull/17720) ([@itsmevichu](https://github.com/itsmevichu))
+- Fix initial column sizes in `FileDialog.getOpenFiles` dialog [#17737](https://github.com/jupyterlab/jupyterlab/pull/17737) ([@martinRenou](https://github.com/martinRenou))
+- Exclude version 6.30.0 of ipykernel, which add a regression on the debugger [#17744](https://github.com/jupyterlab/jupyterlab/pull/17744) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Avoid ipykernel 7.0.0a2 in CI [#17778](https://github.com/jupyterlab/jupyterlab/pull/17778) ([@ianthomas23](https://github.com/ianthomas23))
+- Add logs to the server startup in the `js-testing` tests [#17754](https://github.com/jupyterlab/jupyterlab/pull/17754) ([@jtpio](https://github.com/jtpio))
+- Bump form-data from 4.0.2 to 4.0.4 [#17717](https://github.com/jupyterlab/jupyterlab/pull/17717) ([@dependabot[bot]](https://github.com/apps/dependabot))
+- Pin to `httpx<1` [#17746](https://github.com/jupyterlab/jupyterlab/pull/17746) ([@jtpio](https://github.com/jtpio))
+- Add more retries on the frequently failing test [#17689](https://github.com/jupyterlab/jupyterlab/pull/17689) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Fix file browser navigation with `preferredDir` [#17723](https://github.com/jupyterlab/jupyterlab/pull/17723) ([@Darshan808](https://github.com/Darshan808))
+- Fix anchor navigation on sanitized HTML [#17727](https://github.com/jupyterlab/jupyterlab/pull/17727) ([@brichet](https://github.com/brichet))
+- Improve documentation for `jupyter.lab.transform` [#17726](https://github.com/jupyterlab/jupyterlab/pull/17726) ([@MUFFANUJ](https://github.com/MUFFANUJ))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-07-20&to=2025-08-15&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-07-20..2025-08-15&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-07-20..2025-08-15&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2025-07-20..2025-08-15&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-07-20..2025-08-15&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-07-20..2025-08-15&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-07-20..2025-08-15&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-07-20..2025-08-15&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-07-20..2025-08-15&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AZsailer+updated%3A2025-07-20..2025-08-15&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.4...5c433d7b6dc090db623e70b9cedc7b85f1b13eae))
@@ -512,8 +549,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-06-28&to=2025-07-20&type=c))
 
 [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-06-28..2025-07-20&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-06-28..2025-07-20&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2025-06-28..2025-07-20&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-06-28..2025-07-20&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-06-28..2025-07-20&type=Issues) | [@kr-2003](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akr-2003+updated%3A2025-06-28..2025-07-20&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-06-28..2025-07-20&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-06-28..2025-07-20&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-06-28..2025-07-20&type=Issues) | [@nkn2022](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ankn2022+updated%3A2025-06-28..2025-07-20&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.4
 
