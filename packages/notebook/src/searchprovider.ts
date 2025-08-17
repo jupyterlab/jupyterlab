@@ -648,7 +648,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (reverse && this.widget.content.mode === 'command') {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       const currentMatch = searchEngine.getCurrentMatch();
-      if (!currentMatch) {
+
+      const hasAnyMatch = searchEngine.matchesCount !== 0 ? true : false;
+
+      if (!currentMatch && !hasAnyMatch) {
         this._currentProviderIndex -= 1;
       }
       if (loop) {

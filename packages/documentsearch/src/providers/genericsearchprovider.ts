@@ -11,7 +11,7 @@ import { SearchProvider } from '../searchprovider';
 import { ITranslator } from '@jupyterlab/translation';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
-const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
+const SELECTED_CLASSES = ['CodeMirror-selectedtext', 'jp-current-match'];
 
 /**
  * HTML search engine
@@ -334,10 +334,13 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         markedNode.classList.add(...FOUND_CLASSES);
         markedNode.textContent = match.text;
 
+        const spanNode = document.createElement('span');
+        spanNode.appendChild(markedNode);
+
         const newNode = activeNode.splitText(match.position);
         newNode.textContent = newNode.textContent!.slice(match.text.length);
-        parent.insertBefore(markedNode, newNode);
-        return markedNode;
+        parent.insertBefore(spanNode, newNode);
+        return spanNode;
       });
 
       // Insert node in reverse order as we replace from last to first
