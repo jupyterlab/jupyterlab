@@ -1181,6 +1181,11 @@ class _AppHandler:
         disabled = page_config.get("disabledExtensions", {})
         if isinstance(disabled, list):
             disabled = dict.fromkeys(disabled, True)
+
+        # Short circuit if disabled is empty
+        if not disabled:
+            return False
+
         page_config["lockedExtensions"] = disabled
         write_page_config(page_config, level=level)
         return True
