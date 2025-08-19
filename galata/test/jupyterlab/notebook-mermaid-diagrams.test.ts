@@ -38,7 +38,11 @@ const EXPECTED_MERMAID_ORDER = [
   'xy',
   'block',
   'kanban',
-  'flowchart-elk'
+  'flowchart-elk',
+  'architecture',
+  'packet',
+  'radar',
+  'treemap',
 ];
 
 /**
