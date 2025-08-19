@@ -93,7 +93,7 @@ import {
   IRenderMime,
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { NbConvert } from '@jupyterlab/services';
+import { Contents, NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -107,18 +107,20 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IDisposableMenuItem,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon,
+  RankedMenu,
   refreshIcon,
   runIcon,
   stopIcon,
   tableRowsIcon
 } from '@jupyterlab/ui-components';
-import { ArrayExt } from '@lumino/algorithm';
+import { ArrayExt, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
@@ -129,7 +131,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel, Widget } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
@@ -174,6 +176,8 @@ namespace CommandIDs {
   export const closeAndShutdown = 'notebook:close-and-shutdown';
 
   export const trust = 'notebook:trust';
+
+  export const openNotebookNoKernel = 'notebook:open-notebook-no-kernel';
 
   export const exportToFormat = 'notebook:export-to-format';
 
@@ -1124,6 +1128,60 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to add "Notebook (no kernel)" to the "Open With" context menu.
+ *
+ * Follows a similar logic as the filebrowser plugin populating the "Open With" menu
+ * based on widget factories.
+ *
+ * TODO: investigate generalizing opening without a kernel to other file types that may be
+ * backed by a kernel.
+ */
+const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:open-with-no-kernel',
+  description: 'Adds the "Notebook (no kernel)" option to the Open With menu.',
+  requires: [IFileBrowserFactory],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, factory: IFileBrowserFactory): void => {
+    const { tracker } = factory;
+
+    let items: IDisposableMenuItem[] = [];
+
+    function updateOpenWithMenu(contextMenu: ContextMenu) {
+      // Clear previous items
+      items.forEach(item => item.dispose());
+      items.length = 0;
+
+      const openWith =
+        (contextMenu.menu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-contextmenu-open-with'
+        )?.submenu as RankedMenu) ?? null;
+
+      if (!openWith) {
+        return; // Bail early if the open with menu is not displayed
+      }
+
+      const selectedItems = tracker.currentWidget
+        ? Array.from(tracker.currentWidget.selectedItems())
+        : [];
+      const hasNotebooks = selectedItems.some(item => item.type === 'notebook');
+
+      if (hasNotebooks) {
+        items.push(
+          openWith.addItem({
+            args: {},
+            command: CommandIDs.openNotebookNoKernel
+          })
+        );
+      }
+    }
+
+    app.contextMenu.opened.connect(updateOpenWithMenu);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1148,7 +1206,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   languageServerPlugin,
   updateRawMimetype,
   customMetadataEditorFields,
-  activeCellTool
+  activeCellTool,
+  openWithNoKernelPlugin
 ];
 export default plugins;
 
@@ -2150,6 +2209,41 @@ function activateNotebookHandler(
             )
           }
         }
+      }
+    }
+  });
+
+  // Add a command for opening notebook without kernel.
+  commands.addCommand(CommandIDs.openNotebookNoKernel, {
+    execute: () => {
+      const filebrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      if (!filebrowser) {
+        return;
+      }
+
+      return Promise.all(
+        Array.from(
+          map(filebrowser.selectedItems(), (item: Contents.IModel) => {
+            // only check notebook files
+            if (item.type === 'notebook') {
+              return commands.execute('docmanager:open', {
+                path: item.path,
+                kernelPreference: {
+                  shouldStart: false
+                }
+              });
+            }
+          })
+        )
+      );
+    },
+    label: trans.__('Notebook (no kernel)'),
+    icon: notebookIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
