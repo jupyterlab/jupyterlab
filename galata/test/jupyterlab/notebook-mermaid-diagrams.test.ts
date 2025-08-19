@@ -42,7 +42,7 @@ const EXPECTED_MERMAID_ORDER = [
   'architecture',
   'packet',
   'radar',
-  'treemap',
+  'treemap'
 ];
 
 /**
