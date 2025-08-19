@@ -90,6 +90,27 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       return !!findEditorView();
     };
 
+    const isCodeFoldEnabled = () => {
+      const currentWidget = app.shell.currentWidget;
+      // Check for active notebook
+      if (
+        tracker.currentWidget !== null &&
+        tracker.currentWidget === currentWidget
+      ) {
+        return true;
+      }
+      // Check for file editor with focus method
+      const fileEditorWidget = currentWidget as any;
+      if (
+        fileEditorWidget &&
+        fileEditorWidget.content &&
+        typeof fileEditorWidget.content.editor?.focus === 'function'
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     app.commands.addCommand(CommandIDs.deleteLine, {
       label: trans.__('Delete the current line'),
       describedBy: {
@@ -228,7 +249,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         if (range) {
           foldCode(view);
         }
-      }
+      },
+      isEnabled: isCodeFoldEnabled
     });
 
     app.commands.addCommand(CommandIDs.unfoldCurrent, {
@@ -272,7 +294,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         if (range) {
           unfoldCode(view);
         }
-      }
+      },
+      isEnabled: isCodeFoldEnabled
     });
 
     app.commands.addCommand(CommandIDs.foldSubregions, {
@@ -352,7 +375,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         } catch (e) {
           // Silent fail
         }
-      }
+      },
+      isEnabled: isCodeFoldEnabled
     });
 
     app.commands.addCommand(CommandIDs.unfoldSubregions, {
@@ -413,7 +437,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         } catch (e) {
           // Silent fail
         }
-      }
+      },
+      isEnabled: isCodeFoldEnabled
     });
 
     app.commands.addCommand(CommandIDs.foldAll, {
@@ -455,7 +480,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         } catch (e) {
           // Silent fail
         }
-      }
+      },
+      isEnabled: isCodeFoldEnabled
     });
 
     app.commands.addCommand(CommandIDs.unfoldAll, {
@@ -497,7 +523,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         } catch (e) {
           // Silent fail
         }
-      }
+      },
+      isEnabled: isCodeFoldEnabled
     });
 
     if (palette) {
