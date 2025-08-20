@@ -285,6 +285,9 @@ export namespace NotebookActions {
    * @param mergeAbove - If only one cell is selected, indicates whether to merge it
    *    with the cell above (true) or below (false, default).
    *
+   * @param addExtraLine - Whether to add an extra newline between merged cell contents
+   *    (true, default) or use only a single newline (false).
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -296,7 +299,8 @@ export namespace NotebookActions {
    */
   export function mergeCells(
     notebook: Notebook,
-    mergeAbove: boolean = false
+    mergeAbove: boolean = false,
+    addExtraLine: boolean = true
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -365,7 +369,7 @@ export namespace NotebookActions {
     const newModel = {
       cell_type,
       metadata,
-      source: toMerge.join('\n\n'),
+      source: toMerge.join(addExtraLine ? '\n\n' : '\n'),
       attachments:
         primaryModel.cell_type === 'markdown' ||
         primaryModel.cell_type === 'raw'
