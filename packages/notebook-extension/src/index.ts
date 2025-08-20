@@ -3326,7 +3326,7 @@ function addCommands(
 
       if (current) {
         const addExtraLine =
-          (settings?.get('mergeCellsAddExtraLine').composite as boolean) ??
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
         return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
@@ -3346,7 +3346,7 @@ function addCommands(
 
       if (current) {
         const addExtraLine =
-          (settings?.get('mergeCellsAddExtraLine').composite as boolean) ??
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
         return NotebookActions.mergeCells(current.content, true, addExtraLine);
       }
@@ -3366,7 +3366,7 @@ function addCommands(
 
       if (current) {
         const addExtraLine =
-          (settings?.get('mergeCellsAddExtraLine').composite as boolean) ??
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
           true;
         return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
