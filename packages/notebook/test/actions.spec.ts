@@ -433,6 +433,36 @@ describe('@jupyterlab/notebook', () => {
         expect(model.cell_type).toEqual('code');
         expect(model.attachments).toBeUndefined();
       });
+
+      it('should merge cells with double newline when addExtraLine is true (default)', () => {
+        const firstCell = widget.activeCell!;
+        const firstSource = firstCell.model.sharedModel.getSource();
+        const secondCell = widget.widgets[1];
+        const secondSource = secondCell.model.sharedModel.getSource();
+        widget.select(secondCell);
+
+        NotebookActions.mergeCells(widget, false, true);
+
+        const expectedSource = firstSource + '\n\n' + secondSource;
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          expectedSource
+        );
+      });
+
+      it('should merge cells with single newline when addExtraLine is false', () => {
+        const firstCell = widget.activeCell!;
+        const firstSource = firstCell.model.sharedModel.getSource();
+        const secondCell = widget.widgets[1];
+        const secondSource = secondCell.model.sharedModel.getSource();
+        widget.select(secondCell);
+
+        NotebookActions.mergeCells(widget, false, false);
+
+        const expectedSource = firstSource + '\n' + secondSource;
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          expectedSource
+        );
+      });
     });
 
     describe('#deleteCells()', () => {
