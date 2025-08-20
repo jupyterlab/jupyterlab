@@ -1148,7 +1148,7 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
     const { tracker } = factory;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
 
-    let items: IDisposableMenuItem[] = [];
+    const items: IDisposableMenuItem[] = [];
 
     function updateOpenWithMenu(contextMenu: ContextMenu) {
       // Clear previous items
