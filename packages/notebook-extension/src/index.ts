@@ -93,7 +93,7 @@ import {
   IRenderMime,
   IRenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { Contents, NbConvert } from '@jupyterlab/services';
+import { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -120,7 +120,7 @@ import {
   stopIcon,
   tableRowsIcon
 } from '@jupyterlab/ui-components';
-import { ArrayExt, map } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
@@ -176,8 +176,6 @@ namespace CommandIDs {
   export const closeAndShutdown = 'notebook:close-and-shutdown';
 
   export const trust = 'notebook:trust';
-
-  export const openNotebookNoKernel = 'notebook:open-notebook-no-kernel';
 
   export const exportToFormat = 'notebook:export-to-format';
 
@@ -1140,9 +1138,15 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:open-with-no-kernel',
   description: 'Adds the "Notebook (no kernel)" option to the Open With menu.',
   requires: [IFileBrowserFactory],
+  optional: [ITranslator],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, factory: IFileBrowserFactory): void => {
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator | null
+  ): void => {
     const { tracker } = factory;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
 
     let items: IDisposableMenuItem[] = [];
 
@@ -1170,8 +1174,14 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
       if (hasNotebooks) {
         items.push(
           openWith.addItem({
-            args: {},
-            command: CommandIDs.openNotebookNoKernel
+            command: 'filebrowser:open',
+            args: {
+              label: trans.__('Notebook (no kernel)'),
+              factory: FACTORY,
+              kernelPreference: {
+                shouldStart: false
+              }
+            }
           })
         );
       }
@@ -2209,41 +2219,6 @@ function activateNotebookHandler(
             )
           }
         }
-      }
-    }
-  });
-
-  // Add a command for opening notebook without kernel.
-  commands.addCommand(CommandIDs.openNotebookNoKernel, {
-    execute: () => {
-      const filebrowser =
-        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
-      if (!filebrowser) {
-        return;
-      }
-
-      return Promise.all(
-        Array.from(
-          map(filebrowser.selectedItems(), (item: Contents.IModel) => {
-            // only check notebook files
-            if (item.type === 'notebook') {
-              return commands.execute('docmanager:open', {
-                path: item.path,
-                kernelPreference: {
-                  shouldStart: false
-                }
-              });
-            }
-          })
-        )
-      );
-    },
-    label: trans.__('Notebook (no kernel)'),
-    icon: notebookIcon,
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
       }
     }
   });
