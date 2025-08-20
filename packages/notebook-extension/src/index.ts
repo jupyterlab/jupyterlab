@@ -3325,7 +3325,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content);
+        const addExtraLine =
+          (settings?.get('mergeCellsAddExtraLine').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
     isEnabled,
@@ -3342,7 +3345,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, true);
+        const addExtraLine =
+          (settings?.get('mergeCellsAddExtraLine').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, true, addExtraLine);
       }
     },
     isEnabled,
@@ -3359,7 +3365,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, false);
+        const addExtraLine =
+          (settings?.get('mergeCellsAddExtraLine').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
     isEnabled,
