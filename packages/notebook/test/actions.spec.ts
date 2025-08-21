@@ -303,6 +303,58 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    it('should clear execution metadata when splitting a running cell', () => {
+      const cell = widget.activeCell as CodeCell;
+      // Simulate a running cell with only iopub.status.busy and iopub.execute_input
+      const busyTime = '2000-01-01T00:00:00.000Z';
+      const inputTime = '2000-01-01T00:00:01.000Z';
+      cell.model.setMetadata('execution', {
+        'iopub.status.busy': busyTime,
+        'iopub.execute_input': inputTime
+      });
+      cell.model.sharedModel.setSource('line1\nline2');
+      const editor = cell.editor as CodeEditor.IEditor;
+      editor.setCursorPosition(editor.getPositionAt(6)!);
+      NotebookActions.splitCell(widget);
+
+      // After split, both cells should have execution metadata cleared if reply is not present
+      const firstCell = widget.model!.cells.get(0);
+      const execMeta = firstCell.getMetadata('execution') as any;
+      expect(execMeta).toBeUndefined();
+
+      const secondCell = widget.model!.cells.get(1);
+      const secondExecMeta = secondCell.getMetadata('execution') as any;
+      expect(secondExecMeta['iopub.status.busy']).toEqual(busyTime);
+      expect(secondExecMeta['iopub.execute_input']).toEqual(inputTime);
+    });
+
+    it('should not clear or remove execution metadata when splitting an executed cell', () => {
+      const cell = widget.activeCell as CodeCell;
+      // Simulate a fully executed cell
+      const busyTime = '2000-01-01T00:00:00.000Z';
+      const inputTime = '2000-01-01T00:00:01.000Z';
+      const replyTime = '2000-01-01T00:00:02.000Z';
+      const execMeta = {
+        'iopub.status.busy': busyTime,
+        'iopub.execute_input': inputTime,
+        'shell.execute_reply': replyTime
+      };
+      cell.model.setMetadata('execution', execMeta);
+      cell.model.sharedModel.setSource('line1\nline2');
+      const editor = cell.editor as CodeEditor.IEditor;
+      editor.setCursorPosition(editor.getPositionAt(6)!);
+      NotebookActions.splitCell(widget);
+
+      // After split, both cells should have the full execution metadata
+      const firstCell = widget.model!.cells.get(0);
+      const firstExecMeta = firstCell.getMetadata('execution') as any;
+      expect(firstExecMeta).toEqual(execMeta);
+
+      const secondCell = widget.model!.cells.get(1);
+      const secondExecMeta = secondCell.getMetadata('execution') as any;
+      expect(secondExecMeta).toEqual(execMeta);
+    });
+
     describe('#mergeCells', () => {
       it('should merge the selected cells', () => {
         let source = widget.activeCell!.model.sharedModel.getSource() + '\n\n';
