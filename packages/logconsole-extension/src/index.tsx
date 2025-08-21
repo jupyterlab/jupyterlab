@@ -47,6 +47,7 @@ import { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
 import { LogConsoleStatus } from './status';
 
+const LOG_CONSOLE_FACTORY = 'LogConsole';
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
 /**
@@ -102,13 +103,13 @@ function activateLogConsole(
     toolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,
-      'LogConsole',
+      LOG_CONSOLE_FACTORY,
       LOG_CONSOLE_PLUGIN_ID,
       translator
     );
 
     toolbarRegistry.addFactory(
-      'LogConsole',
+      LOG_CONSOLE_FACTORY,
       'set-level',
       (panel: MainAreaWidget<LogConsolePanel>) =>
         new LogLevelSwitcher(panel.content, translator)
