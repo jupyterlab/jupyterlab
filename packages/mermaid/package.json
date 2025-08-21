@@ -46,8 +46,8 @@
     "@jupyterlab/rendermime-interfaces": "^3.12.6",
     "@lumino/coreutils": "^2.2.1",
     "@lumino/widgets": "^2.7.1",
-    "@mermaid-js/layout-elk": "^0.1.7",
-    "mermaid": "^11.6.0"
+    "@mermaid-js/layout-elk": "^0.1.9",
+    "mermaid": "^11.10.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
