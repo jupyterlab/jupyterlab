@@ -97,22 +97,20 @@ function activateLogConsole(
   let logConsolePanel: LogConsolePanel | null = null;
 
   let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
-  if (toolbarRegistry && settingRegistry) {
-    toolbarFactory = createToolbarFactory(
-      toolbarRegistry,
-      settingRegistry,
-      LOG_CONSOLE_FACTORY,
-      LOG_CONSOLE_PLUGIN_ID,
-      translator
-    );
+  toolbarFactory = createToolbarFactory(
+    toolbarRegistry,
+    settingRegistry,
+    LOG_CONSOLE_FACTORY,
+    LOG_CONSOLE_PLUGIN_ID,
+    translator
+  );
 
-    toolbarRegistry.addFactory(
-      LOG_CONSOLE_FACTORY,
-      'set-level',
-      (panel: MainAreaWidget<LogConsolePanel>) =>
-        new LogLevelSwitcher(panel.content, translator)
-    );
-  }
+  toolbarRegistry.addFactory(
+    LOG_CONSOLE_FACTORY,
+    'set-level',
+    (panel: MainAreaWidget<LogConsolePanel>) =>
+      new LogLevelSwitcher(panel.content, translator)
+  );
 
   const loggerRegistry = new LoggerRegistry({
     defaultRendermime: rendermime,
@@ -175,15 +173,7 @@ function activateLogConsole(
     logConsoleWidget.title.icon = listIcon;
     logConsoleWidget.title.label = trans.__('Log Console');
 
-    // const addCheckpointButton = new CommandToolbarButton({
-    //   commands: app.commands,
-    //   id: CommandIDs.addCheckpoint
-    // });
-
-    // const clearButton = new CommandToolbarButton({
-    //   commands: app.commands,
-    //   id: CommandIDs.clear
-    // });
+    setToolbar(logConsoleWidget, toolbarFactory);
 
     const notifyCommands = () => {
       app.commands.notifyCommandChanged(CommandIDs.addCheckpoint);
@@ -191,22 +181,6 @@ function activateLogConsole(
       app.commands.notifyCommandChanged(CommandIDs.open);
       app.commands.notifyCommandChanged(CommandIDs.setLevel);
     };
-
-    // set toolbar should go here. idk if panel or widget, i think widget
-    if (toolbarFactory) {
-      setToolbar(logConsoleWidget, toolbarFactory);
-    }
-
-    // logConsoleWidget.toolbar.addItem(
-    //   'lab-log-console-add-checkpoint',
-    //   addCheckpointButton
-    // );
-    // logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
-
-    // logConsoleWidget.toolbar.addItem(
-    //   'level',
-    //   new LogLevelSwitcher(logConsoleWidget.content, translator)
-    // );
 
     logConsolePanel.sourceChanged.connect(() => {
       notifyCommands();
