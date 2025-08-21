@@ -41,9 +41,9 @@
     "@jupyterlab/mermaid": "^4.5.0-alpha.3",
     "@jupyterlab/rendermime": "^4.5.0-alpha.3",
     "@lumino/coreutils": "^2.2.1",
-    "marked": "^15.0.7",
-    "marked-gfm-heading-id": "^4.1.1",
-    "marked-mangle": "^1.1.10"
+    "marked": "^16.2.0",
+    "marked-gfm-heading-id": "^4.1.2",
+    "marked-mangle": "^1.1.11"
   },
   "devDependencies": {
     "@types/d3": "^7.4.0",

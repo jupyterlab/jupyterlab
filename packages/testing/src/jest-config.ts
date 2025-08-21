@@ -15,6 +15,7 @@ const esModules = [
   'color',
   'exenv-es6',
   'lib0',
+  'marked',
   'nanoid',
   'vscode-ws-jsonrpc',
   'y-protocols',
