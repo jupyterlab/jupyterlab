@@ -68,15 +68,13 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   description: 'Provides the logger registry.',
   provides: ILoggerRegistry,
-  requires: [IRenderMimeRegistry, ITranslator],
-  optional: [
-    ILabShell,
-    ICommandPalette,
-    ILayoutRestorer,
+  requires: [
+    IRenderMimeRegistry,
+    ITranslator,
     ISettingRegistry,
-    IStatusBar,
     IToolbarWidgetRegistry
   ],
+  optional: [ILabShell, ICommandPalette, ILayoutRestorer, IStatusBar],
   autoStart: true
 };
 
@@ -87,12 +85,12 @@ function activateLogConsole(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
+  settingRegistry: ISettingRegistry,
+  toolbarRegistry: IToolbarWidgetRegistry,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
-  settingRegistry: ISettingRegistry | null,
-  statusBar: IStatusBar | null,
-  toolbarRegistry: IToolbarWidgetRegistry | null
+  statusBar: IStatusBar | null
 ): ILoggerRegistry {
   const trans = translator.load('jupyterlab');
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> | null = null;
