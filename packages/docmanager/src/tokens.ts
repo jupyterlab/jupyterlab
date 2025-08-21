@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISessionContext } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
@@ -245,7 +246,8 @@ export interface IDocumentManager extends IDisposable {
     path: string,
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined;
 
   /**
