@@ -12,8 +12,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   ICommandPalette,
+  IToolbarWidgetRegistry,
   MainAreaWidget,
+  setToolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
@@ -35,7 +38,6 @@ import {
 import {
   addIcon,
   clearIcon,
-  CommandToolbarButton,
   HTMLSelect,
   listIcon,
   ReactWidget
@@ -71,7 +73,8 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
     ICommandPalette,
     ILayoutRestorer,
     ISettingRegistry,
-    IStatusBar
+    IStatusBar,
+    IToolbarWidgetRegistry
   ],
   autoStart: true
 };
@@ -87,11 +90,30 @@ function activateLogConsole(
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
-  statusBar: IStatusBar | null
+  statusBar: IStatusBar | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): ILoggerRegistry {
   const trans = translator.load('jupyterlab');
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> | null = null;
   let logConsolePanel: LogConsolePanel | null = null;
+
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
+  if (toolbarRegistry && settingRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      'LogConsole',
+      LOG_CONSOLE_PLUGIN_ID,
+      translator
+    );
+
+    toolbarRegistry.addFactory(
+      'LogConsole',
+      'set-level',
+      (panel: MainAreaWidget<LogConsolePanel>) =>
+        new LogLevelSwitcher(panel.content, translator)
+    );
+  }
 
   const loggerRegistry = new LoggerRegistry({
     defaultRendermime: rendermime,
@@ -154,15 +176,15 @@ function activateLogConsole(
     logConsoleWidget.title.icon = listIcon;
     logConsoleWidget.title.label = trans.__('Log Console');
 
-    const addCheckpointButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.addCheckpoint
-    });
+    // const addCheckpointButton = new CommandToolbarButton({
+    //   commands: app.commands,
+    //   id: CommandIDs.addCheckpoint
+    // });
 
-    const clearButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.clear
-    });
+    // const clearButton = new CommandToolbarButton({
+    //   commands: app.commands,
+    //   id: CommandIDs.clear
+    // });
 
     const notifyCommands = () => {
       app.commands.notifyCommandChanged(CommandIDs.addCheckpoint);
@@ -171,16 +193,21 @@ function activateLogConsole(
       app.commands.notifyCommandChanged(CommandIDs.setLevel);
     };
 
-    logConsoleWidget.toolbar.addItem(
-      'lab-log-console-add-checkpoint',
-      addCheckpointButton
-    );
-    logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
+    // set toolbar should go here. idk if panel or widget, i think widget
+    if (toolbarFactory) {
+      setToolbar(logConsoleWidget, toolbarFactory);
+    }
 
-    logConsoleWidget.toolbar.addItem(
-      'level',
-      new LogLevelSwitcher(logConsoleWidget.content, translator)
-    );
+    // logConsoleWidget.toolbar.addItem(
+    //   'lab-log-console-add-checkpoint',
+    //   addCheckpointButton
+    // );
+    // logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
+
+    // logConsoleWidget.toolbar.addItem(
+    //   'level',
+    //   new LogLevelSwitcher(logConsoleWidget.content, translator)
+    // );
 
     logConsolePanel.sourceChanged.connect(() => {
       notifyCommands();
