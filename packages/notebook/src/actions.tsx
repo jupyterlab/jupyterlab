@@ -205,21 +205,31 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
+    const { cell_type, metadata } = child.model.sharedModel.toJSON();
+    const baseMetadata = JSON.parse(JSON.stringify(metadata ?? {}));
+
+    // If execution metadata is present but missing execute_reply (i.e., it is in running state),
+    // remove execution metadata entirely for new cells
+    if (
+      cell_type === 'code' &&
+      baseMetadata.execution &&
+      baseMetadata.execution['iopub.execute_input'] &&
+      !baseMetadata.execution['shell.execute_reply']
+    ) {
+      delete baseMetadata.execution;
+    }
+
     // Create new cells for all content pieces EXCEPT the last one
     // The last piece will remain in the original cell to preserve kernel connection
-    const newCells = offsets.slice(0, -2).map((offset, offsetIdx) => {
-      const { cell_type, metadata } = child.model.sharedModel.toJSON();
-
-      return {
-        cell_type,
-        metadata,
-        source: orig
-          .slice(offset, offsets[offsetIdx + 1])
-          .replace(/^\n+/, '')
-          .replace(/\n+$/, ''),
-        outputs: undefined
-      };
-    });
+    const newCells = offsets.slice(0, -2).map((offset, offsetIdx) => ({
+      cell_type,
+      metadata: JSON.parse(JSON.stringify(baseMetadata)),
+      source: orig
+        .slice(offset, offsets[offsetIdx + 1])
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, ''),
+      outputs: undefined
+    }));
 
     // Prepare the content for the original cell (last piece)
     const lastPieceStart = offsets[offsets.length - 2];
@@ -285,6 +295,9 @@ export namespace NotebookActions {
    * @param mergeAbove - If only one cell is selected, indicates whether to merge it
    *    with the cell above (true) or below (false, default).
    *
+   * @param addExtraLine - Whether to add an extra newline between merged cell contents
+   *    (true, default) or use only a single newline (false).
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -296,7 +309,8 @@ export namespace NotebookActions {
    */
   export function mergeCells(
     notebook: Notebook,
-    mergeAbove: boolean = false
+    mergeAbove: boolean = false,
+    addExtraLine: boolean = true
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -365,7 +379,7 @@ export namespace NotebookActions {
     const newModel = {
       cell_type,
       metadata,
-      source: toMerge.join('\n\n'),
+      source: toMerge.join(addExtraLine ? '\n\n' : '\n'),
       attachments:
         primaryModel.cell_type === 'markdown' ||
         primaryModel.cell_type === 'raw'

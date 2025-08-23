@@ -841,6 +841,12 @@
       "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",
       "type": "boolean",
       "default": false
+    },
+    "addExtraLineOnCellMerge": {
+      "title": "Add extra line when merging cells",
+      "description": "Whether to add an extra blank line between cells when merging them. When enabled, cells are joined with double newlines. When disabled, cells are joined with single newlines.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,
