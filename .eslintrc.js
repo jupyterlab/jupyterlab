@@ -21,14 +21,15 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier',
-    'plugin:react/recommended'
+    'plugin:react/recommended',
+    'plugin:regexp/recommended'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'ES2018',
     project: ['./tsconfig.eslint.json']
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'regexp'],
   overrides: [
     {
       files: ['packages/**/*.spec.ts', 'testutils/**/*.spec.ts'],
