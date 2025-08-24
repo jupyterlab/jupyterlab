@@ -57,7 +57,11 @@ test.describe('Notebook Run Mermaid', () => {
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
+    await page.screenshot({
+      path: 'docs/source/user/images/mermaid-use/mermaid-example.png'
+    });
   });
+    
 
   test('Run notebook with Mermaid cell in dark theme', async ({
     page,
