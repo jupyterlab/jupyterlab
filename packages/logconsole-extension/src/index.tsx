@@ -68,13 +68,15 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   description: 'Provides the logger registry.',
   provides: ILoggerRegistry,
-  requires: [
-    IRenderMimeRegistry,
-    ITranslator,
+  requires: [IRenderMimeRegistry, ITranslator],
+  optional: [
+    ILabShell,
+    ICommandPalette,
+    ILayoutRestorer,
+    IStatusBar,
     ISettingRegistry,
     IToolbarWidgetRegistry
   ],
-  optional: [ILabShell, ICommandPalette, ILayoutRestorer, IStatusBar],
   autoStart: true
 };
 
@@ -85,32 +87,34 @@ function activateLogConsole(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
-  settingRegistry: ISettingRegistry,
-  toolbarRegistry: IToolbarWidgetRegistry,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
-  statusBar: IStatusBar | null
+  statusBar: IStatusBar | null,
+  settingRegistry: ISettingRegistry | null,
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): ILoggerRegistry {
   const trans = translator.load('jupyterlab');
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> | null = null;
   let logConsolePanel: LogConsolePanel | null = null;
 
   let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
-  toolbarFactory = createToolbarFactory(
-    toolbarRegistry,
-    settingRegistry,
-    LOG_CONSOLE_FACTORY,
-    LOG_CONSOLE_PLUGIN_ID,
-    translator
-  );
+  if (settingRegistry && toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      LOG_CONSOLE_FACTORY,
+      LOG_CONSOLE_PLUGIN_ID,
+      translator
+    );
 
-  toolbarRegistry.addFactory(
-    LOG_CONSOLE_FACTORY,
-    'set-level',
-    (panel: MainAreaWidget<LogConsolePanel>) =>
-      new LogLevelSwitcher(panel.content, translator)
-  );
+    toolbarRegistry.addFactory(
+      LOG_CONSOLE_FACTORY,
+      'set-level',
+      (panel: MainAreaWidget<LogConsolePanel>) =>
+        new LogLevelSwitcher(panel.content, translator)
+    );
+  }
 
   const loggerRegistry = new LoggerRegistry({
     defaultRendermime: rendermime,
@@ -173,7 +177,9 @@ function activateLogConsole(
     logConsoleWidget.title.icon = listIcon;
     logConsoleWidget.title.label = trans.__('Log Console');
 
-    setToolbar(logConsoleWidget, toolbarFactory);
+    if (toolbarFactory) {
+      setToolbar(logConsoleWidget, toolbarFactory);
+    }
 
     const notifyCommands = () => {
       app.commands.notifyCommandChanged(CommandIDs.addCheckpoint);
