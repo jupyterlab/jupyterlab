@@ -150,8 +150,6 @@ print(data.head())`;
     await page.getByLabel('Change Console Prompt Position').first().click();
     await page.getByText('Prompt to top').click();
 
-    await page.waitForTimeout(500);
-
     const heightAtTop = await codeConsoleInput.boundingBox();
     expect(heightAtTop).not.toBeNull();
     expect(heightAtTop!.height).toBe(heightAtBottom!.height);
