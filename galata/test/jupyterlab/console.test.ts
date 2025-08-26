@@ -72,3 +72,56 @@ test.describe('Console (terminal mode)', () => {
     await expect(executedCell).toContainText('4194304');
   });
 });
+
+test.describe('Console Input Auto-Resize', () => {
+  test.beforeEach(async ({ page }) => setupConsole(page));
+
+  test('Input prompt auto-resizes with multiple lines of text', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await codeConsoleInput.boundingBox();
+    expect(initialHeight).not.toBeNull();
+
+    const multiLineCode = `def hello_world():
+print("Hello")
+print("World")
+return "Done"`;
+
+    await page.keyboard.type(multiLineCode);
+
+    const afterTypingHeight = await codeConsoleInput.boundingBox();
+    expect(afterTypingHeight).not.toBeNull();
+    expect(afterTypingHeight!.height).toBeGreaterThan(initialHeight!.height);
+  });
+
+  test('Input prompt auto-resize works with paste operations', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await codeConsoleInput.boundingBox();
+    expect(initialHeight).not.toBeNull();
+
+    const pastedCode = `import numpy as np
+import pandas as pd
+
+data = pd.DataFrame({
+    'x': [1, 2, 3, 4, 5],
+    'y': [2, 4, 6, 8, 10]
+})
+
+print(data.head())`;
+
+    await page.evaluate(async code => {
+      await navigator.clipboard.writeText(code);
+    }, pastedCode);
+
+    await page.keyboard.press('ControlOrMeta+v');
+
+    const afterPasteHeight = await codeConsoleInput.boundingBox();
+    expect(afterPasteHeight).not.toBeNull();
+    expect(afterPasteHeight!.height).toBeGreaterThan(initialHeight!.height);
+  });
+});
