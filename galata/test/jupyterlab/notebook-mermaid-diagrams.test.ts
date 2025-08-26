@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 import * as path from 'path';
 import { Locator } from '@playwright/test';
 
@@ -54,6 +59,11 @@ async function resizePageAndScreenshot(locator: Locator) {
   const page = locator.page();
   const box = await locator.boundingBox();
   const originalSize = page.viewportSize();
+  if (originalSize == null || box == null) {
+    throw new Error(`a size could not be measured: 
+      original: ${originalSize}
+      box: ${box}`);
+  }
   if (box.width > originalSize.width || box.height > originalSize.height) {
     const scaleFactor = Math.max(
       originalSize.width / box.width,
@@ -94,6 +104,9 @@ for (const theme of ['default', 'dark']) {
       await page.notebook.activate(fileName);
     });
 
+    const cellOutput = (page: IJupyterLabPageFixture, i: number) =>
+      page.locator(`.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`);
+
     for (let i = 0; i < EXPECTED_MERMAID_ORDER.length; i++) {
       let diagram = EXPECTED_MERMAID_ORDER[i];
       const iZero = `${i}`.padStart(2, '0');
@@ -101,11 +114,9 @@ for (const theme of ['default', 'dark']) {
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
       }) => {
-        const output = page.locator(
-          `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`
-        );
+        cellOutput(page, EXPECTED_MERMAID_ORDER.length - 1).waitFor();
+        const output = cellOutput(page, i);
         await output.waitFor();
-
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
           `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
         );
