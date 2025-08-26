@@ -108,7 +108,7 @@ for (const theme of ['default', 'dark']) {
       }) => {
         await page.notebook.selectCells(i);
         const output = page.locator(
-          `.jp-Cell.jp-mod-selected .jp-RenderedMermaid`
+          `.jp-Cell.jp-mod-selected .jp-RenderedMermaid img`
         );
         await output.waitFor({ state: 'visible' });
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
