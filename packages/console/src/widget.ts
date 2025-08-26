@@ -1045,6 +1045,11 @@ export class CodeConsole extends Widget {
       sizes = [100, 1];
     }
     this._splitPanel.setRelativeSizes(sizes);
+
+    requestAnimationFrame(() => {
+      // adjust the sizes if the prompt cell is moved with code in it
+      this._adjustSplitPanelForInputGrowth();
+    });
   }
 
   private _banner: RawCell | null = null;

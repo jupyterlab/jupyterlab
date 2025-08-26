@@ -124,4 +124,36 @@ print(data.head())`;
     expect(afterPasteHeight).not.toBeNull();
     expect(afterPasteHeight!.height).toBeGreaterThan(initialHeight!.height);
   });
+
+  test('Input prompt maintains auto-resize height when moved from bottom to top', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const pastedCode = `def complex_function():
+    for i in range(10):
+        if i % 2 == 0:
+            print(f"Even: {i}")
+        else:
+            print(f"Odd: {i}")
+    return "Completed"`;
+
+    await page.evaluate(async code => {
+      await navigator.clipboard.writeText(code);
+    }, pastedCode);
+
+    await page.keyboard.press('ControlOrMeta+v');
+
+    const heightAtBottom = await codeConsoleInput.boundingBox();
+    expect(heightAtBottom).not.toBeNull();
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    await page.waitForTimeout(500);
+
+    const heightAtTop = await codeConsoleInput.boundingBox();
+    expect(heightAtTop).not.toBeNull();
+    expect(heightAtTop!.height).toBe(heightAtBottom!.height);
+  });
 });
