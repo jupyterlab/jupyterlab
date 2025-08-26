@@ -317,6 +317,16 @@ export class CodeConsole extends Widget {
     if (this.isDisposed) {
       return;
     }
+
+    // Clean up ResizeObserver from the current prompt cell
+    const promptCell = this.promptCell;
+    if (promptCell) {
+      if (this._promptResizeObserver) {
+        this._promptResizeObserver.disconnect();
+        this._promptResizeObserver = null;
+      }
+    }
+
     this._msgIdCells = null!;
     this._msgIds = null!;
     this._history.dispose();
@@ -678,6 +688,11 @@ export class CodeConsole extends Widget {
       requestIdleCallback(() => {
         // Clear the signals to avoid memory leaks
         Signal.clearData(oldCell.editor);
+
+        if (this._promptResizeObserver) {
+          this._promptResizeObserver.disconnect();
+          this._promptResizeObserver = null;
+        }
       });
 
       // Ensure to clear the cursor
@@ -701,6 +716,14 @@ export class CodeConsole extends Widget {
     this._input.addWidget(promptCell);
 
     this._history.editor = promptCell.editor;
+
+    // Detect height changes
+    if (promptCell.node) {
+      this._promptResizeObserver = new ResizeObserver(() => {
+        this._adjustSplitPanelForInputGrowth();
+      });
+      this._promptResizeObserver.observe(promptCell.node);
+    }
 
     if (!this._config.clearCodeContentOnExecute) {
       promptCell.model.sharedModel.setSource(previousContent);
@@ -944,6 +967,53 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Adjust split panel sizes when the input cell grows.
+   */
+  private _adjustSplitPanelForInputGrowth(): void {
+    if (!this._input.node || !this._content.node) {
+      return;
+    }
+
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    // Only adjust for vertical layouts (top/bottom positions)
+    if (promptCellPosition === 'left' || promptCellPosition === 'right') {
+      return;
+    }
+
+    const inputHeight = this._input.node.scrollHeight;
+    const totalHeight = this._splitPanel.node.clientHeight;
+
+    if (totalHeight <= 0 || inputHeight <= 0) {
+      this._splitPanel.fit();
+      return;
+    }
+
+    const remainingHeight = totalHeight - inputHeight;
+    let contentRatio: number;
+    let inputRatio: number;
+
+    if (promptCellPosition === 'bottom') {
+      contentRatio = remainingHeight / totalHeight;
+      inputRatio = inputHeight / totalHeight;
+    } else {
+      inputRatio = inputHeight / totalHeight;
+      contentRatio = remainingHeight / totalHeight;
+    }
+
+    // Convert to the format expected by setRelativeSizes
+    const totalRatio = contentRatio + inputRatio;
+    if (totalRatio > 0) {
+      const normalizedSizes =
+        promptCellPosition === 'bottom'
+          ? [contentRatio / totalRatio, inputRatio / totalRatio]
+          : [inputRatio / totalRatio, contentRatio / totalRatio];
+
+      this._splitPanel.setRelativeSizes(normalizedSizes);
+    }
+  }
+
+  /**
    * Update the layout of the code console.
    */
   private _updateLayout(): void {
@@ -999,6 +1069,7 @@ export class CodeConsole extends Widget {
   private _focusedCell: Cell | null = null;
   private _translator: ITranslator;
   private _splitPanel: SplitPanel;
+  private _promptResizeObserver: ResizeObserver | null = null;
 }
 
 /**
