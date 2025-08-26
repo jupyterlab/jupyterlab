@@ -110,7 +110,7 @@ for (const theme of ['default', 'dark']) {
         const output = page.locator(
           `.jp-Cell.jp-mod-selected .jp-RenderedMermaid`
         );
-        await output.waitFor();
+        await output.waitFor({ state: 'visible' });
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
           `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
         );
