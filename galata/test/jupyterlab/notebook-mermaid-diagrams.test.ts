@@ -60,7 +60,7 @@ async function resizePageAndScreenshot(locator: Locator) {
   const box = await locator.boundingBox();
   const originalSize = page.viewportSize();
   if (originalSize == null || box == null) {
-    throw new Error(`a size could not be measured: 
+    throw new Error(`a size could not be measured:
       original: ${originalSize}
       box: ${box}`);
   }
