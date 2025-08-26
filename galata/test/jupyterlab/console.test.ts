@@ -154,4 +154,55 @@ print(data.head())`;
     expect(heightAtTop).not.toBeNull();
     expect(heightAtTop!.height).toBe(heightAtBottom!.height);
   });
+
+  test('Input prompt continues to auto-resize after code execution', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    // Get initial height of empty input
+    const initialHeight = await codeConsoleInput.boundingBox();
+    expect(initialHeight).not.toBeNull();
+
+    // Type multi-line code
+    const multiLineCode = `def test_function():
+    print("Line 1")
+    print("Line 2")
+    return "Done"`;
+
+    await page.keyboard.type(multiLineCode);
+
+    const heightBeforeExecution = await codeConsoleInput.boundingBox();
+    expect(heightBeforeExecution).not.toBeNull();
+    expect(heightBeforeExecution!.height).toBeGreaterThan(
+      initialHeight!.height
+    );
+
+    // Execute the code
+    await page.keyboard.press('Shift+Enter');
+
+    // Wait for execution to complete and new prompt to be created
+    await page.locator('text=| Idle').waitFor();
+
+    // Check that the new empty input cell has shrunk back to original size
+    const heightAfterExecution = await codeConsoleInput.boundingBox();
+    expect(heightAfterExecution).not.toBeNull();
+    expect(heightAfterExecution!.height).toBe(initialHeight!.height);
+
+    // Type new multi-line code in the new prompt cell
+    const moreCode = `import os
+import sys
+print("Testing auto-resize")
+print("After execution")`;
+
+    await page.keyboard.type(moreCode);
+
+    const heightAfterTyping = await codeConsoleInput.boundingBox();
+    expect(heightAfterTyping).not.toBeNull();
+
+    // The input should have grown again for the new multi-line content
+    expect(heightAfterTyping!.height).toBeGreaterThan(
+      heightAfterExecution!.height
+    );
+  });
 });
