@@ -104,9 +104,6 @@ for (const theme of ['default', 'dark']) {
       await page.notebook.activate(fileName);
     });
 
-    const cellOutput = (page: IJupyterLabPageFixture, i: number) =>
-      page.locator(`.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`);
-
     for (let i = 0; i < EXPECTED_MERMAID_ORDER.length; i++) {
       let diagram = EXPECTED_MERMAID_ORDER[i];
       const iZero = `${i}`.padStart(2, '0');
@@ -114,8 +111,10 @@ for (const theme of ['default', 'dark']) {
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
       }) => {
-        cellOutput(page, EXPECTED_MERMAID_ORDER.length - 1).waitFor();
-        const output = cellOutput(page, i);
+        await page.notebook.selectCells(i);
+        const output = page.locator(
+          `.jp-Cell.jp-mod-selected .jp-RenderedMermaid`
+        );
         await output.waitFor();
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
           `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
