@@ -30,7 +30,6 @@ See the sections below for more detailed information, or browse the rest of this
    extension_tutorial
    extension_multiple_ui
    extension_migration
-   ../developer/api
 
 Other resources
 ---------------

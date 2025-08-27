@@ -51,7 +51,6 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    css
    performance
    security
-   api
 
 .. contents:: Table of contents
     :local:
