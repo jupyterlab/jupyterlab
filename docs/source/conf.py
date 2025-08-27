@@ -391,6 +391,7 @@ html_theme_options = {
     "navbar_start": ["navbar-logo", "version-switcher"],
     "navigation_with_keys": False,
     "footer_start": ["copyright.html"],
+    "footer_end": ["privacy_footer.html", "theme-version"],
     "switcher": {
         # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
         # otherwise older versions won't list newer versions
