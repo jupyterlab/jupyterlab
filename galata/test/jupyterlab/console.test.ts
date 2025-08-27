@@ -160,11 +160,9 @@ print(data.head())`;
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    // Get initial height of empty input
     const initialHeight = await codeConsoleInput.boundingBox();
     expect(initialHeight).not.toBeNull();
 
-    // Type multi-line code
     const multiLineCode = `def test_function():
     print("Line 1")
     print("Line 2")
@@ -181,7 +179,6 @@ print(data.head())`;
     // Execute the code
     await page.keyboard.press('Shift+Enter');
 
-    // Wait for execution to complete and new prompt to be created
     await page.locator('text=| Idle').waitFor();
 
     // Check that the new empty input cell has shrunk back to original size
@@ -204,5 +201,34 @@ print("After execution")`;
     expect(heightAfterTyping!.height).toBeGreaterThan(
       heightAfterExecution!.height
     );
+  });
+
+  test('Input prompt shrinks when content is cleared', async ({ page }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await codeConsoleInput.boundingBox();
+    expect(initialHeight).not.toBeNull();
+
+    const multiLineCode = `def multi_line_function():
+    print("This is line 1")
+    print("This is line 2")
+    print("This is line 3")
+    for i in range(5):
+        print(f"Loop iteration {i}")
+    return "Finished"`;
+
+    await page.keyboard.type(multiLineCode);
+
+    const expandedHeight = await codeConsoleInput.boundingBox();
+    expect(expandedHeight).not.toBeNull();
+    expect(expandedHeight!.height).toBeGreaterThan(initialHeight!.height);
+
+    // Clear the input using Ctrl+A followed by Delete
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+
+    const shrunkHeight = await codeConsoleInput.boundingBox();
+    expect(shrunkHeight).not.toBeNull();
+    expect(shrunkHeight!.height).toBe(initialHeight!.height);
   });
 });

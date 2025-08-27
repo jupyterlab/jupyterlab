@@ -728,7 +728,12 @@ export class CodeConsole extends Widget {
     // Detect height changes
     if (promptCell.node) {
       this._promptResizeObserver = new ResizeObserver(() => {
-        this._adjustSplitPanelForInputGrowth();
+        if (!this._hasManualResize) {
+          this._resetInputSize();
+        }
+        requestAnimationFrame(() => {
+          this._adjustSplitPanelForInputGrowth();
+        });
       });
       this._promptResizeObserver.observe(promptCell.node);
     }
@@ -1008,7 +1013,7 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Adjust split panel sizes when the input cell grows.
+   * Adjust split panel sizes when the input cell grows or shrinks.
    */
   private _adjustSplitPanelForInputGrowth(): void {
     if (!this._input.node || !this._content.node || this._hasManualResize) {
