@@ -45,14 +45,12 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    :hidden:
 
    repo
-   components
    patterns
    Accessibility <accessibility>
    internationalization
    css
    performance
    security
-   api
 
 .. contents:: Table of contents
     :local:
