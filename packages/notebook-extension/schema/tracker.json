@@ -832,7 +832,7 @@
     },
     "windowingMode": {
       "title": "Windowing mode",
-      "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
+      "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport - 'contentVisibility': Browser-optimized rendering - Use content-visibility to skip offscreen cells",
       "enum": ["defer", "full", "none", "contentVisibility"],
       "default": "full"
     },
