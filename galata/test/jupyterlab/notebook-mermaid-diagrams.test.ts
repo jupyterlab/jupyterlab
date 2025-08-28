@@ -21,6 +21,8 @@ test.use({
 
 // prefer appending to this list, as the index ends up being relevant
 const EXPECTED_MERMAID_ORDER = [
+  'radar',
+  'treemap',
   'flowchart',
   'sequence',
   'class',
@@ -40,9 +42,7 @@ const EXPECTED_MERMAID_ORDER = [
   'kanban',
   'flowchart-elk',
   'architecture',
-  'packet',
-  'radar',
-  'treemap'
+  'packet'
 ];
 
 /**
@@ -96,7 +96,8 @@ for (const theme of ['default', 'dark']) {
 
     for (let i = 0; i < EXPECTED_MERMAID_ORDER.length; i++) {
       let diagram = EXPECTED_MERMAID_ORDER[i];
-      const iZero = `${i}`.padStart(2, '0');
+      const j = i >= 2 ? i - 2 : i;
+      const iZero = `${j}`.padStart(2, '0');
 
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
