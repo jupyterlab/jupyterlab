@@ -327,9 +327,3 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   contain: layout style paint;
   contain-intrinsic-size: 300px;
 }
-
-.jp-OutputArea.jp-content-visibility .dataframe {
-  content-visibility: auto;
-  contain: layout style paint;
-  contain-intrinsic-size: 300px 300px;
-}
