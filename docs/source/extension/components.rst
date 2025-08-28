@@ -64,5 +64,5 @@ The filebrowser example has two key source files:
 Reviewing the source code of each file will help you see the role that
 each file plays in the stand-alone filebrowser example.
 
-.. |filebrowser user interface| image:: filebrowser_example.png
-.. |filebrowser source code| image:: filebrowser_source.png
+.. |filebrowser user interface| image:: images/filebrowser_example.png
+.. |filebrowser source code| image:: images/filebrowser_source.png
