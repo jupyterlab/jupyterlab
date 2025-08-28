@@ -12,25 +12,21 @@ A JupyterLab extension is a package that contains a number of JupyterLab plugins
 
 See the sections below for more detailed information, or browse the rest of this page for an overview.
 
-.. warning::
-    Your extensions may break with new releases of JupyterLab. As noted in :ref:`versioning_notes`,
-    JupyterLab development and release cycles follow semantic versioning, so we recommend planning
-    your development process to account for possible future breaking changes that may disrupt users
-    of your extensions. Consider documenting your maintenance plans to users in your project, or
-    setting an upper bound on the version of JupyterLab your extension is compatible with in your
-    project's package metadata.
 
 .. toctree::
    :maxdepth: 1
 
    extension_points
    ui_components
+   components
    documents
    notebook
    virtualdom
    ui_helpers
    internationalization
    identity
+   ../developer/patterns
+   ../developer/css
    extension_tutorial
    extension_multiple_ui
    extension_migration
@@ -79,6 +75,14 @@ A JupyterLab plugin is the basic unit of extensibility in JupyterLab. An extensi
 An extension can be published both as a source extension on NPM and as a prebuilt extension (e.g., published as a Python package). In some cases, system administrators may even choose to install a prebuilt extension by directly copying the prebuilt bundle to an appropriate directory, circumventing the need to create a Python package. If a source extension and a prebuilt extension with the same name are installed in JupyterLab, the prebuilt extension takes precedence.
 
 Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multi-user systems where JupyterLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
+
+.. warning::
+    Your extensions may break with new releases of JupyterLab. As noted in :ref:`versioning_notes`,
+    JupyterLab development and release cycles follow semantic versioning, so we recommend planning
+    your development process to account for possible future breaking changes that may disrupt users
+    of your extensions. Consider documenting your maintenance plans to users in your project, or
+    setting an upper bound on the version of JupyterLab your extension is compatible with in your
+    project's package metadata.
 
 .. tip::
 
