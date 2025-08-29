@@ -38,8 +38,17 @@ const EXPECTED_MERMAID_ORDER = [
   'xy',
   'block',
   'kanban',
-  'flowchart-elk'
+  'flowchart-elk',
+  'architecture',
+  'packet',
+  'radar',
+  'treemap'
 ];
+
+const MERMAID_SNAPSHOT_THRESHOLD = {
+  radar: 0.02,
+  treemap: 0.02
+};
 
 /**
  * Workaround for playwright not handling screenshots
@@ -50,6 +59,11 @@ async function resizePageAndScreenshot(locator: Locator) {
   const page = locator.page();
   const box = await locator.boundingBox();
   const originalSize = page.viewportSize();
+  if (originalSize == null || box == null) {
+    throw new Error(`a size could not be measured:
+      original: ${originalSize}
+      box: ${box}`);
+  }
   if (box.width > originalSize.width || box.height > originalSize.height) {
     const scaleFactor = Math.max(
       originalSize.width / box.width,
@@ -97,13 +111,14 @@ for (const theme of ['default', 'dark']) {
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
       }) => {
+        await page.notebook.selectCells(i);
         const output = page.locator(
-          `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`
+          `.jp-Cell.jp-mod-selected .jp-RenderedMermaid img`
         );
-        await output.waitFor();
-
+        await output.waitFor({ state: 'visible' });
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
-          `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
+          `mermaid-diagram-${theme}-${iZero}-${diagram}.png`,
+          { threshold: MERMAID_SNAPSHOT_THRESHOLD[diagram] || void 0 }
         );
       });
     }

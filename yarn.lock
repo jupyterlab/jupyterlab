@@ -4023,9 +4023,9 @@ __metadata:
     "@lumino/coreutils": ^2.2.1
     "@types/d3": ^7.4.0
     "@types/dompurify": ^2.4.0
-    marked: ^15.0.7
-    marked-gfm-heading-id: ^4.1.1
-    marked-mangle: ^1.1.10
+    marked: ^16.2.0
+    marked-gfm-heading-id: ^4.1.2
+    marked-mangle: ^1.1.11
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown
@@ -4067,10 +4067,10 @@ __metadata:
     "@jupyterlab/rendermime-interfaces": ^3.12.6
     "@lumino/coreutils": ^2.2.1
     "@lumino/widgets": ^2.7.1
-    "@mermaid-js/layout-elk": ^0.1.7
+    "@mermaid-js/layout-elk": ^0.1.9
     "@types/jest": ^29.2.0
     jest: ^29.2.0
-    mermaid: ^11.6.0
+    mermaid: ^11.10.0
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown
@@ -5534,24 +5534,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mermaid-js/layout-elk@npm:^0.1.7":
-  version: 0.1.7
-  resolution: "@mermaid-js/layout-elk@npm:0.1.7"
+"@mermaid-js/layout-elk@npm:^0.1.9":
+  version: 0.1.9
+  resolution: "@mermaid-js/layout-elk@npm:0.1.9"
   dependencies:
     d3: ^7.9.0
     elkjs: ^0.9.3
   peerDependencies:
-    mermaid: ^11.0.0
-  checksum: 787d8e0bbaff4c2b329d92c5ac4daf8e1450c0f6a5678da5599a0efba7694a168b3179423909b1a47999ee134af4797b56502f4b438a18d06d17467c1c612956
+    mermaid: ^11.0.2
+  checksum: a4783005640555b41ab665df916ed338b4dceb86cc5a2db2f156e76e5f86531dbec869a0ce85d4660e268578ee38ece0f17d63764fc3e5a6e342b87267ce074e
   languageName: node
   linkType: hard
 
-"@mermaid-js/parser@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "@mermaid-js/parser@npm:0.4.0"
+"@mermaid-js/parser@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "@mermaid-js/parser@npm:0.6.2"
   dependencies:
     langium: 3.3.1
-  checksum: bb2412416807fea35a4c6dce8908cf54e1192293e1e16696b4b7a793b871cc03519738247a59ff8d8e2aac39665883f2c1e75567354a6498e874e18d973d3de7
+  checksum: 4ed8e11731429b444f2aa4c59c420a45960ecfa2efeb0f7065fdc78fec3ea7e9872280ae47baa844665fce030c5d96addcc31cfd4d1c8046b384397b8d55643e
   languageName: node
   linkType: hard
 
@@ -11012,15 +11012,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.2.4":
-  version: 3.2.4
-  resolution: "dompurify@npm:3.2.4"
+"dompurify@npm:^3.2.5":
+  version: 3.2.6
+  resolution: "dompurify@npm:3.2.6"
   dependencies:
     "@types/trusted-types": ^2.0.7
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 7a299cbbfe3b3d189e5fc77ab94ad312807e37fda1e24a927548b76a58a9c98137e612ce8d94a2f6cd3d3db59844f14fca477676b5eae6103568a82142771df6
+  checksum: 4d002997dbae13f6bdf0e6be014384129c83b1ee8cd3fca9d96f95b9142d1e96256924466a2fc25e7ffb6ede54290e5c4a7d1bd10f9b14cfa07928dd799c3b42
   languageName: node
   linkType: hard
 
@@ -14957,14 +14957,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"katex@npm:^0.16.9":
-  version: 0.16.21
-  resolution: "katex@npm:0.16.21"
+"katex@npm:^0.16.22":
+  version: 0.16.22
+  resolution: "katex@npm:0.16.22"
   dependencies:
     commander: ^8.3.0
   bin:
     katex: cli.js
-  checksum: 14180322a4e8fe9e4227a08b7d86fde9ee445859ff534e6a540b85eb5022b39ea2be70082776cce8c59b891c247fce3d1c1a090ea7821e005fd8b7bfee714936
+  checksum: 66a609b6f3e1a3e8634a03228dcd31cb88b7f39d057cfe5271417bc8eb64b85f256accdbd68f453b5714e4e9546192bad554f75c8b9adb91d6b0a7a93505376b
   languageName: node
   linkType: hard
 
@@ -15683,32 +15683,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked-gfm-heading-id@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "marked-gfm-heading-id@npm:4.1.1"
+"marked-gfm-heading-id@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "marked-gfm-heading-id@npm:4.1.2"
   dependencies:
     github-slugger: ^2.0.0
   peerDependencies:
-    marked: ">=13 <16"
-  checksum: 3f761f1b479a98af3b76d3ae40f6b80f3db682b138d052c6d892d061eced7d8e87936d165e6b371e0265cff1933024c0313114550af405f82c2b2ce62f30f186
+    marked: ">=13 <17"
+  checksum: 47020ae9e4433371a6059fecb6698044b95a07232904c59cc2ca52995ade692724cddc2c0ee9c3db42f65ed37ceb6957afce3d9bd0d30b7d17afba45c03cdd1b
   languageName: node
   linkType: hard
 
-"marked-mangle@npm:^1.1.10":
-  version: 1.1.10
-  resolution: "marked-mangle@npm:1.1.10"
+"marked-mangle@npm:^1.1.11":
+  version: 1.1.11
+  resolution: "marked-mangle@npm:1.1.11"
   peerDependencies:
-    marked: ">=4 <16"
-  checksum: 76ca4736e7f3839a5866329bfa2c274fb5699ef4962ed32b16b10b76c0aeb3ca5f67461041c9d7b8ab56900e84cb377aaa596a097f7327baa89342de442a138b
+    marked: ">=4 <17"
+  checksum: e2872cbe62dc60347eaef2494049a3fb65bcef3f1097407dd8e3f946856085d3ce05b516ba0d2307cbf91019fd38ad25704200c9dc601a0da29d64c76c803027
   languageName: node
   linkType: hard
 
-"marked@npm:^15.0.7":
-  version: 15.0.7
-  resolution: "marked@npm:15.0.7"
+"marked@npm:^16.2.0":
+  version: 16.2.0
+  resolution: "marked@npm:16.2.0"
   bin:
     marked: bin/marked.js
-  checksum: 5863eddd39b9b47dd8dc0d9aa1a4a675580c5c2194ea25b887b905ea9c1e8115e3da50293db4814d5e84a98c466f164c4aebf6c3b9a0e86ecde43c1c4273dbee
+  checksum: a7c6c7d8c21970e06d6157c858a971ded9a36dec5aba1849fc0824fe374f4ebb3cd2e3b8dfce85e1e5f8a26adc13aa785635fc024324bd5af1625d49f4fee6fe
   languageName: node
   linkType: hard
 
@@ -15849,13 +15849,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mermaid@npm:^11.6.0":
-  version: 11.6.0
-  resolution: "mermaid@npm:11.6.0"
+"mermaid@npm:^11.10.0":
+  version: 11.10.0
+  resolution: "mermaid@npm:11.10.0"
   dependencies:
     "@braintree/sanitize-url": ^7.0.4
     "@iconify/utils": ^2.1.33
-    "@mermaid-js/parser": ^0.4.0
+    "@mermaid-js/parser": ^0.6.2
     "@types/d3": ^7.4.3
     cytoscape: ^3.29.3
     cytoscape-cose-bilkent: ^4.1.0
@@ -15864,16 +15864,16 @@ __metadata:
     d3-sankey: ^0.12.3
     dagre-d3-es: 7.0.11
     dayjs: ^1.11.13
-    dompurify: ^3.2.4
-    katex: ^0.16.9
+    dompurify: ^3.2.5
+    katex: ^0.16.22
     khroma: ^2.1.0
     lodash-es: ^4.17.21
-    marked: ^15.0.7
+    marked: ^16.0.0
     roughjs: ^4.6.6
     stylis: ^4.3.6
     ts-dedent: ^2.2.0
     uuid: ^11.1.0
-  checksum: 1796e7c96ed511801f364d301bcda9d3942cd5a6f86be16f087ab1cc5d9988e27f2c5a03db3997bf2d77172d91c37caf1e4a42c95b1a39ce6ebf18836cc5956b
+  checksum: 1af6acfb6aed4efc494d26fda6f3e4a5fe4c07a2885ad50be127d6f0408bb9b68ab96e383bf870a93a6ae4d7e7d98470ce87eb7aa71269cf0efa854e398cc97c
   languageName: node
   linkType: hard
 
