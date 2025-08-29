@@ -47,7 +47,7 @@ const EXPECTED_MERMAID_ORDER = [
 
 const MERMAID_SNAPSHOT_THRESHOLD = {
   radar: 0.02,
-  treemap: 0.02,
+  treemap: 0.02
 };
 
 /**
