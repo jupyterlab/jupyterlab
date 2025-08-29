@@ -709,7 +709,6 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private _clearModel(): void {
     this._model.callstack.frames = [];
-    // this._model.variables.scopes = [];
   }
 
   /**
