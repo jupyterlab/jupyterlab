@@ -45,6 +45,11 @@ const EXPECTED_MERMAID_ORDER = [
   'treemap'
 ];
 
+const MERMAID_SNAPSHOT_THRESHOLD = {
+  radar: 0.02,
+  treemap: 0.02,
+};
+
 /**
  * Workaround for playwright not handling screenshots
  * for elements larger than viewport, derived from:
@@ -108,11 +113,12 @@ for (const theme of ['default', 'dark']) {
       }) => {
         await page.notebook.selectCells(i);
         const output = page.locator(
-          `.jp-Cell.jp-mod-selected .jp-RenderedMermaid figure`
+          `.jp-Cell.jp-mod-selected .jp-RenderedMermaid img`
         );
         await output.waitFor({ state: 'visible' });
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
-          `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
+          `mermaid-diagram-${theme}-${iZero}-${diagram}.png`,
+          { threshold: MERMAID_SNAPSHOT_THRESHOLD[diagram] || void 0 }
         );
       });
     }
