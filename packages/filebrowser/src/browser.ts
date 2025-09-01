@@ -126,7 +126,8 @@ export class FileBrowser extends SidePanel {
       model,
       renderer,
       translator,
-      state: options.state
+      state: options.state,
+      handleOpenFile: options.handleOpenFile
     });
     this.listing.addClass(LISTING_CLASS);
     this.listing.selectionChanged.connect(() => {
@@ -623,6 +624,11 @@ export namespace FileBrowser {
      * the columns sizes
      */
     state?: IStateDB;
+
+    /**
+     * Callback for when a file is being open by the file browser
+     */
+    handleOpenFile?: (path: string) => void;
   }
 
   /**
