@@ -1406,6 +1406,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       'trusted' | 'isDirty' | 'executionCount' | 'executionState'
     >
   ) => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (change.name) {
       case 'executionCount':
       case 'executionState':
