@@ -369,7 +369,7 @@ Plugin ID Format
 
 Plugin IDs usually follow the format: ``package-name:plugin-name``
 
-For a complete list of core plugin IDs, see the :ref:`Core Plugins <core-plugins>` documentation.
+For a complete list of core plugin IDs, see the :ref:`Core Plugins <core_tokens>` documentation.
 
 Alternatives
 ------------
