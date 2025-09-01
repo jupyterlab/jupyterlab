@@ -549,7 +549,6 @@ div.jp-Cell-Placeholder-content-3 {
 .jp-Notebook-cell.jp-content-visibility {
   content-visibility: auto;
   contain: layout style paint; /* Isolates layout, style, and paint for this element */
-  contain-intrinsic-size: 300px; /* Estimated height used to avoid layout shifts before content is visible */
 }
 
 /*-----------------------------------------------------------------------------

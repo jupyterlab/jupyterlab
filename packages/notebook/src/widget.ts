@@ -971,7 +971,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // Apply content visibility to this newly created cell
     if (this._notebookConfig.windowingMode === 'contentVisibility') {
-      this._applyContentVisibility(cell);
+      this._applyContentVisibility(cell, cellIdx);
     }
 
     this.layout.insertWidget(cellIdx, cell);
@@ -1030,26 +1030,23 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
   private _applyContentVisibilityToAllCells(): void {
     requestAnimationFrame(() => {
-      for (const cell of this.cellsArray) {
-        this._applyContentVisibility(cell);
-      }
+      this.cellsArray.forEach((cell, i) => {
+        this._applyContentVisibility(cell, i);
+      });
     });
   }
 
-  private _applyContentVisibility(cell: Cell<ICellModel>): void {
+  private _applyContentVisibility(cell: Cell<ICellModel>, index: number): void {
     const isContentVisibility =
       this._notebookConfig.windowingMode === 'contentVisibility';
 
     cell.toggleClass('jp-content-visibility', isContentVisibility);
 
-    if (cell.model.type === 'code') {
-      const codeCell = cell as CodeCell;
-      if (codeCell.outputArea) {
-        codeCell.outputArea.toggleClass(
-          'jp-content-visibility',
-          isContentVisibility
-        );
-      }
+    if (isContentVisibility) {
+      const estHeight = this._viewModel.estimateWidgetSize(index);
+      cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+    } else {
+      cell.node.style.removeProperty('contain-intrinsic-size');
     }
   }
 

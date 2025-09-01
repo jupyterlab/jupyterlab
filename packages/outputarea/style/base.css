@@ -321,9 +321,3 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 .jp-TrimmedOutputs > a:hover {
   text-decoration: none;
 }
-
-.jp-OutputArea.jp-content-visibility {
-  content-visibility: auto;
-  contain: layout style paint;
-  contain-intrinsic-size: 300px;
-}
