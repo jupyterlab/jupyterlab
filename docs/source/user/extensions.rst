@@ -86,7 +86,7 @@ may have been disabled by your system administrator for security reasons.
 
    An extension will be listed if the Python package has the classifier:
    `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
-   
+
    Moreover it is advised that the extension author to provide the ``install.json`` file
    to specify the exact Python package name.
 
