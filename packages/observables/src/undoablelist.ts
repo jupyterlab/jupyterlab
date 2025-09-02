@@ -213,6 +213,12 @@ export class ObservableUndoableList<T>
       case 'move':
         this.move(change.newIndex, change.oldIndex);
         break;
+      case 'clear':
+        index = 0;
+        for (const value of change.oldValues) {
+          this.insert(index++, serializer.fromJSON(value));
+        }
+        break;
       default:
         return;
     }
@@ -244,6 +250,9 @@ export class ObservableUndoableList<T>
         break;
       case 'move':
         this.move(change.oldIndex, change.newIndex);
+        break;
+      case 'clear':
+        this.clear();
         break;
       default:
         return;

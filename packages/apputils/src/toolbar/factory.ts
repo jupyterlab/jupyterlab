@@ -300,6 +300,9 @@ export function createToolbarFactory(
             })
           );
           break;
+        case 'clear':
+          toolbar.clear();
+          break;
       }
     };
 
@@ -429,6 +432,11 @@ export function setToolbar(
               item.name,
               item.widget
             );
+          });
+          break;
+        case 'clear':
+          Array.from(toolbar_.children()).forEach(child => {
+            child.parent = null;
           });
           break;
       }

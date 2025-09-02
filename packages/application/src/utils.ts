@@ -116,6 +116,7 @@ export function addSemanticCommand(options: ISemanticCommandOptions): void {
           []
         );
         if (commandIds.includes(args.id)) {
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (args.type) {
             case 'changed':
             case 'many-changed':
