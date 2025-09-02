@@ -2702,7 +2702,8 @@ export namespace DirListing {
     allowDragDropUpload?: boolean;
 
     /**
-     * Callback for when a file is being open by the file browser
+     * Callback overriding action performed when user asks to open a file.
+     * The default is to open the file in the main area if it is not open already, or to reveal it otherwise.
      */
     handleOpenFile?: (path: string) => void;
   }
