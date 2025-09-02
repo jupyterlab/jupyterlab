@@ -215,6 +215,54 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.removeChild(node);
     });
 
+    it('should return one selected file upon double click', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const dialog = FileDialog.getOpenFiles({
+        manager,
+        title: 'Select a notebook',
+        host: node,
+        filter: (value: Contents.IModel) =>
+          value.type === 'notebook' ? {} : null
+      });
+
+      await waitForDialog();
+      await framePromise();
+
+      let counter = 0;
+      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      expect(listing).toBeTruthy();
+
+      let items = listing.getElementsByTagName('li');
+      counter = 0;
+      // Wait for the directory listing to be populated
+      while (items.length === 0 && counter < 100) {
+        await sleep(10);
+        items = listing.getElementsByTagName('li');
+        counter++;
+      }
+
+      // Fails if there is no items shown
+      expect(items.length).toBeGreaterThan(0);
+
+      // Emulate notebook file dbl click
+      const item = listing.querySelector('li[data-file-type="notebook"]')!;
+      simulate(item, 'mousedown');
+      simulate(item, 'dblclick');
+
+      // No need to accept the dialog! It should resolve itself upon dblclick
+      // await acceptDialog();
+      const result = await dialog;
+      const files = result.value!;
+      expect(files.length).toBe(1);
+      expect(files[0].type).toBe('notebook');
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
+
+      document.body.removeChild(node);
+    });
+
     it('should return current path if nothing is selected', async () => {
       const dialog = FileDialog.getOpenFiles({
         manager
