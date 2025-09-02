@@ -44,6 +44,7 @@ export * from './mainareawidget';
 export * from './menufactory';
 export * from './notification';
 export * from './printing';
+export * from './quickopen';
 export * from './runningSessions';
 export * from './sanitizer';
 export * from './semanticCommand';

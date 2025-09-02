@@ -10,6 +10,8 @@ import '@jupyterlab/statusbar/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/application/style/index.js';
+import '@jupyterlab/docmanager/style/index.js';
+import '@jupyterlab/filebrowser/style/index.js';
 import '@jupyterlab/mainmenu/style/index.js';
 
 import './base.css';

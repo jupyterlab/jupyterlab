@@ -1,0 +1,50 @@
+{
+  "title": "Quick Open",
+  "description": "Quick open file dialog settings.",
+  "jupyter.lab.setting-icon": "ui-components:search",
+  "jupyter.lab.setting-icon-label": "Quick Open",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "apputils:quickopen",
+      "keys": ["Accel Shift P"],
+      "selector": "body"
+    }
+  ],
+  "properties": {
+    "excludes": {
+      "title": "Exclude Patterns",
+      "description": "File patterns to exclude from quick open results",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        ".*",
+        "*.pyc",
+        "__pycache__",
+        "node_modules",
+        ".git",
+        ".vscode",
+        ".DS_Store",
+        "build",
+        "static",
+        "lib"
+      ]
+    },
+    "depth": {
+      "title": "Maximum Search Depth",
+      "description": "Maximum directory depth to search. Use null for unlimited depth.",
+      "type": "number",
+      "minimum": 1,
+      "default": 20
+    },
+    "relativeSearch": {
+      "title": "Relative Search",
+      "description": "Whether to search relative to the current file browser path or from the root",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
+}
