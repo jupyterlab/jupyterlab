@@ -60,7 +60,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test --project galata jupyterlab --grep "Notebook Mermaid Diagrams"
+          jlpm run test --project galata jupyterlab
           mv galata/test-results galata/test-jupyterlab-results || true
           # Run once benchmark tests to ensure they have no regression
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
