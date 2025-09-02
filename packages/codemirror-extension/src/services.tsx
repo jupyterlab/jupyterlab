@@ -132,6 +132,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
         registry.addExtension(extensionFactory);
       }
 
+      console.log('dane');
       if (settingRegistry) {
         const updateSettings = (settings: ISettingRegistry.ISettings) => {
           registry.baseConfiguration =
@@ -146,18 +147,36 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
           settings.changed.connect(updateSettings);
         });
 
+        console.log('registry.baseConfiguration', registry.baseConfiguration);
+
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
+            if (props.name === 'codeCellConfig') {
+              console.log('pause');
+            }
+            let defaultFormData: Record<string, any>;
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
             ) as any;
-            const defaultFormData: Record<string, any> = {};
+            if (['codeCellConfig'].includes(props.name)) {
+              defaultFormData =
+                props.formContext.defaultFormData.codeCellConfig;
+              console.log('defaultFormData', defaultFormData);
+            } else {
+              defaultFormData = {};
+            }
             // Only provide customizable options
             for (const [key, value] of Object.entries(
               registry.defaultConfiguration
             )) {
-              if (typeof properties[key] !== 'undefined') {
+              if (
+                typeof properties[key] !== 'undefined' &&
+                !(key in defaultFormData)
+              ) {
+                if (key === 'lineWrap') {
+                  console.log('dev doodoo');
+                }
                 defaultFormData[key] = value;
               }
             }

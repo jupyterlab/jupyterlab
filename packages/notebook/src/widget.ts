@@ -1121,19 +1121,19 @@ export namespace StaticNotebook {
    */
   export const defaultEditorConfig: IEditorConfig = {
     code: {
-      lineNumbers: true,
-      lineWrap: true,
+      lineNumbers: false,
+      lineWrap: false,
       matchBrackets: true,
       tabFocusable: false
     },
     markdown: {
-      lineNumbers: true,
+      lineNumbers: false,
       lineWrap: true,
-      matchBrackets: true,
+      matchBrackets: false,
       tabFocusable: false
     },
     raw: {
-      lineNumbers: true,
+      lineNumbers: false,
       lineWrap: true,
       matchBrackets: false,
       tabFocusable: false
