@@ -242,7 +242,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the content for the given line number.
    */
   getLine(line: number): string | undefined {
-    // TODO: CM6 remove +1 when CM6 first line number has propagated
+    // Jupyter uses a 0-based index for line numbers, CodeMirror 6 uses a 1-based index
     line = line + 1;
     return line <= this.doc.lines ? this.doc.line(line).text : undefined;
   }
@@ -251,7 +251,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    // TODO: CM6 remove +1 when CM6 first line number has propagated
+    // Jupyter uses a 0-based index for line numbers, CodeMirror 6 uses a 1-based index
     return this.doc.line(position.line + 1).from + position.column;
   }
 
@@ -259,7 +259,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    // TODO: CM6 remove -1 when CM6 first line number has propagated
+    // Jupyter uses a 0-based index for line numbers, CodeMirror 6 uses a 1-based index
     const line = this.doc.lineAt(offset);
     return { line: line.number - 1, column: offset - line.from };
   }
