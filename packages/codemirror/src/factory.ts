@@ -3,7 +3,6 @@
 
 import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { EditorView, keymap } from '@codemirror/view';
 import { EditorExtensionRegistry } from './extension';
 import { CodeMirrorEditor } from './editor';
 import { EditorLanguageRegistry } from './language';
@@ -59,16 +58,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
       ...options,
       config: { ...this.documentCodeMirrorConfig, ...(options.config ?? {}) },
       inline: false,
-      extensions: [
-        keymap.of([
-          {
-            key: 'Shift-Enter',
-            run: (target: EditorView) => {
-              return true;
-            }
-          }
-        ])
-      ].concat(options.extensions ?? [])
+      extensions: options.extensions ?? []
     });
   };
 
