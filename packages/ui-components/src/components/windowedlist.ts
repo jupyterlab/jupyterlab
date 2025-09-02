@@ -639,6 +639,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       case 'set':
         this.resetAfterIndex(changes.newIndex - 1);
         break;
+      case 'clear':
+        this._widgetSizers.length = 0;
+        this.resetAfterIndex(-1);
+        break;
     }
   }
 
