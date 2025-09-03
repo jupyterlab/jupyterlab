@@ -412,6 +412,7 @@ function activate(
   let launcherDisposables: IDisposable | null = null;
   let paletteDisposables: IDisposable | null = null;
   let menuDisposables: IDisposable | null = null;
+  let filebrowsermenuDisposables: IDisposable | null = null;
 
   const updateKernelFileTypeComponents = (fileTypes: Set<IFileTypeData>) => {
     // Dispose of previous entries if they exist
@@ -428,6 +429,11 @@ function activate(
     if (menuDisposables) {
       menuDisposables.dispose();
       menuDisposables = null;
+    }
+
+    if (filebrowsermenuDisposables) {
+      filebrowsermenuDisposables.dispose();
+      filebrowsermenuDisposables = null;
     }
 
     if (launcher) {
@@ -449,6 +455,11 @@ function activate(
     if (menu) {
       menuDisposables = Commands.addKernelLanguageMenuItems(menu, fileTypes);
     }
+
+    filebrowsermenuDisposables = Commands.addKernelLanguageBrowserMenuItems(
+      app,
+      fileTypes
+    );
   };
 
   // Update if new specs are added later
