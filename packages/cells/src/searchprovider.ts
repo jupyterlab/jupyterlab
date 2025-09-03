@@ -123,6 +123,15 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider.length = 0;
   }
 
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this.currentProviderIndex === -1) {
+      return super.getCurrentMatch();
+    } else if (this.currentProviderIndex < this.outputsProvider.length) {
+      const provider = this.outputsProvider[this.currentProviderIndex];
+      return provider.currentMatch ?? undefined;
+    }
+  }
+
   /**
    * Highlight the next match.
    *
