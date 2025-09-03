@@ -7,7 +7,7 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { ToolbarButton } from '@jupyterlab/ui-components';
 
-import { Message } from '@lumino/messaging';
+import { ISignal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
@@ -63,12 +63,14 @@ export class InputArea extends Widget {
   constructor(options: InputArea.IOptions) {
     super();
     this.addClass(INPUT_AREA_CLASS);
-    const { contentFactory, editorOptions, model } = options;
+    const { contentFactory, editorOptions, hoverChanged, model } = options;
     this.model = model;
     this.contentFactory = contentFactory;
 
     // Prompt
-    const prompt = (this._prompt = contentFactory.createInputPrompt());
+    const prompt = (this._prompt = contentFactory.createInputPrompt({
+      hoverChanged
+    }));
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
@@ -185,7 +187,7 @@ export namespace InputArea {
   /**
    * The options used to create an `InputArea`.
    */
-  export interface IOptions {
+  export interface IOptions extends IInputPromptOptions {
     /**
      * The model used by the widget.
      */
@@ -220,7 +222,7 @@ export namespace InputArea {
     /**
      * Create an input prompt.
      */
-    createInputPrompt(): IInputPrompt;
+    createInputPrompt(options?: IInputPromptOptions): IInputPrompt;
   }
 
   /**
@@ -246,8 +248,8 @@ export namespace InputArea {
     /**
      * Create an input prompt.
      */
-    createInputPrompt(): IInputPrompt {
-      return new InputPrompt();
+    createInputPrompt(options?: IInputPromptOptions): IInputPrompt {
+      return new InputPrompt(options);
     }
 
     private _editor: CodeEditor.Factory;
@@ -270,11 +272,21 @@ export namespace InputArea {
       editorFactory: CodeEditor.Factory;
     }
   }
-}
 
-/** ****************************************************************************
- * InputPrompt
- ******************************************************************************/
+  /** ****************************************************************************
+   * InputPrompt
+   ******************************************************************************/
+
+  /**
+   * The options to pass to the input prompt constructor.
+   */
+  export interface IInputPromptOptions {
+    /**
+     * Signal triggered when the hover changed on cell widget.
+     */
+    hoverChanged?: ISignal<Widget, boolean>;
+  }
+}
 
 /**
  * The interface for the input prompt indicator.
@@ -300,7 +312,7 @@ export class InputPrompt extends Widget implements IInputPrompt {
   /*
    * Create an input prompt widget.
    */
-  constructor() {
+  constructor(options?: InputArea.IInputPromptOptions) {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
     // Two sub-elements: prompt text and run button
@@ -308,15 +320,18 @@ export class InputPrompt extends Widget implements IInputPrompt {
     const promptIndicator = (this._promptIndicator =
       new InputPromptIndicator());
     layout.addWidget(promptIndicator);
+
+    options?.hoverChanged?.connect(this._hoverChanged);
   }
 
   /**
    * The run button.
    */
-  get runButton(): ToolbarButton {
+  get runButton(): ToolbarButton | undefined {
     return this._runButton;
   }
   set runButton(button: ToolbarButton) {
+    this._runButton?.dispose();
     this._runButton = button;
     this._runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
     (this.layout as PanelLayout).addWidget(this._runButton);
@@ -341,35 +356,17 @@ export class InputPrompt extends Widget implements IInputPrompt {
    * @param event - The DOM event sent to the widget.
    *
    */
-  handleEvent(event: Event): void {
-    switch (event.type) {
-      case 'mouseover':
-        this._isHovered = true;
-        this.updateRunButtonVisibility();
-        break;
-      case 'mouseout':
-        this._isHovered = false;
-        this.updateRunButtonVisibility();
-        break;
-    }
-  }
-
-  protected onAfterAttach(msg: Message): void {
-    this.node.addEventListener('mouseover', this, true);
-    this.node.addEventListener('mouseout', this, true);
-  }
-
-  protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('mouseover', this, true);
-    this.node.removeEventListener('mouseout', this, true);
-  }
+  private _hoverChanged = (_: Widget, hover: boolean): void => {
+    this._isHovered = hover;
+    this.updateRunButtonVisibility();
+  };
 
   private updateRunButtonVisibility() {
     if (!this._runButton) {
       return;
     }
 
-    // Show the run button if we're hovered and if we're in the active cell
+    // Show the run button if the cell is hovered.
     if (this._isHovered) {
       this._runButton.show();
       this._promptIndicator.hide();
@@ -389,7 +386,7 @@ export class InputPrompt extends Widget implements IInputPrompt {
   private _executionCount: string | null = null;
   private _isHovered: boolean = false;
   private _promptIndicator: InputPromptIndicator;
-  private _runButton: ToolbarButton;
+  private _runButton: ToolbarButton | undefined;
 }
 
 export class InputPromptIndicator

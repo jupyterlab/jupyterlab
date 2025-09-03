@@ -266,6 +266,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     return this._inViewportChanged;
   }
 
+  get hoverChanged(): ISignal<Widget, boolean> {
+    return this._hoverChanged;
+  }
+
   /**
    * Whether the cell is a placeholder not yet fully rendered or not.
    */
@@ -613,12 +617,16 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const input = (this._input = new InputArea({
       model,
       contentFactory,
-      editorOptions: this.getEditorOptions()
+      editorOptions: this.getEditorOptions(),
+      hoverChanged: this.hoverChanged
     }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
+
+    inputWrapper.node.addEventListener('mouseenter', this);
+    inputWrapper.node.addEventListener('mouseleave', this);
 
     this._inputPlaceholder = new InputPlaceholder({
       callback: () => {
@@ -670,6 +678,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.update();
+  }
+
+  /**
+   * Handle `before-detach` messages.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._inputWrapper?.node.removeEventListener('mouseenter', this);
+    this._inputWrapper?.node.removeEventListener('mouseleave', this);
   }
 
   /**
@@ -727,6 +743,23 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   }
 
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   */
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'mouseenter':
+        this._hoverChanged.emit(true);
+        break;
+      case 'mouseleave':
+        this._hoverChanged.emit(false);
+        break;
+    }
+  }
+
   protected prompt = '';
   protected translator: ITranslator;
   protected _displayChanged = new Signal<this, void>(this);
@@ -779,6 +812,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }, 0);
   private _syncCollapse = false;
   private _syncEditable = false;
+  private _hoverChanged = new Signal<Widget, boolean>(this);
 }
 
 /**
@@ -939,8 +973,8 @@ export namespace Cell {
     /**
      * Create an input prompt.
      */
-    createInputPrompt(): IInputPrompt {
-      return new InputPrompt();
+    createInputPrompt(options?: InputArea.IInputPromptOptions): IInputPrompt {
+      return new InputPrompt(options);
     }
 
     /**
