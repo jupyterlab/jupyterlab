@@ -1010,6 +1010,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     // Apply content visibility when notebook settings update (without reload)
     if (this._notebookConfig.windowingMode === 'contentVisibility') {
       this._applyContentVisibilityToAllCells();
+    } else {
+      // Remove content-visibility from all cells
+      this.cellsArray.forEach((cell, i) => {
+        cell.toggleClass('jp-content-visibility', false);
+        cell.node.style.removeProperty('contain-intrinsic-size');
+      });
     }
   }
 
