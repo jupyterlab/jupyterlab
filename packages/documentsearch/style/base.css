@@ -237,6 +237,19 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   height: 100%;
 }
 
+.jp-DocumentSearch-replace-button-disabled {
+  display: inline-block;
+  text-align: center;
+  cursor: not-allowed;
+  box-sizing: border-box;
+  color: var(--jp-ui-font-color2);
+
+  /* height - 2 * (padding of wrapper) */
+  line-height: calc(var(--jp-private-document-search-button-height) - 2px);
+  width: 100%;
+  height: 100%;
+}
+
 .jp-DocumentSearch-replace-button:focus {
   outline: none;
 }
