@@ -16,16 +16,10 @@
       "path": "../cell-toolbar"
     },
     {
-      "path": "../notebook"
-    },
-    {
       "path": "../settingregistry"
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }
