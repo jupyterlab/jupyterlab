@@ -45,8 +45,19 @@ export class SourcesBody extends Widget {
 
     this._model.currentFrameChanged.connect(async (_, frame) => {
       if (!frame) {
-        this._clearEditor();
+        if (this._clearTimer) {
+          window.clearTimeout(this._clearTimer);
+        }
+        this._clearTimer = window.setTimeout(() => {
+          this._clearEditor();
+          this._clearTimer = null;
+        }, 100);
         return;
+      }
+
+      if (this._clearTimer) {
+        window.clearTimeout(this._clearTimer);
+        this._clearTimer = null;
       }
 
       void this._showSource(frame);
@@ -133,6 +144,7 @@ export class SourcesBody extends Widget {
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
   private _mimeTypeService: IEditorMimeTypeService;
+  private _clearTimer: number | null = null;
 }
 
 /**
