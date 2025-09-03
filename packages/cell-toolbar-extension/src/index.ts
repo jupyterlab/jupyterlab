@@ -90,7 +90,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
 
 const runCellButton: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID.runButton,
-  description: 'Add the cells toolbar.',
+  description: 'Add the run cell button on each cell prompt.',
   autoStart: true,
   requires: [INotebookTracker],
   optional: [ITranslator],
