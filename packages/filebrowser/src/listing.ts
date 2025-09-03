@@ -238,6 +238,11 @@ export class DirListing extends Widget {
     this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
     this._state = options.state || null;
+    this._handleOpenFile =
+      options.handleOpenFile ||
+      ((path: string) => {
+        this._manager.openOrReveal(path);
+      });
 
     // Get the width of the "modified" column
     this._updateModifiedSize(this.node);
@@ -1578,7 +1583,7 @@ export class DirListing extends Widget {
         );
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path);
+      this._handleOpenFile(path);
     }
   }
 
@@ -2528,6 +2533,7 @@ export class DirListing extends Widget {
     direction: 'ascending',
     key: 'name'
   };
+  private _handleOpenFile: (path: string) => void;
   private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
   private _drag: Drag | null = null;
   private _dragData: {
@@ -2621,6 +2627,12 @@ export namespace DirListing {
      * the columns sizes
      */
     state?: IStateDB;
+
+    /**
+     * Callback overriding action performed when user asks to open a file.
+     * The default is to open the file in the main area if it is not open already, or to reveal it otherwise.
+     */
+    handleOpenFile?: (path: string) => void;
   }
 
   /**
