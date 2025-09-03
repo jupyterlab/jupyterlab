@@ -148,16 +148,24 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
+            let defaultFormData: Record<string, any>;
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
             ) as any;
-            const defaultFormData: Record<string, any> = {};
+            if (props.name in props.formContext.defaultFormData) {
+              defaultFormData = props.formContext.defaultFormData[props.name];
+            } else {
+              defaultFormData = {};
+            }
             // Only provide customizable options
             for (const [key, value] of Object.entries(
               registry.defaultConfiguration
             )) {
-              if (typeof properties[key] !== 'undefined') {
+              if (
+                typeof properties[key] !== 'undefined' &&
+                !(key in defaultFormData)
+              ) {
                 defaultFormData[key] = value;
               }
             }
