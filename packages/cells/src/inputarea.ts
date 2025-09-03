@@ -370,16 +370,9 @@ export class InputPrompt extends Widget implements IInputPrompt {
     if (this._isHovered) {
       this._runButton.show();
       this._promptIndicator.hide();
-      return;
-    }
-
-    // Show the run button if the execution count is null
-    if (this.executionCount) {
+    } else {
       this._runButton.hide();
       this._promptIndicator.show();
-    } else {
-      this._runButton.show();
-      this._promptIndicator.hide();
     }
   }
 
