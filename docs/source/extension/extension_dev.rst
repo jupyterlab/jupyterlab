@@ -91,6 +91,8 @@ Because prebuilt extensions do not require a JupyterLab rebuild, they have a dis
 Plugins
 -------
 
+*Main article:* :ref:`jupyterlab-plugin-system`
+
 A JupyterLab plugin is the basic unit of extensibility in JupyterLab. JupyterLab supports several types of plugins:
 
 -  **Application plugins:** Application plugins are the fundamental building block of JupyterLab functionality. Application plugins interact with JupyterLab and other plugins by requiring services provided by other plugins, and optionally providing their own service to the system. Application plugins in core JupyterLab include the main menu system, the file browser, and the notebook, console, and file editor components.
