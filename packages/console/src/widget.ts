@@ -134,6 +134,11 @@ export class CodeConsole extends Widget {
 
     layout.addWidget(this._splitPanel);
 
+    // Listen for manual split panel resizing
+    this._splitPanel.handleMoved.connect(() => {
+      this._hasManualResize = true;
+    }, this);
+
     // initialize the console with defaults
     this.setConfig({
       clearCellsOnExecute: false,
@@ -317,6 +322,16 @@ export class CodeConsole extends Widget {
     if (this.isDisposed) {
       return;
     }
+
+    // Clean up ResizeObserver from the current prompt cell
+    const promptCell = this.promptCell;
+    if (promptCell) {
+      if (this._promptResizeObserver) {
+        this._promptResizeObserver.disconnect();
+        this._promptResizeObserver = null;
+      }
+    }
+
     this._msgIdCells = null!;
     this._msgIds = null!;
     this._history.dispose();
@@ -675,9 +690,14 @@ export class CodeConsole extends Widget {
       // the `readOnly` configuration gets updated before editor signals
       // get disconnected (see `Cell.onUpdateRequest`).
       const oldCell = promptCell;
+      const promptResizeObserver = this._promptResizeObserver;
       requestIdleCallback(() => {
         // Clear the signals to avoid memory leaks
         Signal.clearData(oldCell.editor);
+
+        if (promptResizeObserver) {
+          promptResizeObserver.disconnect();
+        }
       });
 
       // Ensure to clear the cursor
@@ -700,7 +720,23 @@ export class CodeConsole extends Widget {
     // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
 
+    // Reset input size to default (unless the split has manually been resized)
+    this._resetInputSize();
+
     this._history.editor = promptCell.editor;
+
+    // Detect height changes
+    if (promptCell.node) {
+      this._promptResizeObserver = new ResizeObserver(() => {
+        if (!this._hasManualResize) {
+          this._resetInputSize();
+        }
+        requestAnimationFrame(() => {
+          this._adjustSplitPanelForInputGrowth();
+        });
+      });
+      this._promptResizeObserver.observe(promptCell.node);
+    }
 
     if (!this._config.clearCodeContentOnExecute) {
       promptCell.model.sharedModel.setSource(previousContent);
@@ -944,10 +980,93 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Calculate relative sizes for split panel based on prompt cell position.
+   */
+  private _calculateRelativeSizes(): number[] {
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    let sizes = [1, 1];
+    if (promptCellPosition === 'top') {
+      sizes = [1, 100];
+    } else if (promptCellPosition === 'bottom') {
+      sizes = [100, 1];
+    }
+    return sizes;
+  }
+
+  /**
+   * Reset input area size to default when new prompt is created.
+   */
+  private _resetInputSize(): void {
+    if (this._hasManualResize) {
+      return;
+    }
+
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    // Only reset for vertical layouts (top/bottom positions)
+    if (promptCellPosition === 'left' || promptCellPosition === 'right') {
+      return;
+    }
+
+    this._splitPanel.setRelativeSizes(this._calculateRelativeSizes());
+  }
+
+  /**
+   * Adjust split panel sizes when the input cell grows or shrinks.
+   */
+  private _adjustSplitPanelForInputGrowth(): void {
+    if (!this._input.node || !this._content.node || this._hasManualResize) {
+      return;
+    }
+
+    const { promptCellPosition = 'bottom' } = this._config;
+
+    // Only adjust for vertical layouts (top/bottom positions)
+    if (promptCellPosition === 'left' || promptCellPosition === 'right') {
+      return;
+    }
+
+    const inputHeight = this._input.node.scrollHeight;
+    const totalHeight = this._splitPanel.node.clientHeight;
+
+    if (totalHeight <= 0 || inputHeight <= 0) {
+      this._splitPanel.fit();
+      return;
+    }
+
+    const remainingHeight = totalHeight - inputHeight;
+    let contentRatio: number;
+    let inputRatio: number;
+
+    if (promptCellPosition === 'bottom') {
+      contentRatio = remainingHeight / totalHeight;
+      inputRatio = inputHeight / totalHeight;
+    } else {
+      inputRatio = inputHeight / totalHeight;
+      contentRatio = remainingHeight / totalHeight;
+    }
+
+    // Convert to the format expected by setRelativeSizes
+    const totalRatio = contentRatio + inputRatio;
+    if (totalRatio > 0) {
+      const normalizedSizes =
+        promptCellPosition === 'bottom'
+          ? [contentRatio / totalRatio, inputRatio / totalRatio]
+          : [inputRatio / totalRatio, contentRatio / totalRatio];
+
+      this._splitPanel.setRelativeSizes(normalizedSizes);
+    }
+  }
+
+  /**
    * Update the layout of the code console.
    */
   private _updateLayout(): void {
     const { promptCellPosition = 'bottom' } = this._config;
+
+    // Reset manual resize flag when layout changes
+    this._hasManualResize = false;
 
     this._splitPanel.orientation = ['left', 'right'].includes(
       promptCellPosition
@@ -967,14 +1086,12 @@ export class CodeConsole extends Widget {
       this._splitPanel.insertWidget(1, this._content);
     }
 
-    // Default relative sizes
-    let sizes = [1, 1];
-    if (promptCellPosition === 'top') {
-      sizes = [1, 100];
-    } else if (promptCellPosition === 'bottom') {
-      sizes = [100, 1];
-    }
-    this._splitPanel.setRelativeSizes(sizes);
+    this._splitPanel.setRelativeSizes(this._calculateRelativeSizes());
+
+    requestAnimationFrame(() => {
+      // adjust the sizes if the prompt cell is moved with code in it
+      this._adjustSplitPanelForInputGrowth();
+    });
   }
 
   private _banner: RawCell | null = null;
@@ -999,6 +1116,8 @@ export class CodeConsole extends Widget {
   private _focusedCell: Cell | null = null;
   private _translator: ITranslator;
   private _splitPanel: SplitPanel;
+  private _promptResizeObserver: ResizeObserver | null = null;
+  private _hasManualResize = false;
 }
 
 /**
