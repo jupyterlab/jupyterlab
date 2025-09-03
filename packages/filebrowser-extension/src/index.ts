@@ -58,6 +58,7 @@ import {
   markdownIcon,
   newFolderIcon,
   pasteIcon,
+  pythonIcon,
   RankedMenu,
   refreshIcon,
   stopIcon,
@@ -111,6 +112,8 @@ namespace CommandIDs {
   export const createNewDirectory = 'filebrowser:create-new-directory';
 
   export const createNewFile = 'filebrowser:create-new-file';
+
+  export const createNewPythonFile = 'filebrowser:create-new-python-file';
 
   export const createNewMarkdownFile = 'filebrowser:create-new-markdown-file';
 
@@ -1476,6 +1479,24 @@ function addCommands(
     },
     icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('New File'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.createNewPythonFile, {
+    execute: () => {
+      const widget = tracker.currentWidget;
+
+      if (widget) {
+        return widget.createNewFile({ ext: 'py' });
+      }
+    },
+    icon: pythonIcon,
+    label: trans.__('New Python File'),
     describedBy: {
       args: {
         type: 'object',
