@@ -26,16 +26,20 @@ export class RunCellButtonExtension
   createNew(panel: NotebookPanel) {
     const updateButtons = () => {
       panel.content.widgets.forEach(cell => {
-        cell.ready.then(() => {
-          if (!cell.inputArea) {
-            return;
-          }
-          if (this._enabled) {
-            cell.inputArea.prompt.runButton = this._runButtonFactory(panel);
-          } else {
-            cell.inputArea.prompt.runButton = undefined;
-          }
-        });
+        cell.ready
+          .then(() => {
+            if (!cell.inputArea) {
+              return;
+            }
+            if (this._enabled && cell.model.type === 'code') {
+              cell.inputArea.prompt.runButton = this._runButtonFactory(panel);
+            } else {
+              cell.inputArea.prompt.runButton = undefined;
+            }
+          })
+          .catch(() => {
+            // no-op
+          });
       });
     };
 
