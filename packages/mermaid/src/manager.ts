@@ -352,6 +352,7 @@ namespace Private {
     let promises: Promise<any>[] = [];
 
     for (const match of [...text.matchAll(RE_DEFAULT_RENDERER)]) {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch ((match && match[2]) || null) {
         case 'elk':
           promises.push(Private.ensureMermaidElk());

@@ -458,7 +458,6 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
       const schemaIds = id.split('_');
       schemaIds.shift();
       const schemaId = schemaIds.join('.');
-
       const isRoot = schemaId === '';
 
       const hasCustomField =

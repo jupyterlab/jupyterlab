@@ -26,7 +26,7 @@ documentation <developer_extensions>`.
 Installing Extensions
 ---------------------
 
-A JupyterLab extension contains JavaScript that is installed into Jupyterlab and
+A JupyterLab extension contains JavaScript that is installed into JupyterLab and
 run in the browser. An extension contains one or more plugins that extend JupyterLab.
 The preferred JupyterLab extension type is a *prebuilt extension* because it does not
 require rebuilding JupyterLab JavaScript files.
@@ -81,12 +81,13 @@ may have been disabled by your system administrator for security reasons.
 
 .. note::
 
-   Since JupyterLab v4, the default manager uses PyPI.org as source for the available
+   Since JupyterLab v4, the default manager uses PyPI.org as the source for the available
    extensions and ``pip`` to install them.
 
    An extension will be listed if the Python package has the classifier:
    `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt <https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt>`__
-   Moreover it is advised for extension author to provide the ``install.json`` file
+
+   Moreover it is advised that the extension author to provide the ``install.json`` file
    to specify the exact Python package name.
 
 .. warning::
@@ -143,8 +144,8 @@ your screen.
 Finding Extensions
 ^^^^^^^^^^^^^^^^^^
 
-You can use the extension manager to find extensions for JupyterLab. To discovery
-freely among the currently available extensions, expand the "Discovery" section.
+You can use the extension manager to find extensions for JupyterLab. To look
+through the currently available extensions, expand the "Discovery" section.
 This triggers a search for all JupyterLab extensions on the PyPI.org registry, and
 the results are listed alphabetically.
 
@@ -207,7 +208,7 @@ e.g. to use the *read-only* manager:
 PyPI Manager settings
 """""""""""""""""""""
 
-The ``pypi`` manager have specific options that can be set using command line options:
+The ``pypi`` manager has specific options that can be set using command line options:
 
 - ``--PyPIExtensionManager.base_url``: PyPI warehouse base URL - default to https://pypi.org/pypi.
 - ``--PyPIExtensionManager.rpc_request_throttling``: Throttling time between requests to the PyPI XML-RPC API in seconds - default 1.
@@ -315,7 +316,7 @@ The details for the ``listings_tornado_options`` are listed
 on `this page <https://www.tornadoweb.org/en/stable/httpclient.html#tornado.httpclient.HTTPRequest>`__
 (for example, you could pass ``{'request_timeout': 10}`` to change the HTTP request timeout value).
 
-The listings are json files hosted on the URIs you have given.
+The listings are JSON files hosted on the URIs you have given.
 
 For each entry, you have to define the `name` of the extension as published in the NPM registry.
 The ``name`` attribute supports regular expressions.

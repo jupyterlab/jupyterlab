@@ -405,6 +405,8 @@ close the notebook without saving it.`,
         break;
       case 'remove':
         break;
+      case 'clear':
+        break;
       case 'set':
         change.newValues.forEach(cell => {
           cell.contentChanged.connect(this.triggerContentChange, this);

@@ -865,13 +865,16 @@ export namespace Commands {
           // no selection, submit whole line and advance
           code = editor.getLine(selection.start.line);
           const cursor = editor.getCursorPosition();
+          const nextLine = editor.getLine(cursor.line + 1);
+
           if (cursor.line + 1 === editor.lineCount) {
             const text = editor.model.sharedModel.getSource();
             editor.model.sharedModel.setSource(text + '\n');
           }
+
           editor.setCursorPosition({
             line: cursor.line + 1,
-            column: cursor.column
+            column: nextLine?.length ?? 0 // Place cursor at end of line if line has content else place at start of line
           });
         }
 

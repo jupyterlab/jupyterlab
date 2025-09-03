@@ -1390,7 +1390,8 @@ function addCommands(
 
             return commands.execute('docmanager:open', {
               factory: factory,
-              path: item.path
+              path: item.path,
+              kernelPreference: args['kernelPreference']
             });
           })
         )
