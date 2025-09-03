@@ -54,6 +54,7 @@ import {
   filterIcon,
   folderIcon,
   IDisposableMenuItem,
+  LabIcon,
   linkIcon,
   markdownIcon,
   newFolderIcon,
@@ -1467,19 +1468,40 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.createNewFile, {
-    execute: () => {
+    execute: (args: { ext: string; label: string }) => {
       const widget = tracker.currentWidget;
 
       if (widget) {
-        return widget.createNewFile({ ext: 'txt' });
+        return widget.createNewFile({ ext: args.ext ?? 'txt' });
       }
     },
-    icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('New File'),
+    icon: (args: { iconName: string }) => {
+      return args.iconName
+        ? LabIcon.resolve({ icon: args.iconName })
+        : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
+    },
+    label: (args: { ext: string; label: string }) => {
+      return trans.__(args.label ?? 'New File');
+    },
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          label: {
+            type: 'string',
+            default: 'New File',
+            description: trans.__('The command label.')
+          },
+          iconName: {
+            type: 'string',
+            description: trans.__('The command icon.')
+          },
+          ext: {
+            type: 'string',
+            default: 'txt',
+            description: trans.__('The file extension.')
+          }
+        }
       }
     }
   });
