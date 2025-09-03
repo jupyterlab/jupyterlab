@@ -12,18 +12,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import {
-  INotebookTracker,
-  NotebookActions,
-  NotebookPanel
-} from '@jupyterlab/notebook';
+  CellBarExtension,
+  RunCellButtonExtension
+} from '@jupyterlab/cell-toolbar';
 import {
   createToolbarFactory,
   IToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { runIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
 const PLUGIN_ID = {
   cellToolbar: '@jupyterlab/cell-toolbar-extension:plugin',
@@ -90,49 +87,27 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
 
 const runCellButton: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID.runButton,
-  description: 'Add the run cell button on each cell prompt.',
+  description: 'Add the run cell buttons',
   autoStart: true,
-  requires: [INotebookTracker],
-  optional: [ITranslator],
-  activate: (
+  optional: [ISettingRegistry, ITranslator],
+  activate: async (
     app: JupyterFrontEnd,
-    tracker: INotebookTracker,
+    settingRegistry: ISettingRegistry,
     translator: ITranslator
   ) => {
-    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    const extension = new RunCellButtonExtension({ translator });
 
-    const runButtonFactory = (panel: NotebookPanel) =>
-      new ToolbarButton({
-        icon: runIcon,
-        onClick: () => {
-          void NotebookActions.runAndAdvance(
-            panel.content,
-            panel.sessionContext
-          );
-        },
-        tooltip: trans.__('Run the selected cells and advance')
-      });
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(PLUGIN_ID.runButton);
 
-    tracker.widgetAdded.connect((_, panel) => {
-      const cellListChanged = () => {
-        panel.content.widgets.forEach(cell => {
-          cell.ready
-            .then(() => {
-              if (cell.inputArea) {
-                cell.inputArea.prompt.runButton = runButtonFactory(panel);
-              }
-            })
-            .catch(() => {
-              // no-op
-            });
-        });
-      };
-      panel.content.model?.cells.changed.connect(cellListChanged);
+      function updateEnabled() {
+        extension.enabled = setting.get('showRunButton').composite as boolean;
+      }
 
-      panel.disposed.connect(() => {
-        panel.content.model?.cells.changed.disconnect(cellListChanged);
-      });
-    });
+      updateEnabled();
+      setting.changed.connect(updateEnabled);
+    }
+    app.docRegistry.addWidgetExtension('Notebook', extension);
   }
 };
 

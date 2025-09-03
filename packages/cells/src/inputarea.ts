@@ -330,11 +330,14 @@ export class InputPrompt extends Widget implements IInputPrompt {
   get runButton(): ToolbarButton | undefined {
     return this._runButton;
   }
-  set runButton(button: ToolbarButton) {
+  set runButton(button: ToolbarButton | undefined) {
     this._runButton?.dispose();
     this._runButton = button;
-    this._runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
-    (this.layout as PanelLayout).addWidget(this._runButton);
+
+    if (this._runButton) {
+      this._runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
+      (this.layout as PanelLayout).addWidget(this._runButton);
+    }
     this.updateRunButtonVisibility();
   }
 
@@ -363,6 +366,7 @@ export class InputPrompt extends Widget implements IInputPrompt {
 
   private updateRunButtonVisibility() {
     if (!this._runButton) {
+      this._promptIndicator.show();
       return;
     }
 
