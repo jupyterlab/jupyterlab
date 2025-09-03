@@ -2180,16 +2180,6 @@
     }
   },
   {
-    "id": "filebrowser:create-new-python-file",
-    "label": "New File",
-    "caption": "",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
     "id": "filebrowser:create-new-markdown-file",
     "label": "New Markdown File",
     "caption": "",
