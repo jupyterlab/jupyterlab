@@ -132,11 +132,6 @@
         "rank": 51
       },
       {
-        "command": "filebrowser:create-new-python-file",
-        "selector": ".jp-DirListing-content",
-        "rank": 52
-      },
-      {
         "command": "filebrowser:create-new-directory",
         "selector": ".jp-DirListing-content",
         "rank": 55

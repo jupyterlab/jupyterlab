@@ -1650,6 +1650,34 @@ export namespace Commands {
   }
 
   /**
+   * Add Create New ___ File commands to the FileBrowser menu for common file types associated with available kernels
+   * Returns a DisposableSet containing all added items
+   */
+  export function addKernelLanguageBrowserMenuItems(
+    app: JupyterFrontEnd,
+    availableKernelFileTypes: Iterable<IFileTypeData>
+  ): IDisposable {
+    const disposables = new DisposableSet();
+
+    for (const ext of availableKernelFileTypes) {
+      disposables.add(
+        app.contextMenu.addItem({
+          command: 'filebrowser:create-new-file',
+          selector: '.jp-DirListing',
+          args: {
+            ext: ext.fileExt,
+            label: ext.paletteLabel,
+            iconName: ext.iconName
+          },
+          rank: 52
+        })
+      );
+    }
+
+    return disposables;
+  }
+
+  /**
    * Add a File Editor code runner to the Run menu
    */
   export function addCodeRunnersToRunMenu(
