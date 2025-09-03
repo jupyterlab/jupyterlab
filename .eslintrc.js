@@ -72,6 +72,7 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/triple-slash-reference': 'warn',
     '@typescript-eslint/no-inferrable-types': 'off',
+    '@typescript-eslint/switch-exhaustiveness-check': 'error',
     camelcase: [
       'error',
       {
