@@ -153,13 +153,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
               () => registry.settingsSchema,
               []
             ) as any;
-            if (
-              [
-                'codeCellConfig',
-                'markdownCellConfig',
-                'rawCellConfig'
-              ].includes(props.name)
-            ) {
+            if (props.name in props.formContext.defaultFormData) {
               defaultFormData = props.formContext.defaultFormData[props.name];
             } else {
               defaultFormData = {};
