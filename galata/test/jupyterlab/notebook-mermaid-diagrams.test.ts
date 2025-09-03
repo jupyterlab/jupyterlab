@@ -64,10 +64,12 @@ async function resizePageAndScreenshot(locator: Locator) {
       height: Math.ceil(box.height * scaleFactor)
     });
   }
-  // Wait for next animation frame (next rendering cycle)
+  // Wait for two animation frames (rendering cycles)
   await page.evaluate(() => {
     return new Promise<void>(resolve => {
-      requestAnimationFrame(() => resolve());
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
     });
   });
   const screenshot = await locator.screenshot();
