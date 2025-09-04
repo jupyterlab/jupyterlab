@@ -123,11 +123,15 @@ export class SourcesBody extends Widget {
 
     requestAnimationFrame(() => {
       EditorHandler.showCurrentLine(this._editor.editor, frame.line);
-      // Scroll to the highlighted line.
-      this.node
-        .getElementsByClassName(LINE_HIGHLIGHT_CLASS)
-        .item(0)
-        ?.scrollIntoView();
+      try {
+        // Scroll to the highlighted line.
+        this.node
+          .getElementsByClassName(LINE_HIGHLIGHT_CLASS)
+          .item(0)
+          ?.scrollIntoView();
+      } catch {
+        // no op
+      }
     });
 
     this._editor.show();
