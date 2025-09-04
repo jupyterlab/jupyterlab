@@ -50,6 +50,19 @@
   user-select: none;
 }
 
+.jp-InputArea-prompt-run {
+  position: absolute;
+  display: flex;
+  top: 0.4em;
+  right: 1em;
+  z-index: 20;
+}
+
+.jp-InputArea-prompt-run > jp-button {
+  height: var(--jp-code-line-height);
+  margin: unset;
+}
+
 /*-----------------------------------------------------------------------------
 | Print
 |----------------------------------------------------------------------------*/

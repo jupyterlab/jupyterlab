@@ -3,11 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import { ToolbarButton } from '@jupyterlab/ui-components';
+
+import { ISignal } from '@lumino/signaling';
+
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { ICellModel } from './model';
 
@@ -20,6 +22,22 @@ const INPUT_AREA_CLASS = 'jp-InputArea';
  * The class name added to the prompt area of cell.
  */
 const INPUT_AREA_PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to the prompt area's text indicator
+ */
+const INPUT_AREA_PROMPT_INDICATOR_CLASS = 'jp-InputArea-prompt-indicator';
+
+/**
+ * Class for an empty prompt indicator, indicating no execution count
+ */
+const INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS =
+  'jp-InputArea-prompt-indicator-empty';
+
+/**
+ * The class name added to the prompt area's run button
+ */
+const INPUT_AREA_PROMPT_RUN_CLASS = 'jp-InputArea-prompt-run';
 
 /**
  * The class name added to OutputPrompt.
@@ -45,12 +63,14 @@ export class InputArea extends Widget {
   constructor(options: InputArea.IOptions) {
     super();
     this.addClass(INPUT_AREA_CLASS);
-    const { contentFactory, editorOptions, model } = options;
+    const { contentFactory, editorOptions, hoverChanged, model } = options;
     this.model = model;
     this.contentFactory = contentFactory;
 
     // Prompt
-    const prompt = (this._prompt = contentFactory.createInputPrompt());
+    const prompt = (this._prompt = contentFactory.createInputPrompt({
+      hoverChanged
+    }));
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
@@ -88,6 +108,13 @@ export class InputArea extends Widget {
    */
   get editor(): CodeEditor.IEditor {
     return this._editor.editor;
+  }
+
+  /**
+   * Get the prompt widget of the cell.
+   */
+  get prompt(): IInputPrompt {
+    return this._prompt;
   }
 
   /**
@@ -160,7 +187,7 @@ export namespace InputArea {
   /**
    * The options used to create an `InputArea`.
    */
-  export interface IOptions {
+  export interface IOptions extends IInputPromptOptions {
     /**
      * The model used by the widget.
      */
@@ -195,7 +222,7 @@ export namespace InputArea {
     /**
      * Create an input prompt.
      */
-    createInputPrompt(): IInputPrompt;
+    createInputPrompt(options?: IInputPromptOptions): IInputPrompt;
   }
 
   /**
@@ -221,8 +248,8 @@ export namespace InputArea {
     /**
      * Create an input prompt.
      */
-    createInputPrompt(): IInputPrompt {
-      return new InputPrompt();
+    createInputPrompt(options?: IInputPromptOptions): IInputPrompt {
+      return new InputPrompt(options);
     }
 
     private _editor: CodeEditor.Factory;
@@ -245,16 +272,26 @@ export namespace InputArea {
       editorFactory: CodeEditor.Factory;
     }
   }
+
+  /** ****************************************************************************
+   * InputPrompt
+   ******************************************************************************/
+
+  /**
+   * The options to pass to the input prompt constructor.
+   */
+  export interface IInputPromptOptions {
+    /**
+     * Signal triggered when the hover changed on cell widget.
+     */
+    hoverChanged?: ISignal<Widget, boolean>;
+  }
 }
 
-/** ****************************************************************************
- * InputPrompt
- ******************************************************************************/
-
 /**
- * The interface for the input prompt.
+ * The interface for the input prompt indicator.
  */
-export interface IInputPrompt extends Widget {
+export interface IInputPromptIndicator extends Widget {
   /**
    * The execution count of the prompt.
    */
@@ -262,15 +299,46 @@ export interface IInputPrompt extends Widget {
 }
 
 /**
- * The default input prompt implementation.
+ * The interface for the input prompt.
  */
+export interface IInputPrompt extends IInputPromptIndicator {
+  /**
+   * The run button.
+   */
+  runButton?: ToolbarButton;
+}
+
 export class InputPrompt extends Widget implements IInputPrompt {
   /*
-   * Create an output prompt widget.
+   * Create an input prompt widget.
    */
-  constructor() {
+  constructor(options?: InputArea.IInputPromptOptions) {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
+    // Two sub-elements: prompt text and run button
+    const layout = (this.layout = new PanelLayout());
+    const promptIndicator = (this._promptIndicator =
+      new InputPromptIndicator());
+    layout.addWidget(promptIndicator);
+
+    options?.hoverChanged?.connect(this._hoverChanged);
+  }
+
+  /**
+   * The run button.
+   */
+  get runButton(): ToolbarButton | undefined {
+    return this._runButton;
+  }
+  set runButton(button: ToolbarButton | undefined) {
+    this._runButton?.dispose();
+    this._runButton = button;
+
+    if (this._runButton) {
+      this._runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
+      (this.layout as PanelLayout).addWidget(this._runButton);
+    }
+    this.updateRunButtonVisibility();
   }
 
   /**
@@ -281,10 +349,69 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
   set executionCount(value: string | null) {
     this._executionCount = value;
-    if (value === null) {
-      this.node.textContent = ' ';
+    this._promptIndicator.executionCount = value;
+    this.updateRunButtonVisibility();
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   */
+  private _hoverChanged = (_: Widget, hover: boolean): void => {
+    this._isHovered = hover;
+    this.updateRunButtonVisibility();
+  };
+
+  private updateRunButtonVisibility() {
+    if (!this._runButton) {
+      this._promptIndicator.show();
+      return;
+    }
+
+    // Show the run button if the cell is hovered.
+    if (this._isHovered) {
+      this._runButton.show();
+      this._promptIndicator.hide();
     } else {
-      this.node.textContent = `[${value || ' '}]:`;
+      this._runButton.hide();
+      this._promptIndicator.show();
+    }
+  }
+
+  private _executionCount: string | null = null;
+  private _isHovered: boolean = false;
+  private _promptIndicator: InputPromptIndicator;
+  private _runButton: ToolbarButton | undefined;
+}
+
+export class InputPromptIndicator
+  extends Widget
+  implements IInputPromptIndicator
+{
+  /*
+   * Create an input prompt widget.
+   */
+  constructor() {
+    super();
+    this.addClass(INPUT_AREA_PROMPT_INDICATOR_CLASS);
+  }
+
+  /**
+   * The execution count for the prompt.
+   */
+  get executionCount(): string | null {
+    return this._executionCount;
+  }
+  set executionCount(value: string | null) {
+    this._executionCount = value;
+    if (value) {
+      this.node.textContent = `[${value}]:`;
+      this.removeClass(INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS);
+    } else {
+      this.node.textContent = '[ ]:';
+      this.addClass(INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS);
     }
   }
 
