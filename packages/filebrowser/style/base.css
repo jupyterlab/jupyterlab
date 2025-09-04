@@ -423,6 +423,7 @@
   border: none;
   color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
+  z-index: 0;
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {
