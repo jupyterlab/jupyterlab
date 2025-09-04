@@ -372,6 +372,18 @@ export class OutputArea extends Widget {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
+
+    // Update overlay height so it always matches the output panel.
+    const resize = () => {
+      const panel = this.node.querySelector(
+        '.jp-OutputArea-child'
+      ) as HTMLElement;
+      if (panel) {
+        overlay.style.height = `${panel.scrollHeight}px`;
+      }
+    };
+    new ResizeObserver(resize).observe(this.node);
+
     requestAnimationFrame(() => {
       this._initialize.emit();
     });
