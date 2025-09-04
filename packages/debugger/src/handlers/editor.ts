@@ -35,7 +35,7 @@ import { IDebugger } from '../tokens';
 /**
  * The class name added to the current line.
  */
-const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
+export const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
 
 /**
  * The timeout for listening to editor content changes.
