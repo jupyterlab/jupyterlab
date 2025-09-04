@@ -50,13 +50,6 @@
   user-select: none;
 }
 
-.jp-InputArea-prompt-indicator {
-  position: absolute;
-  top: var(--jp-code-padding);
-  right: var(--jp-code-padding);
-  z-index: 10;
-}
-
 .jp-InputArea-prompt-run {
   position: absolute;
   display: flex;
