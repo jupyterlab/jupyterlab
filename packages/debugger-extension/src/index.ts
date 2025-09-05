@@ -23,7 +23,7 @@ import {
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeCell } from '@jupyterlab/cells';
+// import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -49,7 +49,7 @@ import {
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { Session } from '@jupyterlab/services';
+import { ServiceManager, Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
@@ -556,6 +556,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         variablesModel.changed.connect(refreshWidget);
         activeWidget?.disposed.connect(disposeWidget);
 
+        // ! bookmark shell add
         shell.add(widget, 'main', {
           mode: trackerMime.currentWidget ? 'split-right' : 'split-bottom',
           activate: false,
@@ -829,13 +830,68 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
   }
 };
 
+const createDebugConsole = (
+  contentFactory: ConsolePanel.IContentFactory,
+  editorServices: IEditorServices,
+  manager: ServiceManager.IManager,
+  consoleTracker: IConsoleTracker
+) => {
+  console.log('dev lol');
+
+  // const trackerMime = new WidgetTracker<ConsolePanel>({
+  //   namespace: 'debugger/debug-console'
+  // });
+
+  const id = 'jp-debug-console';
+
+  // Create a custom debug console executor
+  // const debugConsoleExecutor = new DebugConsoleCellExecutor(
+  //   service,
+  //   rendermime,
+  //   loggerRegistry,
+  //   labShell
+  // );
+
+  const rendermime = new RenderMimeRegistry({ initialFactories });
+
+  const consolePanel = new ConsolePanel({
+    manager,
+    name: 'Debug Console',
+    contentFactory,
+    rendermime,
+    // executor: debugConsoleExecutor,
+    // sessionContext,
+    mimeTypeService: editorServices.mimeTypeService
+  });
+  consolePanel.title.label = 'Console';
+  consolePanel.id = id;
+
+  // Add a specific class to distinguish debug console from regular consoles
+  consolePanel.addClass('jp-DebugConsole');
+  consolePanel.console.addClass('jp-DebugConsole-widget');
+
+  // Add the console panel to the console tracker
+  void consoleTracker.add(consolePanel);
+
+  // Set it as the current widget in the tracker
+  // consoleTracker.currentWidget = consolePanel;
+
+  return consolePanel;
+};
 /**
  * The main debugger UI plugin.
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
   description: 'Initialize the debugger user interface.',
-  requires: [IDebugger, IDebuggerSidebar, IEditorServices, ITranslator],
+  requires: [
+    IDebugger,
+    IDebuggerSidebar,
+    IEditorServices,
+    ITranslator,
+    ConsolePanel.IContentFactory,
+    IConsoleTracker
+  ],
   optional: [
     ICommandPalette,
     IDebuggerSourceViewer,
@@ -851,6 +907,8 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar: IDebugger.ISidebar,
     editorServices: IEditorServices,
     translator: ITranslator,
+    consolePanelContentFactory: ConsolePanel.IContentFactory,
+    consoleTracker: IConsoleTracker,
     palette: ICommandPalette | null,
     sourceViewer: IDebugger.ISourceViewer | null,
     labShell: ILabShell | null,
@@ -883,56 +941,68 @@ const main: JupyterFrontEndPlugin<void> = {
     }
 
     // get the mime type of the kernel language for the current debug session
-    const getMimeType = async (): Promise<string> => {
-      const kernel = service.session?.connection?.kernel;
-      if (!kernel) {
-        return '';
-      }
-      const info = (await kernel.info).language_info;
-      const name = info.name;
-      const mimeType =
-        editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
-      return mimeType;
-    };
+    // const getMimeType = async (): Promise<string> => {
+    //   const kernel = service.session?.connection?.kernel;
+    //   if (!kernel) {
+    //     return '';
+    //   }
+    //   const info = (await kernel.info).language_info;
+    //   const name = info.name;
+    //   const mimeType =
+    //     editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+    //   return mimeType;
+    // };
 
-    const rendermime = new RenderMimeRegistry({ initialFactories });
+    // const rendermime = new RenderMimeRegistry({ initialFactories });
 
     commands.addCommand(CommandIDs.evaluate, {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => service.hasStoppedThreads(),
+      isEnabled: () => true,
       execute: async () => {
-        const mimeType = await getMimeType();
-        const result = await Debugger.Dialogs.getCode({
-          title: trans.__('Evaluate Code'),
-          okLabel: trans.__('Evaluate'),
-          cancelLabel: trans.__('Cancel'),
-          mimeType,
-          contentFactory: new CodeCell.ContentFactory({
-            editorFactory: options =>
-              editorServices.factoryService.newInlineEditor(options)
-          }),
-          rendermime
-        });
-        const code = result.value;
-        if (!result.button.accept || !code) {
-          return;
-        }
-        const reply = await service.evaluate(code);
-        if (reply) {
-          const data = reply.result;
-          const path = service?.session?.connection?.path;
-          const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
+        // const mimeType = await getMimeType();
+        // const result = await Debugger.Dialogs.getCode({
+        //   title: trans.__('Evaluate Code'),
+        //   okLabel: trans.__('Evaluate'),
+        //   cancelLabel: trans.__('Cancel'),
+        //   mimeType,
+        //   contentFactory: new CodeCell.ContentFactory({
+        //     editorFactory: options =>
+        //       editorServices.factoryService.newInlineEditor(options)
+        //   }),
+        //   rendermime
+        // });
+        // const code = result.value;
+        // if (!result.button.accept || !code) {
+        //   return;
+        // }
+        // const reply = await service.evaluate(code);
+        // if (reply) {
+        //   const data = reply.result;
+        //   const path = service?.session?.connection?.path;
+        //   const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
 
-          if (logger) {
-            // print to log console of the notebook currently being debugged
-            logger.log({ type: 'text', data, level: logger.level });
-          } else {
-            // fallback to printing to devtools console
-            console.debug(data);
-          }
-        }
+        //   if (logger) {
+        //     // print to log console of the notebook currently being debugged
+        //     logger.log({ type: 'text', data, level: logger.level });
+        //   } else {
+        //     // fallback to printing to devtools console
+        //     console.debug(data);
+        //   }
+        // }
+        const debugConsole = createDebugConsole(
+          consolePanelContentFactory,
+          editorServices,
+          app.serviceManager,
+          consoleTracker
+        );
+
+        shell.add(debugConsole, 'main', {
+          mode: 'split-bottom',
+          activate: true,
+          type: 'Debugger console'
+        });
       },
       describedBy: {
         args: {

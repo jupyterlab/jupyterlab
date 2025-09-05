@@ -95,6 +95,8 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
    * @param obj - The instance to inject into the tracker.
    */
   inject(obj: T): void;
+
+  add(widget: T): Promise<void>;
 }
 
 /**
@@ -224,6 +226,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * already had a focused widget.
    */
   async add(widget: T): Promise<void> {
+    console.log('dev add');
     this._focusTracker.add(widget);
     await this._pool.add(widget);
     if (!this._focusTracker.activeWidget) {
