@@ -301,7 +301,7 @@ export function createToolbarFactory(
           );
           break;
         case 'clear':
-          toolbar.clear();
+          change.oldValues.forEach(() => toolbar.remove(change.oldIndex));
           break;
       }
     };
