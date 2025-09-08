@@ -379,7 +379,10 @@ export class OutputArea extends Widget {
         '.jp-OutputArea-child'
       ) as HTMLElement;
       if (panel) {
-        overlay.style.height = `${panel.scrollHeight}px`;
+        overlay.style.height = `${Math.max(
+          panel.scrollHeight,
+          this.node.scrollHeight
+        )}px`;
       }
     };
     new ResizeObserver(resize).observe(this.node);
