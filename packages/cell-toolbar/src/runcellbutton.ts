@@ -57,7 +57,7 @@ export class RunCellButtonExtension
     new ToolbarButton({
       icon: runIcon,
       onClick: () => {
-        void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
+        void NotebookActions.run(panel.content, panel.sessionContext);
       },
       tooltip: this._trans.__('Run the selected cells and advance')
     });
