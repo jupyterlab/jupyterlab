@@ -23,7 +23,6 @@ import {
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-// import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -557,7 +556,6 @@ const variables: JupyterFrontEndPlugin<void> = {
         variablesModel.changed.connect(refreshWidget);
         activeWidget?.disposed.connect(disposeWidget);
 
-        // ! bookmark shell add
         shell.add(widget, 'main', {
           mode: trackerMime.currentWidget ? 'split-right' : 'split-bottom',
           activate: false,
@@ -838,25 +836,18 @@ const createDebugConsole = (
   consoleTracker: IConsoleTracker,
   service: IDebugger
 ) => {
-  console.log('dev lol');
-
-  // const trackerMime = new WidgetTracker<ConsolePanel>({
-  //   namespace: 'debugger/debug-console'
-  // });
-
   const id = 'jp-debug-console';
 
   const rendermime = new RenderMimeRegistry({ initialFactories });
-  // Create a custom debug console executor
+
   const debugConsoleExecutor = new DebugConsoleCellExecutor(service);
-  // console.log('debugConsoleExecutor', debugConsoleExecutor);
+
   const consolePanel = new ConsolePanel({
     manager,
     name: 'Debug Console',
     contentFactory,
     rendermime,
     executor: debugConsoleExecutor,
-    // sessionContext,
     mimeTypeService: editorServices.mimeTypeService
   });
   consolePanel.title.label = 'Console';
@@ -936,26 +927,11 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
-    // get the mime type of the kernel language for the current debug session
-    // const getMimeType = async (): Promise<string> => {
-    //   const kernel = service.session?.connection?.kernel;
-    //   if (!kernel) {
-    //     return '';
-    //   }
-    //   const info = (await kernel.info).language_info;
-    //   const name = info.name;
-    //   const mimeType =
-    //     editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
-    //   return mimeType;
-    // };
-
-    // const rendermime = new RenderMimeRegistry({ initialFactories });
-
     commands.addCommand(CommandIDs.evaluate, {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => true,
+      isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         const debugConsole = createDebugConsole(
           consolePanelContentFactory,

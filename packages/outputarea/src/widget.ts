@@ -937,7 +937,6 @@ export namespace OutputArea {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | undefined> {
-    console.log('dev less lol');
     // Override the default for `stop_on_error`.
     let stopOnError = true;
     if (
@@ -956,7 +955,6 @@ export namespace OutputArea {
     if (!kernel) {
       throw new Error('Session has no kernel.');
     }
-    // ! this kernel is stopped, that's prob why nothing happens with the custom shit
     const future = kernel.requestExecute(content, false, metadata);
     output.future = future;
     return future.done;

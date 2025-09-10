@@ -636,14 +636,6 @@ async function activateConsole(
    * Whether there is an active console.
    */
   function isEnabled(): boolean {
-    console.log(
-      'tracker.currentWidget !== null',
-      tracker.currentWidget !== null
-    );
-    console.log(
-      'tracker.currentWidget === shell.currentWidget',
-      tracker.currentWidget === shell.currentWidget
-    );
     return (
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget
