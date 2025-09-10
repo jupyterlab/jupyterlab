@@ -789,7 +789,6 @@ export class CodeConsole extends Widget {
         error?: Error | null;
       }) => {
         this._executed.emit(args.executionDate);
-        console.log('dev oncellexecuted');
 
         if (args.error) {
           for (const cell of this._cells) {
@@ -802,7 +801,6 @@ export class CodeConsole extends Widget {
     } satisfies IConsoleCellExecutor.IRunCellOptions;
 
     try {
-      console.log('dev does this happen?');
       await this._executor.runCell(options);
     } finally {
       if (!this.isDisposed) {

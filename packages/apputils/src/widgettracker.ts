@@ -226,7 +226,6 @@ export class WidgetTracker<T extends Widget = Widget>
    * already had a focused widget.
    */
   async add(widget: T): Promise<void> {
-    console.log('dev add');
     this._focusTracker.add(widget);
     await this._pool.add(widget);
     if (!this._focusTracker.activeWidget) {

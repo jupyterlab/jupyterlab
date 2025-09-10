@@ -1755,7 +1755,6 @@ export namespace CodeCell {
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     const model = cell.model;
     const code = model.sharedModel.getSource();
-    console.log('dev code', code);
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.sharedModel.transact(() => {
         model.clearExecution();
