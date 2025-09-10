@@ -150,6 +150,15 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       msg: KernelMessage.IIOPubMessage
     ): void => {
       if (
+        (msg.parent_header as KernelMessage.IHeader).msg_type ===
+          'execute_request' ||
+        (msg.parent_header as KernelMessage.IHeader).msg_type === 'display_data'
+      ) {
+        console.log('dev jsjdgjrdffgikergnrffigkrgnrikgnghiok');
+        const s = 'please stop';
+        console.log('s', s);
+      }
+      if (
         this._service.isStarted &&
         !this._service.hasStoppedThreads() &&
         (msg.parent_header as KernelMessage.IHeader).msg_type ===

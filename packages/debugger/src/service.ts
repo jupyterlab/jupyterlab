@@ -247,6 +247,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   async evaluate(
     expression: string
   ): Promise<DebugProtocol.EvaluateResponse['body'] | null> {
+    console.log('dev eval');
     if (!this.session) {
       throw new Error('No active debugger session');
     }
