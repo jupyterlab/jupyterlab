@@ -1,63 +1,68 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { IConsoleCellExecutor } from '@jupyterlab/console';
 import { IDebugger } from '@jupyterlab/debugger';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ILoggerRegistry } from '@jupyterlab/logconsole';
-import { ILabShell } from '@jupyterlab/application';
-
-/**
- * Extract the debugger evaluate logic into a reusable function.
- */
-export async function evaluateWithDebugger(
-  code: string,
-  debuggerService: IDebugger,
-  rendermime: IRenderMimeRegistry,
-  loggerRegistry: ILoggerRegistry | null,
-  shell: ILabShell | null
-): Promise<boolean> {
-  try {
-    // Check if debugger has stopped threads (required for evaluation)
-    if (!debuggerService.hasStoppedThreads()) {
-      console.warn('Debugger does not have stopped threads - cannot evaluate');
-      return false;
-    }
-
-    // Evaluate the code using the debugger service
-    const reply = await debuggerService.evaluate(code);
-
-    if (reply) {
-      const data = reply.result;
-      const path = debuggerService?.session?.connection?.path;
-      const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
-
-      if (logger) {
-        // Print to log console of the notebook currently being debugged
-        logger.log({ type: 'text', data, level: logger.level });
-      } else {
-        // Fallback to printing to devtools console
-        console.debug('Debug evaluation result:', data);
-      }
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('Error evaluating code with debugger:', error);
-    return false;
-  }
-}
+import { IDisplayData } from '@jupyterlab/nbformat';
 
 /**
  * Custom console cell executor that uses debugger evaluation.
  */
 export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
-  constructor(
-    private debuggerService: IDebugger,
-    private rendermime: IRenderMimeRegistry,
-    private loggerRegistry: ILoggerRegistry | null,
-    private shell: ILabShell | null
-  ) {}
+  _debuggerService: IDebugger;
+
+  constructor(debuggerService: IDebugger) {
+    this._debuggerService = debuggerService;
+  }
+
+  /**
+   * Extract the debugger evaluate logic into a reusable function.
+   */
+  async evaluateWithDebugger(code: string): Promise<IDisplayData | null> {
+    try {
+      // Check if debugger has stopped threads (required for evaluation)
+      if (!this._debuggerService.hasStoppedThreads()) {
+        console.warn(
+          'Debugger does not have stopped threads - cannot evaluate'
+        );
+        return null;
+      }
+
+      // Evaluate the code using the debugger service
+      const reply = await this._debuggerService.evaluate(code);
+
+      if (!reply) {
+        return null;
+      }
+
+      // Convert reply to IDisplayData format
+      const result = reply.result;
+      const resultStr =
+        typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+
+      return {
+        output_type: 'display_data',
+        data: {
+          'text/plain': resultStr,
+          'text/html': `<div class="debug-result"><pre>${resultStr}</pre></div>`
+        },
+        metadata: {
+          execution_count: null
+        }
+      };
+    } catch (error) {
+      console.error('Error evaluating code with debugger:', error);
+      return {
+        output_type: 'display_data',
+        data: {
+          'text/plain': `Error: ${error}`,
+          'text/html': `<div class="debug-error"><pre>Error: ${error}</pre></div>`
+        },
+        metadata: {
+          execution_count: null
+        }
+      };
+    }
+  }
 
   /**
    * Execute a cell using debugger evaluation.
@@ -65,39 +70,17 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
   async runCell(
     options: IConsoleCellExecutor.IRunCellOptions
   ): Promise<boolean> {
-    const { cell, onCellExecuted } = options;
+    const { cell } = options;
 
-    // Get the source code from the cell
-    const source = cell.model.sharedModel.getSource();
+    const code = cell.model.sharedModel.getSource();
+    const ouputDisplayData = await this.evaluateWithDebugger(code);
 
-    // Handle special console commands
-    if (source === 'clear' || source === '%clear') {
-      // Let the console handle clear commands normally
-      onCellExecuted({
-        cell,
-        executionDate: new Date(),
-        success: true
-      });
-      return true;
+    if (!ouputDisplayData) {
+      console.log('nope');
+      return false;
     }
 
-    // Use debugger evaluation for regular code
-    const success = await evaluateWithDebugger(
-      source,
-      this.debuggerService,
-      this.rendermime,
-      this.loggerRegistry,
-      this.shell
-    );
-
-    // Notify about execution completion
-    onCellExecuted({
-      cell,
-      executionDate: new Date(),
-      success,
-      error: success ? null : new Error('Debugger evaluation failed')
-    });
-
-    return success;
+    cell.model.outputs.add(ouputDisplayData);
+    return true;
   }
 }

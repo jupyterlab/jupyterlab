@@ -53,6 +53,7 @@ import { ServiceManager, Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
+import { DebugConsoleCellExecutor } from './debug-console-executor';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -834,7 +835,8 @@ const createDebugConsole = (
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
   manager: ServiceManager.IManager,
-  consoleTracker: IConsoleTracker
+  consoleTracker: IConsoleTracker,
+  service: IDebugger
 ) => {
   console.log('dev lol');
 
@@ -844,22 +846,16 @@ const createDebugConsole = (
 
   const id = 'jp-debug-console';
 
-  // Create a custom debug console executor
-  // const debugConsoleExecutor = new DebugConsoleCellExecutor(
-  //   service,
-  //   rendermime,
-  //   loggerRegistry,
-  //   labShell
-  // );
-
   const rendermime = new RenderMimeRegistry({ initialFactories });
-
+  // Create a custom debug console executor
+  const debugConsoleExecutor = new DebugConsoleCellExecutor(service);
+  // console.log('debugConsoleExecutor', debugConsoleExecutor);
   const consolePanel = new ConsolePanel({
     manager,
     name: 'Debug Console',
     contentFactory,
     rendermime,
-    // executor: debugConsoleExecutor,
+    executor: debugConsoleExecutor,
     // sessionContext,
     mimeTypeService: editorServices.mimeTypeService
   });
@@ -961,41 +957,12 @@ const main: JupyterFrontEndPlugin<void> = {
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => true,
       execute: async () => {
-        // const mimeType = await getMimeType();
-        // const result = await Debugger.Dialogs.getCode({
-        //   title: trans.__('Evaluate Code'),
-        //   okLabel: trans.__('Evaluate'),
-        //   cancelLabel: trans.__('Cancel'),
-        //   mimeType,
-        //   contentFactory: new CodeCell.ContentFactory({
-        //     editorFactory: options =>
-        //       editorServices.factoryService.newInlineEditor(options)
-        //   }),
-        //   rendermime
-        // });
-        // const code = result.value;
-        // if (!result.button.accept || !code) {
-        //   return;
-        // }
-        // const reply = await service.evaluate(code);
-        // if (reply) {
-        //   const data = reply.result;
-        //   const path = service?.session?.connection?.path;
-        //   const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
-
-        //   if (logger) {
-        //     // print to log console of the notebook currently being debugged
-        //     logger.log({ type: 'text', data, level: logger.level });
-        //   } else {
-        //     // fallback to printing to devtools console
-        //     console.debug(data);
-        //   }
-        // }
         const debugConsole = createDebugConsole(
           consolePanelContentFactory,
           editorServices,
           app.serviceManager,
-          consoleTracker
+          consoleTracker,
+          service
         );
 
         shell.add(debugConsole, 'main', {
