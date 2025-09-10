@@ -37,9 +37,9 @@ jobs:
           # Build dev-mode
           jlpm run build
 
-      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        run: |
-          pip install --upgrade --pre ipykernel!=7.0.0a2
+      #- name: Install ipykernel pre-release that supports subshells (TEMPORARY)
+      #  run: |
+      #    pip install --upgrade --pre ipykernel!=7.0.0a2
 
       - name: Launch JupyterLab
         run: |

@@ -105,6 +105,7 @@ test.describe('Kernel', () => {
       );
     });
 
+    /*
     test('Should support opening subshell in separate code console', async ({
       page
     }) => {
@@ -177,6 +178,7 @@ test.describe('Kernel', () => {
       expect(text3[0]).toEqual('subshell id: None');
       expect(text3[5]).toEqual(`subshell list: ['${subshellId}']`);
     });
+    */
   });
 
   test.describe('Console', () => {
