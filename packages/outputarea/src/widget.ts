@@ -385,7 +385,12 @@ export class OutputArea extends Widget {
         )}px`;
       }
     };
-    new ResizeObserver(resize).observe(this.node);
+    const observer = new ResizeObserver(resize);
+    observer.observe(this.node);
+
+    this.disposed.connect(() => {
+      observer.disconnect();
+    });
 
     requestAnimationFrame(() => {
       this._initialize.emit();
