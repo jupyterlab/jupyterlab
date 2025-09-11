@@ -14,9 +14,6 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     this._debuggerService = debuggerService;
   }
 
-  /**
-   * Extract the debugger evaluate logic into a reusable function.
-   */
   async evaluateWithDebugger(options: {
     code: string;
     executionCount: ExecutionCount;
@@ -40,15 +37,10 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
       }
 
       // Convert reply to IDisplayData format
-      const result = reply.result;
-      const resultStr =
-        typeof result === 'string' ? result : JSON.stringify(result, null, 2);
-
       return {
         output_type: 'display_data',
         data: {
-          'text/plain': resultStr
-          // 'text/html': `<pre>${resultStr}</pre>`
+          'text/plain': reply.result
         },
         metadata: {
           execution_count: executionCount
@@ -60,7 +52,6 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
         output_type: 'display_data',
         data: {
           'text/plain': `Error: ${error}`
-          // 'text/html': `<pre>Error: ${error}</pre>`
         },
         metadata: {
           execution_count: executionCount

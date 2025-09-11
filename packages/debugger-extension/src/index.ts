@@ -72,6 +72,44 @@ function updateState(commands: CommandRegistry, debug: IDebugger): void {
   notifyCommands(commands);
 }
 
+function createDebugConsole(
+  contentFactory: ConsolePanel.IContentFactory,
+  editorServices: IEditorServices,
+  manager: ServiceManager.IManager,
+  consoleTracker: IConsoleTracker,
+  service: IDebugger
+) {
+  const id = 'jp-debug-console';
+
+  const rendermime = new RenderMimeRegistry({ initialFactories });
+
+  const debugConsoleExecutor = new DebugConsoleCellExecutor(service);
+
+  const consolePanel = new ConsolePanel({
+    manager,
+    name: 'Debug Console',
+    contentFactory,
+    rendermime,
+    executor: debugConsoleExecutor,
+    mimeTypeService: editorServices.mimeTypeService,
+    kernelPreference: { shouldStart: false, canStart: false }
+  });
+  consolePanel.title.label = 'Console';
+  consolePanel.id = id;
+
+  // Add a specific class to distinguish debug console from regular consoles
+  consolePanel.addClass('jp-DebugConsole');
+  consolePanel.console.addClass('jp-DebugConsole-widget');
+
+  // Add the console panel to the console tracker
+  void consoleTracker.add(consolePanel);
+
+  // Set it as the current widget in the tracker
+  // consoleTracker.currentWidget = consolePanel;
+
+  return consolePanel;
+}
+
 /**
  * A plugin that provides visual debugging support for consoles.
  */
@@ -829,43 +867,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
   }
 };
 
-const createDebugConsole = (
-  contentFactory: ConsolePanel.IContentFactory,
-  editorServices: IEditorServices,
-  manager: ServiceManager.IManager,
-  consoleTracker: IConsoleTracker,
-  service: IDebugger
-) => {
-  const id = 'jp-debug-console';
-
-  const rendermime = new RenderMimeRegistry({ initialFactories });
-
-  const debugConsoleExecutor = new DebugConsoleCellExecutor(service);
-
-  const consolePanel = new ConsolePanel({
-    manager,
-    name: 'Debug Console',
-    contentFactory,
-    rendermime,
-    executor: debugConsoleExecutor,
-    mimeTypeService: editorServices.mimeTypeService,
-    kernelPreference: { shouldStart: false, canStart: false }
-  });
-  consolePanel.title.label = 'Console';
-  consolePanel.id = id;
-
-  // Add a specific class to distinguish debug console from regular consoles
-  consolePanel.addClass('jp-DebugConsole');
-  consolePanel.console.addClass('jp-DebugConsole-widget');
-
-  // Add the console panel to the console tracker
-  void consoleTracker.add(consolePanel);
-
-  // Set it as the current widget in the tracker
-  // consoleTracker.currentWidget = consolePanel;
-
-  return consolePanel;
-};
 /**
  * The main debugger UI plugin.
  */
