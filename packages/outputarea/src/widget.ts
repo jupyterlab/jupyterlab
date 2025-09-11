@@ -374,6 +374,7 @@ export class OutputArea extends Widget {
     this.node.appendChild(overlay);
 
     // Update overlay height so it always matches the output panel.
+    // TODO: use CSS anchor positionning level once fully supported in all browsers
     const resize = () => {
       const panel = this.node.querySelector(
         '.jp-OutputArea-child'
