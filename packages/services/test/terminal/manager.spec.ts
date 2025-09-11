@@ -110,7 +110,7 @@ describe('terminal', () => {
       it('should dispose without errors when terminals are not available', async () => {
         const terminalAPIClient = new UnavailableTerminalAPIClient();
         const manager = new TerminalManager({ terminalAPIClient });
-        expect(manager.dispose).not.toThrow();
+        expect(manager.dispose.bind(manager)).not.toThrow();
       });
     });
 
