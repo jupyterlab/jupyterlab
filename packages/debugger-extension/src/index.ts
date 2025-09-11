@@ -848,7 +848,8 @@ const createDebugConsole = (
     contentFactory,
     rendermime,
     executor: debugConsoleExecutor,
-    mimeTypeService: editorServices.mimeTypeService
+    mimeTypeService: editorServices.mimeTypeService,
+    kernelPreference: { shouldStart: false, canStart: false }
   });
   consolePanel.title.label = 'Console';
   consolePanel.id = id;
