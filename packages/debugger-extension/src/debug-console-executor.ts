@@ -42,11 +42,11 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
       return {
         output_type: 'display_data',
         data: {
-          'text/plain': resultStr,
-          'text/html': `<div class="debug-result"><pre>${resultStr}</pre></div>`
+          'text/plain': resultStr
+          // 'text/html': `<pre>${resultStr}</pre>`
         },
         metadata: {
-          execution_count: null
+          execution_count: 15
         }
       };
     } catch (error) {
@@ -54,11 +54,11 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
       return {
         output_type: 'display_data',
         data: {
-          'text/plain': `Error: ${error}`,
-          'text/html': `<div class="debug-error"><pre>Error: ${error}</pre></div>`
+          'text/plain': `Error: ${error}`
+          // 'text/html': `<pre>Error: ${error}</pre>`
         },
         metadata: {
-          execution_count: null
+          execution_count: 15
         }
       };
     }
@@ -79,7 +79,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
       console.log('nope');
       return false;
     }
-
+    cell.model.outputs.set;
     cell.model.outputs.add(ouputDisplayData);
     return true;
   }
