@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { IConsoleCellExecutor } from '@jupyterlab/console';
 import { IDebugger } from '@jupyterlab/debugger';
-import { IDisplayData } from '@jupyterlab/nbformat';
+import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
 
 /**
  * Custom console cell executor that uses debugger evaluation.
@@ -17,7 +17,12 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
   /**
    * Extract the debugger evaluate logic into a reusable function.
    */
-  async evaluateWithDebugger(code: string): Promise<IDisplayData | null> {
+  async evaluateWithDebugger(options: {
+    code: string;
+    executionCount: ExecutionCount;
+  }): Promise<IDisplayData | null> {
+    const { code, executionCount } = options;
+
     try {
       // Check if debugger has stopped threads (required for evaluation)
       if (!this._debuggerService.hasStoppedThreads()) {
@@ -46,7 +51,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
           // 'text/html': `<pre>${resultStr}</pre>`
         },
         metadata: {
-          execution_count: 15
+          execution_count: executionCount
         }
       };
     } catch (error) {
@@ -58,7 +63,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
           // 'text/html': `<pre>Error: ${error}</pre>`
         },
         metadata: {
-          execution_count: 15
+          execution_count: executionCount
         }
       };
     }
@@ -73,13 +78,17 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     const { cell } = options;
 
     const code = cell.model.sharedModel.getSource();
-    const ouputDisplayData = await this.evaluateWithDebugger(code);
+    const executionCount = cell.model.sharedModel.execution_count;
+    const ouputDisplayData = await this.evaluateWithDebugger({
+      code,
+      executionCount
+    });
 
     if (!ouputDisplayData) {
-      console.log('nope');
+      console.warn('Could not display output data');
       return false;
     }
-    cell.model.outputs.set;
+
     cell.model.outputs.add(ouputDisplayData);
     return true;
   }
