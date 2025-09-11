@@ -1393,6 +1393,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._menuHandler.panel.children();
       case 'bottom':
         return this._bottomPanel.children();
+      case 'down':
+        return this._downPanel.stackedPanel.children();
       default:
         throw new Error(`Invalid area: ${area}`);
     }
