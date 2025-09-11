@@ -418,7 +418,16 @@ export namespace EditorHandler {
       effects: _highlightEffect.of({ pos: [linePos] })
     });
     if (scrollIntoView) {
-      cmEditor.revealPosition({ line, column: 0 }, { block: 'start' });
+      // Reveal position increases the line number before scrolling to it, because
+      // Jupyter uses 0-indexes line number while CM6 uses 1-indexes line number.
+      // In this case, the line number is 1-indexes as it comes from the debugProtocol
+      // stackFrame https://microsoft.github.io/debug-adapter-protocol/specification#Types_StackFrame
+      // Let's decrease it before revealing the position.
+      const cellLine = line - 1;
+      cmEditor.revealPosition(
+        { line: cellLine, column: 0 },
+        { block: 'start' }
+      );
     }
   }
 
