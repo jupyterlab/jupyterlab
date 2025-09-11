@@ -677,6 +677,7 @@ export class OutputArea extends Widget {
    * @returns a rendered widget, or null if we cannot render
    * #### Notes
    */
+  // ! look here
   protected createOutputItem(model: IOutputModel): Widget | null {
     const output = this.createRenderedMimetype(model);
 
