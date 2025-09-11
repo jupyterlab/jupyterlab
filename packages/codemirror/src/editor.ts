@@ -342,21 +342,33 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Reveal the given position in the editor.
    */
-  revealPosition(position: CodeEditor.IPosition): void {
+  revealPosition(
+    position: CodeEditor.IPosition,
+    options?: CodeMirrorEditor.IRevealOptions
+  ): void {
     const offset = this.getOffsetAt(position);
     this._editor.dispatch({
-      effects: EditorView.scrollIntoView(offset)
+      effects: EditorView.scrollIntoView(offset, {
+        y: options?.block,
+        x: options?.inline
+      })
     });
   }
 
   /**
    * Reveal the given selection in the editor.
    */
-  revealSelection(selection: CodeEditor.IRange): void {
+  revealSelection(
+    selection: CodeEditor.IRange,
+    options?: CodeMirrorEditor.IRevealOptions
+  ): void {
     const start = this.getOffsetAt(selection.start);
     const end = this.getOffsetAt(selection.end);
     this._editor.dispatch({
-      effects: EditorView.scrollIntoView(EditorSelection.range(start, end))
+      effects: EditorView.scrollIntoView(EditorSelection.range(start, end), {
+        y: options?.block,
+        x: options?.inline
+      })
     });
   }
 
@@ -778,6 +790,21 @@ export namespace CodeMirrorEditor {
      * CodeMirror languages registry
      */
     languages?: IEditorLanguageRegistry;
+  }
+
+  /**
+   * The options for the reveal functions, a subset of the options of `scrollIntoView`.
+   * https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+   */
+  export interface IRevealOptions {
+    /**
+     * Vertical alignment.
+     */
+    block?: 'nearest' | 'start' | 'end' | 'center';
+    /**
+     * Horizontal alignment.
+     */
+    inline?: 'nearest' | 'start' | 'end' | 'center';
   }
 }
 

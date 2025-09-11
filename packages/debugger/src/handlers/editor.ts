@@ -35,7 +35,7 @@ import { IDebugger } from '../tokens';
 /**
  * The class name added to the current line.
  */
-export const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
+const LINE_HIGHLIGHT_CLASS = 'jp-DebuggerEditor-highlight';
 
 /**
  * The timeout for listening to editor content changes.
@@ -408,7 +408,8 @@ export namespace EditorHandler {
    */
   export function showCurrentLine(
     editor: CodeEditor.IEditor,
-    line: number
+    line: number,
+    scrollIntoView: boolean = true
   ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
@@ -416,6 +417,9 @@ export namespace EditorHandler {
     cmEditor.editor.dispatch({
       effects: _highlightEffect.of({ pos: [linePos] })
     });
+    if (scrollIntoView) {
+      cmEditor.revealPosition({ line, column: 0 }, { block: 'start' });
+    }
   }
 
   /**

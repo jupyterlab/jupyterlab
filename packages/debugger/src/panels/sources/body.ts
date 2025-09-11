@@ -13,7 +13,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { Debugger } from '../..';
 
-import { EditorHandler, LINE_HIGHLIGHT_CLASS } from '../../handlers/editor';
+import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 
@@ -123,15 +123,6 @@ export class SourcesBody extends Widget {
 
     requestAnimationFrame(() => {
       EditorHandler.showCurrentLine(this._editor.editor, frame.line);
-      try {
-        // Scroll to the highlighted line.
-        this.node
-          .getElementsByClassName(LINE_HIGHLIGHT_CLASS)
-          .item(0)
-          ?.scrollIntoView();
-      } catch {
-        // no op
-      }
     });
 
     this._editor.show();
