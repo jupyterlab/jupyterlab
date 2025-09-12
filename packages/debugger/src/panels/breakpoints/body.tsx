@@ -11,6 +11,13 @@ import { ICodeCellModel } from '@jupyterlab/cells';
  * The body for a Breakpoints Panel.
  */
 export class BreakpointsBody extends ReactWidget {
+  /**
+   * Instantiate a new Body for the Breakpoints Panel.
+   *
+   * @param model The model for the breakpoints.
+   * @param notebookTracker The notebook tracker.
+   * @param config The debugger configuration.
+   */
   constructor(
     model: IDebugger.Model.IBreakpoints,
     notebookTracker: INotebookTracker,
@@ -39,7 +46,13 @@ export class BreakpointsBody extends ReactWidget {
 }
 
 /**
- * Component to render all breakpoints.
+ * A React component to display a list of breakpoints.
+ *
+ * @param {object} props The component props.
+ * @param props.model The model for the breakpoints.
+ * @param props.notebookTracker The notebook tracker.
+ * @param props.config The debugger configuration.
+ * @returns A JSX element.
  */
 const BreakpointsComponent = ({
   model,
@@ -84,7 +97,14 @@ const BreakpointsComponent = ({
 };
 
 /**
- * Component to render breakpoints for a single file.
+ * A React Component to display breakpoints grouped by source file.
+ *
+ * @param {object} props The component props.
+ * @param props.breakpoints The list of breakpoints.
+ * @param props.model The model for the breakpoints.
+ * @param props.notebookTracker The notebook tracker.
+ * @param props.config The debugger configuration.
+ * @returns A JSX element.
  */
 const BreakpointCellComponent = ({
   breakpoints,
@@ -113,7 +133,14 @@ const BreakpointCellComponent = ({
 );
 
 /**
- * Component to render a single breakpoint.
+ * A React Component to display a single breakpoint.
+ *
+ * @param {object} props The component props.
+ * @param props.breakpoint The breakpoint.
+ * @param props.model The model for the breakpoints.
+ * @param props.notebookTracker The notebook tracker.
+ * @param props.config The debugger configuration.
+ * @returns A JSX element.
  */
 const BreakpointComponent = ({
   breakpoint,

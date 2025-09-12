@@ -128,6 +128,9 @@ export namespace Breakpoints {
      */
     notebookTracker: INotebookTracker;
 
+    /**
+     * The debugger configuration.
+     */
     config: IDebugger.IConfig;
   }
 }
