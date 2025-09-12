@@ -8,7 +8,7 @@ import { Signal } from '@lumino/signaling';
 /**
  * Widget extension that creates run buttons each time a notebook is created.
  */
-export class RunCellButtonExtension
+export class InputPromptButtonExtension
   implements DocumentRegistry.WidgetExtension
 {
   constructor(options: { translator: ITranslator }) {
@@ -32,9 +32,9 @@ export class RunCellButtonExtension
               return;
             }
             if (this._enabled && cell.model.type === 'code') {
-              cell.inputArea.prompt.runButton = this._runButtonFactory(panel);
+              cell.inputArea.prompt.button = this._buttonFactory(panel);
             } else {
-              cell.inputArea.prompt.runButton = undefined;
+              cell.inputArea.prompt.button = undefined;
             }
           })
           .catch(() => {
@@ -53,7 +53,7 @@ export class RunCellButtonExtension
     updateButtons();
   }
 
-  private _runButtonFactory = (panel: NotebookPanel) =>
+  private _buttonFactory = (panel: NotebookPanel) =>
     new ToolbarButton({
       icon: runIcon,
       onClick: () => {
@@ -64,5 +64,7 @@ export class RunCellButtonExtension
 
   private _trans: IRenderMime.TranslationBundle;
   private _enabled: boolean = true;
-  private _enabledChanged = new Signal<RunCellButtonExtension, boolean>(this);
+  private _enabledChanged = new Signal<InputPromptButtonExtension, boolean>(
+    this
+  );
 }

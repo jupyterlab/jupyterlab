@@ -14,7 +14,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   CellBarExtension,
-  RunCellButtonExtension
+  InputPromptButtonExtension
 } from '@jupyterlab/cell-toolbar';
 import {
   createToolbarFactory,
@@ -24,7 +24,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 const PLUGIN_ID = {
   cellToolbar: '@jupyterlab/cell-toolbar-extension:plugin',
-  runButton: '@jupyterlab/cell-toolbar-extension:run-button'
+  promptButton: '@jupyterlab/cell-toolbar-extension:prompt-button'
 };
 
 const cellToolbar: JupyterFrontEndPlugin<void> = {
@@ -85,9 +85,9 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
   optional: [ISettingRegistry, IToolbarWidgetRegistry, ITranslator]
 };
 
-const runCellButton: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID.runButton,
-  description: 'Add the run cell buttons',
+const inputPromptButton: JupyterFrontEndPlugin<void> = {
+  id: PLUGIN_ID.promptButton,
+  description: 'Add the input prompt buttons',
   autoStart: true,
   optional: [ISettingRegistry, ITranslator],
   activate: async (
@@ -95,13 +95,13 @@ const runCellButton: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry,
     translator: ITranslator
   ) => {
-    const extension = new RunCellButtonExtension({ translator });
+    const extension = new InputPromptButtonExtension({ translator });
 
     if (settingRegistry) {
-      const setting = await settingRegistry.load(PLUGIN_ID.runButton);
+      const setting = await settingRegistry.load(PLUGIN_ID.promptButton);
 
       function updateEnabled() {
-        extension.enabled = setting.get('showRunButton').composite as boolean;
+        extension.enabled = setting.get('showButton').composite as boolean;
       }
 
       updateEnabled();
@@ -111,4 +111,4 @@ const runCellButton: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export default [cellToolbar, runCellButton];
+export default [cellToolbar, inputPromptButton];

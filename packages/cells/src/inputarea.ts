@@ -35,9 +35,9 @@ const INPUT_AREA_PROMPT_INDICATOR_EMPTY_CLASS =
   'jp-InputArea-prompt-indicator-empty';
 
 /**
- * The class name added to the prompt area's run button
+ * The class name added to the prompt area's button
  */
-const INPUT_AREA_PROMPT_RUN_CLASS = 'jp-InputArea-prompt-run';
+const INPUT_AREA_PROMPT_BUTTON_CLASS = 'jp-InputArea-prompt-button';
 
 /**
  * The class name added to OutputPrompt.
@@ -303,9 +303,9 @@ export interface IInputPromptIndicator extends Widget {
  */
 export interface IInputPrompt extends IInputPromptIndicator {
   /**
-   * The run button.
+   * The prompt button.
    */
-  runButton?: ToolbarButton;
+  button?: ToolbarButton;
 }
 
 export class InputPrompt extends Widget implements IInputPrompt {
@@ -315,7 +315,7 @@ export class InputPrompt extends Widget implements IInputPrompt {
   constructor(options?: InputArea.IInputPromptOptions) {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
-    // Two sub-elements: prompt text and run button
+    // Two sub-elements: prompt text and button
     const layout = (this.layout = new PanelLayout());
     const promptIndicator = (this._promptIndicator =
       new InputPromptIndicator());
@@ -325,18 +325,18 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
 
   /**
-   * The run button.
+   * The prompt button.
    */
-  get runButton(): ToolbarButton | undefined {
-    return this._runButton;
+  get button(): ToolbarButton | undefined {
+    return this._button;
   }
-  set runButton(button: ToolbarButton | undefined) {
-    this._runButton?.dispose();
-    this._runButton = button;
+  set button(button: ToolbarButton | undefined) {
+    this._button?.dispose();
+    this._button = button;
 
-    if (this._runButton) {
-      this._runButton.node.classList.add(INPUT_AREA_PROMPT_RUN_CLASS);
-      (this.layout as PanelLayout).addWidget(this._runButton);
+    if (this._button) {
+      this._button.node.classList.add(INPUT_AREA_PROMPT_BUTTON_CLASS);
+      (this.layout as PanelLayout).addWidget(this._button);
     }
     this.updateRunButtonVisibility();
   }
@@ -365,17 +365,17 @@ export class InputPrompt extends Widget implements IInputPrompt {
   };
 
   private updateRunButtonVisibility() {
-    if (!this._runButton) {
+    if (!this._button) {
       this._promptIndicator.show();
       return;
     }
 
-    // Show the run button if the cell is hovered.
+    // Show the button if the cell is hovered.
     if (this._isHovered) {
-      this._runButton.show();
+      this._button.show();
       this._promptIndicator.hide();
     } else {
-      this._runButton.hide();
+      this._button.hide();
       this._promptIndicator.show();
     }
   }
@@ -383,7 +383,7 @@ export class InputPrompt extends Widget implements IInputPrompt {
   private _executionCount: string | null = null;
   private _isHovered: boolean = false;
   private _promptIndicator: InputPromptIndicator;
-  private _runButton: ToolbarButton | undefined;
+  private _button: ToolbarButton | undefined;
 }
 
 export class InputPromptIndicator
