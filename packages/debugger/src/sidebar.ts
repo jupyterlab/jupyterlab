@@ -63,6 +63,8 @@ export class DebuggerSidebar extends SidePanel {
     this.callstack = new CallstackPanel({
       commands: callstackCommands,
       model: model.callstack,
+      config,
+      notebookTracker,
       translator
     });
 
