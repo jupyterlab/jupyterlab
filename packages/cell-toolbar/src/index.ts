@@ -7,3 +7,4 @@
  * @module cell-toolbar
  */
 export * from './celltoolbartracker';
+export * from './inputpromptbutton';
