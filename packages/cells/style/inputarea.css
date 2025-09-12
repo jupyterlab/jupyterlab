@@ -63,6 +63,14 @@
   margin: unset;
 }
 
+.jp-Cell:not(:hover) .jp-InputArea-prompt-button {
+  display: none;
+}
+
+.jp-Cell:hover .jp-InputArea-prompt-indicator.toggleable {
+  display: none;
+}
+
 /*-----------------------------------------------------------------------------
 | Print
 |----------------------------------------------------------------------------*/
