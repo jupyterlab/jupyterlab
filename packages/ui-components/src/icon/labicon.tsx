@@ -896,7 +896,10 @@ namespace Private {
     // decode any uri escaping, condense leading/lagging whitespace,
     // then match to raw svg string
     const [, base64, raw] = decodeURIComponent(svgstr)
-      .replace(/>\s*\n\s*</g, '><')
+      .replace(
+        />[\t\v\f\r \xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]*\n\s*</g,
+        '><'
+      )
       .replace(/\s*\n\s*/g, ' ')
       .match(
         strict
