@@ -1,33 +1,93 @@
 name: Check Release
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
-  release:
-    types: [published]
+    branches:
+      - main
+      - '*.x'
+
+permissions:
+  contents: write # To be able to push the release commit
+  pull-requests: write # To be able to create a PR with the changelog
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-
   check_release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-
-      - name: Check Release
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v2
         with:
+          # Fetch all history and tags
+          fetch-depth: 0
+          # With a token so we can push
           token: ${{ secrets.GITHUB_TOKEN }}
-          version_spec: next
-
-      - name: Upload Assets
-        uses: actions/upload-artifact@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          name: jupyterlab-releaser-dist-${{ github.run_number }}
-          path: |
-            .jupyter_releaser_checkout/dist/*.*
+          node-version: '20'
+          cache: 'yarn'
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+          architecture: x64
+          cache: 'pip'
+          cache-dependency-path: 'pyproject.toml'
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+      - name: Install dependencies
+        run: |
+          pip install -e '.[dev]'
+          yarn install --immutable
+      - name: Clean git state
+        run: git checkout -- . && git clean -dfx
+      - name: Bump version
+        run: |
+          jlpm run bump:version:check
+        env:
+          VERSION_TYPE: 'next'
+      - name: Build packages
+        run: |
+          jlpm run build:all
+      - name: Lint the repository
+        run: |
+          jlpm run lint:check
+      - name: Run python tests
+        run: |
+          pytest -vv jupyterlab/tests
+          # Run some examples tests
+          python -m jupyterlab.browser_check
+      - name: Check the changelog
+        id: changelog
+        run: |
+          CHANGELOG_PATH=CHANGELOG.md
+
+          # Add a temporary origin to be able to compare with upstream
+          # branches.
+          git remote add upstream https://github.com/jupyterlab/jupyterlab.git
+          git fetch upstream --tags
+
+          if [[ ${{ steps.branch-name.outputs.is_default_branch }} == "true" ]]; then
+            # On the default branch (main), the changelog may be updated for the next release.
+            # We check if there is one and only one next version section.
+            python buildutils/lib/changelog.py check-draft $CHANGELOG_PATH
+          else
+            # On other branches, we check whether a changelog entry has been added for the PR.
+            echo "Checking for changelog entry for PR # ${{ github.event.number }}"
+            python buildutils/lib/changelog.py check $CHANGELOG_PATH ${{ github.event.number }}
+          fi
+      - name: Push commit if changelog has been updated
+        if: ${{ steps.changelog.outputs.status == 'updated' && github.event_name == 'pull_request' }}
+        run: |
+          # Configure Git
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Action"
+
+          git add $CHANGELOG_PATH
+          git commit -m "[ci] Automatic changelog update"
+          git push origin HEAD:${{ github.head_ref }}
