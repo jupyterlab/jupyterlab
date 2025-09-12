@@ -2176,7 +2176,22 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "label": {
+          "type": "string",
+          "default": "New File",
+          "description": "The command label."
+        },
+        "iconName": {
+          "type": "string",
+          "description": "The command icon."
+        },
+        "ext": {
+          "type": "string",
+          "default": "txt",
+          "description": "The file extension."
+        }
+      }
     }
   },
   {

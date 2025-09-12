@@ -155,6 +155,7 @@
   "@jupyterlab/notebook-extension:log-output": "Adds cell outputs log to the application logger.",
   "@jupyterlab/notebook-extension:metadata-editor": "Adds metadata form for full metadata editor.",
   "@jupyterlab/notebook-extension:mode-status": "Adds a notebook mode status widget.",
+  "@jupyterlab/notebook-extension:open-with-no-kernel": "Adds the \"Notebook (no kernel)\" option to the Open With menu.",
   "@jupyterlab/notebook-extension:search": "Adds search capability to notebooks.",
   "@jupyterlab/notebook-extension:toc": "Adds table of content capability to the notebooks",
   "@jupyterlab/notebook-extension:tools": "Provides the notebook tools.",
