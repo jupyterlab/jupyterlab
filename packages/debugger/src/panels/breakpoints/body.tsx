@@ -68,25 +68,32 @@ const BreakpointsComponent = ({
   );
 
   useEffect(() => {
-    const updateBreakpoints = (): void => {
+    const updateBreakpoints = (
+      _: IDebugger.Model.IBreakpoints,
+      updates: IDebugger.IBreakpoint[]
+    ): void => {
+      setBreakpoints(Array.from(model.breakpoints.entries()));
+    };
+
+    const restoreBreakpoints = (_: IDebugger.Model.IBreakpoints): void => {
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
     model.changed.connect(updateBreakpoints);
-    model.restored.connect(updateBreakpoints);
+    model.restored.connect(restoreBreakpoints);
 
     return (): void => {
       model.changed.disconnect(updateBreakpoints);
-      model.restored.disconnect(updateBreakpoints);
+      model.restored.disconnect(restoreBreakpoints);
     };
   });
 
   return (
     <>
-      {breakpoints.map(([path, bpts]) => (
+      {breakpoints.map(entry => (
         <BreakpointCellComponent
-          key={path}
-          breakpoints={bpts}
+          key={entry[0]}
+          breakpoints={entry[1]}
           model={model}
           notebookTracker={notebookTracker}
           config={config}
@@ -119,8 +126,10 @@ const BreakpointCellComponent = ({
 }): JSX.Element => (
   <>
     {breakpoints
-      .sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
-      .map((breakpoint, index) => (
+      .sort((a, b) => {
+        return (a.line ?? 0) - (b.line ?? 0);
+      })
+      .map((breakpoint: IDebugger.IBreakpoint, index) => (
         <BreakpointComponent
           key={(breakpoint.source?.path ?? '') + index}
           breakpoint={breakpoint}
