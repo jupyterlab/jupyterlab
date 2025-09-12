@@ -28,11 +28,15 @@ export class Breakpoints extends PanelWithToolbar {
    */
   constructor(options: Breakpoints.IOptions) {
     super(options);
-    const { model, service, commands, notebookTracker, config } = options;
+    const { model, service, commands, config, notebookTracker } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Breakpoints');
 
-    const body = new BreakpointsBody(model, notebookTracker, config);
+    const body = new BreakpointsBody(
+      model,
+      config,
+      notebookTracker || undefined
+    );
 
     this.toolbar.node.setAttribute(
       'aria-label',
@@ -126,7 +130,7 @@ export namespace Breakpoints {
     /**
      * Notebook tracker to resolve cell indices.
      */
-    notebookTracker: INotebookTracker;
+    notebookTracker: INotebookTracker | null;
 
     /**
      * The debugger configuration.

@@ -168,7 +168,7 @@ export namespace DebuggerSidebar {
     /**
      * The notebook tracker (required to resolve notebook breakpoints).
      */
-    notebookTracker: INotebookTracker;
+    notebookTracker: INotebookTracker | null;
 
     /**
      * The debugger configuration.

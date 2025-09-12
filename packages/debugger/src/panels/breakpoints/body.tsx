@@ -20,8 +20,8 @@ export class BreakpointsBody extends ReactWidget {
    */
   constructor(
     model: IDebugger.Model.IBreakpoints,
-    notebookTracker: INotebookTracker,
-    config: IDebugger.IConfig
+    config: IDebugger.IConfig,
+    notebookTracker?: INotebookTracker
   ) {
     super();
     this._model = model;
@@ -41,8 +41,8 @@ export class BreakpointsBody extends ReactWidget {
   }
 
   private _model: IDebugger.Model.IBreakpoints;
-  private _notebookTracker: INotebookTracker;
   private _config: IDebugger.IConfig;
+  private _notebookTracker: INotebookTracker | undefined;
 }
 
 /**
@@ -60,7 +60,7 @@ const BreakpointsComponent = ({
   config
 }: {
   model: IDebugger.Model.IBreakpoints;
-  notebookTracker: INotebookTracker;
+  notebookTracker: INotebookTracker | undefined;
   config: IDebugger.IConfig;
 }): JSX.Element => {
   const [breakpoints, setBreakpoints] = useState(
@@ -121,8 +121,8 @@ const BreakpointCellComponent = ({
 }: {
   breakpoints: IDebugger.IBreakpoint[];
   model: IDebugger.Model.IBreakpoints;
-  notebookTracker: INotebookTracker;
   config: IDebugger.IConfig;
+  notebookTracker?: INotebookTracker | undefined;
 }): JSX.Element => (
   <>
     {breakpoints
@@ -159,13 +159,13 @@ const BreakpointComponent = ({
 }: {
   breakpoint: IDebugger.IBreakpoint;
   model: IDebugger.Model.IBreakpoints;
-  notebookTracker: INotebookTracker;
   config: IDebugger.IConfig;
+  notebookTracker: INotebookTracker | undefined;
 }): JSX.Element => {
   const resolveExecutionCount = (): number | null => {
     let execCount: number | null = null;
 
-    notebookTracker.forEach(panel => {
+    notebookTracker?.forEach(panel => {
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
       panel.content.widgets.forEach((cell, i) => {
         const code = cell.model.sharedModel.getSource();
@@ -199,7 +199,7 @@ const BreakpointComponent = ({
     >
       <span className="jp-DebuggerBreakpoint-marker">●</span>
       <span className="jp-DebuggerBreakpoint-source jp-left-truncated">
-        Cell {execCount === null ? '[*]' : `[${execCount}]`}
+        {`Cell ${execCount === null ? '[*]' : `[${execCount}]`}`}
       </span>
       <span className="jp-DebuggerBreakpoint-line">{breakpoint.line}</span>
     </div>
