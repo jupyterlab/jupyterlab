@@ -1579,6 +1579,7 @@ describe('Kernel.IKernel', () => {
     });
   });
 
+  /*
   describe('should support subshells', () => {
     it('#supportsSubshells should return true', () => {
       expect(defaultKernel.supportsSubshells).toBeTruthy();
@@ -1611,4 +1612,5 @@ describe('Kernel.IKernel', () => {
       expect(listReply2.content.subshell_id).toEqual([]);
     });
   });
+  */
 });

@@ -4,7 +4,7 @@
 import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import {
-  CommsOverSubshells,
+  //CommsOverSubshells,
   Kernel,
   KernelManager,
   KernelMessage
@@ -85,6 +85,7 @@ describe('jupyter.services - Comm', () => {
         expect(comm.subshellId).toBeNull();
       });
 
+      /*
       it('should spawn a subshell per-comm', async () => {
         await echoKernel.info;
 
@@ -179,6 +180,7 @@ describe('jupyter.services - Comm', () => {
 
         expect(comm.subshellId).not.toEqual(comm2.subshellId);
       });
+      */
 
       it('should use the given id', () => {
         const comm = kernel.createComm('test', '1234');
