@@ -50,7 +50,7 @@
   user-select: none;
 }
 
-.jp-InputArea-prompt-run {
+.jp-InputArea-prompt-button {
   position: absolute;
   display: flex;
   top: 0.4em;
@@ -58,7 +58,7 @@
   z-index: 20;
 }
 
-.jp-InputArea-prompt-run > jp-button {
+.jp-InputArea-prompt-button > jp-button {
   height: var(--jp-code-line-height);
   margin: unset;
 }
