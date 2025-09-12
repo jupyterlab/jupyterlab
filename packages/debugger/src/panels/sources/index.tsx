@@ -15,6 +15,7 @@ import React from 'react';
 import { IDebugger } from '../../tokens';
 import { SourcesBody } from './body';
 import { SourcePathComponent } from './sourcepath';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -27,7 +28,7 @@ export class Sources extends PanelWithToolbar {
    */
   constructor(options: Sources.IOptions) {
     super();
-    const { model, service, editorServices } = options;
+    const { model, service, editorServices, notebookTracker } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Source');
 
@@ -39,7 +40,8 @@ export class Sources extends PanelWithToolbar {
     const body = new SourcesBody({
       service,
       model,
-      editorServices
+      editorServices,
+      notebookTracker
     });
     this.toolbar.addItem(
       'open',
@@ -88,5 +90,10 @@ export namespace Sources {
      * The application language translator
      */
     translator?: ITranslator;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker?: INotebookTracker | null;
   }
 }

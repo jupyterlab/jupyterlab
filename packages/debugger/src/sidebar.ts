@@ -81,7 +81,8 @@ export class DebuggerSidebar extends SidePanel {
       model: model.sources,
       service,
       editorServices,
-      translator
+      translator,
+      notebookTracker
     });
 
     this.kernelSources = new KernelSourcesPanel({
