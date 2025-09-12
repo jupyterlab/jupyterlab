@@ -344,7 +344,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   revealPosition(
     position: CodeEditor.IPosition,
-    options?: CodeMirrorEditor.IRevealOptions
+    options?: ScrollIntoViewOptions
   ): void {
     const offset = this.getOffsetAt(position);
     this._editor.dispatch({
@@ -360,7 +360,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   revealSelection(
     selection: CodeEditor.IRange,
-    options?: CodeMirrorEditor.IRevealOptions
+    options?: ScrollIntoViewOptions
   ): void {
     const start = this.getOffsetAt(selection.start);
     const end = this.getOffsetAt(selection.end);
@@ -790,21 +790,6 @@ export namespace CodeMirrorEditor {
      * CodeMirror languages registry
      */
     languages?: IEditorLanguageRegistry;
-  }
-
-  /**
-   * The options for the reveal functions, a subset of the options of `scrollIntoView`.
-   * https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
-   */
-  export interface IRevealOptions {
-    /**
-     * Vertical alignment.
-     */
-    block?: 'nearest' | 'start' | 'end' | 'center';
-    /**
-     * Horizontal alignment.
-     */
-    inline?: 'nearest' | 'start' | 'end' | 'center';
   }
 }
 
