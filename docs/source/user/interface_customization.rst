@@ -320,3 +320,63 @@ Custom CSS
 ==========
 
 .. include:: custom_css.rst
+
+.. _settings-editor-filtering:
+
+Settings Editor Plugin Filtering
+=================================
+
+The Settings Editor supports configurable filtering of plugins to hide specific plugins from the settings interface. This allows administrators and power users to hide complex or sensitive plugins while keeping them fully functional.
+The hidden plugins will remain accessible in the JSON Settings Editor.
+
+Configuration Options
+---------------------
+
+Via Settings UI
+^^^^^^^^^^^^^^^
+
+1. Open JupyterLab Settings Editor (*Settings > Settings Editor*)
+2. Search for "Settings Editor Form UI"
+3. Find the "Additional plugins to skip in settings editor" field
+4. Add plugin IDs in the format ``package:plugin``
+5. Save the settings
+
+Via overrides.json
+^^^^^^^^^^^^^^^^^^
+
+Add the following to your ``overrides.json`` file:
+
+.. code-block:: json
+
+    {
+      "@jupyterlab/settingeditor-extension:form-ui": {
+        "toSkip": [
+          "my-extension:plugin-to-hide",
+          "another-extension:config-plugin"
+        ]
+      }
+    }
+
+Always Hidden Plugins
+---------------------
+
+The following plugins are hidden by default from the settings editor:
+
+- ``@jupyterlab/application-extension:context-menu``
+- ``@jupyterlab/mainmenu-extension:plugin``
+
+Plugin ID Format
+----------------
+
+Plugin IDs usually follow the format: ``package-name:plugin-name``
+
+For a complete list of core plugin IDs, see the :ref:`Core Plugins <core_tokens>` documentation.
+
+Alternatives
+------------
+
+If you need to completely disable plugin functionality, consider:
+
+- Disabling extensions entirely via the Extension Manager
+- Using ``page_config.json`` to disable specific plugins
+- Using the command line: ``jupyter labextension disable package-name:plugin-name``
