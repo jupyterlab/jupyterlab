@@ -411,7 +411,7 @@ export namespace EditorHandler {
   export function showCurrentLine(
     editor: CodeEditor.IEditor,
     line: number,
-    scrollLogicalPosition: ScrollLogicalPosition | false = 'start'
+    scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
