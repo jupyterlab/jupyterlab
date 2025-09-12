@@ -342,21 +342,33 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Reveal the given position in the editor.
    */
-  revealPosition(position: CodeEditor.IPosition): void {
+  revealPosition(
+    position: CodeEditor.IPosition,
+    options?: ScrollIntoViewOptions
+  ): void {
     const offset = this.getOffsetAt(position);
     this._editor.dispatch({
-      effects: EditorView.scrollIntoView(offset)
+      effects: EditorView.scrollIntoView(offset, {
+        y: options?.block,
+        x: options?.inline
+      })
     });
   }
 
   /**
    * Reveal the given selection in the editor.
    */
-  revealSelection(selection: CodeEditor.IRange): void {
+  revealSelection(
+    selection: CodeEditor.IRange,
+    options?: ScrollIntoViewOptions
+  ): void {
     const start = this.getOffsetAt(selection.start);
     const end = this.getOffsetAt(selection.end);
     this._editor.dispatch({
-      effects: EditorView.scrollIntoView(EditorSelection.range(start, end))
+      effects: EditorView.scrollIntoView(EditorSelection.range(start, end), {
+        y: options?.block,
+        x: options?.inline
+      })
     });
   }
 

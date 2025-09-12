@@ -122,7 +122,7 @@ export class SourcesBody extends Widget {
     };
 
     requestAnimationFrame(() => {
-      EditorHandler.showCurrentLine(this._editor.editor, frame.line);
+      EditorHandler.showCurrentLine(this._editor.editor, frame.line, 'start');
     });
 
     this._editor.show();
