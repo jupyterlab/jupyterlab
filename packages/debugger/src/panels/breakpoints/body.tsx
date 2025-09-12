@@ -160,35 +160,45 @@ const BreakpointComponent = ({
   breakpoint: IDebugger.IBreakpoint;
   model: IDebugger.Model.IBreakpoints;
   config: IDebugger.IConfig;
-  notebookTracker: INotebookTracker | undefined;
+  notebookTracker?: INotebookTracker;
 }): JSX.Element => {
-  const resolveExecutionCount = (): number | null => {
-    let execCount: number | null = null;
+  const resolveExecutionDisplay = (): string | null => {
+    let display: string | null = null;
 
     notebookTracker?.forEach(panel => {
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach((cell, i) => {
+      panel.content.widgets.forEach(cell => {
+        if (cell.model.type !== 'code') {
+          return;
+        }
+
         const code = cell.model.sharedModel.getSource();
         const codeId = config.getCodeId(code, kernelName);
+
         if (codeId && codeId === breakpoint.source?.path) {
-          execCount =
-            cell.model.type === 'code'
-              ? (cell.model as ICodeCellModel).executionCount
-              : null;
+          const codeCell = cell.model as ICodeCellModel;
+
+          if (codeCell.executionState === 'running') {
+            display = `[*]`;
+          } else if (codeCell.executionCount === null) {
+            display = `[ ]`;
+          } else {
+            display = `[${codeCell.executionCount}]`;
+          }
         }
       });
     });
 
-    return execCount;
+    return display;
   };
 
-  const execCount = resolveExecutionCount();
+  const execDisplay = resolveExecutionDisplay();
 
   console.log(
-    '[BreakpointComponent] Resolved execution count for breakpoint:',
+    '[BreakpointComponent] Resolved execution display for breakpoint:',
     breakpoint,
     '->',
-    execCount
+    execDisplay
   );
 
   return (
@@ -199,7 +209,8 @@ const BreakpointComponent = ({
     >
       <span className="jp-DebuggerBreakpoint-marker">●</span>
       <span className="jp-DebuggerBreakpoint-source jp-left-truncated">
-        {`Cell ${execCount === null ? '[*]' : `[${execCount}]`}`}
+        <span>Cell</span>&nbsp;
+        <span>{execDisplay ?? '[ ]'}</span>
       </span>
       <span className="jp-DebuggerBreakpoint-line">{breakpoint.line}</span>
     </div>
