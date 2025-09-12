@@ -51,8 +51,10 @@ import {
 import { ServiceManager, Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
+import { DebuggerInlineCompletionProvider } from './debugger-inline-provider';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -96,6 +98,9 @@ function createDebugConsole(
   });
   consolePanel.title.label = 'Console';
   consolePanel.id = id;
+
+  // Need underlying CodeConsole in executor
+  debugConsoleExecutor.codeConsole = consolePanel.console;
 
   // TODO: The banner stuff below
   // This is actually only used on kernel/kernel status change
@@ -1209,6 +1214,34 @@ const main: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides debugger-based inline completions.
+ */
+const debuggerCompletions: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:completions',
+  description: 'Provides debugger-based inline completions.',
+  autoStart: true,
+  requires: [IDebugger, ICompletionProviderManager],
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    debuggerService: IDebugger,
+    completionManager: ICompletionProviderManager,
+    translator: ITranslator | null
+  ): void => {
+    // Create and register the debugger inline completion provider
+    const provider = new DebuggerInlineCompletionProvider({
+      debuggerService: debuggerService,
+      translator: translator || nullTranslator
+    });
+
+    // Register the provider with the completion manager
+    completionManager.registerInlineProvider(provider);
+
+    console.log('Debugger inline completion provider registered');
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1221,7 +1254,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
   sources,
   sourceViewer,
-  configuration
+  configuration,
+  debuggerCompletions
 ];
 
 export default plugins;
