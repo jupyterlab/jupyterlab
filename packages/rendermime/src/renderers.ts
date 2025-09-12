@@ -1322,7 +1322,10 @@ namespace Private {
       return;
     }
     try {
-      const urlPath = await resolver.resolveUrl(source);
+      const urlPath = await resolver.resolveUrl(source, {
+        attribute: name,
+        tag: node.localName as IRenderMime.IResolveUrlContext['tag']
+      });
       let url = await resolver.getDownloadUrl(urlPath);
       if (URLExt.parse(url).protocol !== 'data:') {
         // Bust caching for local src attrs.
@@ -1369,7 +1372,7 @@ namespace Private {
     }
     // Get the appropriate file path.
     return resolver
-      .resolveUrl(href)
+      .resolveUrl(href, { attribute: 'href', tag: 'a' })
       .then(urlPath => {
         // decode encoded url from url to api path
         const path = decodeURIComponent(urlPath);
