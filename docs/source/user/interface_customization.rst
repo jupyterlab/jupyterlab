@@ -327,6 +327,7 @@ Settings Editor Plugin Filtering
 =================================
 
 The Settings Editor supports configurable filtering of plugins to hide specific plugins from the settings interface. This allows administrators and power users to hide complex or sensitive plugins while keeping them fully functional.
+The hidden plugins will remain accessible in the JSON Settings Editor.
 
 Configuration Options
 ---------------------
