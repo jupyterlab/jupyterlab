@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IConsoleCellExecutor } from '@jupyterlab/console';
+import { CodeCell } from '@jupyterlab/cells';
+import { CodeConsole, IConsoleCellExecutor } from '@jupyterlab/console';
 import { IDebugger } from '@jupyterlab/debugger';
 import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
 
@@ -8,10 +9,41 @@ import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
  * Custom console cell executor that uses debugger evaluation.
  */
 export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
-  _debuggerService: IDebugger;
+  private _debuggerService: IDebugger;
+  private _codeConsole: CodeConsole;
+  private _currentPromptCell: CodeCell;
 
   constructor(debuggerService: IDebugger) {
     this._debuggerService = debuggerService;
+  }
+
+  get codeConsole(): CodeConsole {
+    return this._codeConsole;
+  }
+
+  set codeConsole(value: CodeConsole) {
+    this._codeConsole = value;
+
+    // Prompt cell gets recreated every execution
+    this._codeConsole.promptCellCreated.connect((_, promptCell) => {
+      this._currentPromptCell = promptCell;
+
+      // TODO debounce
+      // Capture typing
+      this._currentPromptCell.model.sharedModel.changed.connect(() => {
+        this.evalForCompletion();
+      });
+    });
+  }
+
+  async evalForCompletion() {
+    console.log('evaling for completion');
+    const input = this._currentPromptCell.model.sharedModel.getSource();
+    const code = `get_ipython().completer('${input}')`;
+    console.log('code', code);
+    const results = await this._debuggerService.evaluate(code);
+    this._currentPromptCell.editor?.injectExtension;
+    console.log('results', results);
   }
 
   async evaluateWithDebugger(options: {
