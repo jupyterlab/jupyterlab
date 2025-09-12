@@ -11,6 +11,8 @@ import { bugIcon, SidePanel } from '@jupyterlab/ui-components';
 
 import { Widget } from '@lumino/widgets';
 
+import { INotebookTracker } from '@jupyterlab/notebook';
+
 import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
 import { Callstack as CallstackPanel } from './panels/callstack';
@@ -44,7 +46,9 @@ export class DebuggerSidebar extends SidePanel {
       breakpointsCommands,
       editorServices,
       service,
-      themeManager
+      themeManager,
+      notebookTracker,
+      config
     } = options;
     const model = service.model;
 
@@ -66,7 +70,9 @@ export class DebuggerSidebar extends SidePanel {
       service,
       commands: breakpointsCommands,
       model: model.breakpoints,
-      translator
+      translator,
+      notebookTracker,
+      config
     });
 
     this.sources = new SourcesPanel({
@@ -140,7 +146,7 @@ export namespace DebuggerSidebar {
     callstackCommands: CallstackPanel.ICommands;
 
     /**
-     * The callstack toolbar commands.
+     * The breakpoints toolbar commands.
      */
     breakpointsCommands: BreakpointsPanel.ICommands;
 
@@ -158,6 +164,16 @@ export namespace DebuggerSidebar {
      * An optional application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * The notebook tracker (required to resolve notebook breakpoints).
+     */
+    notebookTracker: INotebookTracker;
+
+    /**
+     * The debugger configuration.
+     */
+    config: IDebugger.IConfig;
   }
 
   /**

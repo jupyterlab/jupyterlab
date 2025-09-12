@@ -15,6 +15,7 @@ import { Panel } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
 import { PauseOnExceptionsWidget } from './pauseonexceptions';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A Panel to show a list of breakpoints.
@@ -27,11 +28,11 @@ export class Breakpoints extends PanelWithToolbar {
    */
   constructor(options: Breakpoints.IOptions) {
     super(options);
-    const { model, service, commands } = options;
+    const { model, service, commands, notebookTracker, config } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Breakpoints');
 
-    const body = new BreakpointsBody(model);
+    const body = new BreakpointsBody(model, notebookTracker, config);
 
     this.toolbar.node.setAttribute(
       'aria-label',
@@ -97,6 +98,7 @@ export namespace Breakpoints {
      */
     pauseOnExceptions: string;
   }
+
   /**
    * Instantiation options for `Breakpoints`.
    */
@@ -120,5 +122,12 @@ export namespace Breakpoints {
      * The application language translator..
      */
     translator?: ITranslator;
+
+    /**
+     * Notebook tracker to resolve cell indices.
+     */
+    notebookTracker: INotebookTracker;
+
+    config: IDebugger.IConfig;
   }
 }
