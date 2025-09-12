@@ -1,74 +1,45 @@
-name: MacOS Tests
+name: macOS Tests
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'examples/**'
-      - 'packages/galata/**'
-      - 'ui-tests/**'
-      - 'binder/**'
-      - 'docs/**'
-      - '.github/workflows/benchmark.yml'
-      - '.github/workflows/benchmark-report.yml'
-      - '.github/workflows/docker-test.yml'
-      - '.github/workflows/galata.yml'
-      - '.github/workflows/linuxtests.yml'
-      - '.github/workflows/windowstests.yml'
-      - '!packages/galata/test/jupyterlab/galata.generated.test.ts'
   push:
-    branches:
-      - main
-      - '*.x'
-    paths-ignore:
-      - 'examples/**'
-      - 'packages/galata/**'
-      - 'ui-tests/**'
-      - 'binder/**'
-      - 'docs/**'
-      - '.github/workflows/benchmark.yml'
-      - '.github/workflows/benchmark-report.yml'
-      - '.github/workflows/docker-test.yml'
-      - '.github/workflows/galata.yml'
-      - '.github/workflows/linuxtests.yml'
-      - '.github/workflows/windowstests.yml'
-      - '!packages/galata/test/jupyterlab/galata.generated.test.ts'
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
 
 jobs:
-  tests:
-    runs-on: macos-12
+  macostests:
+    name: macOS
     strategy:
-      fail-fast: false
       matrix:
-        python_version: ['3.8', '3.9', '3.10']
+        group: [integrity, python, usage, usage2]
+        python-version: [3.12]
+        include:
+          - group: python
+            python-version: 3.13
+      fail-fast: false
+    timeout-minutes: 45
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python_version }}
-          architecture: x64
-          cache: 'pip'
-          cache-dependency-path: 'pyproject.toml'
-      - name: Install Dependencies
-        run: |
-          bash scripts/ci_install.sh
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Setup firefox
+        run: brew install --cask firefox
+
+      - name: Install dependencies
         env:
-          DEPENDENCY_TYPE: standard
-      - name: Run Tests
+          GROUP: ${{ matrix.group }}
         run: |
-          bash scripts/ci_script.sh
+          bash ./scripts/ci_install.sh
+
+      - name: Run test ${{ matrix.group }}
         env:
-          JUPYTER_PLATFORM_ARCH: 'osx-64'
+          GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: webkit
+        run: |
+          bash ./scripts/ci_script.sh
