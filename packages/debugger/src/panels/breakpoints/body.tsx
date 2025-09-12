@@ -4,6 +4,8 @@
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
 import { IDebugger } from '../../tokens';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { ICodeCellModel } from '@jupyterlab/cells';
 
 /**
  * The body for a Breakpoints Panel.
@@ -13,21 +15,34 @@ export class BreakpointsBody extends ReactWidget {
    * Instantiate a new Body for the Breakpoints Panel.
    *
    * @param model The model for the breakpoints.
+   * @param notebookTracker The notebook tracker.
+   * @param config The debugger configuration.
    */
-  constructor(model: IDebugger.Model.IBreakpoints) {
+  constructor(
+    model: IDebugger.Model.IBreakpoints,
+    config: IDebugger.IConfig,
+    notebookTracker?: INotebookTracker
+  ) {
     super();
     this._model = model;
+    this._notebookTracker = notebookTracker;
+    this._config = config;
     this.addClass('jp-DebuggerBreakpoints-body');
   }
 
-  /**
-   * Render the BreakpointsComponent.
-   */
   render(): JSX.Element {
-    return <BreakpointsComponent model={this._model} />;
+    return (
+      <BreakpointsComponent
+        model={this._model}
+        notebookTracker={this._notebookTracker}
+        config={this._config}
+      />
+    );
   }
 
   private _model: IDebugger.Model.IBreakpoints;
+  private _config: IDebugger.IConfig;
+  private _notebookTracker: INotebookTracker | undefined;
 }
 
 /**
@@ -35,11 +50,18 @@ export class BreakpointsBody extends ReactWidget {
  *
  * @param {object} props The component props.
  * @param props.model The model for the breakpoints.
+ * @param props.notebookTracker The notebook tracker.
+ * @param props.config The debugger configuration.
+ * @returns A JSX element.
  */
 const BreakpointsComponent = ({
-  model
+  model,
+  notebookTracker,
+  config
 }: {
   model: IDebugger.Model.IBreakpoints;
+  notebookTracker: INotebookTracker | undefined;
+  config: IDebugger.IConfig;
 }): JSX.Element => {
   const [breakpoints, setBreakpoints] = useState(
     Array.from(model.breakpoints.entries())
@@ -73,6 +95,8 @@ const BreakpointsComponent = ({
           key={entry[0]}
           breakpoints={entry[1]}
           model={model}
+          notebookTracker={notebookTracker}
+          config={config}
         />
       ))}
     </>
@@ -85,30 +109,37 @@ const BreakpointsComponent = ({
  * @param {object} props The component props.
  * @param props.breakpoints The list of breakpoints.
  * @param props.model The model for the breakpoints.
+ * @param props.notebookTracker The notebook tracker.
+ * @param props.config The debugger configuration.
+ * @returns A JSX element.
  */
 const BreakpointCellComponent = ({
   breakpoints,
-  model
+  model,
+  notebookTracker,
+  config
 }: {
   breakpoints: IDebugger.IBreakpoint[];
   model: IDebugger.Model.IBreakpoints;
-}): JSX.Element => {
-  return (
-    <>
-      {breakpoints
-        .sort((a, b) => {
-          return (a.line ?? 0) - (b.line ?? 0);
-        })
-        .map((breakpoint: IDebugger.IBreakpoint, index) => (
-          <BreakpointComponent
-            key={(breakpoint.source?.path ?? '') + index}
-            breakpoint={breakpoint}
-            model={model}
-          />
-        ))}
-    </>
-  );
-};
+  config: IDebugger.IConfig;
+  notebookTracker?: INotebookTracker | undefined;
+}): JSX.Element => (
+  <>
+    {breakpoints
+      .sort((a, b) => {
+        return (a.line ?? 0) - (b.line ?? 0);
+      })
+      .map((breakpoint: IDebugger.IBreakpoint, index) => (
+        <BreakpointComponent
+          key={(breakpoint.source?.path ?? '') + index}
+          breakpoint={breakpoint}
+          model={model}
+          notebookTracker={notebookTracker}
+          config={config}
+        />
+      ))}
+  </>
+);
 
 /**
  * A React Component to display a single breakpoint.
@@ -116,30 +147,72 @@ const BreakpointCellComponent = ({
  * @param {object} props The component props.
  * @param props.breakpoint The breakpoint.
  * @param props.model The model for the breakpoints.
+ * @param props.notebookTracker The notebook tracker.
+ * @param props.config The debugger configuration.
+ * @returns A JSX element.
  */
 const BreakpointComponent = ({
   breakpoint,
-  model
+  model,
+  notebookTracker,
+  config
 }: {
   breakpoint: IDebugger.IBreakpoint;
   model: IDebugger.Model.IBreakpoints;
+  config: IDebugger.IConfig;
+  notebookTracker?: INotebookTracker;
 }): JSX.Element => {
-  const moveToEndFirstCharIfSlash = (breakpointSourcePath: string): string => {
-    return breakpointSourcePath[0] === '/'
-      ? breakpointSourcePath.slice(1) + '/'
-      : breakpointSourcePath;
+  const resolveExecutionDisplay = (): string | null => {
+    let display: string | null = null;
+
+    notebookTracker?.forEach(panel => {
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+      panel.content.widgets.forEach(cell => {
+        if (cell.model.type !== 'code') {
+          return;
+        }
+
+        const code = cell.model.sharedModel.getSource();
+        const codeId = config.getCodeId(code, kernelName);
+
+        if (codeId && codeId === breakpoint.source?.path) {
+          const codeCell = cell.model as ICodeCellModel;
+
+          if (codeCell.executionState === 'running') {
+            display = `[*]`;
+          } else if (codeCell.executionCount === null) {
+            display = `[ ]`;
+          } else {
+            display = `[${codeCell.executionCount}]`;
+          }
+        }
+      });
+    });
+
+    return display;
   };
+
+  const execDisplay = resolveExecutionDisplay();
+
+  console.log(
+    '[BreakpointComponent] Resolved execution display for breakpoint:',
+    breakpoint,
+    '->',
+    execDisplay
+  );
+
   return (
     <div
-      className={'jp-DebuggerBreakpoint'}
-      onClick={(): void => model.clicked.emit(breakpoint)}
+      className="jp-DebuggerBreakpoint"
+      onClick={() => model.clicked.emit(breakpoint)}
       title={breakpoint.source?.path}
     >
-      <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
-      <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
-        {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
+      <span className="jp-DebuggerBreakpoint-marker">●</span>
+      <span className="jp-DebuggerBreakpoint-source jp-left-truncated">
+        <span>Cell</span>&nbsp;
+        <span>{execDisplay ?? '[ ]'}</span>
       </span>
-      <span className={'jp-DebuggerBreakpoint-line'}>{breakpoint.line}</span>
+      <span className="jp-DebuggerBreakpoint-line">{breakpoint.line}</span>
     </div>
   );
 };
