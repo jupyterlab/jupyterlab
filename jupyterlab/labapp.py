@@ -57,6 +57,7 @@ from .handlers.announcements import (
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
+from .handlers.files_handler import FilesHandler, files_path
 from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
@@ -896,6 +897,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                     ),
                 ]
             )
+
+            # Add files handler
+            files_handler = (files_path, FilesHandler, {})
+            handlers.append(files_handler)
 
         # If running under JupyterHub, add more metadata.
         if "hub_prefix" in self.serverapp.tornado_settings:
