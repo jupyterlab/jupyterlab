@@ -438,14 +438,16 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined {
     return this._createOrOpenDocument(
       'open',
       path,
       widgetName,
       kernel,
-      options
+      options,
+      kernelPreference
     );
   }
 
@@ -469,7 +471,8 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
@@ -479,7 +482,7 @@ export class DocumentManager implements IDocumentManager {
       });
       return widget;
     }
-    return this.open(path, widgetName, kernel, options ?? {});
+    return this.open(path, widgetName, kernel, options ?? {}, kernelPreference);
   }
 
   /**
@@ -638,7 +641,8 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined {
     const widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
@@ -651,11 +655,10 @@ export class DocumentManager implements IDocumentManager {
     }
 
     // Handle the kernel preference.
-    const preference = this.registry.getKernelPreference(
-      path,
-      widgetFactory.name,
-      kernel
-    );
+    const preference = {
+      ...this.registry.getKernelPreference(path, widgetFactory.name, kernel),
+      ...kernelPreference
+    };
 
     let context: Private.IContext | null;
     let ready: Promise<void> = Promise.resolve(undefined);
