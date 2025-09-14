@@ -16,6 +16,7 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
 import {
   Compartment,
   Prec,
+  Range,
   RangeSet,
   StateEffect,
   StateEffectType,
@@ -82,6 +83,11 @@ export class EditorHandler implements IDisposable {
       this._addBreakpointsToEditor();
     });
 
+    this._debuggerService.model.breakpoints.clicked.connect((_, breakpoint) => {
+      this._selectedBreakpointLine = breakpoint.line ?? null;
+      this._addBreakpointsToEditor();
+    });
+
     this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
       const editor = this.editor;
       if (editor) {
@@ -89,8 +95,14 @@ export class EditorHandler implements IDisposable {
       }
     });
 
-    this._breakpointEffect = StateEffect.define<{ pos: number[] }>({
-      map: (value, mapping) => ({ pos: value.pos.map(v => mapping.mapPos(v)) })
+    this._breakpointEffect = StateEffect.define<
+      { pos: number; selected: boolean }[]
+    >({
+      map: (value, mapping) =>
+        value.map(v => ({
+          pos: mapping.mapPos(v.pos),
+          selected: v.selected
+        }))
     });
 
     this._breakpointState = StateField.define<RangeSet<GutterMarker>>({
@@ -98,21 +110,27 @@ export class EditorHandler implements IDisposable {
         return RangeSet.empty;
       },
       update: (breakpoints, transaction) => {
-        breakpoints = breakpoints.map(transaction.changes);
+        let hasEffect = false;
+        let decorations: Range<GutterMarker> | readonly Range<GutterMarker>[] =
+          [];
+
         for (let ef of transaction.effects) {
           if (ef.is(this._breakpointEffect)) {
-            let e = ef as StateEffect<{ pos: number[] }>;
-            if (e.value.pos.length) {
-              breakpoints = breakpoints.update({
-                add: e.value.pos.map(v => Private.breakpointMarker.range(v)),
-                sort: true
-              });
-            } else {
-              breakpoints = RangeSet.empty;
-            }
+            hasEffect = true;
+            decorations = ef.value.map(({ pos, selected }) => {
+              const marker = selected
+                ? Private.selectedBreakpointMarker
+                : Private.breakpointMarker;
+              return marker.range(pos);
+            });
           }
         }
-        return breakpoints;
+
+        if (hasEffect) {
+          return RangeSet.of(decorations, true);
+        }
+
+        return breakpoints.map(transaction.changes);
       }
     });
 
@@ -304,12 +322,16 @@ export class EditorHandler implements IDisposable {
     const breakpoints = this._getBreakpoints();
 
     this._clearGutter(editor);
-    const breakpointPos = breakpoints.map(b => {
-      return editor.state.doc.line(b.line!).from;
+
+    const selectedLine = this._selectedBreakpointLine;
+    const breakpointData = breakpoints.map(b => {
+      const pos = editor.state.doc.line(b.line!).from;
+      const selected = b.line! === selectedLine;
+      return { pos, selected };
     });
 
     editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: breakpointPos })
+      effects: this._breakpointEffect.of(breakpointData)
     });
   }
 
@@ -334,7 +356,7 @@ export class EditorHandler implements IDisposable {
 
     const view = (editor as CodeMirrorEditor).editor;
     view.dispatch({
-      effects: this._breakpointEffect.of({ pos: [] })
+      effects: this._breakpointEffect.of([])
     });
   }
 
@@ -352,7 +374,9 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _debuggerService: IDebugger;
   private _editor: () => CodeEditor.IEditor | null;
-  private _breakpointEffect: StateEffectType<{ pos: number[] }>;
+  private _breakpointEffect: StateEffectType<
+    { pos: number; selected: boolean }[]
+  >;
   private _breakpointState: StateField<RangeSet<GutterMarker>>;
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
@@ -360,6 +384,7 @@ export class EditorHandler implements IDisposable {
   private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
   private _path: string;
   private _src: ISharedText;
+  private _selectedBreakpointLine: number | null = null;
 }
 
 /**
@@ -444,6 +469,13 @@ namespace Private {
   export const breakpointMarker = new (class extends GutterMarker {
     toDOM() {
       const marker = document.createTextNode('●');
+      return marker;
+    }
+  })();
+
+  export const selectedBreakpointMarker = new (class extends GutterMarker {
+    toDOM() {
+      const marker = document.createTextNode('◉');
       return marker;
     }
   })();
