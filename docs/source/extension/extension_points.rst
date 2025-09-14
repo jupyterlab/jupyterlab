@@ -723,11 +723,11 @@ A typical example is the notebook toolbar as in the snippet below:
 
      // Register notebook toolbar specific widgets
      if (toolbarRegistry) {
-       toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+       toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
          ToolbarItems.createCellTypeItem(panel, translator)
        );
 
-       toolbarRegistry.registerFactory<NotebookPanel>(
+       toolbarRegistry.addFactory<NotebookPanel>(
          FACTORY,
          'kernelStatus',
          panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
@@ -759,7 +759,7 @@ A typical example is the notebook toolbar as in the snippet below:
      });
      app.docRegistry.addWidgetFactory(factory);
 
-The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair
+The registry ``addFactory`` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper ``createToolbarFactory`` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
 
@@ -874,7 +874,7 @@ Here is an example for enabling a toolbar on a widget:
 
      // Toolbar
      // - Define a custom toolbar item
-     toolbarRegistry.registerFactory(
+     toolbarRegistry.addFactory(
        'FileBrowser', // Factory name
        'uploader',
        (browser: FileBrowser) =>

@@ -107,12 +107,14 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IDisposableMenuItem,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon,
+  RankedMenu,
   refreshIcon,
   runIcon,
   stopIcon,
@@ -129,7 +131,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel, Widget } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
@@ -1124,6 +1126,72 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to add "Notebook (no kernel)" to the "Open With" context menu.
+ *
+ * Follows a similar logic as the filebrowser plugin populating the "Open With" menu
+ * based on widget factories.
+ *
+ * TODO: investigate generalizing opening without a kernel to other file types that may be
+ * backed by a kernel.
+ */
+const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:open-with-no-kernel',
+  description: 'Adds the "Notebook (no kernel)" option to the Open With menu.',
+  requires: [IFileBrowserFactory],
+  optional: [ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator | null
+  ): void => {
+    const { tracker } = factory;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const items: IDisposableMenuItem[] = [];
+
+    function updateOpenWithMenu(contextMenu: ContextMenu) {
+      // Clear previous items
+      items.forEach(item => item.dispose());
+      items.length = 0;
+
+      const openWith =
+        (contextMenu.menu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-contextmenu-open-with'
+        )?.submenu as RankedMenu) ?? null;
+
+      if (!openWith) {
+        return; // Bail early if the open with menu is not displayed
+      }
+
+      const selectedItems = tracker.currentWidget
+        ? Array.from(tracker.currentWidget.selectedItems())
+        : [];
+      const hasNotebooks = selectedItems.some(item => item.type === 'notebook');
+
+      if (hasNotebooks) {
+        items.push(
+          openWith.addItem({
+            command: 'filebrowser:open',
+            args: {
+              label: trans.__('Notebook (no kernel)'),
+              factory: FACTORY,
+              kernelPreference: {
+                shouldStart: false
+              }
+            }
+          })
+        );
+      }
+    }
+
+    app.contextMenu.opened.connect(updateOpenWithMenu);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1148,7 +1216,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   languageServerPlugin,
   updateRawMimetype,
   customMetadataEditorFields,
-  activeCellTool
+  activeCellTool,
+  openWithNoKernelPlugin
 ];
 export default plugins;
 
@@ -3325,7 +3394,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
     isEnabled,
@@ -3342,7 +3414,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, true);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, true, addExtraLine);
       }
     },
     isEnabled,
@@ -3359,7 +3434,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, false);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
     isEnabled,

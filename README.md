@@ -151,7 +151,6 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
-- Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Steven Silvester, MongoDB (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 - Jeremy Tuloup, QuantStack (general development, extensions).
@@ -163,6 +162,7 @@ Maintainer emeritus:
 - Jessica Forde, Project Jupyter (demo, documentation)
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis).
 - Cameron Oelsen, Cal Poly (UI/UX design).
+- Isabela Presedo-Floyd, QuanSight Labs (design/UX).
 - Ian Rose, Quansight/City of LA (general core development, extensions).
 - Andrew Schlaepfer, Bloomberg (general development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)

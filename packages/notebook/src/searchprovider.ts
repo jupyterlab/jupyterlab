@@ -584,7 +584,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this._addCellProvider(changes.newIndex + index);
           this._removeCellProvider(changes.newIndex + index + 1);
         });
-
+        break;
+      case 'clear':
+        for (
+          let index = this._searchProviders.length - 1;
+          index >= 0;
+          index--
+        ) {
+          this._removeCellProvider(index);
+        }
         break;
     }
     this._stateChanged.emit();

@@ -38,7 +38,11 @@ const EXPECTED_MERMAID_ORDER = [
   'xy',
   'block',
   'kanban',
-  'flowchart-elk'
+  'flowchart-elk',
+  'architecture',
+  'packet',
+  'radar',
+  'treemap'
 ];
 
 /**
@@ -60,6 +64,12 @@ async function resizePageAndScreenshot(locator: Locator) {
       height: Math.ceil(box.height * scaleFactor)
     });
   }
+  // Wait for next animation frame (next rendering cycle)
+  await page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
   const screenshot = await locator.screenshot();
   await page.setViewportSize(originalSize);
   return screenshot;

@@ -1,0 +1,55 @@
+# This workflow fails in PRs with changes to the jupyterlab/staging directory
+# Won't start unless there is a modification in the staging directory
+
+name: 'Reject changes to staging'
+on:
+  pull_request:
+    paths:
+      - 'jupyterlab/staging/**'
+
+jobs:
+  staging-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fail if files in staging are modified (excluding allowed files)
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA='${{ github.event.pull_request.base.sha }}'
+          HEAD_SHA='${{ github.sha }}'
+
+          # Ensure base commit is available locally
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+
+          # List changed files between base and head
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "${BASE_SHA}...${HEAD_SHA}" || true)
+
+          # Filter to staging dir and exclude allowed files
+          DISALLOWED=$(echo "$CHANGED_FILES" \
+            | grep '^jupyterlab/staging/' \
+            | grep -v -E '^jupyterlab/staging/(yarn\.js|\.yarnrc)$' || true)
+
+          if [[ -n "$DISALLOWED" ]]; then
+            echo "Disallowed changes detected in jupyterlab/staging:" >&2
+            echo "$DISALLOWED" >&2
+
+            # Output to GitHub step summary
+            echo "## ❌ Disallowed Changes in Staging Directory" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following files in \`jupyterlab/staging/\` are not allowed to be modified:" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$DISALLOWED" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Only \`yarn.js\` and \`.yarnrc\` files are allowed to be modified in this directory." >> $GITHUB_STEP_SUMMARY
+
+            exit 1
+          else
+            echo "No disallowed changes in jupyterlab/staging."
+          fi
