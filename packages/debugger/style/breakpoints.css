@@ -73,6 +73,10 @@
   top: -5px;
 }
 
+.cm-breakpoint-gutter-selected {
+  color: var(--jp-warn-color1);
+}
+
 [data-jp-debugger='true'].jp-Editor
   .cm-breakpoint-gutter
   .cm-gutterElement:empty:hover::after,

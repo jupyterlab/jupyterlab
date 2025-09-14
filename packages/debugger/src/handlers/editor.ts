@@ -468,14 +468,18 @@ namespace Private {
    */
   export const breakpointMarker = new (class extends GutterMarker {
     toDOM() {
-      const marker = document.createTextNode('●');
+      const marker = document.createElement('span');
+      marker.textContent = '●';
+      marker.className = 'cm-breakpoint-gutter';
       return marker;
     }
   })();
 
   export const selectedBreakpointMarker = new (class extends GutterMarker {
     toDOM() {
-      const marker = document.createTextNode('◉');
+      const marker = document.createElement('span');
+      marker.textContent = '◉';
+      marker.className = 'cm-breakpoint-gutter-selected';
       return marker;
     }
   })();
