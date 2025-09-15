@@ -107,10 +107,6 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
     context: IInlineCompletionContext,
     trigger?: InlineCompletionTriggerKind
   ) {
-    console.log('reuest', request);
-    console.log('context', context);
-    console.log('trigger', trigger);
-
     // TODO shouldn't need to check here, should be stopped if the console is open
     // Check if debugger has stopped threads (required for evaluation)
     if (!this._debuggerService.hasStoppedThreads()) {
@@ -130,50 +126,6 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
 
       // Get variable-based completions
       const variableCompletions = this.getVariableCompletions(prefix);
-
-      // Use debugger to get completions
-      // const completionCode = `get_ipython().completer('${prefix}')`;
-      // const reply = await this._debuggerService.evaluate(completionCode);
-
-      // if (reply && reply.result) {
-      //   // Parse the completion result
-      //   let completions: string[] = [];
-
-      //   try {
-      //     // The result might be a string representation of a list
-      //     const resultStr = reply.result.toString();
-
-      //     // Try to parse as Python list/tuple
-      //     if (resultStr.startsWith('[') || resultStr.startsWith('(')) {
-      //       // Remove brackets/parentheses and split by comma
-      //       const cleanStr = resultStr.slice(1, -1);
-      //       completions = cleanStr
-      //         .split(',')
-      //         .map(s => s.trim().replace(/^['"]|['"]$/g, '')) // Remove quotes
-      //         .filter(s => s.length > 0);
-      //     } else {
-      //       // Single completion
-      //       completions = [resultStr];
-      //     }
-      //   } catch (parseError) {
-      //     console.warn('Failed to parse completion result:', parseError);
-      //     // Fallback: treat the entire result as a single completion
-      //     completions = [reply.result.toString()];
-      //   }
-
-      //   // Convert completions to inline completion items
-      //   for (const completion of completions.slice(0, this._maxSuggestions)) {
-      //     if (completion.startsWith(prefix)) {
-      //       const insertText = completion.slice(prefix.length);
-      //       if (insertText.length > 0) {
-      //         items.push({
-      //           insertText: insertText,
-      //           filterText: completion
-      //         });
-      //       }
-      //     }
-      //   }
-      // }
 
       // Combine variable completions with regular completions
       items = [...variableCompletions, ...items];

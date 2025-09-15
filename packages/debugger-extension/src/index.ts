@@ -102,13 +102,6 @@ function createDebugConsole(
   // Need underlying CodeConsole in executor
   debugConsoleExecutor.codeConsole = consolePanel.console;
 
-  // TODO: The banner stuff below
-  // This is actually only used on kernel/kernel status change
-  // This console doesn't respect banner setting form UI
-  consolePanel.console.setConfig({ showBanner: false });
-  //@ts-expect-error Doing this gets the banner hidden, hacky though
-  void consolePanel.console._onKernelChanged();
-
   // Add a specific class to distinguish debug console from regular consoles
   consolePanel.addClass('jp-DebugConsole');
   consolePanel.console.addClass('jp-DebugConsole-widget');
