@@ -12,6 +12,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
+import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
 
 /**
  * A handler for notebooks.
@@ -42,9 +43,9 @@ export class NotebookHandler implements IDisposable {
       }
 
       if (event.event === 'stopped') {
-        this._showPausedBanner();
+        this._showPausedOverlay();
       } else if (event.event === 'continued') {
-        this._hidePausedBanner();
+        this._hidePausedOverlay();
       }
     });
 
@@ -75,23 +76,51 @@ export class NotebookHandler implements IDisposable {
     Signal.clearData(this);
   }
 
-  private _showPausedBanner(): void {
-    if (this._pausedBanner) {
+  private _showPausedOverlay(): void {
+    if (this._pausedOverlay) {
       return;
     }
-    const banner = document.createElement('div');
-    banner.className = 'jp-DebuggerPausedBanner';
-    banner.textContent = 'Debugger paused';
-    this._notebookPanel.node.appendChild(banner);
-    this._pausedBanner = banner;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'jp-DebuggerPausedOverlay';
+
+    const text = document.createElement('span');
+    text.textContent = 'Paused in Debugger';
+    overlay.appendChild(text);
+
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'jp-DebuggerPausedBtn';
+    continueBtn.title = 'Continue';
+
+    runIcon.element({ container: continueBtn, elementPosition: 'center' });
+
+    continueBtn.onclick = () => {
+      this._debuggerService.continue();
+    };
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'jp-DebuggerPausedBtn';
+    nextBtn.title = 'Next';
+
+    stepOverIcon.element({ container: nextBtn, elementPosition: 'center' });
+
+    nextBtn.onclick = () => {
+      this._debuggerService.next();
+    };
+
+    overlay.appendChild(continueBtn);
+    overlay.appendChild(nextBtn);
+
+    this._notebookPanel.node.appendChild(overlay);
+    this._pausedOverlay = overlay;
   }
 
-  private _hidePausedBanner(): void {
-    if (!this._pausedBanner) {
+  private _hidePausedOverlay(): void {
+    if (!this._pausedOverlay) {
       return;
     }
-    this._pausedBanner.remove();
-    this._pausedBanner = null;
+    this._pausedOverlay.remove();
+    this._pausedOverlay = null;
   }
 
   /**
@@ -142,7 +171,7 @@ export class NotebookHandler implements IDisposable {
   private _debuggerService: IDebugger;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
-  private _pausedBanner: HTMLDivElement | null = null;
+  private _pausedOverlay: HTMLDivElement | null = null;
 }
 
 /**

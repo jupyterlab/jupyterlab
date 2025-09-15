@@ -30,15 +30,37 @@
   fill: var(--jp-warn-color0);
 }
 
-.jp-DebuggerPausedBanner {
+.jp-DebuggerPausedOverlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #fc0;
-  color: black;
-  text-align: center;
-  font-weight: bold;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  background: var(--jp-layout-color2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  padding: 4px;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-DebuggerPausedBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.jp-DebuggerPausedBtn:hover {
+  background: var(--jp-layout-color3);
 }
