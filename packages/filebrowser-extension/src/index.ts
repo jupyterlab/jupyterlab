@@ -5,6 +5,7 @@
  * @module filebrowser-extension
  */
 
+import { DisposableSet } from '@lumino/disposable';
 import {
   ILabShell,
   ILayoutRestorer,
@@ -27,7 +28,10 @@ import {
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import {
+  DocumentRegistry,
+  getAvailableKernelFileTypes
+} from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
@@ -461,6 +465,55 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+  }
+};
+
+/**
+ * A plugin providing the context menu entries for creating Python/R/Julia files.
+ */
+const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:create-new-language-file',
+  description:
+    'providing the context menu entries for creating Python/R/Julia files',
+  requires: [ITranslator],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    translator: ITranslator
+  ): Promise<void> => {
+    let filebrowsermenuDisposables = new DisposableSet();
+
+    const specsManager = app.serviceManager.kernelspecs;
+
+    const updateFileBrowserContextMenu = async () => {
+      if (filebrowsermenuDisposables) {
+        filebrowsermenuDisposables.dispose();
+        filebrowsermenuDisposables = new DisposableSet();
+      }
+
+      const updatedFileTypes = await getAvailableKernelFileTypes(
+        specsManager,
+        translator
+      );
+
+      for (const ext of updatedFileTypes) {
+        filebrowsermenuDisposables.add(
+          app.contextMenu.addItem({
+            command: 'filebrowser:create-new-file',
+            selector: '.jp-DirListing',
+            args: {
+              ext: ext.fileExt,
+              label: ext.paletteLabel,
+              iconName: ext.iconName
+            },
+            rank: 52
+          })
+        );
+      }
+    };
+
+    specsManager.specsChanged.connect(updateFileBrowserContextMenu);
+    updateFileBrowserContextMenu();
   }
 };
 
@@ -1824,7 +1877,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   openWithPlugin,
   openBrowserTabPlugin,
   openUrlPlugin,
-  notifyUploadPlugin
+  notifyUploadPlugin,
+  createNewLanguageFilePlugin
 ];
 export default plugins;
 

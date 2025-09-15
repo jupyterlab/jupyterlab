@@ -3487,6 +3487,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.5.0-alpha.3
     "@lumino/algorithm": ^2.0.3
     "@lumino/commands": ^2.3.2
+    "@lumino/disposable": ^2.1.4
     "@lumino/widgets": ^2.7.1
     rimraf: ~5.0.5
     typescript: ~5.5.4
