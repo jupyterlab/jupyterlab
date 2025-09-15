@@ -85,6 +85,7 @@ export class EditorHandler implements IDisposable {
 
     this._debuggerService.model.breakpoints.clicked.connect((_, breakpoint) => {
       this._selectedBreakpointLine = breakpoint.line ?? null;
+      this._selectedBreakpointPath = breakpoint.source?.path ?? null;
       this._addBreakpointsToEditor();
     });
 
@@ -324,9 +325,11 @@ export class EditorHandler implements IDisposable {
     this._clearGutter(editor);
 
     const selectedLine = this._selectedBreakpointLine;
+    const selectedPath = this._selectedBreakpointPath;
     const breakpointData = breakpoints.map(b => {
       const pos = editor.state.doc.line(b.line!).from;
-      const selected = b.line! === selectedLine;
+      const selected =
+        b.line! === selectedLine && b.source?.path === selectedPath;
       return { pos, selected };
     });
 
@@ -385,6 +388,7 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpointLine: number | null = null;
+  private _selectedBreakpointPath: string | null = null;
 }
 
 /**
