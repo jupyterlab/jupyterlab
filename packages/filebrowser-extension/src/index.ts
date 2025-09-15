@@ -512,7 +512,7 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
     };
 
     specsManager.specsChanged.connect(updateFileBrowserContextMenu);
-    updateFileBrowserContextMenu();
+    updateFileBrowserContextMenu().catch(console.warn);
   }
 };
 
