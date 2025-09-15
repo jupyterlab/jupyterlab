@@ -73,6 +73,7 @@ const BreakpointsComponent = ({
     return (): void => {
       model.changed.disconnect(updateBreakpoints);
       model.restored.disconnect(restoreBreakpoints);
+      model.clicked.disconnect(handleClick);
     };
   });
 
