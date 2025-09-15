@@ -30,6 +30,24 @@ export class NotebookHandler implements IDisposable {
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
 
+    this._debuggerService.session?.eventMessage.connect((_, event) => {
+      const session = this._debuggerService.session;
+      const contextSession = this._notebookPanel.sessionContext.session;
+
+      if (!session || !contextSession) {
+        return;
+      }
+      if (session.connection?.kernel?.id !== contextSession.kernel?.id) {
+        return;
+      }
+
+      if (event.event === 'stopped') {
+        this._showPausedBanner();
+      } else if (event.event === 'continued') {
+        this._hidePausedBanner();
+      }
+    });
+
     this._onCellsChanged();
   }
 
@@ -55,6 +73,25 @@ export class NotebookHandler implements IDisposable {
     });
     this._cellMap.dispose();
     Signal.clearData(this);
+  }
+
+  private _showPausedBanner(): void {
+    if (this._pausedBanner) {
+      return;
+    }
+    const banner = document.createElement('div');
+    banner.className = 'jp-DebuggerPausedBanner';
+    banner.textContent = 'Debugger paused';
+    this._notebookPanel.node.appendChild(banner);
+    this._pausedBanner = banner;
+  }
+
+  private _hidePausedBanner(): void {
+    if (!this._pausedBanner) {
+      return;
+    }
+    this._pausedBanner.remove();
+    this._pausedBanner = null;
   }
 
   /**
@@ -105,6 +142,7 @@ export class NotebookHandler implements IDisposable {
   private _debuggerService: IDebugger;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
+  private _pausedBanner: HTMLDivElement | null = null;
 }
 
 /**
