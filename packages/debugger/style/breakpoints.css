@@ -32,6 +32,11 @@
   color: var(--jp-error-color1);
 }
 
+.jp-DebuggerBreakpoint-marker-selected {
+  content: '◉';
+  color: var(--jp-warn-color1);
+}
+
 .jp-DebuggerBreakpoint-source {
   white-space: nowrap;
   margin-right: 5px;

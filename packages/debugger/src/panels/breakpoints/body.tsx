@@ -44,6 +44,8 @@ const BreakpointsComponent = ({
   const [breakpoints, setBreakpoints] = useState(
     Array.from(model.breakpoints.entries())
   );
+  const [selectedBreakpoint, setSelectedBreakpoint] =
+    useState<IDebugger.IBreakpoint | null>(null);
 
   useEffect(() => {
     const updateBreakpoints = (
@@ -57,8 +59,16 @@ const BreakpointsComponent = ({
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
+    const handleClick = (
+      _: IDebugger.Model.IBreakpoints,
+      breakpoint: IDebugger.IBreakpoint
+    ): void => {
+      setSelectedBreakpoint(breakpoint);
+    };
+
     model.changed.connect(updateBreakpoints);
     model.restored.connect(restoreBreakpoints);
+    model.clicked.connect(handleClick);
 
     return (): void => {
       model.changed.disconnect(updateBreakpoints);
@@ -73,6 +83,8 @@ const BreakpointsComponent = ({
           key={entry[0]}
           breakpoints={entry[1]}
           model={model}
+          selectedLine={selectedBreakpoint?.line}
+          selectedPath={selectedBreakpoint?.source?.path}
         />
       ))}
     </>
@@ -88,10 +100,14 @@ const BreakpointsComponent = ({
  */
 const BreakpointCellComponent = ({
   breakpoints,
-  model
+  model,
+  selectedLine,
+  selectedPath
 }: {
   breakpoints: IDebugger.IBreakpoint[];
   model: IDebugger.Model.IBreakpoints;
+  selectedLine: number | undefined;
+  selectedPath: string | undefined;
 }): JSX.Element => {
   return (
     <>
@@ -104,6 +120,10 @@ const BreakpointCellComponent = ({
             key={(breakpoint.source?.path ?? '') + index}
             breakpoint={breakpoint}
             model={model}
+            isSelected={
+              selectedLine === breakpoint.line &&
+              selectedPath === breakpoint.source?.path
+            }
           />
         ))}
     </>
@@ -119,10 +139,12 @@ const BreakpointCellComponent = ({
  */
 const BreakpointComponent = ({
   breakpoint,
-  model
+  model,
+  isSelected
 }: {
   breakpoint: IDebugger.IBreakpoint;
   model: IDebugger.Model.IBreakpoints;
+  isSelected: boolean;
 }): JSX.Element => {
   const moveToEndFirstCharIfSlash = (breakpointSourcePath: string): string => {
     return breakpointSourcePath[0] === '/'
@@ -135,7 +157,11 @@ const BreakpointComponent = ({
       onClick={(): void => model.clicked.emit(breakpoint)}
       title={breakpoint.source?.path}
     >
-      <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
+      {!isSelected ? (
+        <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
+      ) : (
+        <span className={'jp-DebuggerBreakpoint-marker-selected'}>◉</span>
+      )}
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
         {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
       </span>
