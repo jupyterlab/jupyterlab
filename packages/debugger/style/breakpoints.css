@@ -33,6 +33,8 @@
 }
 
 .jp-DebuggerBreakpoint-marker-selected {
+  font-size: 20px;
+  padding-right: 5px;
   content: '◉';
   color: var(--jp-warn-color1);
 }
