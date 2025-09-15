@@ -1294,6 +1294,7 @@ export namespace StaticNotebook {
      */
     windowingMode: 'defer' | 'full' | 'none' | 'contentVisibility';
     accessKernelHistory?: boolean;
+    showMinimap: boolean;
   }
 
   /**
@@ -1317,7 +1318,8 @@ export namespace StaticNotebook {
     overscanCount: 1,
     windowingMode: 'full',
     accessKernelHistory: false,
-    showInputPlaceholder: true
+    showInputPlaceholder: true,
+    showMinimap: false
   };
 
   /**
