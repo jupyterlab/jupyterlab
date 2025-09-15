@@ -481,6 +481,8 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     translator: ITranslator
   ): Promise<void> => {
+    const trans = translator.load('jupyterlab');
+
     let filebrowsermenuDisposables = new DisposableSet();
 
     const specsManager = app.serviceManager.kernelspecs;
@@ -491,20 +493,17 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
         filebrowsermenuDisposables = new DisposableSet();
       }
 
-      const updatedFileTypes = await getAvailableKernelFileTypes(
-        specsManager,
-        translator
-      );
+      const updatedFileTypes = await getAvailableKernelFileTypes(specsManager);
 
-      for (const ext of updatedFileTypes) {
+      for (const filetype of updatedFileTypes) {
         filebrowsermenuDisposables.add(
           app.contextMenu.addItem({
             command: CommandIDs.createNewFile,
             selector: '.jp-DirListing',
             args: {
-              ext: ext.fileExt,
-              label: ext.paletteLabel,
-              iconName: ext.iconName
+              ext: filetype.extensions[0],
+              label: trans.__('New %1 File', filetype.displayName),
+              iconName: filetype.icon?.toString() ?? ''
             },
             rank: 52
           })

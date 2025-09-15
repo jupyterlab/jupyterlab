@@ -75,7 +75,7 @@ import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 
-import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
+import { CommandIDs, Commands, FACTORY } from './commands';
 import { editorSyntaxStatus } from './syntaxstatus';
 
 export { Commands } from './commands';
@@ -362,7 +362,9 @@ function activate(
   let paletteDisposables: IDisposable | null = null;
   let menuDisposables: IDisposable | null = null;
 
-  const updateKernelFileTypeComponents = (fileTypes: Set<IFileTypeData>) => {
+  const updateKernelFileTypeComponents = (
+    fileTypes: Set<IRenderMime.IFileType>
+  ) => {
     // Dispose of previous entries if they exist
     if (launcherDisposables) {
       launcherDisposables.dispose();
@@ -396,7 +398,11 @@ function activate(
     }
 
     if (menu) {
-      menuDisposables = Commands.addKernelLanguageMenuItems(menu, fileTypes);
+      menuDisposables = Commands.addKernelLanguageMenuItems(
+        menu,
+        trans,
+        fileTypes
+      );
     }
   };
 
@@ -405,8 +411,7 @@ function activate(
   specsManager.specsChanged.connect(async () => {
     try {
       const updatedFileTypes = await getAvailableKernelFileTypes(
-        app.serviceManager.kernelspecs,
-        translator
+        app.serviceManager.kernelspecs
       );
       updateKernelFileTypeComponents(updatedFileTypes);
     } catch (error) {
@@ -574,7 +579,7 @@ function activate(
     Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
-  getAvailableKernelFileTypes(app.serviceManager.kernelspecs, translator)
+  getAvailableKernelFileTypes(app.serviceManager.kernelspecs)
     .then(updateKernelFileTypeComponents)
     .catch((reason: Error) => {
       console.error(reason.message);

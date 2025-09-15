@@ -1,35 +1,23 @@
-import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { KernelSpec } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
-
-export interface IFileTypeData extends ReadonlyJSONObject {
-  fileExt: string;
-  iconName: string;
-  launcherLabel: string;
-  paletteLabel: string;
-  caption: string;
-}
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * Use available kernels to determine which common file types should have 'Create New'
  * options in the Launcher, File Editor palette, File menu, FileBrowser etc..
  */
 export async function getAvailableKernelFileTypes(
-  specsManager: KernelSpec.IManager,
-  translator: ITranslator
-): Promise<Set<IFileTypeData>> {
-  const trans = translator.load('jupyterlab');
-
-  const commonLanguageFileTypeData = new Map<string, IFileTypeData[]>([
+  specsManager: KernelSpec.IManager
+): Promise<Set<IRenderMime.IFileType>> {
+  const commonLanguageFileTypeData = new Map<string, IRenderMime.IFileType[]>([
     [
       'python',
       [
         {
-          fileExt: 'py',
-          iconName: 'ui-components:python',
-          launcherLabel: trans.__('Python File'),
-          paletteLabel: trans.__('New Python File'),
-          caption: trans.__('Create a new Python file')
+          name: 'Python',
+          extensions: ['.py'],
+          icon: 'ui-components:python',
+          displayName: 'Python',
+          mimeTypes: ['text/plain']
         }
       ]
     ],
@@ -37,11 +25,11 @@ export async function getAvailableKernelFileTypes(
       'julia',
       [
         {
-          fileExt: 'jl',
-          iconName: 'ui-components:julia',
-          launcherLabel: trans.__('Julia File'),
-          paletteLabel: trans.__('New Julia File'),
-          caption: trans.__('Create a new Julia file')
+          name: 'Julia',
+          extensions: ['.jl'],
+          icon: 'ui-components:julia',
+          displayName: 'Julia',
+          mimeTypes: ['text/plain']
         }
       ]
     ],
@@ -49,18 +37,18 @@ export async function getAvailableKernelFileTypes(
       'R',
       [
         {
-          fileExt: 'r',
-          iconName: 'ui-components:r-kernel',
-          launcherLabel: trans.__('R File'),
-          paletteLabel: trans.__('New R File'),
-          caption: trans.__('Create a new R file')
+          name: 'R',
+          extensions: ['.r'],
+          icon: 'ui-components:r-kernel',
+          displayName: 'R',
+          mimeTypes: ['text/plain']
         }
       ]
     ]
   ]);
 
   await specsManager.ready;
-  let fileTypes = new Set<IFileTypeData>();
+  let fileTypes = new Set<IRenderMime.IFileType>();
   const specs = specsManager.specs?.kernelspecs ?? {};
   Object.keys(specs).forEach(spec => {
     const specModel = specs[spec];
