@@ -5512,6 +5512,15 @@
     }
   },
   {
+    "id": "viewmenu:show-minimap",
+    "label": "Show Minimap",
+    "caption": "",
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "viewmenu:match-brackets",
     "label": "Match Brackets",
     "caption": "",

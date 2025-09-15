@@ -91,6 +91,10 @@
             "rank": 10
           },
           {
+            "command": "viewmenu:show-minimap",
+            "rank": 10
+          },
+          {
             "command": "viewmenu:match-brackets",
             "rank": 10
           },
