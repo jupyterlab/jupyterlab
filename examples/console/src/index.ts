@@ -134,7 +134,6 @@ function startApp(
   const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
 
-  // ! bookmark example of creating console panel
   const consolePanel = new ConsolePanel({
     rendermime,
     manager,

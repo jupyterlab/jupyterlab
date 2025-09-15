@@ -21,11 +21,6 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
 
   set codeConsole(value: CodeConsole) {
     this._codeConsole = value;
-
-    // Prompt cell gets recreated every execution
-    this._codeConsole.promptCellCreated.connect((_, promptCell) => {
-      // Note: Inline completions are now handled by DebuggerInlineCompletionProvider
-    });
   }
 
   async evaluateWithDebugger(options: {
