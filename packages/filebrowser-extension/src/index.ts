@@ -473,8 +473,7 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
  */
 const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:create-new-language-file',
-  description:
-    'Adds context menu entries for creating Python/R/Julia files',
+  description: 'Adds context menu entries for creating Python/R/Julia files',
   requires: [ITranslator],
   autoStart: true,
   activate: async (
