@@ -52,6 +52,11 @@ import {
   ImportSettingsWidget
 } from './importSettingsWidget';
 
+const HARDCODED_TO_SKIP = [
+  '@jupyterlab/application-extension:context-menu',
+  '@jupyterlab/mainmenu-extension:plugin'
+];
+
 /**
  * The command IDs used by the setting editor.
  */
@@ -142,6 +147,16 @@ function activate(
 
     const { SettingsEditor } = await import('@jupyterlab/settingeditor');
 
+    // Load the settings to get the configurable toSkip list
+    const settings = await registry.load(plugin.id);
+    const toSkipSetting = settings.get('toSkip').composite;
+    const configurableToSkip = Array.isArray(toSkipSetting)
+      ? (toSkipSetting as string[])
+      : [];
+
+    // Combine hardcoded and configurable skip lists, avoiding duplicates
+    const toSkip = [...new Set([...HARDCODED_TO_SKIP, ...configurableToSkip])];
+
     const editor = new MainAreaWidget<SettingsEditor>({
       content: new SettingsEditor({
         editorRegistry,
@@ -149,10 +164,7 @@ function activate(
         registry,
         state,
         commands,
-        toSkip: [
-          '@jupyterlab/application-extension:context-menu',
-          '@jupyterlab/mainmenu-extension:plugin'
-        ],
+        toSkip,
         translator,
         status,
         query: args.query as string
