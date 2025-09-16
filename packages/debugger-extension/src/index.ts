@@ -934,13 +934,22 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
+    // Track debug console widget for disposal
+    let debugConsoleWidget: ConsolePanel | null = null;
+
     commands.addCommand(CommandIDs.evaluate, {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
-        const debugConsole = createDebugConsole(
+        // Dispose existing debug console if it exists
+        if (debugConsoleWidget) {
+          debugConsoleWidget.dispose();
+          debugConsoleWidget = null;
+        }
+
+        debugConsoleWidget = createDebugConsole(
           consolePanelContentFactory,
           editorServices,
           app.serviceManager,
@@ -948,7 +957,7 @@ const main: JupyterFrontEndPlugin<void> = {
           service
         );
 
-        shell.add(debugConsole, 'main', {
+        shell.add(debugConsoleWidget, 'main', {
           mode: 'split-bottom',
           activate: true,
           type: 'Debugger console'
@@ -1129,6 +1138,14 @@ const main: JupyterFrontEndPlugin<void> = {
         autoCollapseSidebar
       ) {
         labShell.collapseRight();
+      }
+
+      console.log('event.event', event.event);
+
+      // Dispose debug console when debugger is terminated
+      if (event.event === 'terminated' && debugConsoleWidget) {
+        debugConsoleWidget.dispose();
+        debugConsoleWidget = null;
       }
     });
 

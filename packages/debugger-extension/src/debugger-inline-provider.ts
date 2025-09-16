@@ -15,6 +15,14 @@ import {
 } from '@jupyterlab/translation';
 
 /**
+ * Type for inline completion items.
+ */
+interface ICompletionItem {
+  insertText: string;
+  filterText: string;
+}
+
+/**
  * Inline completion provider that uses debugger evaluation for suggestions.
  */
 export class DebuggerInlineCompletionProvider implements IInlineCompletionProvider {
@@ -64,8 +72,6 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
     const debuggerModel = this._debuggerService.model;
     const variables = debuggerModel.variables.scopes;
 
-    console.log('Current debugger variables:', variables);
-
     // Extract variable names from all scopes
     const variableNames: string[] = [];
     variables.forEach(scope => {
@@ -80,10 +86,8 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
       });
     });
 
-    console.log('Available variable names:', variableNames);
-
     // Filter variables that match the prefix and extract suffix
-    const variableCompletions: any[] = [];
+    const variableCompletions: ICompletionItem[] = [];
     variableNames.forEach(name => {
       if (name.toLowerCase().startsWith(prefix.toLowerCase())) {
         const suffix = name.slice(prefix.length);
@@ -107,14 +111,12 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
     context: IInlineCompletionContext,
     trigger?: InlineCompletionTriggerKind
   ) {
-    // TODO shouldn't need to check here, should be stopped if the console is open
     // Check if debugger has stopped threads (required for evaluation)
     if (!this._debuggerService.hasStoppedThreads()) {
       return { items: [] };
     }
 
-    // TODO any -- this should come from ipython completions
-    let items: any[] = [];
+    let items: ICompletionItem[] = [];
 
     try {
       const prefix = this.extractPrefix(request);
@@ -127,8 +129,8 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
       // Get variable-based completions
       const variableCompletions = this.getVariableCompletions(prefix);
 
-      // Combine variable completions with regular completions
-      items = [...variableCompletions, ...items];
+      // Combine variable completions with kernel completions once those work
+      items = [...variableCompletions];
     } catch (error) {
       console.warn('Error fetching debugger completions:', error);
       // Return empty items on error
