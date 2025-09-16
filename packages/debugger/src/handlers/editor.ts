@@ -323,8 +323,8 @@ export class EditorHandler implements IDisposable {
 
     this._clearGutter(editor);
 
-    const selectedLine = this._selectedBreakpointLine;
-    const selectedPath = this._selectedBreakpointPath;
+    const selectedLine = this._selectedBreakpoint?.line;
+    const selectedPath = this._selectedBreakpoint?.source?.path;
     const breakpointData = breakpoints.map(b => {
       const pos = editor.state.doc.line(b.line!).from;
       const selected =
@@ -386,8 +386,7 @@ export class EditorHandler implements IDisposable {
   private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
   private _path: string;
   private _src: ISharedText;
-  private _selectedBreakpointLine: number | null = null;
-  private _selectedBreakpointPath: string | null = null;
+  private _selectedBreakpoint: IDebugger.IBreakpoint | null;
 }
 
 /**

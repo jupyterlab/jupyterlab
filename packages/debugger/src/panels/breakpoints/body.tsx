@@ -101,13 +101,11 @@ const BreakpointsComponent = ({
 const BreakpointCellComponent = ({
   breakpoints,
   model,
-  selectedLine,
-  selectedPath
+  selectedBreakpoint
 }: {
   breakpoints: IDebugger.IBreakpoint[];
   model: IDebugger.Model.IBreakpoints;
-  selectedLine: number | undefined;
-  selectedPath: string | undefined;
+  selectedBreakpoint: IDebugger.IBreakpoint | null;
 }): JSX.Element => {
   return (
     <>
@@ -121,8 +119,8 @@ const BreakpointCellComponent = ({
             breakpoint={breakpoint}
             model={model}
             isSelected={
-              selectedLine === breakpoint.line &&
-              selectedPath === breakpoint.source?.path
+              selectedBreakpoint?.line === breakpoint.line &&
+              selectedBreakpoint?.source?.path === breakpoint.source?.path
             }
           />
         ))}
