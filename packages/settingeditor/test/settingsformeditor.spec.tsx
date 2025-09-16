@@ -4,37 +4,13 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { SettingsFormEditor } from '../src/SettingsFormEditor';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import { StateDB } from '@jupyterlab/statedb';
 import {
   ISettingRegistry,
   SettingRegistry,
   Settings
 } from '@jupyterlab/settingregistry';
 import { FormComponent } from '@jupyterlab/ui-components';
-
-class TestConnector extends StateDB {
-  schemas: { [key: string]: ISettingRegistry.ISchema } = {};
-
-  async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
-    const fetched = await super.fetch(id);
-    if (!fetched && !this.schemas[id]) {
-      return undefined;
-    }
-
-    const schema: ISettingRegistry.ISchema = this.schemas[id] || {
-      type: 'object'
-    };
-    const composite = {};
-    const user = {};
-    const raw = (fetched as string) || '{ }';
-    const version = 'test';
-    return { id, data: { composite, user }, raw, schema, version };
-  }
-
-  async list(): Promise<any> {
-    return Promise.reject('list method not implemented');
-  }
-}
+import { TestConnector } from './utils';
 
 describe('@jupyterlab/settingeditor', () => {
   describe('SettingFormEditor', () => {
