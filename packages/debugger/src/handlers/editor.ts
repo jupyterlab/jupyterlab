@@ -84,8 +84,7 @@ export class EditorHandler implements IDisposable {
     });
 
     this._debuggerService.model.breakpoints.clicked.connect((_, breakpoint) => {
-      this._selectedBreakpointLine = breakpoint.line ?? null;
-      this._selectedBreakpointPath = breakpoint.source?.path ?? null;
+      this._selectedBreakpoint = breakpoint;
       this._addBreakpointsToEditor();
     });
 
@@ -475,6 +474,7 @@ namespace Private {
       const marker = document.createElement('span');
       marker.textContent = '●';
       marker.className = 'cm-breakpoint-gutter';
+      marker.title = 'Breakpoint'; // or ariaLabel if you do not want the tooltip on hover
       return marker;
     }
   })();
@@ -484,6 +484,7 @@ namespace Private {
       const marker = document.createElement('span');
       marker.textContent = '◉';
       marker.className = 'cm-breakpoint-gutter-selected';
+      marker.title = 'Selected breakpoint'; // or ariaLabel if you do not want the tooltip on hover
       return marker;
     }
   })();

@@ -84,8 +84,7 @@ const BreakpointsComponent = ({
           key={entry[0]}
           breakpoints={entry[1]}
           model={model}
-          selectedLine={selectedBreakpoint?.line}
-          selectedPath={selectedBreakpoint?.source?.path}
+          selectedBreakpoint={selectedBreakpoint}
         />
       ))}
     </>
