@@ -156,9 +156,19 @@ const BreakpointComponent = ({
       title={breakpoint.source?.path}
     >
       {!isSelected ? (
-        <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
+        <span
+          className={'jp-DebuggerBreakpoint-marker'}
+          aria-label="Breakpoint"
+        >
+          ●
+        </span>
       ) : (
-        <span className={'jp-DebuggerBreakpoint-marker-selected'}>◉</span>
+        <span
+          className={'jp-DebuggerBreakpoint-marker-selected'}
+          aria-label="Selected breakpoint"
+        >
+          ◉
+        </span>
       )}
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
         {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}

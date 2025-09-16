@@ -473,7 +473,7 @@ namespace Private {
       const marker = document.createElement('span');
       marker.textContent = '●';
       marker.className = 'cm-breakpoint-gutter';
-      marker.title = 'Breakpoint'; // or ariaLabel if you do not want the tooltip on hover
+      marker.ariaLabel = 'Breakpoint';
       return marker;
     }
   })();
@@ -483,7 +483,7 @@ namespace Private {
       const marker = document.createElement('span');
       marker.textContent = '◉';
       marker.className = 'cm-breakpoint-gutter-selected';
-      marker.title = 'Selected breakpoint'; // or ariaLabel if you do not want the tooltip on hover
+      marker.ariaLabel = 'Selected breakpoint';
       return marker;
     }
   })();

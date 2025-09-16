@@ -28,14 +28,12 @@
 .jp-DebuggerBreakpoint-marker {
   font-size: 20px;
   padding-right: 5px;
-  content: '●';
   color: var(--jp-error-color1);
 }
 
 .jp-DebuggerBreakpoint-marker-selected {
   font-size: 20px;
   padding-right: 5px;
-  content: '◉' / 'Selected breakpoint';
   color: var(--jp-warn-color1);
 }
 
@@ -63,7 +61,6 @@
 }
 
 [data-jp-debugger='true'] .cm-breakpoint-gutter .cm-gutterElement:empty::after {
-  content: '●';
   color: var(--jp-error-color1);
   opacity: 0;
 }
