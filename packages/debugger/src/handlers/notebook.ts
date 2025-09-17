@@ -104,7 +104,7 @@ export class NotebookHandler implements IDisposable {
     continueBtn.title = this._trans.__('Continue');
     runIcon.element({ container: continueBtn, elementPosition: 'center' });
     continueBtn.onclick = () => {
-      this._debuggerService.continue();
+      void this._debuggerService.continue();
     };
 
     const nextBtn = document.createElement('button');
