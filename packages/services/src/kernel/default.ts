@@ -1630,10 +1630,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
         case 'status': {
-          if (
-            msg.parent_header.msg_type !== 'kernel_info_request' &&
-            msg.parent_header.msg_type !== 'execute_request'
-          ) {
+          if (msg.parent_header.msg_type == 'debug_request') {
             break;
           }
           // Updating the status is synchronous, and we call no async user code
