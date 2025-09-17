@@ -160,7 +160,7 @@ const BreakpointComponent = ({
       {!isSelected ? (
         <span
           className={'jp-DebuggerBreakpoint-marker'}
-          aria-label="Breakpoint"
+          aria-label={trans.__('Breakpoint')}
         >
           ●
         </span>
