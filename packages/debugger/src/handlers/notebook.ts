@@ -13,6 +13,11 @@ import { Signal } from '@lumino/signaling';
 import { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
 import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * A handler for notebooks.
@@ -27,6 +32,8 @@ export class NotebookHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._notebookPanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
 
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
@@ -89,25 +96,21 @@ export class NotebookHandler implements IDisposable {
     overlay.className = 'jp-DebuggerPausedOverlay';
 
     const text = document.createElement('span');
-    text.textContent = 'Paused in Debugger';
+    text.textContent = this._trans.__('Paused in Debugger');
     overlay.appendChild(text);
 
     const continueBtn = document.createElement('button');
     continueBtn.className = 'jp-DebuggerPausedBtn';
-    continueBtn.title = 'Continue';
-
+    continueBtn.title = this._trans.__('Continue');
     runIcon.element({ container: continueBtn, elementPosition: 'center' });
-
     continueBtn.onclick = () => {
       this._debuggerService.continue();
     };
 
     const nextBtn = document.createElement('button');
     nextBtn.className = 'jp-DebuggerPausedBtn';
-    nextBtn.title = 'Next';
-
+    nextBtn.title = this._trans.__('Next');
     stepOverIcon.element({ container: nextBtn, elementPosition: 'center' });
-
     nextBtn.onclick = () => {
       this._debuggerService.next();
     };
@@ -176,6 +179,8 @@ export class NotebookHandler implements IDisposable {
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
   private _pausedOverlay: HTMLDivElement | null = null;
+  private _trans: TranslationBundle;
+  protected translator: ITranslator;
 }
 
 /**
@@ -195,5 +200,10 @@ export namespace NotebookHandler {
      * The widget to handle.
      */
     widget: NotebookPanel;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
