@@ -66,7 +66,8 @@ export class EditorHandler implements IDisposable {
     this._editorMonitor.activityStopped.connect(() => {
       this._sendEditorBreakpoints();
     }, this);
-
+    this._selectedBreakpoint =
+      this._debuggerService.model.breakpoints.selectedBreakpoint;
     this._debuggerService.model.breakpoints.changed.connect(async () => {
       const editor = this.editor;
       if (!editor || editor.isDisposed) {
@@ -83,10 +84,12 @@ export class EditorHandler implements IDisposable {
       this._addBreakpointsToEditor();
     });
 
-    this._debuggerService.model.breakpoints.clicked.connect((_, breakpoint) => {
-      this._selectedBreakpoint = breakpoint;
-      this._addBreakpointsToEditor();
-    });
+    this._debuggerService.model.breakpoints.selectedChanged.connect(
+      (_, breakpoint) => {
+        this._selectedBreakpoint = breakpoint;
+        this._addBreakpointsToEditor();
+      }
+    );
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
       const editor = this.editor;

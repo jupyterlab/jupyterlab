@@ -64,6 +64,8 @@ const BreakpointsComponent = ({
       breakpoint: IDebugger.IBreakpoint
     ): void => {
       setSelectedBreakpoint(breakpoint);
+      model.selectedBreakpoint = breakpoint;
+      model.selectedChanged.emit(breakpoint);
     };
 
     model.changed.connect(updateBreakpoints);
