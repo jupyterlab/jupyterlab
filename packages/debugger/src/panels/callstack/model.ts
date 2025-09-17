@@ -4,14 +4,22 @@
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
+import { ICodeCellModel } from '@jupyterlab/cells';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
+  constructor(
+    private config: IDebugger.IConfig,
+    private notebookTracker: INotebookTracker | null
+  ) {}
+
   /**
    * Get all the frames.
    */
+
   get frames(): IDebugger.IStackFrame[] {
     return this._state;
   }
@@ -61,6 +69,40 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
    */
   get currentFrameChanged(): ISignal<this, IDebugger.IStackFrame | null> {
     return this._currentFrameChanged;
+  }
+
+  /**
+   * Returns a human-readable display for a frame.
+   */
+  getDisplayName(frame: IDebugger.IStackFrame): string {
+    if (!this.notebookTracker || !this.config) {
+      return frame.source?.path ?? '';
+    }
+
+    let display = frame.source?.path ?? '';
+
+    this.notebookTracker.forEach(panel => {
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+      panel.content.widgets.forEach(cell => {
+        if (cell.model.type !== 'code') return;
+
+        const code = cell.model.sharedModel.getSource();
+        const codeId = this.config.getCodeId(code, kernelName);
+
+        if (codeId && codeId === frame.source?.path) {
+          const codeCell = cell.model as ICodeCellModel;
+          if (codeCell.executionState === 'running') {
+            display = `Cell [*]`;
+          } else if (codeCell.executionCount === null) {
+            display = `Cell [ ]`;
+          } else {
+            display = `Cell [${codeCell.executionCount}]`;
+          }
+        }
+      });
+    });
+
+    return display;
   }
 
   private _state: IDebugger.IStackFrame[] = [];

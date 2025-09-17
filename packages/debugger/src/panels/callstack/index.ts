@@ -10,7 +10,6 @@ import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 import { IDebugger } from '../../tokens';
 import { CallstackBody } from './body';
-import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A Panel to show a callstack.
@@ -26,11 +25,7 @@ export class Callstack extends PanelWithToolbar {
     const { commands, model } = options;
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.title.label = trans.__('Callstack');
-    const body = new CallstackBody(
-      model,
-      options.config,
-      options.notebookTracker ?? undefined
-    );
+    const body = new CallstackBody(model);
 
     this.toolbar.node.setAttribute(
       'aria-label',
@@ -152,16 +147,6 @@ export namespace Callstack {
      * The model for the callstack.
      */
     model: IDebugger.Model.ICallstack;
-
-    /**
-     * The debugger configuration.
-     */
-    config: IDebugger.IConfig;
-
-    /**
-     * The notebook tracker.
-     */
-    notebookTracker: INotebookTracker | null;
 
     /**
      * The application language translator

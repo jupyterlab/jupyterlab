@@ -46,9 +46,7 @@ export class DebuggerSidebar extends SidePanel {
       breakpointsCommands,
       editorServices,
       service,
-      themeManager,
-      notebookTracker,
-      config
+      themeManager
     } = options;
     const model = service.model;
 
@@ -63,8 +61,6 @@ export class DebuggerSidebar extends SidePanel {
     this.callstack = new CallstackPanel({
       commands: callstackCommands,
       model: model.callstack,
-      config,
-      notebookTracker,
       translator
     });
 
@@ -72,17 +68,14 @@ export class DebuggerSidebar extends SidePanel {
       service,
       commands: breakpointsCommands,
       model: model.breakpoints,
-      translator,
-      notebookTracker,
-      config
+      translator
     });
 
     this.sources = new SourcesPanel({
       model: model.sources,
       service,
       editorServices,
-      translator,
-      notebookTracker
+      translator
     });
 
     this.kernelSources = new KernelSourcesPanel({

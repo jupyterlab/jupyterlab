@@ -16,8 +16,6 @@ import { Debugger } from '../..';
 import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
-import { ICodeCellModel } from '@jupyterlab/cells';
-import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * The body for a Sources Panel.
@@ -33,7 +31,6 @@ export class SourcesBody extends Widget {
     this._model = options.model;
     this._debuggerService = options.service;
     this._mimeTypeService = options.editorServices.mimeTypeService;
-    this._notebookTracker = options.notebookTracker ?? undefined;
 
     const factory = new Debugger.ReadOnlyEditorFactory({
       editorServices: options.editorServices
@@ -52,7 +49,7 @@ export class SourcesBody extends Widget {
         return;
       }
 
-      void this._showSource(frame, this._notebookTracker);
+      void this._showSource(frame);
     });
 
     const layout = new PanelLayout();
@@ -86,41 +83,9 @@ export class SourcesBody extends Widget {
    * Show the content of the source for the given frame.
    *
    * @param frame The current frame.
-   * @param notebookTracker The notebook tracker.
    */
-  private async _showSource(
-    frame: IDebugger.IStackFrame,
-    notebookTracker: INotebookTracker | undefined
-  ): Promise<void> {
-    let displayPath = frame.source?.path ?? '';
-
-    console.log(notebookTracker);
-
-    if (notebookTracker && frame.source?.path) {
-      notebookTracker.forEach(panel => {
-        const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-        panel.content.widgets.forEach(cell => {
-          if (cell.model.type !== 'code') return;
-
-          const code = cell.model.sharedModel.getSource();
-          const codeId = this._debuggerService.config.getCodeId(
-            code,
-            kernelName
-          );
-
-          if (codeId === frame.source?.path) {
-            const codeCell = cell.model as ICodeCellModel;
-            if (codeCell.executionState === 'running') {
-              displayPath = `Cell [*]`;
-            } else if (codeCell.executionCount === null) {
-              displayPath = `Cell [ ]`;
-            } else {
-              displayPath = `Cell [${codeCell.executionCount}]`;
-            }
-          }
-        });
-      });
-    }
+  private async _showSource(frame: IDebugger.IStackFrame): Promise<void> {
+    const displayPath = this._model.getDisplayName(frame);
 
     const source = await this._debuggerService.getSource({
       sourceReference: 0,
@@ -170,7 +135,6 @@ export class SourcesBody extends Widget {
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
   private _mimeTypeService: IEditorMimeTypeService;
-  private _notebookTracker: INotebookTracker | undefined;
 }
 
 /**
@@ -195,10 +159,5 @@ export namespace SourcesBody {
      * The editor services used to create new read-only editors.
      */
     editorServices: IEditorServices;
-
-    /**
-     * The notebook tracker.
-     */
-    notebookTracker?: INotebookTracker | null;
   }
 }

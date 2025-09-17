@@ -306,15 +306,17 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [IDebuggerSources, ITranslator],
+  optional: [INotebookTracker, IDebuggerSources, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
+    notebookTracker: INotebookTracker | null,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>
     new Debugger.Service({
       config,
+      notebookTracker,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
       translator
