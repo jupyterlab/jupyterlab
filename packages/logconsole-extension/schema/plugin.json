@@ -67,7 +67,7 @@
     },
     "toolbar": {
       "title": "Log console toolbar items",
-      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the uploader button:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"uploader\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
+      "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the clear button:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"clear\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
       "items": {
         "$ref": "#/definitions/toolbarItem"
       },
