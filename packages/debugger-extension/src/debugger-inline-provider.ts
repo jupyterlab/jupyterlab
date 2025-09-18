@@ -120,6 +120,10 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
 
     try {
       const prefix = this.extractPrefix(request);
+      const text = request.text;
+      const offset = request.offset;
+      console.log('text', text);
+      console.log('offset', offset);
 
       // Skip if prefix is empty or just whitespace
       if (!prefix.trim()) {
@@ -129,8 +133,73 @@ export class DebuggerInlineCompletionProvider implements IInlineCompletionProvid
       // Get variable-based completions
       const variableCompletions = this.getVariableCompletions(prefix);
 
+      const pyCode = `
+from IPython.core.completer import provisionalcompleter as _provisionalcompleter
+from IPython.core.completer import rectify_completions as _rectify_completions
+_EXPERIMENTAL_KEY_NAME = "_jupyter_types_experimental"
+
+def funcToEval(code, cursor_pos):
+    with _provisionalcompleter():
+        raw_completions = get_ipython().Completer.completions(code, cursor_pos)
+        completions = list(_rectify_completions(code, raw_completions))
+
+        comps = []
+        for comp in completions:
+            comps.append(
+                dict(
+                    start=comp.start,
+                    end=comp.end,
+                    text=comp.text,
+                    type=comp.type,
+                    signature=comp.signature,
+                )
+            )
+
+        if completions:
+            s = completions[0].start
+            e = completions[0].end
+            matches = [c.text for c in completions]
+        else:
+            s = cursor_pos
+            e = cursor_pos
+            matches = []
+
+        try:
+            with open("/tmp/ipykernel_debug.log", "a") as f:
+                f.write(f"completions: {repr(completions)}")
+        except Exception as e:
+            pass
+
+        return {
+            "matches": matches,
+            "cursor_end": e,
+            "cursor_start": s,
+            "status": "ok",
+        }
+
+`;
+
+      const t = await this._debuggerService.evaluate(pyCode);
+      console.log('tttttttttttttttt', t);
+
+      const evalCode = `funcToEval("${text}", ${offset})`;
+      const rep = await this._debuggerService.evaluate(evalCode);
+      console.log('rep', rep);
+      if (!rep) {
+        return { items: [] };
+      }
+      const matches = rep.result;
+      console.log('matches', matches);
+
+      // Replace single quotes with double quotes in matches string
+      const correctedMatches = matches.replace(/'/g, '"');
+      console.log('corrected matches', correctedMatches);
+      console.log('correctedMatches', correctedMatches);
+      const ssss = JSON.parse(correctedMatches);
+      console.log('ssss', ssss);
+      // console.log('matches.matches', matches.matches);
       // Combine variable completions with kernel completions once those work
-      items = [...variableCompletions];
+      items = [...variableCompletions, ...ssss.matches];
     } catch (error) {
       console.warn('Error fetching debugger completions:', error);
       // Return empty items on error
