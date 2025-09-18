@@ -7,7 +7,7 @@
       "title": "Show a button in the input prompt of each cell",
       "description": "Show a button over the cell prompt when hovering a cell.",
       "type": "boolean",
-      "default": true
+      "default": false
     }
   },
   "additionalProperties": false,

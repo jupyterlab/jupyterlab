@@ -82,7 +82,29 @@ test.describe('Run Cell Button', () => {
     await page.notebook.setCell(0, 'code', '2**32');
   });
 
+  test.describe('Button disabled', () => {
+    test('Should not have button by default', async ({ page }) => {
+      const inputPrompt = (await page.notebook.getCellLocator(0))!.locator(
+        '.jp-InputPrompt'
+      );
+
+      await inputPrompt?.hover();
+      void expect(
+        inputPrompt.locator('.jp-InputArea-prompt-run')
+      ).not.toBeVisible();
+    });
+  });
+
   test.describe('Button enabled', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/cell-toolbar-extension:run-button': {
+          showRunButton: true
+        }
+      }
+    });
+
     test('Should have the run button', async ({ page }) => {
       const inputPrompt = (await page.notebook.getCellLocator(0))!.locator(
         '.jp-InputPrompt'
@@ -144,28 +166,6 @@ test.describe('Run Cell Button', () => {
       void expect(
         inputPrompt.locator('.jp-InputArea-prompt-run')
       ).toBeVisible();
-    });
-  });
-
-  test.describe('Button disabled', () => {
-    test.use({
-      mockSettings: {
-        ...galata.DEFAULT_SETTINGS,
-        '@jupyterlab/cell-toolbar-extension:run-button': {
-          showRunButton: false
-        }
-      }
-    });
-
-    test('Should not have button if disabled in settings', async ({ page }) => {
-      const inputPrompt = (await page.notebook.getCellLocator(0))!.locator(
-        '.jp-InputPrompt'
-      );
-
-      await inputPrompt?.hover();
-      void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
-      ).not.toBeVisible();
     });
   });
 });
