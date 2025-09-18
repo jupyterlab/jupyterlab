@@ -83,14 +83,22 @@ test.describe('Run Cell Button', () => {
   });
 
   test.describe('Button disabled', () => {
-    test('Should not have button by default', async ({ page }) => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/cell-toolbar-extension:prompt-button': {
+          showButton: false
+        }
+      }
+    });
+    test('Should not have button', async ({ page }) => {
       const inputPrompt = (await page.notebook.getCellLocator(0))!.locator(
         '.jp-InputPrompt'
       );
 
       await inputPrompt?.hover();
       void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).not.toBeVisible();
     });
   });
@@ -99,8 +107,8 @@ test.describe('Run Cell Button', () => {
     test.use({
       mockSettings: {
         ...galata.DEFAULT_SETTINGS,
-        '@jupyterlab/cell-toolbar-extension:run-button': {
-          showRunButton: true
+        '@jupyterlab/cell-toolbar-extension:prompt-button': {
+          showButton: true
         }
       }
     });
@@ -115,13 +123,13 @@ test.describe('Run Cell Button', () => {
       // The button should be displayed when the cell is hovered.
       await cellInput?.hover();
       void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).toBeVisible();
 
       // The button should be hidden when the cell is not hovered.
       await (await page.notebook.getToolbarLocator())?.hover();
       await expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).not.toBeVisible();
     });
 
@@ -133,7 +141,7 @@ test.describe('Run Cell Button', () => {
       await expect(inputPrompt).toHaveText('[ ]:');
 
       await inputPrompt?.hover();
-      await inputPrompt.locator('.jp-InputArea-prompt-run').click();
+      await inputPrompt.locator('.jp-InputArea-prompt-button').click();
 
       await (await page.notebook.getToolbarLocator())?.hover();
       await expect(inputPrompt).toHaveText('[1]:');
@@ -146,25 +154,25 @@ test.describe('Run Cell Button', () => {
 
       await inputPrompt?.hover();
       void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).toBeVisible();
 
       await page.notebook.setCellType(0, 'markdown');
       await inputPrompt?.hover();
       void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).not.toBeVisible();
 
       await page.notebook.setCellType(0, 'raw');
       await inputPrompt?.hover();
       void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).not.toBeVisible();
 
       await page.notebook.setCellType(0, 'code');
       await inputPrompt?.hover();
       void expect(
-        inputPrompt.locator('.jp-InputArea-prompt-run')
+        inputPrompt.locator('.jp-InputArea-prompt-button')
       ).toBeVisible();
     });
   });
