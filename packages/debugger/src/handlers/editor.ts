@@ -32,6 +32,10 @@ import {
 } from '@codemirror/view';
 
 import { IDebugger } from '../tokens';
+import {
+  breakpointIcon,
+  selectedBreakpointIcon
+} from '@jupyterlab/ui-components';
 
 /**
  * The class name added to the current line.
@@ -474,9 +478,16 @@ namespace Private {
   export const breakpointMarker = new (class extends GutterMarker {
     toDOM() {
       const marker = document.createElement('span');
-      marker.textContent = '●';
       marker.className = 'cm-breakpoint-gutter';
       marker.ariaLabel = 'Breakpoint';
+
+      const iconNode = breakpointIcon.element({
+        tag: 'span',
+        className: 'cm-breakpoint-icon',
+        title: 'Breakpoint'
+      });
+
+      marker.appendChild(iconNode);
       return marker;
     }
   })();
@@ -484,9 +495,15 @@ namespace Private {
   export const selectedBreakpointMarker = new (class extends GutterMarker {
     toDOM() {
       const marker = document.createElement('span');
-      marker.textContent = '◉';
-      marker.className = 'cm-breakpoint-gutter-selected';
+      marker.className = 'cm-breakpoint-gutter';
       marker.ariaLabel = 'Selected breakpoint';
+      const iconNode = selectedBreakpointIcon.element({
+        tag: 'span',
+        className: 'cm-selected-breakpoint-icon',
+        title: 'Selected breakpoint'
+      });
+
+      marker.appendChild(iconNode);
       return marker;
     }
   })();

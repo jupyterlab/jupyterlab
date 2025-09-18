@@ -70,15 +70,8 @@
 }
 
 .cm-breakpoint-gutter .cm-gutterElement {
-  color: var(--jp-error-color1);
-  padding-left: 5px;
-  font-size: 20px;
-  position: relative;
-  top: -5px;
-}
-
-.cm-breakpoint-gutter-selected {
-  color: var(--jp-warn-color1);
+  padding-top: 1.1px;
+  height: 18.2px;
 }
 
 [data-jp-debugger='true'].jp-Editor
