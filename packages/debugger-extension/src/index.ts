@@ -54,7 +54,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
-import { DebuggerInlineCompletionProvider } from './debugger-inline-provider';
+import { DebuggerCompletionProvider } from './debugger-completion-provider';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -1238,16 +1238,16 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
     completionManager: ICompletionProviderManager,
     translator: ITranslator | null
   ): void => {
-    // Create and register the debugger inline completion provider
-    const provider = new DebuggerInlineCompletionProvider({
+    // Create and register the debugger completion provider
+    const provider = new DebuggerCompletionProvider({
       debuggerService: debuggerService,
       translator: translator || nullTranslator
     });
 
     // Register the provider with the completion manager
-    completionManager.registerInlineProvider(provider);
+    completionManager.registerProvider(provider);
 
-    console.log('Debugger inline completion provider registered');
+    console.log('Debugger completion provider registered');
   }
 };
 
