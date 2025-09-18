@@ -545,6 +545,12 @@ div.jp-Cell-Placeholder-content-3 {
   white-space: pre-line;
 }
 
+/* Lazy rendering to notebook cells: content outside viewport won't be rendered until scrolled into view */
+.jp-Notebook-cell.jp-content-visibility {
+  content-visibility: auto;
+  contain: layout style paint; /* Isolates layout, style, and paint for this element */
+}
+
 /*-----------------------------------------------------------------------------
 | Printing
 |----------------------------------------------------------------------------*/
