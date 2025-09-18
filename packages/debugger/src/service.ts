@@ -256,7 +256,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       expression,
       frameId
     });
+    console.log('reply', reply);
     if (!reply.success) {
+      console.log('reply.message', reply.message);
       return null;
     }
     // get the frames to retrieve the latest state of the variables
