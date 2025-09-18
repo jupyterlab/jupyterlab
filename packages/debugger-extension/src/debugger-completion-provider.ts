@@ -154,12 +154,45 @@ _EXPERIMENTAL_KEY_NAME = "_jupyter_types_experimental"
 
 def funcToEval(code, cursor_pos):
     ip = get_ipython()
-    namespace = locals()
-    local_completer = IPCompleter(shell=ip, namespace=namespace, global_namespace=ip.user_global_ns, parent=ip)
+
+    # Access the current debugger frame
+    import inspect
+    current_frame = inspect.currentframe()
+
+    # Get the frame that called this function (the debugger's target frame)
+    caller_frame = current_frame.f_back if current_frame else None
+
+    # Get the debugger's frame variables
+    if caller_frame:
+        frame_locals = caller_frame.f_locals
+        frame_globals = caller_frame.f_globals
+    else:
+        frame_locals = locals()
+        frame_globals = globals()
+
+    local_completer = IPCompleter(shell=ip, namespace=frame_locals, global_namespace=frame_globals, parent=ip)
+
+
 
     with _provisionalcompleter():
         raw_completions = local_completer.completions(code, cursor_pos)
         completions = list(_rectify_completions(code, raw_completions))
+
+
+
+        try:
+          with open("/tmp/ipykernel_debug.log", "a") as f:
+            f.write("=== FRAME DEBUG INFO ===\\n")
+            f.write("code: " + repr(code) + ", cursor_pos: " + repr(cursor_pos) + "\\n")
+            f.write("current_frame: " + repr(current_frame) + "\\n")
+            f.write("caller_frame: " + repr(caller_frame) + "\\n")
+            f.write("frame_locals keys: " + repr(list(frame_locals.keys())) + "\\n")
+            f.write("frame_globals keys: " + repr(list(frame_globals.keys())) + "\\n")
+            f.write("========================\\n")
+        except Exception as e:
+          with open("/tmp/ipykernel_debug.log", "a") as f:
+            f.write("Frame debug error: " + repr(e) + "\\n")
+          pass
 
         comps = []
         for comp in completions:
@@ -181,15 +214,6 @@ def funcToEval(code, cursor_pos):
             s = cursor_pos
             e = cursor_pos
             matches = []
-
-
-        try:
-          with open("/tmp/ipykernel_debug.log", "a") as f:
-            f.write("completions: " + repr(completions) + "\\n")
-            f.write("matches: " + repr(matches) + "\\n")
-            f.write("matches length: " + str(len(matches)) + "\\n")
-        except Exception as e:
-          pass
 
         result = {
             "matches": matches,
