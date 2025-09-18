@@ -18,6 +18,7 @@
 .jp-DebuggerBreakpoint {
   display: flex;
   align-items: center;
+  height: 24px;
 }
 
 .jp-DebuggerBreakpoint:hover {
@@ -25,16 +26,12 @@
   cursor: pointer;
 }
 
-.jp-DebuggerBreakpoint-marker {
-  font-size: 20px;
-  padding-right: 5px;
-  color: var(--jp-error-color1);
-}
-
-.jp-DebuggerBreakpoint-marker-selected {
-  font-size: 20px;
-  padding-right: 5px;
-  color: var(--jp-warn-color1);
+.jp-DebuggerBreakpoint-container {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
 }
 
 .jp-DebuggerBreakpoint-source {

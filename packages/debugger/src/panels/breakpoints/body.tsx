@@ -9,6 +9,10 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import {
+  breakpointIcon,
+  selectedBreakpointIcon
+} from '@jupyterlab/ui-components';
 
 /**
  * The body for a Breakpoints Panel.
@@ -179,21 +183,17 @@ const BreakpointComponent = ({
       onClick={(): void => model.clicked.emit(breakpoint)}
       title={breakpoint.source?.path}
     >
-      {!isSelected ? (
-        <span
-          className={'jp-DebuggerBreakpoint-marker'}
-          aria-label={trans.__('Breakpoint')}
-        >
-          ●
-        </span>
-      ) : (
-        <span
-          className={'jp-DebuggerBreakpoint-marker-selected'}
-          aria-label={trans.__('Selected breakpoint')}
-        >
-          ◉
-        </span>
-      )}
+      <span className="jp-DebuggerBreakpoint-container">
+        {!isSelected ? (
+          <breakpointIcon.react
+            aria-label={trans.__('Breakpoint')}
+          ></breakpointIcon.react>
+        ) : (
+          <selectedBreakpointIcon.react
+            aria-label={trans.__('Selected breakpoint')}
+          ></selectedBreakpointIcon.react>
+        )}
+      </span>
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
         {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
       </span>
