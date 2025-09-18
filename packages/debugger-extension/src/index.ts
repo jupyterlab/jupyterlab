@@ -1140,8 +1140,6 @@ const main: JupyterFrontEndPlugin<void> = {
         labShell.collapseRight();
       }
 
-      console.log('event.event', event.event);
-
       // Dispose debug console when debugger is terminated
       if (event.event === 'terminated' && debugConsoleWidget) {
         debugConsoleWidget.dispose();
