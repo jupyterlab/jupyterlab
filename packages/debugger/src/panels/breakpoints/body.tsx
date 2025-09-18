@@ -182,18 +182,14 @@ const BreakpointComponent = ({
       {!isSelected ? (
         <span
           className={'jp-DebuggerBreakpoint-marker'}
-          aria-label={
-            isSelected
-              ? trans.__('Selected breakpoint')
-              : trans.__('Breakpoint')
-          }
+          aria-label={trans.__('Breakpoint')}
         >
           ●
         </span>
       ) : (
         <span
           className={'jp-DebuggerBreakpoint-marker-selected'}
-          aria-label="Selected breakpoint"
+          aria-label={trans.__('Selected breakpoint')}
         >
           ◉
         </span>
