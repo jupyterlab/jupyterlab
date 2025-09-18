@@ -149,11 +149,16 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
       const pyCode = `
 from IPython.core.completer import provisionalcompleter as _provisionalcompleter
 from IPython.core.completer import rectify_completions as _rectify_completions
+from IPython.core.completer import IPCompleter
 _EXPERIMENTAL_KEY_NAME = "_jupyter_types_experimental"
 
 def funcToEval(code, cursor_pos):
+    ip = get_ipython()
+    namespace = locals()
+    local_completer = IPCompleter(shell=ip, namespace=namespace, global_namespace=ip.user_global_ns, parent=ip)
+
     with _provisionalcompleter():
-        raw_completions = get_ipython().Completer.completions(code, cursor_pos)
+        raw_completions = local_completer.completions(code, cursor_pos)
         completions = list(_rectify_completions(code, raw_completions))
 
         comps = []
@@ -181,35 +186,61 @@ def funcToEval(code, cursor_pos):
         try:
           with open("/tmp/ipykernel_debug.log", "a") as f:
             f.write("completions: " + repr(completions) + "\\n")
+            f.write("matches: " + repr(matches) + "\\n")
+            f.write("matches length: " + str(len(matches)) + "\\n")
         except Exception as e:
           pass
 
-        return {
+        result = {
             "matches": matches,
             "cursor_end": e,
             "cursor_start": s,
             "status": "ok",
         }
 
+        try:
+          with open("/tmp/ipykernel_debug.log", "a") as f:
+            f.write("result: " + repr(result) + "\\n")
+        except Exception as e:
+          pass
+
+        return result
+
 `;
 
       const t = await this._debuggerService.evaluate(pyCode);
-      console.log('ttttttttttfffffftttttt', t);
+      console.log('ttttttttttffffffttttttzzzzzzzz', t);
 
       const evalCode = `funcToEval(${JSON.stringify(text)}, ${offset})`;
       const rep = await this._debuggerService.evaluate(evalCode);
-      console.log('rep', rep);
+      console.log('rep1', rep);
       if (!rep) {
         return { start: 0, end: 0, items: variableCompletions };
       }
       const matches = rep.result;
-      console.log('matches', matches);
+      console.log('matches length:', matches.length);
 
       // Replace single quotes with double quotes in matches string
-      const correctedMatches = matches.replace(/'/g, '"');
+      // Slice because return gets truncated
+      let correctedMatches = matches.replace(/'/g, '"');
+
+      // Debug: log the string to see the exact ellipses format
+      console.log('Before ellipses removal:', correctedMatches);
+
+      // TODO - why is the reply truncated????
+      // Remove various ellipses patterns that cause JSON parsing issues
+      correctedMatches = correctedMatches.replace(/, \.\.\./g, '');
+
+      console.log('After ellipses removal:', correctedMatches);
+
       console.log('corrected matches', correctedMatches);
-      parsedResult = JSON.parse(correctedMatches);
-      console.log('parsedResult', parsedResult);
+
+      try {
+        parsedResult = JSON.parse(correctedMatches);
+      } catch (error) {
+        console.error('Failed to parse corrected matches:', error);
+        return { start: 0, end: 0, items: variableCompletions };
+      }
 
       // Combine variable completions with kernel completions
       const kernelCompletions: CompletionHandler.ICompletionItem[] =
@@ -218,7 +249,7 @@ def funcToEval(code, cursor_pos):
           insertText: match
         }));
 
-      items = [...variableCompletions, ...kernelCompletions];
+      items = [...kernelCompletions];
     } catch (error) {
       console.warn('Error fetching debugger completions:', error);
       // Return empty items on error
