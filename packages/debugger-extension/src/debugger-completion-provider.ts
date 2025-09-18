@@ -15,16 +15,6 @@ import {
 } from '@jupyterlab/translation';
 
 /**
- * Type for completion items.
- */
-// interface ICompletionItem {
-//   label: string;
-//   insertText?: string;
-//   type?: string;
-//   filterText?: string;
-// }
-
-/**
  * Completion provider that uses debugger evaluation for suggestions.
  */
 export class DebuggerCompletionProvider implements ICompletionProvider {
@@ -48,74 +38,6 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
   }
 
   /**
-   * Extract the prefix from the current cursor position in the request.
-   */
-  private extractPrefix(request: CompletionHandler.IRequest): string {
-    const text = request.text;
-    const offset = request.offset;
-
-    // Extract the current line and prefix
-    const lines = text.split('\n');
-    let currentLine = 0;
-    let currentColumn = 0;
-
-    // Find current line and column from offset
-    let charCount = 0;
-    for (let i = 0; i < lines.length; i++) {
-      const lineLength = lines[i].length + 1; // +1 for newline
-      if (charCount + lineLength > offset) {
-        currentLine = i;
-        currentColumn = offset - charCount;
-        break;
-      }
-      charCount += lineLength;
-    }
-
-    const currentLineText = lines[currentLine] || '';
-    return currentLineText.slice(0, currentColumn);
-  }
-
-  /**
-   * Get variable-based completions from debugger variables.
-   */
-  private getVariableCompletions(prefix: string): any[] {
-    // Access current debugger variables
-    const debuggerModel = this._debuggerService.model;
-    const variables = debuggerModel.variables.scopes;
-
-    // Extract variable names from all scopes
-    const variableNames: string[] = [];
-    variables.forEach(scope => {
-      scope.variables.forEach(variable => {
-        // Exclude special variables and function variables
-        if (
-          variable.name !== 'special variables' &&
-          variable.name !== 'function variables'
-        ) {
-          variableNames.push(variable.name);
-        }
-      });
-    });
-
-    // Filter variables that match the prefix and extract suffix
-    const variableCompletions: CompletionHandler.ICompletionItem[] = [];
-    variableNames.forEach(name => {
-      if (name.toLowerCase().startsWith(prefix.toLowerCase())) {
-        const suffix = name.slice(prefix.length);
-        if (suffix.length > 0) {
-          variableCompletions.push({
-            label: name,
-            insertText: suffix
-            // filterText: name
-          });
-        }
-      }
-    });
-
-    return variableCompletions;
-  }
-
-  /**
    * Fetch completion suggestions using debugger evaluation.
    */
   async fetch(
@@ -132,19 +54,7 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     let parsedResult;
 
     try {
-      const prefix = this.extractPrefix(request);
-      const text = request.text;
-      const offset = request.offset;
-      console.log('text', text);
-      console.log('offset', offset);
-
-      // Skip if prefix is empty or just whitespace
-      if (!prefix.trim()) {
-        return { start: 0, end: 0, items: [] };
-      }
-
-      // Get variable-based completions
-      const variableCompletions = this.getVariableCompletions(prefix);
+      const { text, offset } = request;
 
       const pyCode = `
 from IPython.core.completer import provisionalcompleter as _provisionalcompleter
@@ -172,27 +82,9 @@ def funcToEval(code, cursor_pos):
 
     local_completer = IPCompleter(shell=ip, namespace=frame_locals, global_namespace=frame_globals, parent=ip)
 
-
-
     with _provisionalcompleter():
         raw_completions = local_completer.completions(code, cursor_pos)
         completions = list(_rectify_completions(code, raw_completions))
-
-
-
-        try:
-          with open("/tmp/ipykernel_debug.log", "a") as f:
-            f.write("=== FRAME DEBUG INFO ===\\n")
-            f.write("code: " + repr(code) + ", cursor_pos: " + repr(cursor_pos) + "\\n")
-            f.write("current_frame: " + repr(current_frame) + "\\n")
-            f.write("caller_frame: " + repr(caller_frame) + "\\n")
-            f.write("frame_locals keys: " + repr(list(frame_locals.keys())) + "\\n")
-            f.write("frame_globals keys: " + repr(list(frame_globals.keys())) + "\\n")
-            f.write("========================\\n")
-        except Exception as e:
-          with open("/tmp/ipykernel_debug.log", "a") as f:
-            f.write("Frame debug error: " + repr(e) + "\\n")
-          pass
 
         comps = []
         for comp in completions:
@@ -222,51 +114,36 @@ def funcToEval(code, cursor_pos):
             "status": "ok",
         }
 
-        try:
-          with open("/tmp/ipykernel_debug.log", "a") as f:
-            f.write("result: " + repr(result) + "\\n")
-        except Exception as e:
-          pass
-
         return result
-
 `;
 
-      const t = await this._debuggerService.evaluate(pyCode);
-      console.log('ttttttttttffffffttttttzzzzzzzz', t);
+      // create method
+      await this._debuggerService.evaluate(pyCode);
 
       const evalCode = `funcToEval(${JSON.stringify(text)}, ${offset})`;
-      const rep = await this._debuggerService.evaluate(evalCode);
-      console.log('rep1', rep);
-      if (!rep) {
-        return { start: 0, end: 0, items: variableCompletions };
+      const evalReply = await this._debuggerService.evaluate(evalCode);
+
+      if (!evalReply) {
+        return { start: 0, end: 0, items: [] };
       }
-      const matches = rep.result;
-      console.log('matches length:', matches.length);
+
+      const matches = evalReply.result;
 
       // Replace single quotes with double quotes in matches string
-      // Slice because return gets truncated
       let correctedMatches = matches.replace(/'/g, '"');
-
-      // Debug: log the string to see the exact ellipses format
-      console.log('Before ellipses removal:', correctedMatches);
 
       // TODO - why is the reply truncated????
       // Remove various ellipses patterns that cause JSON parsing issues
       correctedMatches = correctedMatches.replace(/, \.\.\./g, '');
 
-      console.log('After ellipses removal:', correctedMatches);
-
-      console.log('corrected matches', correctedMatches);
-
       try {
         parsedResult = JSON.parse(correctedMatches);
       } catch (error) {
         console.error('Failed to parse corrected matches:', error);
-        return { start: 0, end: 0, items: variableCompletions };
+        return { start: 0, end: 0, items: [] };
       }
 
-      // Combine variable completions with kernel completions
+      // Parse completions into completion items
       const kernelCompletions: CompletionHandler.ICompletionItem[] =
         parsedResult.matches.map((match: string) => ({
           label: match,
