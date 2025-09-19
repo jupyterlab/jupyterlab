@@ -476,15 +476,14 @@ namespace Private {
    * Create a marker DOM element for a breakpoint.
    */
   export const breakpointMarker = new (class extends GutterMarker {
-    toDOM() {
+    toDOM(view: EditorView) {
       const marker = document.createElement('span');
       marker.className = 'cm-breakpoint-gutter';
-      marker.ariaLabel = 'Breakpoint';
+      marker.ariaLabel = view.state.phrase('Breakpoint');
 
       const iconNode = breakpointIcon.element({
         tag: 'span',
-        className: 'cm-breakpoint-icon',
-        title: 'Breakpoint'
+        className: 'cm-breakpoint-icon'
       });
 
       marker.appendChild(iconNode);
@@ -493,14 +492,13 @@ namespace Private {
   })();
 
   export const selectedBreakpointMarker = new (class extends GutterMarker {
-    toDOM() {
+    toDOM(view: EditorView) {
       const marker = document.createElement('span');
       marker.className = 'cm-breakpoint-gutter';
-      marker.ariaLabel = 'Selected breakpoint';
+      marker.ariaLabel = view.state.phrase('Selected breakpoint');
       const iconNode = selectedBreakpointIcon.element({
         tag: 'span',
-        className: 'cm-selected-breakpoint-icon',
-        title: 'Selected breakpoint'
+        className: 'cm-selected-breakpoint-icon'
       });
 
       marker.appendChild(iconNode);
