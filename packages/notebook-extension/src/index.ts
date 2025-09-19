@@ -2018,7 +2018,6 @@ function activateNotebookHandler(
 
     widget.revealed.then(() => {
       widget.content.scrollbar = factory.notebookConfig.showMinimap;
-      widget;
     });
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
