@@ -86,14 +86,20 @@ const BreakpointsComponent = ({
       model.selectedBreakpoint = breakpoint;
     };
 
+    const handleSelectedChanged = (_: IDebugger.Model.IBreakpoints): void => {
+      setSelectedBreakpoint(model.selectedBreakpoint);
+    };
+
     model.changed.connect(updateBreakpoints);
     model.restored.connect(restoreBreakpoints);
     model.clicked.connect(handleClick);
+    model.selectedChanged.connect(handleSelectedChanged);
 
     return (): void => {
       model.changed.disconnect(updateBreakpoints);
       model.restored.disconnect(restoreBreakpoints);
       model.clicked.disconnect(handleClick);
+      model.selectedChanged.disconnect(() => handleSelectedChanged);
     };
   });
 
