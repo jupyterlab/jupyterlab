@@ -29,6 +29,7 @@ import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
@@ -48,11 +49,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONObject,
-  ReadonlyJSONObject,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
+import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
@@ -125,14 +122,6 @@ export namespace CommandIDs {
   export const find = 'fileeditor:find';
 
   export const goToLine = 'fileeditor:go-to-line';
-}
-
-export interface IFileTypeData extends ReadonlyJSONObject {
-  fileExt: string;
-  iconName: string;
-  launcherLabel: string;
-  paletteLabel: string;
-  caption: string;
 }
 
 /**
@@ -1453,17 +1442,23 @@ export namespace Commands {
   export function addKernelLanguageLauncherItems(
     launcher: ILauncher,
     trans: TranslationBundle,
-    availableKernelFileTypes: Iterable<IFileTypeData>
+    availableKernelFileTypes: Iterable<IRenderMime.IFileType>
   ): IDisposable {
     const disposables = new DisposableSet();
 
-    for (const ext of availableKernelFileTypes) {
+    for (const filetype of availableKernelFileTypes) {
       disposables.add(
         launcher.add({
           command: CommandIDs.createNew,
           category: trans.__('Other'),
           rank: 3,
-          args: ext
+          args: {
+            fileExt: filetype.extensions[0],
+            iconName: filetype.icon?.toString() ?? '',
+            launcherLabel: trans.__('%1 File', filetype.displayName),
+            paletteLabel: trans.__('New %1 File', filetype.displayName),
+            caption: trans.__('Create a new %1 File', filetype.displayName)
+          }
         })
       );
     }
@@ -1563,16 +1558,23 @@ export namespace Commands {
   export function addKernelLanguagePaletteItems(
     palette: ICommandPalette,
     trans: TranslationBundle,
-    availableKernelFileTypes: Iterable<IFileTypeData>
+    availableKernelFileTypes: Iterable<IRenderMime.IFileType>
   ): IDisposable {
     const disposables = new DisposableSet();
     const paletteCategory = trans.__('Text Editor');
 
-    for (const ext of availableKernelFileTypes) {
+    for (const filetype of availableKernelFileTypes) {
       disposables.add(
         palette.addItem({
           command: CommandIDs.createNew,
-          args: { ...ext, isPalette: true },
+          args: {
+            fileExt: filetype.extensions[0],
+            iconName: filetype.icon?.toString() ?? '',
+            launcherLabel: trans.__('%1 File', filetype.displayName),
+            paletteLabel: trans.__('New %1 File', filetype.displayName),
+            caption: trans.__('Create a new %1 File', filetype.displayName),
+            isPalette: true
+          },
           category: paletteCategory
         })
       );
@@ -1632,15 +1634,22 @@ export namespace Commands {
    */
   export function addKernelLanguageMenuItems(
     menu: IMainMenu,
-    availableKernelFileTypes: Iterable<IFileTypeData>
+    trans: TranslationBundle,
+    availableKernelFileTypes: Iterable<IRenderMime.IFileType>
   ): IDisposable {
     const disposables = new DisposableSet();
 
-    for (const ext of availableKernelFileTypes) {
+    for (const filetype of availableKernelFileTypes) {
       disposables.add(
         menu.fileMenu.newMenu.addItem({
           command: CommandIDs.createNew,
-          args: ext,
+          args: {
+            fileExt: filetype.extensions[0],
+            iconName: filetype.icon?.toString() ?? '',
+            launcherLabel: trans.__('%1 File', filetype.displayName),
+            paletteLabel: trans.__('New %1 File', filetype.displayName),
+            caption: trans.__('Create a new %1 File', filetype.displayName)
+          },
           rank: 31
         })
       );
