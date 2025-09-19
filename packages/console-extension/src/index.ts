@@ -461,6 +461,7 @@ async function activateConsole(
   /**
    * Create a console for a given path.
    */
+  // ! LOOKING HERE TIGHT NOFJFHJFH
   async function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
     await manager.ready;
 
@@ -1417,9 +1418,11 @@ function activateConsoleCompleterService(
   const trans = (translator ?? nullTranslator).load('jupyterlab');
   const sanitizer = appSanitizer ?? new Sanitizer();
 
+  // ! issue is no current widget
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: () => {
+      console.log('consoles.currentWidget', consoles.currentWidget);
       const id = consoles.currentWidget && consoles.currentWidget.id;
 
       if (id) {

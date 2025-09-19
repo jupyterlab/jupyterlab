@@ -95,13 +95,6 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
    * @param obj - The instance to inject into the tracker.
    */
   inject(obj: T): void;
-
-  /**
-   * Add a widget to the tracker.
-   *
-   * @param widget - The widget instance to add to the tracker.
-   */
-  add(widget: T): Promise<void>;
 }
 
 /**
