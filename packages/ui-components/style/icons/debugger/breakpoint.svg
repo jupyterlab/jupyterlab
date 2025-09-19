@@ -1,25 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="4.2333331mm"
-   height="4.2333331mm"
-   viewBox="0 0 4.233333 4.233333"
-   version="1.1"
-   id="svg1"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1" />
-  <g
-     id="layer1"
-     transform="matrix(0.35000001,0,0,0.35000001,-29.45007,-50.07857)">
-    <circle
-       style="fill:var(--jp-error-color1);fill-opacity:1;stroke-width:0.264583"
-       class="jp-icon-error1"
-       id="path1"
-       cx="90.190674"
-       cy="149.12924"
-       r="5.2916665" />
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+  <g fill="var(--jp-error-color1, #d32f2f)">
+    <circle cx="10" cy="7" r="6" />
   </g>
 </svg>
