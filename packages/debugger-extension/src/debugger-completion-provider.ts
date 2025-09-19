@@ -33,6 +33,7 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
    * Check if this completion provider is applicable to the given context.
    */
   async isApplicable(context: ICompletionContext): Promise<boolean> {
+    console.log('context', context);
     // Only provide completions when debugger has stopped threads
     return this._debuggerService.hasStoppedThreads();
   }
@@ -45,6 +46,7 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     context: ICompletionContext,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply> {
+    console.log('debug completer fetch');
     // Check if debugger has stopped threads (required for evaluation)
     if (!this._debuggerService.hasStoppedThreads()) {
       return { start: 0, end: 0, items: [] };

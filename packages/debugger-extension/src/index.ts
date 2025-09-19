@@ -52,6 +52,7 @@ import { ServiceManager, Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { ISanitizer } from '@jupyterlab/apputils';
 import type { CommandRegistry } from '@lumino/commands';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
@@ -87,6 +88,10 @@ function createDebugConsole(
 
   const debugConsoleExecutor = new DebugConsoleCellExecutor(service);
 
+  const tracker = new WidgetTracker<ConsolePanel>({
+    namespace: 'debugger/debug-console'
+  });
+
   const consolePanel = new ConsolePanel({
     manager,
     name: 'Debug Console',
@@ -107,7 +112,7 @@ function createDebugConsole(
   consolePanel.console.addClass('jp-DebugConsole-widget');
 
   // Add the console panel to the console tracker
-  void consoleTracker.add(consolePanel);
+  void tracker.add(consolePanel);
 
   // Set it as the current widget in the tracker
   // consoleTracker.currentWidget = consolePanel;
@@ -884,7 +889,8 @@ const main: JupyterFrontEndPlugin<void> = {
     IEditorServices,
     ITranslator,
     ConsolePanel.IContentFactory,
-    IConsoleTracker
+    IConsoleTracker,
+    ICompletionProviderManager
   ],
   optional: [
     ICommandPalette,
@@ -892,7 +898,8 @@ const main: JupyterFrontEndPlugin<void> = {
     ILabShell,
     ILayoutRestorer,
     ILoggerRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    ISanitizer
   ],
   autoStart: true,
   activate: async (
@@ -903,12 +910,14 @@ const main: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     consolePanelContentFactory: ConsolePanel.IContentFactory,
     consoleTracker: IConsoleTracker,
+    completionManager: ICompletionProviderManager,
     palette: ICommandPalette | null,
     sourceViewer: IDebugger.ISourceViewer | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
     loggerRegistry: ILoggerRegistry | null,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    sanitizer: ISanitizer | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -961,6 +970,87 @@ const main: JupyterFrontEndPlugin<void> = {
           mode: 'split-bottom',
           activate: true,
           type: 'Debugger console'
+        });
+
+        // Set up completion for the debug console
+        // This is needed because the debug console is not in the console tracker
+        // so the console extension doesn't automatically set up completion
+        const setupCompletion = async () => {
+          if (!debugConsoleWidget) return;
+
+          const completerContext = {
+            editor: debugConsoleWidget.console.promptCell?.editor ?? null,
+            session: debugConsoleWidget.console.sessionContext.session,
+            widget: debugConsoleWidget,
+            sanitizer: sanitizer ?? undefined
+          };
+
+          try {
+            await completionManager.updateCompleter(completerContext);
+            console.log('Debug console completion setup successful');
+
+            // Debug: Check if debugger completion provider is applicable
+            const debuggerProvider = new DebuggerCompletionProvider({
+              debuggerService: service,
+              translator: translator || nullTranslator
+            });
+            const isApplicable =
+              await debuggerProvider.isApplicable(completerContext);
+            console.log(
+              'Debugger completion provider applicable:',
+              isApplicable
+            );
+            console.log(
+              'Debugger has stopped threads:',
+              service.hasStoppedThreads()
+            );
+          } catch (error) {
+            console.error('Debug console completion setup failed:', error);
+          }
+        };
+
+        // Set up completion initially
+        await setupCompletion();
+
+        // Also set up completion when prompt cell is created
+        debugConsoleWidget.console.promptCellCreated.connect(
+          async (codeConsole, cell) => {
+            if (!debugConsoleWidget) return;
+
+            const newContext = {
+              editor: cell.editor,
+              session: codeConsole.sessionContext.session,
+              widget: debugConsoleWidget,
+              sanitizer: sanitizer ?? undefined
+            };
+
+            try {
+              await completionManager.updateCompleter(newContext);
+              console.log(
+                'Debug console completion updated for new prompt cell'
+              );
+            } catch (error) {
+              console.error('Debug console completion update failed:', error);
+            }
+          }
+        );
+
+        // Set up completion when session changes
+        debugConsoleWidget.console.sessionContext.sessionChanged.connect(
+          async () => {
+            await setupCompletion();
+          }
+        );
+
+        // Add a command to manually invoke completion for debugging
+        app.commands.addCommand('debugger:invoke-completion', {
+          label: 'Invoke Debug Console Completion',
+          execute: () => {
+            if (debugConsoleWidget) {
+              console.log('Manually invoking completion for debug console');
+              completionManager.invoke(debugConsoleWidget.id);
+            }
+          }
         });
       },
       describedBy: {

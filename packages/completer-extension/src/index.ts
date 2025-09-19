@@ -405,6 +405,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
         return;
       }
       const target = event.target as Element;
+      console.log('GET IN THERE');
       switch (event.keyCode) {
         case 9: {
           // Tab key
