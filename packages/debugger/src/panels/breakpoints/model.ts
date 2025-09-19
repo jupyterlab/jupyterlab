@@ -49,6 +49,7 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
    */
   set selectedBreakpoint(selected: IDebugger.IBreakpoint) {
     this._selectedBreakpoint = selected;
+    this._selectedChanged.emit(selected);
   }
 
   /**
