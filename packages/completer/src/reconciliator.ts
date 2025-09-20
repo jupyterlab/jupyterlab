@@ -159,6 +159,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
     request: CompletionHandler.IRequest,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null> {
+    console.log('comp fetch');
     const current = ++this._fetching;
     let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] =
       [];

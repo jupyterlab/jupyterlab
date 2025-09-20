@@ -23,7 +23,6 @@ import {
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -49,10 +48,14 @@ import {
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { Session } from '@jupyterlab/services';
+import { ServiceManager, Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { ISanitizer } from '@jupyterlab/apputils';
 import type { CommandRegistry } from '@lumino/commands';
+import { DebugConsoleCellExecutor } from './debug-console-executor';
+import { DebuggerCompletionProvider } from './debugger-completion-provider';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -70,6 +73,51 @@ function updateState(commands: CommandRegistry, debug: IDebugger): void {
     delete document.body.dataset.jpDebuggerStoppedThreads;
   }
   notifyCommands(commands);
+}
+
+function createDebugConsole(
+  contentFactory: ConsolePanel.IContentFactory,
+  editorServices: IEditorServices,
+  manager: ServiceManager.IManager,
+  consoleTracker: IConsoleTracker,
+  service: IDebugger
+) {
+  const id = 'jp-debug-console';
+
+  const rendermime = new RenderMimeRegistry({ initialFactories });
+
+  const debugConsoleExecutor = new DebugConsoleCellExecutor(service);
+
+  const tracker = new WidgetTracker<ConsolePanel>({
+    namespace: 'debugger/debug-console'
+  });
+
+  const consolePanel = new ConsolePanel({
+    manager,
+    name: 'Debug Console',
+    contentFactory,
+    rendermime,
+    executor: debugConsoleExecutor,
+    mimeTypeService: editorServices.mimeTypeService,
+    kernelPreference: { shouldStart: false, canStart: false }
+  });
+  consolePanel.title.label = 'Console';
+  consolePanel.id = id;
+
+  // Need underlying CodeConsole in executor
+  debugConsoleExecutor.codeConsole = consolePanel.console;
+
+  // Add a specific class to distinguish debug console from regular consoles
+  consolePanel.addClass('jp-DebugConsole');
+  consolePanel.console.addClass('jp-DebugConsole-widget');
+
+  // Add the console panel to the console tracker
+  void tracker.add(consolePanel);
+
+  // Set it as the current widget in the tracker
+  // consoleTracker.currentWidget = consolePanel;
+
+  return consolePanel;
 }
 
 /**
@@ -835,14 +883,23 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
   description: 'Initialize the debugger user interface.',
-  requires: [IDebugger, IDebuggerSidebar, IEditorServices, ITranslator],
+  requires: [
+    IDebugger,
+    IDebuggerSidebar,
+    IEditorServices,
+    ITranslator,
+    ConsolePanel.IContentFactory,
+    IConsoleTracker,
+    ICompletionProviderManager
+  ],
   optional: [
     ICommandPalette,
     IDebuggerSourceViewer,
     ILabShell,
     ILayoutRestorer,
     ILoggerRegistry,
-    ISettingRegistry
+    ISettingRegistry,
+    ISanitizer
   ],
   autoStart: true,
   activate: async (
@@ -851,12 +908,16 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar: IDebugger.ISidebar,
     editorServices: IEditorServices,
     translator: ITranslator,
+    consolePanelContentFactory: ConsolePanel.IContentFactory,
+    consoleTracker: IConsoleTracker,
+    completionManager: ICompletionProviderManager,
     palette: ICommandPalette | null,
     sourceViewer: IDebugger.ISourceViewer | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
     loggerRegistry: ILoggerRegistry | null,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    sanitizer: ISanitizer | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -882,20 +943,8 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
-    // get the mime type of the kernel language for the current debug session
-    const getMimeType = async (): Promise<string> => {
-      const kernel = service.session?.connection?.kernel;
-      if (!kernel) {
-        return '';
-      }
-      const info = (await kernel.info).language_info;
-      const name = info.name;
-      const mimeType =
-        editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
-      return mimeType;
-    };
-
-    const rendermime = new RenderMimeRegistry({ initialFactories });
+    // Track debug console widget for disposal
+    let debugConsoleWidget: ConsolePanel | null = null;
 
     commands.addCommand(CommandIDs.evaluate, {
       label: trans.__('Evaluate Code'),
@@ -903,36 +952,106 @@ const main: JupyterFrontEndPlugin<void> = {
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
-        const mimeType = await getMimeType();
-        const result = await Debugger.Dialogs.getCode({
-          title: trans.__('Evaluate Code'),
-          okLabel: trans.__('Evaluate'),
-          cancelLabel: trans.__('Cancel'),
-          mimeType,
-          contentFactory: new CodeCell.ContentFactory({
-            editorFactory: options =>
-              editorServices.factoryService.newInlineEditor(options)
-          }),
-          rendermime
-        });
-        const code = result.value;
-        if (!result.button.accept || !code) {
-          return;
+        // Dispose existing debug console if it exists
+        if (debugConsoleWidget) {
+          debugConsoleWidget.dispose();
+          debugConsoleWidget = null;
         }
-        const reply = await service.evaluate(code);
-        if (reply) {
-          const data = reply.result;
-          const path = service?.session?.connection?.path;
-          const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
 
-          if (logger) {
-            // print to log console of the notebook currently being debugged
-            logger.log({ type: 'text', data, level: logger.level });
-          } else {
-            // fallback to printing to devtools console
-            console.debug(data);
+        debugConsoleWidget = createDebugConsole(
+          consolePanelContentFactory,
+          editorServices,
+          app.serviceManager,
+          consoleTracker,
+          service
+        );
+
+        shell.add(debugConsoleWidget, 'main', {
+          mode: 'split-bottom',
+          activate: true,
+          type: 'Debugger console'
+        });
+
+        // Set up completion for the debug console
+        // This is needed because the debug console is not in the console tracker
+        // so the console extension doesn't automatically set up completion
+        const setupCompletion = async () => {
+          if (!debugConsoleWidget) return;
+
+          const completerContext = {
+            editor: debugConsoleWidget.console.promptCell?.editor ?? null,
+            session: debugConsoleWidget.console.sessionContext.session,
+            widget: debugConsoleWidget,
+            sanitizer: sanitizer ?? undefined
+          };
+
+          try {
+            await completionManager.updateCompleter(completerContext);
+            console.log('Debug console completion setup successful');
+
+            // Debug: Check if debugger completion provider is applicable
+            const debuggerProvider = new DebuggerCompletionProvider({
+              debuggerService: service,
+              translator: translator || nullTranslator
+            });
+            const isApplicable =
+              await debuggerProvider.isApplicable(completerContext);
+            console.log(
+              'Debugger completion provider applicable:',
+              isApplicable
+            );
+            console.log(
+              'Debugger has stopped threads:',
+              service.hasStoppedThreads()
+            );
+          } catch (error) {
+            console.error('Debug console completion setup failed:', error);
           }
-        }
+        };
+
+        // Set up completion initially
+        await setupCompletion();
+
+        // Also set up completion when prompt cell is created
+        debugConsoleWidget.console.promptCellCreated.connect(
+          async (codeConsole, cell) => {
+            if (!debugConsoleWidget) return;
+
+            const newContext = {
+              editor: cell.editor,
+              session: codeConsole.sessionContext.session,
+              widget: debugConsoleWidget,
+              sanitizer: sanitizer ?? undefined
+            };
+
+            try {
+              await completionManager.updateCompleter(newContext);
+              console.log(
+                'Debug console completion updated for new prompt cell'
+              );
+            } catch (error) {
+              console.error('Debug console completion update failed:', error);
+            }
+          }
+        );
+
+        // Set up completion when session changes
+        debugConsoleWidget.console.sessionContext.sessionChanged.connect(
+          async () => {
+            await setupCompletion();
+          }
+        );
+
+        // Add a command to manually invoke completion for debugging
+        app.commands.addCommand('debugger:invoke-completion', {
+          label: 'Invoke Debug Console Completion',
+          execute: () => {
+            if (debugConsoleWidget) {
+              console.log('Manually invoking completion for debug console');
+              completionManager.invoke(debugConsoleWidget.id);
+            }
+          }
+        });
       },
       describedBy: {
         args: {
@@ -1110,6 +1229,12 @@ const main: JupyterFrontEndPlugin<void> = {
       ) {
         labShell.collapseRight();
       }
+
+      // Dispose debug console when debugger is terminated
+      if (event.event === 'terminated' && debugConsoleWidget) {
+        debugConsoleWidget.dispose();
+        debugConsoleWidget = null;
+      }
     });
 
     service.sessionChanged.connect(_ => {
@@ -1187,6 +1312,34 @@ const main: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides debugger-based inline completions.
+ */
+const debuggerCompletions: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:completions',
+  description: 'Provides debugger-based inline completions.',
+  autoStart: true,
+  requires: [IDebugger, ICompletionProviderManager],
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    debuggerService: IDebugger,
+    completionManager: ICompletionProviderManager,
+    translator: ITranslator | null
+  ): void => {
+    // Create and register the debugger completion provider
+    const provider = new DebuggerCompletionProvider({
+      debuggerService: debuggerService,
+      translator: translator || nullTranslator
+    });
+
+    // Register the provider with the completion manager
+    completionManager.registerProvider(provider);
+
+    console.log('Debugger completion provider registered');
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1199,7 +1352,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
   sources,
   sourceViewer,
-  configuration
+  configuration,
+  debuggerCompletions
 ];
 
 export default plugins;
