@@ -25,6 +25,7 @@ export class ViewMenu extends RankedMenu implements IViewMenu {
     super(options);
     this.editorViewers = {
       toggleLineNumbers: new SemanticCommand(),
+      toggleMinimap: new SemanticCommand(),
       toggleMatchBrackets: new SemanticCommand(),
       toggleWordWrap: new SemanticCommand()
     };
@@ -49,6 +50,11 @@ export namespace IViewMenu {
      * A semantic command to show line numbers in the editor.
      */
     toggleLineNumbers: SemanticCommand;
+
+    /**
+     * A semantic command to show minmap in the editor.
+     */
+    toggleMinimap: SemanticCommand;
 
     /**
      * A semantic command to word-wrap the editor.
