@@ -4563,7 +4563,7 @@ function addCommands(
     isEnabled: args => {
       const enabled =
         (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
+        settings?.composite.windowingMode === 'full';
       return enabled;
     },
     isToggled: () => {
@@ -4573,7 +4573,7 @@ function addCommands(
     isVisible: args => {
       const visible =
         (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
+        settings?.composite.windowingMode === 'full';
       return visible;
     },
     describedBy: {
