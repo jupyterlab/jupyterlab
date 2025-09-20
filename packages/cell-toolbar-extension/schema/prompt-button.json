@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Cell Input Prompt Button",
+  "description": "The settings for input prompt button.",
+  "properties": {
+    "showButton": {
+      "title": "Show a button in the input prompt of each cell",
+      "description": "Show a button over the cell prompt when hovering a cell.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
