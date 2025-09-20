@@ -40,6 +40,7 @@ import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
+import { quickopenPlugin, quickopenProviderPlugin } from './quickopenplugin';
 import { settingsConnector, settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
 import { subshellsSettings } from './subshell-settings';
@@ -890,6 +891,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
   paletteRestorer,
   print,
+  quickopenPlugin,
+  quickopenProviderPlugin,
   resolver,
   runningSessionsStatus,
   subshellsSettings,
