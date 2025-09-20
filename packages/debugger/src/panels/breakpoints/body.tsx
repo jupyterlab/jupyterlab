@@ -20,9 +20,6 @@ export class BreakpointsBody extends ReactWidget {
     this.addClass('jp-DebuggerBreakpoints-body');
   }
 
-  /**
-   * Render the BreakpointsComponent.
-   */
   render(): JSX.Element {
     return <BreakpointsComponent model={this._model} />;
   }
@@ -35,6 +32,7 @@ export class BreakpointsBody extends ReactWidget {
  *
  * @param {object} props The component props.
  * @param props.model The model for the breakpoints.
+ * @returns A JSX element.
  */
 const BreakpointsComponent = ({
   model
@@ -68,12 +66,8 @@ const BreakpointsComponent = ({
 
   return (
     <>
-      {breakpoints.map(entry => (
-        <BreakpointCellComponent
-          key={entry[0]}
-          breakpoints={entry[1]}
-          model={model}
-        />
+      {breakpoints.map(([id, bps]) => (
+        <BreakpointCellComponent key={id} breakpoints={bps} model={model} />
       ))}
     </>
   );
@@ -85,6 +79,7 @@ const BreakpointsComponent = ({
  * @param {object} props The component props.
  * @param props.breakpoints The list of breakpoints.
  * @param props.model The model for the breakpoints.
+ * @returns A JSX element.
  */
 const BreakpointCellComponent = ({
   breakpoints,
@@ -92,23 +87,19 @@ const BreakpointCellComponent = ({
 }: {
   breakpoints: IDebugger.IBreakpoint[];
   model: IDebugger.Model.IBreakpoints;
-}): JSX.Element => {
-  return (
-    <>
-      {breakpoints
-        .sort((a, b) => {
-          return (a.line ?? 0) - (b.line ?? 0);
-        })
-        .map((breakpoint: IDebugger.IBreakpoint, index) => (
-          <BreakpointComponent
-            key={(breakpoint.source?.path ?? '') + index}
-            breakpoint={breakpoint}
-            model={model}
-          />
-        ))}
-    </>
-  );
-};
+}): JSX.Element => (
+  <>
+    {breakpoints
+      .sort((a, b) => (a.line ?? 0) - (b.line ?? 0))
+      .map((bp, idx) => (
+        <BreakpointComponent
+          key={(bp.source?.path ?? '') + idx}
+          breakpoint={bp}
+          model={model}
+        />
+      ))}
+  </>
+);
 
 /**
  * A React Component to display a single breakpoint.
@@ -116,6 +107,7 @@ const BreakpointCellComponent = ({
  * @param {object} props The component props.
  * @param props.breakpoint The breakpoint.
  * @param props.model The model for the breakpoints.
+ * @returns A JSX element.
  */
 const BreakpointComponent = ({
   breakpoint,
@@ -124,22 +116,19 @@ const BreakpointComponent = ({
   breakpoint: IDebugger.IBreakpoint;
   model: IDebugger.Model.IBreakpoints;
 }): JSX.Element => {
-  const moveToEndFirstCharIfSlash = (breakpointSourcePath: string): string => {
-    return breakpointSourcePath[0] === '/'
-      ? breakpointSourcePath.slice(1) + '/'
-      : breakpointSourcePath;
-  };
+  const display = model.getDisplayName(breakpoint);
+
   return (
     <div
-      className={'jp-DebuggerBreakpoint'}
-      onClick={(): void => model.clicked.emit(breakpoint)}
+      className="jp-DebuggerBreakpoint"
+      onClick={() => model.clicked.emit(breakpoint)}
       title={breakpoint.source?.path}
     >
-      <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
-      <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
-        {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
+      <span className="jp-DebuggerBreakpoint-marker">●</span>
+      <span className="jp-DebuggerBreakpoint-source jp-left-truncated">
+        {display}
       </span>
-      <span className={'jp-DebuggerBreakpoint-line'}>{breakpoint.line}</span>
+      <span className="jp-DebuggerBreakpoint-line">{breakpoint.line}</span>
     </div>
   );
 };
