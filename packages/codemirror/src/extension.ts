@@ -1070,7 +1070,10 @@ export namespace EditorExtensionRegistry {
             Completions: trans.__('Completions'),
             // @codemirror/lint
             Diagnostics: trans.__('Diagnostics'),
-            'No diagnostics': trans.__('No diagnostics')
+            'No diagnostics': trans.__('No diagnostics'),
+            // @jupyterlab/debugger
+            Breakpoint: trans.__('Breakpoint'),
+            'Selected breakpoint': trans.__('Selected breakpoint')
           },
           factory: () =>
             createConfigurableExtension<Record<string, string>>(value =>
