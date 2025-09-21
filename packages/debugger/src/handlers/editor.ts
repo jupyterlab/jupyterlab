@@ -405,16 +405,35 @@ export namespace EditorHandler {
    *
    * @param editor The editor to highlight.
    * @param line The line number.
+   * @param scrollLogicalPosition the position of the the widget after scroll, or false
+   * if no scroll is expected.
    */
   export function showCurrentLine(
     editor: CodeEditor.IEditor,
-    line: number
+    line: number,
+    scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
+
+    const effects: StateEffect<any>[] = [
+      _highlightEffect.of({ pos: [linePos] })
+    ];
+
+    if (scrollLogicalPosition) {
+      // getOffsetAt increases the line number before scrolling to it, because
+      // Jupyter uses 0-indexes line number while CM6 uses 1-indexes line number.
+      // In this case, the line number is 1-indexes as it comes from the debugProtocol
+      // stackFrame https://microsoft.github.io/debug-adapter-protocol/specification#Types_StackFrame,
+      // therefore we need to decrease it first.
+      const offset = cmEditor.getOffsetAt({ line: line - 1, column: 0 });
+      effects.push(
+        EditorView.scrollIntoView(offset, { y: scrollLogicalPosition })
+      );
+    }
     cmEditor.editor.dispatch({
-      effects: _highlightEffect.of({ pos: [linePos] })
+      effects: effects
     });
   }
 
