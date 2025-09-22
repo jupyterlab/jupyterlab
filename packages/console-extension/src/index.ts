@@ -1459,6 +1459,7 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
+
   const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
@@ -1485,7 +1486,9 @@ function activateConsoleCompleterService(
       manager.updateCompleter(newContext).catch(console.error);
     });
   };
+
   consoles.widgetAdded.connect(updateCompleter);
+
   manager.activeProvidersChanged.connect(() => {
     consoles.forEach(consoleWidget => {
       updateCompleter(undefined, consoleWidget).catch(e => console.error(e));

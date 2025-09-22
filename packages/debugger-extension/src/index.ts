@@ -1182,16 +1182,17 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     ICompletionProviderManager,
     ISanitizer
   ],
-  optional: [ILabShell],
+  optional: [ILabShell, ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
-    consoleTracker: IConsoleTracker,
+    consoles: IConsoleTracker,
     consolePanelContentFactory: ConsolePanel.IContentFactory,
     editorServices: IEditorServices,
-    completionManager: ICompletionProviderManager,
+    manager: ICompletionProviderManager,
     sanitizer: ISanitizer,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null
   ) => {
     const CommandIDs = Debugger.CommandIDs;
     let debugConsoleWidget: ConsolePanel | null = null;
@@ -1201,50 +1202,68 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       namespace: 'debugger-debug-console'
     });
 
-    // Set up completion for our debug console tracker
-    const setupCompletion = async (
-      sender: WidgetTracker<ConsolePanel>,
-      consolePanel: ConsolePanel
-    ) => {
+    // Add the debugger console completer command
+    app.commands.addCommand('debugger:invoke-console', {
+      label: 'Display the completion helper.',
+      execute: () => {
+        console.log(
+          'debugConsoleTracker.currentWidget',
+          debugConsoleTracker.currentWidget
+        );
+        const id =
+          debugConsoleTracker.currentWidget &&
+          debugConsoleTracker.currentWidget.id;
+
+        if (id) {
+          return manager.invoke(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+      console.log('updating completer');
       const completerContext = {
         editor: consolePanel.console.promptCell?.editor ?? null,
         session: consolePanel.console.sessionContext.session,
-        widget: consolePanel,
-        sanitizer: sanitizer ?? undefined
+        widget: consolePanel
       };
-
-      try {
-        await completionManager.updateCompleter(completerContext);
-        console.log('Debug console completion setup successful');
-
-        // Set up completion for new prompt cells
-        consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
-          const newContext = {
-            editor: cell.editor,
-            session: codeConsole.sessionContext.session,
-            widget: consolePanel,
-            sanitizer: sanitizer ?? undefined
-          };
-          completionManager.updateCompleter(newContext).catch(console.error);
-        });
-
-        // Set up completion for session changes
-        consolePanel.console.sessionContext.sessionChanged.connect(() => {
-          const newContext = {
-            editor: consolePanel.console.promptCell?.editor ?? null,
-            session: consolePanel.console.sessionContext.session,
-            widget: consolePanel,
-            sanitizer: sanitizer ?? undefined
-          };
-          completionManager.updateCompleter(newContext).catch(console.error);
-        });
-      } catch (error) {
-        console.error('Debug console completion setup failed:', error);
-      }
+      await manager.updateCompleter(completerContext);
+      consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
+        const newContext = {
+          editor: cell.editor,
+          session: codeConsole.sessionContext.session,
+          widget: consolePanel,
+          sanitzer: sanitizer
+        };
+        manager.updateCompleter(newContext).catch(console.error);
+      });
+      consolePanel.console.sessionContext.sessionChanged.connect(() => {
+        const newContext = {
+          editor: consolePanel.console.promptCell?.editor ?? null,
+          session: consolePanel.console.sessionContext.session,
+          widget: consolePanel,
+          sanitizer: sanitizer
+        };
+        manager.updateCompleter(newContext).catch(console.error);
+      });
     };
 
+    debugConsoleTracker.widgetAdded.connect(updateCompleter);
+
+    manager.activeProvidersChanged.connect(() => {
+      consoles.forEach(consoleWidget => {
+        updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
+      });
+    });
+
     // Connect to our tracker's widgetAdded signal
-    debugConsoleTracker.widgetAdded.connect(setupCompletion);
+    // debugConsoleTracker.widgetAdded.connect(setupCompletion);
 
     function createDebugConsole(): ConsolePanel {
       const id = 'jp-debug-console';
@@ -1283,7 +1302,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
-        console.log('fidfdfjdfjdhfjdhfjdhfjdhfjdhf');
+        console.log('fidfdfjdfjdhfjdhfjdhfjdhfjdhfhhhh');
         const { shell } = app;
 
         if (!service.hasStoppedThreads()) {
@@ -1319,6 +1338,16 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    // Register the completer schema
+    // if (settingRegistry) {
+    //   settingRegistry.load(debugConsole.id).catch(reason => {
+    //     console.error(
+    //       'Failed to load debug console completer settings.',
+    //       reason
+    //     );
+    //   });
+    // }
   }
 };
 

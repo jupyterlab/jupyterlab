@@ -1,0 +1,15 @@
+{
+    "title": "Debug console Completer",
+    "description": "Debug console completer settings.",
+    "jupyter.lab.shortcuts": [
+      {
+        "command": "debugger:invoke-console",
+        "keys": ["Tab"],
+        "selector": ".jp-CodeConsole-promptCell .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)"
+      }
+    ],
+    "properties": {},
+    "additionalProperties": false,
+    "type": "object"
+  }
+  
