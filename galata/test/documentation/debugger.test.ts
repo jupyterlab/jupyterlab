@@ -72,13 +72,12 @@ test.describe('Debugger', () => {
       .nth(2)
       .locator('span.cm-breakpoint-icon');
 
-    if ((await breakpointIcon.count()) > 0) {
-      expect(
-        await page.screenshot({
-          clip: { y: 100, x: 300, width: 300, height: 80 }
-        })
-      ).toMatchSnapshot('debugger_breakpoint.png');
-    }
+    await breakpointIcon.waitFor()
+    expect(
+      await page.screenshot({
+        clip: { y: 100, x: 300, width: 300, height: 80 }
+      })
+    ).toMatchSnapshot('debugger_breakpoint.png');
   });
 
   test('Highlight run cell button', async ({ page, tmpPath }) => {
