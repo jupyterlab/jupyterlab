@@ -1195,37 +1195,47 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     const CommandIDs = Debugger.CommandIDs;
-    let debugConsoleWidget: ConsolePanel | null = null;
+    // let debugConsoleWidget: ConsolePanel | null = null;
 
     // Create our own tracker for debug consoles
     const debugConsoleTracker = new WidgetTracker<ConsolePanel>({
       namespace: 'debugger-debug-console'
     });
 
-    // Add the debugger console completer command
-    app.commands.addCommand('debugger:invoke-console', {
-      label: 'Display the completion helper.',
-      execute: () => {
-        console.log(
-          'debugConsoleTracker.currentWidget',
-          debugConsoleTracker.currentWidget
-        );
-        const id =
-          debugConsoleTracker.currentWidget &&
-          debugConsoleTracker.currentWidget.id;
+    // ! first we make the console
+    const createDebugConsole = (): ConsolePanel => {
+      const id = 'jp-debug-console';
+      const rendermime = new RenderMimeRegistry({ initialFactories });
+      const debugExecutor = new DebugConsoleCellExecutor(service);
 
-        if (id) {
-          return manager.invoke(id);
-        }
-      },
-      describedBy: {
-        args: {
-          type: 'object',
-          properties: {}
-        }
-      }
-    });
+      const consolePanel = new ConsolePanel({
+        manager: app.serviceManager,
+        name: 'Debug Console',
+        contentFactory: consolePanelContentFactory,
+        rendermime,
+        executor: debugExecutor,
+        mimeTypeService: editorServices.mimeTypeService,
+        kernelPreference: { shouldStart: false, canStart: false }
+      });
+      consolePanel.title.label = 'Console';
+      consolePanel.id = id;
 
+      // Need underlying CodeConsole in executor
+      debugExecutor.codeConsole = consolePanel.console;
+
+      // Add a specific class to distinguish debug console from regular consoles
+      consolePanel.addClass('jp-DebugConsole');
+      consolePanel.console.addClass('jp-DebugConsole-widget');
+
+      // Add the console panel to our debug console tracker
+      void debugConsoleTracker.add(consolePanel);
+
+      return consolePanel;
+    };
+
+    const debugConsoleWidget = createDebugConsole();
+
+    // ! then we do teh compelter callbacks
     const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
       console.log('updating completer');
       const completerContext = {
@@ -1262,38 +1272,30 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       });
     });
 
-    // Connect to our tracker's widgetAdded signal
-    // debugConsoleTracker.widgetAdded.connect(setupCompletion);
+    // ! then we add commands
+    // Add the debugger console completer command
+    app.commands.addCommand('debugger:invoke-console', {
+      label: 'Display the completion helper.',
+      execute: () => {
+        console.log(
+          'debugConsoleTracker.currentWidget',
+          debugConsoleTracker.currentWidget
+        );
+        const id =
+          debugConsoleTracker.currentWidget &&
+          debugConsoleTracker.currentWidget.id;
 
-    function createDebugConsole(): ConsolePanel {
-      const id = 'jp-debug-console';
-      const rendermime = new RenderMimeRegistry({ initialFactories });
-      const debugExecutor = new DebugConsoleCellExecutor(service);
-
-      const consolePanel = new ConsolePanel({
-        manager: app.serviceManager,
-        name: 'Debug Console',
-        contentFactory: consolePanelContentFactory,
-        rendermime,
-        executor: debugExecutor,
-        mimeTypeService: editorServices.mimeTypeService,
-        kernelPreference: { shouldStart: false, canStart: false }
-      });
-      consolePanel.title.label = 'Console';
-      consolePanel.id = id;
-
-      // Need underlying CodeConsole in executor
-      debugExecutor.codeConsole = consolePanel.console;
-
-      // Add a specific class to distinguish debug console from regular consoles
-      consolePanel.addClass('jp-DebugConsole');
-      consolePanel.console.addClass('jp-DebugConsole-widget');
-
-      // Add the console panel to our debug console tracker
-      void debugConsoleTracker.add(consolePanel);
-
-      return consolePanel;
-    }
+        if (id) {
+          return manager.invoke(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
 
     // Add the evaluate command
     app.commands.addCommand(CommandIDs.evaluate, {
@@ -1305,36 +1307,35 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         console.log('fidfdfjdfjdhfjdhfjdhfjdhfjdhfhhhh');
         const { shell } = app;
 
-        if (!service.hasStoppedThreads()) {
-          return;
-        }
+        shell.add(debugConsoleWidget, 'main', {
+          mode: 'split-bottom',
+          activate: true,
+          type: 'Debugger console'
+        });
 
-        // TODO dispose good
-        if (debugConsoleWidget) {
-          debugConsoleWidget.dispose();
-        }
-
-        // Create debug console if it doesn't exist
-        if (!debugConsoleWidget) {
-          debugConsoleWidget = createDebugConsole();
-
-          shell.add(debugConsoleWidget, 'main', {
-            mode: 'split-bottom',
-            activate: true,
-            type: 'Debugger console'
-          });
-
-          // Activate the debug console
-          shell.activateById(debugConsoleWidget.id);
-        } else {
-          // Activate the existing debug console
-          shell.activateById(debugConsoleWidget.id);
-        }
+        // Activate the debug console
+        shell.activateById(debugConsoleWidget.id);
+        updateCompleter(undefined, debugConsoleWidget);
       },
       describedBy: {
         args: {
           type: 'object',
           properties: {}
+        }
+      }
+    });
+
+    // ! then we add keybindings
+
+    // Add Tab key event listener for debug console completion
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Tab') {
+        // Check if we're in a debug console
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.closest('.jp-DebugConsole')) {
+          console.log('Tab key pressed in debug console!');
+          event.preventDefault(); // Prevent default tab behavior
+          app.commands.execute('debugger:invoke-console');
         }
       }
     });
