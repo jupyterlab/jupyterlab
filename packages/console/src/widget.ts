@@ -334,6 +334,7 @@ export class CodeConsole extends Widget {
    * incomplete before attempting submission anyway. The default value is `250`.
    */
   async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
+    console.log('LEMME IN BRAH');
     if (this.sessionContext.session?.kernel?.status === 'dead') {
       return;
     }

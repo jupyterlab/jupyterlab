@@ -1267,7 +1267,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     debugConsoleTracker.widgetAdded.connect(updateCompleter);
 
     manager.activeProvidersChanged.connect(() => {
-      consoles.forEach(consoleWidget => {
+      debugConsoleTracker.forEach(consoleWidget => {
         updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
       });
     });
@@ -1287,6 +1287,44 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 
         if (id) {
           return manager.invoke(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    app.commands.addCommand('debugger:select-console', {
+      label: 'Select the completion suggestion.',
+      execute: () => {
+        console.log('just to be sure');
+        const id =
+          debugConsoleTracker.currentWidget &&
+          debugConsoleTracker.currentWidget.id;
+
+        if (id) {
+          return manager.select(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    // Add the debugger console execute command
+    app.commands.addCommand('debugger:execute-console', {
+      label: 'Execute the current line in debug console.',
+      execute: () => {
+        console.log('lslslslslslslslslslslslslslsl');
+        const currentWidget = debugConsoleTracker.currentWidget;
+        if (currentWidget && currentWidget.console) {
+          return currentWidget.console.execute(true);
         }
       },
       describedBy: {
@@ -1326,29 +1364,39 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     });
 
     // ! then we add keybindings
-
-    // Add Tab key event listener for debug console completion
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Tab') {
-        // Check if we're in a debug console
-        const activeElement = document.activeElement;
-        if (activeElement && activeElement.closest('.jp-DebugConsole')) {
-          console.log('Tab key pressed in debug console!');
-          event.preventDefault(); // Prevent default tab behavior
-          app.commands.execute('debugger:invoke-console');
-        }
-      }
+    app.commands.addKeyBinding({
+      command: 'debugger:select-console',
+      keys: ['Enter'],
+      selector:
+        '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-mod-completer-active'
     });
 
-    // Register the completer schema
-    // if (settingRegistry) {
-    //   settingRegistry.load(debugConsole.id).catch(reason => {
-    //     console.error(
-    //       'Failed to load debug console completer settings.',
-    //       reason
-    //     );
-    //   });
-    // }
+    app.commands.addKeyBinding({
+      command: 'debugger:invoke-console',
+      keys: ['Tab'],
+      selector:
+        '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-CodeConsole-promptCell .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)'
+    });
+
+    app.commands.addKeyBinding({
+      command: 'debugger:execute-console',
+      keys: ['Shift Enter'],
+      selector:
+        '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-CodeConsole-promptCell'
+    });
+
+    // Add Tab key event listener for debug console completion
+    // document.addEventListener('keydown', event => {
+    //   if (event.key === 'Tab') {
+    //     // Check if we're in a debug console
+    //     const activeElement = document.activeElement;
+    //     if (activeElement && activeElement.closest('.jp-DebugConsole')) {
+    //       console.log('Tab key pressed in debug console!');
+    //       event.preventDefault(); // Prevent default tab behavior
+    //       app.commands.execute('debugger:invoke-console');
+    //     }
+    //   }
+    // });
   }
 };
 
