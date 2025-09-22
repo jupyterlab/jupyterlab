@@ -1062,8 +1062,6 @@ const main: JupyterFrontEndPlugin<void> = {
       ) {
         labShell.collapseRight();
       }
-
-      // Debug console disposal is now handled by the debug console plugin
     });
 
     service.sessionChanged.connect(_ => {
@@ -1163,8 +1161,6 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
 
     // Register the provider with the completion manager
     completionManager.registerProvider(provider);
-
-    console.log('Debugger completion provider registered');
   }
 };
 
@@ -1195,14 +1191,13 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     const CommandIDs = Debugger.CommandIDs;
-    // let debugConsoleWidget: ConsolePanel | null = null;
 
     // Create our own tracker for debug consoles
     const debugConsoleTracker = new WidgetTracker<ConsolePanel>({
       namespace: 'debugger-debug-console'
     });
 
-    // ! first we make the console
+    // Create the console
     const createDebugConsole = (): ConsolePanel => {
       const id = 'jp-debug-console';
       const rendermime = new RenderMimeRegistry({ initialFactories });
@@ -1230,14 +1225,19 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       // Add the console panel to our debug console tracker
       void debugConsoleTracker.add(consolePanel);
 
+      service.eventMessage.connect((_, event): void => {
+        if (labShell && event.event === 'terminated') {
+          debugConsoleWidget.dispose();
+        }
+      });
+
       return consolePanel;
     };
 
     const debugConsoleWidget = createDebugConsole();
 
-    // ! then we do teh compelter callbacks
+    // Set up completer
     const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
-      console.log('updating completer');
       const completerContext = {
         editor: consolePanel.console.promptCell?.editor ?? null,
         session: consolePanel.console.sessionContext.session,
@@ -1272,15 +1272,10 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       });
     });
 
-    // ! then we add commands
-    // Add the debugger console completer command
-    app.commands.addCommand('debugger:invoke-console', {
+    // Add commands
+    app.commands.addCommand(CommandIDs.invokeConsole, {
       label: 'Display the completion helper.',
       execute: () => {
-        console.log(
-          'debugConsoleTracker.currentWidget',
-          debugConsoleTracker.currentWidget
-        );
         const id =
           debugConsoleTracker.currentWidget &&
           debugConsoleTracker.currentWidget.id;
@@ -1297,10 +1292,9 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    app.commands.addCommand('debugger:select-console', {
+    app.commands.addCommand(CommandIDs.selectConsole, {
       label: 'Select the completion suggestion.',
       execute: () => {
-        console.log('just to be sure');
         const id =
           debugConsoleTracker.currentWidget &&
           debugConsoleTracker.currentWidget.id;
@@ -1318,10 +1312,9 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     });
 
     // Add the debugger console execute command
-    app.commands.addCommand('debugger:execute-console', {
+    app.commands.addCommand(CommandIDs.executeConsole, {
       label: 'Execute the current line in debug console.',
       execute: () => {
-        console.log('lslslslslslslslslslslslslslsl');
         const currentWidget = debugConsoleTracker.currentWidget;
         if (currentWidget && currentWidget.console) {
           return currentWidget.console.execute(true);
@@ -1335,14 +1328,12 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    // Add the evaluate command
     app.commands.addCommand(CommandIDs.evaluate, {
       label: 'Evaluate Code',
       caption: 'Evaluate Code',
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
-        console.log('fidfdfjdfjdhfjdhfjdhfjdhfjdhfhhhh');
         const { shell } = app;
 
         shell.add(debugConsoleWidget, 'main', {
@@ -1363,40 +1354,27 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    // ! then we add keybindings
+    // Add the keybindings
     app.commands.addKeyBinding({
-      command: 'debugger:select-console',
+      command: CommandIDs.selectConsole,
       keys: ['Enter'],
       selector:
         '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-mod-completer-active'
     });
 
     app.commands.addKeyBinding({
-      command: 'debugger:invoke-console',
+      command: CommandIDs.invokeConsole,
       keys: ['Tab'],
       selector:
         '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-CodeConsole-promptCell .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)'
     });
 
     app.commands.addKeyBinding({
-      command: 'debugger:execute-console',
+      command: CommandIDs.executeConsole,
       keys: ['Shift Enter'],
       selector:
         '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-CodeConsole-promptCell'
     });
-
-    // Add Tab key event listener for debug console completion
-    // document.addEventListener('keydown', event => {
-    //   if (event.key === 'Tab') {
-    //     // Check if we're in a debug console
-    //     const activeElement = document.activeElement;
-    //     if (activeElement && activeElement.closest('.jp-DebugConsole')) {
-    //       console.log('Tab key pressed in debug console!');
-    //       event.preventDefault(); // Prevent default tab behavior
-    //       app.commands.execute('debugger:invoke-console');
-    //     }
-    //   }
-    // });
   }
 };
 

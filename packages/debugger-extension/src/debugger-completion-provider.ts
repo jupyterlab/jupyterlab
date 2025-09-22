@@ -20,7 +20,7 @@ import {
 export class DebuggerCompletionProvider implements ICompletionProvider {
   readonly identifier = 'DebuggerCompletionProvider';
   readonly name: string;
-  readonly rank = 1000; // Higher rank to prioritize debugger completions
+  readonly rank = 1000;
 
   constructor(protected options: DebuggerCompletionProvider.IOptions) {
     const translator = options.translator || nullTranslator;
@@ -45,11 +45,6 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     context: ICompletionContext,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply> {
-    // Check if debugger has stopped threads (required for evaluation)
-    if (!this._debuggerService.hasStoppedThreads()) {
-      return { start: 0, end: 0, items: [] };
-    }
-
     let items: CompletionHandler.ICompletionItem[] = [];
     let parsedResult;
 
@@ -133,7 +128,7 @@ def funcToEval(code, cursor_pos):
       let correctedMatches = matches.replace(/'/g, '"');
 
       // TODO - why is the reply truncated????
-      // Remove various ellipses patterns that cause JSON parsing issues
+      // Remove ellipses that cause JSON parsing issues
       correctedMatches = correctedMatches.replace(/, \.\.\./g, '');
 
       try {

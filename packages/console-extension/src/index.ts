@@ -461,7 +461,6 @@ async function activateConsole(
   /**
    * Create a console for a given path.
    */
-  // ! LOOKING HERE TIGHT NOFJFHJFH
   async function createConsole(options: ICreateOptions): Promise<ConsolePanel> {
     await manager.ready;
 
@@ -1418,11 +1417,9 @@ function activateConsoleCompleterService(
   const trans = (translator ?? nullTranslator).load('jupyterlab');
   const sanitizer = appSanitizer ?? new Sanitizer();
 
-  // ! issue is no current widget
   app.commands.addCommand(CommandIDs.invokeCompleter, {
     label: trans.__('Display the completion helper.'),
     execute: () => {
-      console.log('consoles.currentWidget', consoles.currentWidget);
       const id = consoles.currentWidget && consoles.currentWidget.id;
 
       if (id) {
@@ -1459,7 +1456,6 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-
   const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
@@ -1486,9 +1482,7 @@ function activateConsoleCompleterService(
       manager.updateCompleter(newContext).catch(console.error);
     });
   };
-
   consoles.widgetAdded.connect(updateCompleter);
-
   manager.activeProvidersChanged.connect(() => {
     consoles.forEach(consoleWidget => {
       updateCompleter(undefined, consoleWidget).catch(e => console.error(e));

@@ -127,6 +127,12 @@ export namespace Debugger {
 
     export const copyToGlobals = 'debugger:copy-to-globals';
 
+    export const invokeConsole = 'debugger:invoke-console';
+
+    export const selectConsole = 'debugger:select-console';
+
+    export const executeConsole = 'debugger:execute-console';
+
     export const openSource = 'debugger:open-source';
   }
 

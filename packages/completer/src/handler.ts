@@ -267,7 +267,6 @@ export class CompletionHandler implements IDisposable {
    *    even though the completer is not available.
    */
   protected onSelectionsChanged(): void {
-    console.log('knock knock');
     const model = this.completer.model;
     const editor = this._editor;
 
@@ -400,7 +399,6 @@ export class CompletionHandler implements IDisposable {
 
     // Completer is active.
     this._tabCompleterActive = true;
-    console.log('ahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh');
     this._editor?.host.classList.add(COMPLETER_ACTIVE_CLASS);
   }
 
