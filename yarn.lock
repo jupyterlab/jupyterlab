@@ -2543,6 +2543,7 @@ __metadata:
     "@jupyterlab/docregistry": ^4.5.0-alpha.3
     "@jupyterlab/notebook": ^4.5.0-alpha.3
     "@jupyterlab/observables": ^5.5.0-alpha.3
+    "@jupyterlab/rendermime-interfaces": ^3.13.0-alpha.3
     "@jupyterlab/testing": ^4.5.0-alpha.3
     "@jupyterlab/translation": ^4.5.0-alpha.3
     "@jupyterlab/ui-components": ^4.5.0-alpha.3

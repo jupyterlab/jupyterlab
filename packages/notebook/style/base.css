@@ -107,7 +107,7 @@
   color: var(--jp-warn-color1);
 }
 
-.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputPrompt::before {
+.jp-Notebook .jp-Cell.jp-mod-dirty .jp-InputArea-prompt-indicator::before {
   color: var(--jp-warn-color1);
   content: '•';
 }

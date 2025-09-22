@@ -3,11 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { PanelLayout } from '@lumino/widgets';
-
-import { Widget } from '@lumino/widgets';
-
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import { ToolbarButton } from '@jupyterlab/ui-components';
+
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { ICellModel } from './model';
 
@@ -20,6 +20,16 @@ const INPUT_AREA_CLASS = 'jp-InputArea';
  * The class name added to the prompt area of cell.
  */
 const INPUT_AREA_PROMPT_CLASS = 'jp-InputArea-prompt';
+
+/**
+ * The class name added to the prompt area's text indicator
+ */
+const INPUT_AREA_PROMPT_INDICATOR_CLASS = 'jp-InputArea-prompt-indicator';
+
+/**
+ * The class name added to the prompt area's button
+ */
+const INPUT_AREA_PROMPT_BUTTON_CLASS = 'jp-InputArea-prompt-button';
 
 /**
  * The class name added to OutputPrompt.
@@ -88,6 +98,13 @@ export class InputArea extends Widget {
    */
   get editor(): CodeEditor.IEditor {
     return this._editor.editor;
+  }
+
+  /**
+   * Get the prompt widget of the cell.
+   */
+  get prompt(): IInputPrompt {
+    return this._prompt;
   }
 
   /**
@@ -247,14 +264,10 @@ export namespace InputArea {
   }
 }
 
-/** ****************************************************************************
- * InputPrompt
- ******************************************************************************/
-
 /**
- * The interface for the input prompt.
+ * The interface for the input prompt indicator.
  */
-export interface IInputPrompt extends Widget {
+export interface IInputPromptIndicator extends Widget {
   /**
    * The execution count of the prompt.
    */
@@ -262,15 +275,45 @@ export interface IInputPrompt extends Widget {
 }
 
 /**
- * The default input prompt implementation.
+ * The interface for the input prompt.
  */
+export interface IInputPrompt extends IInputPromptIndicator {
+  /**
+   * The prompt button.
+   */
+  button?: ToolbarButton;
+}
+
 export class InputPrompt extends Widget implements IInputPrompt {
   /*
-   * Create an output prompt widget.
+   * Create an input prompt widget.
    */
   constructor() {
     super();
     this.addClass(INPUT_PROMPT_CLASS);
+    const layout = (this.layout = new PanelLayout());
+    const promptIndicator = (this._promptIndicator =
+      new InputPromptIndicator());
+    layout.addWidget(promptIndicator);
+  }
+
+  /**
+   * The prompt button.
+   */
+  get button(): ToolbarButton | undefined {
+    return this._button;
+  }
+  set button(button: ToolbarButton | undefined) {
+    this._button?.dispose();
+    this._button = button;
+
+    if (this._button) {
+      this._button.node.classList.add(INPUT_AREA_PROMPT_BUTTON_CLASS);
+      (this.layout as PanelLayout).addWidget(this._button);
+      this._promptIndicator.addClass('toggleable');
+    } else {
+      this._promptIndicator.removeClass('toggleable');
+    }
   }
 
   /**
@@ -281,10 +324,38 @@ export class InputPrompt extends Widget implements IInputPrompt {
   }
   set executionCount(value: string | null) {
     this._executionCount = value;
-    if (value === null) {
-      this.node.textContent = ' ';
+    this._promptIndicator.executionCount = value;
+  }
+
+  private _executionCount: string | null = null;
+  private _promptIndicator: InputPromptIndicator;
+  private _button: ToolbarButton | undefined;
+}
+
+export class InputPromptIndicator
+  extends Widget
+  implements IInputPromptIndicator
+{
+  /*
+   * Create an input prompt widget.
+   */
+  constructor() {
+    super();
+    this.addClass(INPUT_AREA_PROMPT_INDICATOR_CLASS);
+  }
+
+  /**
+   * The execution count for the prompt.
+   */
+  get executionCount(): string | null {
+    return this._executionCount;
+  }
+  set executionCount(value: string | null) {
+    this._executionCount = value;
+    if (value) {
+      this.node.textContent = `[${value}]:`;
     } else {
-      this.node.textContent = `[${value || ' '}]:`;
+      this.node.textContent = '[ ]:';
     }
   }
 
