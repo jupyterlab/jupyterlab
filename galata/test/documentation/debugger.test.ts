@@ -72,7 +72,7 @@ test.describe('Debugger', () => {
       .nth(2)
       .locator('span.cm-breakpoint-icon');
 
-    await breakpointIcon.waitFor()
+    await breakpointIcon.waitFor();
     expect(
       await page.screenshot({
         clip: { y: 100, x: 300, width: 300, height: 80 }
