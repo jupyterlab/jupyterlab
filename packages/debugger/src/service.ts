@@ -597,7 +597,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    await this.session.sendRequest('configurationDone', {});
   }
 
   /**
