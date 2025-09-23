@@ -1139,7 +1139,7 @@ const main: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that provides debugger-based inline completions.
+ * A plugin that provides debugger-based completions.
  */
 const debuggerCompletions: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:completions',
@@ -1212,7 +1212,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         mimeTypeService: editorServices.mimeTypeService,
         kernelPreference: { shouldStart: false, canStart: false }
       });
-      consolePanel.title.label = 'Console';
+      consolePanel.title.label = 'Debug Console';
       consolePanel.id = id;
 
       // Need underlying CodeConsole in executor

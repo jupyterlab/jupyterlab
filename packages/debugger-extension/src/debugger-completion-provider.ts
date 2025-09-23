@@ -57,7 +57,7 @@ from IPython.core.completer import rectify_completions as _rectify_completions
 from IPython.core.completer import IPCompleter
 _EXPERIMENTAL_KEY_NAME = "_jupyter_types_experimental"
 
-def funcToEval(code, cursor_pos):
+def getCompletionsForDebugger(code, cursor_pos):
     ip = get_ipython()
 
     # Access the current debugger frame
@@ -115,8 +115,11 @@ def funcToEval(code, cursor_pos):
       // create method
       await this._debuggerService.evaluate(pyCode);
 
-      const evalCode = `funcToEval(${JSON.stringify(text)}, ${offset})`;
-      const evalReply = await this._debuggerService.evaluate(evalCode);
+      const debuggerCompletions = `getCompletionsForDebugger(${JSON.stringify(
+        text
+      )}, ${offset})`;
+      const evalReply =
+        await this._debuggerService.evaluate(debuggerCompletions);
 
       if (!evalReply) {
         return { start: 0, end: 0, items: [] };
@@ -124,7 +127,7 @@ def funcToEval(code, cursor_pos):
 
       const matches = evalReply.result;
 
-      // Replace single quotes with double quotes in matches string
+      // Replace single quotes with double quotes in matches string for JSON parsing
       let correctedMatches = matches.replace(/'/g, '"');
 
       // TODO - why is the reply truncated????
@@ -139,13 +142,13 @@ def funcToEval(code, cursor_pos):
       }
 
       // Parse completions into completion items
-      const kernelCompletions: CompletionHandler.ICompletionItem[] =
+      const parsedCompletions: CompletionHandler.ICompletionItem[] =
         parsedResult.matches.map((match: string) => ({
           label: match,
           insertText: match
         }));
 
-      items = [...kernelCompletions];
+      items = [...parsedCompletions];
     } catch (error) {
       console.warn('Error fetching debugger completions:', error);
       // Return empty items on error
