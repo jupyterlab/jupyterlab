@@ -1197,13 +1197,16 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       namespace: 'debugger-debug-console'
     });
 
+    // Global debug console widget variable for toggling
+    let debugConsoleWidget: ConsolePanel | null = null;
+
     // Create the console
-    const createDebugConsole = (): ConsolePanel => {
-      const id = 'jp-debug-console';
+    const createDebugConsole = () => {
+      // const id = 'jp-debug-console';
       const rendermime = new RenderMimeRegistry({ initialFactories });
       const debugExecutor = new DebugConsoleCellExecutor(service);
 
-      const consolePanel = new ConsolePanel({
+      debugConsoleWidget = new ConsolePanel({
         manager: app.serviceManager,
         name: 'Debug Console',
         contentFactory: consolePanelContentFactory,
@@ -1212,29 +1215,56 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         mimeTypeService: editorServices.mimeTypeService,
         kernelPreference: { shouldStart: false, canStart: false }
       });
-      consolePanel.title.label = 'Debug Console';
-      consolePanel.id = id;
+
+      // debugConsoleWidget.id = id;
+      debugConsoleWidget.title.label = 'Debug Console';
+      debugConsoleWidget.title.icon = Debugger.Icons.evaluateIcon;
 
       // Need underlying CodeConsole in executor
-      debugExecutor.codeConsole = consolePanel.console;
+      debugExecutor.codeConsole = debugConsoleWidget.console;
 
       // Add a specific class to distinguish debug console from regular consoles
-      consolePanel.addClass('jp-DebugConsole');
-      consolePanel.console.addClass('jp-DebugConsole-widget');
+      debugConsoleWidget.addClass('jp-DebugConsole');
+      debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
 
-      // Add the console panel to our debug console tracker
-      void debugConsoleTracker.add(consolePanel);
-
+      // Close console when debugger is terminated
       service.eventMessage.connect((_, event): void => {
         if (labShell && event.event === 'terminated') {
-          debugConsoleWidget.dispose();
+          debugConsoleWidget?.dispose();
         }
       });
 
-      return consolePanel;
-    };
+      app.shell.add(debugConsoleWidget, 'main', {
+        mode: 'split-bottom',
+        activate: true,
+        type: 'Debugger console'
+      });
 
-    const debugConsoleWidget = createDebugConsole();
+      const notifyCommands = () => {
+        app.commands.notifyCommandChanged(CommandIDs.evaluate);
+        app.commands.notifyCommandChanged(CommandIDs.executeConsole);
+        app.commands.notifyCommandChanged(CommandIDs.invokeConsole);
+        app.commands.notifyCommandChanged(CommandIDs.selectConsole);
+      };
+
+      debugConsoleWidget.disposed.connect(() => {
+        debugConsoleWidget = null;
+      });
+
+      app.shell.add(debugConsoleWidget, 'main', {
+        mode: 'split-bottom',
+        activate: true,
+        type: 'Debugger console'
+      });
+
+      void debugConsoleTracker.add(debugConsoleWidget);
+      app.shell.activateById(debugConsoleWidget.id);
+
+      updateCompleter(undefined, debugConsoleWidget);
+      debugConsoleWidget?.update();
+
+      notifyCommands();
+    };
 
     // Set up completer
     const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
@@ -1314,10 +1344,15 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     // Add the debugger console execute command
     app.commands.addCommand(CommandIDs.executeConsole, {
       label: 'Execute the current line in debug console.',
-      execute: () => {
+      execute: async () => {
         const currentWidget = debugConsoleTracker.currentWidget;
         if (currentWidget && currentWidget.console) {
-          return currentWidget.console.execute(true);
+          await currentWidget.console.execute(true);
+          // Ensure focus stays on the console prompt after execution
+          const promptCell = currentWidget.console.promptCell;
+          if (promptCell && promptCell.editor) {
+            promptCell.editor.focus();
+          }
         }
       },
       describedBy: {
@@ -1334,17 +1369,14 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
-        const { shell } = app;
-
-        shell.add(debugConsoleWidget, 'main', {
-          mode: 'split-bottom',
-          activate: true,
-          type: 'Debugger console'
-        });
-
-        // Activate the debug console
-        shell.activateById(debugConsoleWidget.id);
-        updateCompleter(undefined, debugConsoleWidget);
+        if (debugConsoleWidget) {
+          debugConsoleWidget.dispose();
+        } else {
+          createDebugConsole();
+        }
+      },
+      isToggled: () => {
+        return debugConsoleWidget !== null;
       },
       describedBy: {
         args: {
