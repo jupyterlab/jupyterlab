@@ -1279,7 +1279,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
           editor: cell.editor,
           session: codeConsole.sessionContext.session,
           widget: consolePanel,
-          sanitzer: sanitizer
+          sanitizer: sanitizer
         };
         manager.updateCompleter(newContext).catch(console.error);
       });

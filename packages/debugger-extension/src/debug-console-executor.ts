@@ -79,17 +79,17 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
 
     const code = cell.model.sharedModel.getSource();
     const executionCount = cell.model.sharedModel.execution_count;
-    const ouputDisplayData = await this.evaluateWithDebugger({
+    const outputDisplayData = await this.evaluateWithDebugger({
       code,
       executionCount
     });
 
-    if (!ouputDisplayData) {
+    if (!outputDisplayData) {
       console.warn('Could not display output data');
       return false;
     }
 
-    cell.model.outputs.add(ouputDisplayData);
+    cell.model.outputs.add(outputDisplayData);
     return true;
   }
 }
