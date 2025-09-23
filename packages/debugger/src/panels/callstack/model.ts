@@ -92,11 +92,11 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
         if (codeId && codeId === frame.source?.path) {
           if (isCodeCellModel(cell.model)) {
             if (cell.model.executionState === 'running') {
-              display = `[*]`;
+              display = `Cell [*]`;
             } else if (cell.model.executionCount === null) {
-              display = `[ ]`;
+              display = `Cell [ ]`;
             } else {
-              display = `[${cell.model.executionCount}]`;
+              display = `Cell [${cell.model.executionCount}]`;
             }
           }
         }

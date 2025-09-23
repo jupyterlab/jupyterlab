@@ -196,7 +196,7 @@ const BreakpointComponent = ({
         )}
       </span>
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
-        {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
+        {display}
       </span>
       <span className="jp-DebuggerBreakpoint-line">{breakpoint.line}</span>
     </div>
