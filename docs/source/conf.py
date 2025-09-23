@@ -101,9 +101,6 @@ exclude_patterns = [
     "api/media/*.md",
 ]
 
-linkcheck_ignore = [r"https://www\.npmjs\.com/search\?q=keywords:jupyterlab-extension"]
-
-
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
