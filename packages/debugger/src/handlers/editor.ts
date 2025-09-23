@@ -16,6 +16,7 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
 import {
   Compartment,
   Prec,
+  Range,
   RangeSet,
   StateEffect,
   StateEffectType,
@@ -31,6 +32,10 @@ import {
 } from '@codemirror/view';
 
 import { IDebugger } from '../tokens';
+import {
+  breakpointIcon,
+  selectedBreakpointIcon
+} from '@jupyterlab/ui-components';
 
 /**
  * The class name added to the current line.
@@ -65,7 +70,8 @@ export class EditorHandler implements IDisposable {
     this._editorMonitor.activityStopped.connect(() => {
       this._sendEditorBreakpoints();
     }, this);
-
+    this._selectedBreakpoint =
+      this._debuggerService.model.breakpoints.selectedBreakpoint;
     this._debuggerService.model.breakpoints.changed.connect(async () => {
       const editor = this.editor;
       if (!editor || editor.isDisposed) {
@@ -82,6 +88,13 @@ export class EditorHandler implements IDisposable {
       this._addBreakpointsToEditor();
     });
 
+    this._debuggerService.model.breakpoints.selectedChanged.connect(
+      (_, breakpoint) => {
+        this._selectedBreakpoint = breakpoint;
+        this._addBreakpointsToEditor();
+      }
+    );
+
     this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
       const editor = this.editor;
       if (editor) {
@@ -89,8 +102,14 @@ export class EditorHandler implements IDisposable {
       }
     });
 
-    this._breakpointEffect = StateEffect.define<{ pos: number[] }>({
-      map: (value, mapping) => ({ pos: value.pos.map(v => mapping.mapPos(v)) })
+    this._breakpointEffect = StateEffect.define<
+      { pos: number; selected: boolean }[]
+    >({
+      map: (value, mapping) =>
+        value.map(v => ({
+          pos: mapping.mapPos(v.pos),
+          selected: v.selected
+        }))
     });
 
     this._breakpointState = StateField.define<RangeSet<GutterMarker>>({
@@ -98,21 +117,27 @@ export class EditorHandler implements IDisposable {
         return RangeSet.empty;
       },
       update: (breakpoints, transaction) => {
-        breakpoints = breakpoints.map(transaction.changes);
+        let hasEffect = false;
+        let decorations: Range<GutterMarker> | readonly Range<GutterMarker>[] =
+          [];
+
         for (let ef of transaction.effects) {
           if (ef.is(this._breakpointEffect)) {
-            let e = ef as StateEffect<{ pos: number[] }>;
-            if (e.value.pos.length) {
-              breakpoints = breakpoints.update({
-                add: e.value.pos.map(v => Private.breakpointMarker.range(v)),
-                sort: true
-              });
-            } else {
-              breakpoints = RangeSet.empty;
-            }
+            hasEffect = true;
+            decorations = ef.value.map(({ pos, selected }) => {
+              const marker = selected
+                ? Private.selectedBreakpointMarker
+                : Private.breakpointMarker;
+              return marker.range(pos);
+            });
           }
         }
-        return breakpoints;
+
+        if (hasEffect) {
+          return RangeSet.of(decorations, true);
+        }
+
+        return breakpoints.map(transaction.changes);
       }
     });
 
@@ -304,12 +329,18 @@ export class EditorHandler implements IDisposable {
     const breakpoints = this._getBreakpoints();
 
     this._clearGutter(editor);
-    const breakpointPos = breakpoints.map(b => {
-      return editor.state.doc.line(b.line!).from;
+
+    const selectedLine = this._selectedBreakpoint?.line;
+    const selectedPath = this._selectedBreakpoint?.source?.path;
+    const breakpointData = breakpoints.map(b => {
+      const pos = editor.state.doc.line(b.line!).from;
+      const selected =
+        b.line! === selectedLine && b.source?.path === selectedPath;
+      return { pos, selected };
     });
 
     editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: breakpointPos })
+      effects: this._breakpointEffect.of(breakpointData)
     });
   }
 
@@ -334,7 +365,7 @@ export class EditorHandler implements IDisposable {
 
     const view = (editor as CodeMirrorEditor).editor;
     view.dispatch({
-      effects: this._breakpointEffect.of({ pos: [] })
+      effects: this._breakpointEffect.of([])
     });
   }
 
@@ -352,7 +383,9 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _debuggerService: IDebugger;
   private _editor: () => CodeEditor.IEditor | null;
-  private _breakpointEffect: StateEffectType<{ pos: number[] }>;
+  private _breakpointEffect: StateEffectType<
+    { pos: number; selected: boolean }[]
+  >;
   private _breakpointState: StateField<RangeSet<GutterMarker>>;
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
@@ -360,6 +393,7 @@ export class EditorHandler implements IDisposable {
   private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
   private _path: string;
   private _src: ISharedText;
+  private _selectedBreakpoint: IDebugger.IBreakpoint | null;
 }
 
 /**
@@ -405,16 +439,35 @@ export namespace EditorHandler {
    *
    * @param editor The editor to highlight.
    * @param line The line number.
+   * @param scrollLogicalPosition the position of the the widget after scroll, or false
+   * if no scroll is expected.
    */
   export function showCurrentLine(
     editor: CodeEditor.IEditor,
-    line: number
+    line: number,
+    scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
+
+    const effects: StateEffect<any>[] = [
+      _highlightEffect.of({ pos: [linePos] })
+    ];
+
+    if (scrollLogicalPosition) {
+      // getOffsetAt increases the line number before scrolling to it, because
+      // Jupyter uses 0-indexes line number while CM6 uses 1-indexes line number.
+      // In this case, the line number is 1-indexes as it comes from the debugProtocol
+      // stackFrame https://microsoft.github.io/debug-adapter-protocol/specification#Types_StackFrame,
+      // therefore we need to decrease it first.
+      const offset = cmEditor.getOffsetAt({ line: line - 1, column: 0 });
+      effects.push(
+        EditorView.scrollIntoView(offset, { y: scrollLogicalPosition })
+      );
+    }
     cmEditor.editor.dispatch({
-      effects: _highlightEffect.of({ pos: [linePos] })
+      effects: effects
     });
   }
 
@@ -442,8 +495,32 @@ namespace Private {
    * Create a marker DOM element for a breakpoint.
    */
   export const breakpointMarker = new (class extends GutterMarker {
-    toDOM() {
-      const marker = document.createTextNode('●');
+    toDOM(view: EditorView) {
+      const marker = document.createElement('span');
+      marker.className = 'cm-breakpoint-gutter';
+      marker.ariaLabel = view.state.phrase('Breakpoint');
+
+      const iconNode = breakpointIcon.element({
+        tag: 'span',
+        className: 'cm-breakpoint-icon'
+      });
+
+      marker.appendChild(iconNode);
+      return marker;
+    }
+  })();
+
+  export const selectedBreakpointMarker = new (class extends GutterMarker {
+    toDOM(view: EditorView) {
+      const marker = document.createElement('span');
+      marker.className = 'cm-breakpoint-gutter';
+      marker.ariaLabel = view.state.phrase('Selected breakpoint');
+      const iconNode = selectedBreakpointIcon.element({
+        tag: 'span',
+        className: 'cm-selected-breakpoint-icon'
+      });
+
+      marker.appendChild(iconNode);
       return marker;
     }
   })();

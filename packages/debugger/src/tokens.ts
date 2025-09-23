@@ -856,6 +856,16 @@ export namespace IDebugger {
       readonly restored: ISignal<this, void>;
 
       /**
+       * Signal emitted when the breakpoints are restored.
+       */
+      readonly selectedChanged: Signal<this, IDebugger.IBreakpoint>;
+
+      /**
+       * Selected breakpoint
+       */
+      selectedBreakpoint: IDebugger.IBreakpoint;
+
+      /**
        * Get the breakpoints for a given id (path).
        *
        * @param id The code id (path).
