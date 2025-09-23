@@ -4,7 +4,7 @@
 import { ISignal, Signal } from '@lumino/signaling';
 import { IDebugger } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { ICodeCellModel } from '@jupyterlab/cells';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 /**
  * A model for a list of breakpoints.
@@ -91,10 +91,15 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
         const codeId = this.config?.getCodeId(code, kernelName);
 
         if (codeId && codeId === breakpoint.source?.path) {
-          const codeCell = cell.model as ICodeCellModel;
-          if (codeCell.executionState === 'running') display = `Cell [*]`;
-          else if (codeCell.executionCount === null) display = `Cell [ ]`;
-          else display = `Cell [${codeCell.executionCount}]`;
+          if (isCodeCellModel(cell.model)) {
+            if (cell.model.executionState === 'running') {
+              display = `[*]`;
+            } else if (cell.model.executionCount === null) {
+              display = `[ ]`;
+            } else {
+              display = `[${cell.model.executionCount}]`;
+            }
+          }
         }
       });
     });
