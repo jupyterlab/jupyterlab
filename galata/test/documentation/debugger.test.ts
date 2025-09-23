@@ -64,6 +64,15 @@ test.describe('Debugger', () => {
     // Wait for breakpoint to finish appearing
     await page.waitForTimeout(150);
 
+    const breakpointIcon = page
+      .locator('.jp-NotebookPanel-notebook')
+      .first()
+      .locator('.jp-Cell[data-windowed-list-index="0"]')
+      .locator('.cm-gutter.cm-breakpoint-gutter .cm-gutterElement')
+      .nth(2)
+      .locator('span.cm-breakpoint-icon');
+
+    await breakpointIcon.waitFor();
     expect(
       await page.screenshot({
         clip: { y: 100, x: 300, width: 300, height: 80 }
