@@ -2015,10 +2015,8 @@ function activateNotebookHandler(
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
+    widget.content.scrollbar = factory.notebookConfig.showMinimap;
 
-    widget.revealed.then(() => {
-      widget.content.scrollbar = factory.notebookConfig.showMinimap;
-    });
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
@@ -2033,9 +2031,7 @@ function activateNotebookHandler(
   function updateTracker(options: NotebookPanel.IConfig): void {
     tracker.forEach(widget => {
       widget.setConfig(options);
-      widget.revealed.then(() => {
-        widget.content.scrollbar = options.notebookConfig.showMinimap;
-      });
+      widget.content.scrollbar = options.notebookConfig.showMinimap;
     });
   }
 
