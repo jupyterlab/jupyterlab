@@ -460,7 +460,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else if (this.isStarted) {
-      this._clearModel();
+      this._model.callstack.frames = [];
       this._clearSignals();
     }
 

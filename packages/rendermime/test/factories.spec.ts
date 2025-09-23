@@ -321,6 +321,53 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe(source);
       });
 
+      it.each([
+        [
+          '<a href="test.py">link</a>',
+          '<a href="test.py?attribute=href&amp;tag=a" rel="noopener" target="_blank">link</a>'
+        ],
+        [
+          '<img src="image.png">',
+          '<img src="data:image.png?attribute=src&amp;tag=img" alt="Image">'
+        ],
+        ['<img src="data:image">', '<img src="data:image" alt="Image">']
+      ])(
+        'should use resolver for URLs and pass the correct URL context',
+        async (source, expected) => {
+          const f = markdownRendererFactory;
+          const mimeType = 'text/markdown';
+          const model = createModel(mimeType, source);
+          const knownPaths = ['test.py', 'image.png'];
+          const w = f.createRenderer({
+            mimeType,
+            ...defaultOptions,
+            markdownParser,
+            resolver: {
+              resolveUrl: async (
+                url: string,
+                options: IRenderMime.IResolveUrlContext
+              ) => {
+                if (options.tag === 'img') {
+                  // using data: protocol in test to prevent getting cache buster addition
+                  url = 'data:' + url;
+                }
+                return (
+                  url + `?attribute=${options.attribute}&tag=${options.tag}`
+                );
+              },
+              isLocal: (url: string) => {
+                return knownPaths.includes(url);
+              },
+              getDownloadUrl: (url: string) => {
+                return url;
+              }
+            }
+          });
+          await w.renderModel(model);
+          expect(w.node.innerHTML).toBe(expected);
+        }
+      );
+
       it('should be re-renderable', async () => {
         const f = markdownRendererFactory;
         const source = '<p>hello</p>';
