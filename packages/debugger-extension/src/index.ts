@@ -1176,7 +1176,8 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     ConsolePanel.IContentFactory,
     IEditorServices,
     ICompletionProviderManager,
-    ISanitizer
+    ISanitizer,
+    ITranslator
   ],
   optional: [ILabShell, ISettingRegistry],
   activate: (
@@ -1187,10 +1188,12 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     editorServices: IEditorServices,
     manager: ICompletionProviderManager,
     sanitizer: ISanitizer,
+    translator: ITranslator,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null
   ) => {
     const CommandIDs = Debugger.CommandIDs;
+    const trans = translator.load('jupyterlab');
 
     // Create our own tracker for debug consoles
     const debugConsoleTracker = new WidgetTracker<ConsolePanel>({
@@ -1217,7 +1220,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       });
 
       // debugConsoleWidget.id = id;
-      debugConsoleWidget.title.label = 'Debug Console';
+      debugConsoleWidget.title.label = trans.__('Debug Console');
       debugConsoleWidget.title.icon = Debugger.Icons.evaluateIcon;
 
       // Need underlying CodeConsole in executor
@@ -1304,7 +1307,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 
     // Add commands
     app.commands.addCommand(CommandIDs.invokeConsole, {
-      label: 'Display the completion helper.',
+      label: trans.__('Display the completion helper.'),
       execute: () => {
         const id =
           debugConsoleTracker.currentWidget &&
@@ -1323,7 +1326,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     });
 
     app.commands.addCommand(CommandIDs.selectConsole, {
-      label: 'Select the completion suggestion.',
+      label: trans.__('Select the completion suggestion.'),
       execute: () => {
         const id =
           debugConsoleTracker.currentWidget &&
@@ -1343,7 +1346,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 
     // Add the debugger console execute command
     app.commands.addCommand(CommandIDs.executeConsole, {
-      label: 'Execute the current line in debug console.',
+      label: trans.__('Execute the current line in debug console.'),
       execute: async () => {
         const currentWidget = debugConsoleTracker.currentWidget;
         if (currentWidget && currentWidget.console) {
@@ -1364,8 +1367,8 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     });
 
     app.commands.addCommand(CommandIDs.evaluate, {
-      label: 'Evaluate Code',
-      caption: 'Evaluate Code',
+      label: trans.__('Evaluate Code'),
+      caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
