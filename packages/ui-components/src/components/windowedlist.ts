@@ -451,7 +451,12 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    *
    * @returns The current items range to display
    */
-  getRangeToRender(): WindowedList.WindowIndex | null {
+  getRangeToRender(options?: {
+    virtual?: boolean;
+  }): WindowedList.WindowIndex | null {
+    if (options?.virtual) {
+      return this._computeVirtualRange();
+    }
     let newWindowIndex: [number, number, number, number] = [
       0,
       Math.max(this.widgetCount - 1, -1),
@@ -461,7 +466,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
     const previousLastMeasuredIndex = this._measuredAllUntilIndex;
     if (this.windowingActive) {
-      newWindowIndex = this.getVirtualRangeToRender();
+      newWindowIndex = this._computeVirtualRange();
     }
     const [startIndex, stopIndex] = newWindowIndex;
 
@@ -474,7 +479,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       return newWindowIndex;
     }
 
-    return null;
+    return newWindowIndex ?? null;
   }
 
   /**
@@ -771,7 +776,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     );
   }
 
-  getVirtualRangeToRender(): WindowedList.WindowIndex {
+  /**
+   * Compute the virtual range of items to render.
+   */
+  private _computeVirtualRange(): WindowedList.WindowIndex {
     const widgetCount = this.widgetCount;
 
     if (widgetCount === 0) {
@@ -794,7 +802,6 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       stopIndex
     ];
   }
-
   private _getStartIndexForOffset(offset: number): number {
     return this._findNearestItem(offset);
   }
@@ -1631,7 +1638,7 @@ export class WindowedList<
     }
 
     if (this.scrollbar) {
-      const newWindowIndex = this.viewModel.getVirtualRangeToRender();
+      const newWindowIndex = this.viewModel.getRangeToRender({ virtual: true });
       if (newWindowIndex !== null) {
         const [firstVisibleIndex, lastVisibleIndex] = newWindowIndex;
 
@@ -1999,16 +2006,9 @@ export namespace WindowedList {
      *
      * @returns The current items range to display
      */
-    getRangeToRender(): WindowIndex | null;
-
-    /**
-     * Compute the items range to display.
-     *
-     * It returns ``null`` if the range does not need to be updated. Same as `getRangeToRender` in full windowing mode.
-     *
-     * @returns The current items range to display
-     */
-    getVirtualRangeToRender(): WindowIndex | null;
+    getRangeToRender(options?: {
+      virtual?: boolean;
+    }): WindowedList.WindowIndex | null;
 
     /**
      * Return the viewport top position and height for range spanning from

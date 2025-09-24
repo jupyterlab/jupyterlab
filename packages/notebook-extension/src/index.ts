@@ -4551,6 +4551,10 @@ function addCommands(
         current.content.scrollbar = !current.content.scrollbar;
       }
     },
+    isEnabled: () => {
+      const current = tracker.currentWidget;
+      return !!current;
+    },
     isToggled: () => {
       const current = tracker.currentWidget;
       return current?.content.scrollbar ?? false;
