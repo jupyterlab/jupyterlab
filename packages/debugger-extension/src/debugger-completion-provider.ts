@@ -45,7 +45,17 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
    */
   async isApplicable(context: ICompletionContext): Promise<boolean> {
     // Only provide completions when debugger has stopped threads
-    return this._debuggerService.hasStoppedThreads();
+    if (!this._debuggerService.hasStoppedThreads()) {
+      return false;
+    }
+
+    try {
+      const spec =
+        await this._debuggerService.session?.connection?.kernel?.spec;
+      return spec?.language === 'python';
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
