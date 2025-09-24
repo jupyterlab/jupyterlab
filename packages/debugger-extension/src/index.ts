@@ -1200,7 +1200,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     let debugConsoleWidget: ConsolePanel | null = null;
 
     // Create the console
-    const createDebugConsole = () => {
+    const createDebugConsole = async () => {
       const rendermime = new RenderMimeRegistry({ initialFactories });
       const debugExecutor = new DebugConsoleCellExecutor(service);
 
@@ -1248,7 +1248,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       void debugConsoleTracker.add(debugConsoleWidget);
       app.shell.activateById(debugConsoleWidget.id);
 
-      updateCompleter(undefined, debugConsoleWidget);
+      await updateCompleter(undefined, debugConsoleWidget);
       debugConsoleWidget?.update();
 
       notifyCommands();
