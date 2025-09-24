@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { CodeConsole, IConsoleCellExecutor } from '@jupyterlab/console';
+import { IConsoleCellExecutor } from '@jupyterlab/console';
 import { IDebugger } from '@jupyterlab/debugger';
 import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
 
@@ -8,19 +8,8 @@ import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
  * Custom console cell executor that uses debugger evaluation.
  */
 export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
-  private _debuggerService: IDebugger;
-  private _codeConsole: CodeConsole;
-
   constructor(debuggerService: IDebugger) {
     this._debuggerService = debuggerService;
-  }
-
-  get codeConsole(): CodeConsole {
-    return this._codeConsole;
-  }
-
-  set codeConsole(value: CodeConsole) {
-    this._codeConsole = value;
   }
 
   async evaluateWithDebugger(options: {
@@ -92,4 +81,6 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     cell.model.outputs.add(outputDisplayData);
     return true;
   }
+
+  private _debuggerService: IDebugger;
 }

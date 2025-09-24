@@ -1142,7 +1142,7 @@ const main: JupyterFrontEndPlugin<void> = {
  */
 const debuggerCompletions: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:completions',
-  description: 'Provides debugger-based inline completions.',
+  description: 'Provides debugger-based completions.',
   autoStart: true,
   requires: [IDebugger, ICompletionProviderManager],
   optional: [ITranslator],
@@ -1217,9 +1217,6 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       debugConsoleWidget.title.label = trans.__('Debug Console');
       debugConsoleWidget.title.icon = Debugger.Icons.evaluateIcon;
 
-      // Need underlying CodeConsole in executor
-      debugExecutor.codeConsole = debugConsoleWidget.console;
-
       // Add a specific class to distinguish debug console from regular consoles
       debugConsoleWidget.addClass('jp-DebugConsole');
       debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
@@ -1258,7 +1255,10 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     };
 
     // Set up completer
-    const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+    const updateCompleter = async (
+      _: WidgetTracker<ConsolePanel> | undefined,
+      consolePanel: ConsolePanel
+    ) => {
       const completerContext = {
         editor: consolePanel.console.promptCell?.editor ?? null,
         session: consolePanel.console.sessionContext.session,
