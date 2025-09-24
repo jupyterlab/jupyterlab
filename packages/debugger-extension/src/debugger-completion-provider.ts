@@ -15,6 +15,17 @@ import {
 } from '@jupyterlab/translation';
 
 /**
+ * Interface for the parsed result from debugger completion evaluation.
+ */
+interface IDebuggerCompletionResult {
+  matches: string[];
+  types?: string[];
+  cursor_start: number;
+  cursor_end: number;
+  status: string;
+}
+
+/**
  * Completion provider that uses debugger evaluation for suggestions.
  */
 export class DebuggerCompletionProvider implements ICompletionProvider {
@@ -46,7 +57,7 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply> {
     let items: CompletionHandler.ICompletionItem[] = [];
-    let parsedResult;
+    let parsedResult: IDebuggerCompletionResult;
 
     try {
       const { text, offset } = request;
@@ -97,13 +108,16 @@ def getCompletionsForDebugger(code, cursor_pos):
             s = completions[0].start
             e = completions[0].end
             matches = [c.text for c in completions]
+            types = [c.type for c in completions]
         else:
             s = cursor_pos
             e = cursor_pos
             matches = []
+            types = []
 
         result = {
             "matches": matches,
+            "types": types,
             "cursor_end": e,
             "cursor_start": s,
             "status": "ok",
@@ -111,7 +125,6 @@ def getCompletionsForDebugger(code, cursor_pos):
 
         return result
 `;
-
       // create method
       await this._debuggerService.evaluate(pyCode);
 
@@ -145,9 +158,10 @@ def getCompletionsForDebugger(code, cursor_pos):
 
       // Parse completions into completion items
       const parsedCompletions: CompletionHandler.ICompletionItem[] =
-        parsedResult.matches.map((match: string) => ({
+        parsedResult.matches.map((match: string, index: number) => ({
           label: match,
-          insertText: match
+          insertText: match,
+          type: parsedResult.types?.[index] || undefined
         }));
 
       items = [...parsedCompletions];
