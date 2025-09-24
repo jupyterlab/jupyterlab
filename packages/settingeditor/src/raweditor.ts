@@ -113,8 +113,8 @@ export class RawEditor extends SplitPanel {
    */
   get isDirty(): boolean {
     return (
-      this._user.editor.model.sharedModel.getSource() !== this._settings?.raw ??
-      ''
+      this._user.editor.model.sharedModel.getSource() !==
+      (this._settings?.raw ?? '')
     );
   }
 
