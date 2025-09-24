@@ -130,8 +130,10 @@ def getCompletionsForDebugger(code, cursor_pos):
       // Replace single quotes with double quotes in matches string for JSON parsing
       let correctedMatches = matches.replace(/'/g, '"');
 
-      // TODO - why is the reply truncated????
-      // Remove ellipses that cause JSON parsing issues
+      // TODO - Investigate truncation
+      // The eval reply from kernel truncates the result string (a string representation
+      // of an array containing completion results). Anything after a certain number of
+      // matches (19 for ipykernel) is replaced by ellipses, which needs to be removed to parse into JSON.
       correctedMatches = correctedMatches.replace(/, \.\.\./g, '');
 
       try {
