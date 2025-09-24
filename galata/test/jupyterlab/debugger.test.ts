@@ -52,7 +52,7 @@ test.describe('Debugger Tests', () => {
     void page.notebook.run().then();
 
     await page.debugger.waitForCallStack();
-    expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
+    expect(await callStackPanel.innerText()).toMatch(/Cell \[*\]/);
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
