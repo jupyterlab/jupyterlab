@@ -37,7 +37,6 @@ import {
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import {
   INotebookTracker,
   NotebookActions,
@@ -45,6 +44,7 @@ import {
 } from '@jupyterlab/notebook';
 import {
   standardRendererFactories as initialFactories,
+  IRenderMime,
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
@@ -363,7 +363,8 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
     });
   }
 };
-/*
+
+/**
  * A plugin to open detailed views for variables.
  */
 const variables: JupyterFrontEndPlugin<void> = {
@@ -851,7 +852,6 @@ const main: JupyterFrontEndPlugin<void> = {
     IDebuggerSourceViewer,
     ILabShell,
     ILayoutRestorer,
-    ILoggerRegistry,
     ISettingRegistry
   ],
   autoStart: true,
@@ -867,7 +867,6 @@ const main: JupyterFrontEndPlugin<void> = {
     sourceViewer: IDebugger.ISourceViewer | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    loggerRegistry: ILoggerRegistry | null,
     settingRegistry: ISettingRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
@@ -1172,25 +1171,22 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [
     IDebugger,
-    IConsoleTracker,
     ConsolePanel.IContentFactory,
     IEditorServices,
     ICompletionProviderManager,
     ISanitizer,
     ITranslator
   ],
-  optional: [ILabShell, ISettingRegistry],
+  optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
-    consoles: IConsoleTracker,
     consolePanelContentFactory: ConsolePanel.IContentFactory,
     editorServices: IEditorServices,
     manager: ICompletionProviderManager,
-    sanitizer: ISanitizer,
+    sanitizer: IRenderMime.ISanitizer,
     translator: ITranslator,
-    labShell: ILabShell | null,
-    settingRegistry: ISettingRegistry | null
+    labShell: ILabShell | null
   ) => {
     const CommandIDs = Debugger.CommandIDs;
     const trans = translator.load('jupyterlab');
@@ -1205,13 +1201,12 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 
     // Create the console
     const createDebugConsole = () => {
-      // const id = 'jp-debug-console';
       const rendermime = new RenderMimeRegistry({ initialFactories });
       const debugExecutor = new DebugConsoleCellExecutor(service);
 
       debugConsoleWidget = new ConsolePanel({
         manager: app.serviceManager,
-        name: 'Debug Console',
+        name: trans.__('Debug Console'),
         contentFactory: consolePanelContentFactory,
         rendermime,
         executor: debugExecutor,
@@ -1219,7 +1214,6 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         kernelPreference: { shouldStart: false, canStart: false }
       });
 
-      // debugConsoleWidget.id = id;
       debugConsoleWidget.title.label = trans.__('Debug Console');
       debugConsoleWidget.title.icon = Debugger.Icons.evaluateIcon;
 
@@ -1235,12 +1229,6 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         if (labShell && event.event === 'terminated') {
           debugConsoleWidget?.dispose();
         }
-      });
-
-      app.shell.add(debugConsoleWidget, 'main', {
-        mode: 'split-bottom',
-        activate: true,
-        type: 'Debugger console'
       });
 
       const notifyCommands = () => {
