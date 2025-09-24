@@ -1358,7 +1358,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       label: trans.__('Evaluate Code'),
       caption: trans.__('Evaluate Code'),
       icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => service.hasStoppedThreads(),
+      isEnabled: () => !!service.session?.isStarted,
       execute: async () => {
         if (debugConsoleWidget) {
           debugConsoleWidget.dispose();

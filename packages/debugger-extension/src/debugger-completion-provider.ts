@@ -44,11 +44,6 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
    * Check if this completion provider is applicable to the given context.
    */
   async isApplicable(context: ICompletionContext): Promise<boolean> {
-    // Only provide completions when debugger has stopped threads
-    if (!this._debuggerService.hasStoppedThreads()) {
-      return false;
-    }
-
     try {
       const spec =
         await this._debuggerService.session?.connection?.kernel?.spec;

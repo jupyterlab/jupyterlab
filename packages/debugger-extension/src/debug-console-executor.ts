@@ -21,10 +21,16 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     try {
       // Check if debugger has stopped threads (required for evaluation)
       if (!this._debuggerService.hasStoppedThreads()) {
-        console.warn(
-          'Debugger does not have stopped threads - cannot evaluate'
-        );
-        return null;
+        return {
+          output_type: 'display_data',
+          data: {
+            'text/plain':
+              'Debugger does not have stopped threads - cannot evaluate'
+          },
+          metadata: {
+            execution_count: executionCount
+          }
+        };
       }
 
       // Evaluate the code using the debugger service
