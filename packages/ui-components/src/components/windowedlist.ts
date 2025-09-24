@@ -449,6 +449,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    *
    * It returns ``null`` if the range does not need to be updated.
    *
+   * @param options - Control how the range is computed.
+   *   - `virtual`: If `true`, return a virtual range without updating
+   *     the current window.
+   *     If `false` or omitted, update and return the actual window range.
    * @returns The current items range to display
    */
   getRangeToRender(options?: {
@@ -2004,6 +2008,10 @@ export namespace WindowedList {
      *
      * It returns ``null`` if the range does not need to be updated.
      *
+     * @param options - Control how the range is computed.
+     *   - `virtual`: If `true`, return a virtual range without updating
+     *     the current window.
+     *     If `false` or omitted, update and return the actual window range.
      * @returns The current items range to display
      */
     getRangeToRender(options?: {
