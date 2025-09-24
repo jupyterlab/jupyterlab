@@ -331,7 +331,7 @@ function activate(
   extensions: IEditorExtensionRegistry,
   languages: IEditorLanguageRegistry,
   themes: IEditorThemeRegistry,
-  // fileBrowser: IDefaultFileBrowser, 
+  // fileBrowser: IDefaultFileBrowser,
   // change made
   fileBrowser: IDefaultFileBrowser | null,
   settingRegistry: ISettingRegistry,
