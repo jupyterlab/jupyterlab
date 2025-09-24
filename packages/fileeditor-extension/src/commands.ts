@@ -982,7 +982,7 @@ export namespace Commands {
               icon: (args.iconName as string) ?? textEditorIcon
             }),
       execute: args => {
-        const cwd = args.cwd || defaultBrowser.model.path;
+        const cwd = args.cwd || (defaultBrowser?.model.path ?? '.');
         return createNew(
           commands,
           cwd as string,
@@ -1038,7 +1038,7 @@ export namespace Commands {
       caption: trans.__('Create a new markdown file'),
       icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
-        const cwd = args['cwd'] || defaultBrowser.model.path;
+        const cwd = args['cwd'] || (defaultBrowser?.model.path ?? '.');
         return createNew(commands, cwd as string, 'md');
       },
       describedBy: {
