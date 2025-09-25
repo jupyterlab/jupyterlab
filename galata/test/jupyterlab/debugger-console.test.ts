@@ -24,8 +24,7 @@ async function setupDebuggerConsole(
     data_list = [1, 2, 3, 4, 5]
     return user_count, welcome_message, data_list
 
-result = test_function()
-print("Debugging session started")`
+result = test_function()`
   );
 
   // Wait for kernel to be ready
@@ -285,5 +284,146 @@ test.describe('Debugger Console', () => {
 
     // Verify the completion was applied
     await expect(inputArea).toContainText('user_count');
+  });
+
+  test('Debug evaluation shows error when debugger has no stopped threads', async ({
+    page,
+    tmpPath
+  }) => {
+    await setupDebuggerConsole(page, tmpPath);
+
+    // Click the Continue button to resume execution (no more stopped threads)
+    const continueButton = page.locator('jp-button[title*="Continue"]');
+    await expect(continueButton).toBeVisible();
+    await continueButton.click();
+
+    // Wait a moment for the debugger to continue
+    await page.waitForTimeout(1000);
+
+    // Focus on the debug console input
+    const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
+    const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
+    const inputArea = promptCell.locator(CELL_EDITOR_SELECTOR);
+
+    await inputArea.click();
+    await inputArea.waitFor();
+
+    // Try to evaluate some code when debugger has no stopped threads
+    await inputArea.type('user_count');
+    await inputArea.press('Shift+Enter');
+
+    // Wait for output to appear
+    await page.waitForTimeout(1000);
+
+    // Check that the output shows the error message
+    const outputArea = debugConsoleWidget
+      .locator('.jp-OutputArea-child')
+      .last();
+    await expect(outputArea).toContainText(
+      'Debugger does not have stopped threads - cannot evaluate'
+    );
+  });
+
+  test('Debug console allows variable modification', async ({
+    page,
+    tmpPath
+  }) => {
+    await setupDebuggerConsole(page, tmpPath);
+
+    // Focus on the debug console input
+    const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
+    const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
+    const inputArea = promptCell.locator(CELL_EDITOR_SELECTOR);
+
+    await inputArea.click();
+    await inputArea.waitFor();
+
+    // First, verify the original value
+    await inputArea.type('user_count');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    let outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('42');
+
+    // Modify the variable
+    await inputArea.click();
+    await inputArea.type('user_count = 100');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    // Verify the variable now has the new value
+    await inputArea.click();
+    await inputArea.type('user_count');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('100');
+
+    // Modify another variable
+    await inputArea.click();
+    await inputArea.type('welcome_message = "modified message"');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    // Verify the modification
+    await inputArea.click();
+    await inputArea.type('welcome_message');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('modified message');
+  });
+
+  test('Debug console allows function calls and complex expressions', async ({
+    page,
+    tmpPath
+  }) => {
+    await setupDebuggerConsole(page, tmpPath);
+
+    // Focus on the debug console input
+    const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
+    const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
+    const inputArea = promptCell.locator(CELL_EDITOR_SELECTOR);
+
+    await inputArea.click();
+    await inputArea.waitFor();
+
+    // Test function call
+    await inputArea.type('len(data_list)');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    let outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('5');
+
+    // Test complex expression
+    await inputArea.click();
+    await inputArea.type('user_count * 2 + len(welcome_message)');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('95'); // 42 * 2 + 11 = 95
+
+    // Test list comprehension
+    await inputArea.click();
+    await inputArea.type('[x * 2 for x in data_list]');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('[2, 4, 6, 8, 10]');
+
+    // Test string methods
+    await inputArea.click();
+    await inputArea.type('welcome_message.upper()');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('HELLO WORLD');
   });
 });
