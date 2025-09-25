@@ -426,4 +426,27 @@ test.describe('Debugger Console', () => {
     outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
     await expect(outputArea).toContainText('HELLO WORLD');
   });
+
+  test('Debug console shows error message for bad input', async ({
+    page,
+    tmpPath
+  }) => {
+    await setupDebuggerConsole(page, tmpPath);
+
+    // Focus on the debug console input
+    const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
+    const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
+    const inputArea = promptCell.locator(CELL_EDITOR_SELECTOR);
+
+    await inputArea.click();
+    await inputArea.waitFor();
+
+    // Test bad input
+    await inputArea.type('1 / 0');
+    await inputArea.press('Shift+Enter');
+    await page.waitForTimeout(1000);
+
+    let outputArea = debugConsoleWidget.locator('.jp-OutputArea-child').last();
+    await expect(outputArea).toContainText('Evaluation resulted in an error');
+  });
 });
