@@ -12,6 +12,24 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     this._debuggerService = debuggerService;
   }
 
+  /**
+   * Create an IDisplayData object with the given text content.
+   */
+  private createDisplayData(
+    text: string,
+    executionCount: ExecutionCount
+  ): IDisplayData {
+    return {
+      output_type: 'display_data',
+      data: {
+        'text/plain': text
+      },
+      metadata: {
+        execution_count: executionCount
+      }
+    };
+  }
+
   async evaluateWithDebugger(options: {
     code: string;
     executionCount: ExecutionCount;
@@ -21,46 +39,27 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     try {
       // Check if debugger has stopped threads (required for evaluation)
       if (!this._debuggerService.hasStoppedThreads()) {
-        return {
-          output_type: 'display_data',
-          data: {
-            'text/plain':
-              'Debugger does not have stopped threads - cannot evaluate'
-          },
-          metadata: {
-            execution_count: executionCount
-          }
-        };
+        return this.createDisplayData(
+          'Debugger does not have stopped threads - cannot evaluate',
+          executionCount
+        );
       }
 
       // Evaluate the code using the debugger service
       const reply = await this._debuggerService.evaluate(code);
 
       if (!reply) {
-        return null;
+        return this.createDisplayData(
+          'Evaluation resulted in an error',
+          executionCount
+        );
       }
 
       // Convert reply to IDisplayData format
-      return {
-        output_type: 'display_data',
-        data: {
-          'text/plain': reply.result
-        },
-        metadata: {
-          execution_count: executionCount
-        }
-      };
+      return this.createDisplayData(reply.result, executionCount);
     } catch (error) {
       console.error('Error evaluating code with debugger:', error);
-      return {
-        output_type: 'display_data',
-        data: {
-          'text/plain': `Error: ${error}`
-        },
-        metadata: {
-          execution_count: executionCount
-        }
-      };
+      return this.createDisplayData(`Error: ${error}`, executionCount);
     }
   }
 
@@ -80,7 +79,11 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
     });
 
     if (!outputDisplayData) {
-      console.warn('Could not display output data');
+      const errorOutputData = this.createDisplayData(
+        'Could not display output data',
+        executionCount
+      );
+      cell.model.outputs.add(errorOutputData);
       return false;
     }
 
