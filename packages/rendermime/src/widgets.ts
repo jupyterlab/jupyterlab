@@ -511,7 +511,9 @@ namespace Private {
     // Harden anchors to contain secure target/rel attributes.
     if (result instanceof Promise) {
       // If promised was returned, await for rendering to complete.
-      result.then(() => renderers.hardenAnchorLinks(host, resolver));
+      result
+        .then(() => renderers.hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
     } else {
       renderers.hardenAnchorLinks(host, resolver);
     }
