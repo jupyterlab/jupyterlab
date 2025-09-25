@@ -26,6 +26,7 @@ import { KernelSpec } from '../kernelspec';
 
 import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 // Stub for requirejs.
 declare let requirejs: any;
@@ -1630,7 +1631,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
         case 'status': {
-          if (msg.parent_header.msg_type == 'debug_request') {
+          const untrackedMessageTypesRaw = PageConfig.getOption(
+            'untracked_message_types'
+          );
+          let untrackedMessageTypes = JSON.parse(
+            untrackedMessageTypesRaw || '[]'
+          );
+          if (untrackedMessageTypes.includes(msg.parent_header.msg_type)) {
             break;
           }
           // Updating the status is synchronous, and we call no async user code
