@@ -1168,6 +1168,7 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
  */
 const debugConsole: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:debug-console',
+  description: 'Debugger console to enable evaluation in debugger context.',
   autoStart: true,
   requires: [
     IDebugger,
