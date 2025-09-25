@@ -84,7 +84,9 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
     const maybePromise = latexTypesetter.typeset(host);
     if (maybePromise instanceof Promise) {
       // Harden anchors to contain secure target/rel attributes.
-      maybePromise.then(() => hardenAnchorLinks(host, resolver));
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
     } else {
       hardenAnchorLinks(host, resolver);
     }
@@ -264,7 +266,7 @@ export async function renderLatex(
     const maybePromise = latexTypesetter.typeset(host);
     if (maybePromise instanceof Promise) {
       // Harden anchors to contain secure target/rel attributes.
-      maybePromise.then(() => hardenAnchorLinks(host));
+      maybePromise.then(() => hardenAnchorLinks(host)).catch(console.warn);
     } else {
       hardenAnchorLinks(host);
     }
