@@ -284,34 +284,17 @@ export class EditorHandler implements IDisposable {
    * @param editor The editor from where the click originated.
    * @param position The position corresponding to the click event.
    */
-  private _onGutterClick(editor: EditorView, position: number): void {
-    if (this._id !== this._debuggerService.session?.connection?.id) {
-      return;
-    }
-
+  private _getEffectiveClickedLine(
+    editor: EditorView,
+    position: number
+  ): [Line | undefined, boolean] {
     let clickedLine = editor.state.doc.lineAt(position);
     let clickedLineNumber = clickedLine.number;
-    let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
-    let stateBreakpoints = editor.state.field(this._breakpointState);
-    let hasBreakpoint = false;
-
-    if (clickedLine.text.trim() !== '') {
-      stateBreakpoints.between(position, position, () => {
-        hasBreakpoint = true;
-      });
-
-      if (hasBreakpoint) {
-        breakpoints = breakpoints.filter(ele => ele.line !== clickedLineNumber);
-      } else {
-        breakpoints.push(
-          Private.createBreakpoint(
-            this._path ?? this._debuggerService.session.connection.name,
-            clickedLineNumber
-          )
-        );
-      }
-    } else {
-      let targetLine: Line | null = null;
+    let targetLine: Line | undefined = undefined;
+    let isLineEmpty: boolean =
+      false; /* is true is the clicked line of code is empty */
+    if (clickedLine.text.trim() === '') {
+      isLineEmpty = true;
       while (clickedLineNumber > 1) {
         clickedLineNumber--;
         const prevLine = editor.state.doc.line(clickedLineNumber);
@@ -320,17 +303,46 @@ export class EditorHandler implements IDisposable {
           break;
         }
       }
-      if (targetLine) {
-        stateBreakpoints.between(targetLine.from, targetLine.from, () => {
-          hasBreakpoint = true;
-        });
+    } else {
+      (isLineEmpty = false), (targetLine = clickedLine);
+    }
+    return [targetLine, isLineEmpty];
+  }
+  /**
+   * Handle a click on the gutter.
+   *
+   * @param editor The editor from where the click originated.
+   * @param position The position corresponding to the click event.
+   */
+  private _onGutterClick(editor: EditorView, position: number): void {
+    if (this._id !== this._debuggerService.session?.connection?.id) {
+      return;
+    }
 
-        if (!hasBreakpoint) {
-          breakpoints.push(
-            Private.createBreakpoint(
-              this._path ?? this._debuggerService.session.connection.name,
-              targetLine.number
-            )
+    const [clickedLine, isLineEmpty] = this._getEffectiveClickedLine(
+      editor,
+      position
+    );
+    let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
+    let stateBreakpoints = editor.state.field(this._breakpointState);
+    let hasBreakpoint = false;
+
+    if (clickedLine) {
+      stateBreakpoints.between(clickedLine?.from, clickedLine?.from, () => {
+        hasBreakpoint = true;
+      });
+
+      if (!hasBreakpoint) {
+        breakpoints.push(
+          Private.createBreakpoint(
+            this._path ?? this._debuggerService.session.connection.name,
+            clickedLine.number
+          )
+        );
+      } else {
+        if (!isLineEmpty) {
+          breakpoints = breakpoints.filter(
+            ele => ele.line !== clickedLine.number
           );
         }
       }
