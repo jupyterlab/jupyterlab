@@ -1363,7 +1363,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
         if (debugConsoleWidget) {
           debugConsoleWidget.dispose();
         } else {
-          createDebugConsole();
+          void createDebugConsole();
         }
       },
       isToggled: () => {
