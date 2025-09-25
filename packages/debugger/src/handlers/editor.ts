@@ -91,6 +91,7 @@ export class EditorHandler implements IDisposable {
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
+        console.log('selected changed');
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
       }
@@ -333,17 +334,39 @@ export class EditorHandler implements IDisposable {
       });
 
       if (!hasBreakpoint) {
-        breakpoints.push(
-          Private.createBreakpoint(
-            this._path ?? this._debuggerService.session.connection.name,
-            clickedLine.number
-          )
+        /* if there is no breakpoint at effective clickedLine : add one */
+        this._debuggerService.model.breakpoints.selectedBreakpoint = null;
+        const newBreakpoint = Private.createBreakpoint(
+          this._path ?? this._debuggerService.session.connection.name,
+          clickedLine.number
         );
+
+        breakpoints.push(newBreakpoint);
       } else {
+        /* if there is already a breakpoint */
         if (!isLineEmpty) {
+          /* remove the in place breakpoint if the clicked line of code is not empty*/
           breakpoints = breakpoints.filter(
             ele => ele.line !== clickedLine.number
           );
+
+          if (this._selectedBreakpoint) {
+            /* if the breakpoint is a selected one: unset selection*/
+            breakpoints = breakpoints.filter(
+              ele => ele.line !== this._selectedBreakpoint?.line
+            );
+            this._debuggerService.model.breakpoints.selectedBreakpoint = null;
+          }
+        } else {
+          /* if the clicked line of code is empty, find the breakpoint at the effective clicked line
+          and make it the selected breakpoint*/
+          const breakPointAtClickedLine = breakpoints.find(
+            b => b.line === clickedLine.number
+          );
+          if (breakPointAtClickedLine) {
+            this._debuggerService.model.breakpoints.selectedBreakpoint =
+              breakPointAtClickedLine;
+          }
         }
       }
     }
