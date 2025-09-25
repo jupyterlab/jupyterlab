@@ -15,6 +15,7 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 import {
   Compartment,
+  Line,
   Prec,
   Range,
   RangeSet,
@@ -288,27 +289,54 @@ export class EditorHandler implements IDisposable {
       return;
     }
 
-    const lineNumber = editor.state.doc.lineAt(position).number;
+    let clickedLine = editor.state.doc.lineAt(position);
+    let clickedLineNumber = clickedLine.number;
+    let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
     let stateBreakpoints = editor.state.field(this._breakpointState);
     let hasBreakpoint = false;
-    stateBreakpoints.between(position, position, () => {
-      hasBreakpoint = true;
-    });
-    let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
-    if (hasBreakpoint) {
-      breakpoints = breakpoints.filter(ele => ele.line !== lineNumber);
+
+    if (clickedLine.text.trim() !== '') {
+      stateBreakpoints.between(position, position, () => {
+        hasBreakpoint = true;
+      });
+
+      if (hasBreakpoint) {
+        breakpoints = breakpoints.filter(ele => ele.line !== clickedLineNumber);
+      } else {
+        breakpoints.push(
+          Private.createBreakpoint(
+            this._path ?? this._debuggerService.session.connection.name,
+            clickedLineNumber
+          )
+        );
+      }
     } else {
-      breakpoints.push(
-        Private.createBreakpoint(
-          this._path ?? this._debuggerService.session.connection.name,
-          lineNumber
-        )
-      );
+      let targetLine: Line | null = null;
+      while (clickedLineNumber > 1) {
+        clickedLineNumber--;
+        const prevLine = editor.state.doc.line(clickedLineNumber);
+        if (prevLine.text.trim() !== '') {
+          targetLine = prevLine;
+          break;
+        }
+      }
+      if (targetLine) {
+        stateBreakpoints.between(targetLine.from, targetLine.from, () => {
+          hasBreakpoint = true;
+        });
+
+        if (!hasBreakpoint) {
+          breakpoints.push(
+            Private.createBreakpoint(
+              this._path ?? this._debuggerService.session.connection.name,
+              targetLine.number
+            )
+          );
+        }
+      }
     }
 
-    breakpoints.sort((a, b) => {
-      return a.line! - b.line!;
-    });
+    breakpoints.sort((a, b) => a.line! - b.line!);
 
     void this._debuggerService.updateBreakpoints(
       this._src.getSource(),
