@@ -373,6 +373,76 @@ describe('rendermime/factories', () => {
           expect.not.arrayContaining(['script'])
         );
       });
+
+      it('should harden remote URLs', async () => {
+        const source = '<a href="https://jupyter.org">link</a>';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre><a href="https://jupyter.org" rel="noopener" target="_blank">link</a></pre>'
+        );
+      });
+
+      it('should harden remote URLs introduced by latex typesetter', async () => {
+        const source = '$$\\href{https://jupyter.org}{link}$$';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const pretendLatexTypesetter: IRenderMime.ILatexTypesetter = {
+          typeset: (element: HTMLElement): void => {
+            element.innerHTML = '';
+            const link = document.createElement('a');
+            link.textContent = 'link';
+            link.href = 'https://jupyter.org';
+            element.appendChild(link);
+          }
+        };
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          latexTypesetter: pretendLatexTypesetter
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<a href="https://jupyter.org" target="_blank" rel="noopener">link</a>'
+        );
+        w.dispose();
+      });
+
+      it('should harden remote URLs introduced by async latex typesetter', async () => {
+        const source = '$$\\href{https://jupyter.org}{link}$$';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const pretendLatexTypesetter: IRenderMime.ILatexTypesetter = {
+          typeset: async (element: HTMLElement): Promise<void> => {
+            // Simulate slower type-setting.
+            await new Promise(resolve => window.setTimeout(resolve, 100));
+            element.innerHTML = '';
+            const link = document.createElement('a');
+            link.textContent = 'link';
+            link.href = 'https://jupyter.org';
+            element.appendChild(link);
+            return;
+          }
+        };
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          latexTypesetter: pretendLatexTypesetter
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        await new Promise(resolve => window.setTimeout(resolve, 200));
+        expect(w.node.innerHTML).toBe(
+          '<a href="https://jupyter.org" target="_blank" rel="noopener">link</a>'
+        );
+        w.dispose();
+      });
     });
   });
 
@@ -434,6 +504,18 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe('<pre></pre>');
+      });
+
+      it('should harden remote URLs', async () => {
+        const source = '<a href="https://jupyter.org">link</a>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<a href="https://jupyter.org" rel="noopener" target="_blank">link</a>'
+        );
       });
     });
 

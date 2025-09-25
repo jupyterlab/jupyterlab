@@ -522,7 +522,7 @@ export namespace IRenderMime {
      * @param element - the DOM element to typeset. The typesetting may
      *   happen synchronously or asynchronously.
      */
-    typeset(element: HTMLElement): void;
+    typeset(element: HTMLElement): void | Promise<void>;
   }
 
   /**
