@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata-extension",
-  "version": "5.4.7",
+  "version": "5.4.8",
   "private": true,
   "description": "JupyterLab UI Testing Framework Extension.",
   "keywords": [
@@ -32,20 +32,20 @@
     "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.7",
-    "@jupyterlab/apputils": "^4.5.7",
-    "@jupyterlab/cells": "^4.4.7",
-    "@jupyterlab/debugger": "^4.4.7",
-    "@jupyterlab/docmanager": "^4.4.7",
-    "@jupyterlab/nbformat": "^4.4.7",
-    "@jupyterlab/notebook": "^4.4.7",
-    "@jupyterlab/settingregistry": "^4.4.7",
+    "@jupyterlab/application": "^4.4.8",
+    "@jupyterlab/apputils": "^4.5.8",
+    "@jupyterlab/cells": "^4.4.8",
+    "@jupyterlab/debugger": "^4.4.8",
+    "@jupyterlab/docmanager": "^4.4.8",
+    "@jupyterlab/nbformat": "^4.4.8",
+    "@jupyterlab/notebook": "^4.4.8",
+    "@jupyterlab/settingregistry": "^4.4.8",
     "@lumino/algorithm": "^2.0.3",
     "@lumino/coreutils": "^2.2.1",
     "@lumino/signaling": "^2.1.4"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.4.7",
+    "@jupyterlab/builder": "^4.4.8",
     "rimraf": "~5.0.5",
     "typescript": "~5.5.4"
   },

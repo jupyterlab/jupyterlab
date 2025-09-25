@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/pluginmanager-extension",
-  "version": "4.4.7",
+  "version": "4.4.8",
   "description": "Enable/disable plugins from user interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,11 +35,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.7",
-    "@jupyterlab/apputils": "^4.5.7",
-    "@jupyterlab/pluginmanager": "^4.4.7",
-    "@jupyterlab/translation": "^4.4.7",
-    "@jupyterlab/ui-components": "^4.4.7",
+    "@jupyterlab/application": "^4.4.8",
+    "@jupyterlab/apputils": "^4.5.8",
+    "@jupyterlab/pluginmanager": "^4.4.8",
+    "@jupyterlab/translation": "^4.4.8",
+    "@jupyterlab/ui-components": "^4.4.8",
     "@lumino/coreutils": "^2.2.1"
   },
   "devDependencies": {
