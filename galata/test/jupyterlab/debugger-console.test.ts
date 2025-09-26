@@ -9,7 +9,7 @@ import {
 } from '@jupyterlab/galata';
 import * as path from 'path';
 
-const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor';
+const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor .cm-content';
 const DEBUG_CONSOLE_SELECTOR = '.jp-DebugConsole';
 const DEBUG_CONSOLE_WIDGET_SELECTOR = '.jp-DebugConsole-widget';
 
