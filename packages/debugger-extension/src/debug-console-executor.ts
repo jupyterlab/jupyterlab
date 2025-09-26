@@ -3,13 +3,15 @@
 import { IConsoleCellExecutor } from '@jupyterlab/console';
 import { IDebugger } from '@jupyterlab/debugger';
 import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
+import { IRenderMime } from '@jupyterlab/rendermime';
 
 /**
  * Custom console cell executor that uses debugger evaluation.
  */
 export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
-  constructor(debuggerService: IDebugger) {
-    this._debuggerService = debuggerService;
+  constructor(options: DebugConsoleCellExecutor.IOptions) {
+    this._debuggerService = options.debuggerService;
+    this._trans = options.trans;
   }
 
   /**
@@ -40,7 +42,9 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
       // Check if debugger has stopped threads (required for evaluation)
       if (!this._debuggerService.hasStoppedThreads()) {
         return this.createDisplayData(
-          'Debugger does not have stopped threads - cannot evaluate',
+          this._trans.__(
+            'Debugger does not have stopped threads - cannot evaluate'
+          ),
           executionCount
         );
       }
@@ -50,7 +54,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
 
       if (!reply) {
         return this.createDisplayData(
-          'Evaluation resulted in an error',
+          this._trans.__('Evaluation resulted in an error'),
           executionCount
         );
       }
@@ -80,7 +84,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
 
     if (!outputDisplayData) {
       const errorOutputData = this.createDisplayData(
-        'Could not display output data',
+        this._trans.__('Could not display output data'),
         executionCount
       );
       cell.model.outputs.add(errorOutputData);
@@ -92,4 +96,25 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
   }
 
   private _debuggerService: IDebugger;
+  private _trans: IRenderMime.TranslationBundle;
+}
+
+/**
+ * A namespace for DebugConsoleCellExecutor statics.
+ */
+export namespace DebugConsoleCellExecutor {
+  /**
+   * The instantiation options for a DebugConsoleCellExecutor.
+   */
+  export interface IOptions {
+    /**
+     * The debugger service for evaluating expressions in debug context.
+     */
+    debuggerService: IDebugger;
+
+    /**
+     * The translation bundle for internationalization.
+     */
+    trans: IRenderMime.TranslationBundle;
+  }
 }

@@ -1203,7 +1203,10 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     // Create the console
     const createDebugConsole = async () => {
       const rendermime = new RenderMimeRegistry({ initialFactories });
-      const debugExecutor = new DebugConsoleCellExecutor(service);
+      const debugExecutor = new DebugConsoleCellExecutor({
+        debuggerService: service,
+        trans
+      });
 
       debugConsoleWidget = new ConsolePanel({
         manager: app.serviceManager,
@@ -1296,7 +1299,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 
     // Add commands
     app.commands.addCommand(CommandIDs.invokeConsole, {
-      label: trans.__('Display the completion helper.'),
+      label: trans.__('Display the tab completion widget.'),
       execute: () => {
         const id =
           debugConsoleTracker.currentWidget &&
