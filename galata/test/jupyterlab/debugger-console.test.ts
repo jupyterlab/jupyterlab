@@ -61,6 +61,10 @@ result = test_function()`
 }
 
 test.describe('Debugger Console', () => {
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await setupDebuggerConsole(page, tmpPath);
+  });
+
   test.afterEach(async ({ page }) => {
     try {
       // Try to switch off debugger if it's still active
@@ -83,11 +87,8 @@ test.describe('Debugger Console', () => {
   });
 
   test('Debug console toggles when evaluate button is clicked', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
     // Verify debug console is visible (already opened by setupDebuggerConsole)
     const debugConsole = page.locator(DEBUG_CONSOLE_SELECTOR);
     await expect(debugConsole).toBeVisible();
@@ -122,11 +123,8 @@ test.describe('Debugger Console', () => {
   });
 
   test('Debug evaluation returns correct values for local variables', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -150,11 +148,8 @@ test.describe('Debugger Console', () => {
   });
 
   test('Debug evaluation returns correct values for expressions', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -178,11 +173,8 @@ test.describe('Debugger Console', () => {
   });
 
   test('Debug evaluation works with complex data structures', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -205,12 +197,7 @@ test.describe('Debugger Console', () => {
     await expect(outputArea).toContainText('[1, 2, 3, 4, 5]');
   });
 
-  test('Tab completion works with language methods', async ({
-    page,
-    tmpPath
-  }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
+  test('Tab completion works with language methods', async ({ page }) => {
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -244,12 +231,7 @@ test.describe('Debugger Console', () => {
     await expect(inputArea).toContainText('capitalize');
   });
 
-  test('Tab completion works with local variables', async ({
-    page,
-    tmpPath
-  }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
+  test('Tab completion works with local variables', async ({ page }) => {
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -287,11 +269,8 @@ test.describe('Debugger Console', () => {
   });
 
   test('Debug evaluation shows error when debugger has no stopped threads', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
     // Click the Continue button to resume execution (no more stopped threads)
     const continueButton = page.locator('jp-button[title*="Continue"]');
     await expect(continueButton).toBeVisible();
@@ -324,12 +303,7 @@ test.describe('Debugger Console', () => {
     );
   });
 
-  test('Debug console allows variable modification', async ({
-    page,
-    tmpPath
-  }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
+  test('Debug console allows variable modification', async ({ page }) => {
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -378,11 +352,8 @@ test.describe('Debugger Console', () => {
   });
 
   test('Debug console allows function calls and complex expressions', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
@@ -427,12 +398,7 @@ test.describe('Debugger Console', () => {
     await expect(outputArea).toContainText('HELLO WORLD');
   });
 
-  test('Debug console shows error message for bad input', async ({
-    page,
-    tmpPath
-  }) => {
-    await setupDebuggerConsole(page, tmpPath);
-
+  test('Debug console shows error message for bad input', async ({ page }) => {
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');
