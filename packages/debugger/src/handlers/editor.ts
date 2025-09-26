@@ -350,11 +350,10 @@ export class EditorHandler implements IDisposable {
           );
 
           if (this._selectedBreakpoint) {
-            /* if the breakpoint is a selected one: unset selection*/
+            /* if the breakpoint is a selected one: remove it*/
             breakpoints = breakpoints.filter(
               ele => ele.line !== this._selectedBreakpoint?.line
             );
-            this._debuggerService.model.breakpoints.selectedBreakpoint = null;
           }
         } else {
           /* if the clicked line of code is empty, find the breakpoint at the effective clicked line
