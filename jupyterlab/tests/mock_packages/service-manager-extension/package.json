@@ -1,12 +1,12 @@
 {
   "name": "@jupyterlab/mock-service-manager-extension",
-  "version": "4.4.8",
+  "version": "4.4.9",
   "private": true,
   "dependencies": {
-    "@jupyterlab/services": "^7.4.8"
+    "@jupyterlab/services": "^7.4.9"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.4.8"
+    "@jupyterlab/builder": "^4.4.9"
   },
   "jupyterlab": {
     "extension": true,

@@ -484,6 +484,23 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.9
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.8...80d2a2ce152f359dbe17af364942472776b49fc7))
+
+### Bugs fixed
+
+- Correctly dispose `TerminalManager` even if terminals are not available [#17876](https://github.com/jupyterlab/jupyterlab/pull/17876) ([@krassowski](https://github.com/krassowski))
+- Fix scrolling to targets within notebook [#17928](https://github.com/jupyterlab/jupyterlab/pull/17928) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-09-25&to=2025-09-26&type=c))
+
+[@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-09-25..2025-09-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-09-25..2025-09-26&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-09-25..2025-09-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-09-25..2025-09-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.8
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.7...526a3d7f7038ed24903bf9c88b9df3e061c65b28))
@@ -508,8 +525,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-09-03&to=2025-09-25&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-09-03..2025-09-25&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-09-03..2025-09-25&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2025-09-03..2025-09-25&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-09-03..2025-09-25&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-09-03..2025-09-25&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-09-03..2025-09-25&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-09-03..2025-09-25&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-09-03..2025-09-25&type=Issues) | [@Meriem-BenIsmail](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMeriem-BenIsmail+updated%3A2025-09-03..2025-09-25&type=Issues) | [@williamstein](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awilliamstein+updated%3A2025-09-03..2025-09-25&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.7
 
