@@ -304,7 +304,9 @@ export class EditorHandler implements IDisposable {
         }
       }
     } else {
-      (isLineEmpty = false), (targetLine = clickedLine);
+      if (isLineEmpty === false) {
+        targetLine = clickedLine;
+      }
     }
     return [targetLine, isLineEmpty];
   }
