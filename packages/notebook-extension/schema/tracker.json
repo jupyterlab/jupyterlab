@@ -847,6 +847,12 @@
       "description": "Whether to add an extra blank line between cells when merging them. When enabled, cells are joined with double newlines. When disabled, cells are joined with single newlines.",
       "type": "boolean",
       "default": true
+    },
+    "showMinimap": {
+      "title": "Show minimap",
+      "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

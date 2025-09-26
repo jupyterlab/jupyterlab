@@ -341,9 +341,12 @@ export class AttachmentsResolver implements IRenderMime.IResolver {
   /**
    * Resolve a relative url to a correct server path.
    */
-  async resolveUrl(url: string): Promise<string> {
+  async resolveUrl(
+    url: string,
+    context?: IRenderMime.IResolveUrlContext
+  ): Promise<string> {
     if (this._parent && !url.startsWith('attachment:')) {
-      return this._parent.resolveUrl(url);
+      return this._parent.resolveUrl(url, context);
     }
     return url;
   }

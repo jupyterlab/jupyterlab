@@ -98,6 +98,8 @@ export namespace CommandIDs {
 
   export const lineNumbering = 'viewmenu:line-numbering';
 
+  export const minimap = 'viewmenu:show-minimap';
+
   export const matchBrackets = 'viewmenu:match-brackets';
 
   export const openRun = 'runmenu:open';
@@ -749,6 +751,25 @@ function createViewMenu(
     semanticCommands: menu.editorViewers.toggleLineNumbers,
     default: {
       label: trans.__('Show Line Numbers')
+    },
+    overrides: {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    },
+    trans
+  });
+
+  addSemanticCommand({
+    id: CommandIDs.minimap,
+    commands,
+    shell,
+    semanticCommands: menu.editorViewers.toggleMinimap,
+    default: {
+      label: trans.__('Show Minimap')
     },
     overrides: {
       describedBy: {
