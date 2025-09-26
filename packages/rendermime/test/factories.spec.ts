@@ -433,6 +433,18 @@ describe('rendermime/factories', () => {
         );
       });
 
+      it('should not add target="_blank" to local URLs', async () => {
+        const source = '<a href="#section-in-notebook">link</a>';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre><a href="#section-in-notebook" rel="noopener" target="_blank">link</a></pre>'
+        );
+      });
+
       it('should harden remote URLs introduced by latex typesetter', async () => {
         const source = '$$\\href{https://jupyter.org}{link}$$';
         const f = markdownRendererFactory;
@@ -456,6 +468,34 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
           '<a href="https://jupyter.org" target="_blank" rel="noopener">link</a>'
+        );
+        w.dispose();
+      });
+
+      it('should not add target to local URLs introduced by latex typesetter', async () => {
+        const source = '$$\\href{https://jupyter.org}{link}$$';
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const model = createModel(mimeType, source);
+        const pretendLatexTypesetter: IRenderMime.ILatexTypesetter = {
+          typeset: (element: HTMLElement): void => {
+            element.innerHTML = '';
+            const link = document.createElement('a');
+            link.textContent = 'link';
+            link.href = '#section-in-notebook';
+            link.target = '_self';
+            element.appendChild(link);
+          }
+        };
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          latexTypesetter: pretendLatexTypesetter
+        });
+        Widget.attach(w, document.body);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<a href="#section-in-notebook" target="_self" rel="noopener">link</a>'
         );
         w.dispose();
       });
