@@ -3,8 +3,7 @@
 import { IConsoleCellExecutor } from '@jupyterlab/console';
 import { IDebugger } from '@jupyterlab/debugger';
 import { ExecutionCount, IDisplayData } from '@jupyterlab/nbformat';
-import { IRenderMime } from '@jupyterlab/rendermime';
-
+import { TranslationBundle } from '@jupyterlab/translation';
 /**
  * Custom console cell executor that uses debugger evaluation.
  */
@@ -96,7 +95,7 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
   }
 
   private _debuggerService: IDebugger;
-  private _trans: IRenderMime.TranslationBundle;
+  private _trans: TranslationBundle;
 }
 
 /**
@@ -115,6 +114,6 @@ export namespace DebugConsoleCellExecutor {
     /**
      * The translation bundle for internationalization.
      */
-    trans: IRenderMime.TranslationBundle;
+    trans: TranslationBundle;
   }
 }
