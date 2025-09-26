@@ -4,7 +4,6 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
-const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
 const GHOST_LINE_SPACER_CLASS = '.jp-GhostText-lineSpacer';
