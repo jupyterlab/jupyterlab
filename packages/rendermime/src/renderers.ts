@@ -256,7 +256,7 @@ export async function renderLatex(
   options: renderLatex.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, shouldTypeset, latexTypesetter } = options;
+  const { host, source, shouldTypeset, latexTypesetter, resolver } = options;
 
   // Set the source on the node.
   host.textContent = source;
@@ -266,9 +266,11 @@ export async function renderLatex(
     const maybePromise = latexTypesetter.typeset(host);
     if (maybePromise instanceof Promise) {
       // Harden anchors to contain secure target/rel attributes.
-      maybePromise.then(() => hardenAnchorLinks(host)).catch(console.warn);
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
     } else {
-      hardenAnchorLinks(host);
+      hardenAnchorLinks(host, resolver);
     }
   }
 }
@@ -300,6 +302,11 @@ export namespace renderLatex {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * An optional url resolver.
+     */
+    resolver?: IRenderMime.IResolver | null;
   }
 }
 

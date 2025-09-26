@@ -240,7 +240,8 @@ export class RenderedLatex extends RenderedCommon {
       host: this.node,
       source: String(model.data[this.mimeType]),
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      resolver: this.resolver
     }));
   }
 

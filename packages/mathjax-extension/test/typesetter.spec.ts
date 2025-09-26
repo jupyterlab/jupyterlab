@@ -38,6 +38,17 @@ describe('@jupyterlab/mathjax-extension', () => {
           '<a href="https://jupyter.org" rel="noopener" target="_blank">'
         );
       });
+
+      it.each([
+        '<a href="#section-in-notebook" target="_self">link</a>',
+        '<a href="./picture.png">link</a>'
+      ])('should not modify pre-existing URLs', async input => {
+        const host = document.createElement('div');
+        host.innerHTML = input;
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.innerHTML).toContain(input);
+      });
     });
   });
 });
