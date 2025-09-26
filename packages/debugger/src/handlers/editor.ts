@@ -91,7 +91,6 @@ export class EditorHandler implements IDisposable {
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
-        console.log('selected changed');
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
       }
