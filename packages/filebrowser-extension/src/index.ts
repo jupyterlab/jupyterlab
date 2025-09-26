@@ -257,14 +257,16 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
           showFullPath: false,
-          allowFileUploads: true
+          allowFileUploads: true,
+          breadcrumbsLeftItems: 0,
+          breadcrumbsRightItems: 2
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
-            const value = settings.get(key).composite as boolean;
-            browser[key] = value;
+            const value = settings.get(key).composite;
+            (browser as any)[key] = value;
           }
 
           const filterDirectories = settings.get('filterDirectories')

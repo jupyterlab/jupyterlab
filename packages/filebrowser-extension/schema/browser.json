@@ -265,6 +265,20 @@
       "title": "Allow file uploads",
       "description": "Whether to allow uploading files",
       "default": true
+    },
+    "breadcrumbsLeftItems": {
+      "type": "number",
+      "title": "Breadcrumbs left items",
+      "description": "Number of directory items to show on the left side of the ellipsis in breadcrumbs",
+      "default": 0,
+      "minimum": 0
+    },
+    "breadcrumbsRightItems": {
+      "type": "number",
+      "title": "Breadcrumbs right items",
+      "description": "Number of directory items to show on the right side of the ellipsis in breadcrumbs",
+      "default": 2,
+      "minimum": 0
     }
   },
   "additionalProperties": false,
