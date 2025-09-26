@@ -78,15 +78,25 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
   }
 
   // Handle default behavior of nodes.
-  Private.handleDefaults(host, resolver);
+  Private.handleDefaults(host);
+
+  if (shouldTypeset && latexTypesetter) {
+    const maybePromise = latexTypesetter.typeset(host);
+    if (maybePromise instanceof Promise) {
+      // Harden anchors to contain secure target/rel attributes.
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      hardenAnchorLinks(host, resolver);
+    }
+  } else {
+    hardenAnchorLinks(host, resolver);
+  }
 
   // Patch the urls if a resolver is available.
   if (resolver) {
     await Private.handleUrls(host, resolver, linkHandler);
-  }
-
-  if (shouldTypeset && latexTypesetter) {
-    latexTypesetter.typeset(host);
   }
 }
 
@@ -246,14 +256,22 @@ export async function renderLatex(
   options: renderLatex.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, shouldTypeset, latexTypesetter } = options;
+  const { host, source, shouldTypeset, latexTypesetter, resolver } = options;
 
   // Set the source on the node.
   host.textContent = source;
 
   // Typeset the node if needed.
   if (shouldTypeset && latexTypesetter) {
-    latexTypesetter.typeset(host);
+    const maybePromise = latexTypesetter.typeset(host);
+    if (maybePromise instanceof Promise) {
+      // Harden anchors to contain secure target/rel attributes.
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      hardenAnchorLinks(host, resolver);
+    }
   }
 }
 
@@ -284,6 +302,11 @@ export namespace renderLatex {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * An optional url resolver.
+     */
+    resolver?: IRenderMime.IResolver | null;
   }
 }
 
@@ -1127,6 +1150,38 @@ export namespace renderError {
 }
 
 /**
+ * Harden anchor links.
+ */
+export function hardenAnchorLinks(
+  node: HTMLElement,
+  resolver?: IRenderMime.IResolver | null
+): void {
+  // Handle anchor elements.
+  const anchors = node.getElementsByTagName('a');
+  for (let i = 0; i < anchors.length; i++) {
+    const el = anchors[i];
+    // skip when processing a elements inside svg
+    // which are of type SVGAnimatedString
+    if (!(el instanceof HTMLAnchorElement)) {
+      continue;
+    }
+    const path = el.href;
+    const isLocal =
+      resolver && resolver.isLocal
+        ? resolver.isLocal(path)
+        : URLExt.isLocal(path);
+    // set target attribute if not already present
+    if (!el.target) {
+      el.target = isLocal ? '_self' : '_blank';
+    }
+    // set rel as 'noopener' for non-local anchors
+    if (!isLocal) {
+      el.rel = 'noopener';
+    }
+  }
+}
+
+/**
  * The namespace for module implementation details.
  */
 namespace Private {
@@ -1178,34 +1233,7 @@ namespace Private {
   /**
    * Handle the default behavior of nodes.
    */
-  export function handleDefaults(
-    node: HTMLElement,
-    resolver?: IRenderMime.IResolver | null
-  ): void {
-    // Handle anchor elements.
-    const anchors = node.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      const el = anchors[i];
-      // skip when processing a elements inside svg
-      // which are of type SVGAnimatedString
-      if (!(el instanceof HTMLAnchorElement)) {
-        continue;
-      }
-      const path = el.href;
-      const isLocal =
-        resolver && resolver.isLocal
-          ? resolver.isLocal(path)
-          : URLExt.isLocal(path);
-      // set target attribute if not already present
-      if (!el.target) {
-        el.target = isLocal ? '_self' : '_blank';
-      }
-      // set rel as 'noopener' for non-local anchors
-      if (!isLocal) {
-        el.rel = 'noopener';
-      }
-    }
-
+  export function handleDefaults(node: HTMLElement): void {
     // Handle image elements.
     const imgs = node.getElementsByTagName('img');
     for (let i = 0; i < imgs.length; i++) {
