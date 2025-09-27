@@ -178,6 +178,44 @@ on the command line. Administrators can turn it back on by running:
 
     jupyter labextension enable @jupyterlab/cell-toolbar-extension
 
+
+.. _mermaid-diagrams:
+
+Mermaid Diagrams in Markdown Cells
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab supports rendering `Mermaid <https://mermaid.js.org/>`__ diagrams directly inside Markdown cells.
+
+Mermaid is a simple markdown-inspired syntax that lets you create diagrams like flowcharts, sequence diagrams, Gantt charts, and more.
+
+To use Mermaid in a Markdown cell:
+
+.. code-block:: markdown
+
+    ```mermaid
+    graph TD
+      A[Start] --> B{Is it working?}
+      B -- Yes --> C[Awesome!]
+      B -- No --> D[Check Mermaid config]
+    ```
+
+.. image:: ./images/mermaid-use/mermaid-example.png
+   :align: center
+   :class: jp-screenshot
+   :alt: Rendered Mermaid diagram in JupyterLab Markdown cell
+
+This will render a flowchart inside your Markdown cell when run.
+
+Notes:
+
+- Mermaid support is built into **JupyterLab 4.0+**.
+- It works only in **JupyterLab**, not in the classic Jupyter Notebook.
+- If it does not render for you, try installing the extension manually:
+
+.. code-block:: bash
+
+    jupyter labextension install @jupyterlab/mermaid-extension
+
 .. _notebook-trust:
 
 Trust
