@@ -131,7 +131,9 @@ describe('Debugger', () => {
       editorServices: {
         factoryService,
         mimeTypeService
-      }
+      },
+      notebookTracker: null,
+      config
     });
 
     await act(async () => {

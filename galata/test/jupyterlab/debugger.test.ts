@@ -43,7 +43,7 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForBreakPoints();
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
+    expect(await breakpointsPanel.innerText()).toMatch(/Cell \[ \]/);
 
     const callStackPanel = await page.debugger.getCallStackPanelLocator();
     expect(await callStackPanel.innerText()).toBe('');
@@ -52,7 +52,7 @@ test.describe('Debugger Tests', () => {
     void page.notebook.run().then();
 
     await page.debugger.waitForCallStack();
-    expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
+    expect(await callStackPanel.innerText()).toMatch(/Cell \[\*\]/);
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
