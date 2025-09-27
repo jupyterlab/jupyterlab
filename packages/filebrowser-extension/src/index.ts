@@ -160,6 +160,23 @@ namespace CommandIDs {
 }
 
 /**
+ * Settings for configuring the breadcrumb
+ */
+interface IBreadcrumbsSettings {
+  minimumBreadcrumbsLeftItems: number;
+  minimumBreadcrumbsRightItems: number;
+}
+
+/**
+ * Settings for configuring file upload behavior
+ */
+interface IUploadsSettings {
+  autoOpenUploads: boolean;
+  maxAutoOpenSizeMB: number;
+  allowFileUploads: boolean;
+}
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -256,8 +273,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
-          showFullPath: false,
-          allowFileUploads: true
+          showFullPath: false
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
@@ -266,7 +282,17 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             const value = settings.get(key).composite as boolean;
             browser[key] = value;
           }
-
+          const uploadSettings = settings.get('uploads')
+            .composite as unknown as IUploadsSettings;
+          const breadcrumbs = settings.get('breadcrumbs')
+            .composite as unknown as IBreadcrumbsSettings;
+          const minimumBreadcrumbsLeftItems =
+            breadcrumbs.minimumBreadcrumbsLeftItems;
+          const minimumBreadcrumbsRightItems =
+            breadcrumbs.minimumBreadcrumbsRightItems;
+          browser.allowFileUploads = uploadSettings.allowFileUploads;
+          browser.minimumBreadcrumbsLeftItems = minimumBreadcrumbsLeftItems;
+          browser.minimumBreadcrumbsRightItems = minimumBreadcrumbsRightItems;
           const filterDirectories = settings.get('filterDirectories')
             .composite as boolean;
           const useFuzzyFilter = settings.get('useFuzzyFilter')
@@ -1046,14 +1072,16 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     // load and watch settings
     const settings = await settingRegistry.load(FILE_BROWSER_PLUGIN_ID);
-    let autoOpen = settings.get('autoOpenUploads').composite as boolean;
-    let maxSize =
-      (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+    const uploadSettings = settings.get('uploads')
+      .composite as unknown as IUploadsSettings;
+    let autoOpen = uploadSettings.autoOpenUploads;
+    let maxSize = uploadSettings.maxAutoOpenSizeMB * 1024 * 1024;
 
     settings.changed.connect(() => {
-      autoOpen = settings.get('autoOpenUploads').composite as boolean;
-      maxSize =
-        (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+      const newUploadSettings = settings.get('uploads')
+        .composite as unknown as IUploadsSettings;
+      autoOpen = newUploadSettings.autoOpenUploads;
+      maxSize = newUploadSettings.maxAutoOpenSizeMB * 1024 * 1024;
     });
 
     // attach to the Uploader after restore
