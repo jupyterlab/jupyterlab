@@ -67,13 +67,13 @@ export class BreadCrumbs extends Widget {
     this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
     this._fullPath = options.fullPath || false;
-    this._leftItems = options.leftItems || 0;
-    this._rightItems = options.rightItems || 2;
+    this._minimumLeftItems = options.minimumLeftItems || 0;
+    this._minimumRightItems = options.minimumRightItems || 2;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators(
-      this._leftItems,
-      this._rightItems
+      this._minimumLeftItems,
+      this._minimumRightItems
     );
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
@@ -130,23 +130,23 @@ export class BreadCrumbs extends Widget {
   /**
    * Number of items to show on left of ellipsis
    */
-  get leftItems(): number {
-    return this._leftItems;
+  get minimumLeftItems(): number {
+    return this._minimumLeftItems;
   }
 
-  set leftItems(value: number) {
-    this._leftItems = value;
+  set minimumLeftItems(value: number) {
+    this._minimumLeftItems = value;
   }
 
   /**
    * Number of items to show on right of ellipsis
    */
-  get rightItems(): number {
-    return this._rightItems;
+  get minimumRightItems(): number {
+    return this._minimumRightItems;
   }
 
-  set rightItems(value: number) {
-    this._rightItems = value;
+  set minimumRightItems(value: number) {
+    this._minimumRightItems = value;
   }
 
   /**
@@ -187,8 +187,8 @@ export class BreadCrumbs extends Widget {
       path: localPath,
       hasPreferred: this._hasPreferred,
       fullPath: this._fullPath,
-      leftItems: this._leftItems,
-      rightItems: this._rightItems
+      minimumLeftItems: this._minimumLeftItems,
+      minimumRightItems: this._minimumRightItems
     };
     if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
       return;
@@ -361,8 +361,8 @@ export class BreadCrumbs extends Widget {
   private _crumbSeps: ReadonlyArray<HTMLElement>;
   private _fullPath: boolean;
   private _previousState: Private.ICrumbsState | null = null;
-  private _leftItems: number;
-  private _rightItems: number;
+  private _minimumLeftItems: number;
+  private _minimumRightItems: number;
 }
 
 /**
@@ -391,12 +391,12 @@ export namespace BreadCrumbs {
     /**
      * Number of items to show on left of ellipsis
      */
-    leftItems?: number;
+    minimumLeftItems?: number;
 
     /**
      * Number of items to show on right of ellipsis
      */
-    rightItems?: number;
+    minimumRightItems?: number;
   }
 }
 
@@ -423,8 +423,8 @@ namespace Private {
     path: string;
     hasPreferred: boolean;
     fullPath: boolean;
-    leftItems: number;
-    rightItems: number;
+    minimumLeftItems: number;
+    minimumRightItems: number;
   }
 
   /**
@@ -452,15 +452,15 @@ namespace Private {
 
     const parts = state.path.split('/').filter(part => part !== '');
     if (!state.fullPath && parts.length > 0) {
-      const leftItems = state.leftItems;
-      const rightItems = state.rightItems;
+      const minimumLeftItems = state.minimumLeftItems;
+      const minimumRightItems = state.minimumRightItems;
 
       // Check if we need ellipsis
-      if (parts.length > leftItems + rightItems) {
+      if (parts.length > minimumLeftItems + minimumRightItems) {
         let separatorIndex = 1;
 
         // Add left items
-        for (let i = 0; i < leftItems; i++) {
+        for (let i = 0; i < minimumLeftItems; i++) {
           const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
@@ -469,18 +469,18 @@ namespace Private {
 
         // Add ellipsis
         node.appendChild(breadcrumbs[Crumb.Ellipsis]);
-        const hiddenStartIndex = leftItems;
-        const hiddenEndIndex = parts.length - rightItems;
+        const hiddenStartIndex = minimumLeftItems;
+        const hiddenEndIndex = parts.length - minimumRightItems;
         const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
         const hiddenPath =
           hiddenParts.length > 0
             ? `/${parts.slice(0, hiddenEndIndex).join('/')}`
-            : `/${parts.slice(0, leftItems).join('/')}`;
+            : `/${parts.slice(0, minimumLeftItems).join('/')}`;
         breadcrumbs[Crumb.Ellipsis].title = hiddenPath;
         node.appendChild(separators[separatorIndex++]);
 
         // Add right items
-        const rightStartIndex = parts.length - rightItems;
+        const rightStartIndex = parts.length - minimumRightItems;
         for (let i = rightStartIndex; i < parts.length; i++) {
           const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
           const elem = createBreadcrumbElement(parts[i], elemPath);
@@ -555,11 +555,11 @@ namespace Private {
    * Create the breadcrumb separator nodes.
    */
   export function createCrumbSeparators(
-    leftItems: number,
-    rightItems: number
+    minimumLeftItems: number,
+    minimumRightItems: number
   ): ReadonlyArray<HTMLElement> {
     const items: HTMLElement[] = [];
-    const REQUIRED_SEPARATORS = 1 + leftItems + 1 + rightItems;
+    const REQUIRED_SEPARATORS = 1 + minimumLeftItems + 1 + minimumRightItems;
 
     for (let i = 0; i < REQUIRED_SEPARATORS; i++) {
       const item = document.createElement('span');

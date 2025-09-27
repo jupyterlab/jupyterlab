@@ -248,37 +248,51 @@
       "description": "Whether to allow single click selection on file browser items",
       "default": false
     },
-    "autoOpenUploads": {
-      "type": "boolean",
-      "title": "Auto-open uploads",
-      "description": "Automatically open uploaded notebooks and supported files",
-      "default": true
+    "uploads": {
+      "title": "File Uploads",
+      "description": "Settings related to file upload behavior.",
+      "type": "object",
+      "properties": {
+        "autoOpenUploads": {
+          "type": "boolean",
+          "title": "Auto-open uploads",
+          "description": "Automatically open uploaded notebooks and supported files",
+          "default": true
+        },
+        "maxAutoOpenSizeMB": {
+          "type": "number",
+          "title": "Max auto-open size",
+          "description": "Maximum file size (MB) to auto-open files on upload",
+          "default": 50
+        },
+        "allowFileUploads": {
+          "type": "boolean",
+          "title": "Allow file uploads",
+          "description": "Whether to allow uploading files",
+          "default": true
+        }
+      }
     },
-    "maxAutoOpenSizeMB": {
-      "type": "number",
-      "title": "Max auto-open size",
-      "description": "Maximum file size (MB) to auto-open files on upload",
-      "default": 50
-    },
-    "allowFileUploads": {
-      "type": "boolean",
-      "title": "Allow file uploads",
-      "description": "Whether to allow uploading files",
-      "default": true
-    },
-    "breadcrumbsLeftItems": {
-      "type": "number",
-      "title": "Breadcrumbs left items",
-      "description": "Number of directory items to show on the left side of the ellipsis in breadcrumbs",
-      "default": 0,
-      "minimum": 0
-    },
-    "breadcrumbsRightItems": {
-      "type": "number",
-      "title": "Breadcrumbs right items",
-      "description": "Number of directory items to show on the right side of the ellipsis in breadcrumbs",
-      "default": 2,
-      "minimum": 0
+    "breadcrumbs": {
+      "title": "Breadcrumbs",
+      "description": "Settings related to breadcrumbs display and behavior.",
+      "type": "object",
+      "properties": {
+        "minimumBreadcrumbsLeftItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs left items",
+          "description": "Minimum number of directory items to display on the left side of the breadcrumbs ellipsis",
+          "default": 0,
+          "minimum": 0
+        },
+        "minimumBreadcrumbsRightItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs right items",
+          "description": "Minimum number of directory items to display on the right side of the breadcrumbs ellipsis",
+          "default": 2,
+          "minimum": 0
+        }
+      }
     }
   },
   "additionalProperties": false,
