@@ -120,7 +120,7 @@
       "type": "number",
       "title": "Autosave Interval",
       "description": "Length of save interval in seconds",
-      "default": 120
+      "default": 5
     },
     "confirmClosingDocument": {
       "type": "boolean",
