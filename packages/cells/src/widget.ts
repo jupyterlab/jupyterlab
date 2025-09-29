@@ -169,11 +169,6 @@ const RENDERED_CLASS = 'jp-mod-rendered';
 const NO_OUTPUTS_CLASS = 'jp-mod-noOutputs';
 
 /**
- * The text applied to an empty markdown cell.
- */
-const DEFAULT_MARKDOWN_TEXT = 'Type Markdown and LaTeX: $ α^2 $';
-
-/**
  * The timeout to wait for change activity to have ceased before rendering.
  */
 const RENDER_TIMEOUT = 1000;
@@ -2185,6 +2180,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       });
 
     this._cachedHeadingText = this.model.sharedModel.getSource();
+    this._emptyPlaceholder =
+      options.emptyPlaceholder ?? trans.__('Type Markdown and LaTeX: $ α^2 $');
   }
 
   /**
@@ -2550,7 +2547,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     const model = this.model;
     const text =
-      (model && model.sharedModel.getSource()) || DEFAULT_MARKDOWN_TEXT;
+      (model && model.sharedModel.getSource()) || this._emptyPlaceholder;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
@@ -2591,6 +2588,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _showEditorForReadOnlyMarkdown = true;
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
+  private _emptyPlaceholder: string;
 }
 
 /**
@@ -2610,6 +2608,11 @@ export namespace MarkdownCell {
      * Show editor for read-only Markdown cells.
      */
     showEditorForReadOnlyMarkdown?: boolean;
+
+    /**
+     * Placeholder shown for empty Markdown cells when rendered.
+     */
+    emptyPlaceholder?: string;
   }
 
   /**

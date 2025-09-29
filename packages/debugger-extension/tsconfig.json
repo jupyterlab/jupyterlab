@@ -13,10 +13,10 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
+      "path": "../codeeditor"
     },
     {
-      "path": "../codeeditor"
+      "path": "../completer"
     },
     {
       "path": "../console"
@@ -34,7 +34,7 @@
       "path": "../fileeditor"
     },
     {
-      "path": "../logconsole"
+      "path": "../nbformat"
     },
     {
       "path": "../notebook"
