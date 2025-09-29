@@ -231,7 +231,7 @@ export class BreadCrumbs extends Widget {
         if (node.classList.contains(BREADCRUMB_ROOT_CLASS)) {
           destination = '/';
         } else {
-          destination = node.title;
+          destination = `/${node.title}`;
         }
         this._model
           .cd(destination)
@@ -461,7 +461,7 @@ namespace Private {
 
         // Add left items
         for (let i = 0; i < minimumLeftItems; i++) {
-          const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
+          const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(separators[separatorIndex++]);
@@ -474,22 +474,22 @@ namespace Private {
         const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
         const hiddenPath =
           hiddenParts.length > 0
-            ? `/${parts.slice(0, hiddenEndIndex).join('/')}`
-            : `/${parts.slice(0, minimumLeftItems).join('/')}`;
+            ? parts.slice(0, hiddenEndIndex).join('/')
+            : parts.slice(0, minimumLeftItems).join('/');
         breadcrumbs[Crumb.Ellipsis].title = hiddenPath;
         node.appendChild(separators[separatorIndex++]);
 
         // Add right items
         const rightStartIndex = parts.length - minimumRightItems;
         for (let i = rightStartIndex; i < parts.length; i++) {
-          const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
+          const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(separators[separatorIndex++]);
         }
       } else {
         for (let i = 0; i < parts.length; i++) {
-          const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
+          const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
           node.appendChild(separators[i + 1]);
@@ -497,7 +497,7 @@ namespace Private {
       }
     } else if (state.fullPath && parts.length > 0) {
       for (let i = 0; i < parts.length; i++) {
-        const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
+        const elemPath = parts.slice(0, i + 1).join('/');
         const elem = createBreadcrumbElement(parts[i], elemPath);
         node.appendChild(elem);
         const separator = document.createElement('span');
