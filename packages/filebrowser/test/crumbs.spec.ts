@@ -315,8 +315,8 @@ describe('filebrowser/model', () => {
       it('should show correct number of left and right directories with ellipsis', async () => {
         const customCrumbs = new LogCrumbs({
           model,
-          leftItems: 1,
-          rightItems: 1
+          minimumLeftItems: 1,
+          minimumRightItems: 1
         });
         Widget.attach(customCrumbs, document.body);
         MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
@@ -332,8 +332,8 @@ describe('filebrowser/model', () => {
           `/${first}/${second}/${third}`
         );
 
-        customCrumbs.leftItems = 0;
-        customCrumbs.rightItems = 0;
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 0;
         customCrumbs.update();
         MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
         items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
@@ -341,8 +341,8 @@ describe('filebrowser/model', () => {
         expect(items.length).toBe(2);
         expect(items[1].querySelector('svg')).not.toBeNull();
 
-        customCrumbs.leftItems = 0;
-        customCrumbs.rightItems = 2;
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 2;
         customCrumbs.update();
         MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
         items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
@@ -352,9 +352,9 @@ describe('filebrowser/model', () => {
         expect(items[2].textContent).toBe(second);
         expect(items[3].textContent).toBe(third);
 
-        // Set leftItems = 2, rightItems = 0,
-        customCrumbs.leftItems = 2;
-        customCrumbs.rightItems = 0;
+        // Set minimumLeftItems = 2, minimumRightItems = 0,
+        customCrumbs.minimumLeftItems = 2;
+        customCrumbs.minimumRightItems = 0;
         customCrumbs.update();
         MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
         items = customCrumbs.node.querySelectorAll(ITEM_QUERY);

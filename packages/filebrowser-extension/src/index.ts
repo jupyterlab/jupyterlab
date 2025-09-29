@@ -160,6 +160,14 @@ namespace CommandIDs {
 }
 
 /**
+ * Settings for configuring the breadcrumb
+ */
+interface IBreadcrumbsSettings {
+  minimumBreadcrumbsLeftItems: number;
+  minimumBreadcrumbsRightItems: number;
+}
+
+/**
  * The file browser namespace token.
  */
 const namespace = 'filebrowser';
@@ -257,18 +265,23 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
           showFullPath: false,
-          allowFileUploads: true,
-          breadcrumbsLeftItems: 0,
-          breadcrumbsRightItems: 2
+          allowFileUploads: true
         };
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
-            const value = settings.get(key).composite;
-            (browser as any)[key] = value;
+            const value = settings.get(key).composite as boolean;
+            browser[key] = value;
           }
-
+          const breadcrumbs = settings.get('breadcrumbs')
+            .composite as unknown as IBreadcrumbsSettings;
+          const minimumBreadcrumbsLeftItems =
+            breadcrumbs.minimumBreadcrumbsLeftItems;
+          const minimumBreadcrumbsRightItems =
+            breadcrumbs.minimumBreadcrumbsRightItems;
+          browser.minimumBreadcrumbsLeftItems = minimumBreadcrumbsLeftItems;
+          browser.minimumBreadcrumbsRightItems = minimumBreadcrumbsRightItems;
           const filterDirectories = settings.get('filterDirectories')
             .composite as boolean;
           const useFuzzyFilter = settings.get('useFuzzyFilter')
