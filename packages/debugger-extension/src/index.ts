@@ -1246,7 +1246,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
       app.shell.add(debugConsoleWidget, 'main', {
         mode: 'split-bottom',
         activate: true,
-        type: 'Debugger console'
+        type: 'Debugger Console'
       });
 
       void debugConsoleTracker.add(debugConsoleWidget);
