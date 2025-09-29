@@ -1291,9 +1291,18 @@ export namespace StaticNotebook {
      * - 'defer': Wait for idle CPU cycles to attach out of viewport cells
      * - 'full': Attach to the DOM only cells in viewport
      * - 'none': Attach all cells to the viewport
+     * - 'contentVisibility': Use content-visibility to skip offscreen cells
      */
     windowingMode: 'defer' | 'full' | 'none' | 'contentVisibility';
     accessKernelHistory?: boolean;
+
+    /**
+     * Whether to show a minimap alongside the notebook.
+     *
+     * The minimap provides a scroll-synchronized view of the
+     * notebook’s content to help with navigation.
+     */
+    showMinimap?: boolean;
   }
 
   /**
@@ -1315,9 +1324,10 @@ export namespace StaticNotebook {
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
-    windowingMode: 'full',
+    windowingMode: 'contentVisibility',
     accessKernelHistory: false,
-    showInputPlaceholder: true
+    showInputPlaceholder: true,
+    showMinimap: false
   };
 
   /**
