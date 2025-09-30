@@ -324,12 +324,12 @@ describe('filebrowser/model', () => {
         let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
         expect(items.length).toBe(4);
         expect(items[1].textContent).toBe(first);
-        expect((items[1] as HTMLElement).title).toBe(`/${first}`);
+        expect((items[1] as HTMLElement).title).toBe(`${first}`);
         // Ellipsis
         expect(items[2].querySelector('svg')).not.toBeNull();
         expect(items[3].textContent).toBe(third);
         expect((items[3] as HTMLElement).title).toBe(
-          `/${first}/${second}/${third}`
+          `${first}/${second}/${third}`
         );
 
         customCrumbs.minimumLeftItems = 0;
