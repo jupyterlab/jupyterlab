@@ -270,6 +270,10 @@
       "title": "Breadcrumbs",
       "description": "Settings related to breadcrumbs display and behavior.",
       "type": "object",
+      "default": {
+        "minimumBreadcrumbsLeftItems": 0,
+        "minimumBreadcrumbsRightItems": 2
+      },
       "properties": {
         "minimumBreadcrumbsLeftItems": {
           "type": "number",
