@@ -206,7 +206,7 @@ test.describe('Reactive toolbar', () => {
     page
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
-    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(15);
+    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(14);
     await expect(
       toolbar.locator('.jp-Toolbar-responsive-opener')
     ).not.toBeVisible();
@@ -236,13 +236,12 @@ test.describe('Reactive toolbar', () => {
       'body > .jp-Toolbar-responsive-popup:visible'
     );
     const popupToolbarItems = popupToolbar.locator('.jp-Toolbar-item:visible');
-    await expect(popupToolbarItems).toHaveCount(4);
+    await expect(popupToolbarItems).toHaveCount(3);
 
     const itemChildClasses = [
       '.jp-DebuggerBugButton',
       '.jp-Toolbar-kernelName',
-      '.jp-Notebook-ExecutionIndicator',
-      '[data-command="notebook:toggle-virtual-scrollbar"]'
+      '.jp-Notebook-ExecutionIndicator'
     ];
 
     for (let i = 0; i < (await popupToolbarItems.count()); i++) {
