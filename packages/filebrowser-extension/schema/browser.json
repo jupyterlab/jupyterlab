@@ -271,18 +271,18 @@
       "description": "Settings related to breadcrumbs display and behavior.",
       "type": "object",
       "default": {
-        "minimumBreadcrumbsLeftItems": 0,
-        "minimumBreadcrumbsRightItems": 2
+        "minimumLeftItems": 0,
+        "minimumRightItems": 2
       },
       "properties": {
-        "minimumBreadcrumbsLeftItems": {
+        "minimumLeftItems": {
           "type": "number",
           "title": "Minimum breadcrumbs left items",
           "description": "Minimum number of directory items to display on the left side of the breadcrumbs ellipsis",
           "default": 0,
           "minimum": 0
         },
-        "minimumBreadcrumbsRightItems": {
+        "minimumRightItems": {
           "type": "number",
           "title": "Minimum breadcrumbs right items",
           "description": "Minimum number of directory items to display on the right side of the breadcrumbs ellipsis",

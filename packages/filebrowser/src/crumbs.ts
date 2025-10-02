@@ -67,8 +67,8 @@ export class BreadCrumbs extends Widget {
     this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
     this._fullPath = options.fullPath || false;
-    this._minimumLeftItems = options.minimumLeftItems || 0;
-    this._minimumRightItems = options.minimumRightItems || 2;
+    this._minimumLeftItems = options.minimumLeftItems ?? 0;
+    this._minimumRightItems = options.minimumRightItems ?? 2;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators(

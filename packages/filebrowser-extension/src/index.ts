@@ -163,8 +163,8 @@ namespace CommandIDs {
  * Settings for configuring the breadcrumb
  */
 interface IBreadcrumbsSettings {
-  minimumBreadcrumbsLeftItems: number;
-  minimumBreadcrumbsRightItems: number;
+  minimumLeftItems: number;
+  minimumRightItems: number;
 }
 
 /**
@@ -276,12 +276,8 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           }
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
-          const minimumBreadcrumbsLeftItems =
-            breadcrumbs.minimumBreadcrumbsLeftItems;
-          const minimumBreadcrumbsRightItems =
-            breadcrumbs.minimumBreadcrumbsRightItems;
-          browser.minimumBreadcrumbsLeftItems = minimumBreadcrumbsLeftItems;
-          browser.minimumBreadcrumbsRightItems = minimumBreadcrumbsRightItems;
+          browser.minimumBreadcrumbsLeftItems = breadcrumbs.minimumLeftItems;
+          browser.minimumBreadcrumbsRightItems = breadcrumbs.minimumRightItems;
           const filterDirectories = settings.get('filterDirectories')
             .composite as boolean;
           const useFuzzyFilter = settings.get('useFuzzyFilter')
