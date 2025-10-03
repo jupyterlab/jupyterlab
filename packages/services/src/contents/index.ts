@@ -1633,7 +1633,7 @@ namespace Private {
 /**
  * The default registry of content providers.
  */
-class ContentProviderRegistry implements IContentProviderRegistry {
+export class ContentProviderRegistry implements IContentProviderRegistry {
   /**
    * Construct a new content provider registry.
    *
