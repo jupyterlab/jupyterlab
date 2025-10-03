@@ -1324,7 +1324,7 @@ export namespace StaticNotebook {
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
-    windowingMode: 'full',
+    windowingMode: 'contentVisibility',
     accessKernelHistory: false,
     showInputPlaceholder: true,
     showMinimap: false
