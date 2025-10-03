@@ -181,7 +181,7 @@ test.describe('Debugger Variables', () => {
   async function init({ page, tmpPath }) {
     // Initialize the debugger.
     await page.goto(`tree/${tmpPath}`);
-    await createNotebook(page);
+    await createNotebook(page, tmpPath);
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
@@ -327,8 +327,14 @@ test.describe('Debugger Variables', () => {
   });
 });
 
-async function createNotebook(page: IJupyterLabPageFixture) {
-  await page.notebook.createNew();
+async function createNotebook(page: IJupyterLabPageFixture, tmpPath: string) {
+  const fileName = 'debugger_variables.ipynb';
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `./notebooks/${fileName}`),
+    `${tmpPath}/${fileName}`
+  );
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  await page.notebook.activate(fileName);
 
   await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 }
@@ -337,13 +343,7 @@ async function setBreakpoint(page: IJupyterLabPageFixture) {
   // Close left side panel to avoid side effect when entering the cell editor.
   await page.sidebar.close('left');
 
-  await page.notebook.setCell(
-    0,
-    'code',
-    'global_var = 1\ndef add(a, b):\n    local_var = a + b\n    return local_var'
-  );
-  await page.notebook.run();
-  await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
+  await page.notebook.runCell(0);
 
   await page.notebook.clickCellGutter(0, 4);
 }
