@@ -48,7 +48,7 @@ export const licensesClient: JupyterFrontEndPlugin<ILicensesClient> = {
   activate: (app: JupyterFrontEnd) => {
     const licensesUrl =
       URLExt.join(
-        PageConfig.getBaseUrl(),
+        app.serviceManager.serverSettings.baseUrl,
         PageConfig.getOption('licensesUrl')
       ) + '/';
     const serverSettings = app.serviceManager.serverSettings;
