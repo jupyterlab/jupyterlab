@@ -387,7 +387,7 @@ Launcher
 
 As with menus, keyboard shortcuts, and the command palette, new items can be added
 to the application launcher via commands.
-You can do this by requesting the :ts:interface:``launcher.ILauncher`` token in your extension:
+You can do this by requesting the :ts:interface:`launcher.ILauncher` token in your extension:
 
 .. code:: typescript
 
@@ -658,7 +658,7 @@ The available semantic menu items are:
 
 - :ts:interface:`mainmenu.IEditMenu.IUndoer`: an activity that knows how to undo and redo.
 - :ts:interface:`mainmenu.IEditMenu.IClearer`: an activity that knows how to clear its content.
-- ``mainmenu.IEditMenu.IGoToLiner``: an activity that knows how to jump to a given line.
+- ``IGoToLiner``: an activity that knows how to jump to a given line.
 - :ts:interface:`mainmenu.IKernelMenu.IKernelUser`: an activity that can perform various kernel-related operations.
 - :ts:interface:`mainmenu.IRunMenu.ICodeRunner`: an activity that can run code from its content.
 - :ts:interface:`mainmenu.IViewMenu.IEditorViewer`: an activity that knows how to set various view-related options on a text editor that it owns.
