@@ -271,13 +271,11 @@ export const ySync = ViewPlugin.fromClass(
  * @param undoManager Yjs text undo manager
  * @returns CodeMirror 6 extension
  */
-export function ybinding({
-  ytext,
-  undoManager
-}: {
+export function ybinding(options: {
   ytext: Text;
   undoManager?: UndoManager;
 }): Extension {
+  const { ytext, undoManager } = options;
   const ySyncConfig = new YSyncConfig(ytext);
   const plugins = [ySyncFacet.of(ySyncConfig), ySync];
   if (undoManager) {
