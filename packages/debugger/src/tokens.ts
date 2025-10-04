@@ -886,6 +886,14 @@ export namespace IDebugger {
        * @param breakpoints The list of breakpoints.
        */
       setBreakpoints(id: string, breakpoints: IBreakpoint[]): void;
+
+      /**
+       * Function to get a display name for a breakpoint.
+       *
+       * @param breakpoint The breakpoint object.
+       * @returns The display name.
+       */
+      getDisplayName(breakpoint: IBreakpoint): string;
     }
 
     /**
@@ -911,6 +919,14 @@ export namespace IDebugger {
        * Signal emitted when the frames have changed.
        */
       readonly framesChanged: ISignal<this, IDebugger.IStackFrame[]>;
+
+      /**
+       * Function to get a display name for a frame.
+       *
+       * @param frame The frame object.
+       * @returns The display name.
+       */
+      getDisplayName?(frame: IDebugger.IStackFrame): string;
     }
 
     /**
@@ -1010,6 +1026,14 @@ export namespace IDebugger {
        * Open a source in the main area.
        */
       open(): void;
+
+      /**
+       * Function to get a display name for a frame.
+       *
+       * @param frame The frame object.
+       * @returns The display name.
+       */
+      getDisplayName(frame: IDebugger.IStackFrame): string;
     }
 
     /**

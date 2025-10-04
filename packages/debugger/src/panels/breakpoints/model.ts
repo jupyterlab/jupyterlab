@@ -2,13 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISignal, Signal } from '@lumino/signaling';
-
 import { IDebugger } from '../../tokens';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 /**
  * A model for a list of breakpoints.
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
+  constructor(
+    private config: IDebugger.IConfig,
+    private notebookTracker: INotebookTracker | null
+  ) {}
+
   /**
    * Signal emitted when the model changes.
    */
@@ -81,12 +87,48 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
 
   /**
    * Restore a map of breakpoints.
-   *
-   * @param breakpoints The map of breakpoints
    */
   restoreBreakpoints(breakpoints: Map<string, IDebugger.IBreakpoint[]>): void {
     this._breakpoints = breakpoints;
     this._restored.emit();
+  }
+
+  /**
+   * Get a human-readable display string for a breakpoint.
+   * Shows execution count if notebook cell, [*] if running, [ ] if never executed.
+   */
+  getDisplayName(breakpoint: IDebugger.IBreakpoint): string {
+    if (!this.notebookTracker || !this.config) {
+      return breakpoint.source?.path ?? '';
+    }
+
+    let display = breakpoint.source?.path ?? '';
+
+    this.notebookTracker.forEach(panel => {
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+      panel.content.widgets.forEach(cell => {
+        if (cell.model.type !== 'code') return;
+
+        const code = cell.model.sharedModel.getSource();
+        const codeId = this.config?.getCodeId(code, kernelName);
+
+        if (codeId && codeId === breakpoint.source?.path) {
+          if (isCodeCellModel(cell.model)) {
+            if (cell.model.executionState === 'running') {
+              display = `Cell [*]`;
+            } else if (cell.model.executionCount === null) {
+              display = `Cell [ ]`;
+            } else {
+              display = `Cell [${cell.model.executionCount}]`;
+            }
+          }
+        }
+      });
+    });
+
+    console.log(display);
+
+    return display;
   }
 
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
