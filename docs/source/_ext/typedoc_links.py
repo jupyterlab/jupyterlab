@@ -10,6 +10,7 @@ from pathlib import Path
 
 from docutils import nodes
 from sphinx.application import Sphinx
+from sphinx.domains import Domain
 from sphinx.util.docutils import SphinxRole
 
 
@@ -75,21 +76,50 @@ class TypeDocReference(SphinxRole):
         return [ref_node], []
 
 
-def setup(app: Sphinx) -> dict:
-    """Setup the TypeDoc links extension."""
+class TypeScriptDomain(Domain):
+    """TypeScript domain for TypeDoc API references."""
 
-    def create_role(kind):
-        def role(name, rawtext, text, lineno, inliner, options=None, content=None):
-            role_instance = TypeDocReference(kind)
+    name = "ts"
+    label = "TypeScript"
+
+    def __init__(self, env):
+        super().__init__(env)
+
+        # Create role functions for each API type
+        self.roles = {}
+        for api_type in [
+            "module",
+            "interface",
+            "class",
+            "namespace",
+            "type",
+            "variable",
+            "function",
+        ]:
+            self.roles[api_type] = self._create_role(api_type)
+
+    def _create_role(self, api_type: str):
+        """Create a role function for a specific API type."""
+
+        def role_function(name, rawtext, text, lineno, inliner, options=None, content=None):
+            role_instance = TypeDocReference(api_type)
             role_instance.rawtext = rawtext
             role_instance.text = text
             role_instance.inliner = inliner
             return role_instance.run()
 
-        return role
+        return role_function
 
-    for kind in ["module", "interface", "class", "namespace", "type", "variable", "function"]:
-        app.add_role(f"ts:{kind}", create_role(kind))
+    def role(self, name: str):
+        """Return the role function for the given role name."""
+        return self.roles.get(name)
+
+
+def setup(app: Sphinx) -> dict:
+    """Setup the TypeDoc links extension."""
+
+    # Register the TypeScript domain
+    app.add_domain(TypeScriptDomain)
 
     return {
         "version": "1.0",
