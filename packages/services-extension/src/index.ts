@@ -268,6 +268,9 @@ const terminalManagerPlugin: ServiceManagerPlugin<Terminal.IManager> = {
     serverSettings: ServerConnection.ISettings | undefined,
     connectionStatus: IConnectionStatus | undefined
   ): Terminal.IManager => {
+    if (!Terminal.isAvailable()) {
+      return new TerminalManager.NoopManager();
+    }
     return new TerminalManager({
       serverSettings,
       standby: () => {
