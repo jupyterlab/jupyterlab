@@ -113,7 +113,7 @@ export class SourcesBody extends Widget {
       debuggerService: this._debuggerService,
       editorReady: () => Promise.resolve(this._editor.editor),
       getEditor: () => this._editor.editor,
-      path: displayPath,
+      path: frame.source?.path ?? '',
       src: this._editor.model.sharedModel
     });
 
