@@ -5,5 +5,5 @@
 
 const func = require('@jupyterlab/testing/lib/jest-config');
 const config = func(__dirname);
-config['testEnvironment'] = './lib/jest-env.js';
+config['testEnvironment'] = './jest-env.js';
 module.exports = config;
