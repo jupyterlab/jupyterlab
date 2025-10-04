@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
 
-const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
 const GHOST_LINE_SPACER_CLASS = '.jp-GhostText-lineSpacer';
@@ -20,14 +20,15 @@ const SHARED_SETTINGS = {
 };
 
 test.describe('Inline Completer', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.notebook.createNew(fileName);
-    await page.notebook.setCell(0, 'code', 'suggestion_1 = 1');
-    await page.notebook.addCell(
-      'code',
-      'suggestion_2 = 2\n# second line\n# third line'
+  test.beforeEach(async ({ page, tmpPath }) => {
+    const fileName = 'inline_completer.ipynb';
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
     );
-    await page.notebook.addCell('code', 's');
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+
     await page.notebook.runCell(0, true);
     await page.notebook.runCell(1, true);
     await page.notebook.enterCellEditingMode(2);
