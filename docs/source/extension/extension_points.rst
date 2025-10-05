@@ -658,7 +658,9 @@ The available semantic menu items are:
 
 - :ts:interface:`mainmenu.IEditMenu.IUndoer`: an activity that knows how to undo and redo.
 - :ts:interface:`mainmenu.IEditMenu.IClearer`: an activity that knows how to clear its content.
-- ``IGoToLiner``: an activity that knows how to jump to a given line.
+- ``IEditMenu.IGoToLiner``: an activity that knows how to jump to a given line.
+- ``IFileMenu.ICloseAndCleaner``: an activity that knows how to close and clean up after itself.
+- ``IFileMenu.IConsoleCreator``: an activity that knows how to create an attached code console for itself.
 - :ts:interface:`mainmenu.IKernelMenu.IKernelUser`: an activity that can perform various kernel-related operations.
 - :ts:interface:`mainmenu.IRunMenu.ICodeRunner`: an activity that can run code from its content.
 - :ts:interface:`mainmenu.IViewMenu.IEditorViewer`: an activity that knows how to set various view-related options on a text editor that it owns.
