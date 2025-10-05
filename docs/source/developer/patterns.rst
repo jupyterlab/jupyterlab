@@ -168,6 +168,55 @@ that do not support them. When handling a resolved or rejected Promise,
 make sure to check for the current state (typically by checking an
 ``.isDisposed`` property) before proceeding.
 
+Server Requests
+---------------
+
+To allow hot-swapping the Jupyter Server in custom applications
+based of JupyterLab components, the request URL should be composed using
+the base URL from the ``ServerConnection.ISettings`` instance derived
+from the service manager, passed down via class constructors as needed.
+The `PageConfig.getBaseUrl()` should not be used directly.
+The following snippets demonstrats the best practice:
+
+.. code:: typescript
+
+    import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+    import { ServerConnection } from '@jupyterlab/services';
+    import { URLExt } from '@jupyterlab/coreutils';
+
+    export class MyAPIClient {
+      constructor(options: MyAPIClient.IOptions = {}) {
+        this._serverSettings = options.serverSettings ?? ServerConnection.makeSettings();
+      }
+      get apiURL() {
+        // If URL needs to be exposed, use a getter to allow hot-swapping
+        const { baseUrl } = this._serverSettings;
+        return URLExt.join(baseUrl, 'my-api')
+      }
+      async fetch() {
+        const { makeRequest } = ServerConnection;
+        const response: Response = await makeRequest(this.apiURL, {}, this._serverSettings);
+
+        // Do something with the response
+        console.log(response)
+      }
+      private _serverSettings: ServerConnection.ISettings;
+    }
+
+    export namespace MyAPIClient {
+      export interface IOptions {
+        serverSettings?: ServerConnection.ISettings;
+      }
+    }
+
+    export const plugin: JupyterFrontEndPlugin<MyAPIClient> = {
+      id: 'my-extension-name:MyAPIClient',
+      autoStart: true,
+      activate: (app: JupyterFrontEnd) => {
+          return new MyAPIClient({ serverSettings: app.serviceManager.serverSettings });
+      },
+    };
+
 Command Names
 -------------
 
