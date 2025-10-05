@@ -863,7 +863,7 @@ export namespace IDebugger {
       /**
        * Selected breakpoint
        */
-      selectedBreakpoint: IDebugger.IBreakpoint;
+      selectedBreakpoint: IDebugger.IBreakpoint | null;
 
       /**
        * Get the breakpoints for a given id (path).

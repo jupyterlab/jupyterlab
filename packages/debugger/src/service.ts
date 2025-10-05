@@ -260,11 +260,15 @@ export class DebuggerService implements IDebugger, IDisposable {
       expression,
       frameId
     });
+
     if (!reply.success) {
       return null;
     }
+
+    // TODO - Should this be here?
+    this._model.variables.scopes = [];
+
     // get the frames to retrieve the latest state of the variables
-    this._clearModel();
     await this._getAllFrames();
 
     return reply.body;
