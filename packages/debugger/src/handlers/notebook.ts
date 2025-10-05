@@ -100,7 +100,7 @@ export class NotebookHandler implements IDisposable {
     overlay.appendChild(text);
 
     const continueBtn = document.createElement('button');
-    continueBtn.className = 'jp-DebuggerPausedBtn';
+    continueBtn.className = 'jp-DebuggerPausedButton';
     continueBtn.title = this._trans.__('Continue');
     runIcon.element({ container: continueBtn, elementPosition: 'center' });
     continueBtn.onclick = () => {
@@ -108,11 +108,11 @@ export class NotebookHandler implements IDisposable {
     };
 
     const nextBtn = document.createElement('button');
-    nextBtn.className = 'jp-DebuggerPausedBtn';
+    nextBtn.className = 'jp-DebuggerPausedButton';
     nextBtn.title = this._trans.__('Next');
     stepOverIcon.element({ container: nextBtn, elementPosition: 'center' });
     nextBtn.onclick = () => {
-      this._debuggerService.next();
+      void this._debuggerService.next();
     };
 
     overlay.appendChild(continueBtn);
