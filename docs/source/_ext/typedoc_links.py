@@ -62,7 +62,7 @@ class TypeDocReference(SphinxRole):
             msg = f"Target not found :ts:{self.api_type}:`{target}` in API Reference. Check type, module name, and typos."
             raise ValueError(msg)
 
-        url = f"/api/{plural_api}/{actual_file}.html"
+        url = f"../api/{plural_api}/{actual_file}.html"
 
         # Create the reference node with <code> inside
         code_node = nodes.literal(text=f"{name}")
