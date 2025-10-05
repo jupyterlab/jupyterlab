@@ -1,31 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
+import * as path from 'path';
 
-const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor';
+const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor .cm-content';
 const DEBUG_CONSOLE_SELECTOR = '.jp-DebugConsole';
 const DEBUG_CONSOLE_WIDGET_SELECTOR = '.jp-DebugConsole-widget';
+
+const fileName = 'debugger_console.ipynb';
 
 async function setupDebuggerConsole(
   page: IJupyterLabPageFixture,
   tmpPath: string
 ) {
-  // Create a new notebook
-  await page.notebook.createNew();
-
-  // Add some code with variables to debug
-  await page.notebook.setCell(
-    0,
-    'code',
-    `def test_function():
-    user_count = 42
-    welcome_message = "hello world"
-    data_list = [1, 2, 3, 4, 5]
-    return user_count, welcome_message, data_list
-
-result = test_function()`
-  );
+  // Open a notebook which has code setting variables to debug
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   // Wait for kernel to be ready
   await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
@@ -61,6 +56,16 @@ result = test_function()`
 }
 
 test.describe('Debugger Console', () => {
+  test.use({ tmpPath: 'test-debugger-console' });
+
+  test.beforeAll(async ({ tmpPath, request }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+  });
+
   test.beforeEach(async ({ page, tmpPath }) => {
     await setupDebuggerConsole(page, tmpPath);
   });
@@ -134,7 +139,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Evaluate local variable 'user_count'
-    await inputArea.type('user_count');
+    await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
 
     // Wait for output to appear
@@ -159,7 +164,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Evaluate an expression using local variables
-    await inputArea.type('user_count + 10');
+    await inputArea.fill('user_count + 10');
     await inputArea.press('Shift+Enter');
 
     // Wait for output to appear
@@ -184,7 +189,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Evaluate list variable 'data_list'
-    await inputArea.type('data_list');
+    await inputArea.fill('data_list');
     await inputArea.press('Shift+Enter');
 
     // Wait for output to appear
@@ -206,7 +211,7 @@ test.describe('Debugger Console', () => {
     await inputArea.click();
     await inputArea.waitFor();
 
-    await inputArea.type('welcome_message.');
+    await inputArea.fill('welcome_message.');
     await inputArea.press('Tab');
     await page.waitForTimeout(1000);
 
@@ -241,7 +246,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Type 'user_' and trigger completion
-    await inputArea.type('user_');
+    await inputArea.fill('user_');
     await inputArea.press('Tab');
     await page.waitForTimeout(1000);
 
@@ -288,7 +293,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Try to evaluate some code when debugger has no stopped threads
-    await inputArea.type('user_count');
+    await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
 
     // Wait for output to appear
@@ -313,7 +318,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // First, verify the original value
-    await inputArea.type('user_count');
+    await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -322,13 +327,13 @@ test.describe('Debugger Console', () => {
 
     // Modify the variable
     await inputArea.click();
-    await inputArea.type('user_count = 100');
+    await inputArea.fill('user_count = 100');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
     // Verify the variable now has the new value
     await inputArea.click();
-    await inputArea.type('user_count');
+    await inputArea.fill('user_count');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -337,13 +342,13 @@ test.describe('Debugger Console', () => {
 
     // Modify another variable
     await inputArea.click();
-    await inputArea.type('welcome_message = "modified message"');
+    await inputArea.fill('welcome_message = "modified message"');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
     // Verify the modification
     await inputArea.click();
-    await inputArea.type('welcome_message');
+    await inputArea.fill('welcome_message');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -363,7 +368,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Test function call
-    await inputArea.type('len(data_list)');
+    await inputArea.fill('len(data_list)');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -372,7 +377,7 @@ test.describe('Debugger Console', () => {
 
     // Test complex expression
     await inputArea.click();
-    await inputArea.type('user_count * 2 + len(welcome_message)');
+    await inputArea.fill('user_count * 2 + len(welcome_message)');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -381,7 +386,7 @@ test.describe('Debugger Console', () => {
 
     // Test list comprehension
     await inputArea.click();
-    await inputArea.type('[x * 2 for x in data_list]');
+    await inputArea.fill('[x * 2 for x in data_list]');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -390,7 +395,7 @@ test.describe('Debugger Console', () => {
 
     // Test string methods
     await inputArea.click();
-    await inputArea.type('welcome_message.upper()');
+    await inputArea.fill('welcome_message.upper()');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
@@ -408,7 +413,7 @@ test.describe('Debugger Console', () => {
     await inputArea.waitFor();
 
     // Test bad input
-    await inputArea.type('1 / 0');
+    await inputArea.fill('1 / 0');
     await inputArea.press('Shift+Enter');
     await page.waitForTimeout(1000);
 
