@@ -11,8 +11,8 @@ import { isCodeCellModel } from '@jupyterlab/cells';
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   constructor(
-    private config: IDebugger.IConfig,
-    private notebookTracker: INotebookTracker | null
+    private _config: IDebugger.IConfig,
+    private _notebookTracker: INotebookTracker | null
   ) {}
 
   /**
@@ -98,19 +98,19 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
    * Shows execution count if notebook cell, [*] if running, [ ] if never executed.
    */
   getDisplayName(breakpoint: IDebugger.IBreakpoint): string {
-    if (!this.notebookTracker || !this.config) {
+    if (!this._notebookTracker || !this._config) {
       return breakpoint.source?.path ?? '';
     }
 
     let display = breakpoint.source?.path ?? '';
 
-    this.notebookTracker.forEach(panel => {
+    this._notebookTracker.forEach(panel => {
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
       panel.content.widgets.forEach(cell => {
         if (cell.model.type !== 'code') return;
 
         const code = cell.model.sharedModel.getSource();
-        const codeId = this.config?.getCodeId(code, kernelName);
+        const codeId = this._config?.getCodeId(code, kernelName);
 
         if (codeId && codeId === breakpoint.source?.path) {
           if (isCodeCellModel(cell.model)) {

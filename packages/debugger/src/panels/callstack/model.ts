@@ -12,8 +12,8 @@ import { INotebookTracker } from '@jupyterlab/notebook';
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
   constructor(
-    private config: IDebugger.IConfig,
-    private notebookTracker: INotebookTracker | null
+    private _config: IDebugger.IConfig,
+    private _notebookTracker: INotebookTracker | null
   ) {}
 
   /**
@@ -75,19 +75,19 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
    * Returns a human-readable display for a frame.
    */
   getDisplayName(frame: IDebugger.IStackFrame): string {
-    if (!this.notebookTracker || !this.config) {
+    if (!this._notebookTracker || !this._config) {
       return frame.source?.path ?? '';
     }
 
     let display = frame.source?.path ?? '';
 
-    this.notebookTracker.forEach(panel => {
+    this._notebookTracker.forEach(panel => {
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
       panel.content.widgets.forEach(cell => {
         if (cell.model.type !== 'code') return;
 
         const code = cell.model.sharedModel.getSource();
-        const codeId = this.config.getCodeId(code, kernelName);
+        const codeId = this._config.getCodeId(code, kernelName);
 
         if (codeId && codeId === frame.source?.path) {
           if (isCodeCellModel(cell.model)) {

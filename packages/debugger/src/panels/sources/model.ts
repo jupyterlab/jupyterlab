@@ -18,8 +18,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
    */
   constructor(options: SourcesModel.IOptions) {
     this.currentFrameChanged = options.currentFrameChanged;
-    this.notebookTracker = options.notebookTracker ?? undefined;
-    this.config = options.config;
+    this._notebookTracker = options.notebookTracker ?? undefined;
+    this._config = options.config;
   }
 
   /**
@@ -76,17 +76,17 @@ export class SourcesModel implements IDebugger.Model.ISources {
   getDisplayName(frame: IDebugger.IStackFrame): string {
     let display = frame.source?.path ?? '';
 
-    if (!this.notebookTracker || !this.config || !frame.source?.path) {
+    if (!this._notebookTracker || !this._config || !frame.source?.path) {
       return display;
     }
 
-    this.notebookTracker.forEach(panel => {
+    this._notebookTracker.forEach(panel => {
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
       panel.content.widgets.forEach(cell => {
         if (cell.model.type !== 'code') return;
 
         const code = cell.model.sharedModel.getSource();
-        const codeId = this.config!.getCodeId(code, kernelName);
+        const codeId = this._config!.getCodeId(code, kernelName);
 
         if (codeId === frame.source?.path) {
           if (isCodeCellModel(cell.model)) {
@@ -114,8 +114,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
     SourcesModel,
     IDebugger.Source | null
   >(this);
-  private notebookTracker?: INotebookTracker;
-  private config?: IDebugger.IConfig;
+  private _notebookTracker?: INotebookTracker;
+  private _config?: IDebugger.IConfig;
 }
 
 /**
