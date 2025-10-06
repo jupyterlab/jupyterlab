@@ -118,6 +118,9 @@ export class NotebookHandler implements IDisposable {
     overlay.appendChild(continueBtn);
     overlay.appendChild(nextBtn);
 
+    this._notebookPanel.node.style.pointerEvents = 'none';
+    overlay.style.pointerEvents = 'auto';
+
     this._notebookPanel.node.appendChild(overlay);
     this._pausedOverlay = overlay;
   }
@@ -126,6 +129,9 @@ export class NotebookHandler implements IDisposable {
     if (!this._pausedOverlay) {
       return;
     }
+
+    this._notebookPanel.node.style.pointerEvents = '';
+
     this._pausedOverlay.remove();
     this._pausedOverlay = null;
   }
