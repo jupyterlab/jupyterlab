@@ -23,17 +23,16 @@ export class DebuggerModel implements IDebugger.Model.IService {
   /**
    * Instantiate a new DebuggerModel
    */
-  constructor(
-    config: IDebugger.IConfig,
-    notebookTracker: INotebookTracker | null
-  ) {
+  constructor(options: DebuggerModel.IOptions) {
+    const { config, notebookTracker } = options;
+
     this.breakpoints = new BreakpointsModel(config, notebookTracker);
     this.callstack = new CallstackModel(config, notebookTracker);
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
-      notebookTracker: notebookTracker,
-      config: config
+      notebookTracker,
+      config
     });
     this.kernelSources = new KernelSourcesModel();
   }
@@ -169,4 +168,24 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
+}
+
+/**
+ * A namespace for DebuggerModel
+ */
+export namespace DebuggerModel {
+  /**
+   * Instantiation options for a DebuggerModel.
+   */
+  export interface IOptions {
+    /**
+     * Debugger configuration.
+     */
+    config: IDebugger.IConfig;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker: INotebookTracker | null;
+  }
 }

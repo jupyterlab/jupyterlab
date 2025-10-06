@@ -40,10 +40,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     // runs a kernel with debugging ability
     this._session = null;
     this._specsManager = options.specsManager ?? null;
-    this._model = new Debugger.Model(
-      options.config,
-      options.notebookTracker || null
-    );
+    this._model = new Debugger.Model({
+      config: options.config,
+      notebookTracker: options.notebookTracker || null
+    });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
