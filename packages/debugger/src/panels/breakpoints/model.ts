@@ -87,6 +87,8 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
 
   /**
    * Restore a map of breakpoints.
+   *
+   * @param breakpoints The map of breakpoints
    */
   restoreBreakpoints(breakpoints: Map<string, IDebugger.IBreakpoint[]>): void {
     this._breakpoints = breakpoints;
@@ -125,8 +127,6 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
         }
       });
     });
-
-    console.log(display);
 
     return display;
   }
