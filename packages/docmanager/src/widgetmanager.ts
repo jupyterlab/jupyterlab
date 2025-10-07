@@ -40,7 +40,7 @@ export class DocumentWidgetManager implements IDisposable {
     return this._activateRequested;
   }
 
-  /**  private _dialogs?: IDocumentManagerDialogs;
+  /**
    * Set the dialog provider.
    */
   set dialogs(dialogs: IDocumentManagerDialogs | null) {
