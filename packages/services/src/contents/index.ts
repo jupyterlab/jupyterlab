@@ -403,7 +403,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @param path A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -976,7 +976,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1395,7 +1395,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Copy a file into a given directory.
    *
-   * @param localPath - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1713,7 +1713,7 @@ class ContentProviderRegistry implements IContentProviderRegistry {
   >(this);
 }
 
-namespace ContentProviderRegistry {
+export namespace ContentProviderRegistry {
   /**
    * Initialization options for `ContentProviderRegistry`.
    */
