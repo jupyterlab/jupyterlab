@@ -14,6 +14,12 @@ import { Signal } from '@lumino/signaling';
 import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
 
 /**
  * A handler for consoles.
@@ -28,6 +34,8 @@ export class ConsoleHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._consolePanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
 
     const codeConsole = this._consolePanel.console;
 
@@ -45,6 +53,30 @@ export class ConsoleHandler implements IDisposable {
     };
     addHandlers();
     this._consolePanel.console.cells.changed.connect(addHandlers);
+
+    // Connect debugger events
+    this._debuggerService.session?.eventMessage.connect((_, event) => {
+      const session = this._debuggerService.session;
+      const contextSession = this._consolePanel.sessionContext.session;
+
+      if (!session || !contextSession) {
+        return;
+      }
+      if (session.connection?.kernel?.id !== contextSession.kernel?.id) {
+        return;
+      }
+
+      if (event.event === 'stopped') {
+        this._showPausedOverlay();
+      } else if (event.event === 'continued') {
+        this._hidePausedOverlay();
+      }
+    });
+
+    // If already paused when initialized
+    if (this._debuggerService.hasStoppedThreads()) {
+      this._showPausedOverlay();
+    }
   }
 
   /**
@@ -63,6 +95,7 @@ export class ConsoleHandler implements IDisposable {
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
     Signal.clearData(this);
+    this._hidePausedOverlay();
   }
 
   /**
@@ -92,9 +125,65 @@ export class ConsoleHandler implements IDisposable {
     this._cellMap.set(modelId, editorHandler);
   }
 
+  /**
+   * Show the "Paused in Debugger" overlay.
+   */
+  private _showPausedOverlay(): void {
+    if (this._pausedOverlay) {
+      return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'jp-DebuggerPausedOverlay';
+
+    const text = document.createElement('span');
+    text.textContent = this._trans.__('Paused in Debugger');
+    overlay.appendChild(text);
+
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'jp-DebuggerPausedButton';
+    continueBtn.title = this._trans.__('Continue');
+    runIcon.element({ container: continueBtn, elementPosition: 'center' });
+    continueBtn.onclick = () => {
+      void this._debuggerService.continue();
+    };
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'jp-DebuggerPausedButton';
+    nextBtn.title = this._trans.__('Next');
+    stepOverIcon.element({ container: nextBtn, elementPosition: 'center' });
+    nextBtn.onclick = () => {
+      void this._debuggerService.next();
+    };
+
+    overlay.appendChild(continueBtn);
+    overlay.appendChild(nextBtn);
+
+    this._consolePanel.node.style.pointerEvents = 'none';
+    overlay.style.pointerEvents = 'auto';
+    this._consolePanel.node.appendChild(overlay);
+
+    this._pausedOverlay = overlay;
+  }
+
+  /**
+   * Hide the overlay.
+   */
+  private _hidePausedOverlay(): void {
+    if (!this._pausedOverlay) {
+      return;
+    }
+    this._consolePanel.node.style.pointerEvents = '';
+    this._pausedOverlay.remove();
+    this._pausedOverlay = null;
+  }
+
   private _consolePanel: ConsolePanel;
   private _debuggerService: IDebugger;
   private _cellMap: IObservableMap<EditorHandler>;
+  private _pausedOverlay: HTMLDivElement | null = null;
+  private _trans: TranslationBundle;
+  protected translator: ITranslator;
 }
 
 /**
@@ -114,5 +203,10 @@ export namespace ConsoleHandler {
      * The widget to handle.
      */
     widget: ConsolePanel;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
