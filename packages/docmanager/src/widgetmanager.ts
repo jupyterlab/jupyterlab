@@ -571,7 +571,7 @@ export namespace DocumentWidgetManager {
     registry: DocumentRegistry;
 
     /**
-     * ..
+     * The provider for document manager dialogs.
      */
     dialogs?: IDocumentManagerDialogs;
 

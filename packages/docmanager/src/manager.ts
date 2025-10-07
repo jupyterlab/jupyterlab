@@ -789,7 +789,7 @@ export namespace DocumentManager {
     sessionDialogs?: ISessionContext.IDialogs;
 
     /**
-     * ...
+     * The provider for document manager dialogs.
      */
     docManagerDialogs?: IDocumentManagerDialogs;
 
