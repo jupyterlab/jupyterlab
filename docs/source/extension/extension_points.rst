@@ -125,7 +125,7 @@ Add a Command to the Command Palette
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In order to add an existing, registered command to the command palette, you need to request the
-``ICommandPalette`` token in your extension.
+:ts:interface:`apputils.ICommandPalette` token in your extension.
 Here is an example showing how to add a command to the command palette (given by ``palette``):
 
 .. code:: typescript
@@ -387,7 +387,7 @@ Launcher
 
 As with menus, keyboard shortcuts, and the command palette, new items can be added
 to the application launcher via commands.
-You can do this by requesting the ``ILauncher`` token in your extension:
+You can do this by requesting the :ts:interface:`launcher.ILauncher` token in your extension:
 
 .. code:: typescript
 
@@ -407,7 +407,7 @@ Jupyter Front-End Shell
 
 The Jupyter front-end
 `shell <../api/interfaces/application.JupyterFrontEnd.IShell.html>`__
-is used to add and interact with content in the application. The ``IShell``
+is used to add and interact with content in the application. The :ts:interface:`application.JupyterFrontEnd.IShell`
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
 
@@ -572,7 +572,7 @@ property ``disabled`` to ``true``.
 API-defined menu
 ^^^^^^^^^^^^^^^^
 
-To use the API, you should request the ``IMainMenu`` token for your extension.
+To use the API, you should request the :ts:interface:`mainmenu.IMainMenu` token for your extension.
 
 There are three main ways to extend:
 
@@ -656,15 +656,14 @@ item to determine whether to delegate the menu command to your activity, and ``i
 More examples for how to register semantic menu items are found throughout the JupyterLab code base.
 The available semantic menu items are:
 
-- ``IEditMenu.IUndoer``: an activity that knows how to undo and redo.
-- ``IEditMenu.IClearer``: an activity that knows how to clear its content.
+- :ts:interface:`mainmenu.IEditMenu.IUndoer`: an activity that knows how to undo and redo.
+- :ts:interface:`mainmenu.IEditMenu.IClearer`: an activity that knows how to clear its content.
 - ``IEditMenu.IGoToLiner``: an activity that knows how to jump to a given line.
 - ``IFileMenu.ICloseAndCleaner``: an activity that knows how to close and clean up after itself.
 - ``IFileMenu.IConsoleCreator``: an activity that knows how to create an attached code console for itself.
-- ``IHelpMenu.IKernelUser``: an activity that knows how to get a related kernel session.
-- ``IKernelMenu.IKernelUser``: an activity that can perform various kernel-related operations.
-- ``IRunMenu.ICodeRunner``: an activity that can run code from its content.
-- ``IViewMenu.IEditorViewer``: an activity that knows how to set various view-related options on a text editor that it owns.
+- :ts:interface:`mainmenu.IKernelMenu.IKernelUser`: an activity that can perform various kernel-related operations.
+- :ts:interface:`mainmenu.IRunMenu.ICodeRunner`: an activity that can run code from its content.
+- :ts:interface:`mainmenu.IViewMenu.IEditorViewer`: an activity that knows how to set various view-related options on a text editor that it owns.
 
 
 Status Bar
@@ -676,7 +675,7 @@ which might contain any kind of content. Since the status bar has limited space,
 you should endeavor to only add small widgets to it.
 
 The following example shows how to place a status item that displays the current
-"busy" status for the application. This information is available from the ``ILabStatus``
+"busy" status for the application. This information is available from the :ts:interface:`application.ILabStatus`
 token, which we reference by a variable named ``labStatus``.
 We place the ``statusWidget`` in the middle of the status bar.
 When the ``labStatus`` busy state changes, we update the text content of the
@@ -699,7 +698,7 @@ When the ``labStatus`` busy state changes, we update the text content of the
 Toolbar Registry
 ----------------
 
-JupyterLab provides an infrastructure to define and customize toolbar widgets
+JupyterLab provides a :ts:interface:`apputils.IToolbarWidgetRegistry` to define and customize toolbar widgets
 from the settings, which is similar to that defining the context menu and the main menu
 bar.
 
@@ -907,10 +906,10 @@ Often extensions will want to interact with documents and activities created by 
 For instance, an extension may want to inject some text into a notebook cell,
 or set a custom keymap, or close all documents of a certain type.
 Actions like these are typically done by widget trackers.
-Extensions keep track of instances of their activities in ``WidgetTrackers``,
+Extensions keep track of instances of their activities in instances of :ts:class:`apputils.WidgetTracker` class,
 which are then provided as tokens so that other extensions may request them.
 
-For instance, if you want to interact with notebooks, you should request the ``INotebookTracker`` token.
+For instance, if you want to interact with notebooks, you should request the :ts:interface:`notebook.INotebookTracker` token.
 You can then use this tracker to iterate over, filter, and search all open notebooks.
 You can also use it to be notified via signals when notebooks are added and removed from the tracker.
 
@@ -925,14 +924,14 @@ Completion Providers
 
 Both code completer and inline completer can be extended by registering
 an (inline) completion provider on the completion manager provided by
-the ``ICompletionProviderManager`` token.
+the :ts:interface:`completer.ICompletionProviderManager` token.
 
 
 Code Completer
 ^^^^^^^^^^^^^^
 
 A minimal code completion provider needs to implement the `fetch` and `isApplicable`
-methods, and define a unique `identifier` property, but the ``ICompletionProvider``
+methods, and define a unique `identifier` property, but the :ts:interface:`completer.ICompletionProvider`
 interface allows for much more extensive customization of the completer.
 
 .. code:: typescript
@@ -992,7 +991,7 @@ Inline Completer
 A minimal inline completion provider extension would only implement the
 required method `fetch` and define `identifier` and `name` properties,
 but a number of additional fields can be used for enhanced functionality,
-such as streaming, see the ``IInlineCompletionProvider`` documentation.
+such as streaming, see the :ts:interface:`completer.IInlineCompletionProvider` documentation.
 
 .. code:: typescript
 
@@ -1036,7 +1035,7 @@ For an example of an inline completion provider with streaming support, see
 State Database
 --------------
 
-The state database can be accessed by importing ``IStateDB`` from
+The state database can be accessed by importing :ts:interface:`statedb.IStateDB` from
 ``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
 a plugin:
 
@@ -1131,7 +1130,12 @@ For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-propos
 LSP Features
 --------------
 
-JupyterLab provides an infrastructure to communicate with the language servers. If the LSP services are activated and users have language servers installed, JupyterLab will start the language servers for the language of the opened notebook or file. Extension authors can access the virtual documents and the associated LSP connection of opened document by requiring the ``ILSPDocumentConnectionManager`` token from ``@jupyterlab/lsp``.
+JupyterLab provides an infrastructure to communicate with the language servers.
+If the LSP services are activated and users have language servers installed,
+JupyterLab will start the language servers for the language of the opened notebook or file.
+
+Extension authors can access the virtual documents and the associated LSP connection of opened document
+by requiring the :ts:interface:`lsp.ILSPDocumentConnectionManager` token from ``@jupyterlab/lsp``.
 
 Here is an example for making requests to the language server.
 
@@ -1253,9 +1257,9 @@ the intended use cases, and the way these are exposed in the user interface are 
     when selecting how to open a file using the "Open with" dropdown.
 
 To register a custom drive, use the contents manager's ``addDrive`` method.
-The drive needs to follow the ``IDrive`` interface. For drives that use
+The drive needs to follow the :ts:interface:`services.Contents.IDrive` interface. For drives that use
 a jupyter-server compliant REST API you may wish to extend or re-use
-the built-in ``Drive`` class, as demonstrated below:
+the built-in :ts:class:`services.Drive` class, as demonstrated below:
 
 .. code:: typescript
 
