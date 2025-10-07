@@ -180,6 +180,28 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Number of directory items to show on the left side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsLeftItems(): number {
+    return this.crumbs.minimumLeftItems;
+  }
+
+  set minimumBreadcrumbsLeftItems(value: number) {
+    this.crumbs.minimumLeftItems = value;
+  }
+
+  /**
+   * Number of directory items to show on the right side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsRightItems(): number {
+    return this.crumbs.minimumRightItems;
+  }
+
+  set minimumBreadcrumbsRightItems(value: number) {
+    this.crumbs.minimumRightItems = value;
+  }
+
+  /**
    * Whether to show the full path in the breadcrumbs
    */
   get showFullPath(): boolean {

@@ -311,5 +311,62 @@ describe('filebrowser/model', () => {
         model.dispose();
       });
     });
+    describe('#breadcrumbitems', () => {
+      it('should show correct number of left and right directories with ellipsis', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 1,
+          minimumRightItems: 1
+        });
+        Widget.attach(customCrumbs, document.body);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect((items[1] as HTMLElement).title).toBe(`${first}`);
+        // Ellipsis
+        expect(items[2].querySelector('svg')).not.toBeNull();
+        expect(items[3].textContent).toBe(third);
+        expect((items[3] as HTMLElement).title).toBe(
+          `${first}/${second}/${third}`
+        );
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis
+        expect(items.length).toBe(2);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 2;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis, second, third
+        expect(items.length).toBe(4);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].textContent).toBe(third);
+
+        // Set minimumLeftItems = 2, minimumRightItems = 0,
+        customCrumbs.minimumLeftItems = 2;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, first, second, ellipsis
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].querySelector('svg')).not.toBeNull();
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+      });
+    });
   });
 });
