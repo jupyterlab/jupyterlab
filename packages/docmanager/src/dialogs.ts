@@ -8,7 +8,7 @@ import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import { IDocumentManager } from './';
+import { IDocumentManager, IDocumentManagerDialogs } from './';
 
 /**
  * The class name added to file dialogs.
@@ -35,35 +35,55 @@ export interface IFileContainer extends JSONObject {
 }
 
 /**
- * Rename a file with a dialog.
+ * Namespace for DocumentManagerDialogs.
  */
-export function renameDialog(
-  manager: IDocumentManager,
-  context: DocumentRegistry.Context,
-  translator?: ITranslator
-): Promise<void | null> {
-  translator = translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
+export namespace DocumentManagerDialogs {
+  export interface IOptions {
+    translator?: ITranslator;
+  }
+}
 
-  const localPath = context.localPath.split('/');
-  const fileName = localPath.pop() || context.localPath;
+/**
+ * Default implementation of IDocumentManagerDialogs.
+ */
+export class DocumentManagerDialogs implements IDocumentManagerDialogs {
+  constructor(options: DocumentManagerDialogs.IOptions = {}) {
+    this._translator = options.translator || nullTranslator;
+  }
 
-  return showDialog({
-    title: trans.__('Rename File'),
-    body: new RenameHandler(fileName),
-    focusNodeSelector: 'input',
-    buttons: [
-      Dialog.cancelButton(),
-      Dialog.okButton({
-        label: trans.__('Rename'),
-        ariaLabel: trans.__('Rename File')
-      })
-    ]
-  }).then(result => {
-    if (!result.value) {
+  /**
+   * Show a dialog to rename a file.
+   */
+  async rename(context: DocumentRegistry.Context): Promise<void | null> {
+    const trans = this._translator.load('jupyterlab');
+    const localPath = context.localPath.split('/');
+    const fileName = localPath.pop() || context.localPath;
+    const handler = new RenameHandler(fileName, this._translator);
+
+    const result = await showDialog({
+      title: trans.__('Rename File'),
+      body: handler,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.okButton({
+          label: trans.__('Rename'),
+          ariaLabel: trans.__('Rename File')
+        })
+      ],
+      focusNodeSelector: 'input'
+    });
+
+    if (!result.button.accept) {
       return null;
     }
-    if (!isValidFileName(result.value)) {
+
+    const newPath = result.value;
+
+    if (!newPath || newPath === fileName) {
+      return null;
+    }
+
+    if (!isValidFileName(newPath)) {
       void showErrorMessage(
         trans.__('Rename Error'),
         Error(
@@ -75,8 +95,107 @@ export function renameDialog(
       );
       return null;
     }
-    return context.rename(result.value);
-  });
+    return context.rename(newPath);
+  }
+
+  /**
+   * Show a dialog asking whether to close a document.
+   */
+  async confirmClose(
+    fileName: string,
+    isDirty: boolean
+  ): Promise<[boolean, boolean, boolean]> {
+    const trans = this._translator.load('jupyterlab');
+
+    const buttons = [
+      Dialog.cancelButton(),
+      Dialog.okButton({
+        label: isDirty ? trans.__('Close and save') : trans.__('Close'),
+        ariaLabel: isDirty
+          ? trans.__('Close and save Document')
+          : trans.__('Close Document')
+      })
+    ];
+    if (isDirty) {
+      buttons.splice(
+        1,
+        0,
+        Dialog.warnButton({
+          label: trans.__('Close without saving'),
+          ariaLabel: trans.__('Close Document without saving')
+        })
+      );
+    }
+
+    const confirm = await showDialog({
+      title: trans.__('Confirmation'),
+      body: trans.__('Please confirm you want to close "%1".', fileName),
+      checkbox: isDirty
+        ? null
+        : {
+            label: trans.__('Do not ask me again.'),
+            caption: trans.__(
+              'If checked, no confirmation to close a document will be asked in the future.'
+            )
+          },
+      buttons
+    });
+
+    const shouldClose = confirm.button.accept;
+    const ignoreSave = isDirty ? confirm.button.displayType === 'warn' : true;
+    const doNotAskAgain = confirm.isChecked === true;
+
+    return [shouldClose, ignoreSave, doNotAskAgain];
+  }
+
+  /**
+   * Show a dialog asking whether to save before closing a dirty document.
+   */
+  async saveBeforeClose(
+    fileName: string,
+    isDirty: boolean,
+    writable?: boolean
+  ): Promise<[boolean, boolean]> {
+    const trans = this._translator.load('jupyterlab');
+
+    const saveLabel = writable ? trans.__('Save') : trans.__('Save as');
+
+    const result = await showDialog({
+      title: trans.__('Save your work'),
+      body: trans.__('Save changes in "%1" before closing?', fileName),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({
+          label: trans.__('Discard'),
+          ariaLabel: trans.__('Discard changes to file')
+        }),
+        Dialog.okButton({ label: saveLabel })
+      ]
+    });
+
+    const shouldClose = result.button.accept;
+    const ignoreSave = result.button.displayType === 'warn';
+
+    return [shouldClose, ignoreSave];
+  }
+
+  private _translator: ITranslator;
+}
+
+/**
+ * Rename a file with a dialog.
+ */
+export function renameDialog(
+  manager: IDocumentManager,
+  context: DocumentRegistry.Context,
+  translator?: ITranslator,
+  dialogs?: IDocumentManagerDialogs
+): Promise<void | null> {
+  if (dialogs) {
+    return dialogs.rename(context);
+  }
+  const newDialogs = new DocumentManagerDialogs({ translator: translator });
+  return newDialogs.rename(context);
 }
 
 /**
@@ -146,8 +265,8 @@ class RenameHandler extends Widget {
   /**
    * Construct a new "rename" dialog.
    */
-  constructor(oldPath: string) {
-    super({ node: Private.createRenameNode(oldPath) });
+  constructor(oldPath: string, translator?: ITranslator) {
+    super({ node: Private.createRenameNode(oldPath, translator) });
     this.addClass(FILE_DIALOG_CLASS);
     const ext = PathExt.extname(oldPath);
     const value = (this.inputNode.value = PathExt.basename(oldPath));

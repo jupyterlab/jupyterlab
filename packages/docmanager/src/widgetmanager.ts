@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
@@ -12,7 +11,8 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IRecentsManager } from './tokens';
+import { IDocumentManagerDialogs, IRecentsManager } from './tokens';
+import { DocumentManagerDialogs } from '.';
 
 /**
  * The class name added to document widgets.
@@ -30,6 +30,7 @@ export class DocumentWidgetManager implements IDisposable {
     this._registry = options.registry;
     this.translator = options.translator || nullTranslator;
     this._recentsManager = options.recentsManager || null;
+    this._dialogs = options.dialogs || null;
   }
 
   /**
@@ -37,6 +38,20 @@ export class DocumentWidgetManager implements IDisposable {
    */
   get activateRequested(): ISignal<this, string> {
     return this._activateRequested;
+  }
+
+  /**  private _dialogs?: IDocumentManagerDialogs;
+   * Set the dialog provider.
+   */
+  set dialogs(dialogs: IDocumentManagerDialogs | null) {
+    this._dialogs = dialogs;
+  }
+
+  /**
+   * Get the dialog provider.
+   */
+  get dialogs(): IDocumentManagerDialogs | null {
+    return this._dialogs;
   }
 
   /**
@@ -434,7 +449,6 @@ export class DocumentWidgetManager implements IDisposable {
     translator?: ITranslator
   ): Promise<[boolean, boolean]> {
     translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
     // Bail if the model is not dirty or other widgets are using the model.)
     const context = Private.contextProperty.get(widget);
     if (!context) {
@@ -459,72 +473,27 @@ export class DocumentWidgetManager implements IDisposable {
       context.model.dirty &&
       widgets.length <= 1 &&
       !(factory?.readOnly ?? true);
-
+    const dialogs =
+      this._dialogs ?? new DocumentManagerDialogs({ translator: translator });
     // Ask confirmation
     if (this.confirmClosingDocument) {
-      const buttons = [
-        Dialog.cancelButton(),
-        Dialog.okButton({
-          label: isDirty ? trans.__('Close and save') : trans.__('Close'),
-          ariaLabel: isDirty
-            ? trans.__('Close and save Document')
-            : trans.__('Close Document')
-        })
-      ];
-      if (isDirty) {
-        buttons.splice(
-          1,
-          0,
-          Dialog.warnButton({
-            label: trans.__('Close without saving'),
-            ariaLabel: trans.__('Close Document without saving')
-          })
-        );
-      }
+      const [shouldClose, ignoreSave, doNotAskAgain] =
+        await dialogs.confirmClose(fileName, isDirty);
 
-      const confirm = await showDialog({
-        title: trans.__('Confirmation'),
-        body: trans.__('Please confirm you want to close "%1".', fileName),
-        checkbox: isDirty
-          ? null
-          : {
-              label: trans.__('Do not ask me again.'),
-              caption: trans.__(
-                'If checked, no confirmation to close a document will be asked in the future.'
-              )
-            },
-        buttons
-      });
-
-      if (confirm.isChecked) {
+      if (doNotAskAgain) {
         this.confirmClosingDocument = false;
       }
 
-      return Promise.resolve([
-        confirm.button.accept,
-        isDirty ? confirm.button.displayType === 'warn' : true
-      ]);
+      return Promise.resolve([shouldClose, ignoreSave]);
     } else {
       if (!isDirty) {
         return Promise.resolve([true, true]);
       }
-
-      const saveLabel = context.contentsModel?.writable
-        ? trans.__('Save')
-        : trans.__('Save as');
-      const result = await showDialog({
-        title: trans.__('Save your work'),
-        body: trans.__('Save changes in "%1" before closing?', fileName),
-        buttons: [
-          Dialog.cancelButton(),
-          Dialog.warnButton({
-            label: trans.__('Discard'),
-            ariaLabel: trans.__('Discard changes to file')
-          }),
-          Dialog.okButton({ label: saveLabel })
-        ]
-      });
-      return [result.button.accept, result.button.displayType === 'warn'];
+      return dialogs?.saveBeforeClose(
+        fileName,
+        isDirty,
+        context.contentsModel?.writable
+      );
     }
   }
 
@@ -585,6 +554,7 @@ export class DocumentWidgetManager implements IDisposable {
     this
   );
   private _recentsManager: IRecentsManager | null;
+  private _dialogs: IDocumentManagerDialogs | null;
 }
 
 /**
@@ -599,6 +569,11 @@ export namespace DocumentWidgetManager {
      * A document registry instance.
      */
     registry: DocumentRegistry;
+
+    /**
+     * ..
+     */
+    dialogs?: IDocumentManagerDialogs;
 
     /**
      * The manager for recent documents.

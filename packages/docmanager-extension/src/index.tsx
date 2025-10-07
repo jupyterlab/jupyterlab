@@ -30,7 +30,9 @@ import {
 import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  DocumentManagerDialogs,
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager,
   PathStatus,
@@ -178,7 +180,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     ISessionContextDialogs,
     JupyterLab.IInfo,
     IRecentsManager,
-    IUrlResolverFactory
+    IUrlResolverFactory,
+    IDocumentManagerDialogs
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -188,12 +191,15 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null,
     recentsManager: IRecentsManager | null,
-    urlResolverFactory: IUrlResolverFactory | null
+    urlResolverFactory: IUrlResolverFactory | null,
+    docManagerDialogs_: IDocumentManagerDialogs | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
+    const docManagerDialogs =
+      docManagerDialogs_ ?? new DocumentManagerDialogs({ translator });
     const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
@@ -211,7 +217,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         return true;
       },
       recentsManager: recentsManager ?? undefined,
-      urlResolverFactory: urlResolverFactory ?? undefined
+      urlResolverFactory: urlResolverFactory ?? undefined,
+      docManagerDialogs: docManagerDialogs
     });
 
     return docManager;

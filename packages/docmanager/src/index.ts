@@ -13,3 +13,4 @@ export * from './savingstatus';
 export * from './tokens';
 export * from './widgetmanager';
 export * from './recents';
+export * from './plugins';

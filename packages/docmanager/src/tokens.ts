@@ -37,6 +37,55 @@ export const IRecentsManager = new Token<IRecentsManager>(
 );
 
 /**
+ * The document manager dialogs token.
+ */
+export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
+  '@jupyterlab/docmanager:IDocumentManagerDialogs',
+  'A service for displaying dialogs related to document management.'
+);
+
+/**
+ * An interface for dialogs related to document management.
+ */
+export interface IDocumentManagerDialogs {
+  /**
+   * Show a dialog to rename a file.
+   *
+   * @param context - The document context
+   * @returns A promise that resolves when rename is complete or null if cancelled
+   */
+  rename(context: DocumentRegistry.Context): Promise<void | null>;
+
+  /**
+   * Show a dialog asking whether to close a document.
+   *
+   * This dialog is shown when closing a clean (non-dirty) document
+   * and confirmClosingDocument is true.
+   *
+   * @param context - The document context
+   * @returns A promise that resolves to [shouldClose, shouldDiscard, doNotAskAgain]
+   */
+  confirmClose(
+    fileName: string,
+    isDirty: boolean
+  ): Promise<[boolean, boolean, boolean]>;
+
+  /**
+   * Show a dialog asking whether to save before closing a dirty document.
+   *
+   * @param context - The document context
+   * @returns A promise that resolves to [shouldClose, shouldDiscard]
+   *          - shouldClose: true if user chose Save or Discard
+   *          - shouldDiscard: true if user chose Discard (don't save)
+   */
+  saveBeforeClose(
+    fileName: string,
+    isDirty: boolean,
+    writable?: boolean
+  ): Promise<[boolean, boolean]>;
+}
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {
