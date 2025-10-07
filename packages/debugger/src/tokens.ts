@@ -122,7 +122,6 @@ export interface IDebugger {
    * Request to set a variable in the global scope.
    *
    * @param name The name of the variable.
-   * @param value The value of the variable.
    */
   copyToGlobals(name: string): Promise<void>;
 
