@@ -195,7 +195,7 @@ export class DSVModel extends DataModel implements IDisposable {
    *
    * @param column - The column index of the cell of interest.
    *
-   * @param returns - The data value for the specified cell.
+   * @returns - The data value for the specified cell.
    */
   data(region: DataModel.CellRegion, row: number, column: number): string {
     let value: string;
