@@ -17,7 +17,6 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
  * Fetch all of the kernel specs.
  *
  * @param settings - The optional server settings.
- * @param useCache - Whether to use the cache. If false, always request.
  *
  * @returns A promise that resolves with the kernel specs.
  *
