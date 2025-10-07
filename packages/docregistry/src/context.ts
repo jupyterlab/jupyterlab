@@ -289,7 +289,14 @@ export class Context<
   /**
    * Save the document to a different path chosen by the user.
    *
-   * Returns true if the file was successfully saved, false if the operation was cancelled
+   * @returns A promise that resolves to `true` if the save operation was initiated.
+   * Returns `false` if the user cancelled the operation.
+   *
+   * Note:
+   * - If the save operation proceeds but fails due to an error in the content manager,
+   *   the returned value will still be `true`.
+   * - Consumers interested in the actual result of the save should listen to the
+   *   {@link saveState} signal to be notified when the save succeeds or fails.
    */
   async saveAs(): Promise<boolean> {
     await this.ready;
