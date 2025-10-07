@@ -31,6 +31,28 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   }
 
   /**
+   * Signal emitted when the selected breakpoint changes.
+   */
+  get selectedChanged(): Signal<this, IDebugger.IBreakpoint> {
+    return this._selectedChanged;
+  }
+
+  /**
+   * Get selected breakpoint
+   */
+  get selectedBreakpoint(): IDebugger.IBreakpoint {
+    return this._selectedBreakpoint;
+  }
+
+  /**
+   * Set selected breakpoint
+   */
+  set selectedBreakpoint(selected: IDebugger.IBreakpoint) {
+    this._selectedBreakpoint = selected;
+    this._selectedChanged.emit(selected);
+  }
+
+  /**
    * Get all the breakpoints.
    */
   get breakpoints(): Map<string, IDebugger.IBreakpoint[]> {
@@ -71,4 +93,6 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
+  private _selectedBreakpoint: IDebugger.IBreakpoint;
+  private _selectedChanged = new Signal<this, IDebugger.IBreakpoint>(this);
 }

@@ -372,6 +372,27 @@ export class OutputArea extends Widget {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
+
+    // Update overlay height so it always matches the output panel.
+    // TODO: use CSS anchor positionning level once fully supported in all browsers
+    const resize = () => {
+      const panel = this.node.querySelector(
+        '.jp-OutputArea-child'
+      ) as HTMLElement;
+      if (panel) {
+        overlay.style.height = `${Math.max(
+          panel.scrollHeight,
+          this.node.scrollHeight
+        )}px`;
+      }
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(this.node);
+
+    this.disposed.connect(() => {
+      observer.disconnect();
+    });
+
     requestAnimationFrame(() => {
       this._initialize.emit();
     });

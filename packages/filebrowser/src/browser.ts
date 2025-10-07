@@ -126,7 +126,8 @@ export class FileBrowser extends SidePanel {
       model,
       renderer,
       translator,
-      state: options.state
+      state: options.state,
+      handleOpenFile: options.handleOpenFile
     });
     this.listing.addClass(LISTING_CLASS);
     this.listing.selectionChanged.connect(() => {
@@ -176,6 +177,28 @@ export class FileBrowser extends SidePanel {
     } else {
       console.warn('Listing does not support toggling column visibility');
     }
+  }
+
+  /**
+   * Number of directory items to show on the left side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsLeftItems(): number {
+    return this.crumbs.minimumLeftItems;
+  }
+
+  set minimumBreadcrumbsLeftItems(value: number) {
+    this.crumbs.minimumLeftItems = value;
+  }
+
+  /**
+   * Number of directory items to show on the right side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsRightItems(): number {
+    return this.crumbs.minimumRightItems;
+  }
+
+  set minimumBreadcrumbsRightItems(value: number) {
+    this.crumbs.minimumRightItems = value;
   }
 
   /**
@@ -623,6 +646,12 @@ export namespace FileBrowser {
      * the columns sizes
      */
     state?: IStateDB;
+
+    /**
+     * Callback overriding action performed when user asks to open a file.
+     * The default is to open the file in the main area if it is not open already, or to reveal it otherwise.
+     */
+    handleOpenFile?: (path: string) => void;
   }
 
   /**

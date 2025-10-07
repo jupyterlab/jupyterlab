@@ -1121,7 +1121,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Register an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook will intercept.
+   * @param msgId - The parent_header message id the hook will intercept.
    *
    * @param hook - The callback invoked for the message.
    *
@@ -1154,7 +1154,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Remove an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook intercepted.
+   * @param msgId - The parent_header message id the hook intercepted.
    *
    * @param hook - The callback invoked for the message.
    *

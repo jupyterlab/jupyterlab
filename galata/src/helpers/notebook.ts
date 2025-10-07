@@ -1129,7 +1129,7 @@ export class NotebookHelper {
       let break_ = true;
       try {
         await Utils.waitForCondition(
-          async () => ((await gutter.textContent())?.length ?? 0) > 0,
+          async () => (await gutter.locator('.cm-breakpoint-icon').count()) > 0,
           1000
         );
       } catch (reason) {

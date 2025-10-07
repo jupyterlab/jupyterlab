@@ -122,7 +122,6 @@ export interface IDebugger {
    * Request to set a variable in the global scope.
    *
    * @param name The name of the variable.
-   * @param value The value of the variable.
    */
   copyToGlobals(name: string): Promise<void>;
 
@@ -854,6 +853,16 @@ export namespace IDebugger {
        * Signal emitted when the breakpoints are restored.
        */
       readonly restored: ISignal<this, void>;
+
+      /**
+       * Signal emitted when the breakpoints are restored.
+       */
+      readonly selectedChanged: Signal<this, IDebugger.IBreakpoint>;
+
+      /**
+       * Selected breakpoint
+       */
+      selectedBreakpoint: IDebugger.IBreakpoint | null;
 
       /**
        * Get the breakpoints for a given id (path).

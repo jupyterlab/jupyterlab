@@ -5,6 +5,7 @@
  * @module filebrowser-extension
  */
 
+import { DisposableSet } from '@lumino/disposable';
 import {
   ILabShell,
   ILayoutRestorer,
@@ -27,7 +28,10 @@ import {
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import {
+  DocumentRegistry,
+  getAvailableKernelFileTypes
+} from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
@@ -54,6 +58,7 @@ import {
   filterIcon,
   folderIcon,
   IDisposableMenuItem,
+  LabIcon,
   linkIcon,
   markdownIcon,
   newFolderIcon,
@@ -152,6 +157,14 @@ namespace CommandIDs {
   export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
+}
+
+/**
+ * Settings for configuring the breadcrumb
+ */
+interface IBreadcrumbsSettings {
+  minimumLeftItems: number;
+  minimumRightItems: number;
 }
 
 /**
@@ -261,7 +274,10 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             const value = settings.get(key).composite as boolean;
             browser[key] = value;
           }
-
+          const breadcrumbs = settings.get('breadcrumbs')
+            .composite as unknown as IBreadcrumbsSettings;
+          browser.minimumBreadcrumbsLeftItems = breadcrumbs.minimumLeftItems;
+          browser.minimumBreadcrumbsRightItems = breadcrumbs.minimumRightItems;
           const filterDirectories = settings.get('filterDirectories')
             .composite as boolean;
           const useFuzzyFilter = settings.get('useFuzzyFilter')
@@ -460,6 +476,53 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+  }
+};
+
+/**
+ * A plugin providing the context menu entries for creating Python/R/Julia files.
+ */
+const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:create-new-language-file',
+  description: 'Adds context menu entries for creating Python/R/Julia files',
+  requires: [ITranslator],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    translator: ITranslator
+  ): Promise<void> => {
+    const trans = translator.load('jupyterlab');
+
+    let filebrowsermenuDisposables = new DisposableSet();
+
+    const specsManager = app.serviceManager.kernelspecs;
+
+    const updateFileBrowserContextMenu = async () => {
+      if (filebrowsermenuDisposables) {
+        filebrowsermenuDisposables.dispose();
+        filebrowsermenuDisposables = new DisposableSet();
+      }
+
+      const updatedFileTypes = await getAvailableKernelFileTypes(specsManager);
+
+      for (const filetype of updatedFileTypes) {
+        filebrowsermenuDisposables.add(
+          app.contextMenu.addItem({
+            command: CommandIDs.createNewFile,
+            selector: '.jp-DirListing',
+            args: {
+              ext: filetype.extensions[0],
+              label: trans.__('New %1 File', filetype.displayName),
+              iconName: filetype.icon?.toString() ?? ''
+            },
+            rank: 52
+          })
+        );
+      }
+    };
+
+    specsManager.specsChanged.connect(updateFileBrowserContextMenu);
+    updateFileBrowserContextMenu().catch(console.warn);
   }
 };
 
@@ -1467,19 +1530,40 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.createNewFile, {
-    execute: () => {
+    execute: (args: { ext: string; label: string }) => {
       const widget = tracker.currentWidget;
 
       if (widget) {
-        return widget.createNewFile({ ext: 'txt' });
+        return widget.createNewFile({ ext: args.ext ?? 'txt' });
       }
     },
-    icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('New File'),
+    icon: (args: { iconName: string }) => {
+      return args.iconName
+        ? LabIcon.resolve({ icon: args.iconName })
+        : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
+    },
+    label: (args: { ext: string; label: string }) => {
+      return trans.__(args.label ?? 'New File');
+    },
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          label: {
+            type: 'string',
+            default: 'New File',
+            description: trans.__('The command label.')
+          },
+          iconName: {
+            type: 'string',
+            description: trans.__('The command icon.')
+          },
+          ext: {
+            type: 'string',
+            default: 'txt',
+            description: trans.__('The file extension.')
+          }
+        }
       }
     }
   });
@@ -1802,7 +1886,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   openWithPlugin,
   openBrowserTabPlugin,
   openUrlPlugin,
-  notifyUploadPlugin
+  notifyUploadPlugin,
+  createNewLanguageFilePlugin
 ];
 export default plugins;
 
