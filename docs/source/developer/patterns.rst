@@ -176,7 +176,7 @@ based of JupyterLab components, the request URL should be composed using
 the base URL from the :ts:interface:`services.ServerConnection.ISettings` instance derived
 from the service manager, passed down via class constructors as needed.
 The :ts:function:`coreutils.PageConfig.getBaseUrl()` should not be used directly.
-The following snippets demonstrats the best practice:
+The following snippets demonstrate the best practice:
 
 .. code:: typescript
 
