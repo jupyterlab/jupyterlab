@@ -10,10 +10,10 @@ import { isCodeCellModel } from '@jupyterlab/cells';
  * A model for a list of breakpoints.
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
-  constructor(
-    private _config: IDebugger.IConfig,
-    private _notebookTracker: INotebookTracker | null
-  ) {}
+  constructor(options: BreakpointsModel.IOptions) {
+    this._config = options.config;
+    this._notebookTracker = options.notebookTracker;
+  }
 
   /**
    * Signal emitted when the model changes.
@@ -131,10 +131,32 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
     return display;
   }
 
+  private _config: IDebugger.IConfig;
+  private _notebookTracker: INotebookTracker | null;
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
   private _selectedBreakpoint: IDebugger.IBreakpoint;
   private _selectedChanged = new Signal<this, IDebugger.IBreakpoint>(this);
+}
+
+/**
+ * Namespace for BreakpointsModel
+ */
+export namespace BreakpointsModel {
+  /**
+   * Instantiation options for a BreakpointsModel.
+   */
+  export interface IOptions {
+    /**
+     * Debugger configuration.
+     */
+    config: IDebugger.IConfig;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker: INotebookTracker | null;
+  }
 }

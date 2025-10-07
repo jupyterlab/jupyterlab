@@ -11,10 +11,10 @@ import { INotebookTracker } from '@jupyterlab/notebook';
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
-  constructor(
-    private _config: IDebugger.IConfig,
-    private _notebookTracker: INotebookTracker | null
-  ) {}
+  constructor(options: CallstackModel.IOptions) {
+    this._config = options.config;
+    this._notebookTracker = options.notebookTracker ?? null;
+  }
 
   /**
    * Get all the frames.
@@ -106,12 +106,34 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
     return display;
   }
 
+  private _config: IDebugger.IConfig;
+  private _notebookTracker: INotebookTracker | null;
   private _state: IDebugger.IStackFrame[] = [];
   private _currentFrame: IDebugger.IStackFrame | null = null;
   private _framesChanged = new Signal<this, IDebugger.IStackFrame[]>(this);
   private _currentFrameChanged = new Signal<this, IDebugger.IStackFrame | null>(
     this
   );
+}
+
+/**
+ * A namespace for CallstackModel
+ */
+export namespace CallstackModel {
+  /**
+   * Instantiation options for CallstackModel
+   */
+  export interface IOptions {
+    /**
+     * Debugger configuration.
+     */
+    config: IDebugger.IConfig;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker: INotebookTracker | null;
+  }
 }
 
 /**

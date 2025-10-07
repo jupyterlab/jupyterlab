@@ -26,8 +26,8 @@ export class DebuggerModel implements IDebugger.Model.IService {
   constructor(options: DebuggerModel.IOptions) {
     const { config, notebookTracker } = options;
 
-    this.breakpoints = new BreakpointsModel(config, notebookTracker);
-    this.callstack = new CallstackModel(config, notebookTracker);
+    this.breakpoints = new BreakpointsModel({ config, notebookTracker });
+    this.callstack = new CallstackModel({ config, notebookTracker });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
