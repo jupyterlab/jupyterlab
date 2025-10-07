@@ -362,13 +362,14 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         connection,
         config: this._service.config
       });
+      await this._service.restoreState(false);
     } else {
       this._previousConnection = this._service.session!.connection?.kernel
         ? this._service.session.connection
         : null;
       this._service.session.connection = connection;
+      await this._service.restoreState(true);
     }
-    await this._service.restoreState(false);
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
       if (this._service.session?.capabilities?.supportsModulesRequest) {
