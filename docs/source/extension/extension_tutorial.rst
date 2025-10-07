@@ -266,8 +266,8 @@ to the command palette interface and the ``JupyterFrontEnd`` instance.
 
     import { ICommandPalette } from '@jupyterlab/apputils';
 
-Locate the ``plugin`` object of type ``JupyterFrontEndPlugin``. Change the
-definition so that it reads like so:
+Locate the ``plugin`` object of type :ts:type:`application.JupyterFrontEndPlugin`.
+Change the definition so that it reads like so:
 
 .. code-block:: typescript
     :emphasize-lines: 5,8-9,11
@@ -287,8 +287,8 @@ definition so that it reads like so:
     };
 
 The ``requires`` attribute states that your plugin needs an object that
-implements the ``ICommandPalette`` interface when it starts. JupyterLab
-will pass an instance of ``ICommandPalette`` as the second parameter of
+implements the :ts:interface:`apputils.ICommandPalette` interface when it starts. JupyterLab
+will pass an instance of ``apputils.ICommandPalette`` as the second parameter of
 ``activate`` in order to satisfy this requirement. Defining
 ``palette: ICommandPalette`` makes this instance available to your code
 in that function. The second ``console.log`` line exists only so that
@@ -880,7 +880,7 @@ extension behave this way too.
 
 Update the imports at the top of your ``index.ts`` file so that the
 entire list of import statements looks like the following (Adding
-``ILayoutRestorer`` and ``WidgetTracker``):
+:ts:interface:`application.ILayoutRestorer` and :ts:class:`apputils.WidgetTracker`):
 
 .. code-block:: typescript
     :emphasize-lines: 2,7-11

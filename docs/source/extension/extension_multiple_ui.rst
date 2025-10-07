@@ -41,7 +41,7 @@ This is how basic compatibility features work: both apps use the same building
 blocks and methods. For instance, both JupyterLab and Notebook 7 accept Lumino widgets
 as interface components, both apps enable you to add them to the interface by
 specifying an "area" to place them into, and extensions for both use the same
-basic ``JupyterFrontendPlugin`` class.
+basic :ts:type:`application.JupyterFrontEndPlugin` type.
 
 How to Achieve Compatibility
 ----------------------------
@@ -157,14 +157,14 @@ in the examples repo (you can read the full extension example code there):
       }
     };
 
-This plugin marks ``IStatusBar`` as optional, and adds an argument for it to the
+This plugin marks :ts:interface:`statusbar.IStatusBar` as optional, and adds an argument for it to the
 plugin's ``activate`` function (which will be called by JupyterLab when the extension
-loads). If ``IStatusBar`` is not available, the second argument to the ``activate``
+loads). If :ts:interface:`statusbar.IStatusBar` is not available, the second argument to the ``activate``
 function will be ``null``, as is the case when the extension is loaded in Jupyter
 Notebook 7.
 
 The extension always creates a common main widget, but when it comes time to use the
-status bar, the extension first checks if the ``IStatusBar`` is available, and only then
+status bar, the extension first checks if the :ts:interface:`statusbar.IStatusBar` is available, and only then
 proceeds to create a status bar item. This allows the extension to run successfully in both
 JupyterLab and Jupyter Notebook 7:
 
@@ -261,7 +261,7 @@ example code there):
 As you can see above, this extension exports multiple plugins in a list,
 and each plugin uses different *requires* features to switch between
 different behaviors (in this case, different layout areas) depending on
-the app it is being loaded into. The first plugin requires ``ILabShell``
+the app it is being loaded into. The first plugin requires :ts:interface:`application.ILabShell`
 (available in JupyterLab), and the second plugin requires ``INotebookShell``
 (available in Jupyter Notebook 7).
 
