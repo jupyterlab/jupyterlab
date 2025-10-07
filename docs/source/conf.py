@@ -26,6 +26,7 @@
 import json
 import os
 import shutil
+import sys
 import time
 from collections import ChainMap
 from functools import partial
@@ -33,6 +34,9 @@ from pathlib import Path
 from subprocess import check_call
 
 HERE = Path(__file__).parent.resolve()
+
+# Add the _ext directory to Python path for custom extensions
+sys.path.insert(0, str(HERE / "_ext"))
 
 # -- General configuration ------------------------------------------------
 
@@ -48,6 +52,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
 myst_enable_extensions = ["html_image"]
