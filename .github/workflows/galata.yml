@@ -36,7 +36,7 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
-          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+          key: ${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
@@ -76,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-test-assets
+          name: jupyterlab-galata-test-assets-${{ matrix.browser }}
           path: |
             galata/test-jupyterlab-results
             galata/test-results
@@ -85,7 +85,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-report
+          name: jupyterlab-galata-report-${{ matrix.browser }}
           path: |
             galata/playwright-report
 
