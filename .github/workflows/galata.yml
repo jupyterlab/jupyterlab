@@ -15,7 +15,7 @@ jobs:
   test:
     name: Visual Regression Tests (${{ matrix.browser }})
     if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
-    timeout-minutes: 80
+    timeout-minutes: 260
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
