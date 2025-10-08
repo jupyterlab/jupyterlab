@@ -175,7 +175,7 @@ To allow hot-swapping the Jupyter Server in custom applications
 based of JupyterLab components, the request URL should be composed using
 the base URL from the :ts:interface:`services.ServerConnection.ISettings` instance derived
 from the service manager, passed down via class constructors as needed.
-The :ts:function:`coreutils.PageConfig.getBaseUrl()` should not be used directly.
+The :ts:function:`coreutils.PageConfig.getBaseUrl` should not be used directly.
 The following snippets demonstrate the best practice:
 
 .. code:: typescript
