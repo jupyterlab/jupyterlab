@@ -68,8 +68,11 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test --project galata ${{ matrix.project }}
-          mv galata/test-results galata/test-jupyterlab-results || true
+          jlpm run test --project ${{ matrix.project }}
+          if [[ "${{ matrix.browser }}" == "chromium" ]]; then
+            jlpm run test --project galata
+            mv galata/test-results galata/test-jupyterlab-results || true
+          fi
           # Run once benchmark tests to ensure they have no regression
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
 
