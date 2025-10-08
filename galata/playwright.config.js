@@ -41,7 +41,8 @@ module.exports = {
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {
-          permissions: ['clipboard-read', 'clipboard-write']
+          // https://github.com/microsoft/playwright/issues/13037
+          permissions: []
         },
         browserName: 'firefox'
       },
