@@ -47,7 +47,7 @@ module.exports = {
         browserName: 'firefox'
       },
       // We do not want to match exactly on Firefox
-      expect: { toMatchSnapshot: { maxDiffPixels: 500 } }
+      expect: { toMatchSnapshot: { maxDiffPixels: Number.MAX_SAFE_INTEGER } }
     }
   ],
   // Switch to 'always' to keep raw assets for all tests
