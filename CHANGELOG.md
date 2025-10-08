@@ -4,6 +4,22 @@
 
 # JupyterLab Changelog
 
+## v4.5
+
+JupyterLab 4.5 includes a number of new features (described below), bug fixes, and enhancements.
+This release is compatible with extensions supporting JupyterLab 4.0.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-4-to-4-5) which lists deprecations and changes to the public API.
+
+### Performance and windowing
+
+### Notebook and console improvements
+
+### Debugger improvements
+
+### Extended media and content support
+
+### User interface and accessibility
+
 ## v4.4
 
 JupyterLab 4.4 includes a number of new features (described below), bug fixes, and enhancements.
