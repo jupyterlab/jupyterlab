@@ -12,12 +12,8 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
-import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**
  * A handler for notebooks.
@@ -33,7 +29,11 @@ export class NotebookHandler implements IDisposable {
     this._notebookPanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
     this.translator = options.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
+    this._pausedOverlay = new DebuggerPausedOverlay({
+      debuggerService: this._debuggerService,
+      container: this._notebookPanel.node,
+      translator: this.translator
+    });
 
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
@@ -50,14 +50,14 @@ export class NotebookHandler implements IDisposable {
       }
 
       if (event.event === 'stopped') {
-        this._showPausedOverlay();
+        this._pausedOverlay.show();
       } else if (event.event === 'continued') {
-        this._hidePausedOverlay();
+        this._pausedOverlay.hide();
       }
     });
 
     if (this._debuggerService.hasStoppedThreads() === true) {
-      this._showPausedOverlay();
+      this._pausedOverlay.show();
     }
 
     this._onCellsChanged();
@@ -76,6 +76,9 @@ export class NotebookHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+
+    this._pausedOverlay.dispose();
+
     this._cellMap.values().forEach(handler => {
       handler.dispose();
       // Ensure to restore notebook editor settings
@@ -85,55 +88,6 @@ export class NotebookHandler implements IDisposable {
     });
     this._cellMap.dispose();
     Signal.clearData(this);
-  }
-
-  private _showPausedOverlay(): void {
-    if (this._pausedOverlay) {
-      return;
-    }
-
-    const overlay = document.createElement('div');
-    overlay.className = 'jp-DebuggerPausedOverlay';
-
-    const text = document.createElement('span');
-    text.textContent = this._trans.__('Paused in Debugger');
-    overlay.appendChild(text);
-
-    const continueBtn = document.createElement('button');
-    continueBtn.className = 'jp-DebuggerPausedButton';
-    continueBtn.title = this._trans.__('Continue');
-    runIcon.element({ container: continueBtn, elementPosition: 'center' });
-    continueBtn.onclick = () => {
-      void this._debuggerService.continue();
-    };
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'jp-DebuggerPausedButton';
-    nextBtn.title = this._trans.__('Next');
-    stepOverIcon.element({ container: nextBtn, elementPosition: 'center' });
-    nextBtn.onclick = () => {
-      void this._debuggerService.next();
-    };
-
-    overlay.appendChild(continueBtn);
-    overlay.appendChild(nextBtn);
-
-    this._notebookPanel.node.style.pointerEvents = 'none';
-    overlay.style.pointerEvents = 'auto';
-
-    this._notebookPanel.node.appendChild(overlay);
-    this._pausedOverlay = overlay;
-  }
-
-  private _hidePausedOverlay(): void {
-    if (!this._pausedOverlay) {
-      return;
-    }
-
-    this._notebookPanel.node.style.pointerEvents = '';
-
-    this._pausedOverlay.remove();
-    this._pausedOverlay = null;
   }
 
   /**
@@ -184,8 +138,7 @@ export class NotebookHandler implements IDisposable {
   private _debuggerService: IDebugger;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
-  private _pausedOverlay: HTMLDivElement | null = null;
-  private _trans: TranslationBundle;
+  private _pausedOverlay: DebuggerPausedOverlay;
   protected translator: ITranslator;
 }
 
