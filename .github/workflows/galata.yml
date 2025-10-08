@@ -18,6 +18,7 @@ jobs:
     timeout-minutes: 80
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         include:
           - project: 'jupyterlab'
