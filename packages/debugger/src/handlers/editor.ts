@@ -260,6 +260,8 @@ export class EditorHandler implements IDisposable {
    * Send the breakpoints from the editor UI via the debug service.
    */
   private _sendEditorBreakpoints(): void {
+    // console.log('dev _sendEditorBreakpoints');
+    // console.trace();
     if (this.editor?.isDisposed) {
       return;
     }
@@ -417,6 +419,7 @@ export class EditorHandler implements IDisposable {
     breakpoints.between(0, editor.doc.length, (from: number) => {
       lines.push(editor.doc.lineAt(from).number);
     });
+    console.log('lines', lines);
 
     return lines;
   }

@@ -427,9 +427,15 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
 
+    console.log(
+      'restore state this._model.breakpoints.breakpoints',
+      this._model.breakpoints.breakpoints
+    );
+
+    // ! this is the debug info message
     const reply = await this.session.restoreState();
     const { body } = reply;
-    const breakpoints = this._mapBreakpoints(body.breakpoints);
+    const kernelBreakpoints = this._mapBreakpoints(body.breakpoints);
     const stoppedThreads = new Set(body.stoppedThreads);
 
     this._model.hasRichVariableRendering = body.richRendering === true;
@@ -457,7 +463,48 @@ export class DebuggerService implements IDebugger, IDisposable {
         ? this.session?.connection?.name || '-'
         : '-';
     }
+    console.log('newd kernelBreakpoints', kernelBreakpoints);
+    const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    const { prefix, suffix } = this._config.getTmpFileParams(kernel);
+    for (const item of this._model.breakpoints.breakpoints) {
+      const [id, list] = item;
+      const unsuffixedId = id.substr(0, id.length - suffix.length);
+      const codeHash = unsuffixedId.substr(unsuffixedId.lastIndexOf('/') + 1);
+      const newId = prefix.concat(codeHash).concat(suffix);
+      breakpoints.set(newId, list);
+    }
 
+    console.log('newd breakpoints', breakpoints);
+
+    // Add kernel breakpoints, merging with existing ones if path already exists
+    for (const [path, bpList] of kernelBreakpoints) {
+      if (breakpoints.has(path)) {
+        // Merge breakpoints for the same path, avoiding duplicates
+        const existingBps = breakpoints.get(path)!;
+        const mergedBps = [...existingBps];
+
+        for (const kernelBp of bpList) {
+          const exists = existingBps.some(
+            existingBp => existingBp.line === kernelBp.line
+          );
+          if (!exists) {
+            mergedBps.push(kernelBp);
+          }
+        }
+
+        breakpoints.set(path, mergedBps);
+      } else {
+        breakpoints.set(path, bpList);
+      }
+    }
+
+    console.log('newd allBreakpoints', breakpoints);
+    // restore in kernel
+    await this._restoreBreakpoints(breakpoints);
+
+    // restore in model which also happen in _restoreBreakpoints
+    // ? is this necessary?
     if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(breakpoints);
       this._model.breakpoints.restoreBreakpoints(filtered);
@@ -563,6 +610,8 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void> {
+    // console.trace();
+    console.log('updateBreakpoints');
     if (!this.session?.isStarted) {
       return;
     }
@@ -570,18 +619,26 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!path) {
       path = (await this._dumpCell(code)).body.sourcePath;
     }
+    // console.log('breakpoints', breakpoints);
 
     const state = await this.session.restoreState();
-    const localBreakpoints = [
-      ...this._inMemoryBreakpoints
-        .filter(({ line }) => typeof line === 'number')
-        .map(({ line }) => ({ line: line! })),
+    const allBreakpoints = [
+      // ...this._inMemoryBreakpoints
+      //   .filter(({ line }) => typeof line === 'number')
+      //   .map(({ line }) => ({ line: line! })),
       ...breakpoints
         .filter(({ line }) => typeof line === 'number')
         .map(({ line }) => ({ line: line! }))
     ];
+
+    void console.log('this._inMemoryBreakpoints', this._inMemoryBreakpoints);
+
+    // Deduplicate based on line number
+    const localBreakpoints = allBreakpoints.filter(
+      (bp, index, arr) => arr.findIndex(b => b.line === bp.line) === index
+    );
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
-    console.log('localBreakpoints', localBreakpoints);
+    // console.log('localBreakpoints', localBreakpoints);
     // Set the local copy of breakpoints to reflect only editors that exist.
     if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(remoteBreakpoints);
@@ -604,6 +661,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       return cond1 && cond2;
     });
 
+    console.log('newd updatedBreakpoints', updatedBreakpoints);
     this._inMemoryBreakpoints = updatedBreakpoints;
 
     // Update the local model and finish kernel configuration.
