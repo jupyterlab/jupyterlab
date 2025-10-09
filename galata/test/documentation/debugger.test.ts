@@ -316,7 +316,7 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel.*\/\d+.py/);
+    expect(await breakpointsPanel.innerText()).toMatch(/Cell \[\d+\]/);
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path
@@ -345,7 +345,7 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
     await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
-      '/tmp/ipykernel_'
+      'Cell ['
     );
 
     // Don't compare screenshot as the kernel id varies
