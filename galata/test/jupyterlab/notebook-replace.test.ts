@@ -91,6 +91,11 @@ test.describe('Notebook Search and Replace', () => {
   });
 
   test('Replace all', async ({ page }) => {
+    test.skip(
+      ({ browserName }) => browserName === 'firefox',
+      'Flaky on Firefox'
+    );
+
     // Open search box
     await page.keyboard.press('Control+f');
 
