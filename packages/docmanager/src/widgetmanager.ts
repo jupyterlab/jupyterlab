@@ -477,8 +477,8 @@ export class DocumentWidgetManager implements IDisposable {
       this._dialogs ?? new DocumentManagerDialogs({ translator: translator });
     // Ask confirmation
     if (this.confirmClosingDocument) {
-      const [shouldClose, ignoreSave, doNotAskAgain] =
-        await dialogs.confirmClose(fileName, isDirty);
+      const { shouldClose, ignoreSave, doNotAskAgain } =
+        await dialogs.confirmClose({ fileName, isDirty });
 
       if (doNotAskAgain) {
         this.confirmClosingDocument = false;
@@ -489,11 +489,11 @@ export class DocumentWidgetManager implements IDisposable {
       if (!isDirty) {
         return Promise.resolve([true, true]);
       }
-      return dialogs?.saveBeforeClose(
+      const result = await dialogs?.saveBeforeClose({
         fileName,
-        isDirty,
-        context.contentsModel?.writable
-      );
+        writable: context.contentsModel?.writable
+      });
+      return [result.shouldClose, result.ignoreSave];
     }
   }
 

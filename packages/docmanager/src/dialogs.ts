@@ -8,7 +8,14 @@ import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import { IDocumentManager, IDocumentManagerDialogs } from './';
+import {
+  IConfirmCloseOptions,
+  IConfirmCloseResult,
+  IDocumentManager,
+  IDocumentManagerDialogs,
+  ISaveBeforeCloseOptions,
+  ISaveBeforeCloseResult
+} from './';
 
 /**
  * The class name added to file dialogs.
@@ -102,10 +109,10 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
    * Show a dialog asking whether to close a document.
    */
   async confirmClose(
-    fileName: string,
-    isDirty: boolean
-  ): Promise<[boolean, boolean, boolean]> {
+    options: IConfirmCloseOptions
+  ): Promise<IConfirmCloseResult> {
     const trans = this._translator.load('jupyterlab');
+    const { fileName, isDirty } = options;
 
     const buttons = [
       Dialog.cancelButton(),
@@ -145,18 +152,17 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
     const ignoreSave = isDirty ? confirm.button.displayType === 'warn' : true;
     const doNotAskAgain = confirm.isChecked === true;
 
-    return [shouldClose, ignoreSave, doNotAskAgain];
+    return { shouldClose, ignoreSave, doNotAskAgain };
   }
 
   /**
    * Show a dialog asking whether to save before closing a dirty document.
    */
   async saveBeforeClose(
-    fileName: string,
-    isDirty: boolean,
-    writable?: boolean
-  ): Promise<[boolean, boolean]> {
+    options: ISaveBeforeCloseOptions
+  ): Promise<ISaveBeforeCloseResult> {
     const trans = this._translator.load('jupyterlab');
+    const { fileName, writable } = options;
 
     const saveLabel = writable ? trans.__('Save') : trans.__('Save as');
 
@@ -176,7 +182,7 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
     const shouldClose = result.button.accept;
     const ignoreSave = result.button.displayType === 'warn';
 
-    return [shouldClose, ignoreSave];
+    return { shouldClose, ignoreSave };
   }
 
   private _translator: ITranslator;

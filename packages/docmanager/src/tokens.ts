@@ -45,7 +45,40 @@ export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
 );
 
 /**
- * An interface for dialogs related to document management.
+ * Options for confirmClose dialog.
+ */
+export interface IConfirmCloseOptions {
+  fileName: string;
+  isDirty: boolean;
+}
+
+/**
+ * Result of confirmClose dialog.
+ */
+export interface IConfirmCloseResult {
+  shouldClose: boolean;
+  ignoreSave: boolean;
+  doNotAskAgain: boolean;
+}
+
+/**
+ * Options for saveBeforeClose dialog.
+ */
+export interface ISaveBeforeCloseOptions {
+  fileName: string;
+  writable?: boolean;
+}
+
+/**
+ * Result of saveBeforeClose dialog.
+ */
+export interface ISaveBeforeCloseResult {
+  shouldClose: boolean;
+  ignoreSave: boolean;
+}
+
+/**
+ * Dialog interfaces for document management.
  */
 export interface IDocumentManagerDialogs {
   /**
@@ -62,27 +95,20 @@ export interface IDocumentManagerDialogs {
    * This dialog is shown when closing a clean (non-dirty) document
    * and confirmClosingDocument is true.
    *
-   * @param context - The document context
-   * @returns A promise that resolves to [shouldClose, shouldDiscard, doNotAskAgain]
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
    */
-  confirmClose(
-    fileName: string,
-    isDirty: boolean
-  ): Promise<[boolean, boolean, boolean]>;
+  confirmClose(options: IConfirmCloseOptions): Promise<IConfirmCloseResult>;
 
   /**
    * Show a dialog asking whether to save before closing a dirty document.
    *
-   * @param context - The document context
-   * @returns A promise that resolves to [shouldClose, shouldDiscard]
-   *          - shouldClose: true if user chose Save or Discard
-   *          - shouldDiscard: true if user chose Discard (don't save)
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
    */
   saveBeforeClose(
-    fileName: string,
-    isDirty: boolean,
-    writable?: boolean
-  ): Promise<[boolean, boolean]>;
+    options: ISaveBeforeCloseOptions
+  ): Promise<ISaveBeforeCloseResult>;
 }
 
 /**
