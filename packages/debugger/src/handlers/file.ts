@@ -14,6 +14,7 @@ import { EditorHandler } from '../handlers/editor';
 import { IDebugger } from '../tokens';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A handler for files.
@@ -118,6 +119,11 @@ export namespace FileHandler {
      * The widget to handle.
      */
     widget: DocumentWidget<FileEditor>;
+
+    /**
+     * The debugger settings.
+     */
+    settings?: ISettingRegistry.ISettings;
 
     /**
      * The application language translator.

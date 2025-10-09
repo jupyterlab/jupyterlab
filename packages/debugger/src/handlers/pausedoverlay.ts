@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { IDebugger } from '../tokens';
 import {
   ITranslator,
@@ -5,6 +8,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A reusable helper to show a "Paused in Debugger" overlay and block interactions.
@@ -13,10 +17,21 @@ export class DebuggerPausedOverlay {
   constructor(options: DebuggerPausedOverlay.IOptions) {
     this._debuggerService = options.debuggerService;
     this._container = options.container;
+    this._settings = options.settings ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
 
-  show(): void {
+  /**
+   * Show the overlay, if enabled by user settings.
+   */
+  async show(): Promise<void> {
+    const showOverlay =
+      (this._settings?.composite['showPausedOverlay'] as boolean) ?? true;
+
+    if (!showOverlay) {
+      return;
+    }
+
     if (this._overlay) {
       return;
     }
@@ -47,7 +62,7 @@ export class DebuggerPausedOverlay {
     overlay.appendChild(continueBtn);
     overlay.appendChild(nextBtn);
 
-    // Block interactions with the container
+    // Block interactions with the underlying container
     this._container.style.pointerEvents = 'none';
     overlay.style.pointerEvents = 'auto';
     this._container.appendChild(overlay);
@@ -55,6 +70,9 @@ export class DebuggerPausedOverlay {
     this._overlay = overlay;
   }
 
+  /**
+   * Hide and remove the overlay.
+   */
   hide(): void {
     if (!this._overlay) {
       return;
@@ -64,12 +82,16 @@ export class DebuggerPausedOverlay {
     this._overlay = null;
   }
 
+  /**
+   * Dispose of the overlay completely.
+   */
   dispose(): void {
     this.hide();
   }
 
   private _debuggerService: IDebugger;
   private _container: HTMLElement;
+  private _settings: ISettingRegistry.ISettings | null;
   private _trans: TranslationBundle;
   private _overlay: HTMLDivElement | null = null;
 }
@@ -78,6 +100,7 @@ export namespace DebuggerPausedOverlay {
   export interface IOptions {
     debuggerService: IDebugger;
     container: HTMLElement;
+    settings?: ISettingRegistry.ISettings;
     translator?: ITranslator;
   }
 }

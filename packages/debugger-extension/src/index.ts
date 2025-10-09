@@ -81,17 +81,22 @@ const consoles: JupyterFrontEndPlugin<void> = {
   description: 'Add debugger capability to the consoles.',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
-  optional: [ILabShell],
-  activate: (
+  optional: [ILabShell, ISettingRegistry, ITranslator],
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
   ) => {
+    const settings = await settingRegistry.load(main.id);
     const handler = new Debugger.Handler({
       type: 'console',
       shell: app.shell,
-      service: debug
+      service: debug,
+      settings: settings,
+      translator: translator
     });
 
     const updateHandlerAndCommands = async (
@@ -129,17 +134,22 @@ const files: JupyterFrontEndPlugin<void> = {
   description: 'Adds debugger capabilities to files.',
   autoStart: true,
   requires: [IDebugger, IEditorTracker],
-  optional: [ILabShell],
-  activate: (
+  optional: [ILabShell, ISettingRegistry, ITranslator],
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
   ) => {
+    const settings = await settingRegistry.load(main.id);
     const handler = new Debugger.Handler({
       type: 'file',
       shell: app.shell,
-      service: debug
+      service: debug,
+      settings: settings,
+      translator: translator
     });
 
     const activeSessions: {
@@ -203,24 +213,34 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     'Adds debugger capability to notebooks and provides the debugger notebook handler.',
   autoStart: true,
   requires: [IDebugger, INotebookTracker],
-  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
+  optional: [
+    ILabShell,
+    ICommandPalette,
+    ISessionContextDialogs,
+    ISettingRegistry,
+    ITranslator
+  ],
   provides: IDebuggerHandler,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
     labShell: ILabShell | null,
     palette: ICommandPalette | null,
     sessionDialogs_: ISessionContextDialogs | null,
+    settingRegistry: ISettingRegistry,
     translator_: ITranslator | null
-  ): Debugger.Handler => {
+  ): Promise<Debugger.Handler> => {
     const translator = translator_ ?? nullTranslator;
+    const settings = await settingRegistry.load(main.id);
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
-      service
+      service,
+      settings: settings,
+      translator: translator
     });
 
     const trans = translator.load('jupyterlab');
