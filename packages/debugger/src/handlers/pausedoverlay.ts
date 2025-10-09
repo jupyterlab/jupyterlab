@@ -19,23 +19,8 @@ export class DebuggerPausedOverlay {
     this._container = options.container;
     this._settings = options.settings ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
-  }
 
-  /**
-   * Show the overlay, if enabled by user settings.
-   */
-  async show(): Promise<void> {
-    const showOverlay =
-      (this._settings?.composite['showPausedOverlay'] as boolean) ?? true;
-
-    if (!showOverlay) {
-      return;
-    }
-
-    if (this._overlay) {
-      return;
-    }
-
+    // Create overlay
     const overlay = document.createElement('div');
     overlay.className = 'jp-DebuggerPausedOverlay';
 
@@ -62,24 +47,35 @@ export class DebuggerPausedOverlay {
     overlay.appendChild(continueBtn);
     overlay.appendChild(nextBtn);
 
-    // Block interactions with the underlying container
-    this._container.style.pointerEvents = 'none';
     overlay.style.pointerEvents = 'auto';
-    this._container.appendChild(overlay);
-
     this._overlay = overlay;
   }
 
   /**
-   * Hide and remove the overlay.
+   * Show the overlay, if enabled by user settings.
+   */
+  async show(): Promise<void> {
+    const showOverlay =
+      (this._settings?.composite['showPausedOverlay'] as boolean) ?? true;
+
+    if (!showOverlay || !this._overlay || this._overlay.isConnected) {
+      return;
+    }
+
+    // Block interactions with the underlying container
+    this._container.style.pointerEvents = 'none';
+    this._container.appendChild(this._overlay);
+  }
+
+  /**
+   * Hide and unmount the overlay.
    */
   hide(): void {
-    if (!this._overlay) {
+    if (!this._overlay || !this._overlay.isConnected) {
       return;
     }
     this._container.style.pointerEvents = '';
     this._overlay.remove();
-    this._overlay = null;
   }
 
   /**
@@ -87,13 +83,14 @@ export class DebuggerPausedOverlay {
    */
   dispose(): void {
     this.hide();
+    this._overlay = null;
   }
 
   private _debuggerService: IDebugger;
   private _container: HTMLElement;
   private _settings: ISettingRegistry.ISettings | null;
   private _trans: TranslationBundle;
-  private _overlay: HTMLDivElement | null = null;
+  private _overlay: HTMLDivElement | null;
 }
 
 export namespace DebuggerPausedOverlay {
