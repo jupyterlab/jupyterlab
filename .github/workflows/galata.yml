@@ -72,9 +72,9 @@ jobs:
           if [[ "${{ matrix.browser }}" == "chromium" ]]; then
             jlpm run test --project galata
             mv galata/test-results galata/test-jupyterlab-results || true
+            # Run benchmark tests once to ensure they have no regression
+            BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
           fi
-          # Run once benchmark tests to ensure they have no regression
-          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
 
       - name: Upload Galata Test assets
         if: always()
@@ -82,7 +82,7 @@ jobs:
         with:
           name: jupyterlab-galata-test-assets-${{ matrix.browser }}
           path: |
-            galata/test-jupyterlab-results
+            galata/test-${{ matrix.project }}-results
             galata/test-results
 
       - name: Upload Galata Test report
