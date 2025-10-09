@@ -78,13 +78,14 @@ async function waitForFrame(
   page: Page,
   frameSelector: Parameters<Page['frame']>[0]
 ): Promise<Frame> {
-  let frame = null;
-  while (!frame) {
-    frame = page.frame(frameSelector);
+  const loops = 200;
+  const pause = 10;
+  for (let i = 0; i < loops; i++) {
+    const frame = page.frame(frameSelector);
     if (frame) {
       return frame;
     }
-    await page.waitForTimeout(10);
+    await page.waitForTimeout(pause);
   }
-  return frame as never;
+  throw Error(`Frame was not found after ${pause * loops}ms`);
 }
