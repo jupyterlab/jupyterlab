@@ -322,9 +322,8 @@ export interface IManager extends IDisposable {
   /**
    * Connect to a running session.
    *
-   * @param model - The model of the target session.
-   *
-   * @param options - The session options to use.
+   * @param options - The session options to use
+   * @param options.model - The model of the target session.
    *
    * @returns The new session instance.
    */

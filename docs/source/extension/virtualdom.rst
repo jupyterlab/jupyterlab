@@ -16,7 +16,7 @@ which have some additional features over native DOM elements, including:
 -  Both CSS-based and absolutely positioned layouts.
 
 We support wrapping React components to turn them into Lumino
-widgets using the ``ReactWidget`` class from ``@jupyterlab/ui-components``:
+widgets using the :ts:class:`apputils.ReactWidget` class from ``@jupyterlab/ui-components``:
 
 .. literalinclude:: virtualdom.create.tsx
    :force:

@@ -4,6 +4,8 @@
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -16,6 +18,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
    */
   constructor(options: SourcesModel.IOptions) {
     this.currentFrameChanged = options.currentFrameChanged;
+    this._notebookTracker = options.notebookTracker ?? undefined;
+    this._config = options.config;
   }
 
   /**
@@ -64,6 +68,43 @@ export class SourcesModel implements IDebugger.Model.ISources {
     this._currentSourceOpened.emit(this._currentSource);
   }
 
+  /**
+   * Get a human-readable display for a frame.
+   *
+   * For notebook cells, shows execution count if available, [*] if running, or [ ] if never executed.
+   */
+  getDisplayName(frame: IDebugger.IStackFrame): string {
+    let display = frame.source?.path ?? '';
+
+    if (!this._notebookTracker || !this._config || !frame.source?.path) {
+      return display;
+    }
+
+    this._notebookTracker.forEach(panel => {
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+      panel.content.widgets.forEach(cell => {
+        if (cell.model.type !== 'code') return;
+
+        const code = cell.model.sharedModel.getSource();
+        const codeId = this._config!.getCodeId(code, kernelName);
+
+        if (codeId === frame.source?.path) {
+          if (isCodeCellModel(cell.model)) {
+            if (cell.model.executionState === 'running') {
+              display = `Cell [*]`;
+            } else if (cell.model.executionCount === null) {
+              display = `Cell [ ]`;
+            } else {
+              display = `Cell [${cell.model.executionCount}]`;
+            }
+          }
+        }
+      });
+    });
+
+    return display;
+  }
+
   private _currentSource: IDebugger.Source | null;
   private _currentSourceOpened = new Signal<
     SourcesModel,
@@ -73,6 +114,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
     SourcesModel,
     IDebugger.Source | null
   >(this);
+  private _notebookTracker?: INotebookTracker;
+  private _config?: IDebugger.IConfig;
 }
 
 /**
@@ -90,5 +133,15 @@ export namespace SourcesModel {
       IDebugger.Model.ICallstack,
       IDebugger.IStackFrame | null
     >;
+
+    /**
+     * Optional notebook tracker to resolve cell execution numbers.
+     */
+    notebookTracker: INotebookTracker | null;
+
+    /**
+     * Debugger config used to get code ids.
+     */
+    config: IDebugger.IConfig;
   }
 }

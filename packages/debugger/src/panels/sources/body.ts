@@ -85,10 +85,11 @@ export class SourcesBody extends Widget {
    * @param frame The current frame.
    */
   private async _showSource(frame: IDebugger.IStackFrame): Promise<void> {
-    const path = frame.source?.path;
+    const displayPath = this._model.getDisplayName(frame);
+
     const source = await this._debuggerService.getSource({
       sourceReference: 0,
-      path
+      path: frame.source?.path
     });
 
     if (!source?.content) {
@@ -102,7 +103,8 @@ export class SourcesBody extends Widget {
 
     const { content, mimeType } = source;
     const editorMimeType =
-      mimeType || this._mimeTypeService.getMimeTypeByFilePath(path ?? '');
+      mimeType ||
+      this._mimeTypeService.getMimeTypeByFilePath(frame.source?.path ?? '');
 
     this._editor.model.sharedModel.setSource(content);
     this._editor.model.mimeType = editorMimeType;
@@ -111,14 +113,14 @@ export class SourcesBody extends Widget {
       debuggerService: this._debuggerService,
       editorReady: () => Promise.resolve(this._editor.editor),
       getEditor: () => this._editor.editor,
-      path,
+      path: frame.source?.path ?? '',
       src: this._editor.model.sharedModel
     });
 
     this._model.currentSource = {
       content,
       mimeType: editorMimeType,
-      path: path ?? ''
+      path: displayPath
     };
 
     requestAnimationFrame(() => {
