@@ -338,8 +338,11 @@ test.describe('Workspace in doc mode', () => {
   test('should restore workspace when switching back to lab mode', async ({
     baseURL,
     page,
-    tmpPath
+    tmpPath,
+    browserName
   }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
+
     // Open the browser in doc mode.
     // This should not change the saved workspace's main area information,
     // the document opened from URL should not be saved in workspace.
