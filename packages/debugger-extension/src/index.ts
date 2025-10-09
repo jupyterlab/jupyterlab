@@ -309,15 +309,17 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [IDebuggerSources, ITranslator],
+  optional: [INotebookTracker, IDebuggerSources, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
+    notebookTracker: INotebookTracker | null,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>
     new Debugger.Service({
       config,
+      notebookTracker,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
       translator
@@ -620,14 +622,16 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
   id: '@jupyterlab/debugger-extension:sidebar',
   description: 'Provides the debugger sidebar.',
   provides: IDebuggerSidebar,
-  requires: [IDebugger, IEditorServices, ITranslator],
-  optional: [IThemeManager, ISettingRegistry],
+  requires: [IDebugger, IEditorServices, ITranslator, IDebuggerConfig],
+  optional: [INotebookTracker, IThemeManager, ISettingRegistry],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     editorServices: IEditorServices,
     translator: ITranslator,
+    config: IDebugger.IConfig,
+    notebookTracker: INotebookTracker | null,
     themeManager: IThemeManager | null,
     settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISidebar> => {
@@ -654,6 +658,8 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       callstackCommands,
       breakpointsCommands,
       editorServices,
+      config,
+      notebookTracker,
       themeManager,
       translator
     });
