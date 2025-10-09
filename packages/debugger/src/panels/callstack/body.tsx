@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PathExt } from '@jupyterlab/coreutils';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
 import { IDebugger } from '../../tokens';
@@ -36,6 +35,7 @@ export class CallstackBody extends ReactWidget {
  *
  * @param {object} props The component props.
  * @param props.model The model for the callstack.
+ * @returns A JSX element.
  */
 const FramesComponent = ({
   model
@@ -62,14 +62,6 @@ const FramesComponent = ({
     };
   }, [model]);
 
-  const toShortLocation = (el: IDebugger.IStackFrame) => {
-    const path = el.source?.path || '';
-    const base = PathExt.basename(PathExt.dirname(path));
-    const filename = PathExt.basename(path);
-    const shortname = PathExt.join(base, filename);
-    return `${shortname}:${el.line}`;
-  };
-
   return (
     <ul>
       {frames.map(ele => (
@@ -87,7 +79,7 @@ const FramesComponent = ({
             className={'jp-DebuggerCallstackFrame-location'}
             title={ele.source?.path}
           >
-            {toShortLocation(ele)}
+            {model.getDisplayName?.(ele) ?? ele.source?.path}
           </span>
         </li>
       ))}
