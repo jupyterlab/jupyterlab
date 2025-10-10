@@ -461,26 +461,20 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._model.breakpoints.breakpoints
     );
 
-    // Add kernel breakpoints, merging with existing ones if path already exists
-    for (const [path, bpList] of kernelBreakpoints) {
-      if (breakpoints.has(path)) {
-        // Merge breakpoints for the same path, avoiding duplicates
-        const existingBps = breakpoints.get(path)!;
-        const mergedBps = [...existingBps];
+    // Merge kernel breakpoints with existing breakpoints, avoiding duplicates
+    for (const [path, kernelBpList] of kernelBreakpoints) {
+      const existingBreakpoints = breakpoints.get(path) ?? [];
 
-        for (const kernelBp of bpList) {
-          const exists = existingBps.some(
+      // Filter out kernel breakpoints that already exist at the same line
+      const newBreakpoints = kernelBpList.filter(
+        kernelBp =>
+          !existingBreakpoints.some(
             existingBp => existingBp.line === kernelBp.line
-          );
-          if (!exists) {
-            mergedBps.push(kernelBp);
-          }
-        }
+          )
+      );
 
-        breakpoints.set(path, mergedBps);
-      } else {
-        breakpoints.set(path, bpList);
-      }
+      // Merge existing and new breakpoints
+      breakpoints.set(path, [...existingBreakpoints, ...newBreakpoints]);
     }
 
     // restore in kernel AND model
