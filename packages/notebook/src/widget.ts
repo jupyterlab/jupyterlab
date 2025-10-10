@@ -1046,14 +1046,20 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     const isContentVisibility =
       this._notebookConfig.windowingMode === 'contentVisibility';
 
-    cell.toggleClass('jp-content-visibility', isContentVisibility);
-
-    if (isContentVisibility) {
-      const estHeight = this._viewModel.estimateWidgetSize(index);
-      cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-    } else {
+    if (!isContentVisibility) {
       cell.node.style.removeProperty('contain-intrinsic-size');
+      cell.toggleClass('jp-content-visibility', false);
+      return;
     }
+
+    const estHeight = this._viewModel.estimateWidgetSize(index);
+
+    // Delay applying content-visibility for cells
+    // (handles early CodeMirror editor initialization cases, e.g. in Firefox)
+    requestAnimationFrame(() => {
+      cell.toggleClass('jp-content-visibility', true);
+      cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+    });
   }
 
   protected cellsArray: Array<Cell>;
