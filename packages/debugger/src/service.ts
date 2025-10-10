@@ -427,7 +427,6 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
 
-    // ! this is the debug info message
     const reply = await this.session.restoreState();
     const { body } = reply;
     const kernelBreakpoints = this._mapBreakpoints(body.breakpoints);
@@ -487,8 +486,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     // restore in kernel AND model
     await this._restoreBreakpoints(breakpoints);
 
-    // restore in model which also happen in _restoreBreakpoints
-    // ? is this necessary?
     if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(breakpoints);
       this._model.breakpoints.restoreBreakpoints(filtered);
@@ -603,17 +600,12 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const state = await this.session.restoreState();
-    const allBreakpoints = [
-      ...breakpoints
-        .filter(({ line }) => typeof line === 'number')
-        .map(({ line }) => ({ line: line! }))
-    ];
+    const localBreakpoints = breakpoints
+      .filter(({ line }) => typeof line === 'number')
+      .map(({ line }) => ({ line: line! }));
 
-    // Deduplicate based on line number
-    const localBreakpoints = allBreakpoints.filter(
-      (bp, index, arr) => arr.findIndex(b => b.line === bp.line) === index
-    );
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
+
     // Set the local copy of breakpoints to reflect only editors that exist.
     if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(remoteBreakpoints);
