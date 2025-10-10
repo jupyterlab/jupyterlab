@@ -45,36 +45,54 @@ export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
 );
 
 /**
- * Options for confirmClose dialog.
+ * Namespace for dialog-related interfaces (argument/result) used by IDocumentManagerDialogs.
  */
-export interface IConfirmCloseOptions {
-  fileName: string;
-  isDirty: boolean;
-}
+export namespace IDocumentManagerDialogArgs {
+  /**
+   * Options for {@link IDocumentManagerDialogs.confirmClose} dialog.
+   *
+   * @property fileName - The name of the file to be closed.
+   * @property isDirty - Whether the file has unsaved changes.
+   */
+  export interface IConfirmCloseOptions {
+    fileName: string;
+    isDirty: boolean;
+  }
 
-/**
- * Result of confirmClose dialog.
- */
-export interface IConfirmCloseResult {
-  shouldClose: boolean;
-  ignoreSave: boolean;
-  doNotAskAgain: boolean;
-}
+  /**
+   * Result of {@link IDocumentManagerDialogs.confirmClose} dialog.
+   *
+   * @property shouldClose - Indicates whether the document should be closed.
+   * @property ignoreSave - If true, the document will be closed without saving changes.
+   * @property doNotAskAgain - If true, the confirmation dialog should not be shown again for this document.
+   */
+  export interface IConfirmCloseResult {
+    shouldClose: boolean;
+    ignoreSave: boolean;
+    doNotAskAgain: boolean;
+  }
 
-/**
- * Options for saveBeforeClose dialog.
- */
-export interface ISaveBeforeCloseOptions {
-  fileName: string;
-  writable?: boolean;
-}
+  /**
+   * Options for {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+   *
+   * @property fileName - The name of the file to be saved.
+   * @property writable - Whether the file is writable. If not specified, defaults to false
+   */
+  export interface ISaveBeforeCloseOptions {
+    fileName: string;
+    writable?: boolean;
+  }
 
-/**
- * Result of saveBeforeClose dialog.
- */
-export interface ISaveBeforeCloseResult {
-  shouldClose: boolean;
-  ignoreSave: boolean;
+  /**
+   * Result of {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+   *
+   * @property shouldClose - Indicates whether the document should be closed after the operation.
+   * @property ignoreSave - Indicates whether the save operation should be ignored (i.e., close without saving).
+   */
+  export interface ISaveBeforeCloseResult {
+    shouldClose: boolean;
+    ignoreSave: boolean;
+  }
 }
 
 /**
@@ -98,7 +116,9 @@ export interface IDocumentManagerDialogs {
    * @param options - Options for the dialog
    * @returns A promise that resolves to a result object
    */
-  confirmClose(options: IConfirmCloseOptions): Promise<IConfirmCloseResult>;
+  confirmClose(
+    options: IDocumentManagerDialogArgs.IConfirmCloseOptions
+  ): Promise<IDocumentManagerDialogArgs.IConfirmCloseResult>;
 
   /**
    * Show a dialog asking whether to save before closing a dirty document.
@@ -107,8 +127,8 @@ export interface IDocumentManagerDialogs {
    * @returns A promise that resolves to a result object
    */
   saveBeforeClose(
-    options: ISaveBeforeCloseOptions
-  ): Promise<ISaveBeforeCloseResult>;
+    options: IDocumentManagerDialogArgs.ISaveBeforeCloseOptions
+  ): Promise<IDocumentManagerDialogArgs.ISaveBeforeCloseResult>;
 }
 
 /**

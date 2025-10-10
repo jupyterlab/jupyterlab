@@ -9,12 +9,9 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import {
-  IConfirmCloseOptions,
-  IConfirmCloseResult,
   IDocumentManager,
-  IDocumentManagerDialogs,
-  ISaveBeforeCloseOptions,
-  ISaveBeforeCloseResult
+  IDocumentManagerDialogArgs,
+  IDocumentManagerDialogs
 } from './';
 
 /**
@@ -109,8 +106,8 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
    * Show a dialog asking whether to close a document.
    */
   async confirmClose(
-    options: IConfirmCloseOptions
-  ): Promise<IConfirmCloseResult> {
+    options: IDocumentManagerDialogArgs.IConfirmCloseOptions
+  ): Promise<IDocumentManagerDialogArgs.IConfirmCloseResult> {
     const trans = this._translator.load('jupyterlab');
     const { fileName, isDirty } = options;
 
@@ -159,8 +156,8 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
    * Show a dialog asking whether to save before closing a dirty document.
    */
   async saveBeforeClose(
-    options: ISaveBeforeCloseOptions
-  ): Promise<ISaveBeforeCloseResult> {
+    options: IDocumentManagerDialogArgs.ISaveBeforeCloseOptions
+  ): Promise<IDocumentManagerDialogArgs.ISaveBeforeCloseResult> {
     const trans = this._translator.load('jupyterlab');
     const { fileName, writable } = options;
 
