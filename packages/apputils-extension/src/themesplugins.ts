@@ -13,7 +13,7 @@ import {
   IThemeManager,
   ThemeManager
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -63,7 +63,10 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     const trans = translator.load('jupyterlab');
     const host = app.shell;
     const commands = app.commands;
-    const url = URLExt.join(PageConfig.getBaseUrl(), paths.urls.themes);
+    const url = URLExt.join(
+      app.serviceManager.serverSettings.baseUrl,
+      paths.urls.themes
+    );
     const key = themesPlugin.id;
     const manager = new ThemeManager({
       key,

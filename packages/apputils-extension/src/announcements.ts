@@ -28,14 +28,16 @@ const PRIVACY_URL =
  *
  * @param endpoint Endpoint to request
  * @param init Initial values for the request
+ * @param serverSettings The server settings to use for the request
  * @returns The response body interpreted as JSON
  */
 async function requestAPI<T>(
   endpoint: string,
-  init: RequestInit = {}
+  init: RequestInit = {},
+  serverSettings?: ServerConnection.ISettings
 ): Promise<T> {
   // Make request to Jupyter API
-  const settings = ServerConnection.makeSettings();
+  const settings = serverSettings ?? ServerConnection.makeSettings();
   const requestUrl = URLExt.join(settings.baseUrl, endpoint);
 
   let response: Response;
@@ -169,7 +171,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               news: (Notification.INotification & {
                 link?: [string, string];
               })[];
-            }>(NEWS_API_URL);
+            }>(NEWS_API_URL, {}, app.serviceManager.serverSettings);
 
             for (const { link, message, type, options } of response.news) {
               // @ts-expect-error data has no index
@@ -231,7 +233,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   link?: [string, string];
                 })
               | null;
-          }>(UPDATE_API_URL);
+          }>(UPDATE_API_URL, {}, app.serviceManager.serverSettings);
 
           if (response.notification) {
             const { link, message, type, options } = response.notification;

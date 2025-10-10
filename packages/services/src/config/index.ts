@@ -134,13 +134,9 @@ class DefaultConfigSection implements IConfigSection {
    * Construct a new config section.
    */
   constructor(options: ConfigSection.IOptions) {
-    const settings = (this.serverSettings =
-      options.serverSettings ?? ServerConnection.makeSettings());
-    this._url = URLExt.join(
-      settings.baseUrl,
-      SERVICE_CONFIG_URL,
-      encodeURIComponent(options.name)
-    );
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+    this._name = options.name;
   }
 
   /**
@@ -207,7 +203,18 @@ class DefaultConfigSection implements IConfigSection {
     return this._data;
   }
 
-  private _url = 'unknown';
+  /**
+   * Get the URL for this config section.
+   */
+  private get _url(): string {
+    return URLExt.join(
+      this.serverSettings.baseUrl,
+      SERVICE_CONFIG_URL,
+      encodeURIComponent(this._name)
+    );
+  }
+
+  private _name: string;
   private _data: JSONObject;
 }
 

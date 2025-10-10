@@ -498,7 +498,7 @@ function createFileMenu(
         ]
       }).then(async result => {
         if (result.button.accept) {
-          const setting = ServerConnection.makeSettings();
+          const setting = app.serviceManager.serverSettings;
           const apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
 
           // Shutdown all kernel and terminal sessions before shutting down the server
