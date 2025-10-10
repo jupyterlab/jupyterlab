@@ -130,10 +130,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._kernelChangedHandlers[widget.id] = kernelChanged;
     connection.kernelChanged.connect(kernelChanged);
 
-    const statusChanged = (
+    const statusChanged = async (
       _: Session.ISessionConnection,
       status: Kernel.Status
-    ): void => {
+    ): Promise<void> => {
       if (status.endsWith('restarting')) {
         void this.updateWidget(widget, connection);
       }
@@ -362,14 +362,19 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         connection,
         config: this._service.config
       });
-      await this._service.restoreState(false);
     } else {
       this._previousConnection = this._service.session!.connection?.kernel
         ? this._service.session.connection
         : null;
       this._service.session.connection = connection;
-      await this._service.restoreState(true);
     }
+
+    if (this._service.session.isStarted) {
+      await this._service.restoreState(true);
+    } else {
+      await this._service.restoreState(false);
+    }
+
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
       if (this._service.session?.capabilities?.supportsModulesRequest) {
