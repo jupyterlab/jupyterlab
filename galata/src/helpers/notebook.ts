@@ -692,7 +692,11 @@ export class NotebookHelper {
     }
     await this.page.keyboard.press('Control+A');
     await this.page.keyboard.press('Control+C');
-    await this.page.context().grantPermissions(['clipboard-read']);
+    try {
+      await this.page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not it it either
+    }
     const handle = await this.page.evaluateHandle(() =>
       navigator.clipboard.readText()
     );
