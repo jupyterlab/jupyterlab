@@ -198,14 +198,14 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Clear all the breakpoints for the current session.
    */
   async clearBreakpoints(): Promise<void> {
-    if (this.session?.isStarted !== true) {
-      return;
+    // Clear breakpoints in kernel if session is started
+    if (this.session?.isStarted) {
+      this._model.breakpoints.breakpoints.forEach((_, path, map) => {
+        void this._setBreakpoints([], path);
+      });
     }
 
-    this._model.breakpoints.breakpoints.forEach((_, path, map) => {
-      void this._setBreakpoints([], path);
-    });
-
+    // Clear breakpoints in model
     let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
     this._model.breakpoints.restoreBreakpoints(bpMap);
   }
