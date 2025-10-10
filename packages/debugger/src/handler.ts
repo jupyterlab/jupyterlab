@@ -130,10 +130,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._kernelChangedHandlers[widget.id] = kernelChanged;
     connection.kernelChanged.connect(kernelChanged);
 
-    const statusChanged = async (
+    const statusChanged = (
       _: Session.ISessionConnection,
       status: Kernel.Status
-    ): Promise<void> => {
+    ): void => {
       if (status.endsWith('restarting')) {
         void this.updateWidget(widget, connection);
       }
