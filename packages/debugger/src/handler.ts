@@ -369,7 +369,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._service.session.connection = connection;
     }
 
-    if (this._service.session.isStarted) {
+    if (isDebuggerOn()) {
       await this._service.restoreState(true);
     } else {
       await this._service.restoreState(false);
