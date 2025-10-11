@@ -30,7 +30,9 @@ import {
 import { IChangedArgs, PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
+  DocumentManagerDialogs,
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager,
   PathStatus,
@@ -178,7 +180,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     ISessionContextDialogs,
     JupyterLab.IInfo,
     IRecentsManager,
-    IUrlResolverFactory
+    IUrlResolverFactory,
+    IDocumentManagerDialogs
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -188,12 +191,15 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null,
     recentsManager: IRecentsManager | null,
-    urlResolverFactory: IUrlResolverFactory | null
+    urlResolverFactory: IUrlResolverFactory | null,
+    docManagerDialogs_: IDocumentManagerDialogs | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
+    const docManagerDialogs =
+      docManagerDialogs_ ?? new DocumentManagerDialogs({ translator });
     const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
@@ -211,7 +217,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         return true;
       },
       recentsManager: recentsManager ?? undefined,
-      urlResolverFactory: urlResolverFactory ?? undefined
+      urlResolverFactory: urlResolverFactory ?? undefined,
+      docManagerDialogs: docManagerDialogs
     });
 
     return docManager;
@@ -589,6 +596,23 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides the default dialogs for three document management operations:
+ * Rename, Confirm Close, and Save Before Close.
+ *
+ * To customize these dialogs, implement a custom plugin that provides the `IDocumentManagerDialogs` token.
+ */
+const dialogsPlugin: JupyterFrontEndPlugin<IDocumentManagerDialogs> = {
+  id: '@jupyterlab/docmanager-extension:dialogs',
+  description: 'Provides default dialogs for document management operations.',
+  autoStart: true,
+  provides: IDocumentManagerDialogs,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    return new DocumentManagerDialogs({ translator });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -600,7 +624,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   downloadPlugin,
   openBrowserTabPlugin,
   openerPlugin,
-  recentsManagerPlugin
+  recentsManagerPlugin,
+  dialogsPlugin
 ];
 export default plugins;
 
