@@ -43,6 +43,11 @@ const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
 
 /**
+ * The class name for the breadcrumbs ellipsis node
+ */
+const BREADCRUMB_ELLIPSIS_CLASS = 'jp-BreadCrumbs-ellipsis';
+
+/**
  * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -150,6 +155,26 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Get all breadcrumb elements that can be drop targets.
+   */
+  private _getBreadcrumbElements(): HTMLElement[] {
+    const elements: HTMLElement[] = [];
+    const children = this.node.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      if (
+        (child.classList.contains(BREADCRUMB_ITEM_CLASS) ||
+          child.classList.contains(BREADCRUMB_ROOT_CLASS) ||
+          child.classList.contains(BREADCRUMB_PREFERRED_CLASS)) &&
+        !child.classList.contains(BREADCRUMB_ELLIPSIS_CLASS)
+      ) {
+        elements.push(child);
+      }
+    }
+    return elements;
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -253,12 +278,18 @@ export class BreadCrumbs extends Widget {
    */
   private _evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
-      const index = ArrayExt.findFirstIndex(this._crumbs, node =>
+      const breadcrumbElements = this._getBreadcrumbElements();
+      const index = ArrayExt.findFirstIndex(breadcrumbElements, node =>
         ElementExt.hitTest(node, event.clientX, event.clientY)
       );
       if (index !== -1) {
-        if (index !== Private.Crumb.Current) {
-          this._crumbs[index].classList.add(DROP_TARGET_CLASS);
+        const hitElement = breadcrumbElements[index];
+        // Don't allow dropping on the current path
+        const currentPath = this._model.manager.services.contents.localPath(
+          this._model.path
+        );
+        if (hitElement.title !== currentPath) {
+          hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
         }
@@ -289,11 +320,12 @@ export class BreadCrumbs extends Widget {
     if (dropTarget) {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
-    const index = ArrayExt.findFirstIndex(this._crumbs, node =>
+    const breadcrumbElements = this._getBreadcrumbElements();
+    const index = ArrayExt.findFirstIndex(breadcrumbElements, node =>
       ElementExt.hitTest(node, event.clientX, event.clientY)
     );
     if (index !== -1) {
-      this._crumbs[index].classList.add(DROP_TARGET_CLASS);
+      breadcrumbElements[index].classList.add(DROP_TARGET_CLASS);
     }
   }
 
@@ -336,16 +368,14 @@ export class BreadCrumbs extends Widget {
     }
 
     const model = this._model;
-    const resolvedPath = PathExt.resolve(model.path, destinationPath);
     const manager = model.manager;
 
     // Move all of the items.
     const promises: Promise<any>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
-      const localOldPath = manager.services.contents.localPath(oldPath);
-      const name = PathExt.basename(localOldPath);
-      const newPath = PathExt.join(resolvedPath, name);
+      const name = PathExt.basename(oldPath);
+      const newPath = PathExt.join(destinationPath, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
@@ -532,7 +562,7 @@ namespace Private {
       stylesheet: 'breadCrumb'
     });
     const ellipsis = ellipsesIcon.element({
-      className: BREADCRUMB_ITEM_CLASS,
+      className: `${BREADCRUMB_ITEM_CLASS} ${BREADCRUMB_ELLIPSIS_CLASS}`,
       tag: 'span',
       stylesheet: 'breadCrumb'
     });
