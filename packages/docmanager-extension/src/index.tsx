@@ -596,6 +596,23 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides the default dialogs for three document management operations:
+ * Rename, Confirm Close, and Save Before Close.
+ *
+ * To customize these dialogs, implement a custom plugin that provides the `IDocumentManagerDialogs` token.
+ */
+const dialogsPlugin: JupyterFrontEndPlugin<IDocumentManagerDialogs> = {
+  id: '@jupyterlab/docmanager-extension:dialogs',
+  description: 'Provides default dialogs for document management operations.',
+  autoStart: true,
+  provides: IDocumentManagerDialogs,
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    return new DocumentManagerDialogs({ translator });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -607,7 +624,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   downloadPlugin,
   openBrowserTabPlugin,
   openerPlugin,
-  recentsManagerPlugin
+  recentsManagerPlugin,
+  dialogsPlugin
 ];
 export default plugins;
 
