@@ -47,7 +47,7 @@ export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
 /**
  * Namespace for dialog-related interfaces (argument/result) used by IDocumentManagerDialogs.
  */
-export namespace IDocumentManagerDialogArgs {
+export namespace IDocumentManagerDialogs {
   /**
    * Options for {@link IDocumentManagerDialogs.confirmClose} dialog.
    *
@@ -117,8 +117,8 @@ export interface IDocumentManagerDialogs {
    * @returns A promise that resolves to a result object
    */
   confirmClose(
-    options: IDocumentManagerDialogArgs.IConfirmCloseOptions
-  ): Promise<IDocumentManagerDialogArgs.IConfirmCloseResult>;
+    options: IDocumentManagerDialogs.IConfirmCloseOptions
+  ): Promise<IDocumentManagerDialogs.IConfirmCloseResult>;
 
   /**
    * Show a dialog asking whether to save before closing a dirty document.
@@ -127,8 +127,8 @@ export interface IDocumentManagerDialogs {
    * @returns A promise that resolves to a result object
    */
   saveBeforeClose(
-    options: IDocumentManagerDialogArgs.ISaveBeforeCloseOptions
-  ): Promise<IDocumentManagerDialogArgs.ISaveBeforeCloseResult>;
+    options: IDocumentManagerDialogs.ISaveBeforeCloseOptions
+  ): Promise<IDocumentManagerDialogs.ISaveBeforeCloseResult>;
 }
 
 /**
