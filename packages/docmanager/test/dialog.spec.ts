@@ -5,11 +5,7 @@
 
 import {
   DocumentManager,
-  IConfirmCloseOptions,
-  IConfirmCloseResult,
   IDocumentManagerDialogs,
-  ISaveBeforeCloseOptions,
-  ISaveBeforeCloseResult,
   renameDialog,
   renameFile
 } from '@jupyterlab/docmanager';
@@ -101,14 +97,16 @@ class MinimalCustomDialogs implements IDocumentManagerDialogs {
     return null;
   }
 
-  async confirmClose(args: IConfirmCloseOptions): Promise<IConfirmCloseResult> {
+  async confirmClose(
+    args: IDocumentManagerDialogs.IConfirmCloseOptions
+  ): Promise<IDocumentManagerDialogs.IConfirmCloseResult> {
     this.confirmCloseCalled = true;
     return { shouldClose: false, ignoreSave: true, doNotAskAgain: true };
   }
 
   async saveBeforeClose(
-    args: ISaveBeforeCloseOptions
-  ): Promise<ISaveBeforeCloseResult> {
+    args: IDocumentManagerDialogs.ISaveBeforeCloseOptions
+  ): Promise<IDocumentManagerDialogs.ISaveBeforeCloseResult> {
     this.saveBeforeCloseCalled = true;
     return { shouldClose: false, ignoreSave: true };
   }
