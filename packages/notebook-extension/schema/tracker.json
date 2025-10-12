@@ -671,6 +671,12 @@
           "type": "boolean",
           "title": "Show execution progress.",
           "default": true
+        },
+        "showJumpToRecentExecutionButton": {
+          "type": "boolean",
+          "title": "Show jump to most recently executed/executing cell button",
+          "description": "If enabled, displays a button that scrolls to the currently executing cell or, if none, the most recently executed cell.",
+          "default": false
         }
       }
     }
@@ -790,7 +796,8 @@
       "$ref": "#/definitions/kernelStatusConfig",
       "default": {
         "showOnStatusBar": false,
-        "showProgress": true
+        "showProgress": true,
+        "showJumpToRecentExecutionButton": false
       }
     },
     "documentWideUndoRedo": {
