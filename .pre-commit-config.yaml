@@ -9,7 +9,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: forbid-new-submodules
       - id: end-of-file-fixer
@@ -27,13 +27,13 @@ repos:
         exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.29.1
+    rev: 0.33.0
     hooks:
       - id: check-github-workflows
 
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.3
+    rev: v0.11.12
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -61,4 +61,4 @@ repos:
         name: integrity
         entry: 'npm run integrity --force'
         language: node
-        stages: [push]
+        stages: [pre-push]

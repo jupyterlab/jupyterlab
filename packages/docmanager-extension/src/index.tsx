@@ -18,6 +18,7 @@ import {
   Dialog,
   ICommandPalette,
   InputDialog,
+  ISessionContext,
   ISessionContextDialogs,
   Notification,
   ReactWidget,
@@ -37,6 +38,7 @@ import {
   SavingStatus
 } from '@jupyterlab/docmanager';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -175,7 +177,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     ILabStatus,
     ISessionContextDialogs,
     JupyterLab.IInfo,
-    IRecentsManager
+    IRecentsManager,
+    IUrlResolverFactory
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -184,7 +187,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
     status: ILabStatus | null,
     sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null,
-    recentsManager: IRecentsManager | null
+    recentsManager: IRecentsManager | null,
+    urlResolverFactory: IUrlResolverFactory | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
@@ -206,7 +210,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
         }
         return true;
       },
-      recentsManager: recentsManager ?? undefined
+      recentsManager: recentsManager ?? undefined,
+      urlResolverFactory: urlResolverFactory ?? undefined
     });
 
     return docManager;
@@ -485,6 +490,12 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Download'),
       caption: trans.__('Download the file to your computer'),
       isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {
@@ -554,7 +565,25 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
         });
       },
       iconClass: args => (args['icon'] as string) || '',
-      label: () => trans.__('Open in New Browser Tab')
+      label: () => trans.__('Open in New Browser Tab'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__(
+                'The path of the file to open in browser tab'
+              )
+            },
+            icon: {
+              type: 'string',
+              description: trans.__('The icon class for the command')
+            }
+          },
+          required: ['path']
+        }
+      }
     });
   }
 };
@@ -676,6 +705,18 @@ function addCommands(
 
   commands.addCommand(CommandIDs.deleteFile, {
     label: () => `Delete ${fileType(shell.currentWidget, docManager)}`,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the file to delete'
+          }
+        },
+        required: ['path']
+      }
+    },
     execute: args => {
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
@@ -706,7 +747,35 @@ function addCommands(
         .newUntitled(options)
         .catch(error => showErrorMessage(errorTitle, error));
     },
-    label: args => (args['label'] as string) || `New ${args['type'] as string}`
+    label: args => (args['label'] as string) || `New ${args['type'] as string}`,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          error: {
+            type: 'string',
+            description: 'The error title to display'
+          },
+          path: {
+            type: 'string',
+            description: 'The path where to create the file'
+          },
+          type: {
+            type: 'string',
+            description: 'The type of content to create',
+            enum: ['file', 'directory', 'notebook']
+          },
+          ext: {
+            type: 'string',
+            description: 'The file extension (for file type)'
+          },
+          label: {
+            type: 'string',
+            description: 'The label for the command'
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.open, {
@@ -715,17 +784,68 @@ function addCommands(
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
       const factory = (args['factory'] as string) || void 0;
       const kernel = args?.kernel as unknown as Kernel.IModel | undefined;
+      const kernelPreference = args?.kernelPreference as unknown as
+        | ISessionContext.IKernelPreference
+        | undefined;
       const options =
         (args['options'] as DocumentRegistry.IOpenOptions) || void 0;
       return docManager.services.contents
         .get(path, { content: false })
-        .then(() => docManager.openOrReveal(path, factory, kernel, options));
+        .then(() =>
+          docManager.openOrReveal(
+            path,
+            factory,
+            kernel,
+            options,
+            kernelPreference
+          )
+        );
     },
     iconClass: args => (args['icon'] as string) || '',
     label: args =>
       ((args['label'] || args['factory']) ??
         trans.__('Open the provided `path`.')) as string,
-    mnemonic: args => (args['mnemonic'] as number) || -1
+    mnemonic: args => (args['mnemonic'] as number) || -1,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: 'The path of the file to open'
+          },
+          factory: {
+            type: 'string',
+            description: 'The widget factory name'
+          },
+          kernel: {
+            type: 'object',
+            description: 'The kernel model to use'
+          },
+          kernelPreference: {
+            type: 'object',
+            description:
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values'
+          },
+          options: {
+            type: 'object',
+            description: 'Additional options for opening'
+          },
+          icon: {
+            type: 'string',
+            description: 'The icon class for the command'
+          },
+          label: {
+            type: 'string',
+            description: 'The label for the command'
+          },
+          mnemonic: {
+            type: 'number',
+            description: 'The mnemonic index for the command'
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.reload, {
@@ -736,6 +856,12 @@ function addCommands(
       ),
     caption: trans.__('Reload contents from disk'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
@@ -782,6 +908,12 @@ function addCommands(
       ),
     caption: trans.__('Revert contents to previous checkpoint'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
@@ -841,12 +973,6 @@ function addCommands(
 
   const caption = () => {
     if (shell.currentWidget) {
-      const context = docManager.contextForWidget(shell.currentWidget);
-      if (context?.model.collaborative) {
-        return trans.__(
-          'In collaborative mode, the document is saved automatically after every change'
-        );
-      }
       if (!isWritable()) {
         return trans.__(
           `Document is read-only. "Save" is disabled; use "Save as…" instead`
@@ -873,6 +999,21 @@ function addCommands(
         return isWritable();
       }
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: 'Whether executed from toolbar'
+          },
+          _luminoEvent: {
+            type: 'object',
+            description: 'The lumino event object'
+          }
+        }
+      }
+    },
     execute: async args => {
       // Checks that shell.currentWidget is valid:
       const widget = shell.currentWidget;
@@ -888,10 +1029,7 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-          if (
-            !context.contentsModel?.writable &&
-            !context.model.collaborative
-          ) {
+          if (!context.contentsModel?.writable) {
             let type = (args._luminoEvent as ReadonlyPartialJSONObject)?.type;
             if (args._luminoEvent && type === 'keybinding') {
               readonlyNotification(context.path);
@@ -916,12 +1054,12 @@ function addCommands(
           ) {
             const result = await InputDialog.getText({
               title: trans.__('Rename file'),
-              okLabel: trans.__('Rename'),
+              okLabel: trans.__('Rename and Save'),
               placeholder: trans.__('File name'),
               text: oldName,
               selectionRange: oldName.length - PathExt.extname(oldName).length,
               checkbox: {
-                label: trans.__('Do not ask me again.'),
+                label: trans.__('Do not ask for rename on first save.'),
                 caption: trans.__(
                   'If checked, you will not be asked to rename future untitled files when saving them.'
                 )
@@ -987,6 +1125,12 @@ function addCommands(
         w => docManager.contextForWidget(w)?.contentsModel?.writable ?? false
       );
     },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       const promises: Promise<void>[] = [];
       const paths = new Set<string>(); // Cache so we don't double save files.
@@ -1010,6 +1154,12 @@ function addCommands(
       trans.__('Save %1 As…', fileType(shell.currentWidget, docManager)),
     caption: trans.__('Save with new path'),
     isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    },
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
@@ -1072,6 +1222,12 @@ function addCommands(
             `Failed to set ${docManagerPluginId}:${key} - ${reason.message}`
           );
         });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1136,6 +1292,17 @@ function addLabCommands(
       if (child) {
         widgetOpener.open(child, options);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          options: {
+            type: 'object',
+            description: trans.__('Options for opening the cloned document')
+          }
+        }
+      }
     }
   });
 
@@ -1154,6 +1321,12 @@ function addLabCommands(
         const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1168,6 +1341,12 @@ function addLabCommands(
           return;
         }
         return docManager.duplicate(context.path);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1198,6 +1377,12 @@ function addLabCommands(
           });
         }
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1214,6 +1399,12 @@ function addLabCommands(
       // 'activate' is needed if this command is selected in the "open tabs" sidebar
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 

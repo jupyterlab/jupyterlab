@@ -26,6 +26,8 @@ class CssProp {
     integer: `[+-]?[0-9]+`,
     integer_pos: `[+]?[0-9]+`,
     integer_zero_ff: `([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])`,
+    integer_non_zero: `[+-]?([1-9][0-9]*)`,
+    integer_pos_non_zero: `[+]?([1-9][0-9]*)`,
     number: `[+-]?([0-9]*[.])?[0-9]+(e-?[0-9]*)?`,
     number_pos: `[+]?([0-9]*[.])?[0-9]+(e-?[0-9]*)?`,
     number_zero_hundred: `[+]?(([0-9]|[1-9][0-9])([.][0-9]+)?|100)`,
@@ -35,7 +37,7 @@ class CssProp {
   /*
    * Base expressions of common CSS syntax elements
    */
-  private static readonly B = {
+  private static readonly _B = {
     angle: `(${CssProp.N.number}(deg|rad|grad|turn)|0)`,
     frequency: `${CssProp.N.number}(Hz|kHz)`,
     ident: String.raw`-?([_a-z]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\xA0-\xFF]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*`,
@@ -52,7 +54,54 @@ class CssProp {
   };
 
   /*
-   * Atomic (i.e. not dependant on other regular expressions) sub RegEx segments
+   * Extended base expressions of common CSS syntax elements
+   */
+  private static readonly _B1 = {
+    flex: `(${CssProp.N.number}|${CssProp._B.len_or_perc}|none|auto)\\s*((${CssProp.N.number}|${CssProp._B.len_or_perc}|auto)\\s*){0,2}`,
+    fixed_breadth: `${CssProp._B.len_or_perc}`,
+    grid_line: `auto|${CssProp._B.ident}|(${CssProp.N.integer_non_zero}(\\s+${CssProp._B.ident})?)|(span\\s+(${CssProp.N.integer_pos_non_zero}|${CssProp._B.ident}))`,
+    line_names: String.raw`\[\s*${CssProp._B.ident}(\s+${CssProp._B.ident})*\s*\]`
+  };
+
+  private static readonly _B2 = {
+    inflexible_breadth: `${CssProp._B.len_or_perc}|auto|min-content|max-content`,
+    track_breadth: `${CssProp._B.len_or_perc}|${CssProp._B1.flex}|auto|min-content|max-content`
+  };
+
+  private static readonly _B3 = {
+    fixed_size: `${CssProp._B1.fixed_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B1.fixed_breadth}\\s*\\)|minmax\\(\\s*${CssProp._B1.fixed_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)`,
+    track_size: `${CssProp._B2.track_breadth}|minmax\\(\\s*${CssProp._B2.inflexible_breadth}\\s*,\\s*${CssProp._B2.track_breadth}\\s*\\)|fit-content\\(\\s*(${CssProp._B.len_or_perc}\\s*)*\\)`
+  };
+
+  private static readonly _B4 = {
+    name_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero}|auto-fill)\\s*,\\s*(${CssProp._B1.line_names})+\\s*\\)`,
+    auto_repeat: `repeat\\(\\s*(auto-fill|auto-fit)\\s*,\\s*((${CssProp._B1.line_names}\\s+)?${CssProp._B3.fixed_size}\\s*)+(${CssProp._B1.line_names})?\\s*\\)`,
+    fixed_repeat: `repeat\\(\\s*(${CssProp.N.integer_pos_non_zero})\\s*,\\s*((${CssProp._B1.line_names}\\s+)?${CssProp._B3.fixed_size}\\s*)+(${CssProp._B1.line_names})?\\s*\\)`
+  };
+
+  private static readonly _B5 = {
+    auto_track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.fixed_size}|${CssProp._B4.fixed_repeat})*(${CssProp._B1.line_names}\\s*)?${CssProp._B4.auto_repeat}(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.fixed_size}|${CssProp._B4.fixed_repeat})*(${CssProp._B1.line_names}\\s*)?`,
+    explicit_track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size})+(${CssProp._B1.line_names}\\s*)?`,
+    track_list: `(${CssProp._B1.line_names}\\s*)?(${CssProp._B3.track_size}|${CssProp._B4.name_repeat})+(${CssProp._B1.line_names}\\s*)?`
+  };
+
+  private static readonly _B6 = {
+    grid_template_rows: `none|${CssProp._B5.track_list}|${CssProp._B5.auto_track_list}|subgrid\\s*(${CssProp._B1.line_names})?`,
+    grid_template_columns: `none|${CssProp._B5.track_list}|${CssProp._B5.auto_track_list}|subgrid\\s*(${CssProp._B1.line_names})?`
+  };
+
+  private static readonly B = {
+    ...CssProp._B,
+    ...CssProp._B1,
+    ...CssProp._B2,
+    ...CssProp._B3,
+    ...CssProp._B4,
+    ...CssProp._B5,
+    ...CssProp._B6
+  };
+
+  /*
+   * Atomic (i.e. not dependent on other regular expressions) sub RegEx segments
    */
   private static readonly A = {
     absolute_size: `xx-small|x-small|small|medium|large|x-large|xx-large`,
@@ -84,7 +133,7 @@ class CssProp {
   };
 
   /*
-   * Compound (i.e. dependant on other (sub) regular expressions) sub RegEx segments
+   * Compound (i.e. dependent on other (sub) regular expressions) sub RegEx segments
    */
   private static readonly _C = {
     alpha: `${CssProp.N.integer_zero_ff}|${CssProp.N.number_zero_one}|${CssProp.B.percentage_zero_hundred}`,
@@ -140,32 +189,47 @@ class CssProp {
   };
 
   /*
-   * Property value regular expressions not dependant on other sub expressions
+   * Property value regular expressions not dependent on other sub expressions
    */
   private static readonly AP = {
+    baseline_position: `baseline|first baseline|last baseline`,
     border_collapse: `collapse|separate`,
     box: `normal|none|contents`,
     box_sizing: `content-box|padding-box|border-box`,
     caption_side: `top|bottom`,
     clear: `none|left|right|both`,
+    content_position: `start|end|center|flex-start|flex-end`,
+    content_distribution: `stretch|space-between|space-around|space-evenly`,
     direction: `ltr|rtl`,
     empty_cells: `show|hide`,
+    flex_direction: `row|row-reverse|column|column-reverse`,
+    flex_wrap: `nowrap|wrap|wrap-reverse`,
     float: `left|right|none`,
     font_stretch: `normal|wider|narrower|ultra-condensed|extra-condensed|condensed|semi-condensed|semi-expanded|expanded|extra-expanded|ultra-expanded`,
     font_style: `normal|italic|oblique`,
     font_variant: `normal|small-caps`,
     font_weight: `normal|bold|bolder|lighter|100|200|300|400|500|600|700|800|900`,
     list_style_position: `inside|outside`,
+    gap: `normal`,
+    grid_auto_flow: `row|column|dense|row dense|column dense`,
+    justify_content: `start|end|center|stretch|space-between|space-around|space-evenly`,
+    justify_items: `start|end|center|stretch`,
+    justify_self: `auto|start|end|center|stretch`,
     list_style_type: `disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-latin|upper-latin|armenian|georgian|lower-alpha|upper-alpha|none`,
     overflow: `visible|hidden|scroll|auto`,
+    overflow_position: `unsafe|safe`,
     overflow_wrap: `normal|break-word`,
     overflow_x: `visible|hidden|scroll|auto|no-display|no-content`,
     page_break_after: `auto|always|avoid|left|right`,
     page_break_before: `auto|always|avoid|left|right`,
     page_break_inside: `avoid|auto`,
+    place_content: `(center|start|end|space-between|space-around|space-evenly|stretch){1,2}`,
+    place_items: `(center|start|end|baseline|stretch){1,2}`,
+    place_self: `(center|start|end|baseline|stretch){1,2}`,
     position: `static|relative|absolute`,
     resize: `none|both|horizontal|vertical`,
     speak: `normal|none|spell-out`,
+    self_position: `center|start|end|self-start|self-end|flex-start|flex-end`,
     speak_header: `once|always`,
     speak_numeral: `digits|continuous`,
     speak_punctuation: `code|none`,
@@ -181,9 +245,12 @@ class CssProp {
   };
 
   /*
-   * Compound propertiy value regular expressions (i.e. dependant on other sub expressions)
+   * Compound propertiy value regular expressions (i.e. dependent on other sub expressions)
    */
   private static readonly _CP = {
+    align_content: `normal|${CssProp.AP.baseline_position}|${CssProp.AP.content_distribution}|${CssProp.AP.overflow_position}|${CssProp.AP.content_position}`,
+    align_items: `normal|stretch|${CssProp.AP.baseline_position}|(${CssProp.AP.overflow_position})?\\s*${CssProp.AP.self_position}|anchor-center`,
+    align_self: `auto|normal|stretch|${CssProp.AP.baseline_position}|(${CssProp.AP.overflow_position})?\\s*${CssProp.AP.self_position}|anchor-center`,
     background_attachment: `${CssProp.A.attachment}(,\\s*${CssProp.A.attachment})*`,
     background_color: CssProp.C.color,
     background_origin: `${CssProp.A.box}(,\\s*${CssProp.A.box})*`,
@@ -278,7 +345,32 @@ class CssProp {
     border_left: `((${CssProp.C.border_width}|${CssProp.A.border_style}|${CssProp.C.color})\\s*){1,3}`,
     quotes: `(${CssProp.B.string}\\s*${CssProp.B.string})+|none`,
     border_top_right_radius: `(${CssProp.B.length}|${CssProp.B.percentage})(\\s*(${CssProp.B.length}|${CssProp.B.percentage}))?`,
-    min_width: `${CssProp.B.length_pos}|${CssProp.B.percentage_pos}|auto`
+    min_width: `${CssProp.B.length_pos}|${CssProp.B.percentage_pos}|auto`,
+    // Add flexbox and grid properties
+    flex_basis: `${CssProp.B.len_or_perc}|auto|content|max-content|min-content|fit-content\\(\\s*(${CssProp.B.len_or_perc}\\s*)*\\)`, // simplified no <calc-size()> and <anchor-size()>
+    flex_grow: CssProp.N.number_pos,
+    flex_shrink: CssProp.N.number_pos,
+    grid: `(${CssProp.B.string}|none|subgrid)\\s*(\\/\\s*(${CssProp.B.string}|none|subgrid))?`,
+    grid_area: `${CssProp.B.ident}|auto|(${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer}\\s*\\/\\s*${CssProp.N.integer})`,
+    grid_auto_columns: `(${CssProp.B.track_size})+`,
+    grid_auto_rows: `(${CssProp.B.track_size})+`,
+    grid_column: `${CssProp.B.grid_line}(\\s*\\/\\s*${CssProp.B.grid_line})?`,
+    grid_column_start: `${CssProp.B.grid_line}`,
+    grid_column_end: `${CssProp.B.grid_line}`,
+    grid_column_gap: `${CssProp.B.len_or_perc}|normal`,
+    grid_gap: `(${CssProp.B.len_or_perc}|normal)(\\s*(${CssProp.B.len_or_perc}|normal))?`,
+    grid_row: `${CssProp.B.grid_line}(\\s*\\/\\s*${CssProp.B.grid_line})?`,
+    grid_row_start: `${CssProp.B.grid_line}`,
+    grid_row_end: `${CssProp.B.grid_line}`,
+    grid_row_gap: `${CssProp.B.len_or_perc}|normal`,
+    grid_template: `none|(${CssProp.B.grid_template_rows}\\s*\\/\\s*${CssProp.B.grid_template_columns})|(${CssProp.B.line_names}\\s*)?(${CssProp.B.string}\\s*${CssProp.B.track_size}\\s*(${CssProp.B.line_names}\\s*)?)+\\s*(\\/\\s*${CssProp.B.explicit_track_list})?`,
+    grid_template_areas: `none|(${CssProp.B.string})+`,
+    grid_template_columns: `${CssProp.B.grid_template_columns}`,
+    grid_template_rows: `${CssProp.B.grid_template_rows}`,
+    row_gap: `${CssProp.B.len_or_perc}|normal`,
+    column_gap: `${CssProp.B.len_or_perc}|normal`,
+    gap: `(${CssProp.B.len_or_perc}|normal)(\\s*(${CssProp.B.len_or_perc}|normal))?`,
+    order: CssProp.N.integer
   };
 
   private static readonly _CP1 = {
@@ -428,6 +520,47 @@ class CssProp {
     CssProp.CP.border_top_right_radius
   );
   static MIN_WIDTH = CssProp.reg(CssProp.CP.min_width);
+
+  // Flexbox properties
+  static ALIGN_CONTENT = CssProp.reg(CssProp.CP.align_content);
+  static ALIGN_ITEMS = CssProp.reg(CssProp.CP.align_items);
+  static ALIGN_SELF = CssProp.reg(CssProp.CP.align_self);
+  static FLEX = CssProp.reg(CssProp.B.flex);
+  static FLEX_BASIS = CssProp.reg(CssProp.CP.flex_basis);
+  static FLEX_DIRECTION = CssProp.reg(CssProp.AP.flex_direction);
+  static FLEX_GROW = CssProp.reg(CssProp.CP.flex_grow);
+  static FLEX_SHRINK = CssProp.reg(CssProp.CP.flex_shrink);
+  static FLEX_WRAP = CssProp.reg(CssProp.AP.flex_wrap);
+  static JUSTIFY_CONTENT = CssProp.reg(CssProp.AP.justify_content);
+  static JUSTIFY_ITEMS = CssProp.reg(CssProp.AP.justify_items);
+  static JUSTIFY_SELF = CssProp.reg(CssProp.AP.justify_self);
+  static ORDER = CssProp.reg(CssProp.CP.order);
+
+  // Grid properties
+  static GRID = CssProp.reg(CssProp.CP.grid);
+  static GRID_AREA = CssProp.reg(CssProp.CP.grid_area);
+  static GRID_AUTO_COLUMNS = CssProp.reg(CssProp.CP.grid_auto_columns);
+  static GRID_AUTO_FLOW = CssProp.reg(CssProp.AP.grid_auto_flow);
+  static GRID_AUTO_ROWS = CssProp.reg(CssProp.CP.grid_auto_rows);
+  static GRID_COLUMN = CssProp.reg(CssProp.CP.grid_column);
+  static GRID_COLUMN_END = CssProp.reg(CssProp.CP.grid_column_end);
+  static GRID_COLUMN_GAP = CssProp.reg(CssProp.CP.grid_column_gap);
+  static GRID_COLUMN_START = CssProp.reg(CssProp.CP.grid_column_start);
+  static GRID_GAP = CssProp.reg(CssProp.CP.grid_gap);
+  static GRID_ROW = CssProp.reg(CssProp.CP.grid_row);
+  static GRID_ROW_END = CssProp.reg(CssProp.CP.grid_row_end);
+  static GRID_ROW_GAP = CssProp.reg(CssProp.CP.grid_row_gap);
+  static GRID_ROW_START = CssProp.reg(CssProp.CP.grid_row_start);
+  static GRID_TEMPLATE = CssProp.reg(CssProp.CP.grid_template);
+  static GRID_TEMPLATE_AREAS = CssProp.reg(CssProp.CP.grid_template_areas);
+  static GRID_TEMPLATE_COLUMNS = CssProp.reg(CssProp.CP.grid_template_columns);
+  static GRID_TEMPLATE_ROWS = CssProp.reg(CssProp.CP.grid_template_rows);
+  static GAP = CssProp.reg(CssProp.CP.gap);
+  static ROW_GAP = CssProp.reg(CssProp.CP.row_gap);
+  static COLUMN_GAP = CssProp.reg(CssProp.CP.column_gap);
+  static PLACE_CONTENT = CssProp.reg(CssProp.AP.place_content);
+  static PLACE_ITEMS = CssProp.reg(CssProp.AP.place_items);
+  static PLACE_SELF = CssProp.reg(CssProp.AP.place_self);
 }
 
 /**
@@ -458,13 +591,23 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * @returns Whether to allow name and id attributes.
+   */
+  get allowNamedProperties(): boolean {
+    return this._allowNamedProperties;
+  }
+
+  /**
    * Set the allowed schemes
    *
-   * @param scheme Allowed schemes
+   * @param scheme Allowed schemes.
+   * Automatically regenerates sanitizer options to apply the change.
+   * Note: the schemes merge into the current config and does not get overwritten.
    */
   setAllowedSchemes(scheme: Array<string>): void {
     // Force copy of `scheme`
-    this._options.allowedSchemes = [...scheme];
+    this._customAllowedSchemes = [...scheme];
+    this._options = this._generateOptions();
   }
 
   /**
@@ -486,513 +629,576 @@ export class Sanitizer implements IRenderMime.ISanitizer {
 
   private _autolink: boolean = true;
   private _allowNamedProperties: boolean = false;
+  private _customAllowedSchemes: string[] | undefined;
   private _options: sanitize.IOptions;
-  private _generateOptions = (): sanitize.IOptions => ({
-    // HTML tags that are allowed to be used. Tags were extracted from Google Caja
-    allowedTags: [
-      'a',
-      'abbr',
-      'acronym',
-      'address',
-      'area',
-      'article',
-      'aside',
-      'audio',
-      'b',
-      'bdi',
-      'bdo',
-      'big',
-      'blockquote',
-      'br',
-      'button',
-      'canvas',
-      'caption',
-      'center',
-      'cite',
-      'code',
-      'col',
-      'colgroup',
-      'colspan',
-      'command',
-      'data',
-      'datalist',
-      'dd',
-      'del',
-      'details',
-      'dfn',
-      'dir',
-      'div',
-      'dl',
-      'dt',
-      'em',
-      'fieldset',
-      'figcaption',
-      'figure',
-      'font',
-      'footer',
-      'form',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'header',
-      'hgroup',
-      'hr',
-      'i',
-      // 'iframe' is allowed by Google Caja, but disallowed by default by sanitize-html
-      // , 'iframe'
-      'img',
-      'input',
-      'ins',
-      'kbd',
-      'label',
-      'legend',
-      'li',
-      'map',
-      'mark',
-      'menu',
-      'meter',
-      'nav',
-      'nobr',
-      'ol',
-      'optgroup',
-      'option',
-      'output',
-      'p',
-      'pre',
-      'progress',
-      'q',
-      'rowspan',
-      's',
-      'samp',
-      'section',
-      'select',
-      'small',
-      'source',
-      'span',
-      'strike',
-      'strong',
-      'sub',
-      'summary',
-      'sup',
-      'table',
-      'tbody',
-      'td',
-      'textarea',
-      'tfoot',
-      'th',
-      'thead',
-      'time',
-      'tr',
-      'track',
-      'tt',
-      'u',
-      'ul',
-      'var',
-      'video',
-      'wbr'
-    ],
-    // Attributes that HTML tags are allowed to have, extracted from Google Caja.
-    // See https://github.com/jupyterlab/jupyterlab/issues/1812#issuecomment-285848435
-    allowedAttributes: {
-      '*': [
-        'class',
-        'dir',
-        'draggable',
-        'hidden',
-        ...(this._allowNamedProperties ? ['id'] : []),
-        'inert',
-        'itemprop',
-        'itemref',
-        'itemscope',
-        'lang',
-        'spellcheck',
-        'style',
-        'title',
-        'translate'
-      ],
-      // 'rel' and 'target' were *not* allowed by Google Caja
-      a: [
-        'accesskey',
-        'coords',
-        'href',
-        'hreflang',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'rel',
-        'shape',
-        'tabindex',
-        'target',
-        'type'
-      ],
-      area: [
-        'accesskey',
-        'alt',
-        'coords',
-        'href',
-        'nohref',
-        'shape',
-        'tabindex'
-      ],
-      // 'autoplay' was *not* allowed by Google Caja
-      audio: [
-        'autoplay',
-        'controls',
-        'loop',
-        'mediagroup',
-        'muted',
-        'preload',
-        'src'
-      ],
-      bdo: ['dir'],
-      blockquote: ['cite'],
-      br: ['clear'],
-      button: [
-        'accesskey',
-        'data-commandlinker-args',
-        'data-commandlinker-command',
-        'disabled',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'tabindex',
-        'type',
-        'value'
-      ],
-      canvas: ['height', 'width'],
-      caption: ['align'],
-      col: ['align', 'char', 'charoff', 'span', 'valign', 'width'],
-      colgroup: ['align', 'char', 'charoff', 'span', 'valign', 'width'],
-      command: [
-        'checked',
+  private _generateOptions = (): sanitize.IOptions => {
+    const schemesToAllow = Array.isArray(this._customAllowedSchemes)
+      ? this._customAllowedSchemes
+      : [...sanitize.defaults.allowedSchemes];
+
+    return {
+      // HTML tags that are allowed to be used. Tags were extracted from Google Caja
+      allowedTags: [
+        'a',
+        'abbr',
+        'acronym',
+        'address',
+        'area',
+        'article',
+        'aside',
+        'audio',
+        'b',
+        'bdi',
+        'bdo',
+        'big',
+        'blockquote',
+        'br',
+        'button',
+        'canvas',
+        'caption',
+        'center',
+        'cite',
+        'code',
+        'col',
+        'colgroup',
+        'colspan',
         'command',
-        'disabled',
-        'icon',
+        'data',
+        'datalist',
+        'dd',
+        'del',
+        'details',
+        'dfn',
+        'dir',
+        'div',
+        'dl',
+        'dt',
+        'em',
+        'fieldset',
+        'figcaption',
+        'figure',
+        'font',
+        'footer',
+        'form',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'header',
+        'hgroup',
+        'hr',
+        'i',
+        // 'iframe' is allowed by Google Caja, but disallowed by default by sanitize-html
+        // , 'iframe'
+        'img',
+        'input',
+        'ins',
+        'kbd',
         'label',
-        'radiogroup',
-        'type'
-      ],
-      data: ['value'],
-      del: ['cite', 'datetime'],
-      details: ['open'],
-      dir: ['compact'],
-      div: ['align'],
-      dl: ['compact'],
-      fieldset: ['disabled'],
-      font: ['color', 'face', 'size'],
-      form: [
-        'accept',
-        'autocomplete',
-        'enctype',
-        'method',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'novalidate'
-      ],
-      h1: ['align'],
-      h2: ['align'],
-      h3: ['align'],
-      h4: ['align'],
-      h5: ['align'],
-      h6: ['align'],
-      hr: ['align', 'noshade', 'size', 'width'],
-      iframe: [
-        'align',
-        'frameborder',
-        'height',
-        'marginheight',
-        'marginwidth',
-        'width'
-      ],
-      img: [
-        'align',
-        'alt',
-        'border',
-        'height',
-        'hspace',
-        'ismap',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'src',
-        'usemap',
-        'vspace',
-        'width'
-      ],
-      input: [
-        'accept',
-        'accesskey',
-        'align',
-        'alt',
-        'autocomplete',
-        'checked',
-        'disabled',
-        'inputmode',
-        'ismap',
-        'list',
-        'max',
-        'maxlength',
-        'min',
-        'multiple',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'placeholder',
-        'readonly',
-        'required',
-        'size',
-        'src',
-        'step',
-        'tabindex',
-        'type',
-        'usemap',
-        'value'
-      ],
-      ins: ['cite', 'datetime'],
-      label: ['accesskey', 'for'],
-      legend: ['accesskey', 'align'],
-      li: ['type', 'value'],
-      map: this._allowNamedProperties ? ['name'] : [],
-      menu: ['compact', 'label', 'type'],
-      meter: ['high', 'low', 'max', 'min', 'value'],
-      ol: ['compact', 'reversed', 'start', 'type'],
-      optgroup: ['disabled', 'label'],
-      option: ['disabled', 'label', 'selected', 'value'],
-      output: ['for', ...(this._allowNamedProperties ? ['name'] : [])],
-      p: ['align'],
-      pre: ['width'],
-      progress: ['max', 'min', 'value'],
-      q: ['cite'],
-      select: [
-        'autocomplete',
-        'disabled',
-        'multiple',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'required',
-        'size',
-        'tabindex'
-      ],
-      source: ['type'],
-      table: [
-        'align',
-        'bgcolor',
-        'border',
-        'cellpadding',
-        'cellspacing',
-        'frame',
-        'rules',
+        'legend',
+        'li',
+        'map',
+        'mark',
+        'menu',
+        'meter',
+        'nav',
+        'nobr',
+        'ol',
+        'optgroup',
+        'option',
+        'output',
+        'p',
+        'pre',
+        'progress',
+        'q',
+        'rowspan',
+        's',
+        'samp',
+        'section',
+        'select',
+        'small',
+        'source',
+        'span',
+        'strike',
+        'strong',
+        'sub',
         'summary',
-        'width'
+        'sup',
+        'table',
+        'tbody',
+        'td',
+        'textarea',
+        'tfoot',
+        'th',
+        'thead',
+        'time',
+        'tr',
+        'track',
+        'tt',
+        'u',
+        'ul',
+        'var',
+        'video',
+        'wbr'
       ],
-      tbody: ['align', 'char', 'charoff', 'valign'],
-      td: [
-        'abbr',
-        'align',
-        'axis',
-        'bgcolor',
-        'char',
-        'charoff',
-        'colspan',
-        'headers',
-        'height',
-        'nowrap',
-        'rowspan',
-        'scope',
-        'valign',
-        'width'
-      ],
-      textarea: [
-        'accesskey',
-        'autocomplete',
-        'cols',
-        'disabled',
-        'inputmode',
-        ...(this._allowNamedProperties ? ['name'] : []),
-        'placeholder',
-        'readonly',
-        'required',
-        'rows',
-        'tabindex',
-        'wrap'
-      ],
-      tfoot: ['align', 'char', 'charoff', 'valign'],
-      th: [
-        'abbr',
-        'align',
-        'axis',
-        'bgcolor',
-        'char',
-        'charoff',
-        'colspan',
-        'headers',
-        'height',
-        'nowrap',
-        'rowspan',
-        'scope',
-        'valign',
-        'width'
-      ],
-      thead: ['align', 'char', 'charoff', 'valign'],
-      tr: ['align', 'bgcolor', 'char', 'charoff', 'valign'],
-      track: ['default', 'kind', 'label', 'srclang'],
-      ul: ['compact', 'type'],
-      video: [
-        'autoplay',
-        'controls',
-        'height',
-        'loop',
-        'mediagroup',
-        'muted',
-        'poster',
-        'preload',
-        'src',
-        'width'
-      ]
-    },
-    // Inline CSS styles that HTML tags may have (and their allowed values)
-    allowedStyles: {
-      // To simplify the data, all styles are allowed on all tags that allow the style attribute
-      '*': {
-        'backface-visibility': [CssProp.BACKFACE_VISIBILITY],
-        background: [CssProp.BACKGROUND],
-        'background-attachment': [CssProp.BACKGROUND_ATTACHMENT],
-        'background-clip': [CssProp.BACKGROUND_CLIP],
-        'background-color': [CssProp.BACKGROUND_COLOR],
-        'background-image': [CssProp.BACKGROUND_IMAGE],
-        'background-origin': [CssProp.BACKGROUND_ORIGIN],
-        'background-position': [CssProp.BACKGROUND_POSITION],
-        'background-repeat': [CssProp.BACKGROUND_REPEAT],
-        'background-size': [CssProp.BACKGROUND_SIZE],
-        border: [CssProp.BORDER],
-        'border-bottom': [CssProp.BORDER_BOTTOM],
-        'border-bottom-color': [CssProp.BORDER_BOTTOM_COLOR],
-        'border-bottom-left-radius': [CssProp.BORDER_BOTTOM_LEFT_RADIUS],
-        'border-bottom-right-radius': [CssProp.BORDER_BOTTOM_RIGHT_RADIUS],
-        'border-bottom-style': [CssProp.BORDER_BOTTOM_STYLE],
-        'border-bottom-width': [CssProp.BORDER_BOTTOM_WIDTH],
-        'border-collapse': [CssProp.BORDER_COLLAPSE],
-        'border-color': [CssProp.BORDER_COLOR],
-        'border-left': [CssProp.BORDER_LEFT],
-        'border-left-color': [CssProp.BORDER_LEFT_COLOR],
-        'border-left-style': [CssProp.BORDER_LEFT_STYLE],
-        'border-left-width': [CssProp.BORDER_LEFT_WIDTH],
-        'border-radius': [CssProp.BORDER_RADIUS],
-        'border-right': [CssProp.BORDER_RIGHT],
-        'border-right-color': [CssProp.BORDER_RIGHT_COLOR],
-        'border-right-style': [CssProp.BORDER_RIGHT_STYLE],
-        'border-right-width': [CssProp.BORDER_RIGHT_WIDTH],
-        'border-spacing': [CssProp.BORDER_SPACING],
-        'border-style': [CssProp.BORDER_STYLE],
-        'border-top': [CssProp.BORDER_TOP],
-        'border-top-color': [CssProp.BORDER_TOP_COLOR],
-        'border-top-left-radius': [CssProp.BORDER_TOP_LEFT_RADIUS],
-        'border-top-right-radius': [CssProp.BORDER_TOP_RIGHT_RADIUS],
-        'border-top-style': [CssProp.BORDER_TOP_STYLE],
-        'border-top-width': [CssProp.BORDER_TOP_WIDTH],
-        'border-width': [CssProp.BORDER_WIDTH],
-        bottom: [CssProp.BOTTOM],
-        box: [CssProp.BOX],
-        'box-shadow': [CssProp.BOX_SHADOW],
-        'box-sizing': [CssProp.BOX_SIZING],
-        'caption-side': [CssProp.CAPTION_SIDE],
-        clear: [CssProp.CLEAR],
-        clip: [CssProp.CLIP],
-        color: [CssProp.COLOR],
-        cursor: [CssProp.CURSOR],
-        direction: [CssProp.DIRECTION],
-        display: [CssProp.DISPLAY],
-        'display-inside': [CssProp.DISPLAY_INSIDE],
-        'display-outside': [CssProp.DISPLAY_OUTSIDE],
-        elevation: [CssProp.ELEVATION],
-        'empty-cells': [CssProp.EMPTY_CELLS],
-        float: [CssProp.FLOAT],
-        font: [CssProp.FONT],
-        'font-family': [CssProp.FONT_FAMILY],
-        'font-size': [CssProp.FONT_SIZE],
-        'font-stretch': [CssProp.FONT_STRETCH],
-        'font-style': [CssProp.FONT_STYLE],
-        'font-variant': [CssProp.FONT_VARIANT],
-        'font-weight': [CssProp.FONT_WEIGHT],
-        height: [CssProp.HEIGHT],
-        left: [CssProp.LEFT],
-        'letter-spacing': [CssProp.LETTER_SPACING],
-        'line-height': [CssProp.LINE_HEIGHT],
-        'list-style': [CssProp.LIST_STYLE],
-        'list-style-image': [CssProp.LIST_STYLE_IMAGE],
-        'list-style-position': [CssProp.LIST_STYLE_POSITION],
-        'list-style-type': [CssProp.LIST_STYLE_TYPE],
-        margin: [CssProp.MARGIN],
-        'margin-bottom': [CssProp.MARGIN_BOTTOM],
-        'margin-left': [CssProp.MARGIN_LEFT],
-        'margin-right': [CssProp.MARGIN_RIGHT],
-        'margin-top': [CssProp.MARGIN_TOP],
-        'max-height': [CssProp.MAX_HEIGHT],
-        'max-width': [CssProp.MAX_WIDTH],
-        'min-height': [CssProp.MIN_HEIGHT],
-        'min-width': [CssProp.MIN_WIDTH],
-        opacity: [CssProp.OPACITY],
-        outline: [CssProp.OUTLINE],
-        'outline-color': [CssProp.OUTLINE_COLOR],
-        'outline-style': [CssProp.OUTLINE_STYLE],
-        'outline-width': [CssProp.OUTLINE_WIDTH],
-        overflow: [CssProp.OVERFLOW],
-        'overflow-wrap': [CssProp.OVERFLOW_WRAP],
-        'overflow-x': [CssProp.OVERFLOW_X],
-        'overflow-y': [CssProp.OVERFLOW_Y],
-        padding: [CssProp.PADDING],
-        'padding-bottom': [CssProp.PADDING_BOTTOM],
-        'padding-left': [CssProp.PADDING_LEFT],
-        'padding-right': [CssProp.PADDING_RIGHT],
-        'padding-top': [CssProp.PADDING_TOP],
-        'page-break-after': [CssProp.PAGE_BREAK_AFTER],
-        'page-break-before': [CssProp.PAGE_BREAK_BEFORE],
-        'page-break-inside': [CssProp.PAGE_BREAK_INSIDE],
-        'pause-after': [CssProp.PAUSE_AFTER],
-        perspective: [CssProp.PERSPECTIVE],
-        pitch: [CssProp.PITCH],
-        'pitch-range': [CssProp.PITCH_RANGE],
-        position: [CssProp.POSITION],
-        quotes: [CssProp.QUOTES],
-        resize: [CssProp.RESIZE],
-        richness: [CssProp.RICHNESS],
-        right: [CssProp.RIGHT],
-        speak: [CssProp.SPEAK],
-        'speak-header': [CssProp.SPEAK_HEADER],
-        'speak-numeral': [CssProp.SPEAK_NUMERAL],
-        'speak-punctuation': [CssProp.SPEAK_PUNCTUATION],
-        'speech-rate': [CssProp.SPEECH_RATE],
-        stress: [CssProp.STRESS],
-        'table-layout': [CssProp.TABLE_LAYOUT],
-        'text-align': [CssProp.TEXT_ALIGN],
-        'text-decoration': [CssProp.TEXT_DECORATION],
-        'text-indent': [CssProp.TEXT_INDENT],
-        'text-overflow': [CssProp.TEXT_OVERFLOW],
-        'text-shadow': [CssProp.TEXT_SHADOW],
-        'text-transform': [CssProp.TEXT_TRANSFORM],
-        'text-wrap': [CssProp.TEXT_WRAP],
-        top: [CssProp.TOP],
-        'unicode-bidi': [CssProp.UNICODE_BIDI],
-        'vertical-align': [CssProp.VERTICAL_ALIGN],
-        visibility: [CssProp.VISIBILITY],
-        volume: [CssProp.VOLUME],
-        'white-space': [CssProp.WHITE_SPACE],
-        width: [CssProp.WIDTH],
-        'word-break': [CssProp.WORD_BREAK],
-        'word-spacing': [CssProp.WORD_SPACING],
-        'word-wrap': [CssProp.WORD_WRAP],
-        'z-index': [CssProp.Z_INDEX],
-        zoom: [CssProp.ZOOM]
-      }
-    },
-    transformTags: {
-      // Set the "rel" attribute for <a> tags to "nofollow".
-      a: sanitize.simpleTransform('a', { rel: 'nofollow' }),
-      // Set the "disabled" attribute for <input> tags.
-      input: sanitize.simpleTransform('input', { disabled: 'disabled' })
-    },
-    allowedSchemes: [...sanitize.defaults.allowedSchemes],
-    allowedSchemesByTag: {
-      // Allow 'attachment:' img src (used for markdown cell attachments).
-      img: sanitize.defaults.allowedSchemes.concat(['attachment'])
-    },
-    // Override of the default option, so we can skip 'src' attribute validation.
-    // 'src' Attributes are validated to be URIs, which does not allow for embedded (image) data.
-    // Since embedded data is no longer deemed to be a threat, validation can be skipped.
-    // See https://github.com/jupyterlab/jupyterlab/issues/5183
-    allowedSchemesAppliedToAttributes: ['href', 'cite']
-  });
+      // Attributes that HTML tags are allowed to have, extracted from Google Caja.
+      // See https://github.com/jupyterlab/jupyterlab/issues/1812#issuecomment-285848435
+      allowedAttributes: {
+        '*': [
+          'class',
+          'data-jupyter-id',
+          'dir',
+          'draggable',
+          'hidden',
+          'id',
+          'inert',
+          'itemprop',
+          'itemref',
+          'itemscope',
+          'lang',
+          'spellcheck',
+          'style',
+          'title',
+          'translate'
+        ],
+        // 'rel' and 'target' were *not* allowed by Google Caja
+        a: [
+          'accesskey',
+          'coords',
+          'href',
+          'hreflang',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'rel',
+          'shape',
+          'tabindex',
+          'target',
+          'type'
+        ],
+        area: [
+          'accesskey',
+          'alt',
+          'coords',
+          'href',
+          'nohref',
+          'shape',
+          'tabindex'
+        ],
+        // 'autoplay' was *not* allowed by Google Caja
+        audio: [
+          'autoplay',
+          'controls',
+          'loop',
+          'mediagroup',
+          'muted',
+          'preload',
+          'src'
+        ],
+        bdo: ['dir'],
+        blockquote: ['cite'],
+        br: ['clear'],
+        button: [
+          'accesskey',
+          'data-commandlinker-args',
+          'data-commandlinker-command',
+          'disabled',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'tabindex',
+          'type',
+          'value'
+        ],
+        canvas: ['height', 'width'],
+        caption: ['align'],
+        col: ['align', 'char', 'charoff', 'span', 'valign', 'width'],
+        colgroup: ['align', 'char', 'charoff', 'span', 'valign', 'width'],
+        command: [
+          'checked',
+          'command',
+          'disabled',
+          'icon',
+          'label',
+          'radiogroup',
+          'type'
+        ],
+        data: ['value'],
+        del: ['cite', 'datetime'],
+        details: ['open'],
+        dir: ['compact'],
+        div: ['align'],
+        dl: ['compact'],
+        fieldset: ['disabled'],
+        font: ['color', 'face', 'size'],
+        form: [
+          'accept',
+          'autocomplete',
+          'enctype',
+          'method',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'novalidate'
+        ],
+        h1: ['align'],
+        h2: ['align'],
+        h3: ['align'],
+        h4: ['align'],
+        h5: ['align'],
+        h6: ['align'],
+        hr: ['align', 'noshade', 'size', 'width'],
+        iframe: [
+          'align',
+          'frameborder',
+          'height',
+          'marginheight',
+          'marginwidth',
+          'width'
+        ],
+        img: [
+          'align',
+          'alt',
+          'border',
+          'height',
+          'hspace',
+          'ismap',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'src',
+          'usemap',
+          'vspace',
+          'width'
+        ],
+        input: [
+          'accept',
+          'accesskey',
+          'align',
+          'alt',
+          'autocomplete',
+          'checked',
+          'disabled',
+          'inputmode',
+          'ismap',
+          'list',
+          'max',
+          'maxlength',
+          'min',
+          'multiple',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'placeholder',
+          'readonly',
+          'required',
+          'size',
+          'src',
+          'step',
+          'tabindex',
+          'type',
+          'usemap',
+          'value'
+        ],
+        ins: ['cite', 'datetime'],
+        label: ['accesskey', 'for'],
+        legend: ['accesskey', 'align'],
+        li: ['type', 'value'],
+        map: this._allowNamedProperties ? ['name'] : [],
+        menu: ['compact', 'label', 'type'],
+        meter: ['high', 'low', 'max', 'min', 'value'],
+        ol: ['compact', 'reversed', 'start', 'type'],
+        optgroup: ['disabled', 'label'],
+        option: ['disabled', 'label', 'selected', 'value'],
+        output: ['for', ...(this._allowNamedProperties ? ['name'] : [])],
+        p: ['align'],
+        pre: ['width'],
+        progress: ['max', 'min', 'value'],
+        q: ['cite'],
+        select: [
+          'autocomplete',
+          'disabled',
+          'multiple',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'required',
+          'size',
+          'tabindex'
+        ],
+        source: ['type'],
+        table: [
+          'align',
+          'bgcolor',
+          'border',
+          'cellpadding',
+          'cellspacing',
+          'frame',
+          'rules',
+          'summary',
+          'width'
+        ],
+        tbody: ['align', 'char', 'charoff', 'valign'],
+        td: [
+          'abbr',
+          'align',
+          'axis',
+          'bgcolor',
+          'char',
+          'charoff',
+          'colspan',
+          'headers',
+          'height',
+          'nowrap',
+          'rowspan',
+          'scope',
+          'valign',
+          'width'
+        ],
+        textarea: [
+          'accesskey',
+          'autocomplete',
+          'cols',
+          'disabled',
+          'inputmode',
+          ...(this._allowNamedProperties ? ['name'] : []),
+          'placeholder',
+          'readonly',
+          'required',
+          'rows',
+          'tabindex',
+          'wrap'
+        ],
+        tfoot: ['align', 'char', 'charoff', 'valign'],
+        th: [
+          'abbr',
+          'align',
+          'axis',
+          'bgcolor',
+          'char',
+          'charoff',
+          'colspan',
+          'headers',
+          'height',
+          'nowrap',
+          'rowspan',
+          'scope',
+          'valign',
+          'width'
+        ],
+        thead: ['align', 'char', 'charoff', 'valign'],
+        tr: ['align', 'bgcolor', 'char', 'charoff', 'valign'],
+        track: ['default', 'kind', 'label', 'srclang'],
+        ul: ['compact', 'type'],
+        video: [
+          'autoplay',
+          'controls',
+          'height',
+          'loop',
+          'mediagroup',
+          'muted',
+          'poster',
+          'preload',
+          'src',
+          'width'
+        ]
+      },
+      // Inline CSS styles that HTML tags may have (and their allowed values)
+      allowedStyles: {
+        // To simplify the data, all styles are allowed on all tags that allow the style attribute
+        '*': {
+          'backface-visibility': [CssProp.BACKFACE_VISIBILITY],
+          background: [CssProp.BACKGROUND],
+          'background-attachment': [CssProp.BACKGROUND_ATTACHMENT],
+          'background-clip': [CssProp.BACKGROUND_CLIP],
+          'background-color': [CssProp.BACKGROUND_COLOR],
+          'background-image': [CssProp.BACKGROUND_IMAGE],
+          'background-origin': [CssProp.BACKGROUND_ORIGIN],
+          'background-position': [CssProp.BACKGROUND_POSITION],
+          'background-repeat': [CssProp.BACKGROUND_REPEAT],
+          'background-size': [CssProp.BACKGROUND_SIZE],
+          border: [CssProp.BORDER],
+          'border-bottom': [CssProp.BORDER_BOTTOM],
+          'border-bottom-color': [CssProp.BORDER_BOTTOM_COLOR],
+          'border-bottom-left-radius': [CssProp.BORDER_BOTTOM_LEFT_RADIUS],
+          'border-bottom-right-radius': [CssProp.BORDER_BOTTOM_RIGHT_RADIUS],
+          'border-bottom-style': [CssProp.BORDER_BOTTOM_STYLE],
+          'border-bottom-width': [CssProp.BORDER_BOTTOM_WIDTH],
+          'border-collapse': [CssProp.BORDER_COLLAPSE],
+          'border-color': [CssProp.BORDER_COLOR],
+          'border-left': [CssProp.BORDER_LEFT],
+          'border-left-color': [CssProp.BORDER_LEFT_COLOR],
+          'border-left-style': [CssProp.BORDER_LEFT_STYLE],
+          'border-left-width': [CssProp.BORDER_LEFT_WIDTH],
+          'border-radius': [CssProp.BORDER_RADIUS],
+          'border-right': [CssProp.BORDER_RIGHT],
+          'border-right-color': [CssProp.BORDER_RIGHT_COLOR],
+          'border-right-style': [CssProp.BORDER_RIGHT_STYLE],
+          'border-right-width': [CssProp.BORDER_RIGHT_WIDTH],
+          'border-spacing': [CssProp.BORDER_SPACING],
+          'border-style': [CssProp.BORDER_STYLE],
+          'border-top': [CssProp.BORDER_TOP],
+          'border-top-color': [CssProp.BORDER_TOP_COLOR],
+          'border-top-left-radius': [CssProp.BORDER_TOP_LEFT_RADIUS],
+          'border-top-right-radius': [CssProp.BORDER_TOP_RIGHT_RADIUS],
+          'border-top-style': [CssProp.BORDER_TOP_STYLE],
+          'border-top-width': [CssProp.BORDER_TOP_WIDTH],
+          'border-width': [CssProp.BORDER_WIDTH],
+          bottom: [CssProp.BOTTOM],
+          box: [CssProp.BOX],
+          'box-shadow': [CssProp.BOX_SHADOW],
+          'box-sizing': [CssProp.BOX_SIZING],
+          'caption-side': [CssProp.CAPTION_SIDE],
+          clear: [CssProp.CLEAR],
+          clip: [CssProp.CLIP],
+          color: [CssProp.COLOR],
+          cursor: [CssProp.CURSOR],
+          direction: [CssProp.DIRECTION],
+          display: [CssProp.DISPLAY],
+          'display-inside': [CssProp.DISPLAY_INSIDE],
+          'display-outside': [CssProp.DISPLAY_OUTSIDE],
+          elevation: [CssProp.ELEVATION],
+          'empty-cells': [CssProp.EMPTY_CELLS],
+          float: [CssProp.FLOAT],
+          font: [CssProp.FONT],
+          'font-family': [CssProp.FONT_FAMILY],
+          'font-size': [CssProp.FONT_SIZE],
+          'font-stretch': [CssProp.FONT_STRETCH],
+          'font-style': [CssProp.FONT_STYLE],
+          'font-variant': [CssProp.FONT_VARIANT],
+          'font-weight': [CssProp.FONT_WEIGHT],
+          height: [CssProp.HEIGHT],
+          left: [CssProp.LEFT],
+          'letter-spacing': [CssProp.LETTER_SPACING],
+          'line-height': [CssProp.LINE_HEIGHT],
+          'list-style': [CssProp.LIST_STYLE],
+          'list-style-image': [CssProp.LIST_STYLE_IMAGE],
+          'list-style-position': [CssProp.LIST_STYLE_POSITION],
+          'list-style-type': [CssProp.LIST_STYLE_TYPE],
+          margin: [CssProp.MARGIN],
+          'margin-bottom': [CssProp.MARGIN_BOTTOM],
+          'margin-left': [CssProp.MARGIN_LEFT],
+          'margin-right': [CssProp.MARGIN_RIGHT],
+          'margin-top': [CssProp.MARGIN_TOP],
+          'max-height': [CssProp.MAX_HEIGHT],
+          'max-width': [CssProp.MAX_WIDTH],
+          'min-height': [CssProp.MIN_HEIGHT],
+          'min-width': [CssProp.MIN_WIDTH],
+          opacity: [CssProp.OPACITY],
+          outline: [CssProp.OUTLINE],
+          'outline-color': [CssProp.OUTLINE_COLOR],
+          'outline-style': [CssProp.OUTLINE_STYLE],
+          'outline-width': [CssProp.OUTLINE_WIDTH],
+          overflow: [CssProp.OVERFLOW],
+          'overflow-wrap': [CssProp.OVERFLOW_WRAP],
+          'overflow-x': [CssProp.OVERFLOW_X],
+          'overflow-y': [CssProp.OVERFLOW_Y],
+          padding: [CssProp.PADDING],
+          'padding-bottom': [CssProp.PADDING_BOTTOM],
+          'padding-left': [CssProp.PADDING_LEFT],
+          'padding-right': [CssProp.PADDING_RIGHT],
+          'padding-top': [CssProp.PADDING_TOP],
+          'page-break-after': [CssProp.PAGE_BREAK_AFTER],
+          'page-break-before': [CssProp.PAGE_BREAK_BEFORE],
+          'page-break-inside': [CssProp.PAGE_BREAK_INSIDE],
+          'pause-after': [CssProp.PAUSE_AFTER],
+          perspective: [CssProp.PERSPECTIVE],
+          pitch: [CssProp.PITCH],
+          'pitch-range': [CssProp.PITCH_RANGE],
+          position: [CssProp.POSITION],
+          quotes: [CssProp.QUOTES],
+          resize: [CssProp.RESIZE],
+          richness: [CssProp.RICHNESS],
+          right: [CssProp.RIGHT],
+          speak: [CssProp.SPEAK],
+          'speak-header': [CssProp.SPEAK_HEADER],
+          'speak-numeral': [CssProp.SPEAK_NUMERAL],
+          'speak-punctuation': [CssProp.SPEAK_PUNCTUATION],
+          'speech-rate': [CssProp.SPEECH_RATE],
+          stress: [CssProp.STRESS],
+          'table-layout': [CssProp.TABLE_LAYOUT],
+          'text-align': [CssProp.TEXT_ALIGN],
+          'text-decoration': [CssProp.TEXT_DECORATION],
+          'text-indent': [CssProp.TEXT_INDENT],
+          'text-overflow': [CssProp.TEXT_OVERFLOW],
+          'text-shadow': [CssProp.TEXT_SHADOW],
+          'text-transform': [CssProp.TEXT_TRANSFORM],
+          'text-wrap': [CssProp.TEXT_WRAP],
+          top: [CssProp.TOP],
+          'unicode-bidi': [CssProp.UNICODE_BIDI],
+          'vertical-align': [CssProp.VERTICAL_ALIGN],
+          visibility: [CssProp.VISIBILITY],
+          volume: [CssProp.VOLUME],
+          'white-space': [CssProp.WHITE_SPACE],
+          width: [CssProp.WIDTH],
+          'word-break': [CssProp.WORD_BREAK],
+          'word-spacing': [CssProp.WORD_SPACING],
+          'word-wrap': [CssProp.WORD_WRAP],
+          'z-index': [CssProp.Z_INDEX],
+          zoom: [CssProp.ZOOM],
+          // Flexbox and Grid properties
+          'align-content': [CssProp.ALIGN_CONTENT],
+          'align-items': [CssProp.ALIGN_ITEMS],
+          'align-self': [CssProp.ALIGN_SELF],
+          flex: [CssProp.FLEX],
+          'flex-basis': [CssProp.FLEX_BASIS],
+          'flex-direction': [CssProp.FLEX_DIRECTION],
+          'flex-grow': [CssProp.FLEX_GROW],
+          'flex-shrink': [CssProp.FLEX_SHRINK],
+          'flex-wrap': [CssProp.FLEX_WRAP],
+          grid: [CssProp.GRID],
+          'grid-area': [CssProp.GRID_AREA],
+          'grid-auto-columns': [CssProp.GRID_AUTO_COLUMNS],
+          'grid-auto-flow': [CssProp.GRID_AUTO_FLOW],
+          'grid-auto-rows': [CssProp.GRID_AUTO_ROWS],
+          'grid-column': [CssProp.GRID_COLUMN],
+          'grid-column-end': [CssProp.GRID_COLUMN_END],
+          'grid-column-gap': [CssProp.GRID_COLUMN_GAP],
+          'grid-column-start': [CssProp.GRID_COLUMN_START],
+          'grid-gap': [CssProp.GRID_GAP],
+          'grid-row': [CssProp.GRID_ROW],
+          'grid-row-end': [CssProp.GRID_ROW_END],
+          'grid-row-gap': [CssProp.GRID_ROW_GAP],
+          'grid-row-start': [CssProp.GRID_ROW_START],
+          'grid-template': [CssProp.GRID_TEMPLATE],
+          'grid-template-areas': [CssProp.GRID_TEMPLATE_AREAS],
+          'grid-template-columns': [CssProp.GRID_TEMPLATE_COLUMNS],
+          'grid-template-rows': [CssProp.GRID_TEMPLATE_ROWS],
+          gap: [CssProp.GAP],
+          'row-gap': [CssProp.ROW_GAP],
+          'column-gap': [CssProp.COLUMN_GAP],
+          'justify-content': [CssProp.JUSTIFY_CONTENT],
+          'justify-items': [CssProp.JUSTIFY_ITEMS],
+          'justify-self': [CssProp.JUSTIFY_SELF],
+          order: [CssProp.ORDER],
+          'place-content': [CssProp.PLACE_CONTENT],
+          'place-items': [CssProp.PLACE_ITEMS],
+          'place-self': [CssProp.PLACE_SELF]
+        }
+      },
+      transformTags: {
+        // Set the "rel" attribute for <a> tags to "nofollow".
+        a: sanitize.simpleTransform('a', { rel: 'nofollow' }),
+        // Set the "disabled" attribute for <input> tags.
+        input: sanitize.simpleTransform('input', { disabled: 'disabled' }),
+        // Replace "id" attribute by "data-jupyter-id" if "id" is not allowed.
+        ...(this._allowNamedProperties
+          ? {}
+          : {
+              '*': function (tagName: string, attribs: sanitize.Attributes) {
+                if (attribs.id !== undefined) {
+                  attribs['data-jupyter-id'] = attribs.id;
+                  delete attribs.id;
+                }
+                return {
+                  tagName,
+                  attribs: {
+                    ...attribs
+                  }
+                };
+              }
+            })
+      },
+      allowedSchemes: schemesToAllow,
+      allowedSchemesByTag: {
+        // Allow 'attachment:' img src (used for markdown cell attachments).
+        img: [...schemesToAllow, 'attachment']
+      },
+      // Override of the default option, so we can skip 'src' attribute validation.
+      // 'src' Attributes are validated to be URIs, which does not allow for embedded (image) data.
+      // Since embedded data is no longer deemed to be a threat, validation can be skipped.
+      // See https://github.com/jupyterlab/jupyterlab/issues/5183
+      allowedSchemesAppliedToAttributes: ['href', 'cite']
+    };
+  };
 }

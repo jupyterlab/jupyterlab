@@ -13,7 +13,7 @@ Dialogs
 Generic Dialog
 ^^^^^^^^^^^^^^
 
-To display a generic dialog, use ``showDialog`` function from ``@jupyterlab/apputils``.
+To display a generic dialog, use :ts:function:`apputils.showDialog` function from ``@jupyterlab/apputils``.
 
 The options available are:
 
@@ -51,28 +51,28 @@ The options available are:
 Message Dialogs
 ^^^^^^^^^^^^^^^
 
-Helper functions to show a message to the user are available in the ``apputils`` package.
+Helper functions to show a message to the user are available in the :ts:module:`apputils` package.
 These dialogs return a ``Promise`` resolving when the user dismisses the dialog.
 
 There is one helper:
 
-* ``showErrorMessage`` : show an error message dialog.
+* :ts:function:`apputils.showErrorMessage` : show an error message dialog.
 
 
 Input Dialogs
 ^^^^^^^^^^^^^
 
 Helper functions to request a single input from the user are available in the ``apputils``
-package within the ``InputDialog`` namespace. There are four helpers:
+package within the :ts:namespace:`apputils.InputDialog` namespace. There are four helpers:
 
-* ``getBoolean`` : request a boolean through a checkbox.
-* ``getItem`` : request a item from a list; the list may be editable.
-* ``getNumber`` : request a number; if the user input is not a valid number, NaN is returned.
-* ``getText`` : request a short text.
-* ``getPassword`` : request a short password.
+* :ts:function:`apputils.InputDialog.getBoolean` : request a boolean through a checkbox.
+* :ts:function:`apputils.InputDialog.getItem` : request a item from a list; the list may be editable.
+* :ts:function:`apputils.InputDialog.getNumber` : request a number; if the user input is not a valid number, NaN is returned.
+* :ts:function:`apputils.InputDialog.getText` : request a short text.
+* :ts:function:`apputils.InputDialog.getPassword` : request a short password.
 
-All dialogs are built on the standard ``Dialog``. Therefore the helper functions each return
-a ``Promise`` resolving in a ``Dialog.IResult`` object.
+All dialogs are built on the standard :ts:namespace:`apputils.Dialog` namespace using the :ts:class:`apputils.Dialog` class.
+Therefore the helper functions each return a ``Promise`` resolving in a :ts:interface:`apputils.Dialog.IResult` object.
 
 .. code:: typescript
 
@@ -118,7 +118,7 @@ File Dialogs
 ^^^^^^^^^^^^
 
 Two helper functions to ask a user to open a file or a folder are
-available in the ``filebrowser`` package under the namespace ``FileDialog``.
+available in the :ts:module:`filebrowser` package under the namespace :ts:namespace:`filebrowser.FileDialog`.
 
 Here is an example to request a file.
 
@@ -150,7 +150,8 @@ And for a folder.
     }
 
 .. note:: The document manager can be obtained in a plugin by
-    requesting ``IFileBrowserFactory`` token. The ``manager`` will be accessed through
+    requesting :ts:variable:`filebrowser.IFileBrowserFactory` token.
+    The ``manager`` will be accessed through
     ``factory.defaultBrowser.model.manager``.
 
 Notifications

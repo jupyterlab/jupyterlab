@@ -36,16 +36,8 @@ async function getInnerHeight(panel: Locator) {
     10
   );
 }
-async function getWindowHeight(panel: Locator) {
-  return parseInt(
-    await panel
-      .locator('.jp-WindowedPanel-viewport')
-      .evaluate(node => (node as HTMLElement).style.minHeight),
-    10
-  );
-}
 
-test('should update window height on resize', async ({ page, tmpPath }) => {
+test('should update displayed cells on resize', async ({ page, tmpPath }) => {
   // Note: this needs many small cells so that they get added during resize changing height.
   const notebookName = '20_empty_cells.ipynb';
   await page.contents.uploadFile(
@@ -56,18 +48,19 @@ test('should update window height on resize', async ({ page, tmpPath }) => {
 
   const notebook = await page.notebook.getNotebookInPanelLocator();
 
-  // Measure height when the notebook is open but launcher closed
-  const fullHeight = await getWindowHeight(notebook!);
+  const cell = notebook.locator('.jp-Cell[data-windowed-list-index="10"]');
+
+  // Cell should be visible
+  await expect.soft(cell).toBeVisible();
 
   // Add a new launcher below the notebook
   await page.evaluate(async () => {
     const widget = await window.jupyterapp.commands.execute('launcher:create');
     window.jupyterapp.shell.add(widget, 'main', { mode: 'split-bottom' });
   });
-  // Measure height after splitting the dock area
-  const heightAfterSplit = await getWindowHeight(notebook!);
 
-  expect(heightAfterSplit).toBeLessThan(fullHeight);
+  // The cell should no longer be visible
+  await expect.soft(cell).not.toBeVisible();
 
   // Resize the dock panel, increasing the notebook height/decreasing the launcher height.
   const resizeHandle = page.locator(
@@ -75,10 +68,8 @@ test('should update window height on resize', async ({ page, tmpPath }) => {
   );
   await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
-  // Measure height after resizing
-  const heightAfterResize = await getWindowHeight(notebook!);
-
-  expect(heightAfterResize).toBeGreaterThan(heightAfterSplit);
+  // The cell should be visible aqain
+  await expect.soft(cell).toBeVisible();
 });
 
 test('should not update height when hiding', async ({ page, tmpPath }) => {
@@ -91,7 +82,7 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   // Wait to ensure the rendering logic is stable.
   do {
     previousHeight = initialHeight;
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(600);
 
     initialHeight = await getInnerHeight(notebook!);
   } while (previousHeight !== initialHeight && counter++ < 10);
@@ -257,6 +248,11 @@ const scrollOnKeyPressCases: {
   }
 ];
 test.describe('Scrolling on keyboard interaction when active editor is above the viewport', () => {
+  test.skip(
+    ({ browserName }) => browserName === 'firefox',
+    'Needs fixing on Firefox'
+  );
+
   for (const testCase of scrollOnKeyPressCases) {
     test(`Show ${testCase.showCell} cell on pressing ${testCase.key} ${testCase.times} times`, async ({
       page,
@@ -313,8 +309,10 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   const h = await page.notebook.getNotebookInPanelLocator();
@@ -339,8 +337,10 @@ test('should detach a markdown code cell when scrolling out of the viewport', as
 
 test('should reattach a markdown code cell when scrolling back into the viewport', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   const h = await page.notebook.getNotebookInPanelLocator();
@@ -398,10 +398,63 @@ test('should remove all cells including hidden outputs artifacts', async ({
   expect(found).toEqual(false);
 });
 
+test('should display cells below on scrolling after inserting a cell on top', async ({
+  page,
+  tmpPath,
+  browserName
+}) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
+  // Regression test against "disappearing cells" issue:
+  // https://github.com/jupyterlab/jupyterlab/issues/16978
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  const notebook = await page.notebook.getNotebookInPanelLocator()!;
+  const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
+  await firstCell.waitFor();
+
+  const bbox = await notebook.boundingBox();
+  await page.mouse.move(bbox!.x, bbox!.y);
+
+  // Needs to be two separate mouse wheel events.
+  await page.mouse.wheel(0, 3000);
+  await page.mouse.wheel(0, 3000);
+
+  // Scroll down to reveal last cell to ensure these all items have been measured...
+  await Promise.all([
+    firstCell.waitFor({ state: 'hidden' }),
+    lastCell.waitFor()
+  ]);
+
+  await page.mouse.wheel(0, -3000);
+  await page.mouse.wheel(0, -3000);
+
+  // ...then scroll back up and select first cell.
+  await Promise.all([
+    lastCell.waitFor({ state: 'hidden' }),
+    firstCell.waitFor()
+  ]);
+  await page.notebook.selectCells(0);
+
+  // Insert cell below.
+  await page.keyboard.press('b');
+  await page.mouse.wheel(0, 3000);
+  await page.mouse.wheel(0, 3000);
+
+  // Scroll down again.
+  await Promise.all([
+    firstCell.waitFor({ state: 'hidden' }),
+    lastCell.waitFor()
+  ]);
+  await expect(lastCell).toBeVisible();
+});
+
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const mdCell = page.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
   const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');

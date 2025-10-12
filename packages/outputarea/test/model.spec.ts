@@ -169,6 +169,36 @@ describe('outputarea/model', () => {
         expect(model.get(0).toJSON().text).toBe('jupyter\njupyter\njupyter');
       });
 
+      it('should reconcile stream with new lines after carriage returns', () => {
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['abc\r']
+        });
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['\n-']
+        });
+        expect(model.get(0).toJSON().text).toBe('abc\n-');
+      });
+
+      it('should correctly merge lines if the first line does not end with new line', () => {
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['The meaning of life is....\nSome people... ']
+        });
+        model.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['More text.']
+        });
+        expect(model.get(0).toJSON().text).toBe(
+          'The meaning of life is....\nSome people... More text.'
+        );
+      });
+
       it('should be fast in sparse presence of returns and backspaces', () => {
         // locally this test run in 36 ms; setting it to 10 times
         // more to allow for slower runs on CI

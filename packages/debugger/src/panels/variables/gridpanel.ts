@@ -156,7 +156,7 @@ namespace Grid {
  */
 export class GridModel extends DataModel {
   /**
-   * Create gird model
+   * Create grid model
    * @param translator optional translator
    */
   constructor(translator?: ITranslator) {

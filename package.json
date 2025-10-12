@@ -22,6 +22,7 @@
     "tests/test-*",
     "testutils",
     "jupyterlab/tests/mock_packages/extension",
+    "jupyterlab/tests/mock_packages/service-manager-extension",
     "jupyterlab/tests/mock_packages/interop/*"
   ],
   "scripts": {
@@ -67,7 +68,7 @@
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
     "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest && jlpm install",
-    "docs": "typedoc --options typedoc.js",
+    "docs": "typedoc --options typedoc.js && python scripts/ensure_typedoc_links.py",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --cache --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx --cache .",
@@ -105,7 +106,9 @@
   },
   "resolutions": {
     "@types/react": "^18.0.26",
+    "marked": "^16.2.0",
     "react": "^18.2.0",
+    "type-fest": "^4.30.0",
     "yjs": "^13.5.40"
   },
   "dependencies": {
@@ -126,7 +129,7 @@
   },
   "devDependencies": {
     "lerna": "^7.1.4",
-    "typedoc": "~0.25.12",
-    "typedoc-plugin-mdn-links": "^3.1.20"
+    "typedoc": "~0.27.4",
+    "typedoc-plugin-mdn-links": "^4.0.4"
   }
 }

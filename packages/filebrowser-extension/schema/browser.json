@@ -180,6 +180,11 @@
       "command": "filebrowser:duplicate",
       "keys": ["Accel D"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
+      "command": "filebrowser:select-all",
+      "keys": ["Accel A"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
   "properties": {
@@ -242,6 +247,49 @@
       "title": "Navigate files and directories with single click",
       "description": "Whether to allow single click selection on file browser items",
       "default": false
+    },
+    "autoOpenUploads": {
+      "type": "boolean",
+      "title": "Auto-open uploads",
+      "description": "Automatically open uploaded notebooks and supported files",
+      "default": true
+    },
+    "maxAutoOpenSizeMB": {
+      "type": "number",
+      "title": "Max auto-open size",
+      "description": "Maximum file size (MB) to auto-open files on upload",
+      "default": 50
+    },
+    "allowFileUploads": {
+      "type": "boolean",
+      "title": "Allow file uploads",
+      "description": "Whether to allow uploading files",
+      "default": true
+    },
+    "breadcrumbs": {
+      "title": "Breadcrumbs",
+      "description": "Settings related to breadcrumbs display and behavior.",
+      "type": "object",
+      "default": {
+        "minimumLeftItems": 0,
+        "minimumRightItems": 2
+      },
+      "properties": {
+        "minimumLeftItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs left items",
+          "description": "Minimum number of directory items to display on the left side of the breadcrumbs ellipsis",
+          "default": 0,
+          "minimum": 0
+        },
+        "minimumRightItems": {
+          "type": "number",
+          "title": "Minimum breadcrumbs right items",
+          "description": "Minimum number of directory items to display on the right side of the breadcrumbs ellipsis",
+          "default": 2,
+          "minimum": 0
+        }
+      }
     }
   },
   "additionalProperties": false,

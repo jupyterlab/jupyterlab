@@ -248,6 +248,8 @@ function LineColComponent(
   };
   return (
     <TextItem
+      role="button"
+      aria-haspopup
       onClick={props.handleClick}
       source={trans.__('Ln %1, Col %2', props.line, props.column)}
       title={trans.__('Go to line number…')}

@@ -4,10 +4,10 @@
 // We explicitly reference the jest typings since the jest.d.ts file shipped
 // with jest 26 masks the @types/jest typings
 
-/// <reference types="jest" />
+/// <reference types="jest" preserve="true"/>
 
 import { PathExt } from '@jupyterlab/coreutils';
-import { PartialJSONObject, ReadonlyJSONObject, UUID } from '@lumino/coreutils';
+import { ReadonlyJSONObject, UUID } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { BaseManager } from './basemanager';
@@ -787,7 +787,7 @@ export class FakeUserManager extends BaseManager implements User.IManager {
 
         this._userChanged.emit({
           identity: this._identity,
-          permissions: this._permissions as PartialJSONObject
+          permissions: this._permissions as ReadonlyJSONObject
         });
 
         resolve();

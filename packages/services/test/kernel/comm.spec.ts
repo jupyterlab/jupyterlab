@@ -3,7 +3,13 @@
 
 import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Kernel, KernelManager, KernelMessage } from '../../src';
+import {
+  CommsOverSubshells,
+  Kernel,
+  KernelManager,
+  KernelMessage
+} from '../../src';
+import { CommHandler } from '../../src/kernel/comm';
 
 const BLIP = `
 from ipykernel.comm import Comm
@@ -42,6 +48,7 @@ describe('jupyter.services - Comm', () => {
   let server: JupyterServer;
   let kernelManager: KernelManager;
   let kernel: Kernel.IKernelConnection;
+  let echoKernel: Kernel.IKernelConnection;
 
   jest.retryTimes(3);
 
@@ -50,6 +57,7 @@ describe('jupyter.services - Comm', () => {
     await server.start();
     kernelManager = new KernelManager();
     kernel = await kernelManager.startNew({ name: 'ipython' });
+    echoKernel = await kernelManager.startNew();
   }, 30000);
 
   afterEach(() => {
@@ -70,6 +78,106 @@ describe('jupyter.services - Comm', () => {
         const comm = kernel.createComm('test');
         expect(comm.targetName).toBe('test');
         expect(typeof comm.commId).toBe('string');
+      });
+
+      it('should not spawn a subshell by default', () => {
+        const comm = echoKernel.createComm('test') as CommHandler;
+        expect(comm.subshellId).toBeNull();
+      });
+
+      it('should spawn a subshell per-comm', async () => {
+        await echoKernel.info;
+
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
+        const comm2 = echoKernel.createComm('testTarget') as CommHandler;
+
+        expect(echoKernel.commsOverSubshells).toEqual(
+          CommsOverSubshells.PerComm
+        );
+        expect(comm.commsOverSubshells).toEqual(CommsOverSubshells.PerComm);
+
+        await comm.subshellStarted;
+        await comm2.subshellStarted;
+
+        expect(comm.subshellId).not.toBeNull();
+        expect(comm2.subshellId).not.toBeNull();
+
+        expect(comm.subshellId).not.toEqual(comm2.subshellId);
+      });
+
+      it('should dispose the subshell per-comm', async () => {
+        await echoKernel.info;
+
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerComm;
+
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        const replyMsg = await echoKernel.requestListSubshell({}).done;
+        const before = replyMsg.content.subshell_id.length;
+
+        comm.dispose();
+
+        const replyMsg2 = await echoKernel.requestListSubshell({}).done;
+        const after = replyMsg2.content.subshell_id.length;
+
+        // We should have less subshells after the comm disposal than before
+        expect(after).toBeLessThan(before);
+      });
+
+      it('should spawn a subshell per-comm-target', async () => {
+        await echoKernel.info;
+
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        echoKernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
+
+        const comm = echoKernel.createComm('testTarget') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        const replyMsg = await echoKernel.requestListSubshell({}).done;
+        const before = replyMsg.content.subshell_id.length;
+
+        const comm2 = echoKernel.createComm('testTarget') as CommHandler;
+        await comm2.subshellStarted;
+        expect(comm2.subshellId).not.toBeNull();
+
+        const replyMsg2 = await echoKernel.requestListSubshell({}).done;
+        const after = replyMsg2.content.subshell_id.length;
+
+        // We shouldn't have more subshells before and after the second comm creation
+        expect(before).toEqual(after);
+      });
+
+      it('should spawn a subshell per-comm-target per kernel', async () => {
+        // Issue #17633
+        await kernel.info;
+        await echoKernel.info;
+
+        expect(kernel.supportsSubshells).toBeTruthy();
+        expect(echoKernel.supportsSubshells).toBeTruthy();
+
+        kernel.commsOverSubshells = CommsOverSubshells.PerCommTarget;
+
+        // First kernel
+        const comm = kernel.createComm('testTarget2') as CommHandler;
+        await comm.subshellStarted;
+        expect(comm.subshellId).not.toBeNull();
+
+        // Second kernel
+        const comm2 = echoKernel.createComm('testTarget2') as CommHandler;
+        await comm2.subshellStarted;
+        expect(comm2.subshellId).not.toBeNull();
+
+        expect(comm.subshellId).not.toEqual(comm2.subshellId);
       });
 
       it('should use the given id', () => {

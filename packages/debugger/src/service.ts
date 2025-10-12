@@ -20,6 +20,7 @@ import { Debugger } from './debugger';
 import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -39,7 +40,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     // runs a kernel with debugging ability
     this._session = null;
     this._specsManager = options.specsManager ?? null;
-    this._model = new Debugger.Model();
+    this._model = new Debugger.Model({
+      config: options.config,
+      notebookTracker: options.notebookTracker || null
+    });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
@@ -109,6 +113,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
+        this._model.stoppedThreads.clear();
         this._model.stoppedThreads.add(event.body.threadId);
         void this._getAllFrames();
       } else if (event.event === 'continued') {
@@ -255,11 +260,15 @@ export class DebuggerService implements IDebugger, IDisposable {
       expression,
       frameId
     });
+
     if (!reply.success) {
       return null;
     }
+
+    // TODO - Should this be here?
+    this._model.variables.scopes = [];
+
     // get the frames to retrieve the latest state of the variables
-    this._clearModel();
     await this._getAllFrames();
 
     return reply.body;
@@ -459,7 +468,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else if (this.isStarted) {
-      this._clearModel();
+      this._model.callstack.frames = [];
       this._clearSignals();
     }
 
@@ -578,7 +587,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Removes duplicated breakpoints. It is better to do it here than
     // in the editor, because the kernel can change the line of a
-    // breakpoint (when you attemp to set a breakpoint on an empty
+    // breakpoint (when you attempt to set a breakpoint on an empty
     // line for instance).
     let addedLines = new Set<number>();
     // Set the kernel's breakpoints for this path.
@@ -592,7 +601,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    await this.session.sendRequest('configurationDone', {});
   }
 
   /**
@@ -752,8 +760,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get the current thread from the model.
    */
   private _currentThread(): number {
-    // TODO: ask the model for the current thread ID
-    return 1;
+    return this._model.stoppedThreads.values().next().value ?? 1;
   }
 
   /**
@@ -1042,5 +1049,10 @@ export namespace DebuggerService {
      * The application language translator.
      */
     translator?: ITranslator | null;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker?: INotebookTracker | null;
   }
 }

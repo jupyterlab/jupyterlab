@@ -79,7 +79,7 @@ function generateConfig({
     ...(coreData.resolutions ?? {})
   };
 
-  // Alow extensions to match a wider range than the core dependency
+  // Allow extensions to match a wider range than the core dependency
   // To ensure forward compatibility.
   Object.keys(coreDeps).forEach(element => {
     shared[element] = {
@@ -91,7 +91,7 @@ function generateConfig({
   // Add package dependencies.
   Object.keys(data.dependencies).forEach(element => {
     // TODO: make sure that the core dependency semver range is a subset of our
-    // data.depencies version range for any packages in the core deps.
+    // data.dependencies version range for any packages in the core deps.
     if (!shared[element]) {
       shared[element] = {};
     }

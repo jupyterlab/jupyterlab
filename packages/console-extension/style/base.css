@@ -1,0 +1,16 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Toolbar menu to select the prompt cell position */
+.jp-CodeConsolePromptMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-CodeConsolePromptMenu .lm-Menu-itemIcon > svg {
+  vertical-align: sub;
+}

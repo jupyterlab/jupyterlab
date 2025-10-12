@@ -264,6 +264,10 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   display: block;
 }
 
+.jp-LinkedOutputView .jp-OutputArea-child:only-child {
+  height: 100%;
+}
+
 .jp-LinkedOutputView .jp-OutputArea-output:only-child {
   height: 100%;
 }

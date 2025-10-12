@@ -322,10 +322,17 @@ export namespace RenderMimeRegistry {
     translator?: ITranslator;
   }
 
+  export interface IUrlResolver extends IRenderMime.IResolver {
+    /**
+     * The path of the object, from which local urls can be derived.
+     */
+    path: string;
+  }
+
   /**
    * A default resolver that uses a given reference path and a contents manager.
    */
-  export class UrlResolver implements IRenderMime.IResolver {
+  export class UrlResolver implements IUrlResolver {
     /**
      * Create a new url resolver.
      */
@@ -393,7 +400,7 @@ export namespace RenderMimeRegistry {
 
     /**
      * Resolve a path from Jupyter kernel to a path:
-     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - relative to `root_dir` (preferably) this is in jupyter-server scope,
      * - path understood and known by kernel (if such a path exists).
      * Returns `null` if there is no file matching provided path in neither
      * kernel nor jupyter-server contents manager.
@@ -473,6 +480,18 @@ export namespace RenderMimeRegistry {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
+  }
+
+  /**
+   * The factory of resolvers.
+   */
+  export interface IUrlResolverFactory {
+    /**
+     * Create an URL resolver.
+     */
+    createResolver(
+      options: RenderMimeRegistry.IUrlResolverOptions
+    ): IUrlResolver;
   }
 }
 

@@ -870,7 +870,7 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
-      {...props.dataset}
+      {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
@@ -1069,7 +1069,7 @@ export function addCommandToolbarButtonClass(w: Widget): Widget {
 }
 
 /**
- * Phosphor Widget version of CommandToolbarButtonComponent.
+ * Lumino widget version of CommandToolbarButtonComponent.
  */
 export class CommandToolbarButton extends ReactWidget {
   /**
@@ -1136,6 +1136,7 @@ class ToolbarPopup extends Widget {
    */
   constructor() {
     super({ node: document.createElement('jp-toolbar') });
+    this.node.setAttribute('aria-label', 'Responsive popup toolbar');
     this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
     this.addClass('jp-ThemedContainer');
@@ -1309,6 +1310,25 @@ class ToolbarPopupOpener extends ToolbarButton {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Ensures all dataset keys have the 'data-' prefix.
+   * @param dataset object
+   */
+  export function normalizeDataset(
+    dataset?: DOMStringMap
+  ): DOMStringMap | undefined {
+    if (!dataset) {
+      return undefined;
+    }
+
+    const normalized: DOMStringMap = {};
+    for (const [key, value] of Object.entries(dataset)) {
+      const normalizedKey = key.startsWith('data-') ? key : `data-${key}`;
+      normalized[normalizedKey] = value;
+    }
+    return normalized;
+  }
+
   export function propsFromCommand(
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {

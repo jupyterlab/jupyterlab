@@ -39,10 +39,7 @@ function getSchemaPath() {
   const schemaLocalPath = 'schema/schema.json';
 
   const cmd = `python -c '
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib.resources import files
 print(files("${serverPackage}")/ "${schemaLocalPath}")
   '`;
   let schemaPath;

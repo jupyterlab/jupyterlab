@@ -134,6 +134,8 @@
   flex-direction: column;
   outline: 0;
   overflow: hidden;
+
+  --jp-dirlisting-padding-width: 12px;
 }
 
 .jp-DirListing-header {
@@ -164,10 +166,6 @@
   overflow: hidden;
 }
 
-.jp-DirListing-header > .jp-DirListing-headerItem:last-child {
-  flex-grow: 1;
-}
-
 .jp-DirListing-headerItem:hover {
   background: var(--jp-layout-color2);
 }
@@ -187,7 +185,8 @@
   flex: 0 0 75px;
 }
 
-.jp-DirListing-headerItem.jp-id-modified {
+.jp-DirListing-headerItem.jp-id-modified,
+.jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
   /* stylelint-disable */
   container-type: inline-size;
@@ -202,12 +201,16 @@
 @container (max-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
     display: inline;
   }
 
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
     display: none;
   }
 }
@@ -216,18 +219,42 @@
 @container (min-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    > .jp-DirListing-headerItemText-small {
     display: none;
   }
 
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    > .jp-DirListing-headerItemText-large {
     display: inline;
   }
 }
 
-.jp-DirListing-headerItem.jp-id-filesize {
-  text-align: right;
+/* stylelint-disable */
+@container (max-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (min-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: inline;
+  }
 }
 
 .jp-DirListing-headerItem.jp-mod-selected {
@@ -242,6 +269,7 @@
   list-style-type: none;
   overflow: auto;
   background-color: var(--jp-layout-color1);
+  overflow-x: hidden;
 }
 
 .jp-DirListing-content mark {
@@ -262,29 +290,22 @@
 }
 
 .jp-DirListing-item {
-  display: flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 4px var(--jp-dirlisting-padding-width);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.jp-DirListing-item > :last-child {
-  flex-grow: 1;
-  margin-right: 2px;
+  display: inline-grid;
+  grid-auto-columns: max-content;
+  width: 100%;
+  box-sizing: border-box;
+  grid-auto-flow: column;
 }
 
 .jp-DirListing-checkboxWrapper {
   /* Increases hit area of checkbox. */
   padding: 4px;
-}
-
-.jp-DirListing-header
-  .jp-DirListing-checkboxWrapper
-  + .jp-DirListing-headerItem {
-  padding-left: 4px;
 }
 
 .jp-DirListing-content .jp-DirListing-checkboxWrapper {
@@ -402,6 +423,7 @@
   border: none;
   color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
+  z-index: 0;
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {

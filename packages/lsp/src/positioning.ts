@@ -79,7 +79,7 @@ export function positionAtOffset(
 /**
  * Given a list of line and position in form of line and column number,
  * compute the offset from the start of first line.
- * @param position - postion of cursor
+ * @param position - position of cursor
  * @param  lines - list of lines to compute the position
  * @param linesIncludeBreaks - should count the line break as space?
  * return - offset number

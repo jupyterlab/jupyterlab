@@ -13,7 +13,10 @@ export function createEditorWidget(): CodeEditorWrapper {
   const factory = (options: CodeEditor.IOptions) => {
     options.extensions = [
       ...(options.extensions ?? []),
-      ybinding({ ytext: sharedModel.ysource })
+      ybinding({
+        ytext: sharedModel.ysource,
+        undoManager: sharedModel.undoManager ?? undefined
+      })
     ];
     return new CodeMirrorEditor(options);
   };

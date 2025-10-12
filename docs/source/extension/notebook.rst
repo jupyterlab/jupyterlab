@@ -101,8 +101,8 @@ Higher level actions using NotebookActions
 """"""""""""""""""""""""""""""""""""""""""
 
 Higher-level actions are contained in the
-`NotebookActions <../api/classes/notebook.NotebookActions-1.html>`__
-namespace, which has functions, when given a notebook widget, to run a
+:ts:module:`notebook.NotebookActions` namespace,
+which has functions, when given a notebook widget, to run a
 cell and select the next cell, merge or split cells at the cursor,
 delete selected cells, etc.
 
@@ -114,21 +114,18 @@ widgets <../api/classes/cells.Cell-1.html>`__,
 corresponding to the cell models in its cell list.
 
 -  Each cell widget contains an
-   `InputArea <../api/classes/cells.InputArea-1.html>`__,
+   :ts:class:`cells.InputArea`,
 
    -  which contains a
-      `CodeEditorWrapper <../api/classes/codeeditor.CodeEditorWrapper-1.html>`__,
+      :ts:class:`codeeditor.CodeEditorWrapper`,
 
       -  which contains a JavaScript CodeMirror instance.
 
 A
-`CodeCell <../api/classes/cells.CodeCell-1.html>`__
-also contains an
-`OutputArea <../api/classes/outputarea.OutputArea-1.html>`__.
+:ts:class:`cells.CodeCell` also contains an :ts:class:`outputarea.OutputArea`.
 An OutputArea is responsible for rendering the outputs in the
-`OutputAreaModel <../api/classes/outputarea.OutputAreaModel-1.html>`__
-list. An OutputArea uses a notebook-specific
-`RenderMimeRegistry <../api/classes/rendermime.RenderMimeRegistry-1.html>`__
+:ts:class:`outputarea.OutputAreaModel` list.
+An OutputArea uses a notebook-specific :ts:class:`rendermime.RenderMimeRegistry`
 object to render ``display_data`` output messages.
 
 The Notebook widget is represented in the DOM with a ``<div>`` element
@@ -155,7 +152,7 @@ It contains a sequence of cells widgets.
    In the case of nbconvert, code cells are rendered using the Pygments Python
    library, which produces static HTML with syntax highlighting. The
    `jupyterlab_pygments <https://github.com/jupyterlab/jupyterlab_pygments.git>`_
-   Pygments theme mimicks the default CodeMirror theme of JupyterLab.
+   Pygments theme mimics the default CodeMirror theme of JupyterLab.
 
 .. note::
    The SVG figures presenting the DOM structures of the different cell types
@@ -366,10 +363,9 @@ This discussion will be a bit confusing since we've been using the term
 intrinsic relation between *lumino widgets* and *Jupyter interactive widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook *widget*
-extension using the `Document
-Registry <../api/classes/docregistry.DocumentRegistry-1.html>`__.
-The ``createNew()`` function is called with a NotebookPanel and
-`DocumentContext <../api/interfaces/docregistry.DocumentRegistry.IContext.html>`__.
+extension using the :ts:class:`docregistry.DocumentRegistry`.
+The ``createNew()`` function is called with a :ts:class:`notebook.NotebookPanel` and
+:ts:interface:`docregistry.DocumentRegistry.IContext`.
 The plugin then creates a ipywidget manager (which uses the context to
 interact the kernel and kernel's comm manager). The plugin then
 registers an ipywidget renderer with the notebook instance's rendermime

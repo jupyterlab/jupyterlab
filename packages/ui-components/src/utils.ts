@@ -80,7 +80,7 @@ export function getReactAttrs(
     .reduce<{ [key: string]: string | null }>((d, name) => {
       if (name === 'style' || ignore.includes(name)) {
         void 0;
-      } else if (name.startsWith('data')) {
+      } else if (name.startsWith('data') || name.startsWith('aria')) {
         d[name] = elem.getAttribute(name);
       } else {
         d[Text.camelCase(name)] = elem.getAttribute(name);

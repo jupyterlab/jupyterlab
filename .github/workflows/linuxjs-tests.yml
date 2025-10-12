@@ -13,10 +13,7 @@ jobs:
     name: JS
     strategy:
       matrix:
-        # Fix for https://github.com/jupyterlab/jupyterlab/issues/13903
-        include:
-          - group: js-debugger
-            python-version: '3.11'
+        python-version: ["3.13"]
         group:
           [
             js-application,
@@ -41,6 +38,7 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
+            js-mathjax-extension,
             js-mermaid,
             js-metadataform,
             js-metapackage,

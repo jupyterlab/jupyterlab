@@ -584,7 +584,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this._addCellProvider(changes.newIndex + index);
           this._removeCellProvider(changes.newIndex + index + 1);
         });
-
+        break;
+      case 'clear':
+        for (
+          let index = this._searchProviders.length - 1;
+          index >= 0;
+          index--
+        ) {
+          this._removeCellProvider(index);
+        }
         break;
     }
     this._stateChanged.emit();
@@ -854,7 +862,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       textMode = false;
     } else {
       // When search in selection is off we either search in full cells
-      // (toggling off isActive flag on search enginges of non-selected cells)
+      // (toggling off isActive flag on search engines of non-selected cells)
       // or in selected text of the active cell.
       textMode = this._selectionSearchMode === 'text';
     }

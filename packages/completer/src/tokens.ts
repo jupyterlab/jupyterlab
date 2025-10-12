@@ -216,7 +216,11 @@ export interface IInlineCompletionError {
  * @alpha
  */
 export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
+  /**
+   * Token passed to identify the completion when streaming updates.
+   */
   token?: string;
+
   /**
    * Whether generation of `insertText` is still ongoing. If your provider supports streaming,
    * you can set this to true, which will result in the provider's `stream()` method being called
@@ -491,6 +495,7 @@ export interface IInlineCompleterSettings {
   providers: {
     [providerId: string]: {
       enabled: boolean;
+      autoFillInMiddle: boolean;
       debouncerDelay: number;
       timeout: number;
       [property: string]: JSONValue;
@@ -520,7 +525,8 @@ export interface IProviderReconciliator {
    */
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger?: InlineCompletionTriggerKind
+    trigger?: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[];
 
   /**

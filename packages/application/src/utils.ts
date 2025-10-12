@@ -116,6 +116,7 @@ export function addSemanticCommand(options: ISemanticCommandOptions): void {
           []
         );
         if (commandIds.includes(args.id)) {
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (args.type) {
             case 'changed':
             case 'many-changed':
@@ -199,7 +200,8 @@ export function createSemanticCommand(
       let result: any = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
-          result = await commands.execute(commandId!);
+          const args = { [SemanticCommand.WIDGET]: widget!.id };
+          result = await commands.execute(commandId!, args);
           if (typeof result === 'boolean' && result === false) {
             // If a command returns a boolean, assume it is the execution success status
             // So break if it is false.

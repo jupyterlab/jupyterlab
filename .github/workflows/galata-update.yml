@@ -15,7 +15,10 @@ jobs:
       (
         github.event.issue.author_association == 'OWNER' ||
         github.event.issue.author_association == 'COLLABORATOR' ||
-        github.event.issue.author_association == 'MEMBER'
+        github.event.issue.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'COLLABORATOR' ||
+        github.event.comment.author_association == 'MEMBER'
       ) && github.event.issue.pull_request && (
         contains(github.event.comment.body, 'please update galata snapshots') ||
         contains(github.event.comment.body, 'please update snapshots')
@@ -103,7 +106,10 @@ jobs:
       (
         github.event.issue.author_association == 'OWNER' ||
         github.event.issue.author_association == 'COLLABORATOR' ||
-        github.event.issue.author_association == 'MEMBER'
+        github.event.issue.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'COLLABORATOR' ||
+        github.event.comment.author_association == 'MEMBER'
       ) && github.event.issue.pull_request && (
         contains(github.event.comment.body, 'please update documentation snapshots') ||
         contains(github.event.comment.body, 'please update snapshots')

@@ -3,7 +3,7 @@
 
 import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { JSONObject, UUID } from '@lumino/coreutils';
-import { ConfigSection, ConfigWithDefaults } from '../../src';
+import { ConfigSectionManager, ConfigWithDefaults } from '../../src';
 import { getRequestHandler, handleRequest, makeSettings } from '../utils';
 
 /**
@@ -19,9 +19,12 @@ function randomName() {
 }
 
 const server = new JupyterServer();
+let configSectionManager: ConfigSectionManager;
 
 beforeAll(async () => {
   await server.start();
+  const serverSettings = makeSettings();
+  configSectionManager = new ConfigSectionManager({ serverSettings });
 }, 30000);
 
 afterAll(async () => {
@@ -29,26 +32,24 @@ afterAll(async () => {
 });
 
 describe('config', () => {
-  describe('ConfigSection.create()', () => {
+  describe('ConfigSectionManager', () => {
     it('should load a config', async () => {
-      const config = await ConfigSection.create({ name: randomName() });
+      const config = await configSectionManager.create({ name: randomName() });
       expect(Object.keys(config.data).length).toBe(0);
     });
 
     it('should accept server settings', async () => {
-      const serverSettings = makeSettings();
-      const config = await ConfigSection.create({
-        name: randomName(),
-        serverSettings
+      const config = await configSectionManager.create({
+        name: randomName()
       });
       expect(Object.keys(config.data).length).toBe(0);
     });
 
     it('should fail for an incorrect response', async () => {
-      const serverSettings = getRequestHandler(201, {});
-      const configPromise = ConfigSection.create({
-        name: randomName(),
-        serverSettings
+      const settings = getRequestHandler(201, {});
+      const manager = new ConfigSectionManager({ serverSettings: settings });
+      const configPromise = manager.create({
+        name: randomName()
       });
       await expect(configPromise).rejects.toThrow(/Invalid response: 201/);
     });
@@ -56,7 +57,7 @@ describe('config', () => {
 
   describe('#update()', () => {
     it('should update a config', async () => {
-      const config = await ConfigSection.create({ name: randomName() });
+      const config = await configSectionManager.create({ name: randomName() });
       const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
       expect(data.foo).toBe('baz');
       expect(config.data['foo']).toBe('baz');
@@ -65,10 +66,8 @@ describe('config', () => {
     });
 
     it('should accept server settings', async () => {
-      const serverSettings = makeSettings();
-      const config = await ConfigSection.create({
-        name: randomName(),
-        serverSettings
+      const config = await configSectionManager.create({
+        name: randomName()
       });
       const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
       expect(data.foo).toBe('baz');
@@ -78,7 +77,7 @@ describe('config', () => {
     });
 
     it('should fail for an incorrect response', async () => {
-      const config = await ConfigSection.create({ name: randomName() });
+      const config = await configSectionManager.create({ name: randomName() });
       handleRequest(config, 201, {});
       const update = config.update({ foo: 'baz' });
       await expect(update).rejects.toThrow(/Invalid response: 201/);
@@ -91,7 +90,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should complete properly', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
       const className = 'testclass';
-      const section = await ConfigSection.create({
+      const section = await configSectionManager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
@@ -107,7 +106,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a new config value', async () => {
       const defaults: JSONObject = { foo: 'bar' };
       const className = 'testclass';
-      const section = await ConfigSection.create({
+      const section = await configSectionManager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
@@ -122,7 +121,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a default config value', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
       const className = 'testclass';
-      const section = await ConfigSection.create({
+      const section = await configSectionManager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
@@ -137,7 +136,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a default config value with no class', async () => {
       const defaults: JSONObject = { spam: 'eggs' };
       const className = 'testclass';
-      const section = await ConfigSection.create({
+      const section = await configSectionManager.create({
         name: randomName()
       });
       const config = new ConfigWithDefaults({
@@ -152,10 +151,10 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     it('should get a falsey value', async () => {
       const defaults: JSONObject = { foo: true };
       const className = 'testclass';
-      const serverSettings = getRequestHandler(200, { foo: false });
-      const section = await ConfigSection.create({
-        name: randomName(),
-        serverSettings
+      const settings = getRequestHandler(200, { foo: false });
+      const manager = new ConfigSectionManager({ serverSettings: settings });
+      const section = await manager.create({
+        name: randomName()
       });
       const config = new ConfigWithDefaults({
         section,
@@ -170,7 +169,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
   describe('#set()', () => {
     it('should set a value in a class immediately', async () => {
       const className = 'testclass';
-      const section = await ConfigSection.create({ name: randomName() });
+      const section = await configSectionManager.create({ name: randomName() });
       const config = new ConfigWithDefaults({ section, className });
       let data: any = await config.set('foo', 'bar');
       data = section.data['testclass'] as JSONObject;
@@ -178,7 +177,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     });
 
     it('should set a top level value', async () => {
-      const section = await ConfigSection.create({ name: randomName() });
+      const section = await configSectionManager.create({ name: randomName() });
       const config = new ConfigWithDefaults({ section });
       const set = config.set('foo', 'bar');
       expect(section.data['foo']).toBe('bar');
@@ -187,10 +186,8 @@ describe('jupyter.services - ConfigWithDefaults', () => {
     });
 
     it('should fail for an invalid response', async () => {
-      const serverSettings = getRequestHandler(200, {});
-      const section = await ConfigSection.create({
-        name: randomName(),
-        serverSettings
+      const section = await configSectionManager.create({
+        name: randomName()
       });
       handleRequest(section, 201, { foo: 'bar' });
       const config = new ConfigWithDefaults({ section });

@@ -32,7 +32,7 @@
 /*
 Hiding collapsers in print mode.
 
-Note: input and output wrappers have "display: block" propery in print mode.
+Note: input and output wrappers have "display: block" property in print mode.
 */
 
 @media print {

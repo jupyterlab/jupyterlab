@@ -19,6 +19,7 @@ test.use({
   }
 });
 
+// prefer appending to this list, as the index ends up being relevant
 const EXPECTED_MERMAID_ORDER = [
   'flowchart',
   'sequence',
@@ -34,7 +35,14 @@ const EXPECTED_MERMAID_ORDER = [
   'mindmap',
   'timeline',
   'sankey',
-  'xy'
+  'xy',
+  'block',
+  'kanban',
+  'flowchart-elk',
+  'architecture',
+  'packet',
+  'radar',
+  'treemap'
 ];
 
 /**
@@ -56,6 +64,12 @@ async function resizePageAndScreenshot(locator: Locator) {
       height: Math.ceil(box.height * scaleFactor)
     });
   }
+  // Wait for next animation frame (next rendering cycle)
+  await page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
   const screenshot = await locator.screenshot();
   await page.setViewportSize(originalSize);
   return screenshot;

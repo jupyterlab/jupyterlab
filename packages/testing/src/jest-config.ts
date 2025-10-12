@@ -7,12 +7,15 @@ import path from 'path';
 
 const esModules = [
   '@codemirror',
+  '@marijn',
   '@microsoft',
   '@jupyter/react-components',
   '@jupyter/web-components',
   '@jupyter/ydoc',
+  'color',
   'exenv-es6',
   'lib0',
+  'marked',
   'nanoid',
   'vscode-ws-jsonrpc',
   'y-protocols',

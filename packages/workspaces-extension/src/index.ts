@@ -8,7 +8,8 @@
  */
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  JupyterLab
 } from '@jupyterlab/application';
 import {
   IWorkspaceCommands,
@@ -17,6 +18,14 @@ import {
 } from '@jupyterlab/workspaces';
 import { commandsPlugin } from './commands';
 import { workspacesSidebar } from './sidebar';
+import { WorkspaceSelectorWidget } from './top_indicator';
+import {
+  ICommandPalette,
+  IToolbarWidgetRegistry,
+  IWindowResolver
+} from '@jupyterlab/apputils';
+import { ITranslator } from '@jupyterlab/translation';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The extension populating sidebar with workspaces list.
@@ -26,9 +35,16 @@ const workspacesModel: JupyterFrontEndPlugin<IWorkspacesModel> = {
   description: 'Provides a model for available workspaces.',
   provides: IWorkspacesModel,
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
+  optional: [JupyterLab.IInfo],
+  activate: (app: JupyterFrontEnd, info: JupyterLab.IInfo | null) => {
     return new WorkspacesModel({
-      manager: app.serviceManager.workspaces
+      manager: app.serviceManager.workspaces,
+      refreshStandby: () => {
+        if (info) {
+          return !info.isConnected || 'when-hidden';
+        }
+        return 'when-hidden';
+      }
     });
   }
 };
@@ -47,12 +63,103 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The plugin id for the workspace indicator.
+ */
+const WORKSPACE_INDICATOR_PLUGIN_ID =
+  '@jupyterlab/workspaces-extension:indicator';
+
+/**
+ * The command id for the workspace indicator toggle command.
+ */
+const WORKSPACE_INDICATOR_COMMAND_ID = 'workspace-indicator:toggle';
+
+/**
+ * The extension providing workspace indicator at topbar
+ */
+const workspacesIndicator: JupyterFrontEndPlugin<void> = {
+  id: WORKSPACE_INDICATOR_PLUGIN_ID,
+  description: 'Adds a workspace indicator element at topbar',
+  requires: [
+    IWorkspacesModel,
+    IWorkspaceCommands,
+    IWindowResolver,
+    ITranslator,
+    ISettingRegistry,
+    IToolbarWidgetRegistry
+  ],
+  optional: [ICommandPalette],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    model: IWorkspacesModel,
+    commands: IWorkspaceCommands,
+    resolver: IWindowResolver,
+    translator: ITranslator,
+    registry: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry,
+    palette: ICommandPalette | null
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const openWorkspace = async (workspace: string) => {
+      await app.commands.execute(commands.open, { workspace: workspace });
+    };
+    const workspaceSelector = new WorkspaceSelectorWidget({
+      currentWorkspace: resolver.name,
+      identifiers: model.identifiers,
+      openWorkspace: openWorkspace,
+      model: model,
+      translator: translator
+    });
+
+    toolbarRegistry.addFactory('TopBar', 'workspaceIndicator', () => {
+      return workspaceSelector;
+    });
+
+    app.commands.addCommand(WORKSPACE_INDICATOR_COMMAND_ID, {
+      label: trans.__('Show Workspace Indicator'),
+      isToggled: () => workspaceSelector.isVisible,
+      execute: async () => {
+        const toolbar = await registry.get(
+          '@jupyterlab/application-extension:top-bar',
+          'toolbar'
+        );
+        if (Array.isArray(toolbar.composite)) {
+          const updatedToolbar = toolbar.composite.map((item: any) => {
+            if (item.name === 'workspaceIndicator') {
+              return { ...item, disabled: !item.disabled };
+            }
+            return item;
+          });
+          await registry.set(
+            '@jupyterlab/application-extension:top-bar',
+            'toolbar',
+            updatedToolbar
+          );
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    if (palette) {
+      const category = trans.__('Workspaces');
+      palette.addItem({ command: WORKSPACE_INDICATOR_COMMAND_ID, category });
+    }
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   workspacesModel,
   commandsPlugin,
   workspacesSidebar,
-  workspacesMenu
+  workspacesMenu,
+  workspacesIndicator
 ];
 export default plugins;

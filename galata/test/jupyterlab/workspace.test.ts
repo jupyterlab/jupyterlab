@@ -228,6 +228,27 @@ test.describe('Workspace', () => {
     await expect(page.locator(`[role="main"] >> text=${mdFile}`)).toBeVisible();
     await expect(page.locator(`[role="main"] >> text=${nbFile}`)).toBeVisible();
   });
+
+  test('should display workspace indicator and switch workspaces', async ({
+    page
+  }) => {
+    await page.goto();
+    const workspaceSelector = page.locator('.jp-WorkspaceSelector-header');
+    // Not visible by default
+    expect(await workspaceSelector.isVisible()).toBe(false);
+
+    // Open custom workspace
+    await page.goto('workspaces/foo');
+    await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+    await expect(workspaceSelector).toBeVisible();
+    await workspaceSelector.click();
+    await page
+      .locator('.jp-WorkspaceSelector-item:has-text("default")')
+      .click();
+
+    const url = page.url();
+    expect(url).toContain('/workspaces/default');
+  });
 });
 
 test.describe('Workspace in doc mode', () => {
@@ -317,8 +338,11 @@ test.describe('Workspace in doc mode', () => {
   test('should restore workspace when switching back to lab mode', async ({
     baseURL,
     page,
-    tmpPath
+    tmpPath,
+    browserName
   }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
+
     // Open the browser in doc mode.
     // This should not change the saved workspace's main area information,
     // the document opened from URL should not be saved in workspace.

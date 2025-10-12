@@ -1,0 +1,90 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-WorkspaceSelector {
+  position: relative;
+  width: 150px;
+  margin-right: 20px;
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-WorkspaceSelector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+  background: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-WorkspaceSelector-header:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-WorkspaceSelector-dropdown {
+  position: absolute;
+  padding: 2px 4px;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 3px;
+  box-shadow: var(--jp-elevation-z4);
+  z-index: 1000;
+}
+
+.jp-WorkspaceSelector-search {
+  display: flex;
+  padding: 2px 4px;
+  background: var(--jp-layout-color2);
+}
+
+.jp-WorkspaceSelector-input {
+  flex: 1;
+  width: 110px;
+  margin-left: 2px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-WorkspaceSelector-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.jp-WorkspaceSelector-item {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 5fr;
+  cursor: pointer;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-WorkspaceSelector-item:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-WorkspaceSelector-searchIcon {
+  display: flex;
+  align-items: center;
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-WorkspaceSelector-caret {
+  font-size: 0.8em;
+  margin-left: 8px;
+}
