@@ -45,7 +45,7 @@ export function ExecutionIndicatorComponent(
   const [hasExecutedCell, setHasExecutedCell] = React.useState(false);
 
   React.useEffect(() => {
-    if (!showJumpToCell || hasExecutedCell) {
+    if (hasExecutedCell) {
       return;
     }
     const onExecutionScheduled = () => {
@@ -322,7 +322,11 @@ export namespace ExecutionIndicator {
   export class Model extends VDomModel {
     constructor() {
       super();
-      this._displayOption = { showOnToolBar: true, showProgress: true };
+      this._displayOption = {
+        showOnToolBar: true,
+        showProgress: true,
+        showJumpToCell: false
+      };
       this._renderFlag = true;
     }
 
@@ -603,7 +607,7 @@ export namespace ExecutionIndicator {
     updateRenderOption(options: {
       showOnToolBar: boolean;
       showProgress: boolean;
-      showJumpToRecentExecutionButton: boolean;
+      showJumpToCell: boolean;
     }): void {
       if (this.displayOption.showOnToolBar) {
         if (!options.showOnToolBar) {
@@ -613,8 +617,7 @@ export namespace ExecutionIndicator {
         }
       }
       this.displayOption.showProgress = options.showProgress;
-      this.displayOption.showJumpToCell =
-        options.showJumpToRecentExecutionButton;
+      this.displayOption.showJumpToCell = options.showJumpToCell;
       this.stateChanged.emit(void 0);
     }
 
@@ -662,7 +665,22 @@ export namespace ExecutionIndicator {
       loadSettings
         .then(settings => {
           const updateSettings = (newSettings: ISettingRegistry.ISettings) => {
-            toolbarItem.model.updateRenderOption(getSettingValue(newSettings));
+            const displayOptions = getSettingValue(newSettings);
+
+            // Auto-enable recordTiming if jump button is enabled
+            if (displayOptions.showJumpToCell) {
+              const recordTiming = newSettings.get('recordTiming')
+                .composite as boolean;
+              if (!recordTiming) {
+                newSettings.set('recordTiming', true).catch((reason: Error) => {
+                  console.error(
+                    'Failed to auto-enable recordTiming:',
+                    reason.message
+                  );
+                });
+              }
+            }
+            toolbarItem.model.updateRenderOption(displayOptions);
           };
           settings.changed.connect(updateSettings);
           updateSettings(settings);
@@ -680,20 +698,19 @@ export namespace ExecutionIndicator {
   export function getSettingValue(settings: ISettingRegistry.ISettings): {
     showOnToolBar: boolean;
     showProgress: boolean;
-    showJumpToRecentExecutionButton: boolean;
+    showJumpToCell: boolean;
   } {
     let showOnToolBar = true;
     let showProgress = true;
-    let showJumpToRecentExecutionButton = false;
+    let showJumpToCell = false;
     const configValues = settings.get('kernelStatus').composite as JSONObject;
     if (configValues) {
       showOnToolBar = !(configValues.showOnStatusBar as boolean);
       showProgress = configValues.showProgress as boolean;
-      showJumpToRecentExecutionButton =
-        configValues.showJumpToRecentExecutionButton as boolean;
+      showJumpToCell = configValues.showJumpToRecentExecutionButton as boolean;
     }
 
-    return { showOnToolBar, showProgress, showJumpToRecentExecutionButton };
+    return { showOnToolBar, showProgress, showJumpToCell };
   }
 }
 
@@ -716,6 +733,6 @@ namespace Private {
      * The option to show the jump to most recently executed/executing cell button
      * inside the tooltip
      */
-    showJumpToCell?: boolean;
+    showJumpToCell: boolean;
   };
 }
