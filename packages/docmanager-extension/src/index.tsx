@@ -1097,7 +1097,7 @@ function addCommands(
             await context.save();
 
             if (!widget?.isDisposed) {
-              return context!.createCheckpoint();
+              return await context!.createCheckpoint();
             }
           } catch (err) {
             // If the save was canceled by user-action, do nothing.
