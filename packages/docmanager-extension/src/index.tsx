@@ -1096,8 +1096,12 @@ function addCommands(
           try {
             await context.save();
 
+            if (newName !== oldName) {
+              await context.rename(newName);
+            }
+
             if (!widget?.isDisposed) {
-              return await context!.createCheckpoint();
+              await context!.createCheckpoint();
             }
           } catch (err) {
             // If the save was canceled by user-action, do nothing.
@@ -1107,9 +1111,6 @@ function addCommands(
             throw err;
           } finally {
             saveInProgress.delete(context);
-            if (newName !== oldName) {
-              await context.rename(newName);
-            }
           }
         }
       }
