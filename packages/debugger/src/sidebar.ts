@@ -40,13 +40,8 @@ export class DebuggerSidebar extends SidePanel {
     this.title.icon = bugIcon;
     this.addClass('jp-DebuggerSidebar');
 
-    const {
-      callstackCommands,
-      breakpointsCommands,
-      editorServices,
-      service,
-      themeManager
-    } = options;
+    const { callstackCommands, breakpointsCommands, service, themeManager } =
+      options;
     const model = service.model;
 
     this.variables = new VariablesPanel({
@@ -70,13 +65,6 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    this.sources = new SourcesPanel({
-      model: model.sources,
-      service,
-      editorServices,
-      translator
-    });
-
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
       service,
@@ -95,7 +83,6 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    this.addWidget(this.sources);
     this.addWidget(this.kernelSources);
   }
 
