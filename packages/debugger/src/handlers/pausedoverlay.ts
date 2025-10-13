@@ -60,8 +60,6 @@ export class DebuggerPausedOverlay {
       return;
     }
 
-    // Block interactions with the underlying container
-    this._container.style.pointerEvents = 'none';
     this._container.appendChild(this._overlay);
   }
 
