@@ -995,6 +995,11 @@ export namespace IDebugger {
       clear(): void;
 
       variableViewOptions: Map<ViewOptions, boolean>;
+
+      readonly variableViewOptionsChanged: ISignal<
+        this,
+        Map<ViewOptions, boolean>
+      >;
     }
 
     /**
