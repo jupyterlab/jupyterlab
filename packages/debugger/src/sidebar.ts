@@ -17,8 +17,6 @@ import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
 import { Callstack as CallstackPanel } from './panels/callstack';
 
-import { Sources as SourcesPanel } from './panels/sources';
-
 import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
@@ -103,9 +101,8 @@ export class DebuggerSidebar extends SidePanel {
   readonly breakpoints: BreakpointsPanel;
 
   /**
-   * The sources widget.
+   * The kernel sources widget.
    */
-  readonly sources: SourcesPanel;
 
   readonly kernelSources: KernelSourcesPanel;
 }
