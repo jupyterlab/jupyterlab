@@ -138,6 +138,15 @@ export class DebuggerModel implements IDebugger.Model.IService {
     return this._titleChanged;
   }
 
+  get variableViewOptions(): Map<ViewOptions, boolean> {
+    return this._variableViewOptions;
+  }
+
+  set variableViewOptions(options: Map<ViewOptions, boolean>) {
+    // TODO do this better?
+    this._variableViewOptions = options;
+  }
+
   /**
    * Dispose the model.
    */
@@ -171,7 +180,9 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
+  private _variableViewOptions = new Map<ViewOptions, boolean>();
 }
+export type ViewOptions = 'displayModules';
 
 /**
  * A namespace for DebuggerModel
