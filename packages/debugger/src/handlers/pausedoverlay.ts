@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IDisposable } from '@lumino/disposable';
 import { IDebugger } from '../tokens';
 import {
   ITranslator,
@@ -12,7 +13,7 @@ import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
 /**
  * A reusable helper to show a "Paused in Debugger" overlay and block interactions.
  */
-export class DebuggerPausedOverlay {
+export class DebuggerPausedOverlay implements IDisposable {
   constructor(options: DebuggerPausedOverlay.IOptions) {
     this._debuggerService = options.debuggerService;
     this._container = options.container;
@@ -53,9 +54,11 @@ export class DebuggerPausedOverlay {
    * Show the overlay, if enabled by user settings.
    */
   async show(): Promise<void> {
-    const showOverlay = document.body.dataset.showPausedOverlay !== 'false';
-    console.log(showOverlay);
+    if (this._isDisposed) {
+      return;
+    }
 
+    const showOverlay = document.body.dataset.showPausedOverlay !== 'false';
     if (!showOverlay || !this._overlay || this._overlay.isConnected) {
       return;
     }
@@ -67,7 +70,7 @@ export class DebuggerPausedOverlay {
    * Hide and unmount the overlay.
    */
   hide(): void {
-    if (!this._overlay || !this._overlay.isConnected) {
+    if (this._isDisposed || !this._overlay || !this._overlay.isConnected) {
       return;
     }
     this._container.style.pointerEvents = '';
@@ -78,14 +81,26 @@ export class DebuggerPausedOverlay {
    * Dispose of the overlay completely.
    */
   dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
     this.hide();
     this._overlay = null;
+  }
+
+  /**
+   * Whether the overlay has been disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
   }
 
   private _debuggerService: IDebugger;
   private _container: HTMLElement;
   private _trans: TranslationBundle;
   private _overlay: HTMLDivElement | null;
+  private _isDisposed = false;
 }
 
 export namespace DebuggerPausedOverlay {
