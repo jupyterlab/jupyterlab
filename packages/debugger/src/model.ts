@@ -44,6 +44,9 @@ export class DebuggerModel implements IDebugger.Model.IService {
       config
     });
     this.kernelSources = new KernelSourcesModel();
+
+    // Initialize variable view options with default values
+    this._variableViewOptions.set('module', true);
   }
 
   /**
@@ -144,6 +147,13 @@ export class DebuggerModel implements IDebugger.Model.IService {
     return this._titleChanged;
   }
 
+  /**
+   * A signal emitted when the variable view options change.
+   */
+  get variableViewOptionsChanged(): ISignal<this, Map<ViewOptions, boolean>> {
+    return this._variableViewOptionsChanged;
+  }
+
   get variableViewOptions(): Map<ViewOptions, boolean> {
     return this._variableViewOptions;
   }
@@ -151,6 +161,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
   set variableViewOptions(options: Map<ViewOptions, boolean>) {
     // TODO do this better?
     this._variableViewOptions = options;
+    this._variableViewOptionsChanged.emit(options);
   }
 
   /**
@@ -186,9 +197,13 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
+  private _variableViewOptionsChanged = new Signal<
+    this,
+    Map<ViewOptions, boolean>
+  >(this);
   private _variableViewOptions = new Map<ViewOptions, boolean>();
 }
-export type ViewOptions = 'displayModules';
+export type ViewOptions = 'module' | string;
 
 /**
  * A namespace for DebuggerModel
