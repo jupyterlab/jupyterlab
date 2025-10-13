@@ -18,6 +18,7 @@ import { Panel } from '@lumino/widgets';
 import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
+import { ViewOptions } from './model';
 
 import { IDebuggerSourceDisplayProvider } from './displayregistry';
 
@@ -992,6 +993,8 @@ export namespace IDebugger {
        * Clear the model.
        */
       clear(): void;
+
+      variableViewOptions: Map<ViewOptions, boolean>;
     }
 
     /**
