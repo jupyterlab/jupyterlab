@@ -33,7 +33,11 @@ import {
 } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import {
+  DocumentRegistry,
+  getAvailableKernelFileTypes,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import {
@@ -71,7 +75,7 @@ import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 
-import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
+import { CommandIDs, Commands, FACTORY } from './commands';
 import { editorSyntaxStatus } from './syntaxstatus';
 
 export { Commands } from './commands';
@@ -354,66 +358,13 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
-  const commonLanguageFileTypeData = new Map<string, IFileTypeData[]>([
-    [
-      'python',
-      [
-        {
-          fileExt: 'py',
-          iconName: 'ui-components:python',
-          launcherLabel: trans.__('Python File'),
-          paletteLabel: trans.__('New Python File'),
-          caption: trans.__('Create a new Python file')
-        }
-      ]
-    ],
-    [
-      'julia',
-      [
-        {
-          fileExt: 'jl',
-          iconName: 'ui-components:julia',
-          launcherLabel: trans.__('Julia File'),
-          paletteLabel: trans.__('New Julia File'),
-          caption: trans.__('Create a new Julia file')
-        }
-      ]
-    ],
-    [
-      'R',
-      [
-        {
-          fileExt: 'r',
-          iconName: 'ui-components:r-kernel',
-          launcherLabel: trans.__('R File'),
-          paletteLabel: trans.__('New R File'),
-          caption: trans.__('Create a new R file')
-        }
-      ]
-    ]
-  ]);
-
-  // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
-  const getAvailableKernelFileTypes = async (): Promise<Set<IFileTypeData>> => {
-    const specsManager = app.serviceManager.kernelspecs;
-    await specsManager.ready;
-    let fileTypes = new Set<IFileTypeData>();
-    const specs = specsManager.specs?.kernelspecs ?? {};
-    Object.keys(specs).forEach(spec => {
-      const specModel = specs[spec];
-      if (specModel) {
-        const exts = commonLanguageFileTypeData.get(specModel.language);
-        exts?.forEach(ext => fileTypes.add(ext));
-      }
-    });
-    return fileTypes;
-  };
-
   let launcherDisposables: IDisposable | null = null;
   let paletteDisposables: IDisposable | null = null;
   let menuDisposables: IDisposable | null = null;
 
-  const updateKernelFileTypeComponents = (fileTypes: Set<IFileTypeData>) => {
+  const updateKernelFileTypeComponents = (
+    fileTypes: Set<IRenderMime.IFileType>
+  ) => {
     // Dispose of previous entries if they exist
     if (launcherDisposables) {
       launcherDisposables.dispose();
@@ -447,7 +398,11 @@ function activate(
     }
 
     if (menu) {
-      menuDisposables = Commands.addKernelLanguageMenuItems(menu, fileTypes);
+      menuDisposables = Commands.addKernelLanguageMenuItems(
+        menu,
+        trans,
+        fileTypes
+      );
     }
   };
 
@@ -455,7 +410,9 @@ function activate(
   const specsManager = app.serviceManager.kernelspecs;
   specsManager.specsChanged.connect(async () => {
     try {
-      const updatedFileTypes = await getAvailableKernelFileTypes();
+      const updatedFileTypes = await getAvailableKernelFileTypes(
+        app.serviceManager.kernelspecs
+      );
       updateKernelFileTypeComponents(updatedFileTypes);
     } catch (error) {
       console.error('Error updating kernel file types:', error);
@@ -622,7 +579,7 @@ function activate(
     Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
-  getAvailableKernelFileTypes()
+  getAvailableKernelFileTypes(app.serviceManager.kernelspecs)
     .then(updateKernelFileTypeComponents)
     .catch((reason: Error) => {
       console.error(reason.message);

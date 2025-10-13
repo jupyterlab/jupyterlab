@@ -14,6 +14,7 @@ import { SourcesModel } from './panels/sources/model';
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A model for a debugger.
@@ -22,12 +23,16 @@ export class DebuggerModel implements IDebugger.Model.IService {
   /**
    * Instantiate a new DebuggerModel
    */
-  constructor() {
-    this.breakpoints = new BreakpointsModel();
-    this.callstack = new CallstackModel();
+  constructor(options: DebuggerModel.IOptions) {
+    const { config, notebookTracker } = options;
+
+    this.breakpoints = new BreakpointsModel({ config, notebookTracker });
+    this.callstack = new CallstackModel({ config, notebookTracker });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
-      currentFrameChanged: this.callstack.currentFrameChanged
+      currentFrameChanged: this.callstack.currentFrameChanged,
+      notebookTracker,
+      config
     });
     this.kernelSources = new KernelSourcesModel();
   }
@@ -163,4 +168,24 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
+}
+
+/**
+ * A namespace for DebuggerModel
+ */
+export namespace DebuggerModel {
+  /**
+   * Instantiation options for a DebuggerModel.
+   */
+  export interface IOptions {
+    /**
+     * Debugger configuration.
+     */
+    config: IDebugger.IConfig;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker: INotebookTracker | null;
+  }
 }

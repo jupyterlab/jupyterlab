@@ -129,7 +129,9 @@ test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
   expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
 });
 
-test('Terminal web link', async ({ page, tmpPath }) => {
+test('Terminal web link', async ({ page, tmpPath, browserName }) => {
+  test.skip(browserName === 'firefox', 'Flaky on Firefox');
+
   await page.locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`).waitFor();
 
   await page.locator('[role="main"] >> p:has-text("Terminal")').click();

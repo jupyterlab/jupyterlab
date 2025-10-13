@@ -117,8 +117,7 @@ import {
   RankedMenu,
   refreshIcon,
   runIcon,
-  stopIcon,
-  tableRowsIcon
+  stopIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -2016,6 +2015,7 @@ function activateNotebookHandler(
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
+    widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
 
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
@@ -2031,15 +2031,8 @@ function activateNotebookHandler(
   function updateTracker(options: NotebookPanel.IConfig): void {
     tracker.forEach(widget => {
       widget.setConfig(options);
+      widget.content.scrollbar = options.notebookConfig.showMinimap ?? false;
     });
-    if (options.notebookConfig.windowingMode !== 'full') {
-      // Disable all virtual scrollbars if any was enabled
-      tracker.forEach(widget => {
-        if (widget.content.scrollbar) {
-          widget.content.scrollbar = false;
-        }
-      });
-    }
   }
 
   /**
@@ -2097,9 +2090,11 @@ function activateNotebookHandler(
       windowingMode: settings.get('windowingMode').composite as
         | 'defer'
         | 'full'
-        | 'none',
+        | 'none'
+        | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
-        .composite as boolean
+        .composite as boolean,
+      showMinimap: settings.get('showMinimap').composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -4548,9 +4543,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Show Minimap'),
-    caption: trans.__(
-      'Show Minimap (virtual scrollbar, enabled with windowing mode: full)'
-    ),
+    caption: trans.__('Show Minimap'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -4558,32 +4551,18 @@ function addCommands(
         current.content.scrollbar = !current.content.scrollbar;
       }
     },
-    icon: args => (args.toolbar ? tableRowsIcon : undefined),
-    isEnabled: args => {
-      const enabled =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return enabled;
+    isEnabled: () => {
+      const current = tracker.currentWidget;
+      return !!current;
     },
     isToggled: () => {
       const current = tracker.currentWidget;
       return current?.content.scrollbar ?? false;
     },
-    isVisible: args => {
-      const visible =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return visible;
-    },
     describedBy: {
       args: {
         type: 'object',
-        properties: {
-          toolbar: {
-            type: 'boolean',
-            description: trans.__('Whether the command is called from toolbar')
-          }
-        }
+        properties: {}
       }
     }
   });
@@ -4774,6 +4753,11 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleLineNumbers.add({
     id: CommandIDs.toggleAllLines,
     isEnabled
+  });
+
+  mainMenu.viewMenu.editorViewers.toggleMinimap.add({
+    id: CommandIDs.virtualScrollbar,
+    isEnabled: () => true
   });
 
   // Add an ICodeRunner to the application run menu

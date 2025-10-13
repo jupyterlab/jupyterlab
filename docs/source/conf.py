@@ -26,6 +26,7 @@
 import json
 import os
 import shutil
+import sys
 import time
 from collections import ChainMap
 from functools import partial
@@ -33,6 +34,9 @@ from pathlib import Path
 from subprocess import check_call
 
 HERE = Path(__file__).parent.resolve()
+
+# Add the _ext directory to Python path for custom extensions
+sys.path.insert(0, str(HERE / "_ext"))
 
 # -- General configuration ------------------------------------------------
 
@@ -48,6 +52,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
 myst_enable_extensions = ["html_image"]
@@ -358,6 +363,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
+    "announcement": '🚀 Join us in San Diego · JupyterCon 2025 · Nov 4-5 · <a href="https://events.linuxfoundation.org/jupytercon/program/schedule/?ajs_aid=53afb00d-be65-4a99-9112-28cdaac99463">SCHEDULE</a> · <a href="https://events.linuxfoundation.org/jupytercon/register/?ajs_aid=53afb00d-be65-4a99-9112-28cdaac99463">REGISTER NOW</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -546,3 +552,6 @@ def setup(app):
     )
 
     app.connect("build-finished", partial(clean_code_files, tmp_files))
+
+    # Inherit some Jupyter branding CSS rules from the Jupyter Documentation
+    app.add_css_file("https://docs.jupyter.org/en/latest/_static/jupyter.css")

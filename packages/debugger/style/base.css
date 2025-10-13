@@ -14,7 +14,7 @@
 .jp-left-truncated {
   overflow: hidden;
   text-overflow: ellipsis;
-  direction: rtl;
+  direction: ltr;
 }
 
 #jp-debugger .jp-switch-label {

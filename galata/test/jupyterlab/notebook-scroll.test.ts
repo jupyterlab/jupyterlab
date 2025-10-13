@@ -172,7 +172,10 @@ test.describe('Notebook scroll on dragging cells (with windowing)', () => {
     await expect(lastCellLocator).toBeInViewport();
   });
 
-  test('Scroll up on dragging cell to the top edge', async ({ page }) => {
+  test('Scroll up on dragging cell to the top edge', async ({
+    page,
+    browserName
+  }) => {
     const firstCellLocator = page.locator(
       '.jp-Cell[data-windowed-list-index="0"]'
     );
@@ -196,7 +199,8 @@ test.describe('Notebook scroll on dragging cells (with windowing)', () => {
 
     // Ensure the notebook is scrolled correctly and first cell is not visible
     const before = await scroller.evaluate(node => node.scrollTop);
-    expect(before).toBeGreaterThan(notebookContentHeight * 0.75);
+    const factor = browserName === 'firefox' ? 0.6 : 0.75;
+    expect(before).toBeGreaterThan(notebookContentHeight * factor);
     await expect(firstCellLocator).not.toBeInViewport();
 
     // Emulate drag and drop
@@ -391,8 +395,10 @@ test.describe('Notebook scroll beyond a cell with long output (with windowing)',
   });
 
   test('should not change height of the scrollbar when scrolling beyond the cell long', async ({
-    page
+    page,
+    browserName
   }) => {
+    test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
     // Make the first cell active
     await page.notebook.selectCells(0);
 

@@ -122,7 +122,6 @@ export interface IDebugger {
    * Request to set a variable in the global scope.
    *
    * @param name The name of the variable.
-   * @param value The value of the variable.
    */
   copyToGlobals(name: string): Promise<void>;
 
@@ -856,6 +855,16 @@ export namespace IDebugger {
       readonly restored: ISignal<this, void>;
 
       /**
+       * Signal emitted when the breakpoints are restored.
+       */
+      readonly selectedChanged: Signal<this, IDebugger.IBreakpoint>;
+
+      /**
+       * Selected breakpoint
+       */
+      selectedBreakpoint: IDebugger.IBreakpoint | null;
+
+      /**
        * Get the breakpoints for a given id (path).
        *
        * @param id The code id (path).
@@ -876,6 +885,14 @@ export namespace IDebugger {
        * @param breakpoints The list of breakpoints.
        */
       setBreakpoints(id: string, breakpoints: IBreakpoint[]): void;
+
+      /**
+       * Function to get a display name for a breakpoint.
+       *
+       * @param breakpoint The breakpoint object.
+       * @returns The display name.
+       */
+      getDisplayName(breakpoint: IBreakpoint): string;
     }
 
     /**
@@ -901,6 +918,14 @@ export namespace IDebugger {
        * Signal emitted when the frames have changed.
        */
       readonly framesChanged: ISignal<this, IDebugger.IStackFrame[]>;
+
+      /**
+       * Function to get a display name for a frame.
+       *
+       * @param frame The frame object.
+       * @returns The display name.
+       */
+      getDisplayName?(frame: IDebugger.IStackFrame): string;
     }
 
     /**
@@ -1000,6 +1025,14 @@ export namespace IDebugger {
        * Open a source in the main area.
        */
       open(): void;
+
+      /**
+       * Function to get a display name for a frame.
+       *
+       * @param frame The frame object.
+       * @returns The display name.
+       */
+      getDisplayName(frame: IDebugger.IStackFrame): string;
     }
 
     /**

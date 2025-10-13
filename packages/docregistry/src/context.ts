@@ -289,22 +289,30 @@ export class Context<
   /**
    * Save the document to a different path chosen by the user.
    *
-   * It will be rejected if the user abort providing a new path.
+   * @returns A promise that resolves to `true` if the save operation was initiated.
+   * Returns `false` if the user cancelled the operation.
+   *
+   * Note:
+   * - If the save operation proceeds but fails due to an error in the content manager,
+   *   the returned value will still be `true`.
+   * - Consumers interested in the actual result of the save should listen to the
+   *   {@link saveState} signal to be notified when the save succeeds or fails.
    */
-  async saveAs(): Promise<void> {
+  async saveAs(): Promise<boolean> {
     await this.ready;
     const localPath = this._manager.contents.localPath(this.path);
     const newLocalPath = await Private.getSavePath(localPath);
 
     if (this.isDisposed || !newLocalPath) {
-      return;
+      return false;
     }
 
     const drive = this._manager.contents.driveName(this.path);
     const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
 
     if (newPath === this._path) {
-      return this.save();
+      await this.save();
+      return true;
     }
 
     // Make sure the path does not exist.
@@ -316,10 +324,15 @@ export class Context<
       await this._maybeOverWrite(newPath);
     } catch (err) {
       if (!err.response || err.response.status !== 404) {
+        // Dialog rejection (user cancelled)
+        if (!err.response) {
+          return false;
+        }
         throw err;
       }
-      await this._finishSaveAs(newPath);
     }
+    await this._finishSaveAs(newPath);
+    return true;
   }
 
   /**
@@ -923,6 +936,8 @@ or load the version on disk (revert)?`,
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
+      } else {
+        return Promise.reject(new Error('Cancelled'));
       }
     });
   }
