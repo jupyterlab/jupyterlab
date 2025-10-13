@@ -1570,9 +1570,16 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:debug-menu',
   description: 'Debugger meu.',
   autoStart: true,
-  requires: [IDebugger, IMainMenu],
-  activate: (app: JupyterFrontEnd, debug: IDebugger, mainMenu: IMainMenu) => {
+  requires: [IDebugger, IMainMenu, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    mainMenu: IMainMenu,
+
+    translator: ITranslator
+  ) => {
     console.log('@jupyterlab/debugger-extension:debug-menu loadedddd');
+    const trans = translator.load('jupyterlab');
 
     // start debugger
     // run without debugging
@@ -1590,8 +1597,38 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     // enable all bp
     // disable all bp
     // clear bps
+    const localCommandIdsForNow = { toggleModules: 'debugger:toggle-modules' };
+
+    app.commands.addCommand(localCommandIdsForNow.toggleModules, {
+      label: trans.__('Display Modules'),
+      caption: trans.__('Display Modules'),
+      icon: Debugger.Icons.evaluateIcon,
+      // isEnabled: () => !!debug.session?.isStarted,
+      isToggled: () => {
+        console.log(
+          'debug.model.variableViewOptions.get("displayModules")',
+          debug.model.variableViewOptions.get('module')
+        );
+        return !!debug.model.variableViewOptions.get('module');
+      },
+      execute: async () => {
+        const options = debug.model.variableViewOptions;
+        const newOptions = new Map(options);
+        newOptions.set('module', !options.get('module'));
+        debug.model.variableViewOptions = newOptions;
+        app.commands.notifyCommandChanged(localCommandIdsForNow.toggleModules);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     const menu = new Menu({ commands: app.commands });
     const subMenu = new Menu({ commands: app.commands });
+    subMenu.addItem({ command: localCommandIdsForNow.toggleModules });
 
     menu.title.label = 'Debug';
     menu.addItem({
