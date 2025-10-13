@@ -8,7 +8,6 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A reusable helper to show a "Paused in Debugger" overlay and block interactions.
@@ -17,7 +16,6 @@ export class DebuggerPausedOverlay {
   constructor(options: DebuggerPausedOverlay.IOptions) {
     this._debuggerService = options.debuggerService;
     this._container = options.container;
-    this._settings = options.settings ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
 
     // Create overlay
@@ -55,8 +53,8 @@ export class DebuggerPausedOverlay {
    * Show the overlay, if enabled by user settings.
    */
   async show(): Promise<void> {
-    const showOverlay =
-      (this._settings?.composite['showPausedOverlay'] as boolean) ?? true;
+    const showOverlay = document.body.dataset.showPausedOverlay !== 'false';
+    console.log(showOverlay);
 
     if (!showOverlay || !this._overlay || this._overlay.isConnected) {
       return;
@@ -88,7 +86,6 @@ export class DebuggerPausedOverlay {
 
   private _debuggerService: IDebugger;
   private _container: HTMLElement;
-  private _settings: ISettingRegistry.ISettings | null;
   private _trans: TranslationBundle;
   private _overlay: HTMLDivElement | null;
 }
@@ -97,7 +94,6 @@ export namespace DebuggerPausedOverlay {
   export interface IOptions {
     debuggerService: IDebugger;
     container: HTMLElement;
-    settings?: ISettingRegistry.ISettings;
     translator?: ITranslator;
   }
 }

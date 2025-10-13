@@ -14,7 +14,6 @@ import { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A handler for notebooks.
@@ -33,7 +32,6 @@ export class NotebookHandler implements IDisposable {
     this._pausedOverlay = new DebuggerPausedOverlay({
       debuggerService: this._debuggerService,
       container: this._notebookPanel.node,
-      settings: options.settings || undefined,
       translator: this.translator
     });
 
@@ -161,11 +159,6 @@ export namespace NotebookHandler {
      * The widget to handle.
      */
     widget: NotebookPanel;
-
-    /**
-     * The debugger settings
-     */
-    settings?: ISettingRegistry.ISettings;
 
     /**
      * The application language translator.

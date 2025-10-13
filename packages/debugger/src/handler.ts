@@ -91,7 +91,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
-    this._settings = options.settings;
     this._translator = options.translator || nullTranslator;
   }
 
@@ -236,7 +235,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           this._handlers[widget.id] = new NotebookHandler({
             debuggerService: this._service,
             widget: widget as NotebookPanel,
-            settings: this._settings,
             translator: this._translator || undefined
           });
           break;
@@ -244,7 +242,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           this._handlers[widget.id] = new ConsoleHandler({
             debuggerService: this._service,
             widget: widget as ConsolePanel,
-            settings: this._settings,
             translator: this._translator || undefined
           });
           break;
@@ -252,7 +249,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           this._handlers[widget.id] = new FileHandler({
             debuggerService: this._service,
             widget: widget as DocumentWidget<FileEditor>,
-            settings: this._settings,
             translator: this._translator || undefined
           });
           break;
@@ -414,7 +410,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
-  private _settings: ISettingRegistry.ISettings | undefined;
   private _translator: ITranslator | null;
 
   private _contextKernelChangedHandlers: {
