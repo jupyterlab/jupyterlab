@@ -44,8 +44,51 @@ export class VariablesBodyTree extends ReactWidget {
 
     const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
+    this._service.model.variableViewOptionsChanged.connect(
+      this._onVariableViewOptionsChanged,
+      this
+    );
 
     this.addClass('jp-DebuggerVariables-body');
+  }
+
+  /**
+   * Filter variables based on variableViewOptions settings.
+   * Excludes variables whose type has a corresponding false value in the options.
+   */
+  filterVariablesByViewOptions(
+    variables: IDebugger.IVariable[]
+  ): IDebugger.IVariable[] {
+    return variables.filter(variable => {
+      if (!variable.type) {
+        return true; // Keep variables without type
+      }
+
+      const optionValue = this._service.model.variableViewOptions.get(
+        variable.type
+      );
+      console.log('variable.type', variable.type);
+      console.log('optionValue', optionValue);
+      return optionValue !== false; // Keep if not explicitly set to false
+    });
+  }
+
+  /**
+   * Handle variable view options changes by re-filtering scopes.
+   */
+  private _onVariableViewOptionsChanged = (): void => {
+    this._updateFilteredScopes();
+    this.update();
+  };
+
+  /**
+   * Update filtered scopes based on current variable view options.
+   */
+  private _updateFilteredScopes(): void {
+    this._filteredScopes = this._scopes.map(scope => ({
+      ...scope,
+      variables: this.filterVariablesByViewOptions(scope.variables)
+    }));
   }
 
   /**
@@ -53,7 +96,8 @@ export class VariablesBodyTree extends ReactWidget {
    */
   render(): JSX.Element {
     const scope =
-      this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
+      this._filteredScopes.find(scope => scope.name === this._scope) ??
+      this._filteredScopes[0];
 
     const handleSelectVariable = (variable: IDebugger.IVariable) => {
       this.model.selectedVariable = variable;
@@ -110,6 +154,7 @@ export class VariablesBodyTree extends ReactWidget {
       return;
     }
     this._scopes = model.scopes;
+    this._updateFilteredScopes();
     this.update();
   }
 
@@ -118,6 +163,7 @@ export class VariablesBodyTree extends ReactWidget {
   private _scope = '';
   private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
+  private _filteredScopes: IDebugger.IScope[] = [];
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
 }
