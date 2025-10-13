@@ -381,8 +381,8 @@ export class OutputArea extends Widget {
       ) as HTMLElement;
       if (panel) {
         overlay.style.height = `${Math.max(
-          panel.scrollHeight,
-          this.node.clientHeight
+          panel.getBoundingClientRect().height,
+          this.node.getBoundingClientRect().height
         )}px`;
       }
     };
