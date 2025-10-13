@@ -18,6 +18,7 @@ import { Panel } from '@lumino/widgets';
 import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
+import { ViewOptions } from './model';
 
 /**
  * An interface describing an application's visual debugger.
@@ -986,6 +987,8 @@ export namespace IDebugger {
        * Clear the model.
        */
       clear(): void;
+
+      variableViewOptions: Map<ViewOptions, boolean>;
     }
 
     /**
