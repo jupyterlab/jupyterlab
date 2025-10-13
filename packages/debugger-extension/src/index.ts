@@ -58,6 +58,8 @@ import {
   nullTranslator
 } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { IMainMenu } from '@jupyterlab/mainmenu';
+import { Menu } from '@lumino/widgets';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
@@ -1564,6 +1566,70 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const debugMenu: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:debug-menu',
+  description: 'Debugger meu.',
+  autoStart: true,
+  requires: [IDebugger, IMainMenu],
+  activate: (app: JupyterFrontEnd, debug: IDebugger, mainMenu: IMainMenu) => {
+    console.log('@jupyterlab/debugger-extension:debug-menu loadedddd');
+
+    // start debugger
+    // run without debugging
+    // stop debuggung - d
+    // restart debugger
+    // serperator - d
+    // step over - d
+    // into - d
+    // out - d
+    // continue
+    // seperator
+    // toggle breakpoint (current line)
+    // new breakpoint -> submenu
+    // sep
+    // enable all bp
+    // disable all bp
+    // clear bps
+    const menu = new Menu({ commands: app.commands });
+    const subMenu = new Menu({ commands: app.commands });
+
+    menu.title.label = 'Debug';
+    menu.addItem({
+      command: Debugger.CommandIDs.restartDebug
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.terminate
+    });
+    menu.addItem({
+      type: 'separator'
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.next
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.stepIn
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.stepOut
+    });
+    menu.addItem({
+      type: 'separator'
+    });
+
+    subMenu.addItem({
+      command: Debugger.CommandIDs.restartDebug
+    });
+    subMenu.title.label = 'View stuff';
+
+    menu.addItem({
+      type: 'submenu',
+      submenu: subMenu
+    });
+
+    mainMenu.addMenu(menu, true, { rank: 40 });
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -1580,7 +1646,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sourceViewer,
   configuration,
   debuggerCompletions,
-  debugConsole
+  debugConsole,
+  debugMenu
 ];
 
 export default plugins;
