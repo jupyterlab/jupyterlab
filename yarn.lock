@@ -8340,6 +8340,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@verdaccio/core@npm:8.0.0-next-8.21":
+  version: 8.0.0-next-8.21
+  resolution: "@verdaccio/core@npm:8.0.0-next-8.21"
+  dependencies:
+    ajv: 8.17.1
+    http-errors: 2.0.0
+    http-status-codes: 2.3.0
+    minimatch: 7.4.6
+    process-warning: 1.0.0
+    semver: 7.7.2
+  checksum: 7431e4e6f17723241ca9aeea9e63595a6568e6dc90edae8c21c6a87ab13684aff89ddf44a7f6ab96a0bfc1a4238376898fd12dfb79e8bf8982dc6e95c4c3180c
+  languageName: node
+  linkType: hard
+
+"@verdaccio/core@npm:8.0.0-next-8.23":
+  version: 8.0.0-next-8.23
+  resolution: "@verdaccio/core@npm:8.0.0-next-8.23"
+  dependencies:
+    ajv: 8.17.1
+    http-errors: 2.0.0
+    http-status-codes: 2.3.0
+    minimatch: 7.4.6
+    process-warning: 1.0.0
+    semver: 7.7.2
+  checksum: 0a85985bbf25ff9c01775a5f6eea5b822577eac5a080f960777ec1d5b6a677b1d815f1b75349790528002fa760404b67f8be02958da601d2e9e30f7f0d2cc128
+  languageName: node
+  linkType: hard
+
 "@verdaccio/file-locking@npm:10.3.1":
   version: 10.3.1
   resolution: "@verdaccio/file-locking@npm:10.3.1"
@@ -8469,6 +8497,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@verdaccio/signature@npm:8.0.0-next-8.15":
+  version: 8.0.0-next-8.15
+  resolution: "@verdaccio/signature@npm:8.0.0-next-8.15"
+  dependencies:
+    "@verdaccio/config": 8.0.0-next-8.23
+    "@verdaccio/core": 8.0.0-next-8.23
+    debug: 4.4.3
+    jsonwebtoken: 9.0.2
+  checksum: c501d215d3ad6db9a21120d7ceecf01ad83704c9a2ecf9779d69fe3a9ae84b09a34fe3b96941ad635abcb1bb1e4080cfa46ebf7e4f0c84de952e3bdc3dd7a6bf
+  languageName: node
+  linkType: hard
+
 "@verdaccio/streams@npm:10.2.1":
   version: 10.2.1
   resolution: "@verdaccio/streams@npm:10.2.1"
@@ -8515,6 +8555,17 @@ __metadata:
     lodash: 4.17.21
     minimatch: 7.4.6
   checksum: 3e19cd754c59ac8201d61e0e1bd2c36d10536bdc43006cb13075d89d0a7ee61def5d14c26b706dbc46209418b643356b3669c14be1bdcb6d22b98ec2f1c50dd4
+  languageName: node
+  linkType: hard
+
+"@verdaccio/utils@npm:8.1.0-next-8.23":
+  version: 8.1.0-next-8.23
+  resolution: "@verdaccio/utils@npm:8.1.0-next-8.23"
+  dependencies:
+    "@verdaccio/core": 8.0.0-next-8.23
+    lodash: 4.17.21
+    minimatch: 7.4.6
+  checksum: 0a48bdc56371d0f1a132c4019ea5df67ca79bfaffbfd47d8b87ae161b6abf0c4c0a7b898cc45cfba926d3933bcb08f634d0978f36f2e7e87eb84eaa3e2d78a90
   languageName: node
   linkType: hard
 
@@ -10375,6 +10426,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"compression@npm:1.8.1":
+  version: 1.8.1
+  resolution: "compression@npm:1.8.1"
+  dependencies:
+    bytes: 3.1.2
+    compressible: ~2.0.18
+    debug: 2.6.9
+    negotiator: ~0.6.4
+    on-headers: ~1.1.0
+    safe-buffer: 5.2.1
+    vary: ~1.1.2
+  checksum: 906325935180cd3507d30ed898fb129deccab03689383d55536245a94610f5003923bb14c95ee6adc8d658ee13be549407eb4346ef55169045f3e41e9969808e
+  languageName: node
+  linkType: hard
+
 "compute-gcd@npm:^1.2.1":
   version: 1.2.1
   resolution: "compute-gcd@npm:1.2.1"
@@ -11378,6 +11444,30 @@ __metadata:
     supports-color:
       optional: true
   checksum: 822d74e209cd910ef0802d261b150314bbcf36c582ccdbb3e70f0894823c17e49a50d3e66d96b633524263975ca16b6a833f3e3b7e030c157169a5fabac63160
+  languageName: node
+  linkType: hard
+
+"debug@npm:4.4.1":
+  version: 4.4.1
+  resolution: "debug@npm:4.4.1"
+  dependencies:
+    ms: ^2.1.3
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: a43826a01cda685ee4cec00fb2d3322eaa90ccadbef60d9287debc2a886be3e835d9199c80070ede75a409ee57828c4c6cd80e4b154f2843f0dc95a570dc0729
+  languageName: node
+  linkType: hard
+
+"debug@npm:4.4.3":
+  version: 4.4.3
+  resolution: "debug@npm:4.4.3"
+  dependencies:
+    ms: ^2.1.3
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 4805abd570e601acdca85b6aa3757186084a45cff9b2fa6eee1f3b173caa776b45f478b2a71a572d616d2010cea9211d0ac4a02a610e4c18ac4324bde3760834
   languageName: node
   linkType: hard
 
@@ -17732,6 +17822,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"on-headers@npm:~1.1.0":
+  version: 1.1.0
+  resolution: "on-headers@npm:1.1.0"
+  checksum: 98aa64629f986fb8cc4517dd8bede73c980e31208cba97f4442c330959f60ced3dc6214b83420491f5111fc7c4f4343abe2ea62c85f505cf041d67850f238776
+  languageName: node
+  linkType: hard
+
 "once@npm:^1.3.0, once@npm:^1.3.1, once@npm:^1.4.0":
   version: 1.4.0
   resolution: "once@npm:1.4.0"
@@ -18388,6 +18485,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pino@npm:9.9.5":
+  version: 9.9.5
+  resolution: "pino@npm:9.9.5"
+  dependencies:
+    atomic-sleep: ^1.0.0
+    fast-redact: ^3.1.1
+    on-exit-leak-free: ^2.1.0
+    pino-abstract-transport: ^2.0.0
+    pino-std-serializers: ^7.0.0
+    process-warning: ^5.0.0
+    quick-format-unescaped: ^4.0.3
+    real-require: ^0.2.0
+    safe-stable-stringify: ^2.3.1
+    sonic-boom: ^4.0.1
+    thread-stream: ^3.0.0
+  bin:
+    pino: bin.js
+  checksum: 1d76091a8b7ec29a3497b8e318da2856dfebc92d5247c270014f4f769011602a55568a0b47cfbbe4c290d0bc2a47eb0881bec86622ac44cf2103a4eb6972c2a6
+  languageName: node
+  linkType: hard
+
 "pirates@npm:^4.0.4":
   version: 4.0.5
   resolution: "pirates@npm:4.0.5"
@@ -18632,6 +18750,13 @@ __metadata:
   version: 1.0.0
   resolution: "process-warning@npm:1.0.0"
   checksum: c708a03241deec3cabaeee39c4f9ee8c4d71f1c5ef9b746c8252cdb952a6059068cfcdaf348399775244cbc441b6ae5e26a9c87ed371f88335d84f26d19180f9
+  languageName: node
+  linkType: hard
+
+"process-warning@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "process-warning@npm:5.0.0"
+  checksum: 99bce32133a67d45f3efff1202d0895548da3464501ad2acf6ad6d5f6a879b246868f2f382ff8a5872e2bb17b0d800dc1961885947ea9b3344db9cb91405cd88
   languageName: node
   linkType: hard
 
@@ -20160,6 +20285,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sonic-boom@npm:^4.0.1":
+  version: 4.2.0
+  resolution: "sonic-boom@npm:4.2.0"
+  dependencies:
+    atomic-sleep: ^1.0.0
+  checksum: e5e1ffdd3bcb0dee3bf6f7b2ff50dd3ffa2df864dc9d53463f33e225021a28601e91d0ec7e932739824bafd6f4ff3b7090939ac3e34ab1022e01692b41f7e8a3
+  languageName: node
+  linkType: hard
+
 "sort-keys@npm:^2.0.0":
   version: 2.0.0
   resolution: "sort-keys@npm:2.0.0"
@@ -21026,6 +21160,15 @@ __metadata:
   peerDependencies:
     tslib: ^2
   checksum: e73e4bc96aefc41e4f1fdd1cf65eb988c9837f3b5fcd8a472ee30d91c2f7fa9b144562d6b4c5dade6ce70bc5865caf3e869f6d2975cce064b1d81dac3ece3508
+  languageName: node
+  linkType: hard
+
+"thread-stream@npm:^3.0.0":
+  version: 3.1.0
+  resolution: "thread-stream@npm:3.1.0"
+  dependencies:
+    real-require: ^0.2.0
+  checksum: 3c5b494ce776f832dfd696792cc865f78c1e850db93e07979349bbc1a5845857cd447aea95808892906cc0178a2fd3233907329f3376e7fc9951e2833f5b7896
   languageName: node
   linkType: hard
 
