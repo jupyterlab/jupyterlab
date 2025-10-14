@@ -17,7 +17,7 @@ jobs:
         python-version: [3.12]
         include:
           - group: python
-            python-version: 3.13
+            python-version: 3.14
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest
