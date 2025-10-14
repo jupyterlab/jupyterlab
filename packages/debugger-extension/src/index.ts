@@ -1517,8 +1517,8 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     });
 
     app.commands.addCommand(CommandIDs.evaluate, {
-      label: trans.__('Evaluate Code'),
-      caption: trans.__('Evaluate Code'),
+      label: trans.__('Open Debugger Console'),
+      caption: trans.__('Open Debugger Console'),
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => !!service.session?.isStarted,
       execute: async () => {
@@ -1568,7 +1568,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
   description: 'Debugger meu.',
   autoStart: true,
   requires: [IDebugger, IMainMenu, ITranslator],
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     mainMenu: IMainMenu,
@@ -1633,6 +1633,20 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    app.commands.addCommand(Debugger.CommandIDs.clearAllBreakpoints, {
+      label: trans.__('Clear All Breakpoints'),
+      caption: trans.__('Clear All Breakpoints'),
+      execute: () => {
+        debug.clearBreakpoints();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     const menu = new Menu({ commands: app.commands });
     menu.title.label = 'Debug';
 
@@ -1667,9 +1681,21 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       command: Debugger.CommandIDs.stepOut
     });
     menu.addItem({
+      command: Debugger.CommandIDs.debugContinue
+    });
+    menu.addItem({
       type: 'separator'
     });
-
+    menu.addItem({ command: Debugger.CommandIDs.clearAllBreakpoints });
+    menu.addItem({
+      type: 'separator'
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.evaluate
+    });
+    menu.addItem({
+      type: 'separator'
+    });
     menu.addItem({
       type: 'submenu',
       submenu: subMenu
