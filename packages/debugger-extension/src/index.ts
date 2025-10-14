@@ -335,9 +335,9 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     });
 
     const trans = translator.load('jupyterlab');
-    app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
-      label: trans.__('Restart Kernel and Debug…'),
-      caption: trans.__('Restart Kernel and Debug…'),
+    app.commands.addCommand(Debugger.CommandIDs.restartAndDebug, {
+      label: trans.__('Restart Kernel and Debug'),
+      caption: trans.__('Restart Kernel and Debug'),
       isEnabled: () => service.isStarted,
       describedBy: {
         args: {
@@ -404,7 +404,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     if (palette) {
       palette.addItem({
         category: 'Notebook Operations',
-        command: Debugger.CommandIDs.restartDebug
+        command: Debugger.CommandIDs.restartAndDebug
       });
     }
 
@@ -1570,16 +1570,20 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:debug-menu',
   description: 'Debugger meu.',
   autoStart: true,
-  requires: [IDebugger, IMainMenu, ITranslator],
+  requires: [IDebugger, IMainMenu, ITranslator, INotebookTracker],
+  optional: [ISessionContextDialogs],
   activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     mainMenu: IMainMenu,
-
-    translator: ITranslator
+    translator: ITranslator,
+    notebookTracker: INotebookTracker,
+    sessionDialogs_: ISessionContextDialogs | null
   ) => {
     console.log('@jupyterlab/debugger-extension:debug-menu loadedddd');
     const trans = translator.load('jupyterlab');
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
     // start debugger
     // run without debugging
@@ -1650,6 +1654,63 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    // Notebook actions wrappers
+    app.commands.addCommand(Debugger.CommandIDs.runCells, {
+      label: trans.__('Run All Cells'),
+      caption: trans.__('Run All Cells'),
+      execute: async () => {
+        const widget = notebookTracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const { content, sessionContext } = widget;
+
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    app.commands.addCommand(Debugger.CommandIDs.restartAndRunAll, {
+      label: trans.__('Restart Kernel and Run Without Debugging'),
+      caption: trans.__('Restart Kernel and Run Without Debugging'),
+      execute: async () => {
+        const widget = notebookTracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const { content, sessionContext } = widget;
+        const restarted = await sessionDialogs.restart(sessionContext);
+        if (!restarted) {
+          return;
+        }
+
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     const menu = new Menu({ commands: app.commands });
     menu.title.label = 'Debug';
 
@@ -1666,10 +1727,16 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     });
 
     menu.addItem({
-      command: Debugger.CommandIDs.restartDebug
+      command: Debugger.CommandIDs.runCells
     });
     menu.addItem({
       command: Debugger.CommandIDs.terminate
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.restartAndDebug
+    });
+    menu.addItem({
+      command: Debugger.CommandIDs.restartAndRunAll
     });
     menu.addItem({
       type: 'separator'
