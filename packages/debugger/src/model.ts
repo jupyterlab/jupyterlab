@@ -31,6 +31,11 @@ export const variableViewOptions = {
   allCaps: {
     label: 'All Uppercase',
     filter: (variable: IDebugger.IVariable) => !variable.name.match(/^[A-Z_]+$/)
+  },
+  capitalized: {
+    label: 'Capitalized',
+    filter: (variable: IDebugger.IVariable) =>
+      !variable.name.match(/^[A-Z]/) || variable.name.match(/^[A-Z_]+$/)
   }
 } as const;
 
