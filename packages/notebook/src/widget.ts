@@ -925,7 +925,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
+        if (
+          ['defer', 'full', 'contentVisibility'].includes(
+            this.notebookConfig.windowingMode
+          )
+        ) {
           await this._updateForDeferMode(cell, cellIdx);
           if (this.notebookConfig.windowingMode === 'full') {
             // We need to delay slightly the removal to let codemirror properly initialize
@@ -1054,11 +1058,15 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     const estHeight = this._viewModel.estimateWidgetSize(index);
 
-    // Delay applying content-visibility for cells
-    // (handles early CodeMirror editor initialization cases, e.g. in Firefox)
     requestAnimationFrame(() => {
       cell.toggleClass('jp-content-visibility', true);
       cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+
+      // Update height estimate in the view model
+      this.viewModel.setEstimatedWidgetSize(
+        cell.model.id,
+        cell.node.getBoundingClientRect().height
+      );
     });
   }
 
