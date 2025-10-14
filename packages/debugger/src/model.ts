@@ -41,6 +41,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
 
     // Initialize variable view options with default values
     this._variableViewOptions.set('module', true);
+    this._variableViewOptions.set('private', true);
   }
 
   /**

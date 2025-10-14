@@ -1600,35 +1600,53 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     const localCommandIdsForNow = { toggleModules: 'debugger:toggle-modules' };
 
     app.commands.addCommand(localCommandIdsForNow.toggleModules, {
-      label: trans.__('Display Modules'),
-      caption: trans.__('Display Modules'),
+      // TODO don't cast this, do it right
+      label: args => trans.__(args.label ? String(args.label) : 'woops'),
+      caption: args => trans.__(args.label ? String(args.label) : 'woops'),
       icon: Debugger.Icons.evaluateIcon,
       // isEnabled: () => !!debug.session?.isStarted,
-      isToggled: () => {
-        console.log(
-          'debug.model.variableViewOptions.get("displayModules")',
-          debug.model.variableViewOptions.get('module')
-        );
-        return !!debug.model.variableViewOptions.get('module');
+      isToggled: args => {
+        return !!debug.model.variableViewOptions.get(args.option as string);
       },
-      execute: async () => {
+      execute: async args => {
+        console.log('args', args);
+        const { option } = args as { option: string };
+
         const options = debug.model.variableViewOptions;
         const newOptions = new Map(options);
-        newOptions.set('module', !options.get('module'));
+        newOptions.set(option, !options.get(option));
         debug.model.variableViewOptions = newOptions;
         app.commands.notifyCommandChanged(localCommandIdsForNow.toggleModules);
       },
       describedBy: {
         args: {
           type: 'object',
-          properties: {}
+          properties: {
+            label: {
+              type: 'string',
+              description: trans.__('The text displayed for the menu option')
+            },
+            option: {
+              type: 'string',
+              description: trans.__('The view option to be toggled')
+            }
+          },
+          required: ['label, option']
         }
       }
     });
 
     const menu = new Menu({ commands: app.commands });
     const subMenu = new Menu({ commands: app.commands });
-    subMenu.addItem({ command: localCommandIdsForNow.toggleModules });
+    subMenu.addItem({
+      command: localCommandIdsForNow.toggleModules,
+      args: { label: 'Hide Modules', option: 'module' }
+    });
+
+    subMenu.addItem({
+      command: localCommandIdsForNow.toggleModules,
+      args: { label: 'Hide Privates', option: 'private' }
+    });
 
     menu.title.label = 'Debug';
     menu.addItem({
