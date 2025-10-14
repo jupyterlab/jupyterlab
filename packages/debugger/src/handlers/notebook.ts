@@ -50,14 +50,14 @@ export class NotebookHandler implements IDisposable {
       }
 
       if (event.event === 'stopped') {
-        this._pausedOverlay.show();
+        void this._pausedOverlay.show();
       } else if (event.event === 'continued') {
-        this._pausedOverlay.hide();
+        void this._pausedOverlay.hide();
       }
     });
 
     if (this._debuggerService.hasStoppedThreads() === true) {
-      this._pausedOverlay.show();
+      void this._pausedOverlay.show();
     }
 
     this._onCellsChanged();

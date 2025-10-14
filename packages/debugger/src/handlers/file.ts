@@ -58,14 +58,14 @@ export class FileHandler implements IDisposable {
       }
 
       if (event.event === 'stopped') {
-        this._pausedOverlay.show();
+        void this._pausedOverlay.show();
       } else if (event.event === 'continued') {
-        this._pausedOverlay.hide();
+        void this._pausedOverlay.hide();
       }
     });
 
     if (this._debuggerService.hasStoppedThreads()) {
-      this._pausedOverlay.show();
+      void this._pausedOverlay.show();
     }
   }
 
@@ -83,7 +83,7 @@ export class FileHandler implements IDisposable {
     }
     this.isDisposed = true;
 
-    this._pausedOverlay.dispose();
+    void this._pausedOverlay.dispose();
 
     this._editorHandler?.dispose();
     // Restore editor options
