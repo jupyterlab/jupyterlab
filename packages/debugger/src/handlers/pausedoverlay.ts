@@ -53,7 +53,7 @@ export class DebuggerPausedOverlay implements IDisposable {
   /**
    * Show the overlay, if enabled by user settings.
    */
-  async show(): Promise<void> {
+  show(): void {
     if (this._isDisposed) {
       return;
     }
