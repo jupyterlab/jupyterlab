@@ -155,26 +155,6 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Get all breadcrumb elements that can be drop targets.
-   */
-  private _getBreadcrumbElements(): HTMLElement[] {
-    const elements: HTMLElement[] = [];
-    const children = this.node.children;
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i] as HTMLElement;
-      if (
-        (child.classList.contains(BREADCRUMB_ITEM_CLASS) ||
-          child.classList.contains(BREADCRUMB_ROOT_CLASS) ||
-          child.classList.contains(BREADCRUMB_PREFERRED_CLASS)) &&
-        !child.classList.contains(BREADCRUMB_ELLIPSIS_CLASS)
-      ) {
-        elements.push(child);
-      }
-    }
-    return elements;
-  }
-
-  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -252,17 +232,19 @@ export class BreadCrumbs extends Widget {
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
-        let destination: string;
+        let destination: string | undefined;
         if (node.classList.contains(BREADCRUMB_ROOT_CLASS)) {
           destination = '/';
         } else {
-          destination = `/${node.title}`;
+          destination = node.dataset.path;
         }
-        this._model
-          .cd(destination)
-          .catch(error =>
-            showErrorMessage(this._trans.__('Open Error'), error)
-          );
+        if (destination) {
+          this._model
+            .cd(destination)
+            .catch(error =>
+              showErrorMessage(this._trans.__('Open Error'), error)
+            );
+        }
 
         // Stop the event propagation.
         event.preventDefault();
@@ -288,7 +270,7 @@ export class BreadCrumbs extends Widget {
         const currentPath = this._model.manager.services.contents.localPath(
           this._model.path
         );
-        if (hitElement.title !== currentPath) {
+        if (hitElement.dataset.path !== currentPath) {
           hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
@@ -359,8 +341,8 @@ export class BreadCrumbs extends Widget {
     } else if (target.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
       const preferredPath = PageConfig.getOption('preferredPath');
       destinationPath = preferredPath ? '/' + preferredPath : '/';
-    } else if (target.title) {
-      destinationPath = target.title;
+    } else if (target.dataset.path) {
+      destinationPath = target.dataset.path;
     }
 
     if (!destinationPath) {
@@ -381,6 +363,26 @@ export class BreadCrumbs extends Widget {
     void Promise.all(promises).catch(err => {
       return showErrorMessage(this._trans.__('Move Error'), err);
     });
+  }
+
+  /**
+   * Get all breadcrumb elements that can be drop targets.
+   */
+  private _getBreadcrumbElements(): HTMLElement[] {
+    const elements: HTMLElement[] = [];
+    const children = this.node.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      if (
+        (child.classList.contains(BREADCRUMB_ITEM_CLASS) ||
+          child.classList.contains(BREADCRUMB_ROOT_CLASS) ||
+          child.classList.contains(BREADCRUMB_PREFERRED_CLASS)) &&
+        !child.classList.contains(BREADCRUMB_ELLIPSIS_CLASS)
+      ) {
+        elements.push(child);
+      }
+    }
+    return elements;
   }
 
   protected translator: ITranslator;
@@ -440,8 +442,6 @@ namespace Private {
   export enum Crumb {
     Home,
     Ellipsis,
-    Parent,
-    Current,
     Preferred
   }
 
@@ -548,6 +548,7 @@ namespace Private {
     elem.className = BREADCRUMB_ITEM_CLASS;
     elem.textContent = pathPart;
     elem.title = fullPath;
+    elem.dataset.path = fullPath;
     return elem;
   }
 
@@ -561,15 +562,14 @@ namespace Private {
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
       stylesheet: 'breadCrumb'
     });
+    home.dataset.path = '/';
+
     const ellipsis = ellipsesIcon.element({
       className: `${BREADCRUMB_ITEM_CLASS} ${BREADCRUMB_ELLIPSIS_CLASS}`,
       tag: 'span',
       stylesheet: 'breadCrumb'
     });
-    const parent = document.createElement('span');
-    parent.className = BREADCRUMB_ITEM_CLASS;
-    const current = document.createElement('span');
-    current.className = BREADCRUMB_ITEM_CLASS;
+
     const preferredPath = PageConfig.getOption('preferredPath');
     const path = preferredPath ? '/' + preferredPath : preferredPath;
     const preferred = preferredIcon.element({
@@ -578,7 +578,9 @@ namespace Private {
       title: path || 'Jupyter Preferred Path',
       stylesheet: 'breadCrumb'
     });
-    return [home, ellipsis, parent, current, preferred];
+    preferred.dataset.path = path || '/';
+
+    return [home, ellipsis, preferred];
   }
 
   /**
