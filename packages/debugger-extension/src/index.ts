@@ -789,7 +789,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           });
         });
 
-      openOrRevealSourceInMainArea(frame);
+      void openOrRevealSourceInMainArea(frame);
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
