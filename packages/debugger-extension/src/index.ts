@@ -1594,26 +1594,26 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     // enable all bp
     // disable all bp
     // clear bps
-    const localCommandIdsForNow = { toggleModules: 'debugger:toggle-modules' };
-
-    app.commands.addCommand(localCommandIdsForNow.toggleModules, {
-      // TODO don't cast this, do it right
-      label: args => trans.__(args.label ? String(args.label) : 'woops'),
-      caption: args => trans.__(args.label ? String(args.label) : 'woops'),
-      icon: Debugger.Icons.evaluateIcon,
+    app.commands.addCommand(Debugger.CommandIDs.setVariablesViewOptions, {
+      // TODO I think casting here is ok?
+      label: args => trans.__(args.label as string),
+      caption: args => trans.__(args.label as string),
       // isEnabled: () => !!debug.session?.isStarted,
       isToggled: args => {
         return !!debug.model.variableViewOptions.get(args.option as string);
       },
       execute: async args => {
-        console.log('args', args);
         const { option } = args as { option: string };
 
         const options = debug.model.variableViewOptions;
         const newOptions = new Map(options);
+
         newOptions.set(option, !options.get(option));
         debug.model.variableViewOptions = newOptions;
-        app.commands.notifyCommandChanged(localCommandIdsForNow.toggleModules);
+
+        app.commands.notifyCommandChanged(
+          Debugger.CommandIDs.setVariablesViewOptions
+        );
       },
       describedBy: {
         args: {
@@ -1625,7 +1625,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
             },
             option: {
               type: 'string',
-              description: trans.__('The view option to be toggled')
+              description: trans.__('The variable view option to be toggled')
             }
           },
           required: ['label, option']
@@ -1634,18 +1634,20 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     });
 
     const menu = new Menu({ commands: app.commands });
+    menu.title.label = 'Debug';
+
     const subMenu = new Menu({ commands: app.commands });
-    subMenu.addItem({
-      command: localCommandIdsForNow.toggleModules,
-      args: { label: 'Hide Modules', option: 'module' }
-    });
+    subMenu.title.label = 'Filter Variables';
 
     subMenu.addItem({
-      command: localCommandIdsForNow.toggleModules,
+      command: Debugger.CommandIDs.setVariablesViewOptions,
+      args: { label: 'Hide Modules', option: 'module' }
+    });
+    subMenu.addItem({
+      command: Debugger.CommandIDs.setVariablesViewOptions,
       args: { label: 'Hide Privates', option: 'private' }
     });
 
-    menu.title.label = 'Debug';
     menu.addItem({
       command: Debugger.CommandIDs.restartDebug
     });
@@ -1667,11 +1669,6 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     menu.addItem({
       type: 'separator'
     });
-
-    subMenu.addItem({
-      command: Debugger.CommandIDs.restartDebug
-    });
-    subMenu.title.label = 'View stuff';
 
     menu.addItem({
       type: 'submenu',
