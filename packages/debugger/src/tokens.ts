@@ -18,7 +18,6 @@ import { Panel } from '@lumino/widgets';
 import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
-import { ViewOptions } from './model';
 
 import { IDebuggerSourceDisplayProvider } from './displayregistry';
 
@@ -999,12 +998,9 @@ export namespace IDebugger {
        */
       clear(): void;
 
-      variableViewOptions: Map<ViewOptions, boolean>;
+      variableViewOptions: Map<string, boolean>;
 
-      readonly variableViewOptionsChanged: ISignal<
-        this,
-        Map<ViewOptions, boolean>
-      >;
+      readonly variableViewOptionsChanged: ISignal<this, Map<string, boolean>>;
     }
 
     /**

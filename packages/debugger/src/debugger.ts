@@ -134,6 +134,9 @@ export namespace Debugger {
     export const executeConsole = 'debugger:run-in-console';
 
     export const openSource = 'debugger:open-source';
+
+    export const setVariablesViewOptions = 'debugger:variables-view-options';
+
   }
 
   /**
