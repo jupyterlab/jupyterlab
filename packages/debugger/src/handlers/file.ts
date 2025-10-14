@@ -83,7 +83,7 @@ export class FileHandler implements IDisposable {
     }
     this.isDisposed = true;
 
-    void this._pausedOverlay.dispose();
+    this._pausedOverlay.dispose();
 
     this._editorHandler?.dispose();
     // Restore editor options
