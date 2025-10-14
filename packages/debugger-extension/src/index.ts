@@ -788,7 +788,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
             });
           });
         });
-      openOrRevealSourceInMainArea();
+
+      openOrRevealSourceInMainArea(frame);
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
@@ -846,18 +847,15 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
     };
 
-    async function openOrRevealSourceInMainArea() {
-      const frame = service.model.callstack.frame;
-      if (frame) {
-        try {
-          const source = await service.getSource({ path: frame.source?.path });
-          if (source) {
-            openSource(source);
-          }
-        } catch (error) {
-          console.error('Failed to fetch source:', error);
+    async function openOrRevealSourceInMainArea(frame: IDebugger.IStackFrame) {
+      try {
+        const source = await service.getSource({ path: frame.source?.path });
+        if (source) {
+          openSource(source);
         }
-      } else return;
+      } catch (error) {
+        console.error('Failed to fetch source:', error);
+      }
     }
 
     const trans = translator.load('jupyterlab');
