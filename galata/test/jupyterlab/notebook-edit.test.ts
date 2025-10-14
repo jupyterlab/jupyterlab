@@ -48,19 +48,19 @@ test.describe('Notebook Edit', () => {
     const cell = await page.notebook.getCellLocator(1);
     const image = cell!.locator('img');
     const link = cell!.locator('a');
-    expect(link).toHaveCount(0);
-    expect(image).toHaveCount(1);
+    await expect(link).toHaveCount(0);
+    await expect(image).toHaveCount(1);
 
     // Edit and re-render the cell
     await page.notebook.setCell(1, 'markdown', '[link](https://jupyter.org)');
     await page.notebook.runCell(1, true);
 
     // There should be a link but not an image
-    expect(link).toHaveCount(1);
-    expect(image).toHaveCount(0);
+    await expect(link).toHaveCount(1);
+    await expect(image).toHaveCount(0);
 
     // Double-check we see the right link
-    expect(link).toContainText('link');
+    await expect(link).toContainText('link');
   });
 
   test('Cut from code and paste into a Markdown cell', async ({ page }) => {
@@ -71,8 +71,8 @@ test.describe('Notebook Edit', () => {
     const codeCell = await page.notebook.getCellLocator(1);
     const markdownCell = await page.notebook.getCellLocator(2);
 
-    expect(codeCell!).toContainText(text);
-    expect(markdownCell!).not.toContainText(text);
+    await expect(codeCell!).toContainText(text);
+    await expect(markdownCell!).not.toContainText(text);
 
     // Cut from the code cell
     await page.notebook.enterCellEditingMode(1);
@@ -83,8 +83,8 @@ test.describe('Notebook Edit', () => {
     await page.notebook.enterCellEditingMode(2);
     await page.keyboard.press('Control+KeyV');
 
-    expect(codeCell!).not.toContainText(text);
-    expect(markdownCell!).toContainText(text);
+    await expect(codeCell!).not.toContainText(text);
+    await expect(markdownCell!).toContainText(text);
   });
 
   test('Execute again', async ({ page }) => {
