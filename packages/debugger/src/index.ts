@@ -7,6 +7,8 @@
 
 export { Debugger } from './debugger';
 
+export { variableViewOptions } from './model';
+
 export {
   IDebugger,
   IDebuggerConfig,
