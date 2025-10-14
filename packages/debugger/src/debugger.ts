@@ -137,6 +137,9 @@ export namespace Debugger {
 
     export const setVariablesViewOptions = 'debugger:variables-view-options';
 
+    export const clearAllBreakpoints = 'debugger:clear-all-breakpoints';
+
+
   }
 
   /**
