@@ -1701,10 +1701,10 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     const subMenu = new Menu({ commands: app.commands });
     subMenu.title.label = 'Filter Variables';
 
-    variableViewOptions.forEach(viewOption => {
+    Object.entries(variableViewOptions).forEach(([key, val]) => {
       subMenu.addItem({
         command: Debugger.CommandIDs.setVariablesViewOptions,
-        args: { label: `Hide ${viewOption.label}`, option: viewOption.option }
+        args: { label: `Hide ${val.label}`, option: key }
       });
     });
 

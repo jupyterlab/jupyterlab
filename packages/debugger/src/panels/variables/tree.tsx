@@ -27,11 +27,7 @@ import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
 
-const filters = {
-  module: (variable: IDebugger.IVariable) => variable.type !== 'module',
-  private: (variable: IDebugger.IVariable) =>
-    !variable.name.startsWith('_') && !variable.name.startsWith('__')
-};
+import { VariableViewOptionKey, variableViewOptions } from '../../model';
 
 /**
  * The body for tree of variables.
@@ -68,7 +64,8 @@ export class VariablesBodyTree extends ReactWidget {
     let filteredVariables = variables;
     for (const [key, enabled] of this._service.model.variableViewOptions) {
       if (enabled) {
-        const viewFilter = filters[key as keyof typeof filters];
+        const viewFilter =
+          variableViewOptions[key as VariableViewOptionKey]?.filter;
         if (viewFilter) {
           filteredVariables = filteredVariables.filter(viewFilter);
         }
