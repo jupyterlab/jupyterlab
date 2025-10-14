@@ -2176,7 +2176,22 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "label": {
+          "type": "string",
+          "default": "New File",
+          "description": "The command label."
+        },
+        "iconName": {
+          "type": "string",
+          "description": "The command icon."
+        },
+        "ext": {
+          "type": "string",
+          "default": "txt",
+          "description": "The file extension."
+        }
+      }
     }
   },
   {
@@ -4719,16 +4734,11 @@
   {
     "id": "notebook:toggle-virtual-scrollbar",
     "label": "Show Minimap",
-    "caption": "Show Minimap (virtual scrollbar, enabled with windowing mode: full)",
+    "caption": "Show Minimap",
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {
-        "toolbar": {
-          "type": "boolean",
-          "description": "Whether the command is called from toolbar"
-        }
-      }
+      "properties": {}
     }
   },
   {
@@ -5510,6 +5520,16 @@
     "id": "viewmenu:open",
     "label": "Open View Menu",
     "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "viewmenu:show-minimap",
+    "label": "Show Minimap",
+    "caption": "Show Minimap",
     "shortcuts": [],
     "args": {
       "type": "object",

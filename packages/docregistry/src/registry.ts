@@ -969,7 +969,7 @@ export namespace DocumentRegistry {
     /**
      * Save the document to a different path chosen by the user.
      */
-    saveAs(): Promise<void>;
+    saveAs(): Promise<boolean>;
 
     /**
      * Save the document to a different path chosen by the user.

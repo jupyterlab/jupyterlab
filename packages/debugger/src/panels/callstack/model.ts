@@ -4,14 +4,22 @@
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
+import { isCodeCellModel } from '@jupyterlab/cells';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
+  constructor(options: CallstackModel.IOptions) {
+    this._config = options.config;
+    this._notebookTracker = options.notebookTracker ?? null;
+  }
+
   /**
    * Get all the frames.
    */
+
   get frames(): IDebugger.IStackFrame[] {
     return this._state;
   }
@@ -63,12 +71,69 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
     return this._currentFrameChanged;
   }
 
+  /**
+   * Returns a human-readable display for a frame.
+   */
+  getDisplayName(frame: IDebugger.IStackFrame): string {
+    if (!this._notebookTracker || !this._config) {
+      return frame.source?.path ?? '';
+    }
+
+    let display = frame.source?.path ?? '';
+
+    this._notebookTracker.forEach(panel => {
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+      panel.content.widgets.forEach(cell => {
+        if (cell.model.type !== 'code') return;
+
+        const code = cell.model.sharedModel.getSource();
+        const codeId = this._config.getCodeId(code, kernelName);
+
+        if (codeId && codeId === frame.source?.path) {
+          if (isCodeCellModel(cell.model)) {
+            if (cell.model.executionState === 'running') {
+              display = `Cell [*]`;
+            } else if (cell.model.executionCount === null) {
+              display = `Cell [ ]`;
+            } else {
+              display = `Cell [${cell.model.executionCount}]`;
+            }
+          }
+        }
+      });
+    });
+
+    return display;
+  }
+
+  private _config: IDebugger.IConfig;
+  private _notebookTracker: INotebookTracker | null;
   private _state: IDebugger.IStackFrame[] = [];
   private _currentFrame: IDebugger.IStackFrame | null = null;
   private _framesChanged = new Signal<this, IDebugger.IStackFrame[]>(this);
   private _currentFrameChanged = new Signal<this, IDebugger.IStackFrame | null>(
     this
   );
+}
+
+/**
+ * A namespace for CallstackModel
+ */
+export namespace CallstackModel {
+  /**
+   * Instantiation options for CallstackModel
+   */
+  export interface IOptions {
+    /**
+     * Debugger configuration.
+     */
+    config: IDebugger.IConfig;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker: INotebookTracker | null;
+  }
 }
 
 /**
