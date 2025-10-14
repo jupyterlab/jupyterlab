@@ -507,6 +507,7 @@ namespace Private {
             ? parts.slice(0, hiddenEndIndex).join('/')
             : parts.slice(0, minimumLeftItems).join('/');
         breadcrumbs[Crumb.Ellipsis].title = hiddenPath;
+        breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
         node.appendChild(separators[separatorIndex++]);
 
         // Add right items
