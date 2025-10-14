@@ -233,7 +233,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds commands and settings to the document manager.',
   autoStart: true,
   requires: [IDocumentManager, IDocumentWidgetOpener, ISettingRegistry],
-  optional: [ITranslator, ICommandPalette, ILabShell],
+  optional: [ITranslator, ICommandPalette, ILabShell, IDocumentManagerDialogs],
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
@@ -241,7 +241,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry,
     translator: ITranslator | null,
     palette: ICommandPalette | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    dialogs: IDocumentManagerDialogs | null
   ): void => {
     translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
@@ -255,7 +256,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       settingRegistry,
       translator,
       labShell,
-      palette
+      palette,
+      dialogs
     );
 
     // Keep up to date with the settings registry.
@@ -697,7 +699,8 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   labShell: ILabShell | null,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  dialogs: IDocumentManagerDialogs | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -722,10 +725,19 @@ function addCommands(
       { autoClose: 5000 }
     );
   };
-
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    addLabCommands(app, docManager, labShell, widgetOpener, translator);
+    if (!dialogs) {
+      dialogs = new DocumentManagerDialogs({ translator: translator });
+    }
+    addLabCommands(
+      app,
+      docManager,
+      labShell,
+      widgetOpener,
+      translator,
+      dialogs
+    );
   }
 
   commands.addCommand(CommandIDs.deleteFile, {
@@ -1275,7 +1287,8 @@ function addLabCommands(
   docManager: IDocumentManager,
   labShell: ILabShell,
   widgetOpener: IDocumentWidgetOpener,
-  translator: ITranslator
+  translator: ITranslator,
+  dialogs: IDocumentManagerDialogs
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -1344,7 +1357,7 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return renameDialog(docManager, context!);
+        return dialogs?.rename(context!);
       }
     },
     describedBy: {

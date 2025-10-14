@@ -12,7 +12,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IDocumentManagerDialogs, IRecentsManager } from './tokens';
-import { DocumentManagerDialogs } from '.';
+import { DocumentManagerDialogs } from './dialogs';
 
 /**
  * The class name added to document widgets.

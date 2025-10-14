@@ -26,7 +26,7 @@ import {
   IRecentsManager
 } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
-import { DocumentManagerDialogs } from '.';
+import { DocumentManagerDialogs } from './dialogs';
 
 /**
  * The document manager.

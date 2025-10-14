@@ -180,9 +180,10 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
 
   private _translator: ITranslator;
 }
-
 /**
  * Rename a file with a dialog.
+ *
+ * @deprecated You should use {@link DocumentManagerDialogs.rename}
  */
 export function renameDialog(
   manager: IDocumentManager,
