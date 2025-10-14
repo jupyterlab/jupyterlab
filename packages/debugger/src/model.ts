@@ -18,11 +18,23 @@ import { IDebuggerDisplayRegistry } from './tokens';
 import { DebuggerDisplayRegistry } from './displayregistry';
 
 // TODO this should probably be somewhere else
-export const variableViewOptions = [
-  { label: 'Modules', option: 'module' },
-  { label: 'Privates', option: 'private' },
-  { label: 'All Uppercase', option: 'allCaps' }
-];
+export const variableViewOptions = {
+  module: {
+    label: 'Modules',
+    filter: (variable: IDebugger.IVariable) => variable.type !== 'module'
+  },
+  private: {
+    label: 'Privates',
+    filter: (variable: IDebugger.IVariable) =>
+      !variable.name.startsWith('_') && !variable.name.startsWith('__')
+  },
+  allCaps: {
+    label: 'All Uppercase',
+    filter: (variable: IDebugger.IVariable) => !variable.name.match(/^[A-Z_]+$/)
+  }
+} as const;
+
+export type VariableViewOptionKey = keyof typeof variableViewOptions;
 
 /**
  * A model for a debugger.
@@ -48,8 +60,8 @@ export class DebuggerModel implements IDebugger.Model.IService {
 
     // Initialize variable view options with default values
     // TODO save this in settings/statedb?
-    variableViewOptions.forEach(option => {
-      this._variableViewOptions.set(option.option, false);
+    Object.keys(variableViewOptions).forEach(key => {
+      this._variableViewOptions.set(key, false);
     });
   }
 
