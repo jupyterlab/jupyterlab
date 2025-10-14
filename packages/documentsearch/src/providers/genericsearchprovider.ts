@@ -334,13 +334,10 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         markedNode.classList.add(...FOUND_CLASSES);
         markedNode.textContent = match.text;
 
-        const spanNode = document.createElement('span');
-        spanNode.appendChild(markedNode);
-
         const newNode = activeNode.splitText(match.position);
         newNode.textContent = newNode.textContent!.slice(match.text.length);
-        parent.insertBefore(spanNode, newNode);
-        return spanNode;
+        parent.insertBefore(markedNode, newNode);
+        return markedNode;
       });
 
       // Insert node in reverse order as we replace from last to first

@@ -41,65 +41,53 @@ describe('documentsearch/genericsearchprovider', () => {
 
     describe('#startQuery()', () => {
       it.each([
+        [/x/, '<pre>xyz</pre>', `<mark class="${MATCH_CLASSES}">x</mark>yz`],
+        [/y/, '<pre>xyz</pre>', `x<mark class="${MATCH_CLASSES}">y</mark>z`],
+        [/z/, '<pre>xyz</pre>', `xy<mark class="${MATCH_CLASSES}">z</mark>`],
         [
           /x/,
-          '<pre>xyz</pre>',
+          '<pre><span>x</span>yz</pre>',
           `<span><mark class="${MATCH_CLASSES}">x</mark></span>yz`
         ],
         [
           /y/,
-          '<pre>xyz</pre>',
+          '<pre><span>x</span>yz</pre>',
+          `<span>x</span><mark class="${MATCH_CLASSES}">y</mark>z`
+        ],
+        [
+          /z/,
+          '<pre><span>x</span>yz</pre>',
+          `<span>x</span>y<mark class="${MATCH_CLASSES}">z</mark>`
+        ],
+        [
+          /x/,
+          '<pre>x<span>y</span>z</pre>',
+          `<mark class="${MATCH_CLASSES}">x</mark><span>y</span>z`
+        ],
+        [
+          /y/,
+          '<pre>x<span>y</span>z</pre>',
           `x<span><mark class="${MATCH_CLASSES}">y</mark></span>z`
         ],
         [
           /z/,
-          '<pre>xyz</pre>',
+          '<pre>x<span>y</span>z</pre>',
+          `x<span>y</span><mark class="${MATCH_CLASSES}">z</mark>`
+        ],
+        [
+          /x/,
+          '<pre>xy<span>z</span></pre>',
+          `<mark class="${MATCH_CLASSES}">x</mark>y<span>z</span>`
+        ],
+        [
+          /y/,
+          '<pre>xy<span>z</span></pre>',
+          `x<mark class="${MATCH_CLASSES}">y</mark><span>z</span>`
+        ],
+        [
+          /z/,
+          '<pre>xy<span>z</span></pre>',
           `xy<span><mark class="${MATCH_CLASSES}">z</mark></span>`
-        ],
-        [
-          /x/,
-          '<pre><span>x</span>yz</pre>',
-          `<span><span><mark class="${MATCH_CLASSES}">x</mark></span></span>yz`
-        ],
-        [
-          /y/,
-          '<pre><span>x</span>yz</pre>',
-          `<span>x</span><span><mark class="${MATCH_CLASSES}">y</mark></span>z`
-        ],
-        [
-          /z/,
-          '<pre><span>x</span>yz</pre>',
-          `<span>x</span>y<span><mark class="${MATCH_CLASSES}">z</mark></span>`
-        ],
-        [
-          /x/,
-          '<pre>x<span>y</span>z</pre>',
-          `<span><mark class="${MATCH_CLASSES}">x</mark></span><span>y</span>z`
-        ],
-        [
-          /y/,
-          '<pre>x<span>y</span>z</pre>',
-          `x<span><span><mark class="${MATCH_CLASSES}">y</mark></span></span>z`
-        ],
-        [
-          /z/,
-          '<pre>x<span>y</span>z</pre>',
-          `x<span>y</span><span><mark class="${MATCH_CLASSES}">z</mark></span>`
-        ],
-        [
-          /x/,
-          '<pre>xy<span>z</span></pre>',
-          `<span><mark class="${MATCH_CLASSES}">x</mark></span>y<span>z</span>`
-        ],
-        [
-          /y/,
-          '<pre>xy<span>z</span></pre>',
-          `x<span><mark class="${MATCH_CLASSES}">y</mark></span><span>z</span>`
-        ],
-        [
-          /z/,
-          '<pre>xy<span>z</span></pre>',
-          `xy<span><span><mark class="${MATCH_CLASSES}">z</mark></span></span>`
         ]
       ])(
         'should highlight %s fragment in %s',
