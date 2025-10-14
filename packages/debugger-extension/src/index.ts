@@ -35,7 +35,8 @@ import {
   IDebuggerHandler,
   IDebuggerSidebar,
   IDebuggerSources,
-  IDebuggerSourceViewer
+  IDebuggerSourceViewer,
+  variableViewOptions
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -1585,24 +1586,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
-    // start debugger
-    // run without debugging
-    // stop debuggung - d
-    // restart debugger
-    // serperator - d
-    // step over - d
-    // into - d
-    // out - d
-    // continue
-    // seperator
-    // toggle breakpoint (current line)
-    // new breakpoint -> submenu
-    // sep
-    // enable all bp
-    // disable all bp
-    // clear bps
     app.commands.addCommand(Debugger.CommandIDs.setVariablesViewOptions, {
-      // TODO I think casting here is ok?
       label: args => trans.__(args.label as string),
       caption: args => trans.__(args.label as string),
       // isEnabled: () => !!debug.session?.isStarted,
@@ -1717,13 +1701,11 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     const subMenu = new Menu({ commands: app.commands });
     subMenu.title.label = 'Filter Variables';
 
-    subMenu.addItem({
-      command: Debugger.CommandIDs.setVariablesViewOptions,
-      args: { label: 'Hide Modules', option: 'module' }
-    });
-    subMenu.addItem({
-      command: Debugger.CommandIDs.setVariablesViewOptions,
-      args: { label: 'Hide Privates', option: 'private' }
+    variableViewOptions.forEach(viewOption => {
+      subMenu.addItem({
+        command: Debugger.CommandIDs.setVariablesViewOptions,
+        args: { label: `Hide ${viewOption.label}`, option: viewOption.option }
+      });
     });
 
     menu.addItem({

@@ -17,6 +17,13 @@ import { VariablesModel } from './panels/variables/model';
 import { IDebuggerDisplayRegistry } from './tokens';
 import { DebuggerDisplayRegistry } from './displayregistry';
 
+// TODO this should probably be somewhere else
+export const variableViewOptions = [
+  { label: 'Modules', option: 'module' },
+  { label: 'Privates', option: 'private' },
+  { label: 'All Uppercase', option: 'allCaps' }
+];
+
 /**
  * A model for a debugger.
  */
@@ -41,8 +48,9 @@ export class DebuggerModel implements IDebugger.Model.IService {
 
     // Initialize variable view options with default values
     // TODO save this in settings/statedb?
-    this._variableViewOptions.set('module', true);
-    this._variableViewOptions.set('private', true);
+    variableViewOptions.forEach(option => {
+      this._variableViewOptions.set(option.option, false);
+    });
   }
 
   /**
@@ -155,7 +163,6 @@ export class DebuggerModel implements IDebugger.Model.IService {
   }
 
   set variableViewOptions(options: Map<string, boolean>) {
-    // TODO do this better?
     this._variableViewOptions = options;
     this._variableViewOptionsChanged.emit(options);
   }
