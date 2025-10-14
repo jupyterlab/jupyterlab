@@ -36,7 +36,6 @@ import {
   IDocumentWidgetOpener,
   IRecentsManager,
   PathStatus,
-  renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
