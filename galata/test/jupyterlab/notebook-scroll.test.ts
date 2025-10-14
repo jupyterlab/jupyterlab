@@ -466,7 +466,7 @@ test.describe('Jump to execution button', () => {
     // Click and scroll to the first cell (currently executing)
     await jumpButton.click();
     const firstCell = await page.notebook.getCellLocator(0);
-    firstCell?.waitFor({ state: 'visible', timeout: 1000 });
+    await firstCell?.waitFor({ state: 'visible', timeout: 1000 });
 
     // Wait for all executions to complete
     await runPromise;
@@ -475,6 +475,6 @@ test.describe('Jump to execution button', () => {
     await indicator.hover();
     await jumpButton.click();
     const lastCell = await page.notebook.getCellLocator(3);
-    lastCell?.waitFor({ state: 'visible', timeout: 1000 });
+    await lastCell?.waitFor({ state: 'visible', timeout: 1000 });
   });
 });

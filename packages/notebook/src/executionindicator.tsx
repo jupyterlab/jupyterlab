@@ -92,7 +92,7 @@ export function ExecutionIndicatorComponent(
     const nb = props.notebook!;
     NotebookActions.selectLastRunCell(nb);
     if (nb.activeCell) {
-      nb.scrollToCell(nb.activeCell);
+      void nb.scrollToCell(nb.activeCell);
     }
   };
 
