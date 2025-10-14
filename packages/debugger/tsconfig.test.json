@@ -48,6 +48,9 @@
       "path": "../ui-components"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "."
     },
     {
