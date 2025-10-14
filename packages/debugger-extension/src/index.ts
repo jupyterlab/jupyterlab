@@ -864,59 +864,64 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     });
     const { model } = service;
 
-    const onCurrentFrameChanged = (
+    const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
-    ): void => {
-      debuggerSources
-        .find({
-          focus: true,
-          kernel: service.session?.connection?.kernel?.name ?? '',
-          path: service.session?.connection?.path ?? '',
-          source: frame?.source?.path ?? ''
-        })
-        .forEach(editor => {
-          requestAnimationFrame(() => {
-            void editor.reveal().then(() => {
-              const edit = editor.get();
-              if (edit) {
-                Debugger.EditorHandler.showCurrentLine(edit, frame.line);
-              }
-            });
-          });
-        });
-
-      void openOrRevealSourceInMainArea(frame);
+    ): Promise<void> => {
+      if (!service.isStarted || !frame?.source?.path) {
+        return;
+      }
+      try {
+        const source = await service.getSource({ path: frame.source?.path });
+        if (source) {
+          openSource(source, frame);
+        }
+      } catch (error) {
+        console.error('Failed to fetch source:', error);
+      }
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
     const openSource = (
       source: IDebugger.Source,
-      breakpoint?: IDebugger.IBreakpoint
+      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
     ): void => {
       if (!source) {
         return;
       }
       const { content, mimeType, path } = source;
-      const results = debuggerSources.find({
-        focus: true,
-        kernel: service.session?.connection?.kernel?.name ?? '',
-        path: service.session?.connection?.path ?? '',
-        source: path
-      });
-      if (results.length > 0) {
-        if (breakpoint && typeof breakpoint.line !== 'undefined') {
-          results.forEach(editor => {
-            void editor.reveal().then(() => {
-              editor.get()?.revealPosition({
-                line: (breakpoint.line as number) - 1,
-                column: breakpoint.column || 0
+      if (breakpointOrFrame) {
+        const results = debuggerSources.find({
+          focus: true,
+          kernel: service.session?.connection?.kernel?.name ?? '',
+          path: service.session?.connection?.path ?? '',
+          source: breakpointOrFrame?.source?.path ?? ''
+        });
+
+        if (results.length > 0) {
+          if (typeof breakpointOrFrame.line !== 'undefined') {
+            results.forEach(editor => {
+              requestAnimationFrame(() => {
+                void editor.reveal().then(() => {
+                  const edit = editor.get();
+                  if (edit) {
+                    edit.revealPosition({
+                      line: (breakpointOrFrame.line as number) - 1,
+                      column: breakpointOrFrame.column || 0
+                    });
+                    Debugger.EditorHandler.showCurrentLine(
+                      edit,
+                      breakpointOrFrame.line as number
+                    );
+                  }
+                });
               });
             });
-          });
+          }
+          return;
         }
-        return;
       }
+
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
         content,
         mimeType,
@@ -937,23 +942,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         caption: path,
         editorWrapper
       });
-
-      const frame = service.model.callstack.frame;
-      if (frame) {
-        Debugger.EditorHandler.showCurrentLine(editor, frame.line);
-      }
     };
-
-    async function openOrRevealSourceInMainArea(frame: IDebugger.IStackFrame) {
-      try {
-        const source = await service.getSource({ path: frame.source?.path });
-        if (source) {
-          openSource(source);
-        }
-      } catch (error) {
-        console.error('Failed to fetch source:', error);
-      }
-    }
 
     const trans = translator.load('jupyterlab');
 
