@@ -236,7 +236,7 @@ export class BreadCrumbs extends Widget {
         if (node.classList.contains(BREADCRUMB_ROOT_CLASS)) {
           destination = '/';
         } else {
-          destination = node.dataset.path;
+          destination = `/${node.dataset.path}`;
         }
         if (destination) {
           this._model
