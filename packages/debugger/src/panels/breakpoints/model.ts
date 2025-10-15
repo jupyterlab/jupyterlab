@@ -136,17 +136,11 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
     console.log(this._consoleTracker);
 
     this._consoleTracker?.forEach(panel => {
-      console.log('hsjs');
-
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach(cell => {
-        console.log(cell);
 
-        const model = cell?.model;
-
-        const code = model.sharedModel.getSource();
+      Array.from(panel.console.cells).forEach(cell => {
+        const code = cell.model.sharedModel.getSource();
         const codeId = this._config?.getCodeId(code, kernelName);
-
         console.log(
           codeId,
           breakpoint.source?.path,
@@ -154,15 +148,17 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
         );
 
         if (codeId && codeId === breakpoint.source?.path) {
-          const executionCount = model.executionCount ?? null;
-          const executionState = model.executionState ?? null;
+          if (isCodeCellModel(cell.model)) {
+            const executionCount = cell.model.executionCount ?? null;
+            const executionState = cell.model.executionState ?? null;
 
-          if (executionState === 'running') {
-            display = `In [*]`;
-          } else if (executionCount === null) {
-            display = `In [ ]`;
-          } else {
-            display = `In [${executionCount}]`;
+            if (executionState === 'running') {
+              display = `In [*]`;
+            } else if (executionCount === null) {
+              display = `In [ ]`;
+            } else {
+              display = `In [${executionCount}]`;
+            }
           }
         }
       });
