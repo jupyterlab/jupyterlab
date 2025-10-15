@@ -69,7 +69,10 @@
   "@jupyterlab/debugger-extension:config": "Provides the debugger configuration",
   "@jupyterlab/debugger-extension:consoles": "Add debugger capability to the consoles.",
   "@jupyterlab/debugger-extension:debug-console": "Debugger console to enable evaluation in debugger context.",
+<<<<<<< HEAD
   "@jupyterlab/debugger-extension:display-registry": "Provides the debugger display registry for cell/file display names.",
+=======
+>>>>>>> 1ebf7be006 (Update Playwright Snapshots)
   "@jupyterlab/debugger-extension:files": "Adds debugger capabilities to files.",
   "@jupyterlab/debugger-extension:main": "Initialize the debugger user interface.",
   "@jupyterlab/debugger-extension:notebooks": "Adds debugger capability to notebooks and provides the debugger notebook handler.",
