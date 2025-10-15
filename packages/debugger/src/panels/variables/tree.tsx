@@ -30,6 +30,25 @@ import { VariablesModel } from './model';
 import { VariableViewOptionKey, variableViewOptions } from '../../model';
 
 /**
+ * Filter variables based on variableViewOptions settings.
+ */
+function filterVariablesByViewOptions(
+  variables: IDebugger.IVariable[],
+  variableViewOptionsMap: Map<string, boolean>
+): IDebugger.IVariable[] {
+  let filteredVariables = variables;
+  for (const [key, enabled] of variableViewOptionsMap) {
+    if (enabled) {
+      const viewFilter = variableViewOptions[key as VariableViewOptionKey]?.filter;
+      if (viewFilter) {
+        filteredVariables = filteredVariables.filter(viewFilter);
+      }
+    }
+  }
+  return filteredVariables;
+}
+
+/**
  * The body for tree of variables.
  */
 export class VariablesBodyTree extends ReactWidget {
@@ -56,22 +75,14 @@ export class VariablesBodyTree extends ReactWidget {
 
   /**
    * Filter variables based on variableViewOptions settings.
-   * Excludes variables whose type has a corresponding false value in the options.
    */
   filterVariablesByViewOptions(
     variables: IDebugger.IVariable[]
   ): IDebugger.IVariable[] {
-    let filteredVariables = variables;
-    for (const [key, enabled] of this._service.model.variableViewOptions) {
-      if (enabled) {
-        const viewFilter =
-          variableViewOptions[key as VariableViewOptionKey]?.filter;
-        if (viewFilter) {
-          filteredVariables = filteredVariables.filter(viewFilter);
-        }
-      }
-    }
-    return filteredVariables;
+    return filterVariablesByViewOptions(
+      variables,
+      this._service.model.variableViewOptions
+    );
   }
 
   /**
@@ -331,7 +342,14 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 
   const fetchChildren = useCallback(async () => {
     if (expandable && !variables) {
-      setVariables(await service.inspectVariable(variable.variablesReference));
+      const variables = await service.inspectVariable(
+        variable.variablesReference
+      );
+      const filteredVariables = filterVariablesByViewOptions(
+        variables,
+        service.model.variableViewOptions
+      );
+      setVariables(filteredVariables);
     }
   }, [expandable, service, variable.variablesReference, variables]);
 
