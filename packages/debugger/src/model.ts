@@ -17,8 +17,7 @@ import { VariablesModel } from './panels/variables/model';
 import { IDebuggerDisplayRegistry } from './tokens';
 import { DebuggerDisplayRegistry } from './displayregistry';
 
-// TODO this should probably be somewhere else
-export const variableViewOptions = {
+export const variablesFilterOptions = {
   module: {
     label: 'Modules',
     filter: (variable: IDebugger.IVariable) => variable.type !== 'module'
@@ -39,7 +38,7 @@ export const variableViewOptions = {
   }
 } as const;
 
-export type VariableViewOptionKey = keyof typeof variableViewOptions;
+export type VariablesFilterOptionKey = keyof typeof variablesFilterOptions;
 
 /**
  * A model for a debugger.
@@ -64,9 +63,9 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.kernelSources = new KernelSourcesModel();
 
     // Initialize variable view options with default values
-    // TODO save this in settings/statedb?
-    Object.keys(variableViewOptions).forEach(key => {
-      this._variableViewOptions.set(key as VariableViewOptionKey, false);
+    // TODO save/load this in settings/statedb?
+    Object.keys(variablesFilterOptions).forEach(key => {
+      this._variablesFilterOptions.set(key as VariablesFilterOptionKey, false);
     });
   }
 
@@ -171,20 +170,26 @@ export class DebuggerModel implements IDebugger.Model.IService {
   /**
    * A signal emitted when the variable view options change.
    */
-  get variableViewOptionsChanged(): ISignal<
+  get variablesFilterOptionsChanged(): ISignal<
     this,
-    Map<VariableViewOptionKey, boolean>
+    Map<VariablesFilterOptionKey, boolean>
   > {
-    return this._variableViewOptionsChanged;
+    return this._variablesFilterOptionsChanged;
   }
 
-  get variableViewOptions(): Map<VariableViewOptionKey, boolean> {
-    return this._variableViewOptions;
+  /**
+   * Get current variables panel filter options
+   */
+  get variablesFilterOptions(): Map<VariablesFilterOptionKey, boolean> {
+    return this._variablesFilterOptions;
   }
 
-  set variableViewOptions(options: Map<VariableViewOptionKey, boolean>) {
-    this._variableViewOptions = options;
-    this._variableViewOptionsChanged.emit(options);
+  /**
+   * Set current variables panel filter options
+   */
+  set variablesFilterOptions(options: Map<VariablesFilterOptionKey, boolean>) {
+    this._variablesFilterOptions = options;
+    this._variablesFilterOptionsChanged.emit(options);
   }
 
   /**
@@ -220,11 +225,14 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
-  private _variableViewOptionsChanged = new Signal<
+  private _variablesFilterOptionsChanged = new Signal<
     this,
-    Map<VariableViewOptionKey, boolean>
+    Map<VariablesFilterOptionKey, boolean>
   >(this);
-  private _variableViewOptions = new Map<VariableViewOptionKey, boolean>();
+  private _variablesFilterOptions = new Map<
+    VariablesFilterOptionKey,
+    boolean
+  >();
 }
 
 /**

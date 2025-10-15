@@ -27,20 +27,20 @@ import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
 
-import { VariableViewOptionKey, variableViewOptions } from '../../model';
+import { VariablesFilterOptionKey, variablesFilterOptions } from '../../model';
 
 /**
- * Filter variables based on variableViewOptions settings.
+ * Filter variables based on variablesFilterOptions settings.
  */
 function filterVariablesByViewOptions(
   variables: IDebugger.IVariable[],
-  variableViewOptionsMap: Map<VariableViewOptionKey, boolean>
+  variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
 ): IDebugger.IVariable[] {
   let filteredVariables = variables;
-  for (const [key, enabled] of variableViewOptionsMap) {
+  for (const [key, enabled] of variablesFilterOptionsMap) {
     if (enabled) {
       const viewFilter =
-        variableViewOptions[key as VariableViewOptionKey]?.filter;
+        variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
       if (viewFilter) {
         filteredVariables = filteredVariables.filter(viewFilter);
       }
@@ -66,8 +66,8 @@ export class VariablesBodyTree extends ReactWidget {
 
     const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
-    this._service.model.variableViewOptionsChanged.connect(
-      this._onVariableViewOptionsChanged,
+    this._service.model.variablesFilterOptionsChanged.connect(
+      this._onVariablesFilterOptionsChanged,
       this
     );
 
@@ -75,21 +75,21 @@ export class VariablesBodyTree extends ReactWidget {
   }
 
   /**
-   * Filter variables based on variableViewOptions settings.
+   * Filter variables based on variablesFilterOptions settings.
    */
   filterVariablesByViewOptions(
     variables: IDebugger.IVariable[]
   ): IDebugger.IVariable[] {
     return filterVariablesByViewOptions(
       variables,
-      this._service.model.variableViewOptions
+      this._service.model.variablesFilterOptions
     );
   }
 
   /**
    * Handle variable view options changes by re-filtering scopes.
    */
-  private _onVariableViewOptionsChanged = (): void => {
+  private _onVariablesFilterOptionsChanged = (): void => {
     this._updateFilteredScopes();
     this.update();
   };
@@ -348,7 +348,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       );
       const filteredVariables = filterVariablesByViewOptions(
         variables,
-        service.model.variableViewOptions
+        service.model.variablesFilterOptions
       );
       setVariables(filteredVariables);
     }

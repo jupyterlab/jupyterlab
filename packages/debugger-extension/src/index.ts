@@ -36,8 +36,8 @@ import {
   IDebuggerSidebar,
   IDebuggerSources,
   IDebuggerSourceViewer,
-  VariableViewOptionKey,
-  variableViewOptions
+  VariablesFilterOptionKey,
+  variablesFilterOptions
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -1570,7 +1570,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 
 const debugMenu: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:debug-menu',
-  description: 'Debugger meu.',
+  description: 'Menu bar item for interacting with the debugger',
   autoStart: true,
   requires: [IDebugger, IMainMenu, ITranslator, INotebookTracker],
   optional: [ISessionContextDialogs],
@@ -1587,25 +1587,25 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
-    app.commands.addCommand(Debugger.CommandIDs.setVariablesViewOptions, {
+    app.commands.addCommand(Debugger.CommandIDs.setVariablesFilterOptions, {
       label: args => trans.__(args.label as string),
       caption: args => trans.__(args.label as string),
       isToggled: args => {
-        return !!debug.model.variableViewOptions.get(
-          args.option as VariableViewOptionKey
+        return !!debug.model.variablesFilterOptions.get(
+          args.option as VariablesFilterOptionKey
         );
       },
       execute: async args => {
-        const { option } = args as { option: VariableViewOptionKey };
+        const { option } = args as { option: VariablesFilterOptionKey };
 
-        const options = debug.model.variableViewOptions;
+        const options = debug.model.variablesFilterOptions;
         const newOptions = new Map(options);
 
         newOptions.set(option, !options.get(option));
-        debug.model.variableViewOptions = newOptions;
+        debug.model.variablesFilterOptions = newOptions;
 
         app.commands.notifyCommandChanged(
-          Debugger.CommandIDs.setVariablesViewOptions
+          Debugger.CommandIDs.setVariablesFilterOptions
         );
       },
       describedBy: {
@@ -1703,9 +1703,9 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     const subMenu = new Menu({ commands: app.commands });
     subMenu.title.label = 'Filter Variables';
 
-    Object.entries(variableViewOptions).forEach(([key, val]) => {
+    Object.entries(variablesFilterOptions).forEach(([key, val]) => {
       subMenu.addItem({
-        command: Debugger.CommandIDs.setVariablesViewOptions,
+        command: Debugger.CommandIDs.setVariablesFilterOptions,
         args: { label: `Hide ${val.label}`, option: key }
       });
     });

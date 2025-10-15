@@ -9,7 +9,7 @@ export { Debugger } from './debugger';
 
 export { DebuggerDisplayRegistry } from './displayregistry';
 
-export { variableViewOptions, VariableViewOptionKey } from './model';
+export { variablesFilterOptions, VariablesFilterOptionKey } from './model';
 
 export {
   IDebugger,

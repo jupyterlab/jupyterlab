@@ -135,7 +135,7 @@ export namespace Debugger {
 
     export const openSource = 'debugger:open-source';
 
-    export const setVariablesViewOptions = 'debugger:variables-view-options';
+    export const setVariablesFilterOptions = 'debugger:variables-view-options';
 
     export const clearAllBreakpoints = 'debugger:clear-all-breakpoints';
 
