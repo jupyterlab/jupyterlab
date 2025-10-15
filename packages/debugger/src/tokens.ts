@@ -20,6 +20,7 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 import { DebuggerHandler } from './handler';
 
 import { VariablesFilterOptionKey } from './model';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * An interface describing an application's visual debugger.
@@ -454,6 +455,8 @@ export namespace IDebugger {
      * @param params - The editor open parameters.
      */
     open(params: ISources.OpenParams): void;
+
+    notebookTracker(): INotebookTracker | null;
   }
 
   /**

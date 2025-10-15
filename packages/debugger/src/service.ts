@@ -21,6 +21,7 @@ import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IConsoleTracker } from '@jupyterlab/console';
 
 /**
@@ -210,8 +211,106 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model.breakpoints.restoreBreakpoints(bpMap);
   }
 
+  /**
+   * Handle a click on the gutter.
+   *
+   * @param editor The editor from where the click originated.
+   * @param position The position corresponding to the click event.
+   */
+  private _getEffectiveClickedLine(
+    editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): number | undefined {
+    // TODO dummo indexing nonsense
+    let clickedLineNumber = position.line;
+    let actualLineNumberIWant: number | undefined;
+
+    const initialLineText = editor.getLine(clickedLineNumber);
+    if (!initialLineText) {
+      return;
+    }
+    let isLineHaveNoText: boolean =
+      false; /* is true is the clicked line of code is empty */
+
+    if (initialLineText.trim() === '') {
+      isLineHaveNoText = true;
+      while (clickedLineNumber > 1) {
+        clickedLineNumber--;
+        const prevLineText = editor.getLine(clickedLineNumber);
+        if (!prevLineText) {
+          return;
+        }
+        if (prevLineText.trim() !== '') {
+          actualLineNumberIWant = clickedLineNumber;
+          break;
+        }
+      }
+    } else {
+      if (isLineHaveNoText === false) {
+        actualLineNumberIWant = clickedLineNumber;
+      }
+    }
+
+    return actualLineNumberIWant;
+  }
+
   async toggleBreakpoint(): Promise<void> {
-    console.log('toggle bp');
+    if (!this._debuggerSources) {
+      console.warn('No debugger sources available');
+      return;
+    }
+
+    const cell = this._debuggerSources.notebookTracker()?.activeCell;
+    const editor = cell?.editor;
+    const pos = editor?.getCursorPosition();
+
+    if (!editor) {
+      console.log('no ed');
+      return;
+    }
+    if (!pos) {
+      console.log('no pos');
+      return;
+    }
+
+    const lineIWant = this._getEffectiveClickedLine(editor, pos);
+
+    // mah map
+    const modelBps = this.model.breakpoints.breakpoints;
+
+    console.log('bps', modelBps);
+
+    const code = cell?.model.sharedModel.getSource();
+    const kernel = this.session?.connection?.kernel?.name;
+    if (!code) {
+      console.log('no code');
+      return;
+    }
+    if (!kernel) {
+      console.log('no kernel');
+      return;
+    }
+
+    const codeId = this._config.getCodeId(code, kernel);
+    const cellBps = modelBps.get(codeId) ?? [];
+
+    const newBp = {
+      line: lineIWant,
+      verified: true,
+      source: {
+        path: codeId
+      }
+    };
+    console.log('cellBps', cellBps);
+    cellBps?.push(newBp);
+
+    this.updateBreakpoints(code, cellBps, codeId);
+
+    // TODO: Implement breakpoint toggle logic
+    // This would typically involve:
+    // 1. Getting the current cursor position - DONEZO BRO
+    // 2. Checking if a breakpoint already exists at that line
+    // 3. Adding or removing the breakpoint accordingly
   }
 
   /**
