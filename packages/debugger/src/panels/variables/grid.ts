@@ -80,7 +80,6 @@ export class VariablesBodyGrid extends Panel {
     const { Grid } = await((this._pending = import('./gridpanel')));
     const { commands, model, service, themeManager, translator } = this;
 
-    // pass service
     this._grid = new Grid({
       commands,
       model,
