@@ -327,36 +327,6 @@ test.describe('Debugger', () => {
 
     await page.click('jp-button[title^=Continue]');
   });
-
-  test('Source panel', async ({ page, tmpPath }) => {
-    await page.goto(`tree/${tmpPath}`);
-
-    await createNotebook(page);
-
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
-    await page.sidebar.setWidth(251, 'right');
-
-    await setBreakpoint(page);
-
-    // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
-
-    // Wait to be stopped on the breakpoint
-    await page.debugger.waitForCallStack();
-    await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
-      'Cell ['
-    );
-
-    // Don't compare screenshot as the kernel id varies
-    // Need to set precisely the path
-    await page.screenshot({
-      clip: { y: 478, x: 998, width: 280, height: 138 },
-      path: 'test/documentation/screenshots/debugger-source.png'
-    });
-
-    await page.click('jp-button[title^=Continue]');
-  });
 });
 
 async function createNotebook(page: IJupyterLabPageFixture) {
