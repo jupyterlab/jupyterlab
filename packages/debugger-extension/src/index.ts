@@ -1708,52 +1708,66 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       });
     });
 
-    menu.addItem({
-      command: Debugger.CommandIDs.runCells
+    const runCommands = [
+      Debugger.CommandIDs.runCells,
+      Debugger.CommandIDs.terminate,
+      Debugger.CommandIDs.restartAndDebug,
+      Debugger.CommandIDs.restartAndRunAll
+    ];
+
+    const debuggerCommands = [
+      Debugger.CommandIDs.next,
+      Debugger.CommandIDs.stepIn,
+      Debugger.CommandIDs.stepOut,
+      Debugger.CommandIDs.debugContinue
+    ];
+
+    const breakpointCommands = [Debugger.CommandIDs.clearAllBreakpoints];
+
+    runCommands.forEach(command => {
+      menu.addItem({
+        command
+      });
     });
-    menu.addItem({
-      command: Debugger.CommandIDs.terminate
-    });
-    menu.addItem({
-      command: Debugger.CommandIDs.restartAndDebug
-    });
-    menu.addItem({
-      command: Debugger.CommandIDs.restartAndRunAll
-    });
-    menu.addItem({
-      type: 'separator'
-    });
-    menu.addItem({
-      command: Debugger.CommandIDs.next
-    });
-    menu.addItem({
-      command: Debugger.CommandIDs.stepIn
-    });
-    menu.addItem({
-      command: Debugger.CommandIDs.stepOut
-    });
-    menu.addItem({
-      command: Debugger.CommandIDs.debugContinue
-    });
+
     menu.addItem({
       type: 'separator'
     });
-    menu.addItem({ command: Debugger.CommandIDs.clearAllBreakpoints });
+
+    debuggerCommands.forEach(command => {
+      menu.addItem({
+        command
+      });
+    });
+
     menu.addItem({
       type: 'separator'
     });
+
+    breakpointCommands.forEach(command => {
+      menu.addItem({
+        command
+      });
+    });
+
+    menu.addItem({
+      type: 'separator'
+    });
+
     menu.addItem({
       command: Debugger.CommandIDs.evaluate
     });
+
     menu.addItem({
       type: 'separator'
     });
+
     menu.addItem({
       type: 'submenu',
       submenu: subMenu
     });
 
-    mainMenu.addMenu(menu, true, { rank: 40 });
+    mainMenu.addMenu(menu, true);
   }
 };
 
