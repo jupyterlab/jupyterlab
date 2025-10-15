@@ -139,10 +139,10 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
       console.log('hsjs');
 
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach(widget => {
-        console.log(widget);
+      panel.content.widgets.forEach(cell => {
+        console.log(cell);
 
-        const model = widget?.model;
+        const model = cell?.model;
 
         const code = model.sharedModel.getSource();
         const codeId = this._config?.getCodeId(code, kernelName);
