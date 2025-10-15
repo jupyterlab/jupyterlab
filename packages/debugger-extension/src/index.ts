@@ -289,8 +289,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartAndDebug, {
-      label: trans.__('Restart Kernel and Debug'),
-      caption: trans.__('Restart Kernel and Debug'),
+      label: trans.__('Restart Kernel and Debug…'),
+      caption: trans.__('Restart Kernel and Debug…'),
       isEnabled: () => service.isStarted,
       describedBy: {
         args: {
