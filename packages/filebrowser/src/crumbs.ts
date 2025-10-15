@@ -76,10 +76,6 @@ export class BreadCrumbs extends Widget {
     this._minimumRightItems = options.minimumRightItems ?? 2;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
-    this._crumbSeps = Private.createCrumbSeparators(
-      this._minimumLeftItems,
-      this._minimumRightItems
-    );
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     if (this._hasPreferred) {
@@ -199,7 +195,7 @@ export class BreadCrumbs extends Widget {
       return;
     }
     this._previousState = state;
-    Private.updateCrumbs(this._crumbs, this._crumbSeps, state);
+    Private.updateCrumbs(this._crumbs, state);
   }
 
   /**
@@ -390,7 +386,6 @@ export class BreadCrumbs extends Widget {
   private _model: FileBrowserModel;
   private _hasPreferred: boolean;
   private _crumbs: ReadonlyArray<HTMLElement>;
-  private _crumbSeps: ReadonlyArray<HTMLElement>;
   private _fullPath: boolean;
   private _previousState: Private.ICrumbsState | null = null;
   private _minimumLeftItems: number;
@@ -462,7 +457,6 @@ namespace Private {
    */
   export function updateCrumbs(
     breadcrumbs: ReadonlyArray<HTMLElement>,
-    separators: ReadonlyArray<HTMLElement>,
     state: ICrumbsState
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
@@ -475,9 +469,9 @@ namespace Private {
 
     if (state.hasPreferred) {
       node.appendChild(breadcrumbs[Crumb.Home]);
-      node.appendChild(separators[0]);
+      node.appendChild(createCrumbSeparator());
     } else {
-      node.appendChild(separators[0]);
+      node.appendChild(createCrumbSeparator());
     }
 
     const parts = state.path.split('/').filter(part => part !== '');
@@ -487,14 +481,12 @@ namespace Private {
 
       // Check if we need ellipsis
       if (parts.length > minimumLeftItems + minimumRightItems) {
-        let separatorIndex = 1;
-
         // Add left items
         for (let i = 0; i < minimumLeftItems; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
-          node.appendChild(separators[separatorIndex++]);
+          node.appendChild(createCrumbSeparator());
         }
 
         // Add ellipsis
@@ -508,7 +500,7 @@ namespace Private {
             : parts.slice(0, minimumLeftItems).join('/');
         breadcrumbs[Crumb.Ellipsis].title = hiddenPath;
         breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
-        node.appendChild(separators[separatorIndex++]);
+        node.appendChild(createCrumbSeparator());
 
         // Add right items
         const rightStartIndex = parts.length - minimumRightItems;
@@ -516,14 +508,14 @@ namespace Private {
           const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
-          node.appendChild(separators[separatorIndex++]);
+          node.appendChild(createCrumbSeparator());
         }
       } else {
         for (let i = 0; i < parts.length; i++) {
           const elemPath = parts.slice(0, i + 1).join('/');
           const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
-          node.appendChild(separators[i + 1]);
+          node.appendChild(createCrumbSeparator());
         }
       }
     } else if (state.fullPath && parts.length > 0) {
@@ -587,18 +579,9 @@ namespace Private {
   /**
    * Create the breadcrumb separator nodes.
    */
-  export function createCrumbSeparators(
-    minimumLeftItems: number,
-    minimumRightItems: number
-  ): ReadonlyArray<HTMLElement> {
-    const items: HTMLElement[] = [];
-    const REQUIRED_SEPARATORS = 1 + minimumLeftItems + 1 + minimumRightItems;
-
-    for (let i = 0; i < REQUIRED_SEPARATORS; i++) {
-      const item = document.createElement('span');
-      item.textContent = '/';
-      items.push(item);
-    }
-    return items;
+  export function createCrumbSeparator(): HTMLElement {
+    const item = document.createElement('span');
+    item.textContent = '/';
+    return item;
   }
 }
