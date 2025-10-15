@@ -33,7 +33,9 @@ import {
   IDebuggerHandler,
   IDebuggerSidebar,
   IDebuggerSources,
-  IDebuggerSourceViewer
+  IDebuggerSourceViewer,
+  VariablesFilterOptionKey,
+  variablesFilterOptions
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -56,6 +58,8 @@ import {
   nullTranslator
 } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
+import { IMainMenu } from '@jupyterlab/mainmenu';
+import { Menu } from '@lumino/widgets';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
@@ -284,9 +288,9 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     });
 
     const trans = translator.load('jupyterlab');
-    app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
-      label: trans.__('Restart Kernel and Debug…'),
-      caption: trans.__('Restart Kernel and Debug…'),
+    app.commands.addCommand(Debugger.CommandIDs.restartAndDebug, {
+      label: trans.__('Restart Kernel and Debug'),
+      caption: trans.__('Restart Kernel and Debug'),
       isEnabled: () => service.isStarted,
       describedBy: {
         args: {
@@ -349,7 +353,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     if (palette) {
       palette.addItem({
         category: 'Notebook Operations',
-        command: Debugger.CommandIDs.restartDebug
+        command: Debugger.CommandIDs.restartAndDebug
       });
     }
 
@@ -515,7 +519,8 @@ const variables: JupyterFrontEndPlugin<void> = {
             model,
             commands,
             scopes: [{ name, variables }],
-            themeManager
+            themeManager,
+            service
           })
         });
         widget.addClass('jp-DebuggerVariables');
@@ -1424,8 +1429,8 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
     });
 
     app.commands.addCommand(CommandIDs.evaluate, {
-      label: trans.__('Evaluate Code'),
-      caption: trans.__('Evaluate Code'),
+      label: trans.__('Open Debugger Console'),
+      caption: trans.__('Open Debugger Console'),
       icon: Debugger.Icons.evaluateIcon,
       isEnabled: () => !!service.session?.isStarted,
       execute: async () => {
@@ -1470,6 +1475,211 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const debugMenu: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:debug-menu',
+  description: 'Menu bar item for interacting with the debugger',
+  autoStart: true,
+  requires: [IDebugger, IMainMenu, ITranslator, INotebookTracker],
+  optional: [ISessionContextDialogs],
+  activate: async (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    mainMenu: IMainMenu,
+    translator: ITranslator,
+    notebookTracker: INotebookTracker,
+    sessionDialogs_: ISessionContextDialogs | null
+  ) => {
+    console.log('@jupyterlab/debugger-extension:debug-menu loadedddd');
+    const trans = translator.load('jupyterlab');
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
+
+    app.commands.addCommand(Debugger.CommandIDs.setVariablesFilterOptions, {
+      label: args => trans.__(args.label as string),
+      caption: args => trans.__(args.label as string),
+      isToggled: args => {
+        return !!debug.model.variablesFilterOptions.get(
+          args.option as VariablesFilterOptionKey
+        );
+      },
+      execute: async args => {
+        const { option } = args as { option: VariablesFilterOptionKey };
+
+        const options = debug.model.variablesFilterOptions;
+        const newOptions = new Map(options);
+
+        newOptions.set(option, !options.get(option));
+        debug.model.variablesFilterOptions = newOptions;
+
+        app.commands.notifyCommandChanged(
+          Debugger.CommandIDs.setVariablesFilterOptions
+        );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            label: {
+              type: 'string',
+              description: trans.__('The text displayed for the menu option')
+            },
+            option: {
+              type: 'string',
+              description: trans.__('The variables filter option to be toggled')
+            }
+          },
+          required: ['label, option']
+        }
+      }
+    });
+
+    app.commands.addCommand(Debugger.CommandIDs.clearAllBreakpoints, {
+      label: trans.__('Clear All Breakpoints'),
+      caption: trans.__('Clear All Breakpoints'),
+      execute: () => {
+        debug.clearBreakpoints();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    // Notebook actions wrappers
+    app.commands.addCommand(Debugger.CommandIDs.runCells, {
+      label: trans.__('Run All Cells'),
+      caption: trans.__('Run All Cells'),
+      execute: async () => {
+        const widget = notebookTracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const { content, sessionContext } = widget;
+
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    app.commands.addCommand(Debugger.CommandIDs.restartAndRunAll, {
+      label: trans.__('Restart Kernel and Run Without Debugging'),
+      caption: trans.__('Restart Kernel and Run Without Debugging'),
+      execute: async () => {
+        const widget = notebookTracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const { content, sessionContext } = widget;
+        const restarted = await sessionDialogs.restart(sessionContext);
+        if (!restarted) {
+          return;
+        }
+
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    const menu = new Menu({ commands: app.commands });
+    menu.title.label = 'Debug';
+
+    const subMenu = new Menu({ commands: app.commands });
+    subMenu.title.label = 'Filter Variables';
+
+    Object.entries(variablesFilterOptions).forEach(([key, val]) => {
+      subMenu.addItem({
+        command: Debugger.CommandIDs.setVariablesFilterOptions,
+        args: { label: `Hide ${val.label}`, option: key }
+      });
+    });
+
+    const runCommands = [
+      Debugger.CommandIDs.runCells,
+      Debugger.CommandIDs.terminate,
+      Debugger.CommandIDs.restartAndDebug,
+      Debugger.CommandIDs.restartAndRunAll
+    ];
+
+    const debuggerCommands = [
+      Debugger.CommandIDs.next,
+      Debugger.CommandIDs.stepIn,
+      Debugger.CommandIDs.stepOut,
+      Debugger.CommandIDs.debugContinue
+    ];
+
+    const breakpointCommands = [Debugger.CommandIDs.clearAllBreakpoints];
+
+    runCommands.forEach(command => {
+      menu.addItem({
+        command
+      });
+    });
+
+    menu.addItem({
+      type: 'separator'
+    });
+
+    debuggerCommands.forEach(command => {
+      menu.addItem({
+        command
+      });
+    });
+
+    menu.addItem({
+      type: 'separator'
+    });
+
+    breakpointCommands.forEach(command => {
+      menu.addItem({
+        command
+      });
+    });
+
+    menu.addItem({
+      type: 'separator'
+    });
+
+    menu.addItem({
+      command: Debugger.CommandIDs.evaluate
+    });
+
+    menu.addItem({
+      type: 'separator'
+    });
+
+    menu.addItem({
+      type: 'submenu',
+      submenu: subMenu
+    });
+
+    mainMenu.addMenu(menu, true);
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -1485,7 +1695,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sourceViewer,
   configuration,
   debuggerCompletions,
-  debugConsole
+  debugConsole,
+  debugMenu
 ];
 
 export default plugins;

@@ -7,6 +7,8 @@
 
 export { Debugger } from './debugger';
 
+export { variablesFilterOptions, VariablesFilterOptionKey } from './model';
+
 export {
   IDebugger,
   IDebuggerConfig,
