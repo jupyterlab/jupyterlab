@@ -5,6 +5,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { IDebugger } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { isCodeCellModel } from '@jupyterlab/cells';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 /**
  * A model for a list of breakpoints.
@@ -13,6 +14,7 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   constructor(options: BreakpointsModel.IOptions) {
     this._config = options.config;
     this._notebookTracker = options.notebookTracker;
+    this._consoleTracker = options.consoleTracker;
   }
 
   /**
@@ -114,8 +116,11 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
         const code = cell.model.sharedModel.getSource();
         const codeId = this._config?.getCodeId(code, kernelName);
 
+        // console.log(codeId, breakpoint.source?.path, codeId === breakpoint.source?.path);
+
         if (codeId && codeId === breakpoint.source?.path) {
           if (isCodeCellModel(cell.model)) {
+            // console.log(cell.model.executionCount);
             if (cell.model.executionState === 'running') {
               display = `Cell [*]`;
             } else if (cell.model.executionCount === null) {
@@ -128,11 +133,47 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
       });
     });
 
+    console.log(this._consoleTracker);
+
+    this._consoleTracker?.forEach(panel => {
+      console.log('hsjs');
+
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+      panel.content.widgets.forEach(widget => {
+        console.log(widget);
+
+        const model = widget?.model;
+
+        const code = model.sharedModel.getSource();
+        const codeId = this._config?.getCodeId(code, kernelName);
+
+        console.log(
+          codeId,
+          breakpoint.source?.path,
+          codeId === breakpoint.source?.path
+        );
+
+        if (codeId && codeId === breakpoint.source?.path) {
+          const executionCount = model.executionCount ?? null;
+          const executionState = model.executionState ?? null;
+
+          if (executionState === 'running') {
+            display = `In [*]`;
+          } else if (executionCount === null) {
+            display = `In [ ]`;
+          } else {
+            display = `In [${executionCount}]`;
+          }
+        }
+      });
+    });
+
     return display;
   }
 
   private _config: IDebugger.IConfig;
   private _notebookTracker: INotebookTracker | null;
+  private _consoleTracker: IConsoleTracker | null;
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
@@ -158,5 +199,10 @@ export namespace BreakpointsModel {
      * The notebook tracker.
      */
     notebookTracker: INotebookTracker | null;
+
+    /**
+     * The console tracker.
+     */
+    consoleTracker: IConsoleTracker | null;
   }
 }
