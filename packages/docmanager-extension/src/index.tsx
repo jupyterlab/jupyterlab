@@ -1357,7 +1357,7 @@ function addLabCommands(
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
         const context = docManager.contextForWidget(contextMenuWidget()!);
-        return dialogs?.rename(context!);
+        return dialogs.rename(context!);
       }
     },
     describedBy: {

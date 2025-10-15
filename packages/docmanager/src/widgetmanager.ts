@@ -41,20 +41,6 @@ export class DocumentWidgetManager implements IDisposable {
   }
 
   /**
-   * Set the dialog provider.
-   */
-  set dialogs(dialogs: IDocumentManagerDialogs | null) {
-    this._dialogs = dialogs;
-  }
-
-  /**
-   * Get the dialog provider.
-   */
-  get dialogs(): IDocumentManagerDialogs | null {
-    return this._dialogs;
-  }
-
-  /**
    * Whether to ask confirmation to close a tab or not.
    */
   get confirmClosingDocument(): boolean {
