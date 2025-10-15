@@ -218,6 +218,23 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.title = '-';
   }
 
+  filterVariablesByViewOptions(
+    variables: IDebugger.IVariable[],
+    variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+  ): IDebugger.IVariable[] {
+    let filteredVariables = variables;
+    for (const [key, enabled] of variablesFilterOptionsMap) {
+      if (enabled) {
+        const viewFilter =
+          variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
+        if (viewFilter) {
+          filteredVariables = filteredVariables.filter(viewFilter);
+        }
+      }
+    }
+    return filteredVariables;
+  }
+
   private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _hasRichVariableRendering = false;

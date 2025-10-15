@@ -27,28 +27,6 @@ import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
 
-import { VariablesFilterOptionKey, variablesFilterOptions } from '../../model';
-
-/**
- * Filter variables based on variablesFilterOptions settings.
- */
-function filterVariablesByViewOptions(
-  variables: IDebugger.IVariable[],
-  variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
-): IDebugger.IVariable[] {
-  let filteredVariables = variables;
-  for (const [key, enabled] of variablesFilterOptionsMap) {
-    if (enabled) {
-      const viewFilter =
-        variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
-      if (viewFilter) {
-        filteredVariables = filteredVariables.filter(viewFilter);
-      }
-    }
-  }
-  return filteredVariables;
-}
-
 /**
  * The body for tree of variables.
  */
@@ -93,7 +71,7 @@ export class VariablesBodyTree extends ReactWidget {
     };
 
     const filteredVars = scope
-      ? filterVariablesByViewOptions(
+      ? this._service.model.filterVariablesByViewOptions(
           scope.variables,
           this._service.model.variablesFilterOptions
         )
@@ -327,7 +305,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       const variables = await service.inspectVariable(
         variable.variablesReference
       );
-      const filteredVariables = filterVariablesByViewOptions(
+      const filteredVariables = service.model.filterVariablesByViewOptions(
         variables,
         service.model.variablesFilterOptions
       );

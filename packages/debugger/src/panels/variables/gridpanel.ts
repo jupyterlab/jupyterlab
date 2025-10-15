@@ -21,31 +21,7 @@ import {
 } from '@jupyterlab/translation';
 
 import { IDebugger } from '../../tokens';
-import {
-  Debugger,
-  VariablesFilterOptionKey,
-  variablesFilterOptions
-} from '../../';
-
-/**
- * Filter variables based on variablesFilterOptions settings.
- */
-function filterVariablesByViewOptions(
-  variables: IDebugger.IVariable[],
-  variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
-): IDebugger.IVariable[] {
-  let filteredVariables = variables;
-  for (const [key, enabled] of variablesFilterOptionsMap) {
-    if (enabled) {
-      const viewFilter =
-        variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
-      if (viewFilter) {
-        filteredVariables = filteredVariables.filter(viewFilter);
-      }
-    }
-  }
-  return filteredVariables;
-}
+import { Debugger } from '../../';
 
 /**
  * A class wrapping the underlying variables datagrid.
@@ -263,7 +239,6 @@ export class GridModel extends DataModel {
       return this._trans.__('Name');
     }
 
-    console.log('this._data.value[row]', this._data.value[row]);
     return column === 1 ? this._data.value[row] : this._data.type[row];
   }
 
@@ -298,7 +273,7 @@ export class GridModel extends DataModel {
     const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
     const variables = scope?.variables ?? [];
 
-    const filteredVariables = filterVariablesByViewOptions(
+    const filteredVariables = this._service.model.filterVariablesByViewOptions(
       variables,
       this._service.model.variablesFilterOptions
     );
