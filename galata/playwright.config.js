@@ -34,6 +34,20 @@ module.exports = {
           permissions: ['clipboard-read', 'clipboard-write']
         }
       }
+    },
+    {
+      name: 'jupyterlab-firefox',
+      testMatch: 'test/jupyterlab/**/*.test.ts',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      use: {
+        contextOptions: {
+          // https://github.com/microsoft/playwright/issues/13037
+          permissions: []
+        },
+        browserName: 'firefox'
+      },
+      // We do not want to match exactly on Firefox
+      ignoreSnapshots: true
     }
   ],
   // Switch to 'always' to keep raw assets for all tests

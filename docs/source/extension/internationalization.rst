@@ -10,7 +10,7 @@ To internationalize your extension, the following tasks are required:
 
     Please read carefully the :ref:`internationalization-rules` as they are strong constraints for internationalization to work.
 
-1. Add the token ``ITranslator`` from ``@jupyterlab/translation`` package to your plugin dependencies.
+1. Add the token :ts:interface:`translation.ITranslator` from ``@jupyterlab/translation`` package to your plugin dependencies.
 
 .. code:: typescript
 

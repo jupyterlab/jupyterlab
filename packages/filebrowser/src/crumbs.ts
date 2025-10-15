@@ -43,11 +43,6 @@ const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
 
 /**
- * Bread crumb paths.
- */
-const BREAD_CRUMB_PATHS = ['/', '../../', '../', ''];
-
-/**
  * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -72,9 +67,14 @@ export class BreadCrumbs extends Widget {
     this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
     this._fullPath = options.fullPath || false;
+    this._minimumLeftItems = options.minimumLeftItems ?? 0;
+    this._minimumRightItems = options.minimumRightItems ?? 2;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
-    this._crumbSeps = Private.createCrumbSeparators();
+    this._crumbSeps = Private.createCrumbSeparators(
+      this._minimumLeftItems,
+      this._minimumRightItems
+    );
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     if (this._hasPreferred) {
@@ -128,6 +128,28 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Number of items to show on left of ellipsis
+   */
+  get minimumLeftItems(): number {
+    return this._minimumLeftItems;
+  }
+
+  set minimumLeftItems(value: number) {
+    this._minimumLeftItems = value;
+  }
+
+  /**
+   * Number of items to show on right of ellipsis
+   */
+  get minimumRightItems(): number {
+    return this._minimumRightItems;
+  }
+
+  set minimumRightItems(value: number) {
+    this._minimumRightItems = value;
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -164,7 +186,9 @@ export class BreadCrumbs extends Widget {
     const state = {
       path: localPath,
       hasPreferred: this._hasPreferred,
-      fullPath: this._fullPath
+      fullPath: this._fullPath,
+      minimumLeftItems: this._minimumLeftItems,
+      minimumRightItems: this._minimumRightItems
     };
     if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
       return;
@@ -186,8 +210,10 @@ export class BreadCrumbs extends Widget {
     let node = event.target as HTMLElement;
     while (node && node !== this.node) {
       if (node.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+        const preferredPath = PageConfig.getOption('preferredPath');
+        const path = preferredPath ? '/' + preferredPath : preferredPath;
         this._model
-          .cd(PageConfig.getOption('preferredPath'))
+          .cd(path)
           .catch(error =>
             showErrorMessage(this._trans.__('Open Error'), error)
           );
@@ -201,17 +227,11 @@ export class BreadCrumbs extends Widget {
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
-        let index = ArrayExt.findFirstIndex(
-          this._crumbs,
-          value => value === node
-        );
-        let destination = BREAD_CRUMB_PATHS[index];
-        if (
-          this._fullPath &&
-          index < 0 &&
-          !node.classList.contains(BREADCRUMB_ROOT_CLASS)
-        ) {
-          destination = node.title;
+        let destination: string;
+        if (node.classList.contains(BREADCRUMB_ROOT_CLASS)) {
+          destination = '/';
+        } else {
+          destination = `/${node.title}`;
         }
         this._model
           .cd(destination)
@@ -301,17 +321,22 @@ export class BreadCrumbs extends Widget {
       target = target.parentElement;
     }
 
-    // Get the path based on the target node.
-    const index = ArrayExt.findFirstIndex(
-      this._crumbs,
-      node => node === target
-    );
-    if (index === -1) {
+    let destinationPath: string | null = null;
+    if (target.classList.contains(BREADCRUMB_ROOT_CLASS)) {
+      destinationPath = '/';
+    } else if (target.classList.contains(BREADCRUMB_PREFERRED_CLASS)) {
+      const preferredPath = PageConfig.getOption('preferredPath');
+      destinationPath = preferredPath ? '/' + preferredPath : '/';
+    } else if (target.title) {
+      destinationPath = target.title;
+    }
+
+    if (!destinationPath) {
       return;
     }
 
     const model = this._model;
-    const path = PathExt.resolve(model.path, BREAD_CRUMB_PATHS[index]);
+    const resolvedPath = PathExt.resolve(model.path, destinationPath);
     const manager = model.manager;
 
     // Move all of the items.
@@ -320,7 +345,7 @@ export class BreadCrumbs extends Widget {
     for (const oldPath of oldPaths) {
       const localOldPath = manager.services.contents.localPath(oldPath);
       const name = PathExt.basename(localOldPath);
-      const newPath = PathExt.join(path, name);
+      const newPath = PathExt.join(resolvedPath, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
@@ -336,6 +361,8 @@ export class BreadCrumbs extends Widget {
   private _crumbSeps: ReadonlyArray<HTMLElement>;
   private _fullPath: boolean;
   private _previousState: Private.ICrumbsState | null = null;
+  private _minimumLeftItems: number;
+  private _minimumRightItems: number;
 }
 
 /**
@@ -360,6 +387,16 @@ export namespace BreadCrumbs {
      * Show the full file browser path in breadcrumbs
      */
     fullPath?: boolean;
+
+    /**
+     * Number of items to show on left of ellipsis
+     */
+    minimumLeftItems?: number;
+
+    /**
+     * Number of items to show on right of ellipsis
+     */
+    minimumRightItems?: number;
   }
 }
 
@@ -382,10 +419,12 @@ namespace Private {
    * Breadcrumbs state.
    */
   export interface ICrumbsState {
-    [key: string]: string | boolean;
+    [key: string]: string | boolean | number;
     path: string;
     hasPreferred: boolean;
     fullPath: boolean;
+    minimumLeftItems: number;
+    minimumRightItems: number;
   }
 
   /**
@@ -411,41 +450,75 @@ namespace Private {
       node.appendChild(separators[0]);
     }
 
-    const parts = state.path.split('/');
-    if (!state.fullPath && parts.length > 2) {
-      node.appendChild(breadcrumbs[Crumb.Ellipsis]);
-      const grandParent = parts.slice(0, parts.length - 2).join('/');
-      breadcrumbs[Crumb.Ellipsis].title = grandParent;
-      node.appendChild(separators[1]);
-    }
+    const parts = state.path.split('/').filter(part => part !== '');
+    if (!state.fullPath && parts.length > 0) {
+      const minimumLeftItems = state.minimumLeftItems;
+      const minimumRightItems = state.minimumRightItems;
 
-    if (state.path) {
-      if (!state.fullPath) {
-        if (parts.length >= 2) {
-          breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
-          node.appendChild(breadcrumbs[Crumb.Parent]);
-          const parent = parts.slice(0, parts.length - 1).join('/');
-          breadcrumbs[Crumb.Parent].title = parent;
-          node.appendChild(separators[2]);
+      // Check if we need ellipsis
+      if (parts.length > minimumLeftItems + minimumRightItems) {
+        let separatorIndex = 1;
+
+        // Add left items
+        for (let i = 0; i < minimumLeftItems; i++) {
+          const elemPath = parts.slice(0, i + 1).join('/');
+          const elem = createBreadcrumbElement(parts[i], elemPath);
+          node.appendChild(elem);
+          node.appendChild(separators[separatorIndex++]);
         }
-        breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
-        node.appendChild(breadcrumbs[Crumb.Current]);
-        breadcrumbs[Crumb.Current].title = state.path;
-        node.appendChild(separators[3]);
+
+        // Add ellipsis
+        node.appendChild(breadcrumbs[Crumb.Ellipsis]);
+        const hiddenStartIndex = minimumLeftItems;
+        const hiddenEndIndex = parts.length - minimumRightItems;
+        const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
+        const hiddenPath =
+          hiddenParts.length > 0
+            ? parts.slice(0, hiddenEndIndex).join('/')
+            : parts.slice(0, minimumLeftItems).join('/');
+        breadcrumbs[Crumb.Ellipsis].title = hiddenPath;
+        node.appendChild(separators[separatorIndex++]);
+
+        // Add right items
+        const rightStartIndex = parts.length - minimumRightItems;
+        for (let i = rightStartIndex; i < parts.length; i++) {
+          const elemPath = parts.slice(0, i + 1).join('/');
+          const elem = createBreadcrumbElement(parts[i], elemPath);
+          node.appendChild(elem);
+          node.appendChild(separators[separatorIndex++]);
+        }
       } else {
         for (let i = 0; i < parts.length; i++) {
-          const elem = document.createElement('span');
-          elem.className = BREADCRUMB_ITEM_CLASS;
-          elem.textContent = parts[i];
-          const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
-          elem.title = elemPath;
+          const elemPath = parts.slice(0, i + 1).join('/');
+          const elem = createBreadcrumbElement(parts[i], elemPath);
           node.appendChild(elem);
-          const separator = document.createElement('span');
-          separator.textContent = '/';
-          node.appendChild(separator);
+          node.appendChild(separators[i + 1]);
         }
       }
+    } else if (state.fullPath && parts.length > 0) {
+      for (let i = 0; i < parts.length; i++) {
+        const elemPath = parts.slice(0, i + 1).join('/');
+        const elem = createBreadcrumbElement(parts[i], elemPath);
+        node.appendChild(elem);
+        const separator = document.createElement('span');
+        separator.textContent = '/';
+        node.appendChild(separator);
+      }
     }
+  }
+
+  /**
+   * Create a breadcrumb element for a path part.
+   */
+  function createBreadcrumbElement(
+    pathPart: string,
+    fullPath: string
+  ): HTMLElement {
+    const elem = document.createElement('span');
+    elem.className = BREADCRUMB_ITEM_CLASS;
+    elem.textContent = pathPart;
+    elem.title = fullPath;
+    return elem;
   }
 
   /**
@@ -467,10 +540,12 @@ namespace Private {
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
+    const preferredPath = PageConfig.getOption('preferredPath');
+    const path = preferredPath ? '/' + preferredPath : preferredPath;
     const preferred = preferredIcon.element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
-      title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
+      title: path || 'Jupyter Preferred Path',
       stylesheet: 'breadCrumb'
     });
     return [home, ellipsis, parent, current, preferred];
@@ -479,14 +554,14 @@ namespace Private {
   /**
    * Create the breadcrumb separator nodes.
    */
-  export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
+  export function createCrumbSeparators(
+    minimumLeftItems: number,
+    minimumRightItems: number
+  ): ReadonlyArray<HTMLElement> {
     const items: HTMLElement[] = [];
-    // The maximum number of directories that will be shown in the crumbs
-    const MAX_DIRECTORIES = 2;
+    const REQUIRED_SEPARATORS = 1 + minimumLeftItems + 1 + minimumRightItems;
 
-    // Make separators for after each directory, one at the beginning, and one
-    // after a possible ellipsis.
-    for (let i = 0; i < MAX_DIRECTORIES + 2; i++) {
+    for (let i = 0; i < REQUIRED_SEPARATORS; i++) {
       const item = document.createElement('span');
       item.textContent = '/';
       items.push(item);

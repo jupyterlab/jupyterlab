@@ -61,6 +61,31 @@ function activate(
   commands.addCommand(CommandIDs.create, {
     label: trans.__('New Launcher'),
     icon: args => (args.toolbar ? addIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          cwd: {
+            type: 'string',
+            description: trans.__('The current working directory')
+          },
+          toolbar: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from a toolbar'
+            )
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          },
+          ref: {
+            type: 'string',
+            description: trans.__('The reference widget id')
+          }
+        }
+      }
+    },
     execute: (args: JSONObject) => {
       const cwd = (args['cwd'] as string) ?? defaultBrowser?.model.path ?? '';
       const id = `launcher-${Private.id++}`;

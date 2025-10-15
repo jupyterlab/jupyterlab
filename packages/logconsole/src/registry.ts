@@ -18,7 +18,7 @@ export class LoggerRegistry implements ILoggerRegistry {
   /**
    * Construct a LoggerRegistry.
    *
-   * @param defaultRendermime - Default rendermime to render outputs
+   * @param options.defaultRendermime - Default rendermime to render outputs
    * with when logger is not supplied with one.
    */
   constructor(options: LoggerRegistry.IOptions) {
