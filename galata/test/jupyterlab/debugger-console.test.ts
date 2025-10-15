@@ -50,8 +50,10 @@ async function setupDebuggerConsole(
   }
 
   // Click the evaluate button in the callstack toolbar to open the debug console
-  const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
-  await evaluateButton.click();
+  const openDebuggerConsoleButton = page.locator(
+    'jp-button[title*="Open Debugger Console"]'
+  );
+  await openDebuggerConsoleButton.click();
   await page.locator(DEBUG_CONSOLE_SELECTOR).waitFor({ state: 'visible' });
 }
 
