@@ -1002,6 +1002,14 @@ export namespace IDebugger {
         this,
         Map<VariablesFilterOptionKey, boolean>
       >;
+
+      /**
+       * Filter variables based on variablesFilterOptions settings.
+       */
+      filterVariablesByViewOptions(
+        variables: IDebugger.IVariable[],
+        variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+      ): IDebugger.IVariable[];
     }
 
     /**
