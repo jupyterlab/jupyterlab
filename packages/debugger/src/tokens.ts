@@ -1000,8 +1000,15 @@ export namespace IDebugger {
        */
       clear(): void;
 
+      /**
+       * Current filter options for the variables panel.
+       * Maps filter option keys to their enabled/disabled state.
+       */
       variablesFilterOptions: Map<VariablesFilterOptionKey, boolean>;
 
+      /**
+       * Signal emitted when the variables filter options change.
+       */
       readonly variablesFilterOptionsChanged: ISignal<
         this,
         Map<VariablesFilterOptionKey, boolean>
