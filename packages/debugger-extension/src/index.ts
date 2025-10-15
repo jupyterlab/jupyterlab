@@ -874,7 +874,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       try {
         const source = await service.getSource({ path: frame.source?.path });
         if (source) {
-          console.log(source);
           openSource(source, frame);
         }
       } catch (error) {
