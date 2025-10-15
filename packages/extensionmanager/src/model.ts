@@ -665,14 +665,16 @@ namespace Private {
    *
    * @param queryArgs Query arguments
    * @param init Initial values for the request
+   * @param serverSettings The server settings to use for the request
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
     queryArgs: { [k: string]: any } = {},
-    init: RequestInit = {}
+    init: RequestInit = {},
+    serverSettings?: ServerConnection.ISettings
   ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
-    const settings = ServerConnection.makeSettings();
+    const settings = serverSettings ?? ServerConnection.makeSettings();
     const requestUrl = URLExt.join(
       settings.baseUrl,
       EXTENSION_API_PATH // API Namespace
