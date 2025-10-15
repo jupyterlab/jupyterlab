@@ -73,7 +73,11 @@ test.describe('Console Interactions', () => {
 async function getEditorText(page: Page): Promise<string> {
   await page.keyboard.press('Control+A');
   await page.keyboard.press('Control+C');
-  await page.context().grantPermissions(['clipboard-read']);
+  try {
+    await page.context().grantPermissions(['clipboard-read']);
+  } catch {
+    // Firefox does not support clipboard-read but does not it it either
+  }
   const handle = await page.evaluateHandle(() =>
     navigator.clipboard.readText()
   );

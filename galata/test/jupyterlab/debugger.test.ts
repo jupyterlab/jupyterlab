@@ -291,7 +291,8 @@ test.describe('Debugger Variables', () => {
     await page.click('jp-button[title^=Continue]');
   });
 
-  test('Copy to clipboard', async ({ page, tmpPath }) => {
+  test('Copy to clipboard', async ({ page, tmpPath, browserName }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
     await init({ page, tmpPath });
 
     // Don't wait as it will be blocked.

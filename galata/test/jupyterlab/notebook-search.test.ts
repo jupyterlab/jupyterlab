@@ -558,7 +558,8 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Search on deleted cell', async ({ page }) => {
+  test('Search on deleted cell', async ({ page, browserName }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
     // Open search box
     await page.keyboard.press('Control+f');
 

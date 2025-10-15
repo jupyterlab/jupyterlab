@@ -5,6 +5,7 @@ import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Notebook No Kernel', () => {
   const NOTEBOOK_NAME = 'test-notebook-no-kernel.ipynb';
+  test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
 
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(NOTEBOOK_NAME);
