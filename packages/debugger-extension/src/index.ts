@@ -876,7 +876,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         return;
       }
       try {
-        const source = await service.getSource({ path: frame.source?.path });
+        const source = await service.getSource({ path: frame.source.path });
         if (source) {
           openSource(source, frame);
         }
@@ -894,7 +894,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         return;
       }
       const { content, mimeType, path } = source;
-      if (breakpointOrFrame) {
+      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
         const results = debuggerSources.find({
           focus: true,
           kernel: service.session?.connection?.kernel?.name ?? '',
@@ -903,7 +903,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         });
 
         if (results.length > 0) {
-          if (typeof breakpointOrFrame.line !== 'undefined') {
             results.forEach(editor => {
               void editor.reveal().then(() => {
                 const edit = editor.get();
