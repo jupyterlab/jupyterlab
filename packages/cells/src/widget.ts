@@ -220,6 +220,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   initializeState(): this {
     this.loadCollapseState();
     this.loadEditableState();
+    if (this.syncTags) {
+      this.loadTagsState();
+    }
     return this;
   }
 
@@ -493,6 +496,30 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Load the tag state from the model.
+   */
+  loadTagsState(): void {
+    const tags = (this.model.getMetadata('tags') as string[]) ?? [];
+
+    // Remove all existing tag data attributes
+    const attributes = Array.from(this.node.attributes) as Attr[];
+    for (const attr of attributes) {
+      if (attr.name && attr.name.startsWith('data-tag-')) {
+        this.node.removeAttribute(attr.name);
+      }
+    }
+
+    // Add data attributes for current tags
+    for (const tag of tags) {
+      if (typeof tag === 'string' && tag.length > 0) {
+        // Sanitize tag name for use as data attribute
+        const sanitizedTag = tag.replace(/[^a-zA-Z0-9-_]/g, '-');
+        this.node.setAttribute(`data-tag-${sanitizedTag}`, 'true');
+      }
+    }
+  }
+
+  /**
    * Handle the input being hidden.
    *
    * #### Notes
@@ -533,6 +560,22 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._syncEditable = value;
     if (value) {
       this.loadEditableState();
+    }
+  }
+
+  /**
+   * Whether to sync the tags state to the cell model.
+   */
+  get syncTags(): boolean {
+    return this._syncTags;
+  }
+  set syncTags(value: boolean) {
+    if (this._syncTags === value) {
+      return;
+    }
+    this._syncTags = value;
+    if (value) {
+      this.loadTagsState();
     }
   }
 
@@ -717,6 +760,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           this.loadEditableState();
         }
         break;
+      case 'tags':
+        if (this.syncTags) {
+          this.loadTagsState();
+        }
+        break;
       default:
         break;
     }
@@ -774,6 +822,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }, 0);
   private _syncCollapse = false;
   private _syncEditable = false;
+  private _syncTags = true;
 }
 
 /**
