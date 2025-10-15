@@ -5,8 +5,6 @@ import { act } from 'react-dom/test-utils';
 
 import { Button } from '@jupyter/web-components';
 
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
