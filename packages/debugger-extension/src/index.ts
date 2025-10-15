@@ -868,6 +868,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       try {
         const source = await service.getSource({ path: frame.source?.path });
         if (source) {
+          console.log(source);
           openSource(source, frame);
         }
       } catch (error) {
@@ -895,20 +896,18 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         if (results.length > 0) {
           if (typeof breakpointOrFrame.line !== 'undefined') {
             results.forEach(editor => {
-              requestAnimationFrame(() => {
-                void editor.reveal().then(() => {
-                  const edit = editor.get();
-                  if (edit) {
-                    edit.revealPosition({
-                      line: (breakpointOrFrame.line as number) - 1,
-                      column: breakpointOrFrame.column || 0
-                    });
-                    Debugger.EditorHandler.showCurrentLine(
-                      edit,
-                      breakpointOrFrame.line as number
-                    );
-                  }
-                });
+              void editor.reveal().then(() => {
+                const edit = editor.get();
+                if (edit) {
+                  edit.revealPosition({
+                    line: (breakpointOrFrame.line as number) - 1,
+                    column: breakpointOrFrame.column || 0
+                  });
+                  Debugger.EditorHandler.showCurrentLine(
+                    edit,
+                    breakpointOrFrame.line as number
+                  );
+                }
               });
             });
           }
@@ -936,6 +935,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         caption: path,
         editorWrapper
       });
+
+      const frame = service.model.callstack.frame;
+      if (frame) {
+        Debugger.EditorHandler.showCurrentLine(editor, frame.line);
+      }
     };
 
     const trans = translator.load('jupyterlab');
