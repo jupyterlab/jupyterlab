@@ -66,6 +66,11 @@ export interface IDebugger {
   clearBreakpoints(): Promise<void>;
 
   /**
+   * Toggle a brekpoint for the current line in the current editor
+   */
+  toggleBreakpoint(): Promise<void>;
+
+  /**
    * Used to determine if kernel has pause on exception capabilities
    */
   pauseOnExceptionsIsValid(): boolean;

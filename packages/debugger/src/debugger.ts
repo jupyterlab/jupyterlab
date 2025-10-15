@@ -142,6 +142,9 @@ export namespace Debugger {
     export const runCells = 'debugger:run-cells';
 
     export const restartAndRunAll = 'debugger:restart-and-run-all';
+
+    export const toggleBreakpoint = 'debugger:toggle-breakpoint';
+
   }
 
   /**

@@ -1547,6 +1547,20 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    app.commands.addCommand(Debugger.CommandIDs.toggleBreakpoint, {
+      label: trans.__('Toggle Breakpoint'),
+      caption: trans.__('Toggle Breakpoint'),
+      execute: () => {
+        debug.toggleBreakpoint();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     // Notebook actions wrappers
     app.commands.addCommand(Debugger.CommandIDs.runCells, {
       label: trans.__('Run All Cells'),
@@ -1631,7 +1645,10 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       Debugger.CommandIDs.debugContinue
     ];
 
-    const breakpointCommands = [Debugger.CommandIDs.clearAllBreakpoints];
+    const breakpointCommands = [
+      Debugger.CommandIDs.clearAllBreakpoints,
+      Debugger.CommandIDs.toggleBreakpoint
+    ];
 
     runCommands.forEach(command => {
       menu.addItem({

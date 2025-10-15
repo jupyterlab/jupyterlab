@@ -210,6 +210,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model.breakpoints.restoreBreakpoints(bpMap);
   }
 
+  async toggleBreakpoint(): Promise<void> {
+    console.log('toggle bp');
+  }
+
   /**
    * Continues the execution of the current thread.
    */
