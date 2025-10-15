@@ -1615,7 +1615,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
             },
             option: {
               type: 'string',
-              description: trans.__('The variable view option to be toggled')
+              description: trans.__('The variables filter option to be toggled')
             }
           },
           required: ['label, option']
