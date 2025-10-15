@@ -19,6 +19,8 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
+import { VariableViewOptionKey } from './model';
+
 /**
  * An interface describing an application's visual debugger.
  */
@@ -987,9 +989,12 @@ export namespace IDebugger {
        */
       clear(): void;
 
-      variableViewOptions: Map<string, boolean>;
+      variableViewOptions: Map<VariableViewOptionKey, boolean>;
 
-      readonly variableViewOptionsChanged: ISignal<this, Map<string, boolean>>;
+      readonly variableViewOptionsChanged: ISignal<
+        this,
+        Map<VariableViewOptionKey, boolean>
+      >;
     }
 
     /**
