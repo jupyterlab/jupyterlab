@@ -66,7 +66,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     // Initialize variable view options with default values
     // TODO save this in settings/statedb?
     Object.keys(variableViewOptions).forEach(key => {
-      this._variableViewOptions.set(key, false);
+      this._variableViewOptions.set(key as VariableViewOptionKey, false);
     });
   }
 
@@ -171,15 +171,18 @@ export class DebuggerModel implements IDebugger.Model.IService {
   /**
    * A signal emitted when the variable view options change.
    */
-  get variableViewOptionsChanged(): ISignal<this, Map<string, boolean>> {
+  get variableViewOptionsChanged(): ISignal<
+    this,
+    Map<VariableViewOptionKey, boolean>
+  > {
     return this._variableViewOptionsChanged;
   }
 
-  get variableViewOptions(): Map<string, boolean> {
+  get variableViewOptions(): Map<VariableViewOptionKey, boolean> {
     return this._variableViewOptions;
   }
 
-  set variableViewOptions(options: Map<string, boolean>) {
+  set variableViewOptions(options: Map<VariableViewOptionKey, boolean>) {
     this._variableViewOptions = options;
     this._variableViewOptionsChanged.emit(options);
   }
@@ -217,10 +220,11 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
-  private _variableViewOptionsChanged = new Signal<this, Map<string, boolean>>(
-    this
-  );
-  private _variableViewOptions = new Map<string, boolean>();
+  private _variableViewOptionsChanged = new Signal<
+    this,
+    Map<VariableViewOptionKey, boolean>
+  >(this);
+  private _variableViewOptions = new Map<VariableViewOptionKey, boolean>();
 }
 
 /**

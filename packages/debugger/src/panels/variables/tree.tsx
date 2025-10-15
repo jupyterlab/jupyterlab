@@ -34,12 +34,13 @@ import { VariableViewOptionKey, variableViewOptions } from '../../model';
  */
 function filterVariablesByViewOptions(
   variables: IDebugger.IVariable[],
-  variableViewOptionsMap: Map<string, boolean>
+  variableViewOptionsMap: Map<VariableViewOptionKey, boolean>
 ): IDebugger.IVariable[] {
   let filteredVariables = variables;
   for (const [key, enabled] of variableViewOptionsMap) {
     if (enabled) {
-      const viewFilter = variableViewOptions[key as VariableViewOptionKey]?.filter;
+      const viewFilter =
+        variableViewOptions[key as VariableViewOptionKey]?.filter;
       if (viewFilter) {
         filteredVariables = filteredVariables.filter(viewFilter);
       }

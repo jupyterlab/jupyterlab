@@ -36,6 +36,7 @@ import {
   IDebuggerSidebar,
   IDebuggerSources,
   IDebuggerSourceViewer,
+  VariableViewOptionKey,
   variableViewOptions
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -1589,12 +1590,13 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(Debugger.CommandIDs.setVariablesViewOptions, {
       label: args => trans.__(args.label as string),
       caption: args => trans.__(args.label as string),
-      // isEnabled: () => !!debug.session?.isStarted,
       isToggled: args => {
-        return !!debug.model.variableViewOptions.get(args.option as string);
+        return !!debug.model.variableViewOptions.get(
+          args.option as VariableViewOptionKey
+        );
       },
       execute: async args => {
-        const { option } = args as { option: string };
+        const { option } = args as { option: VariableViewOptionKey };
 
         const options = debug.model.variableViewOptions;
         const newOptions = new Map(options);
