@@ -899,24 +899,23 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         });
 
         if (results.length > 0) {
-            results.forEach(editor => {
-              void editor.reveal().then(() => {
-                const edit = editor.get();
-                if (edit) {
-                  edit.revealPosition({
-                    line: (breakpointOrFrame.line as number) - 1,
-                    column: breakpointOrFrame.column || 0
-                  });
-                  Debugger.EditorHandler.showCurrentLine(
-                    edit,
-                    breakpointOrFrame.line as number
-                  );
-                }
-              });
+          results.forEach(editor => {
+            void editor.reveal().then(() => {
+              const edit = editor.get();
+              if (edit) {
+                edit.revealPosition({
+                  line: (breakpointOrFrame.line as number) - 1,
+                  column: breakpointOrFrame.column || 0
+                });
+                Debugger.EditorHandler.showCurrentLine(
+                  edit,
+                  breakpointOrFrame.line as number
+                );
+              }
             });
-          }
-          return;
+          });
         }
+        return;
       }
 
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
