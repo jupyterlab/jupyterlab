@@ -21,7 +21,31 @@ import {
 } from '@jupyterlab/translation';
 
 import { IDebugger } from '../../tokens';
-import { Debugger } from '../../';
+import {
+  Debugger,
+  VariablesFilterOptionKey,
+  variablesFilterOptions
+} from '../../';
+
+/**
+ * Filter variables based on variablesFilterOptions settings.
+ */
+function filterVariablesByViewOptions(
+  variables: IDebugger.IVariable[],
+  variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+): IDebugger.IVariable[] {
+  let filteredVariables = variables;
+  for (const [key, enabled] of variablesFilterOptionsMap) {
+    if (enabled) {
+      const viewFilter =
+        variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
+      if (viewFilter) {
+        filteredVariables = filteredVariables.filter(viewFilter);
+      }
+    }
+  }
+  return filteredVariables;
+}
 
 /**
  * A class wrapping the underlying variables datagrid.
@@ -34,9 +58,10 @@ export class Grid extends Panel {
    */
   constructor(options: Grid.IOptions) {
     super();
-    const { commands, model, themeManager } = options;
+    const { commands, model, service, themeManager } = options;
     this.model = model;
-    const dataModel = new GridModel(options.translator);
+    this.service = service;
+    const dataModel = new GridModel(service, options.translator);
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
@@ -64,12 +89,21 @@ export class Grid extends Panel {
     grid.node.style.height = '100%';
     this._grid = grid;
 
+    this.service.model.variablesFilterOptionsChanged.connect(
+      this._onVariablesFilterOptionsChanged,
+      this
+    );
+
     // Compute the grid's styles based on the current theme.
     if (themeManager) {
       themeManager.themeChanged.connect(this._updateStyles, this);
     }
     this.addWidget(grid);
   }
+
+  _onVariablesFilterOptionsChanged = (): void => {
+    this.dataModel.setData(this.model.scopes ?? []);
+  };
 
   /**
    * Set the variable filter list.
@@ -119,6 +153,7 @@ export class Grid extends Panel {
 
   private _grid: DataGrid;
   protected model: IDebugger.Model.IVariables;
+  protected service: IDebugger;
 }
 
 /**
@@ -140,6 +175,11 @@ namespace Grid {
     model: IDebugger.Model.IVariables;
 
     /**
+     * The debugger service.
+     */
+    service: IDebugger;
+
+    /**
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
@@ -157,10 +197,12 @@ namespace Grid {
 export class GridModel extends DataModel {
   /**
    * Create grid model
+   * @param service The debugger service
    * @param translator optional translator
    */
-  constructor(translator?: ITranslator) {
+  constructor(service: IDebugger, translator?: ITranslator) {
     super();
+    this._service = service;
     this._trans = (translator || nullTranslator).load('jupyterlab');
   }
 
@@ -221,6 +263,7 @@ export class GridModel extends DataModel {
       return this._trans.__('Name');
     }
 
+    console.log('this._data.value[row]', this._data.value[row]);
     return column === 1 ? this._data.value[row] : this._data.type[row];
   }
 
@@ -254,9 +297,16 @@ export class GridModel extends DataModel {
     });
     const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
     const variables = scope?.variables ?? [];
-    const filtered = variables.filter(
+
+    const filteredVariables = filterVariablesByViewOptions(
+      variables,
+      this._service.model.variablesFilterOptions
+    );
+
+    const filtered = filteredVariables.filter(
       variable => variable.name && !this._filter.has(variable.name)
     );
+
     filtered.forEach((variable, index) => {
       this._data.name[index] = variable.name;
       this._data.type[index] = variable.type ?? '';
@@ -285,6 +335,7 @@ export class GridModel extends DataModel {
 
   private _filter = new Set<string>();
   private _scope = '';
+  private _service: IDebugger;
   private _trans: TranslationBundle;
   private _data: {
     name: string[];

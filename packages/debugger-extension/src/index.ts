@@ -617,7 +617,8 @@ const variables: JupyterFrontEndPlugin<void> = {
             model,
             commands,
             scopes: [{ name, variables }],
-            themeManager
+            themeManager,
+            service
           })
         });
         widget.addClass('jp-DebuggerVariables');

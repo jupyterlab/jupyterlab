@@ -28,6 +28,7 @@ export class VariablesBodyGrid extends Panel {
     super();
     this.commands = options.commands;
     this.model = options.model;
+    this.service = options.service;
     this.themeManager = options.themeManager;
     this.translator = options.translator;
     this.model.changed.connect(() => this.update(), this);
@@ -63,6 +64,7 @@ export class VariablesBodyGrid extends Panel {
 
   protected commands: CommandRegistry;
   protected model: IDebugger.Model.IVariables;
+  protected service: IDebugger;
   protected themeManager: IThemeManager | null | undefined;
   protected translator: ITranslator | undefined;
 
@@ -75,10 +77,17 @@ export class VariablesBodyGrid extends Panel {
     }
 
     // Lazily load the datagrid module when the first grid is requested.
-    const { Grid } = await (this._pending = import('./gridpanel'));
-    const { commands, model, themeManager, translator } = this;
+    const { Grid } = await((this._pending = import('./gridpanel')));
+    const { commands, model, service, themeManager, translator } = this;
 
-    this._grid = new Grid({ commands, model, themeManager, translator });
+    // pass service
+    this._grid = new Grid({
+      commands,
+      model,
+      service,
+      themeManager,
+      translator
+    });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._pending = null;
     this.addWidget(this._grid);
@@ -126,6 +135,11 @@ export namespace VariablesBodyGrid {
      * The variables model.
      */
     model: IDebugger.Model.IVariables;
+
+    /**
+     * The debugger service.
+     */
+    service: IDebugger;
 
     /**
      * The commands registry.
