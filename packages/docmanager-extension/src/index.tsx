@@ -56,7 +56,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
-
+import { DEFAULT_AUTOSAVE_INTERVAL } from '@jupyterlab/notebook/src/constants';
 /**
  * The command IDs used by the document manager plugin.
  */
@@ -98,6 +98,7 @@ namespace CommandIDs {
  * The id of the document manager plugin.
  */
 const docManagerPluginId = '@jupyterlab/docmanager-extension:plugin';
+
 
 /**
  * A plugin to open documents in the main area.
@@ -267,7 +268,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
         | null;
-      docManager.autosaveInterval = autosaveInterval || 120;
+      docManager.autosaveInterval = autosaveInterval || DEFAULT_AUTOSAVE_INTERVAL;
 
       // Handle last modified timestamp check margin
       const lastModifiedCheckMargin = settings.get('lastModifiedCheckMargin')
