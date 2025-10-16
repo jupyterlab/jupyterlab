@@ -1630,8 +1630,8 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(Debugger.CommandIDs.clearAllBreakpoints, {
       label: trans.__('Clear All Breakpoints'),
       caption: trans.__('Clear All Breakpoints'),
-      execute: () => {
-        debug.clearBreakpoints();
+      execute: async () => {
+        await debug.clearBreakpoints();
       },
       describedBy: {
         args: {
