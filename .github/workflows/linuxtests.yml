@@ -63,9 +63,6 @@ jobs:
           restore-keys: |
             playwright-browsers-${{ runner.os }}-
 
-      - name: Install verdaccio
-        run: npm install -g verdaccio@6.2.0
-
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
