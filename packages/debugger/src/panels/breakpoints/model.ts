@@ -116,11 +116,8 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
         const code = cell.model.sharedModel.getSource();
         const codeId = this._config?.getCodeId(code, kernelName);
 
-        // console.log(codeId, breakpoint.source?.path, codeId === breakpoint.source?.path);
-
         if (codeId && codeId === breakpoint.source?.path) {
           if (isCodeCellModel(cell.model)) {
-            // console.log(cell.model.executionCount);
             if (cell.model.executionState === 'running') {
               display = `Cell [*]`;
             } else if (cell.model.executionCount === null) {
@@ -133,19 +130,12 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
       });
     });
 
-    console.log(this._consoleTracker);
-
     this._consoleTracker?.forEach(panel => {
       const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
 
       Array.from(panel.console.cells).forEach(cell => {
         const code = cell.model.sharedModel.getSource();
         const codeId = this._config?.getCodeId(code, kernelName);
-        console.log(
-          codeId,
-          breakpoint.source?.path,
-          codeId === breakpoint.source?.path
-        );
 
         if (codeId && codeId === breakpoint.source?.path) {
           if (isCodeCellModel(cell.model)) {

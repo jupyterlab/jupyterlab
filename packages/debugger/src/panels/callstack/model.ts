@@ -6,6 +6,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { IDebugger } from '../../tokens';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 /**
  * A model for a callstack.
@@ -14,6 +15,7 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
   constructor(options: CallstackModel.IOptions) {
     this._config = options.config;
     this._notebookTracker = options.notebookTracker ?? null;
+    this._consoleTracker = options.consoleTracker ?? null;
   }
 
   /**
@@ -103,11 +105,37 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
       });
     });
 
+    this._consoleTracker?.forEach(panel => {
+      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+
+      Array.from(panel.console.cells).forEach(cell => {
+        const code = cell.model.sharedModel.getSource();
+        const codeId = this._config?.getCodeId(code, kernelName);
+        console.log(codeId, frame.source?.path, codeId === frame.source?.path);
+
+        if (codeId && codeId === frame.source?.path) {
+          if (isCodeCellModel(cell.model)) {
+            const executionCount = cell.model.executionCount ?? null;
+            const executionState = cell.model.executionState ?? null;
+
+            if (executionState === 'running') {
+              display = `In [*]`;
+            } else if (executionCount === null) {
+              display = `In [ ]`;
+            } else {
+              display = `In [${executionCount}]`;
+            }
+          }
+        }
+      });
+    });
+
     return display;
   }
 
   private _config: IDebugger.IConfig;
   private _notebookTracker: INotebookTracker | null;
+  private _consoleTracker: IConsoleTracker | null;
   private _state: IDebugger.IStackFrame[] = [];
   private _currentFrame: IDebugger.IStackFrame | null = null;
   private _framesChanged = new Signal<this, IDebugger.IStackFrame[]>(this);
@@ -133,6 +161,11 @@ export namespace CallstackModel {
      * The notebook tracker.
      */
     notebookTracker: INotebookTracker | null;
+
+    /**
+     * The console tracker.
+     */
+    consoleTracker: IConsoleTracker | null;
   }
 }
 

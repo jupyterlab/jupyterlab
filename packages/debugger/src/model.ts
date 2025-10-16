@@ -32,7 +32,11 @@ export class DebuggerModel implements IDebugger.Model.IService {
       notebookTracker,
       consoleTracker
     });
-    this.callstack = new CallstackModel({ config, notebookTracker });
+    this.callstack = new CallstackModel({
+      config,
+      notebookTracker,
+      consoleTracker
+    });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
