@@ -103,6 +103,89 @@ export namespace IDocumentManagerDialogs {
       ignoreSave: boolean;
     }
   }
+
+  /**
+   * Options and result types for reload confirmation dialogs.
+   */
+  export namespace Reload {
+    export interface IOptions {
+      type: string;
+    }
+    export interface IResult {
+      shouldReload: boolean;
+    }
+  }
+
+  /**
+   * Options and result types for delete confirmation dialogs.
+   */
+  export namespace Delete {
+    export interface IOptions {
+      path: string;
+    }
+    export interface IResult {
+      shouldDelete: boolean;
+    }
+  }
+
+  /**
+   * Options and result types for choosing a checkpoint.
+   */
+  export namespace ChooseCheckpoint {
+    export interface IOptions {
+      checkpoints: Contents.ICheckpointModel[];
+      fileType: string;
+    }
+    export interface IResult {
+      checkpoint?: Contents.ICheckpointModel;
+    }
+  }
+
+  /**
+   * Options and result types for the revert confirmation dialog.
+   */
+  export namespace Revert {
+    export interface IOptions {
+      checkpoint: Contents.ICheckpointModel;
+      fileType: string;
+    }
+    export interface IResult {
+      shouldRevert: boolean;
+    }
+  }
+
+  /**
+   * Options and result types for prompting a rename on first save.
+   */
+  export namespace RenameOnSave {
+    /**
+     * Minimal options for prompting rename on first save.
+     */
+    export interface IOptions {
+      /**
+       * The current file name to pre-fill the input with.
+       */
+      name: string;
+    }
+
+    /**
+     * Result of the rename prompt.
+     */
+    export interface IResult {
+      /**
+       * Whether user decided to rename.
+       */
+      accepted: boolean;
+      /**
+       * The new name if accepted.
+       */
+      newName?: string;
+      /**
+       * Whether the user checked the "do not ask again" box.
+       */
+      doNotAskAgain?: boolean;
+    }
+  }
 }
 
 /**
@@ -139,6 +222,58 @@ export interface IDocumentManagerDialogs {
   saveBeforeClose(
     options: IDocumentManagerDialogs.SaveBeforeClose.IOptions
   ): Promise<IDocumentManagerDialogs.SaveBeforeClose.IResult>;
+
+  /**
+   * Dialog to confirm reload from disk.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  reload(
+    options: IDocumentManagerDialogs.Reload.IOptions
+  ): Promise<IDocumentManagerDialogs.Reload.IResult>;
+
+  /**
+   * Dialog to confirm deletion of a file.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  delete(
+    options: IDocumentManagerDialogs.Delete.IOptions
+  ): Promise<IDocumentManagerDialogs.Delete.IResult>;
+
+  /**
+   * Dialog to choose a checkpoint to revert to.
+   *
+   * This dialog only chooses which checkpoint to use; the actual revert
+   * confirmation and restore operation is handled separately by the caller.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  chooseCheckpoint(
+    options: IDocumentManagerDialogs.ChooseCheckpoint.IOptions
+  ): Promise<IDocumentManagerDialogs.ChooseCheckpoint.IResult>;
+
+  /**
+   * Prompt to rename on first save.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  renameOnSave(
+    options: IDocumentManagerDialogs.RenameOnSave.IOptions
+  ): Promise<IDocumentManagerDialogs.RenameOnSave.IResult>;
+  /**
+   * Show a revert confirmation dialog for a chosen checkpoint.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise resolving to whether the user confirmed the revert.
+   */
+  revert(
+    options: IDocumentManagerDialogs.Revert.IOptions
+  ): Promise<IDocumentManagerDialogs.Revert.IResult>;
 }
 
 /**
