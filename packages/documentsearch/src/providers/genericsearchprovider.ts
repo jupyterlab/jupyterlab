@@ -11,7 +11,7 @@ import { SearchProvider } from '../searchprovider';
 import { ITranslator } from '@jupyterlab/translation';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
-const SELECTED_CLASSES = ['CodeMirror-selectedtext'];
+const SELECTED_CLASSES = ['CodeMirror-selectedtext', 'jp-current-match'];
 
 /**
  * HTML search engine
