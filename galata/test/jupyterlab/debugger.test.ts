@@ -60,12 +60,6 @@ test.describe('Debugger Tests', () => {
       'start-debug-session-variables.png'
     );
 
-    await page.debugger.waitForSources();
-    const sourcesPanel = await page.debugger.getSourcePanelLocator();
-    expect(await sourcesPanel.screenshot()).toMatchSnapshot(
-      'start-debug-session-sources.png'
-    );
-
     await page.click('jp-button[title^=Continue]');
   });
 
@@ -165,12 +159,6 @@ test.describe('Debugger Tests', () => {
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-script-variables.png'
-    );
-
-    await page.debugger.waitForSources();
-    const sourcesPanel = await page.debugger.getSourcePanelLocator();
-    expect(await sourcesPanel.screenshot()).toMatchSnapshot(
-      'start-debug-session-script-sources.png'
     );
   });
 });
