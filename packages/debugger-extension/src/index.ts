@@ -914,8 +914,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
               }
             });
           });
+          return;
         }
-        return;
       }
 
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
