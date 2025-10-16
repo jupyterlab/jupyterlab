@@ -306,7 +306,7 @@ describe('@jupyterlab/notebook', () => {
           text: ['cell1 line1\ncell1 line2']
         });
 
-        await provider.startQuery(/cell.* line.*/, { output: true });
+        await provider.startQuery(/cell.? line.?/, { output: true });
         expect(provider.matchesCount).toBe(10); // 4 in codeCell + 4 in codeCellOutput + 2 in markdownCell
         expect(provider.currentMatchIndex).toBe(0);
 
