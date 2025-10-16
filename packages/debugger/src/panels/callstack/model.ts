@@ -111,7 +111,6 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
       Array.from(panel.console.cells).forEach(cell => {
         const code = cell.model.sharedModel.getSource();
         const codeId = this._config?.getCodeId(code, kernelName);
-        console.log(codeId, frame.source?.path, codeId === frame.source?.path);
 
         if (codeId && codeId === frame.source?.path) {
           if (isCodeCellModel(cell.model)) {
