@@ -221,95 +221,75 @@ export class DebuggerService implements IDebugger, IDisposable {
     editor: CodeEditor.IEditor,
     position: CodeEditor.IPosition
   ): [number | undefined, boolean] {
-    // TODO dummo indexing nonsense
-    let clickedLineNumber = position.line;
-    console.log('clickedLineNumber', clickedLineNumber);
-    let actualLineNumberIWant: number | undefined;
-    let isLineHaveNoText: boolean = false;
+    let selectedLineNumber = position.line;
+    let effectiveLineNumber: number | undefined;
+    let isBlankLine: boolean = false;
 
-    const initialLineText = editor.getLine(clickedLineNumber);
-    if (!initialLineText) {
-      return [undefined, isLineHaveNoText];
+    const selectedLineText = editor.getLine(selectedLineNumber);
+    if (selectedLineText === undefined) {
+      return [undefined, isBlankLine];
     }
 
-    console.log(
-      'initialLineText',
-      initialLineText,
-      initialLineText.trim() === ''
-    );
-    if (initialLineText.trim() === '') {
-      isLineHaveNoText = true;
-      while (clickedLineNumber > 1) {
-        clickedLineNumber--;
-        const prevLineText = editor.getLine(clickedLineNumber);
-        if (!prevLineText) {
-          return [undefined, isLineHaveNoText];
+    if (selectedLineText.trim() === '') {
+      isBlankLine = true;
+      while (selectedLineNumber > 0) {
+        selectedLineNumber--;
+        const prevLineText = editor.getLine(selectedLineNumber);
+        if (prevLineText === undefined) {
+          return [undefined, isBlankLine];
         }
         if (prevLineText.trim() !== '') {
-          actualLineNumberIWant = clickedLineNumber + 1;
+          // CodeEditor.IPosition uses old 0-indexed line number
+          // CodeMirror 6 uses 1-indexed line number
+          effectiveLineNumber = selectedLineNumber + 1;
           break;
         }
       }
     } else {
-      if (isLineHaveNoText === false) {
-        actualLineNumberIWant = clickedLineNumber + 1;
+      if (isBlankLine === false) {
+        // CodeEditor.IPosition uses old 0-indexed line number
+        // CodeMirror 6 uses 1-indexed line number
+        effectiveLineNumber = selectedLineNumber + 1;
       }
     }
 
-    console.log('actualLineNumberIWant', actualLineNumberIWant);
-    console.log('isLineHaveNoText', isLineHaveNoText);
-    return [actualLineNumberIWant, isLineHaveNoText];
+    return [effectiveLineNumber, isBlankLine];
   }
 
   async toggleBreakpoint(): Promise<void> {
-    /**
-     * adding
-     * the cursor is on a line with text
-     *  add the bp
-     *  make it selected?
-     *    nah - adding one doesn't mean you want to select it
-     * the cursor is on a line with no text
-     *  find first line above with text and add
-     * removing
-     *  an existing breakpoint is selected
-     *    remove it
-     *    clear selected
-     *  the cursor is on a line with text
-     *    just remove
-     *  the cursor is on a line with no text
-     *    i think select the first bp above
-     */
-
-    // ! set up and stuff p much
     if (!this._debuggerSources) {
       console.warn('No debugger sources available');
       return;
     }
 
-    const cell = this._debuggerSources.notebookTracker()?.activeCell;
-    const editor = cell?.editor;
-    const pos = editor?.getCursorPosition();
+    const activeCell = this._debuggerSources.notebookTracker()?.activeCell;
+    const activeCellEditor = activeCell?.editor;
+    const cursorPosition = activeCellEditor?.getCursorPosition();
 
-    if (!editor) {
+    console.log('activeCell?.id', activeCell?.model.id);
+    console.log('cursorPosition', cursorPosition);
+    if (!activeCellEditor) {
       console.log('no ed');
       return;
     }
-    if (!pos) {
+    if (!cursorPosition) {
       console.log('no pos');
       return;
     }
 
     const [actualLineNumberIWant, isLineHaveNoText] =
-      this._getEffectiveClickedLine(editor, pos);
+      this._getEffectiveClickedLine(activeCellEditor, cursorPosition);
 
+    if (!actualLineNumberIWant) {
+      console.log('no line number found');
+      return;
+    }
     // mah map
-    const modelBps = this.model.breakpoints.breakpoints;
+    const existingBreakpoints = this.model.breakpoints.breakpoints;
 
-    console.log('bps', modelBps);
-
-    const code = cell?.model.sharedModel.getSource();
+    const cellCode = activeCell?.model.sharedModel.getSource();
     const kernel = this.session?.connection?.kernel?.name;
-    if (!code) {
+    if (!cellCode) {
       console.log('no code');
       return;
     }
@@ -318,67 +298,49 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
 
-    const codeId = this._config.getCodeId(code, kernel);
-    const cellBps = modelBps.get(codeId) ?? [];
-
-    // ! ok now we can do stuff
+    const codeId = this._config.getCodeId(cellCode, kernel);
+    const cellBreakpoints = existingBreakpoints.get(codeId) ?? [];
 
     // If there is a selected BP remove it and be done
     if (this.model.breakpoints.selectedBreakpoint) {
-      const newBps = cellBps.filter(bp => {
-        bp.line !== actualLineNumberIWant;
-      });
+      const newBps = cellBreakpoints.filter(
+        bp => bp.line !== this.model.breakpoints.selectedBreakpoint?.line
+      );
       this.model.breakpoints.selectedBreakpoint = null;
-      this.updateBreakpoints(code, newBps, codeId);
+      this.updateBreakpoints(cellCode, newBps, codeId);
       return;
     }
 
-    const bpExist = cellBps.find(bp => {
+    const breakpointAtSelectedLine = cellBreakpoints.find(bp => {
       return bp.line === actualLineNumberIWant;
     });
 
-    let newBps: IDebugger.IBreakpoint[] = [];
-    if (!bpExist) {
-      console.log('in !bpExist');
-      // no bp cool just add that in there
-      // line number stuff should be settled already
-      const newBp: IDebugger.IBreakpoint = {
+    let updatedBreakpoints: IDebugger.IBreakpoint[] = [];
+    if (!breakpointAtSelectedLine) {
+      const newBreakpoint: IDebugger.IBreakpoint = {
         line: actualLineNumberIWant,
         verified: true,
         source: {
           path: codeId
         }
       };
-      cellBps?.push(newBp);
-      newBps = cellBps;
+      cellBreakpoints?.push(newBreakpoint);
+      updatedBreakpoints = cellBreakpoints;
     } else {
-      console.log('in !bpExist else');
-
-      // oh shiiii there's a bp
-      // selected is gone already so don't worry bout that
-      // if it's a line with text get it out of here simple as
+      // There is a breakpoint at the selected line
       if (!isLineHaveNoText) {
-        console.log('in !isLineHaveNoText');
-        newBps = cellBps.filter(bp => {
+        // If line has text, remove the breakpoint
+        updatedBreakpoints = cellBreakpoints.filter(bp => {
           bp.line !== actualLineNumberIWant;
         });
       } else {
-        console.log('in !isLineHaveNoText else');
-        // why you toggle an empty line dawg
-        // let's just select the a bp for these fools
-        this.model.breakpoints.selectedBreakpoint = bpExist;
-        console.log('cellBps', cellBps);
-        newBps = cellBps;
+        // Selected line is blank and the effective line has a breakpoint
+        // Select the breakpoint on the effective line
+        this.model.breakpoints.selectedBreakpoint = breakpointAtSelectedLine;
+        updatedBreakpoints = cellBreakpoints;
       }
     }
-    console.log('newBps', newBps);
-    this.updateBreakpoints(code, newBps, codeId);
-
-    // TODO: Implement breakpoint toggle logic
-    // This would typically involve:
-    // 1. Getting the current cursor position - DONEZO BRO
-    // 2. Checking if a breakpoint already exists at that line
-    // 3. Adding or removing the breakpoint accordingly
+    this.updateBreakpoints(cellCode, updatedBreakpoints, codeId);
   }
 
   /**
