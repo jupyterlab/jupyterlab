@@ -226,7 +226,6 @@ const elementAriaLabels = {
     'Variables Section',
     'Callstack Section',
     'Breakpoints Section',
-    'Source Section',
     'Kernel Sources Section'
   ],
   'extensionmanager.main-view': [
