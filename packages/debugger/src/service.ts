@@ -304,30 +304,30 @@ export class DebuggerService implements IDebugger, IDisposable {
     );
 
     let updatedBreakpoints: IDebugger.IBreakpoint[] = [];
+
     if (!breakpointAtSelectedLine) {
       const newBreakpoint: IDebugger.IBreakpoint = {
         line: actualLineNumberIWant,
         verified: true,
-        source: {
-          path: codeId
-        }
+        source: { path: codeId }
       };
       cellBreakpoints?.push(newBreakpoint);
       updatedBreakpoints = cellBreakpoints;
-    } else {
-      // There is a breakpoint at the selected line
-      if (!isLineHaveNoText) {
-        // If line has text, remove the breakpoint
-        updatedBreakpoints = cellBreakpoints.filter(
-          bp => bp.line !== actualLineNumberIWant
-        );
-      } else {
-        // Selected line is blank and the effective line has a breakpoint
-        // Select the breakpoint on the effective line
-        this.model.breakpoints.selectedBreakpoint = breakpointAtSelectedLine;
-        updatedBreakpoints = cellBreakpoints;
-      }
+      this.updateBreakpoints(cellCode, updatedBreakpoints, codeId);
+      return;
     }
+
+    if (!isLineHaveNoText) {
+      // Line has text - remove the breakpoint
+      updatedBreakpoints = cellBreakpoints.filter(
+        bp => bp.line !== actualLineNumberIWant
+      );
+    } else {
+      // Blank line - select the breakpoint
+      this.model.breakpoints.selectedBreakpoint = breakpointAtSelectedLine;
+      updatedBreakpoints = cellBreakpoints;
+    }
+
     this.updateBreakpoints(cellCode, updatedBreakpoints, codeId);
   }
 
