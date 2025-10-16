@@ -266,8 +266,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     const activeCellEditor = activeCell?.editor;
     const cursorPosition = activeCellEditor?.getCursorPosition();
 
-    console.log('activeCell?.id', activeCell?.model.id);
-    console.log('cursorPosition', cursorPosition);
     if (!activeCellEditor) {
       console.log('no ed');
       return;
@@ -284,11 +282,11 @@ export class DebuggerService implements IDebugger, IDisposable {
       console.log('no line number found');
       return;
     }
-    // mah map
-    const existingBreakpoints = this.model.breakpoints.breakpoints;
 
+    const existingBreakpoints = this.model.breakpoints.breakpoints;
     const cellCode = activeCell?.model.sharedModel.getSource();
     const kernel = this.session?.connection?.kernel?.name;
+
     if (!cellCode) {
       console.log('no code');
       return;
@@ -301,19 +299,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     const codeId = this._config.getCodeId(cellCode, kernel);
     const cellBreakpoints = existingBreakpoints.get(codeId) ?? [];
 
-    // If there is a selected BP remove it and be done
-    if (this.model.breakpoints.selectedBreakpoint) {
-      const newBps = cellBreakpoints.filter(
-        bp => bp.line !== this.model.breakpoints.selectedBreakpoint?.line
-      );
-      this.model.breakpoints.selectedBreakpoint = null;
-      this.updateBreakpoints(cellCode, newBps, codeId);
-      return;
-    }
-
-    const breakpointAtSelectedLine = cellBreakpoints.find(bp => {
-      return bp.line === actualLineNumberIWant;
-    });
+    const breakpointAtSelectedLine = cellBreakpoints.find(
+      bp => bp.line === actualLineNumberIWant
+    );
 
     let updatedBreakpoints: IDebugger.IBreakpoint[] = [];
     if (!breakpointAtSelectedLine) {
@@ -330,9 +318,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       // There is a breakpoint at the selected line
       if (!isLineHaveNoText) {
         // If line has text, remove the breakpoint
-        updatedBreakpoints = cellBreakpoints.filter(bp => {
-          bp.line !== actualLineNumberIWant;
-        });
+        updatedBreakpoints = cellBreakpoints.filter(
+          bp => bp.line !== actualLineNumberIWant
+        );
       } else {
         // Selected line is blank and the effective line has a breakpoint
         // Select the breakpoint on the effective line
