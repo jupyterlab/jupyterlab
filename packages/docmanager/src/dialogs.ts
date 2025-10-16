@@ -102,8 +102,8 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
    * Show a dialog asking whether to close a document.
    */
   async confirmClose(
-    options: IDocumentManagerDialogs.IConfirmCloseOptions
-  ): Promise<IDocumentManagerDialogs.IConfirmCloseResult> {
+    options: IDocumentManagerDialogs.ConfirmClose.IOptions
+  ): Promise<IDocumentManagerDialogs.ConfirmClose.IResult> {
     const trans = this._translator.load('jupyterlab');
     const { fileName, isDirty } = options;
 
@@ -152,8 +152,8 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
    * Show a dialog asking whether to save before closing a dirty document.
    */
   async saveBeforeClose(
-    options: IDocumentManagerDialogs.ISaveBeforeCloseOptions
-  ): Promise<IDocumentManagerDialogs.ISaveBeforeCloseResult> {
+    options: IDocumentManagerDialogs.SaveBeforeClose.IOptions
+  ): Promise<IDocumentManagerDialogs.SaveBeforeClose.IResult> {
     const trans = this._translator.load('jupyterlab');
     const { fileName, writable } = options;
 

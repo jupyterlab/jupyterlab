@@ -98,15 +98,15 @@ class MinimalCustomDialogs implements IDocumentManagerDialogs {
   }
 
   async confirmClose(
-    args: IDocumentManagerDialogs.IConfirmCloseOptions
-  ): Promise<IDocumentManagerDialogs.IConfirmCloseResult> {
+    args: IDocumentManagerDialogs.ConfirmClose.IOptions
+  ): Promise<IDocumentManagerDialogs.ConfirmClose.IResult> {
     this.confirmCloseCalled = true;
     return { shouldClose: false, ignoreSave: true, doNotAskAgain: true };
   }
 
   async saveBeforeClose(
-    args: IDocumentManagerDialogs.ISaveBeforeCloseOptions
-  ): Promise<IDocumentManagerDialogs.ISaveBeforeCloseResult> {
+    args: IDocumentManagerDialogs.SaveBeforeClose.IOptions
+  ): Promise<IDocumentManagerDialogs.SaveBeforeClose.IResult> {
     this.saveBeforeCloseCalled = true;
     return { shouldClose: false, ignoreSave: true };
   }
