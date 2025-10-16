@@ -120,6 +120,12 @@
       "description": "Collapse the debugger sidebar when disabling the debugger on a document.",
       "type": "boolean",
       "default": false
+    },
+    "showPausedOverlay": {
+      "title": "Show Paused Overlay",
+      "description": "Show an overlay on the editor or notebook when execution is paused in the debugger.",
+      "type": "boolean",
+      "default": true
     }
   },
   "additionalProperties": false,
