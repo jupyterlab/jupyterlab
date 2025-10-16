@@ -6,6 +6,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { IDebugger } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { isCodeCellModel } from '@jupyterlab/cells';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -19,6 +20,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
   constructor(options: SourcesModel.IOptions) {
     this.currentFrameChanged = options.currentFrameChanged;
     this._notebookTracker = options.notebookTracker ?? undefined;
+    this._consoleTracker = options.consoleTracker ?? undefined;
     this._config = options.config;
   }
 
@@ -102,6 +104,32 @@ export class SourcesModel implements IDebugger.Model.ISources {
       });
     });
 
+    if (this._consoleTracker) {
+      this._consoleTracker.forEach(panel => {
+        const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
+
+        Array.from(panel.console.cells).forEach(cell => {
+          const code = cell.model.sharedModel.getSource();
+          const codeId = this._config?.getCodeId(code, kernelName);
+
+          if (codeId && codeId === frame.source?.path) {
+            if (isCodeCellModel(cell.model)) {
+              const executionCount = cell.model.executionCount ?? null;
+              const executionState = cell.model.executionState ?? null;
+
+              if (executionState === 'running') {
+                display = `In [*]`;
+              } else if (executionCount === null) {
+                display = `In [ ]`;
+              } else {
+                display = `In [${executionCount}]`;
+              }
+            }
+          }
+        });
+      });
+    }
+
     return display;
   }
 
@@ -115,6 +143,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
     IDebugger.Source | null
   >(this);
   private _notebookTracker?: INotebookTracker;
+  private _consoleTracker?: IConsoleTracker;
   private _config?: IDebugger.IConfig;
 }
 
@@ -138,6 +167,11 @@ export namespace SourcesModel {
      * Optional notebook tracker to resolve cell execution numbers.
      */
     notebookTracker: INotebookTracker | null;
+
+    /**
+     * Optional console tracker to resolve cell execution numbers in console.
+     */
+    consoleTracker: IConsoleTracker | null;
 
     /**
      * Debugger config used to get code ids.

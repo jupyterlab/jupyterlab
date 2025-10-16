@@ -41,6 +41,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
       notebookTracker,
+      consoleTracker,
       config
     });
     this.kernelSources = new KernelSourcesModel();
