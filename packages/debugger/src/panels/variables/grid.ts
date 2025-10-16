@@ -77,7 +77,7 @@ export class VariablesBodyGrid extends Panel {
     }
 
     // Lazily load the datagrid module when the first grid is requested.
-    const { Grid } = await((this._pending = import('./gridpanel')));
+    const { Grid } = await (this._pending = import('./gridpanel'));
     const { commands, model, service, themeManager, translator } = this;
 
     this._grid = new Grid({
