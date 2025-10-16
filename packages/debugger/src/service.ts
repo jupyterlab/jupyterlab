@@ -220,41 +220,67 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _getEffectiveClickedLine(
     editor: CodeEditor.IEditor,
     position: CodeEditor.IPosition
-  ): number | undefined {
+  ): [number | undefined, boolean] {
     // TODO dummo indexing nonsense
     let clickedLineNumber = position.line;
+    console.log('clickedLineNumber', clickedLineNumber);
     let actualLineNumberIWant: number | undefined;
+    let isLineHaveNoText: boolean = false;
 
     const initialLineText = editor.getLine(clickedLineNumber);
     if (!initialLineText) {
-      return;
+      return [undefined, isLineHaveNoText];
     }
-    let isLineHaveNoText: boolean =
-      false; /* is true is the clicked line of code is empty */
 
+    console.log(
+      'initialLineText',
+      initialLineText,
+      initialLineText.trim() === ''
+    );
     if (initialLineText.trim() === '') {
       isLineHaveNoText = true;
       while (clickedLineNumber > 1) {
         clickedLineNumber--;
         const prevLineText = editor.getLine(clickedLineNumber);
         if (!prevLineText) {
-          return;
+          return [undefined, isLineHaveNoText];
         }
         if (prevLineText.trim() !== '') {
-          actualLineNumberIWant = clickedLineNumber;
+          actualLineNumberIWant = clickedLineNumber + 1;
           break;
         }
       }
     } else {
       if (isLineHaveNoText === false) {
-        actualLineNumberIWant = clickedLineNumber;
+        actualLineNumberIWant = clickedLineNumber + 1;
       }
     }
 
-    return actualLineNumberIWant;
+    console.log('actualLineNumberIWant', actualLineNumberIWant);
+    console.log('isLineHaveNoText', isLineHaveNoText);
+    return [actualLineNumberIWant, isLineHaveNoText];
   }
 
   async toggleBreakpoint(): Promise<void> {
+    /**
+     * adding
+     * the cursor is on a line with text
+     *  add the bp
+     *  make it selected?
+     *    nah - adding one doesn't mean you want to select it
+     * the cursor is on a line with no text
+     *  find first line above with text and add
+     * removing
+     *  an existing breakpoint is selected
+     *    remove it
+     *    clear selected
+     *  the cursor is on a line with text
+     *    just remove
+     *  the cursor is on a line with no text
+     *    i think select the first bp above
+     */
+
+    // ! set up and stuff p much
     if (!this._debuggerSources) {
       console.warn('No debugger sources available');
       return;
@@ -273,7 +299,8 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
 
-    const lineIWant = this._getEffectiveClickedLine(editor, pos);
+    const [actualLineNumberIWant, isLineHaveNoText] =
+      this._getEffectiveClickedLine(editor, pos);
 
     // mah map
     const modelBps = this.model.breakpoints.breakpoints;
@@ -294,17 +321,58 @@ export class DebuggerService implements IDebugger, IDisposable {
     const codeId = this._config.getCodeId(code, kernel);
     const cellBps = modelBps.get(codeId) ?? [];
 
-    const newBp = {
-      line: lineIWant,
-      verified: true,
-      source: {
-        path: codeId
-      }
-    };
-    console.log('cellBps', cellBps);
-    cellBps?.push(newBp);
+    // ! ok now we can do stuff
 
-    this.updateBreakpoints(code, cellBps, codeId);
+    // If there is a selected BP remove it and be done
+    if (this.model.breakpoints.selectedBreakpoint) {
+      const newBps = cellBps.filter(bp => {
+        bp.line !== actualLineNumberIWant;
+      });
+      this.model.breakpoints.selectedBreakpoint = null;
+      this.updateBreakpoints(code, newBps, codeId);
+      return;
+    }
+
+    const bpExist = cellBps.find(bp => {
+      return bp.line === actualLineNumberIWant;
+    });
+
+    let newBps: IDebugger.IBreakpoint[] = [];
+    if (!bpExist) {
+      console.log('in !bpExist');
+      // no bp cool just add that in there
+      // line number stuff should be settled already
+      const newBp: IDebugger.IBreakpoint = {
+        line: actualLineNumberIWant,
+        verified: true,
+        source: {
+          path: codeId
+        }
+      };
+      cellBps?.push(newBp);
+      newBps = cellBps;
+    } else {
+      console.log('in !bpExist else');
+
+      // oh shiiii there's a bp
+      // selected is gone already so don't worry bout that
+      // if it's a line with text get it out of here simple as
+      if (!isLineHaveNoText) {
+        console.log('in !isLineHaveNoText');
+        newBps = cellBps.filter(bp => {
+          bp.line !== actualLineNumberIWant;
+        });
+      } else {
+        console.log('in !isLineHaveNoText else');
+        // why you toggle an empty line dawg
+        // let's just select the a bp for these fools
+        this.model.breakpoints.selectedBreakpoint = bpExist;
+        console.log('cellBps', cellBps);
+        newBps = cellBps;
+      }
+    }
+    console.log('newBps', newBps);
+    this.updateBreakpoints(code, newBps, codeId);
 
     // TODO: Implement breakpoint toggle logic
     // This would typically involve:
