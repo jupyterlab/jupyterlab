@@ -111,7 +111,9 @@ test.describe('Debugger Console', () => {
     await expect(debugConsole).toBeVisible();
 
     // Get the evaluate button
-    const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
+    const evaluateButton = page.locator(
+      'jp-button[title*="Open Debugger Console"]'
+    );
     await expect(evaluateButton).toBeVisible();
 
     // Click the evaluate button to close the console
