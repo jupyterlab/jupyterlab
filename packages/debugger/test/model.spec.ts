@@ -61,7 +61,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(mockVariables, filterOptions);
 
       expect(result).toHaveLength(6);
@@ -79,7 +80,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(mockVariables, filterOptions);
 
       expect(result).toHaveLength(5);
@@ -98,7 +100,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(mockVariables, filterOptions);
 
       expect(result).toHaveLength(5);
@@ -117,7 +120,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(mockVariables, filterOptions);
 
       expect(result).toHaveLength(6);
@@ -137,7 +141,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(mockVariables, filterOptions);
 
       expect(result).toHaveLength(4);
@@ -157,7 +162,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(mockVariables, filterOptions);
 
       expect(result).toHaveLength(7);
@@ -174,7 +180,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions([], filterOptions);
 
       expect(result).toHaveLength(0);
@@ -200,7 +207,8 @@ describe('DebuggerModel', () => {
 
       const result = new DebuggerModel({
         config: {} as any,
-        notebookTracker: null
+        notebookTracker: null,
+        consoleTracker: null
       }).filterVariablesByViewOptions(
         variablesWithUndefinedType,
         filterOptions
