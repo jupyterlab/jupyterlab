@@ -569,19 +569,18 @@ namespace ILinker {
       controlCodes +
       '"]{2,}[^\\s' +
       controlCodes +
-      '"\'(){}\\[\\],:;.!?])',
-    'ug'
+      '"\'(){}[\\],:;.!?])',
+    'gu'
   );
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/3e407526a1e2ff22cacb69c7e353e81a12f41029/extensions/notebook-renderers/src/linkify.ts#L9
-  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w\.-]*)+)/;
-  const winRelPathRegex = /(?:(?:\~|\.)(?:(?:\\|\/)[\w\.-]*)+)/;
+  const winAbsPathRegex = /(?:[a-zA-Z]:(?:(?:\\|\/)[\w.-]*)+)/;
+  const winRelPathRegex = /(?:(?:~|\.)(?:(?:\\|\/)[\w.-]*)+)/;
   const winPathRegex = new RegExp(
     `(${winAbsPathRegex.source}|${winRelPathRegex.source})`
   );
-  const posixPathRegex = /((?:\~|\.)?(?:\/[\w\.-]*)+)/;
-  const lineColumnRegex =
-    /(?:(?:\:|", line )(?<line>[\d]+))?(?:\:(?<column>[\d]+))?/;
+  const posixPathRegex = /((?:~|\.)?(?:\/[\w.-]*)+)/;
+  const lineColumnRegex = /(?:(?::|", line )(?<line>\d+))?(?::(?<column>\d+))?/;
   // TODO: this ought to come from kernel (browser may be on a different OS).
   const isWindows = navigator.userAgent.indexOf('Windows') >= 0;
   export const pathLinkRegex = new RegExp(
