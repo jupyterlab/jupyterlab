@@ -14,9 +14,7 @@ import {
   homeIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
-import { ArrayExt } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -257,9 +255,15 @@ export class BreadCrumbs extends Widget {
   private _evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const breadcrumbElements = this._getBreadcrumbElements();
-      const index = ArrayExt.findFirstIndex(breadcrumbElements, node =>
-        ElementExt.hitTest(node, event.clientX, event.clientY)
-      );
+      let index = -1;
+      let target = event.target as HTMLElement;
+      while (target && target !== this.node) {
+        index = breadcrumbElements.indexOf(target);
+        if (index !== -1) {
+          break;
+        }
+        target = target.parentElement as HTMLElement;
+      }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
         // Don't allow dropping on the current path
@@ -299,9 +303,15 @@ export class BreadCrumbs extends Widget {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
     const breadcrumbElements = this._getBreadcrumbElements();
-    const index = ArrayExt.findFirstIndex(breadcrumbElements, node =>
-      ElementExt.hitTest(node, event.clientX, event.clientY)
-    );
+    let index = -1;
+    let target = event.target as HTMLElement;
+    while (target && target !== this.node) {
+      index = breadcrumbElements.indexOf(target);
+      if (index !== -1) {
+        break;
+      }
+      target = target.parentElement as HTMLElement;
+    }
     if (index !== -1) {
       breadcrumbElements[index].classList.add(DROP_TARGET_CLASS);
     }
