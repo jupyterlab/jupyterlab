@@ -2425,6 +2425,8 @@ __metadata:
     "@jupyterlab/services": ^7.5.0-beta.1
     "@jupyterlab/testutils": ^4.5.0-beta.1
     "@jupyterlab/translation": ^4.5.0-beta.1
+    "@jupyterlab/rendermime": ^4.5.0-alpha.2
+    "@jupyterlab/rendermime-interfaces": ^3.13.0-alpha.2
     "@lumino/widgets": ^2.7.1
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
@@ -5201,6 +5203,8 @@ __metadata:
     "@jupyterlab/services": ^7.5.0-beta.1
     "@jupyterlab/testutils": ^4.5.0-beta.1
     "@jupyterlab/translation": ^4.5.0-beta.1
+    "@jupyterlab/rendermime": ^4.5.0-alpha.2
+    "@jupyterlab/rendermime-interfaces": ^3.13.0-alpha.2
     "@lumino/widgets": ^2.7.1
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
