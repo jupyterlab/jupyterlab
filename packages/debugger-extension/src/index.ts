@@ -59,6 +59,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
+import { Widget } from '@lumino/widgets';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -859,11 +860,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     debuggerSources: IDebugger.ISources,
     translator: ITranslator
   ): Promise<IDebugger.ISourceViewer> => {
+    let previousEditorWidget: Widget | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
     const { model } = service;
-
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
@@ -918,11 +919,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         }
       }
 
+      if (previousEditorWidget && !previousEditorWidget.isDisposed) {
+        previousEditorWidget.dispose();
+        previousEditorWidget = null;
+      }
+
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
         content,
         mimeType,
         path
       });
+
       const editor = editorWrapper.editor;
       const editorHandler = new Debugger.EditorHandler({
         debuggerService: service,
@@ -938,6 +945,16 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         caption: path,
         editorWrapper
       });
+
+      for (const widget of app.shell.widgets('main')) {
+        if (
+          widget.title.label === PathExt.basename(path) &&
+          widget.title.caption === path
+        ) {
+          previousEditorWidget = widget;
+          break;
+        }
+      }
 
       const frame = service.model.callstack.frame;
       if (frame) {
