@@ -20,6 +20,8 @@ import { Debugger } from './debugger';
 import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -39,7 +41,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     // runs a kernel with debugging ability
     this._session = null;
     this._specsManager = options.specsManager ?? null;
-    this._model = new Debugger.Model();
+    this._model = new Debugger.Model({
+      config: options.config,
+      notebookTracker: options.notebookTracker || null,
+      consoleTracker: options.consoleTracker || null
+    });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
@@ -256,11 +262,15 @@ export class DebuggerService implements IDebugger, IDisposable {
       expression,
       frameId
     });
+
     if (!reply.success) {
       return null;
     }
+
+    // TODO - Should this be here?
+    this._model.variables.scopes = [];
+
     // get the frames to retrieve the latest state of the variables
-    this._clearModel();
     await this._getAllFrames();
 
     return reply.body;
@@ -460,7 +470,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else if (this.isStarted) {
-      this._clearModel();
+      this._model.callstack.frames = [];
       this._clearSignals();
     }
 
@@ -593,7 +603,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    await this.session.sendRequest('configurationDone', {});
   }
 
   /**
@@ -1042,5 +1051,15 @@ export namespace DebuggerService {
      * The application language translator.
      */
     translator?: ITranslator | null;
+
+    /**
+     * The notebook tracker.
+     */
+    notebookTracker?: INotebookTracker | null;
+
+    /**
+     * The console tracker.
+     */
+    consoleTracker?: IConsoleTracker | null;
   }
 }

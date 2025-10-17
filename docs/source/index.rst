@@ -50,4 +50,4 @@ See the sections below (and the top-level links above) for more information abou
    user/index
    extension/extension_dev
    developer/contributing
-   privacy_policies
+   API Reference <developer/api>

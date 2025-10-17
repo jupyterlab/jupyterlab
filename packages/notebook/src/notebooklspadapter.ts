@@ -299,7 +299,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       cellsAdded.length ||
       change.type === 'set' ||
       change.type === 'move' ||
-      change.type === 'remove'
+      change.type === 'remove' ||
+      change.type === 'clear'
     ) {
       // in contrast to the file editor document which can be only changed by the modification of the editor content,
       // the notebook document can also get modified by a change in the number or arrangement of editors themselves;

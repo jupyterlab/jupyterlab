@@ -20,7 +20,8 @@ package provides UI elements that are widely used in JupyterLab core,
 and that can be reused in your own extensions.
 
 For example, all of the icons in JupyterLab core can be reused via
-``LabIcon``. You can also use ``LabIcon`` to create your own custom
+:ts:class:`ui-components.LabIcon`.
+You can also use ``LabIcon`` to create your own custom
 icons that will be able to automatically change color to match the
 current JupyterLab theme.
 
@@ -31,8 +32,8 @@ current JupyterLab theme.
 ``LabIcon`` - set up and render icons
 -------------------------------------
 
-``LabIcon`` is the icon class used by JupyterLab, and is part of the new
-icon system introduced in JupyterLab v2.0.
+:ts:class:`ui-components.LabIcon` is the icon class used by JupyterLab,
+and is part of the new system introduced in JupyterLab v2.0.
 
 How JupyterLab handles icons
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

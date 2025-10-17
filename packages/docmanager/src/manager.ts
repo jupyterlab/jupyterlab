@@ -8,6 +8,8 @@ import {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { IUrlResolverFactory } from '@jupyterlab/rendermime';
+
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
@@ -19,10 +21,12 @@ import { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
 import {
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager
 } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
+import { DocumentManagerDialogs } from './dialogs';
 
 /**
  * The document manager.
@@ -42,6 +46,9 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
+    this._docManagerDialogs =
+      options.docManagerDialogs ??
+      new DocumentManagerDialogs({ translator: this.translator });
     this._dialogs =
       options.sessionDialogs ??
       new SessionContextDialogs({ translator: options.translator });
@@ -53,12 +60,14 @@ export class DocumentManager implements IDocumentManager {
     const widgetManager = new DocumentWidgetManager({
       registry: this.registry,
       translator: this.translator,
-      recentsManager: options.recentsManager
+      recentsManager: options.recentsManager,
+      dialogs: this._docManagerDialogs
     });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     widgetManager.stateChanged.connect(this._onWidgetStateChanged, this);
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
+    this._urlResolverFactory = options.urlResolverFactory;
   }
 
   /**
@@ -435,14 +444,16 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined {
     return this._createOrOpenDocument(
       'open',
       path,
       widgetName,
       kernel,
-      options
+      options,
+      kernelPreference
     );
   }
 
@@ -466,7 +477,8 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
@@ -476,7 +488,7 @@ export class DocumentManager implements IDocumentManager {
       });
       return widget;
     }
-    return this.open(path, widgetName, kernel, options ?? {});
+    return this.open(path, widgetName, kernel, options ?? {}, kernelPreference);
   }
 
   /**
@@ -578,7 +590,8 @@ export class DocumentManager implements IDocumentManager {
       sessionDialogs: this._dialogs,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator,
-      contentProviderId
+      contentProviderId,
+      urlResolverFactory: this._urlResolverFactory
     });
     const handler = new SaveHandler({
       context,
@@ -634,7 +647,8 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>,
-    options?: DocumentRegistry.IOpenOptions
+    options?: DocumentRegistry.IOpenOptions,
+    kernelPreference?: ISessionContext.IKernelPreference
   ): IDocumentWidget | undefined {
     const widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
@@ -647,11 +661,10 @@ export class DocumentManager implements IDocumentManager {
     }
 
     // Handle the kernel preference.
-    const preference = this.registry.getKernelPreference(
-      path,
-      widgetFactory.name,
-      kernel
-    );
+    const preference = {
+      ...this.registry.getKernelPreference(path, widgetFactory.name, kernel),
+      ...kernelPreference
+    };
 
     let context: Private.IContext | null;
     let ready: Promise<void> = Promise.resolve(undefined);
@@ -730,9 +743,11 @@ export class DocumentManager implements IDocumentManager {
   private _renameUntitledFileOnSave = true;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
+  private _urlResolverFactory?: IUrlResolverFactory;
   private _dialogs: ISessionContext.IDialogs;
   private _isConnectedCallback: () => boolean;
   private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
+  private _docManagerDialogs: IDocumentManagerDialogs;
 }
 
 /**
@@ -774,6 +789,11 @@ export namespace DocumentManager {
     sessionDialogs?: ISessionContext.IDialogs;
 
     /**
+     * The provider for document manager dialogs.
+     */
+    docManagerDialogs?: IDocumentManagerDialogs;
+
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -788,6 +808,11 @@ export namespace DocumentManager {
      * The manager for recent documents.
      */
     recentsManager?: IRecentsManager;
+
+    /**
+     * A factory for the URL resolver.
+     */
+    urlResolverFactory?: IUrlResolverFactory;
   }
 }
 

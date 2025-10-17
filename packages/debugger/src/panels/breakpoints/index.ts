@@ -97,6 +97,7 @@ export namespace Breakpoints {
      */
     pauseOnExceptions: string;
   }
+
   /**
    * Instantiation options for `Breakpoints`.
    */

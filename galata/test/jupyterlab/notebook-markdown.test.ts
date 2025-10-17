@@ -86,12 +86,14 @@ test.describe('Notebook Markdown', () => {
   test('Render a MermaidJS flowchart', async ({ page, tmpPath }) => {
     const imageName = 'render-mermaid-flowchart.png';
     const cell = await page.notebook.getCellLocator(3);
+    await cell!.scrollIntoViewIfNeeded();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Render a MermaidJS error', async ({ page, tmpPath }) => {
     const imageName = 'render-mermaid-error.png';
     const cell = await page.notebook.getCellLocator(4);
+    await cell!.scrollIntoViewIfNeeded();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 });

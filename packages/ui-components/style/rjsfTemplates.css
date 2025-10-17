@@ -162,6 +162,7 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 .jp-FormGroup-contentNormal .jp-FormGroup-description {
   flex-basis: 100%;
   padding: 4px 7px;
+  white-space: pre-wrap;
 }
 
 .jp-FormGroup-contentNormal .jp-FormGroup-default {

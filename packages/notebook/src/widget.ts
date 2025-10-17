@@ -925,7 +925,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
+        if (
+          ['defer', 'full', 'contentVisibility'].includes(
+            this.notebookConfig.windowingMode
+          )
+        ) {
           await this._updateForDeferMode(cell, cellIdx);
           if (this.notebookConfig.windowingMode === 'full') {
             // We need to delay slightly the removal to let codemirror properly initialize
@@ -968,6 +972,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     cellIdx: number
   ): Promise<void> {
     cell.dataset.windowedListIndex = `${cellIdx}`;
+
+    // Apply content visibility to this newly created cell
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      this._applyContentVisibility(cell, cellIdx);
+    }
+
     this.layout.insertWidget(cellIdx, cell);
     await cell.ready;
   }
@@ -1000,6 +1010,64 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     this.viewModel.windowingActive =
       this._notebookConfig.windowingMode === 'full';
+
+    // Apply content visibility when notebook settings update (without reload)
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      this._applyContentVisibilityToAllCells();
+    } else {
+      // Remove content-visibility from all cells
+      this.cellsArray.forEach((cell, i) => {
+        cell.toggleClass('jp-content-visibility', false);
+        cell.node.style.removeProperty('contain-intrinsic-size');
+      });
+    }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+
+    // Apply content visibility when notebook widget is attached to the DOM
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      // Apply content visibility to all cells initially
+      this._applyContentVisibilityToAllCells();
+
+      // watch for newly added cells
+      this.model?.cells.changed.connect(() => {
+        this._applyContentVisibilityToAllCells();
+      });
+    }
+  }
+
+  private _applyContentVisibilityToAllCells(): void {
+    requestAnimationFrame(() => {
+      this.cellsArray.forEach((cell, i) => {
+        this._applyContentVisibility(cell, i);
+      });
+    });
+  }
+
+  private _applyContentVisibility(cell: Cell<ICellModel>, index: number): void {
+    const isContentVisibility =
+      this._notebookConfig.windowingMode === 'contentVisibility';
+
+    if (!isContentVisibility) {
+      cell.node.style.removeProperty('contain-intrinsic-size');
+      cell.toggleClass('jp-content-visibility', false);
+      return;
+    }
+
+    const estHeight = this._viewModel.estimateWidgetSize(index);
+
+    requestAnimationFrame(() => {
+      cell.toggleClass('jp-content-visibility', true);
+      cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+
+      // Update height estimate in the view model
+      this.viewModel.setEstimatedWidgetSize(
+        cell.model.id,
+        cell.node.getBoundingClientRect().height
+      );
+    });
   }
 
   protected cellsArray: Array<Cell>;
@@ -1237,9 +1305,18 @@ export namespace StaticNotebook {
      * - 'defer': Wait for idle CPU cycles to attach out of viewport cells
      * - 'full': Attach to the DOM only cells in viewport
      * - 'none': Attach all cells to the viewport
+     * - 'contentVisibility': Use content-visibility to skip offscreen cells
      */
-    windowingMode: 'defer' | 'full' | 'none';
+    windowingMode: 'defer' | 'full' | 'none' | 'contentVisibility';
     accessKernelHistory?: boolean;
+
+    /**
+     * Whether to show a minimap alongside the notebook.
+     *
+     * The minimap provides a scroll-synchronized view of the
+     * notebook’s content to help with navigation.
+     */
+    showMinimap?: boolean;
   }
 
   /**
@@ -1261,9 +1338,10 @@ export namespace StaticNotebook {
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
-    windowingMode: 'full',
+    windowingMode: 'contentVisibility',
     accessKernelHistory: false,
-    showInputPlaceholder: true
+    showInputPlaceholder: true,
+    showMinimap: false
   };
 
   /**
@@ -1406,6 +1484,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       'trusted' | 'isDirty' | 'executionCount' | 'executionState'
     >
   ) => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (change.name) {
       case 'executionCount':
       case 'executionState':

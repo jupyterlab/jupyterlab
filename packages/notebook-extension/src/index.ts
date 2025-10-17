@@ -107,16 +107,17 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IDisposableMenuItem,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon,
+  RankedMenu,
   refreshIcon,
   runIcon,
-  stopIcon,
-  tableRowsIcon
+  stopIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -129,7 +130,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel, Widget } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
@@ -1124,6 +1125,72 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to add "Notebook (no kernel)" to the "Open With" context menu.
+ *
+ * Follows a similar logic as the filebrowser plugin populating the "Open With" menu
+ * based on widget factories.
+ *
+ * TODO: investigate generalizing opening without a kernel to other file types that may be
+ * backed by a kernel.
+ */
+const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:open-with-no-kernel',
+  description: 'Adds the "Notebook (no kernel)" option to the Open With menu.',
+  requires: [IFileBrowserFactory],
+  optional: [ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator | null
+  ): void => {
+    const { tracker } = factory;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const items: IDisposableMenuItem[] = [];
+
+    function updateOpenWithMenu(contextMenu: ContextMenu) {
+      // Clear previous items
+      items.forEach(item => item.dispose());
+      items.length = 0;
+
+      const openWith =
+        (contextMenu.menu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-contextmenu-open-with'
+        )?.submenu as RankedMenu) ?? null;
+
+      if (!openWith) {
+        return; // Bail early if the open with menu is not displayed
+      }
+
+      const selectedItems = tracker.currentWidget
+        ? Array.from(tracker.currentWidget.selectedItems())
+        : [];
+      const hasNotebooks = selectedItems.some(item => item.type === 'notebook');
+
+      if (hasNotebooks) {
+        items.push(
+          openWith.addItem({
+            command: 'filebrowser:open',
+            args: {
+              label: trans.__('Notebook (no kernel)'),
+              factory: FACTORY,
+              kernelPreference: {
+                shouldStart: false
+              }
+            }
+          })
+        );
+      }
+    }
+
+    app.contextMenu.opened.connect(updateOpenWithMenu);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1148,7 +1215,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   languageServerPlugin,
   updateRawMimetype,
   customMetadataEditorFields,
-  activeCellTool
+  activeCellTool,
+  openWithNoKernelPlugin
 ];
 export default plugins;
 
@@ -1947,6 +2015,7 @@ function activateNotebookHandler(
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
+    widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
 
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
@@ -1962,15 +2031,8 @@ function activateNotebookHandler(
   function updateTracker(options: NotebookPanel.IConfig): void {
     tracker.forEach(widget => {
       widget.setConfig(options);
+      widget.content.scrollbar = options.notebookConfig.showMinimap ?? false;
     });
-    if (options.notebookConfig.windowingMode !== 'full') {
-      // Disable all virtual scrollbars if any was enabled
-      tracker.forEach(widget => {
-        if (widget.content.scrollbar) {
-          widget.content.scrollbar = false;
-        }
-      });
-    }
   }
 
   /**
@@ -2028,9 +2090,11 @@ function activateNotebookHandler(
       windowingMode: settings.get('windowingMode').composite as
         | 'defer'
         | 'full'
-        | 'none',
+        | 'none'
+        | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
-        .composite as boolean
+        .composite as boolean,
+      showMinimap: settings.get('showMinimap').composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -3325,7 +3389,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
     isEnabled,
@@ -3342,7 +3409,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, true);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, true, addExtraLine);
       }
     },
     isEnabled,
@@ -3359,7 +3429,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, false);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
     isEnabled,
@@ -4470,9 +4543,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Show Minimap'),
-    caption: trans.__(
-      'Show Minimap (virtual scrollbar, enabled with windowing mode: full)'
-    ),
+    caption: trans.__('Show Minimap'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -4480,32 +4551,18 @@ function addCommands(
         current.content.scrollbar = !current.content.scrollbar;
       }
     },
-    icon: args => (args.toolbar ? tableRowsIcon : undefined),
-    isEnabled: args => {
-      const enabled =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return enabled;
+    isEnabled: () => {
+      const current = tracker.currentWidget;
+      return !!current;
     },
     isToggled: () => {
       const current = tracker.currentWidget;
       return current?.content.scrollbar ?? false;
     },
-    isVisible: args => {
-      const visible =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return visible;
-    },
     describedBy: {
       args: {
         type: 'object',
-        properties: {
-          toolbar: {
-            type: 'boolean',
-            description: trans.__('Whether the command is called from toolbar')
-          }
-        }
+        properties: {}
       }
     }
   });
@@ -4696,6 +4753,11 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleLineNumbers.add({
     id: CommandIDs.toggleAllLines,
     isEnabled
+  });
+
+  mainMenu.viewMenu.editorViewers.toggleMinimap.add({
+    id: CommandIDs.virtualScrollbar,
+    isEnabled: () => true
   });
 
   // Add an ICodeRunner to the application run menu
