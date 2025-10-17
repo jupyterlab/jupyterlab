@@ -237,7 +237,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           'Search in the cell outputs (not available when replace options are shown).'
         ),
         default: false,
-        supportReplace: false
+        supportReplace: true
       },
       selection: {
         title:
