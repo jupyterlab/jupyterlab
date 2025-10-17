@@ -19,11 +19,15 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
 
   const fileName = 'testfile.txt';
   await page.menu.clickMenuItem('File>New>Text File');
+  await page
+    .locator('.jp-DirListing-item:has-text("untitled.txt")')
+    .waitFor({ state: 'visible' });
   await page.contents.renameFile(
     `${tmpPath}/dir1/dir2/untitled.txt`,
     `${tmpPath}/dir1/dir2/${fileName}`
   );
   const fileItem = page.locator(`.jp-DirListing-item:has-text("${fileName}")`);
+  await fileItem.waitFor({ state: 'visible' });
 
   await fileItem.dragTo(dir1Breadcrumb);
 
