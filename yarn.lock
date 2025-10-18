@@ -2917,6 +2917,7 @@ __metadata:
     "@jupyterlab/testing": ^4.5.0-beta.1
     "@jupyterlab/translation": ^4.5.0-beta.1
     "@lumino/commands": ^2.3.2
+    "@lumino/widgets": ^2.7.1
     "@types/jest": ^29.2.0
     "@types/react-dom": ^18.0.9
     rimraf: ~5.0.5
