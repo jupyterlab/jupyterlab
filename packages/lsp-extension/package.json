@@ -37,9 +37,9 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.5.0-beta.1",
-    "@jupyterlab/apputils": "^4.6.0-beta.1",
+    "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/lsp": "^4.5.0-beta.1",
-    "@jupyterlab/running": "^4.5.0-beta.1",
+    "@jupyterlab/running": "^0.1.3",
     "@jupyterlab/settingregistry": "^4.5.0-beta.1",
     "@jupyterlab/translation": "^4.5.0-beta.1",
     "@jupyterlab/ui-components": "^4.5.0-beta.1",
