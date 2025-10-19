@@ -925,7 +925,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
+        if (
+          ['defer', 'full', 'contentVisibility'].includes(
+            this.notebookConfig.windowingMode
+          )
+        ) {
           await this._updateForDeferMode(cell, cellIdx);
           if (this.notebookConfig.windowingMode === 'full') {
             // We need to delay slightly the removal to let codemirror properly initialize
@@ -1046,14 +1050,24 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     const isContentVisibility =
       this._notebookConfig.windowingMode === 'contentVisibility';
 
-    cell.toggleClass('jp-content-visibility', isContentVisibility);
-
-    if (isContentVisibility) {
-      const estHeight = this._viewModel.estimateWidgetSize(index);
-      cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-    } else {
+    if (!isContentVisibility) {
       cell.node.style.removeProperty('contain-intrinsic-size');
+      cell.toggleClass('jp-content-visibility', false);
+      return;
     }
+
+    const estHeight = this._viewModel.estimateWidgetSize(index);
+
+    requestAnimationFrame(() => {
+      cell.toggleClass('jp-content-visibility', true);
+      cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+
+      // Update height estimate in the view model
+      this.viewModel.setEstimatedWidgetSize(
+        cell.model.id,
+        cell.node.getBoundingClientRect().height
+      );
+    });
   }
 
   protected cellsArray: Array<Cell>;

@@ -50,7 +50,11 @@ import {
 } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  NullTranslator,
+  nullTranslator
+} from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
@@ -84,17 +88,33 @@ const consoles: JupyterFrontEndPlugin<void> = {
   description: 'Add debugger capability to the consoles.',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
-  optional: [ILabShell],
-  activate: (
+  optional: [ILabShell, ISettingRegistry, ITranslator],
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    translator: ITranslator | NullTranslator
   ) => {
+    if (settingRegistry) {
+      const settings = await settingRegistry?.load(main.id);
+
+      const updateOverlaySetting = (): void => {
+        const showOverlay = settings.composite['showPausedOverlay'] ?? true;
+        document.body.dataset.showPausedOverlay = showOverlay
+          ? 'true'
+          : 'false';
+      };
+
+      updateOverlaySetting();
+      settings.changed.connect(updateOverlaySetting);
+    }
     const handler = new Debugger.Handler({
       type: 'console',
       shell: app.shell,
-      service: debug
+      service: debug,
+      translator: translator
     });
 
     const updateHandlerAndCommands = async (
@@ -132,17 +152,33 @@ const files: JupyterFrontEndPlugin<void> = {
   description: 'Adds debugger capabilities to files.',
   autoStart: true,
   requires: [IDebugger, IEditorTracker],
-  optional: [ILabShell],
-  activate: (
+  optional: [ILabShell, ISettingRegistry, ITranslator],
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    translator: ITranslator | NullTranslator
   ) => {
+    if (settingRegistry) {
+      const settings = await settingRegistry?.load(main.id);
+
+      const updateOverlaySetting = (): void => {
+        const showOverlay = settings.composite['showPausedOverlay'] ?? true;
+        document.body.dataset.showPausedOverlay = showOverlay
+          ? 'true'
+          : 'false';
+      };
+
+      updateOverlaySetting();
+      settings.changed.connect(updateOverlaySetting);
+    }
     const handler = new Debugger.Handler({
       type: 'file',
       shell: app.shell,
-      service: debug
+      service: debug,
+      translator: translator
     });
 
     const activeSessions: {
@@ -206,24 +242,45 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     'Adds debugger capability to notebooks and provides the debugger notebook handler.',
   autoStart: true,
   requires: [IDebugger, INotebookTracker],
-  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
+  optional: [
+    ILabShell,
+    ICommandPalette,
+    ISessionContextDialogs,
+    ISettingRegistry,
+    ITranslator
+  ],
   provides: IDebuggerHandler,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
     labShell: ILabShell | null,
     palette: ICommandPalette | null,
     sessionDialogs_: ISessionContextDialogs | null,
+    settingRegistry: ISettingRegistry | null,
     translator_: ITranslator | null
-  ): Debugger.Handler => {
+  ): Promise<Debugger.Handler> => {
     const translator = translator_ ?? nullTranslator;
+    if (settingRegistry) {
+      const settings = await settingRegistry?.load(main.id);
+
+      const updateOverlaySetting = (): void => {
+        const showOverlay = settings.composite['showPausedOverlay'] ?? true;
+        document.body.dataset.showPausedOverlay = showOverlay
+          ? 'true'
+          : 'false';
+      };
+
+      updateOverlaySetting();
+      settings.changed.connect(updateOverlaySetting);
+    }
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
-      service
+      service,
+      translator: translator
     });
 
     const trans = translator.load('jupyterlab');
@@ -309,17 +366,19 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [INotebookTracker, IDebuggerSources, ITranslator],
+  optional: [INotebookTracker, IConsoleTracker, IDebuggerSources, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
     notebookTracker: INotebookTracker | null,
+    consoleTracker: IConsoleTracker | null,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>
     new Debugger.Service({
       config,
       notebookTracker,
+      consoleTracker,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
       translator

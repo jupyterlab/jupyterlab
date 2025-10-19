@@ -21,10 +21,12 @@ import { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
 import {
   IDocumentManager,
+  IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager
 } from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
+import { DocumentManagerDialogs } from './dialogs';
 
 /**
  * The document manager.
@@ -44,6 +46,9 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
+    this._docManagerDialogs =
+      options.docManagerDialogs ??
+      new DocumentManagerDialogs({ translator: this.translator });
     this._dialogs =
       options.sessionDialogs ??
       new SessionContextDialogs({ translator: options.translator });
@@ -55,7 +60,8 @@ export class DocumentManager implements IDocumentManager {
     const widgetManager = new DocumentWidgetManager({
       registry: this.registry,
       translator: this.translator,
-      recentsManager: options.recentsManager
+      recentsManager: options.recentsManager,
+      dialogs: this._docManagerDialogs
     });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     widgetManager.stateChanged.connect(this._onWidgetStateChanged, this);
@@ -741,6 +747,7 @@ export class DocumentManager implements IDocumentManager {
   private _dialogs: ISessionContext.IDialogs;
   private _isConnectedCallback: () => boolean;
   private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
+  private _docManagerDialogs: IDocumentManagerDialogs;
 }
 
 /**
@@ -780,6 +787,11 @@ export namespace DocumentManager {
      * The provider for session dialogs.
      */
     sessionDialogs?: ISessionContext.IDialogs;
+
+    /**
+     * The provider for document manager dialogs.
+     */
+    docManagerDialogs?: IDocumentManagerDialogs;
 
     /**
      * The application language translator.

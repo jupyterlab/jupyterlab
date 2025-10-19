@@ -15,6 +15,7 @@ import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 /**
  * A model for a debugger.
@@ -24,10 +25,18 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const { config, notebookTracker } = options;
+    const { config, notebookTracker, consoleTracker } = options;
 
-    this.breakpoints = new BreakpointsModel({ config, notebookTracker });
-    this.callstack = new CallstackModel({ config, notebookTracker });
+    this.breakpoints = new BreakpointsModel({
+      config,
+      notebookTracker,
+      consoleTracker
+    });
+    this.callstack = new CallstackModel({
+      config,
+      notebookTracker,
+      consoleTracker
+    });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
@@ -187,5 +196,10 @@ export namespace DebuggerModel {
      * The notebook tracker.
      */
     notebookTracker: INotebookTracker | null;
+
+    /**
+     * The console tracker.
+     */
+    consoleTracker: IConsoleTracker | null;
   }
 }
