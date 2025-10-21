@@ -31,13 +31,6 @@ export class DebuggerSources implements IDebugger.ISources {
   }
 
   /**
-   * Get the notebook tracker.
-   */
-  notebookTracker(): INotebookTracker | null {
-    return this._notebookTracker;
-  }
-
-  /**
    * Returns an array of editors for a source matching the current debug
    * session by iterating through all the widgets in each of the supported
    * debugger types (i.e., consoles, files, notebooks).

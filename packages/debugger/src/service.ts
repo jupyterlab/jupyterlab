@@ -138,14 +138,14 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Get the last clicked console editor.
+   * Get the editor for the last clicked console cell.
    */
   get lastClickedConsoleEditor(): CodeEditor.IEditor | null {
     return this._lastClickedConsoleEditor;
   }
 
   /**
-   * Set the last clicked console editor.
+   * Set the editor for the last clicked console cell.
    */
   set lastClickedConsoleEditor(editor: CodeEditor.IEditor | null) {
     this._lastClickedConsoleEditor = editor;
@@ -226,10 +226,11 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Handle a click on the gutter.
+   * Get the effective line from an editor position.
+   * The effective line is the first non-empty line above (and including) the selected line
    *
-   * @param editor The editor from where the click originated.
-   * @param position The position corresponding to the click event.
+   * @param editor The currently selected editor.
+   * @param position The position corresponding to the current cursor position.
    */
   private _getEffectiveClickedLine(
     editor: CodeEditor.IEditor,
@@ -253,7 +254,7 @@ export class DebuggerService implements IDebugger, IDisposable {
           return [undefined, isBlankLine];
         }
         if (prevLineText.trim() !== '') {
-          // CodeEditor.IPosition uses old 0-indexed line number
+          // CodeEditor.IPosition uses the CM5 style 0-indexed line number
           // CodeMirror 6 uses 1-indexed line number
           effectiveLineNumber = selectedLineNumber + 1;
           break;
@@ -261,7 +262,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       }
     } else {
       if (isBlankLine === false) {
-        // CodeEditor.IPosition uses old 0-indexed line number
+        // CodeEditor.IPosition uses the CM5 style 0-indexed line number
         // CodeMirror 6 uses 1-indexed line number
         effectiveLineNumber = selectedLineNumber + 1;
       }
@@ -275,28 +276,16 @@ export class DebuggerService implements IDebugger, IDisposable {
     path: string
   ): Promise<void> {
     if (!activeEditor) {
-      console.log('no activeeditor');
-      return;
-    }
-
-    if (!this._debuggerSources) {
-      console.warn('No debugger sources available');
+      console.log('no active editor');
       return;
     }
 
     const cursorPosition = activeEditor?.getCursorPosition();
 
-    if (!activeEditor) {
-      console.log('no ed');
-      return;
-    }
-    if (!cursorPosition) {
-      console.log('no pos');
-      return;
-    }
-
-    const [actualLineNumberIWant, isLineHaveNoText] =
-      this._getEffectiveClickedLine(activeEditor, cursorPosition);
+    const [actualLineNumberIWant, isBlankLine] = this._getEffectiveClickedLine(
+      activeEditor,
+      cursorPosition
+    );
 
     if (!actualLineNumberIWant) {
       console.log('no line number found');
@@ -306,10 +295,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     const cellCode = activeEditor.model.sharedModel.getSource();
     const kernel = this.session?.connection?.kernel?.name;
 
-    if (!cellCode) {
-      console.log('no code');
-      return;
-    }
     if (!kernel) {
       console.log('no kernel');
       return;
@@ -345,7 +330,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
 
-    if (!isLineHaveNoText) {
+    if (!isBlankLine) {
       // Line has text - remove the breakpoint
       updatedBreakpoints = cellBreakpoints.filter(
         bp => bp.line !== actualLineNumberIWant

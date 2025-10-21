@@ -125,19 +125,15 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    // Store the last clicked editor for console breakpoints
-    // let lastClickedConsoleEditor: CodeEditor.IEditor | null = null;
-
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
     ): Promise<void> => {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
-      console.log('sessionContext', sessionContext);
 
+      // Find the editor for the clicked cell
       widget?.console?.node?.addEventListener('click', (e: PointerEvent) => {
-        // Find the cell that contains the clicked element
         const clickedElement = e.target as HTMLElement;
         const cellElement = clickedElement.closest('.jp-Console-cell');
 
@@ -151,6 +147,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
           }
         }
       });
+
       updateState(app.commands, debug);
     };
 
@@ -824,7 +821,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       source: IDebugger.Source,
       breakpoint?: IDebugger.IBreakpoint
     ): void => {
-      console.log('check');
       if (!source) {
         return;
       }
@@ -1577,45 +1573,36 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       caption: trans.__('Toggle Breakpoint'),
       execute: () => {
         const currentWidget = app.shell.currentWidget;
-        let activeEditor: CodeEditor.IEditor | null = null;
 
+        // Determine editor and path based on widget type
+        let activeEditor: CodeEditor.IEditor | null = null;
         let path: string | undefined = undefined;
 
         if (currentWidget instanceof ConsolePanel) {
-          // Use the last clicked console editor
-
-          if (debug.lastClickedConsoleEditor) {
-            activeEditor = debug.lastClickedConsoleEditor;
-            // For console cells, we don't have a file path, so path remains undefined
-          } else {
+          activeEditor = debug.lastClickedConsoleEditor;
+          if (!activeEditor) {
             console.log('No console editor selected');
             return;
           }
         } else if (currentWidget instanceof NotebookPanel) {
-          // console.log('Current widget is a NotebookPanel');
-          const cellEditor = currentWidget.content.activeCell?.editor;
-          if (!cellEditor) {
-            console.log('go away');
+          activeEditor = currentWidget.content.activeCell?.editor ?? null;
+          if (!activeEditor) {
+            console.log('No active cell editor');
             return;
           }
-          activeEditor = cellEditor;
-          // Handle notebook breakpoint logic here
         } else if (
           currentWidget instanceof MainAreaWidget &&
           currentWidget.content instanceof CodeEditorWrapper
         ) {
-          console.log('Current widget is a MainAreaWidget<CodeEditorWrapper>');
-
-          console.log('currentWidget.titles', currentWidget.title.caption);
-          path = currentWidget.title.caption;
           activeEditor = currentWidget.content.editor;
-          // Handle file editor breakpoint logic here
+          // Read only editors save their path as their title when opened
+          path = currentWidget.title.caption;
         } else {
-          // MainAreaWidget<CodeEditorWrapper>
-          console.log(
-            'Current widget is not a supported type:',
+          console.warn(
+            'Unsupported widget type:',
             currentWidget?.constructor.name
           );
+          return;
         }
 
         debug.toggleBreakpoint(activeEditor, path);

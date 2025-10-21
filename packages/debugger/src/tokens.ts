@@ -20,7 +20,6 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 import { DebuggerHandler } from './handler';
 
 import { VariablesFilterOptionKey } from './model';
-import { INotebookTracker } from '@jupyterlab/notebook';
 
 /**
  * An interface describing an application's visual debugger.
@@ -62,6 +61,11 @@ export interface IDebugger {
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession | null>;
 
   /**
+   * The editor for the last clicked console cell.
+   */
+  lastClickedConsoleEditor: CodeEditor.IEditor | null;
+
+  /**
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;
@@ -73,8 +77,6 @@ export interface IDebugger {
     activeEditor: CodeEditor.IEditor | null,
     path?: string
   ): Promise<void>;
-
-  lastClickedConsoleEditor: CodeEditor.IEditor | null;
 
   /**
    * Used to determine if kernel has pause on exception capabilities
@@ -460,8 +462,6 @@ export namespace IDebugger {
      * @param params - The editor open parameters.
      */
     open(params: ISources.OpenParams): void;
-
-    notebookTracker(): INotebookTracker | null;
   }
 
   /**
