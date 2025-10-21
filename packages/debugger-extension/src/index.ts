@@ -141,19 +141,15 @@ const consoles: JupyterFrontEndPlugin<void> = {
         const clickedElement = e.target as HTMLElement;
         const cellElement = clickedElement.closest('.jp-Console-cell');
 
-        // if (cellElement) {
-        // Find the corresponding cell widget
-        const cells = widget.console.cells;
-        for (const cell of cells) {
-          if (cell.node === cellElement) {
-            // Store the selected editor for use in toggleBreakpoint
-            debug.lastClickedConsoleEditor = cell.editor;
-
-            // You can now use this cell for breakpoint operations
-            break;
+        if (cellElement) {
+          const cells = widget.console.cells;
+          for (const cell of cells) {
+            if (cell.node === cellElement) {
+              debug.lastClickedConsoleEditor = cell.editor;
+              break;
+            }
           }
         }
-        // }
       });
       updateState(app.commands, debug);
     };
@@ -1589,7 +1585,6 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
           // Use the last clicked console editor
 
           if (debug.lastClickedConsoleEditor) {
-            console.log('we pull up');
             activeEditor = debug.lastClickedConsoleEditor;
             // For console cells, we don't have a file path, so path remains undefined
           } else {

@@ -274,7 +274,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     activeEditor: CodeEditor.IEditor | null,
     path: string
   ): Promise<void> {
-    console.log('lemme in');
     if (!activeEditor) {
       console.log('no activeeditor');
       return;
