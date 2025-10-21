@@ -69,7 +69,10 @@ export interface IDebugger {
   /**
    * Toggle a brekpoint for the current line in the current editor
    */
-  toggleBreakpoint(): Promise<void>;
+  toggleBreakpoint(
+    activeEditor: CodeEditor.IEditor | null,
+    path?: string
+  ): Promise<void>;
 
   /**
    * Used to determine if kernel has pause on exception capabilities

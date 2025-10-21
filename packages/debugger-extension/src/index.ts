@@ -1558,7 +1558,8 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const currentWidget = app.shell.currentWidget;
         let activeEditor: CodeEditor.IEditor | null = null;
-        let isNotebook = false;
+        
+        let path: string | undefined = undefined;
 
         if (currentWidget instanceof ConsolePanel) {
           // console.log('Current widget is a ConsolePanel');
@@ -1566,7 +1567,6 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
           // debug.toggleBreakpointCells(cells);
           // Handle console breakpoint logic here
         } else if (currentWidget instanceof NotebookPanel) {
-          isNotebook = true;
           // console.log('Current widget is a NotebookPanel');
           const cellEditor = currentWidget.content.activeCell?.editor;
           if (!cellEditor) {
@@ -1579,10 +1579,10 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
           currentWidget instanceof MainAreaWidget &&
           currentWidget.content instanceof CodeEditorWrapper
         ) {
-          isNotebook = false;
           console.log('Current widget is a MainAreaWidget<CodeEditorWrapper>');
 
           console.log('currentWidget.titles', currentWidget.title.caption);
+          path = currentWidget.title.caption;
           activeEditor = currentWidget.content.editor;
           // Handle file editor breakpoint logic here
         } else {
@@ -1593,7 +1593,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
           );
         }
 
-        debug.toggleBreakpoint(activeEditor, isNotebook);
+        debug.toggleBreakpoint(activeEditor, path);
       },
       describedBy: {
         args: {

@@ -256,17 +256,23 @@ export class DebuggerService implements IDebugger, IDisposable {
     return [effectiveLineNumber, isBlankLine];
   }
 
-  async toggleBreakpoint(): Promise<void> {
+  async toggleBreakpoint(
+    activeEditor: CodeEditor.IEditor | null,
+    path: string
+  ): Promise<void> {
+    if (!activeEditor) {
+      console.log('no activeeditor');
+      return;
+    }
+
     if (!this._debuggerSources) {
       console.warn('No debugger sources available');
       return;
     }
 
-    const activeCell = this._debuggerSources.notebookTracker()?.activeCell;
-    const activeCellEditor = activeCell?.editor;
-    const cursorPosition = activeCellEditor?.getCursorPosition();
+    const cursorPosition = activeEditor?.getCursorPosition();
 
-    if (!activeCellEditor) {
+    if (!activeEditor) {
       console.log('no ed');
       return;
     }
@@ -276,15 +282,14 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const [actualLineNumberIWant, isLineHaveNoText] =
-      this._getEffectiveClickedLine(activeCellEditor, cursorPosition);
+      this._getEffectiveClickedLine(activeEditor, cursorPosition);
 
     if (!actualLineNumberIWant) {
       console.log('no line number found');
       return;
     }
-
     const existingBreakpoints = this.model.breakpoints.breakpoints;
-    const cellCode = activeCell?.model.sharedModel.getSource();
+    const cellCode = activeEditor.model.sharedModel.getSource();
     const kernel = this.session?.connection?.kernel?.name;
 
     if (!cellCode) {
@@ -296,8 +301,15 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
 
-    const codeId = this._config.getCodeId(cellCode, kernel);
-    const cellBreakpoints = existingBreakpoints.get(codeId) ?? [];
+    let cellId;
+
+    if (!path) {
+      cellId = this._config.getCodeId(cellCode, kernel);
+    } else {
+      cellId = path;
+    }
+
+    const cellBreakpoints = existingBreakpoints.get(cellId) ?? [];
 
     const breakpointAtSelectedLine = cellBreakpoints.find(
       bp => bp.line === actualLineNumberIWant
@@ -309,11 +321,11 @@ export class DebuggerService implements IDebugger, IDisposable {
       const newBreakpoint: IDebugger.IBreakpoint = {
         line: actualLineNumberIWant,
         verified: true,
-        source: { path: codeId }
+        source: { path: cellId }
       };
       cellBreakpoints?.push(newBreakpoint);
       updatedBreakpoints = cellBreakpoints;
-      this.updateBreakpoints(cellCode, updatedBreakpoints, codeId);
+      this.updateBreakpoints(cellCode, updatedBreakpoints, cellId);
       return;
     }
 
@@ -328,7 +340,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       updatedBreakpoints = cellBreakpoints;
     }
 
-    this.updateBreakpoints(cellCode, updatedBreakpoints, codeId);
+    this.updateBreakpoints(cellCode, updatedBreakpoints, cellId);
   }
 
   /**
