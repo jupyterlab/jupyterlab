@@ -1559,16 +1559,15 @@ namespace Private {
       const msg = 'Show more outputs';
       node.insertAdjacentHTML(
         'afterbegin',
-        `<a title=${title}>
-          <pre>${msg}</pre>
-        </a>`
+        `<button type="button" title="${title}" class="jp-TrimmedOutputs-button">
+          ${msg}
+        </button>`
       );
       super({
         node
       });
       this._onClick = onClick;
       this.addClass('jp-TrimmedOutputs');
-      this.addClass('jp-RenderedHTMLCommon');
     }
 
     /**
