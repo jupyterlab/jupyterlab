@@ -225,123 +225,67 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model.breakpoints.restoreBreakpoints(bpMap);
   }
 
-  /**
-   * Get the effective line from an editor position.
-   * The effective line is the first non-empty line above (and including) the selected line
-   *
-   * @param editor The currently selected editor.
-   * @param position The position corresponding to the current cursor position.
-   */
-  private _getEffectiveClickedLine(
-    editor: CodeEditor.IEditor,
-    position: CodeEditor.IPosition
-  ): [number | undefined, boolean] {
-    let selectedLineNumber = position.line;
-    let effectiveLineNumber: number | undefined;
-    let isBlankLine: boolean = false;
-
-    const selectedLineText = editor.getLine(selectedLineNumber);
-    if (selectedLineText === undefined) {
-      return [undefined, isBlankLine];
-    }
-
-    if (selectedLineText.trim() === '') {
-      isBlankLine = true;
-      while (selectedLineNumber > 0) {
-        selectedLineNumber--;
-        const prevLineText = editor.getLine(selectedLineNumber);
-        if (prevLineText === undefined) {
-          return [undefined, isBlankLine];
-        }
-        if (prevLineText.trim() !== '') {
-          // CodeEditor.IPosition uses the CM5 style 0-indexed line number
-          // CodeMirror 6 uses 1-indexed line number
-          effectiveLineNumber = selectedLineNumber + 1;
-          break;
-        }
-      }
-    } else {
-      if (isBlankLine === false) {
-        // CodeEditor.IPosition uses the CM5 style 0-indexed line number
-        // CodeMirror 6 uses 1-indexed line number
-        effectiveLineNumber = selectedLineNumber + 1;
-      }
-    }
-
-    return [effectiveLineNumber, isBlankLine];
-  }
-
   async toggleBreakpoint(
     activeEditor: CodeEditor.IEditor | null,
     path: string
   ): Promise<void> {
     if (!activeEditor) {
-      console.log('no active editor');
+      console.log('No active editor');
       return;
     }
 
-    const cursorPosition = activeEditor?.getCursorPosition();
+    const kernel = this.session?.connection?.kernel?.name;
+    if (!kernel) {
+      console.log('No kernel available');
+      return;
+    }
 
-    const [actualLineNumberIWant, isBlankLine] = this._getEffectiveClickedLine(
+    // Get effective line number
+    const cursorPosition = activeEditor.getCursorPosition();
+    const [lineNumber, isBlankLine] = this._getEffectiveClickedLine(
       activeEditor,
       cursorPosition
     );
 
-    if (!actualLineNumberIWant) {
-      console.log('no line number found');
+    if (!lineNumber) {
+      console.log('No valid line number found');
       return;
     }
-    const existingBreakpoints = this.model.breakpoints.breakpoints;
+
+    // Determine cell/source identifier
     const cellCode = activeEditor.model.sharedModel.getSource();
-    const kernel = this.session?.connection?.kernel?.name;
+    const cellId = path || this._config.getCodeId(cellCode, kernel);
 
-    if (!kernel) {
-      console.log('no kernel');
-      return;
-    }
-
-    let cellId;
-
-    // Read only editors use a path to an existing file
-    // Notebook cells need to generate an id
-    if (!path) {
-      cellId = this._config.getCodeId(cellCode, kernel);
-    } else {
-      cellId = path;
-    }
-
-    const cellBreakpoints = existingBreakpoints.get(cellId) ?? [];
-
-    const breakpointAtSelectedLine = cellBreakpoints.find(
-      bp => bp.line === actualLineNumberIWant
+    // Get existing breakpoints for this source
+    const existingBreakpoints =
+      this.model.breakpoints.breakpoints.get(cellId) ?? [];
+    const existingBreakpoint = existingBreakpoints.find(
+      bp => bp.line === lineNumber
     );
 
-    let updatedBreakpoints: IDebugger.IBreakpoint[] = [];
+    let updatedBreakpoints: IDebugger.IBreakpoint[];
 
-    if (!breakpointAtSelectedLine) {
+    if (!existingBreakpoint) {
+      // Add new breakpoint
       const newBreakpoint: IDebugger.IBreakpoint = {
-        line: actualLineNumberIWant,
+        line: lineNumber,
         verified: true,
         source: { path: cellId }
       };
-      cellBreakpoints?.push(newBreakpoint);
-      updatedBreakpoints = cellBreakpoints;
-      this.updateBreakpoints(cellCode, updatedBreakpoints, cellId);
-      return;
-    }
-
-    if (!isBlankLine) {
+      updatedBreakpoints = [...existingBreakpoints, newBreakpoint];
+    } else if (!isBlankLine) {
       // Line has text - remove the breakpoint
-      updatedBreakpoints = cellBreakpoints.filter(
-        bp => bp.line !== actualLineNumberIWant
+      updatedBreakpoints = existingBreakpoints.filter(
+        bp => bp.line !== lineNumber
       );
     } else {
       // Blank line - select the breakpoint
-      this.model.breakpoints.selectedBreakpoint = breakpointAtSelectedLine;
-      updatedBreakpoints = cellBreakpoints;
+      this.model.breakpoints.selectedBreakpoint = existingBreakpoint;
+      updatedBreakpoints = existingBreakpoints;
     }
 
-    this.updateBreakpoints(cellCode, updatedBreakpoints, cellId);
+    // Update breakpoints
+    await this.updateBreakpoints(cellCode, updatedBreakpoints, cellId);
   }
 
   /**
@@ -1142,6 +1086,52 @@ export class DebuggerService implements IDebugger, IDisposable {
       );
     }
     this._model.breakpoints.restoreBreakpoints(breakpoints);
+  }
+
+  /**
+   * Get the effective line from an editor position.
+   * The effective line is the first non-empty line above (and including) the selected line
+   *
+   * @param editor The currently selected editor.
+   * @param position The position corresponding to the current cursor position.
+   */
+  private _getEffectiveClickedLine(
+    editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): [number | undefined, boolean] {
+    let selectedLineNumber = position.line;
+    let effectiveLineNumber: number | undefined;
+    let isBlankLine: boolean = false;
+
+    const selectedLineText = editor.getLine(selectedLineNumber);
+    if (selectedLineText === undefined) {
+      return [undefined, isBlankLine];
+    }
+
+    if (selectedLineText.trim() === '') {
+      isBlankLine = true;
+      while (selectedLineNumber > 0) {
+        selectedLineNumber--;
+        const prevLineText = editor.getLine(selectedLineNumber);
+        if (prevLineText === undefined) {
+          return [undefined, isBlankLine];
+        }
+        if (prevLineText.trim() !== '') {
+          // CodeEditor.IPosition uses the CM5 style 0-indexed line number
+          // CodeMirror 6 uses 1-indexed line number
+          effectiveLineNumber = selectedLineNumber + 1;
+          break;
+        }
+      }
+    } else {
+      if (isBlankLine === false) {
+        // CodeEditor.IPosition uses the CM5 style 0-indexed line number
+        // CodeMirror 6 uses 1-indexed line number
+        effectiveLineNumber = selectedLineNumber + 1;
+      }
+    }
+
+    return [effectiveLineNumber, isBlankLine];
   }
 
   private _config: IDebugger.IConfig;
