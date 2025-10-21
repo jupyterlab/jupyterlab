@@ -23,7 +23,11 @@ import {
   SessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  CodeEditorWrapper,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
@@ -800,6 +804,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       source: IDebugger.Source,
       breakpoint?: IDebugger.IBreakpoint
     ): void => {
+      console.log('check');
       if (!source) {
         return;
       }
@@ -1551,7 +1556,44 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       label: trans.__('Toggle Breakpoint'),
       caption: trans.__('Toggle Breakpoint'),
       execute: () => {
-        debug.toggleBreakpoint();
+        const currentWidget = app.shell.currentWidget;
+        let activeEditor: CodeEditor.IEditor | null = null;
+        let isNotebook = false;
+
+        if (currentWidget instanceof ConsolePanel) {
+          // console.log('Current widget is a ConsolePanel');
+          // const cells = currentWidget.console.cells;
+          // debug.toggleBreakpointCells(cells);
+          // Handle console breakpoint logic here
+        } else if (currentWidget instanceof NotebookPanel) {
+          isNotebook = true;
+          // console.log('Current widget is a NotebookPanel');
+          const cellEditor = currentWidget.content.activeCell?.editor;
+          if (!cellEditor) {
+            console.log('go away');
+            return;
+          }
+          activeEditor = cellEditor;
+          // Handle notebook breakpoint logic here
+        } else if (
+          currentWidget instanceof MainAreaWidget &&
+          currentWidget.content instanceof CodeEditorWrapper
+        ) {
+          isNotebook = false;
+          console.log('Current widget is a MainAreaWidget<CodeEditorWrapper>');
+
+          console.log('currentWidget.titles', currentWidget.title.caption);
+          activeEditor = currentWidget.content.editor;
+          // Handle file editor breakpoint logic here
+        } else {
+          // MainAreaWidget<CodeEditorWrapper>
+          console.log(
+            'Current widget is not a supported type:',
+            currentWidget?.constructor.name
+          );
+        }
+
+        debug.toggleBreakpoint(activeEditor, isNotebook);
       },
       describedBy: {
         args: {
