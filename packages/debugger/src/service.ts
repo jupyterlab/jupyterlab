@@ -138,6 +138,20 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Get the last clicked console editor.
+   */
+  get lastClickedConsoleEditor(): CodeEditor.IEditor | null {
+    return this._lastClickedConsoleEditor;
+  }
+
+  /**
+   * Set the last clicked console editor.
+   */
+  set lastClickedConsoleEditor(editor: CodeEditor.IEditor | null) {
+    this._lastClickedConsoleEditor = editor;
+  }
+
+  /**
    * Dispose the debug service.
    */
   dispose(): void {
@@ -260,6 +274,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     activeEditor: CodeEditor.IEditor | null,
     path: string
   ): Promise<void> {
+    console.log('lemme in');
     if (!activeEditor) {
       console.log('no activeeditor');
       return;
@@ -1157,6 +1172,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
   private _pauseOnExceptionChanged = new Signal<IDebugger, void>(this);
+  private _lastClickedConsoleEditor: CodeEditor.IEditor | null = null;
 }
 
 /**

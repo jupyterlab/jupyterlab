@@ -125,12 +125,36 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
+    // Store the last clicked editor for console breakpoints
+    // let lastClickedConsoleEditor: CodeEditor.IEditor | null = null;
+
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
     ): Promise<void> => {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
+      console.log('sessionContext', sessionContext);
+
+      widget?.console?.node?.addEventListener('click', (e: PointerEvent) => {
+        // Find the cell that contains the clicked element
+        const clickedElement = e.target as HTMLElement;
+        const cellElement = clickedElement.closest('.jp-Console-cell');
+
+        // if (cellElement) {
+        // Find the corresponding cell widget
+        const cells = widget.console.cells;
+        for (const cell of cells) {
+          if (cell.node === cellElement) {
+            // Store the selected editor for use in toggleBreakpoint
+            debug.lastClickedConsoleEditor = cell.editor;
+
+            // You can now use this cell for breakpoint operations
+            break;
+          }
+        }
+        // }
+      });
       updateState(app.commands, debug);
     };
 
@@ -1558,14 +1582,20 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const currentWidget = app.shell.currentWidget;
         let activeEditor: CodeEditor.IEditor | null = null;
-        
+
         let path: string | undefined = undefined;
 
         if (currentWidget instanceof ConsolePanel) {
-          // console.log('Current widget is a ConsolePanel');
-          // const cells = currentWidget.console.cells;
-          // debug.toggleBreakpointCells(cells);
-          // Handle console breakpoint logic here
+          // Use the last clicked console editor
+
+          if (debug.lastClickedConsoleEditor) {
+            console.log('we pull up');
+            activeEditor = debug.lastClickedConsoleEditor;
+            // For console cells, we don't have a file path, so path remains undefined
+          } else {
+            console.log('No console editor selected');
+            return;
+          }
         } else if (currentWidget instanceof NotebookPanel) {
           // console.log('Current widget is a NotebookPanel');
           const cellEditor = currentWidget.content.activeCell?.editor;

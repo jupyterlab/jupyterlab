@@ -74,6 +74,8 @@ export interface IDebugger {
     path?: string
   ): Promise<void>;
 
+  lastClickedConsoleEditor: CodeEditor.IEditor | null;
+
   /**
    * Used to determine if kernel has pause on exception capabilities
    */
