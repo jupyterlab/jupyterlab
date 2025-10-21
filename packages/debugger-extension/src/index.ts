@@ -1494,7 +1494,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     sessionDialogs_: ISessionContextDialogs | null
   ) => {
-    console.log('@jupyterlab/debugger-extension:debug-menu loadedddd');
+    console.log('@jupyterlab/debugger-extension:debug-menu loaded');
     const trans = translator.load('jupyterlab');
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });

@@ -303,6 +303,8 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     let cellId;
 
+    // Read only editors use a path to an existing file
+    // Notebook cells need to generate an id
     if (!path) {
       cellId = this._config.getCodeId(cellCode, kernel);
     } else {
