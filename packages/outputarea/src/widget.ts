@@ -1555,14 +1555,12 @@ namespace Private {
       onClick: (event: MouseEvent) => void
     ) {
       const node = document.createElement('div');
-      const title = `The first ${maxNumberOutputs} are displayed`;
-      const msg = 'Show more outputs';
-      node.insertAdjacentHTML(
-        'afterbegin',
-        `<button type="button" title="${title}" class="jp-TrimmedOutputs-button">
-          ${msg}
-        </button>`
-      );
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'jp-TrimmedOutputs-button';
+      button.title = `The first ${maxNumberOutputs} are displayed`;
+      button.textContent = 'Show more outputs';
+      node.appendChild(button);
       super({
         node
       });
