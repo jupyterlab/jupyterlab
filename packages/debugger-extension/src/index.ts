@@ -283,6 +283,14 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       translator: translator
     });
 
+    if (notebookTracker.currentWidget) {
+      const widget = notebookTracker.currentWidget;
+      const { sessionContext } = widget;
+      await sessionContext.ready;
+      await handler.updateContext(widget, sessionContext);
+      await handler.updateWidget(widget, sessionContext.session);
+    }
+
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
@@ -327,6 +335,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         const { sessionContext } = widget;
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
+        await handler.updateWidget(widget, sessionContext.session);
       }
       updateState(app.commands, service);
     };
