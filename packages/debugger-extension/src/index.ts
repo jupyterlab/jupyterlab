@@ -1580,7 +1580,6 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     sessionDialogs_: ISessionContextDialogs | null
   ) => {
-    console.log('@jupyterlab/debugger-extension:debug-menu loadedddd');
     const trans = translator.load('jupyterlab');
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
@@ -1619,7 +1618,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
               description: trans.__('The variables filter option to be toggled')
             }
           },
-          required: ['label, option']
+          required: ['label', 'option']
         }
       }
     });
