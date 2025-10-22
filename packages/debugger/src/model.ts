@@ -19,20 +19,16 @@ import { DebuggerDisplayRegistry } from './displayregistry';
 
 export const variablesFilterOptions = {
   module: {
-    label: 'Modules',
     filter: (variable: IDebugger.IVariable) => variable.type !== 'module'
   },
   private: {
-    label: 'Privates',
     filter: (variable: IDebugger.IVariable) =>
       !variable.name.startsWith('_') && !variable.name.startsWith('__')
   },
   allCaps: {
-    label: 'All Uppercase',
     filter: (variable: IDebugger.IVariable) => !variable.name.match(/^[A-Z_]+$/)
   },
   capitalized: {
-    label: 'Capitalized',
     filter: (variable: IDebugger.IVariable) =>
       !variable.name.match(/^[A-Z]/) || variable.name.match(/^[A-Z_]+$/)
   }
