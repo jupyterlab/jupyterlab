@@ -144,7 +144,9 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBeLessThan(model.length);
         Widget.attach(widget, document.body);
         simulate(
-          widget.widgets[widget.widgets.length - 1].node.querySelector('a')!,
+          widget.widgets[widget.widgets.length - 1].node.querySelector(
+            'button'
+          )!,
           'click'
         );
         Widget.detach(widget);
