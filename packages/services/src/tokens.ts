@@ -5,6 +5,7 @@ import {
   ConfigSection,
   Contents,
   Event,
+  IContentProvider,
   Kernel,
   KernelSpec,
   NbConvert,
@@ -73,6 +74,16 @@ export const IConfigSectionManager = new Token<ConfigSection.IManager>(
 export const IContentsManager = new Token<Contents.IManager>(
   '@jupyterlab/services:IContentsManager',
   'The contents manager token.'
+);
+
+/**
+ * The default content provider class token.
+ */
+export const IDefaultContentProviderClass = new Token<
+  new (...args: any[]) => IContentProvider
+>(
+  '@jupyterlab/services:IDefaultContentProviderClass',
+  'The default content provider class for the contents manager.'
 );
 
 /**
