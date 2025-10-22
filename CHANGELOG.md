@@ -484,6 +484,38 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.4.10
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.9...58c8b829753da3a3a56a275448d01ecabd842ef2))
+
+### Bugs fixed
+
+- Fix `ObservableList.removeValue` behaviour: if item isn't found, don't just remove the last item! [#18019](https://github.com/jupyterlab/jupyterlab/pull/18019) ([@robertstrauss](https://github.com/robertstrauss))
+- Fix highlighting search on output cells and previous match skips [#17797](https://github.com/jupyterlab/jupyterlab/pull/17797) ([@itsmevichu](https://github.com/itsmevichu))
+- Fix spurious scrollbar in output area due to prompt overlay [#17981](https://github.com/jupyterlab/jupyterlab/pull/17981) ([@shreve](https://github.com/shreve))
+- Fix race condition renaming unnamed files on first save [#17982](https://github.com/jupyterlab/jupyterlab/pull/17982) ([@shreve](https://github.com/shreve))
+- Fix empty whitespace after large cell rendering [#17949](https://github.com/jupyterlab/jupyterlab/pull/17949) ([@Meriem-BenIsmail](https://github.com/Meriem-BenIsmail))
+
+### Maintenance and upkeep improvements
+
+- Bandaid: pin ipykernel on CI to pre-7.0 [#17992](https://github.com/jupyterlab/jupyterlab/pull/17992) ([@krassowski](https://github.com/krassowski))
+- Fix examples on `4.4.x` [#17963](https://github.com/jupyterlab/jupyterlab/pull/17963) ([@krassowski](https://github.com/krassowski))
+- Temporarily pin `ipykernel` to avoid CI breakage with 7.0 pre-release [#17957](https://github.com/jupyterlab/jupyterlab/pull/17957) ([@arjxn-py](https://github.com/arjxn-py))
+
+### Documentation improvements
+
+- Update JupyterCon 2025 announcement links [#17983](https://github.com/jupyterlab/jupyterlab/pull/17983) ([@krassowski](https://github.com/krassowski))
+- Add cross-references to API reference, fix missing packages in API [#17953](https://github.com/jupyterlab/jupyterlab/pull/17953) ([@krassowski](https://github.com/krassowski))
+- Fix parameter documentation issues in API reference [#17954](https://github.com/jupyterlab/jupyterlab/pull/17954) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-09-26&to=2025-10-22&type=c))
+
+[@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2025-09-26..2025-10-22&type=Issues) | [@arjxn-py](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarjxn-py+updated%3A2025-09-26..2025-10-22&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-09-26..2025-10-22&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2025-09-26..2025-10-22&type=Issues) | [@hxrshxz](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahxrshxz+updated%3A2025-09-26..2025-10-22&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-09-26..2025-10-22&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-09-26..2025-10-22&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-09-26..2025-10-22&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2025-09-26..2025-10-22&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-09-26..2025-10-22&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-09-26..2025-10-22&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.4.9
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.4.8...80d2a2ce152f359dbe17af364942472776b49fc7))
@@ -498,8 +530,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-09-25&to=2025-09-26&type=c))
 
 [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-09-25..2025-09-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-09-25..2025-09-26&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-09-25..2025-09-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2025-09-25..2025-09-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.4.8
 

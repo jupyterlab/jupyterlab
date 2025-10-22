@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-extension",
-  "version": "4.4.9",
+  "version": "4.4.10",
   "description": "JupyterLab - Application Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,15 +37,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.9",
-    "@jupyterlab/apputils": "^4.5.9",
-    "@jupyterlab/coreutils": "^6.4.9",
-    "@jupyterlab/property-inspector": "^4.4.9",
-    "@jupyterlab/settingregistry": "^4.4.9",
-    "@jupyterlab/statedb": "^4.4.9",
-    "@jupyterlab/statusbar": "^4.4.9",
-    "@jupyterlab/translation": "^4.4.9",
-    "@jupyterlab/ui-components": "^4.4.9",
+    "@jupyterlab/application": "^4.4.10",
+    "@jupyterlab/apputils": "^4.5.10",
+    "@jupyterlab/coreutils": "^6.4.10",
+    "@jupyterlab/property-inspector": "^4.4.10",
+    "@jupyterlab/settingregistry": "^4.4.10",
+    "@jupyterlab/statedb": "^4.4.10",
+    "@jupyterlab/statusbar": "^4.4.10",
+    "@jupyterlab/translation": "^4.4.10",
+    "@jupyterlab/ui-components": "^4.4.10",
     "@lumino/algorithm": "^2.0.3",
     "@lumino/commands": "^2.3.2",
     "@lumino/coreutils": "^2.2.1",
