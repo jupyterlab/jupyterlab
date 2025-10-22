@@ -37,7 +37,12 @@ export class Grid extends Panel {
     const { commands, model, service, themeManager } = options;
     this.model = model;
     this.service = service;
-    const dataModel = new GridModel(service, options.translator);
+
+    const dataModel = new GridModel({
+      service: service,
+      translator: options.translator
+    });
+
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
@@ -176,10 +181,11 @@ export class GridModel extends DataModel {
    * @param service The debugger service
    * @param translator optional translator
    */
-  constructor(service: IDebugger, translator?: ITranslator) {
+  // constructor(service: IDebugger, translator?: ITranslator) {
+  constructor(options: GridModel.IOptions) {
     super();
-    this._service = service;
-    this._trans = (translator || nullTranslator).load('jupyterlab');
+    this._service = options.service;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
 
   /**
@@ -323,6 +329,26 @@ export class GridModel extends DataModel {
     value: [],
     variablesReference: []
   };
+}
+
+/**
+ * Namespace for GridModel statics
+ */
+namespace GridModel {
+  /**
+   * Options for creating a GridModel
+   */
+  export interface IOptions {
+    /**
+     * The debugger service.
+     */
+    service: IDebugger;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
 }
 
 /**
