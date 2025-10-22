@@ -182,7 +182,6 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   background-color: var(--jp-layout-color1);
   border: 1px solid var(--jp-border-color2);
   color: var(--jp-ui-font-color1);
-  border-radius: var(--jp-border-radius);
   cursor: pointer;
 }
 
