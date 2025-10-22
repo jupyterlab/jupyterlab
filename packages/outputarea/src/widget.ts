@@ -624,11 +624,15 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
 
     if (index === this._maxNumberOutputs) {
-      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
-        const lastShown = this._maxNumberOutputs;
-        this._maxNumberOutputs = Infinity;
-        this._showTrimmedOutputs(lastShown);
-      });
+      const warning = new Private.TrimmedOutputs(
+        this._maxNumberOutputs,
+        () => {
+          const lastShown = this._maxNumberOutputs;
+          this._maxNumberOutputs = Infinity;
+          this._showTrimmedOutputs(lastShown);
+        },
+        this._translator
+      );
       layout.insertWidget(index, this._wrappedOutput(warning));
     } else {
       let output = this.createOutputItem(model);
@@ -1552,14 +1556,16 @@ namespace Private {
      */
     constructor(
       maxNumberOutputs: number,
-      onClick: (event: MouseEvent) => void
+      onClick: (event: MouseEvent) => void,
+      translator?: ITranslator
     ) {
       const node = document.createElement('div');
+      const trans = (translator ?? nullTranslator).load('jupyterlab');
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'jp-TrimmedOutputs-button';
-      button.title = `The first ${maxNumberOutputs} are displayed`;
-      button.textContent = 'Show more outputs';
+      button.title = trans.__('The first %1 are displayed', maxNumberOutputs);
+      button.textContent = trans.__('Show more outputs');
       node.appendChild(button);
       super({
         node
