@@ -42,7 +42,11 @@ import {
   variablesFilterOptions
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import {
+  FileEditor,
+  FileEditorWidget,
+  IEditorTracker
+} from '@jupyterlab/fileeditor';
 import {
   INotebookTracker,
   NotebookActions,
@@ -1580,16 +1584,8 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
 
         if (currentWidget instanceof ConsolePanel) {
           activeEditor = debug.lastClickedConsoleEditor;
-          if (!activeEditor) {
-            console.log('No console editor selected');
-            return;
-          }
         } else if (currentWidget instanceof NotebookPanel) {
           activeEditor = currentWidget.content.activeCell?.editor ?? null;
-          if (!activeEditor) {
-            console.log('No active cell editor');
-            return;
-          }
         } else if (
           currentWidget instanceof MainAreaWidget &&
           currentWidget.content instanceof CodeEditorWrapper
@@ -1597,11 +1593,18 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
           activeEditor = currentWidget.content.editor;
           // Read only editors save their path as their title when opened
           path = currentWidget.title.caption;
+        } else if (currentWidget instanceof FileEditorWidget) {
+          activeEditor = currentWidget.content.editor;
         } else {
           console.warn(
             'Unsupported widget type:',
             currentWidget?.constructor.name
           );
+          return;
+        }
+
+        if (!activeEditor) {
+          console.warn('No editor found');
           return;
         }
 
