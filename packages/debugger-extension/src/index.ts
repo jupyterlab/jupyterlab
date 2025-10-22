@@ -36,8 +36,7 @@ import {
   IDebuggerSidebar,
   IDebuggerSources,
   IDebuggerSourceViewer,
-  VariablesFilterOptionKey,
-  variablesFilterOptions
+  VariablesFilterOptionKey
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -61,7 +60,6 @@ import {
 } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Menu } from '@lumino/widgets';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
@@ -1598,6 +1596,12 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       execute: async args => {
         const { option } = args as { option: VariablesFilterOptionKey };
 
+        if (!option) {
+          console.warn(
+            'No option passed to debugger:variables-view-options command'
+          );
+        }
+
         const options = debug.model.variablesFilterOptions;
         const newOptions = new Map(options);
 
@@ -1696,80 +1700,6 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
         }
       }
     });
-
-    const menu = new Menu({ commands: app.commands });
-    menu.title.label = 'Debug';
-
-    const subMenu = new Menu({ commands: app.commands });
-    subMenu.title.label = 'Filter Variables';
-
-    Object.entries(variablesFilterOptions).forEach(([key, val]) => {
-      subMenu.addItem({
-        command: Debugger.CommandIDs.setVariablesFilterOptions,
-        args: { label: `Hide ${val.label}`, option: key }
-      });
-    });
-
-    const runCommands = [
-      Debugger.CommandIDs.runCells,
-      Debugger.CommandIDs.terminate,
-      Debugger.CommandIDs.restartAndDebug,
-      Debugger.CommandIDs.restartAndRunAll
-    ];
-
-    const debuggerCommands = [
-      Debugger.CommandIDs.next,
-      Debugger.CommandIDs.stepIn,
-      Debugger.CommandIDs.stepOut,
-      Debugger.CommandIDs.debugContinue
-    ];
-
-    const breakpointCommands = [Debugger.CommandIDs.clearAllBreakpoints];
-
-    runCommands.forEach(command => {
-      menu.addItem({
-        command
-      });
-    });
-
-    menu.addItem({
-      type: 'separator'
-    });
-
-    debuggerCommands.forEach(command => {
-      menu.addItem({
-        command
-      });
-    });
-
-    menu.addItem({
-      type: 'separator'
-    });
-
-    breakpointCommands.forEach(command => {
-      menu.addItem({
-        command
-      });
-    });
-
-    menu.addItem({
-      type: 'separator'
-    });
-
-    menu.addItem({
-      command: Debugger.CommandIDs.evaluate
-    });
-
-    menu.addItem({
-      type: 'separator'
-    });
-
-    menu.addItem({
-      type: 'submenu',
-      submenu: subMenu
-    });
-
-    mainMenu.addMenu(menu, true);
   }
 };
 
