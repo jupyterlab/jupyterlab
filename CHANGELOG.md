@@ -39,11 +39,20 @@ when streaming text outputs.
 
 The debugger's evaluate dialog has been replaced with an interactive console with syntax
 highlighting and code completion, and the variables panel now preserves its contents when
-switching editors. Selected breakpoints are now visually highlighted and breakpoints now
-correctly handle empty lines and duplicate clicks.
+switching editors. Selected breakpoints are now visually highlighted and breakpoints
+correctly handle empty lines and duplicate clicks. A visual indicator is displayed
+when the debugger is paused.
+
+Debugger panels as well as console debugging panels now reference the cell execution count helping users relate breakpoints, call stacks and source code to the cells they originate
+from.
 
 For the Log Console, users can now configure the default log level via settings,
 as well as customise the toolbar.
+
+### Terminal enhancements
+
+The terminal now includes search functionality, with search highlights that adapt to
+theme changes.
 
 ### Media and content support
 
@@ -58,6 +67,9 @@ a new `allowFileUploads` setting provides control over upload permissions.
 There is now a menu option for creating new Python, R, or Julia files,
 and a “Select All” command has also been added, also accessible via the
 `Ctrl + A` keyboard shortcut.
+
+Users can now configure file browser breadcrumbs through the settings editor
+options `breadcrumbsLeftItems` and `breadcrumbsRightItems`.
 
 Updates to file dialogs and navigation have addressed column spacing,
 preferred-directory handling and double-click behavior.
