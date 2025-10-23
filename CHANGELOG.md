@@ -75,7 +75,7 @@ JupyterLab now includes built-in audio and video viewers, allowing users to open
 audio and video files directly from within JupyterLab.
 
 <img alt="Video file opened in a JupyterLab tab"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-audio-video.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-media-support.png"
 class="jp-screenshot">
 
 ### File browser enhancements
