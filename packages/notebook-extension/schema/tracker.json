@@ -582,21 +582,6 @@
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
-      "command": "notebook:copy-selected-text",
-      "keys": ["Ctrl C"],
-      "selector": ".jp-Notebook"
-    },
-    {
-      "command": "notebook:paste-text",
-      "keys": ["Ctrl V"],
-      "selector": ".jp-Notebook .jp-InputArea-editor"
-    },
-    {
-      "command": "notebook:cut-selected-text",
-      "keys": ["Ctrl X"],
-      "selector": ".jp-Notebook .jp-InputArea-editor"
-    },
-    {
       "command": "notebook:redo-cell-action",
       "keys": ["Shift Z"],
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
