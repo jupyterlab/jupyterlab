@@ -251,6 +251,21 @@
         "rank": 3
       },
       {
+        "command": "notebook:copy-selected-text",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 3
+      },
+      {
+        "command": "notebook:cut-selected-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
+        "command": "notebook:paste-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
         "rank": 4
@@ -565,6 +580,21 @@
       "command": "notebook:paste-cell-below",
       "keys": ["V"],
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
+    },
+    {
+      "command": "notebook:copy-selected-text",
+      "keys": ["Ctrl C"],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:paste-text",
+      "keys": ["Ctrl V"],
+      "selector": ".jp-Notebook .jp-InputArea-editor"
+    },
+    {
+      "command": "notebook:cut-selected-text",
+      "keys": ["Ctrl X"],
+      "selector": ".jp-Notebook .jp-InputArea-editor"
     },
     {
       "command": "notebook:redo-cell-action",
