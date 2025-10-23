@@ -3426,6 +3426,12 @@ function addCommands(
       // Check for text selection in output area or other DOM content
       const domSelection = window.getSelection();
       return !!domSelection && domSelection.toString().trim().length > 0;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -3468,6 +3474,12 @@ function addCommands(
         selection.start.line !== selection.end.line ||
         selection.start.column !== selection.end.column;
       return hasEditorSelection;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -3510,6 +3522,12 @@ function addCommands(
         return false;
       }
       return !!current.content.activeCell?.editor;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
