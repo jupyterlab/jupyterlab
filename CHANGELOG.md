@@ -25,7 +25,7 @@ and users can now open notebooks without starting a kernel, via the `Open With`
 context menu option.
 
 <img alt="File browser context menu with 'Open With → Notebook (No Kernel)' option"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/user-facing-changelog-4.5/docs/source/getting_started/changelog_assets/4.5-open-with-no-kernel.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-open-with-no-kernel.png"
 class="jp-screenshot">
 
 Markdown support has been expanded for using grid and flex based layouts and the
@@ -52,7 +52,7 @@ helping users relate breakpoints, call stacks and source code to the cells they 
 from.
 
 <img alt="Debugger panels with reference to execution counts and paused indicator as well as console evaluation"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/user-facing-changelog-4.5/docs/source/getting_started/changelog_assets/4.5-debugger-console.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-debugger-console.png"
 class="jp-screenshot">
 
 
@@ -65,7 +65,7 @@ The terminal now includes search functionality, with search highlights that adap
 theme changes.
 
 <img alt="Terminal panel showing the search bar with highlighted matches"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/user-facing-changelog-4.5/docs/source/getting_started/changelog_assets/4.5-terminal-search.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-terminal-search.png"
 class="jp-screenshot">
 
 
@@ -75,7 +75,7 @@ JupyterLab now includes built-in audio and video viewers, allowing users to open
 audio and video files directly from within JupyterLab.
 
 <img alt="Video file opened in a JupyterLab tab"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/user-facing-changelog-4.5/docs/source/getting_started/changelog_assets/4.5-audio-video.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-audio-video.png"
 class="jp-screenshot">
 
 ### File browser enhancements
@@ -91,7 +91,7 @@ Users can now configure file browser breadcrumbs through the settings editor
 options `breadcrumbsLeftItems` and `breadcrumbsRightItems`.
 
 <img alt="File browser with the New menu expanded showing options to create Python, R, and Julia files; breadcrumb bar displayed above file list"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/user-facing-changelog-4.5/docs/source/getting_started/changelog_assets/4.5-filebrowser-newfiles.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-filebrowser-newfiles.png"
 class="jp-screenshot">
 
 Updates to file dialogs and navigation have addressed column spacing,
