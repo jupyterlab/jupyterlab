@@ -212,12 +212,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     if (!this._service.model || !connection) {
       return;
     }
-    console.log(
-      'updateWidget',
-      this._service.isStarted,
-      this._shell.currentWidget?.id,
-      widget.id
-    );
 
     const hasFocus = (): boolean => {
       return this._shell.currentWidget === widget;
