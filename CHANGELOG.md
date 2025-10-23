@@ -91,7 +91,7 @@ Users can now configure file browser breadcrumbs through the settings editor
 options `breadcrumbsLeftItems` and `breadcrumbsRightItems`.
 
 <img alt="File browser with the New menu expanded showing options to create Python, R, and Julia files; breadcrumb bar displayed above file list"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-filebrowser-newfiles.png"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.5-filebrowser-newfiles-breadcrumbs.png"
 class="jp-screenshot">
 
 Updates to file dialogs and navigation have addressed column spacing,
