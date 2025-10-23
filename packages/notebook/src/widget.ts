@@ -1015,7 +1015,10 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     // Apply content visibility when notebook settings update (without reload)
     const isContentVisibility =
       this._notebookConfig.windowingMode === 'contentVisibility';
-    this.toggleClass('jp-content-visibility', isContentVisibility);
+    this.viewportNode.classList.toggle(
+      'jp-content-visibility-mode',
+      isContentVisibility
+    );
 
     if (isContentVisibility) {
       requestAnimationFrame(() => {
@@ -1037,7 +1040,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // Apply content visibility when notebook widget is attached to the DOM
     if (this._notebookConfig.windowingMode === 'contentVisibility') {
-      this.toggleClass('jp-content-visibility', true);
+      this.viewportNode.classList.toggle('jp-content-visibility-mode', true);
 
       // Update intrinsic sizes for all cells initially
       requestAnimationFrame(() => {
