@@ -224,7 +224,7 @@ export namespace Commands {
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    defaultBrowser: IDefaultFileBrowser,
+    defaultBrowser: IDefaultFileBrowser | null,
     extensions: IEditorExtensionRegistry,
     languages: IEditorLanguageRegistry,
     consoleTracker: IConsoleTracker | null,
