@@ -1241,7 +1241,7 @@ export namespace Commands {
           void showDialog({
             title: trans.__('Paste Unavailable'),
             body: trans.__(
-              'Pasting from the context menu is not supported by Firefox.\n\nPlease use Ctrl + V instead.'
+              'Due to browser security restrictions, pasting from the context menu may not be supported.\n\nPlease use Ctrl + V (or ⌘ + V on macOS) instead.'
             ),
             buttons: [Dialog.okButton({ label: trans.__('OK') })]
           });
