@@ -28,8 +28,10 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Debugger,
+  DebuggerDisplayRegistry,
   IDebugger,
   IDebuggerConfig,
+  IDebuggerDisplayRegistry,
   IDebuggerHandler,
   IDebuggerSidebar,
   IDebuggerSources,
@@ -367,12 +369,19 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [INotebookTracker, IConsoleTracker, IDebuggerSources, ITranslator],
+  optional: [
+    INotebookTracker,
+    IConsoleTracker,
+    IDebuggerDisplayRegistry,
+    IDebuggerSources,
+    ITranslator
+  ],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
+    displayRegistry: DebuggerDisplayRegistry,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>
@@ -380,10 +389,23 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
       config,
       notebookTracker,
       consoleTracker,
+      displayRegistry,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
       translator
     })
+};
+
+/**
+ * A plugin providing the debugger display registry.
+ */
+const displayRegistry: JupyterFrontEndPlugin<DebuggerDisplayRegistry> = {
+  id: '@jupyterlab/debugger-extension:display-registry',
+  description:
+    'Provides the debugger display registry for cell/file display names.',
+  provides: IDebuggerDisplayRegistry,
+  autoStart: true,
+  activate: () => new DebuggerDisplayRegistry()
 };
 
 /**
@@ -1476,6 +1498,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   service,
+  displayRegistry,
   consoles,
   files,
   notebooks,

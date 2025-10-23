@@ -16,6 +16,7 @@ import { KernelSourcesModel } from './panels/kernelSources/model';
 import { VariablesModel } from './panels/variables/model';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IConsoleTracker } from '@jupyterlab/console';
+import { DebuggerDisplayRegistry } from './displayregistry';
 
 /**
  * A model for a debugger.
@@ -25,13 +26,10 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const { config, notebookTracker, consoleTracker } = options;
+    const { config, notebookTracker, consoleTracker, displayRegistry } =
+      options;
 
-    this.breakpoints = new BreakpointsModel({
-      config,
-      notebookTracker,
-      consoleTracker
-    });
+    this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
       config,
       notebookTracker,
@@ -201,5 +199,10 @@ export namespace DebuggerModel {
      * The console tracker.
      */
     consoleTracker: IConsoleTracker | null;
+
+    /**
+     * The display registry.
+     */
+    displayRegistry: DebuggerDisplayRegistry;
   }
 }
