@@ -494,6 +494,7 @@ export class ObservableList<T> implements IObservableList<T> {
     const index = ArrayExt.findFirstIndex(this._array, item => {
       return itemCmp(item, value);
     });
+    if (index < 0) return index;
     this.remove(index);
     return index;
   }

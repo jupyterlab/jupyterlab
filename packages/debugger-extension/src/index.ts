@@ -327,6 +327,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         const { sessionContext } = widget;
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
+        await handler.updateWidget(widget, sessionContext.session);
       }
       updateState(app.commands, service);
     };
