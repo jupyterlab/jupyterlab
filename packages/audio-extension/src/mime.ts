@@ -3,18 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { b64toBlob, mediaSizeMB, RenderedCommon } from '@jupyterlab/rendermime';
+import { b64toBlob, RenderedCommon } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * A mime renderer for audio data.
  */
 export class AudioMimeRenderer extends RenderedCommon {
-  /**
-   * Maximum allowed media render size in MB.
-   */
-  MAX_RENDER_SIZE_MB = 20;
-
   /**
    * Construct a new audio mime renderer.
    *
@@ -35,13 +30,6 @@ export class AudioMimeRenderer extends RenderedCommon {
    */
   async render(model: IRenderMime.IMimeModel): Promise<void> {
     const data = model.data[this.mimeType] as string;
-    const size = mediaSizeMB(data);
-    if (size > this.MAX_RENDER_SIZE_MB) {
-      this.node.textContent = `File too large to render in-browser (${size.toFixed(
-        1
-      )} MB). Maximum allowed: ${this.MAX_RENDER_SIZE_MB.toFixed(1)} MB.`;
-      return;
-    }
 
     const blob = b64toBlob(data, this.mimeType);
     this._audio.src = URL.createObjectURL(blob);
