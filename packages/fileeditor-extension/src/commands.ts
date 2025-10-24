@@ -1237,7 +1237,7 @@ export namespace Commands {
             editor.replaceSelection && editor.replaceSelection(clipboardData);
           }
         } catch (err) {
-          // Firefox fallback
+          // browser limitation fallback (e.g Firefox)
           void showDialog({
             title: trans.__('Paste Unavailable'),
             body: trans.__(
