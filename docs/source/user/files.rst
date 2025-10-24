@@ -167,13 +167,83 @@ dragging and dropping files onto the file browser, or by clicking the
 .. _file-download:
 
 Any file in JupyterLab can be downloaded by right-clicking its name in
-the file browser and selecting “Download” from the context menu:
+the file browser and selecting "Download" from the context menu:
 
 .. raw:: html
 
   <div class="jp-youtube-video">
      <iframe src="https://www.youtube-nocookie.com/embed/Wl7Ozl6rMcc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+
+Disabling File Uploads
+----------------------
+
+.. _file-disable-upload:
+
+You can disable file uploads in JupyterLab through multiple mechanisms:
+
+**Using the File Browser Settings**
+
+The file browser includes an "Allow file uploads" setting that can be configured
+in the Settings Editor (Settings → Settings Editor → File Browser), or by adding
+the following configuration to your settings (Settings → Advanced Settings Editor → File Browser):
+
+.. code-block:: json
+
+   {
+     "@jupyterlab/filebrowser-extension:browser": {
+       "allowFileUploads": false
+     }
+   }
+
+When this setting is disabled, users will not be able to upload files either by
+clicking the "Upload Files" button or by dragging and dropping files into the file browser.
+
+**Removing the Upload Button via Settings**
+
+You can also remove the upload button entirely in the file browser toolbar by adding the
+following configuration to your settings (Settings → Advanced Settings Editor → File Browser):
+
+.. code-block:: json
+
+   {
+     "@jupyterlab/filebrowser-extension:widget": {
+       "toolbar": [
+         {
+           "name": "uploader",
+           "disabled": true
+         }
+       ]
+     }
+   }
+
+This will hide the "Upload" button from the file browser toolbar, but
+will not prevent drag-and-drop uploads unless the "Allow file uploads" setting
+is also disabled.
+
+**Combining Both Approaches**
+
+For complete UI-level upload restriction, it is recommended to:
+
+1. Disable the "Allow file uploads" setting (``allowFileUploads: false``) to
+   prevent both button-based and drag-and-drop uploads in the file browser UI
+2. Optionally disable the upload button in the toolbar using the configuration
+   above to remove the UI element entirely
+
+.. important::
+
+   **UI-Only Restriction**
+
+   These settings only disable the file upload functionality in the JupyterLab
+   user interface. They do not prevent file uploads at the server level. If the
+   Jupyter server allows file uploads through its API, users can still upload
+   files programmatically (e.g., using the Contents API directly, through custom
+   code, or via other clients).
+
+   For true upload restriction, you must configure server-side permissions and
+   access controls in addition to these UI settings. Consult the
+   `Jupyter Server documentation <https://jupyter-server.readthedocs.io/>`_ for
+   information on server-side security configurations.
 
 Displaying Hidden files
 -----------------------
