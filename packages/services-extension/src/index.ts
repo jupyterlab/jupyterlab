@@ -20,7 +20,7 @@ import {
   IConnectionStatus,
   IContentProvider,
   IContentsManager,
-  IDefaultContentProviderClass,
+  IDefaultContentProvider,
   IDefaultDrive,
   IEventManager,
   IKernelManager,
@@ -112,17 +112,21 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
 };
 
 /**
- * The default IContentProvider class plugin.
+ * The default IContentProvider plugin.
  */
-const defaultContentProviderClass: ServiceManagerPlugin<
-  new (...args: any[]) => IContentProvider
-> = {
+const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
   id: '@jupyterlab/services-extension:default-content-provider-class',
   description: 'The default content provider class for the contents manager.',
   autoStart: true,
-  provides: IDefaultContentProviderClass,
-  activate: (_: null): new (...args: any[]) => IContentProvider => {
-    return RestContentProvider;
+  provides: IDefaultContentProvider,
+  optional: [IServerSettings],
+  activate: (
+    _: null,
+    serverSettings: ServerConnection.ISettings | null
+  ): IContentProvider => {
+    const apiEndpoint = 'api/contents';
+    serverSettings = serverSettings ?? ServerConnection.makeSettings();
+    return new RestContentProvider({ serverSettings, apiEndpoint });
   }
 };
 
@@ -134,12 +138,17 @@ const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
   description: 'The default drive for the contents manager.',
   autoStart: true,
   provides: IDefaultDrive,
+  requires: [IDefaultContentProvider],
   optional: [IServerSettings],
   activate: (
     _: null,
+    defaultContentProvider: IContentProvider,
     serverSettings: ServerConnection.ISettings | null
   ): Contents.IDrive => {
-    return new Drive({ serverSettings: serverSettings ?? undefined });
+    return new Drive({
+      serverSettings: serverSettings ?? undefined,
+      defaultContentProvider
+    });
   }
 };
 
@@ -413,7 +422,7 @@ export default [
   connectionStatusPlugin,
   contentsManagerPlugin,
   defaultDrivePlugin,
-  defaultContentProviderClass,
+  defaultContentProvider,
   eventManagerPlugin,
   kernelManagerPlugin,
   kernelSpecManagerPlugin,

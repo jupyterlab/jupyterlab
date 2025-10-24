@@ -77,13 +77,11 @@ export const IContentsManager = new Token<Contents.IManager>(
 );
 
 /**
- * The default content provider class token.
+ * The default content provider token.
  */
-export const IDefaultContentProviderClass = new Token<
-  new (...args: any[]) => IContentProvider
->(
-  '@jupyterlab/services:IDefaultContentProviderClass',
-  'The default content provider class for the contents manager.'
+export const IDefaultContentProvider = new Token<IContentProvider>(
+  '@jupyterlab/services:IDefaultContentProvider',
+  'The default content provider for the contents manager.'
 );
 
 /**
