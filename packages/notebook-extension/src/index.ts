@@ -1220,6 +1220,7 @@ const notebookDisplayProvider: JupyterFrontEndPlugin<void> = {
       },
       getDisplayName(source: IDebugger.Source): string {
         let displayName = source.path ?? '';
+        console.log(source);
 
         notebookTracker.forEach(panel => {
           for (const cell of panel.content.widgets) {

@@ -26,14 +26,11 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const { config, notebookTracker, consoleTracker, displayRegistry } =
-      options;
+    const { config, notebookTracker, displayRegistry } = options;
 
     this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
-      config,
-      notebookTracker,
-      consoleTracker
+      displayRegistry
     });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({

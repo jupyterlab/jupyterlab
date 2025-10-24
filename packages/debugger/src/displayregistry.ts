@@ -21,14 +21,27 @@ export class DebuggerDisplayRegistry {
     this._providers.push(provider);
   }
 
+  /**
+   * Try all providers. If any returns something more meaningful than `source.path`,
+   * use that. Otherwise, fall back to `source.path`.
+   */
   getDisplayName(source: IDebugger.Source): string {
+    const path = source.path ?? '';
+    let index = path;
+
     for (const provider of this._providers) {
-      if (provider.canHandle(source)) {
-        return provider.getDisplayName(source);
+      if (!provider.canHandle(source)) {
+        continue;
+      }
+
+      const name = provider.getDisplayName(source);
+
+      // If provider returns something different or more descriptive than raw path
+      if (name && name !== path) {
+        index = name;
       }
     }
-    console.log(source.path);
 
-    return source.path ?? '';
+    return index;
   }
 }
