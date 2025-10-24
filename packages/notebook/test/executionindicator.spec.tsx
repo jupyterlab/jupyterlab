@@ -209,7 +209,11 @@ describe('@jupyterlab/notebook', () => {
     });
   });
   describe('testProgressCircle', () => {
-    let displayOption: { showOnToolBar: boolean; showProgress: boolean };
+    let displayOption: {
+      showOnToolBar: boolean;
+      showProgress: boolean;
+      showJumpToCell: boolean;
+    };
     let defaultState: {
       interval: number;
       kernelStatus: ISessionContext.KernelDisplayStatus;
@@ -226,7 +230,11 @@ describe('@jupyterlab/notebook', () => {
     const FILLED_CIRCLE = 'M 0 0 v -104 A 104 104 1 1 0 0.1815 -103.9998 z';
 
     beforeEach(() => {
-      displayOption = { showOnToolBar: false, showProgress: true };
+      displayOption = {
+        showOnToolBar: false,
+        showProgress: true,
+        showJumpToCell: false
+      };
       defaultState = {
         interval: 0,
         kernelStatus: 'idle',
