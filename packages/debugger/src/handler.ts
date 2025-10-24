@@ -278,7 +278,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         !this._service.session?.connection?.kernel
       ) {
         const model = this._service.model;
-        model.clear();
+        model.clear({ preserveBreakpoints: true });
       }
 
       updateAttribute();
@@ -312,7 +312,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
     const stopDebugger = async (): Promise<void> => {
       this._service.session!.connection = connection;
-      await this._service.stop();
+
+      await this._service.session?.stop();
+      this._service.model.clear({ preserveBreakpoints: true });
     };
 
     const startDebugger = async (): Promise<void> => {
@@ -373,7 +375,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         : null;
       this._service.session.connection = connection;
     }
-    await this._service.restoreState(false);
+
+    if (isDebuggerOn()) {
+      await this._service.restoreState(true);
+    } else {
+      await this._service.restoreState(false);
+    }
+
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
       await this._service.displayDefinedVariables();
       if (this._service.session?.capabilities?.supportsModulesRequest) {
