@@ -17,6 +17,29 @@ import { VariablesModel } from './panels/variables/model';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IConsoleTracker } from '@jupyterlab/console';
 
+export const variablesFilterOptions = {
+  module: {
+    label: 'Modules',
+    filter: (variable: IDebugger.IVariable) => variable.type !== 'module'
+  },
+  private: {
+    label: 'Privates',
+    filter: (variable: IDebugger.IVariable) =>
+      !variable.name.startsWith('_') && !variable.name.startsWith('__')
+  },
+  allCaps: {
+    label: 'All Uppercase',
+    filter: (variable: IDebugger.IVariable) => !variable.name.match(/^[A-Z_]+$/)
+  },
+  capitalized: {
+    label: 'Capitalized',
+    filter: (variable: IDebugger.IVariable) =>
+      !variable.name.match(/^[A-Z]/) || variable.name.match(/^[A-Z_]+$/)
+  }
+} as const;
+
+export type VariablesFilterOptionKey = keyof typeof variablesFilterOptions;
+
 /**
  * A model for a debugger.
  */
@@ -44,6 +67,12 @@ export class DebuggerModel implements IDebugger.Model.IService {
       config
     });
     this.kernelSources = new KernelSourcesModel();
+
+    // Initialize variable view options with default values
+    // TODO save/load this in settings/statedb?
+    Object.keys(variablesFilterOptions).forEach(key => {
+      this._variablesFilterOptions.set(key as VariablesFilterOptionKey, false);
+    });
   }
 
   /**
@@ -145,6 +174,31 @@ export class DebuggerModel implements IDebugger.Model.IService {
   }
 
   /**
+   * A signal emitted when the variable view options change.
+   */
+  get variablesFilterOptionsChanged(): ISignal<
+    this,
+    Map<VariablesFilterOptionKey, boolean>
+  > {
+    return this._variablesFilterOptionsChanged;
+  }
+
+  /**
+   * Get current variables panel filter options
+   */
+  get variablesFilterOptions(): Map<VariablesFilterOptionKey, boolean> {
+    return this._variablesFilterOptions;
+  }
+
+  /**
+   * Set current variables panel filter options
+   */
+  set variablesFilterOptions(options: Map<VariablesFilterOptionKey, boolean>) {
+    this._variablesFilterOptions = options;
+    this._variablesFilterOptionsChanged.emit(options);
+  }
+
+  /**
    * Dispose the model.
    */
   dispose(): void {
@@ -170,6 +224,23 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.title = '-';
   }
 
+  filterVariablesByViewOptions(
+    variables: IDebugger.IVariable[],
+    variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+  ): IDebugger.IVariable[] {
+    let filteredVariables = variables;
+    for (const [key, enabled] of variablesFilterOptionsMap) {
+      if (enabled) {
+        const viewFilter =
+          variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
+        if (viewFilter) {
+          filteredVariables = filteredVariables.filter(viewFilter);
+        }
+      }
+    }
+    return filteredVariables;
+  }
+
   private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _hasRichVariableRendering = false;
@@ -177,6 +248,14 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
+  private _variablesFilterOptionsChanged = new Signal<
+    this,
+    Map<VariablesFilterOptionKey, boolean>
+  >(this);
+  private _variablesFilterOptions = new Map<
+    VariablesFilterOptionKey,
+    boolean
+  >();
 }
 
 /**
