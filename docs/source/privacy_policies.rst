@@ -67,13 +67,18 @@ Users can also disable the plugin by executing:
 External web services
 ---------------------
 
-GitHub Pages
-^^^^^^^^^^^^
+JupyterLab Docs site
+^^^^^^^^^^^^^^^^^^^^
 
-The service hosting the https://jupyterlab.github.io website stores access logs.
-That data is not accessible to and not readable by the JupyterLab development team.
+The service hosting the https://jupyterlab.readthedocs.io website stores access
+logs. Only aggregate statistics are made available to Project Jupyter. See the
+privacy policy at
+https://docs.readthedocs.com/platform/stable/privacy-policy.html.
 
-GitHub's privacy policy can be found at https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement .
+Additional website statistics are collected using Plausible.io and aggregate statistics
+are accessible to Project Jupyter. See the privacy policy at
+https://plausible.io/privacy and the data policy at
+https://plausible.io/data-policy.
 
 PyPI.org
 ^^^^^^^^
