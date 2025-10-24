@@ -115,8 +115,8 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
  * The default IContentProvider plugin.
  */
 const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
-  id: '@jupyterlab/services-extension:default-content-provider-class',
-  description: 'The default content provider class for the contents manager.',
+  id: '@jupyterlab/services-extension:default-content-provider',
+  description: 'The default content provider for the contents manager.',
   autoStart: true,
   provides: IDefaultContentProvider,
   optional: [IServerSettings],
