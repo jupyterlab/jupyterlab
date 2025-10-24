@@ -51,6 +51,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       this._render();
       context.model.contentChanged.connect(this.update, this);
       context.fileChanged.connect(this.update, this);
+      this._startFileWatching();
       this._ready.resolve(void 0);
     });
   }
@@ -109,6 +110,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     if (this._img.src) {
       URL.revokeObjectURL(this._img.src || '');
     }
+    this._stopFileWatching();
     super.dispose();
   }
 
@@ -212,12 +214,80 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
 
+  /**
+   * Start watching for file changes and refresh the image when detected.
+   */
+  private _startFileWatching(): void {
+    // Check for file changes every 2 seconds
+    this._fileWatchInterval = window.setInterval(() => {
+      void this._checkForFileChanges();
+    }, 2000);
+  }
+
+  /**
+   * Stop watching for file changes.
+   */
+  private _stopFileWatching(): void {
+    if (this._fileWatchInterval !== null) {
+      clearInterval(this._fileWatchInterval);
+      this._fileWatchInterval = null;
+    }
+  }
+
+  /**
+   * Check if the file has changed on disk and refresh if needed.
+   */
+  private async _checkForFileChanges(): Promise<void> {
+    if (this.isDisposed || !this.context.isReady) {
+      return;
+    }
+
+    try {
+      // Access the contents manager through the document manager
+      const manager = (this.context as any)._manager;
+      if (!manager?.contents) {
+        return;
+      }
+
+      // Get file metadata without content to check for changes
+      const model = await manager.contents.get(this.context.path, {
+        content: false,
+        hash: true
+      });
+
+      const currentModel = this.context.contentsModel;
+      if (!currentModel) {
+        return;
+      }
+
+      // Check if file has changed using hash (preferred) or last_modified
+      let hasChanged = false;
+      if (model.hash && currentModel.hash) {
+        hasChanged = model.hash !== currentModel.hash;
+      } else if (model.last_modified && currentModel.last_modified) {
+        const diskTime = new Date(model.last_modified).getTime();
+        const memoryTime = new Date(currentModel.last_modified).getTime();
+        // Allow small time differences to account for filesystem precision
+        hasChanged = diskTime > memoryTime + 1000;
+      }
+
+      if (hasChanged) {
+        // File has changed, refresh the image by reverting to disk version
+        await this.context.revert();
+      }
+    } catch (error) {
+      // Ignore errors (file might be temporarily unavailable)
+      console.debug('Error checking for file changes:', error);
+    }
+  }
+
   private _mimeType: string;
   private _scale = 1;
   private _matrix = [1, 0, 0, 1];
   private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
   private _img: HTMLImageElement;
+  private _fileWatchInterval: number | null = null;
 }
 
 /**
