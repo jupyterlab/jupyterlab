@@ -1264,10 +1264,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       'text/plain',
       'application/vnd.jupyter.stderr',
       'application/vnd.jupyter.stdout',
-      'text',
-      'audio/wav',
-      'video/webm',
-      'video/mp4'
+      'text'
     ];
     const preferredOutput = supportedOutputTypes.find(mt => {
       const data = firstOutput.data[mt];

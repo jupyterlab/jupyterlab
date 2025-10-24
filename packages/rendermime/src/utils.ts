@@ -19,16 +19,3 @@ export function b64toBlob(base64: string, mime: string): Blob {
   }
   return new Blob([buffer], { type: mime });
 }
-
-/**
- * Calculates the size of a Base64-encoded media string in megabytes.
- *
- * @param base64 - The base64 encoded string.
- * @returns The size in MB.
- */
-export function mediaSizeMB(base64: string): number {
-  const sizeInBytes =
-    base64.length * (3 / 4) -
-    (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
-  return sizeInBytes / (1024 * 1024);
-}
