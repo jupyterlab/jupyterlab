@@ -56,6 +56,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "resolutions": {
+    "vega-expression": "5.2.0",
+    "vega-functions": "5.18.0",
+    "vega-interpreter": "1.2.0"
+  },
   "jupyterlab": {
     "mimeExtension": true
   },
