@@ -475,7 +475,7 @@ export class DocumentManager implements IDocumentManager {
    */
   openOrReveal(
     path: string,
-    widgetName = 'default',
+    widgetName: string | null = null,
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions,
     kernelPreference?: ISessionContext.IKernelPreference
@@ -483,12 +483,12 @@ export class DocumentManager implements IDocumentManager {
     const widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget, {
-        type: widgetName,
+        type: widgetName || 'default',
         ...options
       });
       return widget;
     }
-    return this.open(path, widgetName, kernel, options ?? {}, kernelPreference);
+    return this.open(path, widgetName || 'default', kernel, options ?? {}, kernelPreference);
   }
 
   /**
