@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, galata, JupyterLabPage, test } from '@jupyterlab/galata';
 import { Page } from '@playwright/test';
 import * as path from 'path';
 
@@ -20,8 +20,9 @@ test.use({
 });
 
 test.describe('Workspace', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
+  test.beforeAll(async ({ request, tmpPath, page, waitForApplication }) => {
     const contents = galata.newContentsHelper(request);
+    await waitForApplication(page, page);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${nbFile}`),
       `${tmpPath}/${nbFile}`
@@ -407,6 +408,158 @@ test.describe('Workspace in doc mode', () => {
     await expect(
       page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
     ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
+    ).toHaveCount(1);
+  });
+});
+
+test.describe('Restore non-default-type editor', () => {
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${nbFile}`),
+      `${tmpPath}/${nbFile}`
+    );
+  });
+
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
+  });
+
+  // Use non-default state to have the running session panel displayed
+  test.use({
+    mockState: {
+      'layout-restorer:data': {
+        main: {
+          current: 'editor:workspace-test/simple_notebook.ipynb',
+          dock: {
+            type: 'tab-area',
+            currentIndex: 0,
+            widgets: ['editor:workspace-test/simple_notebook.ipynb'] // notebook open with file editor, not NotebookPanel
+          }
+        },
+        down: {
+          size: 0,
+          widgets: []
+        },
+        left: {
+          collapsed: false,
+          visible: true,
+          current: 'filebrowser',
+          widgets: [
+            'filebrowser',
+            'running-sessions',
+            '@jupyterlab/toc:plugin',
+            'extensionmanager.main-view'
+          ],
+          widgetStates: {
+            ['jp-running-sessions']: {
+              sizes: [0.25, 0.25, 0.25, 0.25],
+              expansionStates: [false, false, false, false]
+            },
+            ['extensionmanager.main-view']: {
+              sizes: [
+                0.3333333333333333, 0.3333333333333333, 0.3333333333333333
+              ],
+              expansionStates: [false, false, false]
+            }
+          }
+        },
+        right: {
+          collapsed: true,
+          visible: true,
+          widgets: ['jp-property-inspector', 'debugger-sidebar'],
+          widgetStates: {
+            ['jp-debugger-sidebar']: {
+              sizes: [0.2, 0.2, 0.2, 0.2, 0.2],
+              expansionStates: [false, false, false, false, false]
+            }
+          }
+        },
+        relativeSizes: [0.4, 0.6, 0],
+        top: {
+          simpleVisibility: true
+        }
+      },
+      'file-browser-filebrowser:cwd': {
+        path: 'workspace-test'
+      },
+      'editor:workspace-test/simple_notebook.ipynb': {
+        // File Editor, not Notebook
+        data: {
+          path: 'workspace-test/simple_notebook.ipynb',
+          factory: 'Editor'
+        }
+      }
+    } as any
+  });
+
+  test('should restore file editor of `.ipynb` file when reloading, and not open a Notebook', async ({
+    baseURL,
+    page,
+    tmpPath
+  }) => {
+    // load page and wait for workspace to be saved
+    await Promise.all([
+      page.waitForResponse(
+        response =>
+          response.request().method() === 'PUT' &&
+          /api\/workspaces/.test(response.request().url()) &&
+          response.request().postDataJSON().data[
+            `editor:workspace-test/simple_notebook.ipynb`
+          ]
+      ),
+      page.goto(`${baseURL}/lab/workspaces/default?path=${tmpPath}/${nbFile}`)
+    ]);
+
+    // Ensure that there is only the document opened, no matter the workspace content.
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0); // opened as a File, not a Notebook
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
+    ).toHaveCount(1);
+
+    // Reload, which should restore the loaded workspace, which means a file editor and not opening a new Notebook.
+    await Promise.all([page.reload()]);
+    // Requires manual wait due to firefox resolving page.reload() before restore completes.
+    await new Promise(r => setTimeout(r, 2000));
+    await page.evaluate(async () => {
+      await window.jupyterapp.restored;
+    });
+
+    // Ensure that there is STILL only the file editor document opened, and no new Notebook
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0); // opened as a File, not a Notebook
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
+    ).toHaveCount(1);
+
+    // try to open the already open file from the filebrowser, and confirm it doesn't open a new Notebook editor.
+    await Promise.all([page.filebrowser.open('simple_notebook.ipynb')]);
+
+    // Ensure that there is STILL only the file editor document opened, and no new Notebook
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0); // opened as a File, not a Notebook
 
     await expect(
       page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
