@@ -6,7 +6,6 @@
  */
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -113,6 +112,25 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         !inspector.isVisible,
       label: showLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: trans.__('Text to display in the inspector')
+            },
+            refresh: {
+              type: 'boolean',
+              description: trans.__('Whether to refresh the inspector')
+            },
+            isLauncher: {
+              type: 'boolean',
+              description: trans.__('Whether command is called from launcher')
+            }
+          }
+        }
+      },
       execute: args => {
         const text = args && (args.text as string);
         const refresh = args && (args.refresh as boolean);
@@ -130,6 +148,17 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       isEnabled: () => isInspectorOpen(),
       label: closeLabel,
       icon: args => (args.isLauncher ? inspectorIcon : undefined),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            isLauncher: {
+              type: 'boolean',
+              description: trans.__('Whether command is called from launcher')
+            }
+          }
+        }
+      },
       execute: () => closeInspector()
     });
 
@@ -139,6 +168,17 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
       caption,
       label: toggleLabel,
       isToggled: () => isInspectorOpen(),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: trans.__('Text to display in the inspector')
+            }
+          }
+        }
+      },
       execute: args => {
         if (isInspectorOpen()) {
           closeInspector();
@@ -190,13 +230,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
   // FIXME This should be in @jupyterlab/console-extension
   id: '@jupyterlab/inspector-extension:consoles',
   description: 'Adds code introspection support to consoles.',
-  requires: [IInspector, IConsoleTracker, ILabShell],
+  requires: [IInspector, IConsoleTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
     consoles: IConsoleTracker,
-    labShell: ILabShell,
     translator: ITranslator
   ): void => {
     // Maintain association of new consoles with their respective handlers.
@@ -234,8 +273,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
         manager.source = handlers[widget.id];
       }
     };
-    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
-    void app.restored.then(() => setSource(labShell.currentWidget));
+    app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(app.shell.currentWidget));
   }
 };
 
@@ -246,13 +285,12 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   // FIXME This should be in @jupyterlab/notebook-extension
   id: '@jupyterlab/inspector-extension:notebooks',
   description: 'Adds code introspection to notebooks.',
-  requires: [IInspector, INotebookTracker, ILabShell],
+  requires: [IInspector, INotebookTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     manager: IInspector,
-    notebooks: INotebookTracker,
-    labShell: ILabShell
+    notebooks: INotebookTracker
   ): void => {
     // Maintain association of new notebooks with their respective handlers.
     const handlers: { [id: string]: InspectionHandler } = {};
@@ -293,8 +331,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         manager.source = handlers[widget.id];
       }
     };
-    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
-    void app.restored.then(() => setSource(labShell.currentWidget));
+    app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(app.shell.currentWidget));
   }
 };
 

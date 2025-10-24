@@ -447,6 +447,13 @@ export class OutputAreaModel implements IOutputAreaModel {
           item.changed.disconnect(this._onGenericChange, this);
         });
         break;
+      case 'move':
+        break;
+      case 'clear':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
     }
     this._changed.emit(args);
   }
@@ -569,11 +576,11 @@ namespace Private {
       );
       text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
       lastEnd = idx1 + 1;
+      idx0 += prefix.length;
 
       if (idx1 === -1) {
         break;
       }
-      idx0 += prefix.length;
 
       const newChar = newText[idx1];
       if (newChar === '\b') {
@@ -605,6 +612,16 @@ namespace Private {
     return { text, index: idx0 };
   }
 
+  /**
+   * Reallocate the string to prevent memory leak,
+   * workaround for issue in Chrome and Firefox:
+   * - https://issues.chromium.org/issues/41480525
+   * - https://bugzilla.mozilla.org/show_bug.cgi?id=727615
+   */
+  function unleakString(s: string) {
+    return JSON.parse(JSON.stringify(s));
+  }
+
   /*
    * Concatenate a string to an observable string, handling backspaces.
    */
@@ -627,12 +644,12 @@ namespace Private {
         }
       } else if (idx === curText.text.length) {
         if (idx !== text.length) {
-          curText.insert(curText.text.length, text.slice(idx));
+          curText.insert(curText.text.length, unleakString(text.slice(idx)));
           done = true;
         }
       } else if (text[idx] !== curText.text[idx]) {
         curText.remove(idx, curText.text.length);
-        curText.insert(idx, text.slice(idx));
+        curText.insert(idx, unleakString(text.slice(idx)));
         done = true;
       } else {
         idx++;

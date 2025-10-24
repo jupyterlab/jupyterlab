@@ -1,23 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PanelLayout, Widget } from '@lumino/widgets';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Message } from '@lumino/messaging';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { HoverBox } from '@jupyterlab/ui-components';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { TransactionSpec } from '@codemirror/state';
 import { SourceChange } from '@jupyter/ydoc';
-import { kernelIcon, Toolbar } from '@jupyterlab/ui-components';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { TranslationBundle } from '@jupyterlab/translation';
+import { HoverBox, kernelIcon, Toolbar } from '@jupyterlab/ui-components';
+import { IDisposable } from '@lumino/disposable';
+import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
+import { PanelLayout, Widget } from '@lumino/widgets';
+import { GhostTextManager } from './ghost';
+import { CompletionHandler } from './handler';
 import {
   IInlineCompleterFactory,
   IInlineCompleterSettings,
   IInlineCompletionList
 } from './tokens';
-import { CompletionHandler } from './handler';
-import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
 const INLINE_COMPLETER_ACTIVE_CLASS = 'jp-mod-inline-completer-active';
@@ -137,15 +137,13 @@ export class InlineCompleter extends Widget {
     const requestPosition = editor.getOffsetAt(position);
     const start = requestPosition;
     const end = cursorBeforeChange;
-    // update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(
-      requestPosition,
-      cursorBeforeChange,
-      value
-    );
+    const transactions: TransactionSpec = {
+      changes: { from: start, to: end, insert: value }
+    };
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
-      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+      transactions.selection = { anchor: start + value.length };
     }
+    (editor as CodeMirrorEditor).editor.dispatch(transactions);
     model.reset();
     this.update();
   }

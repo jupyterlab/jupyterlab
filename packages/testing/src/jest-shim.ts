@@ -77,19 +77,46 @@ window.Element.prototype.scrollTo = (
 
 // https://github.com/jsdom/jsdom/issues/3368
 class ResizeObserverMock {
-  constructor(_callback: any) {
+  constructor(_callback: ResizeObserverCallback) {
     // no-op
   }
-  observe(_target: any, _options?: any) {
+  observe(_target: Element, _options?: ResizeObserverOptions) {
     // no-op
   }
-  unobserve(_target: any) {
+  unobserve(_target: Element) {
     // no-op
   }
   disconnect() {
     // no-op
   }
 }
+
+// https://github.com/jsdom/jsdom/issues/2032
+class IntersectionObserverMock {
+  constructor(
+    _callback: IntersectionObserverCallback,
+    _options?: IntersectionObserverInit
+  ) {
+    // no-op
+  }
+  observe(_target: Element) {
+    // no-op
+  }
+  unobserve(_target: Element) {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+  takeRecords() {
+    return [];
+  }
+  root = document;
+  rootMargin = '0px 0px 0px 0px';
+  thresholds = [0];
+}
+
+window.IntersectionObserver = IntersectionObserverMock;
 
 window.ResizeObserver = ResizeObserverMock;
 

@@ -214,6 +214,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/outputarea',
     '@jupyterlab/cells',
     '@jupyterlab/notebook',
+    '@jupyterlab/audio-extension',
+    '@jupyterlab/video-extension',
     '@jupyterlab/cell-toolbar',
     '@jupyterlab/cell-toolbar-extension',
     '@jupyterlab/celltags-extension',
@@ -267,6 +269,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/rendermime-extension',
     '@jupyterlab/running',
     '@jupyterlab/running-extension',
+    '@jupyterlab/services-extension',
     '@jupyterlab/settingeditor',
     '@jupyterlab/settingeditor-extension',
     '@jupyterlab/shortcuts-extension',
@@ -284,7 +287,13 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/vega5-extension',
     '@jupyterlab/workspaces-extension'
   ],
-  '@jupyterlab/notebook': ['@jupyterlab/application'],
+  '@jupyterlab/notebook': [
+    '@jupyterlab/application',
+    '@jupyterlab/markedparser-extension' // only used in tests
+  ],
+  '@jupyterlab/notebook-extension': [
+    '@jupyterlab/cell-toolbar' // Only used for CellBarExtension.WIDGET_ID_ARG
+  ],
   '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],
   '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
   '@jupyterlab/testutils': [

@@ -10,7 +10,7 @@ contributing!
 
 Please take a look at the Contributor documentation, familiarize
 yourself with using JupyterLab, and introduce yourself to the community
-(on the `chat <https://gitter.im/jupyterlab/jupyterlab>`__ and/or the `forum <https://discourse.jupyter.org/c/jupyterlab/17>`__)
+(on the `chat <https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab>`__ and/or the `forum <https://discourse.jupyter.org/c/jupyterlab/17>`__)
 and share what area of the project you are interested in working on. Please also see the Jupyter `Community
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
@@ -45,14 +45,12 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    :hidden:
 
    repo
-   components
    patterns
    Accessibility <accessibility>
    internationalization
    css
    performance
    security
-   api
 
 .. contents:: Table of contents
     :local:
@@ -692,7 +690,8 @@ Main reasons for UI test failures are:
    - ``please update snapshots``: Combine the two previous comments effects.
 
     The bot will react with +1 emoji to indicate that the run started and then comment
-    back once it concluded.
+    back once it concluded. This feature is restricted to a subset of users with higher
+    privileges due to security concerns.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.

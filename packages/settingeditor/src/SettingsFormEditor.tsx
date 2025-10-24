@@ -110,7 +110,9 @@ export class SettingsFormEditor extends React.Component<
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const { settings } = props;
+    settings.changed.connect(this._syncFormDataWithSettings);
     this._formData = settings.composite as ReadonlyJSONObject;
+
     this.state = {
       isModified: settings.isModified,
       uiSchema: {},
@@ -189,6 +191,13 @@ export class SettingsFormEditor extends React.Component<
     this.setState({ isModified: false });
   };
 
+  private _syncFormDataWithSettings = () => {
+    this._formData = this.props.settings.composite as ReadonlyJSONObject;
+    this.setState((prevState, props) => ({
+      isModified: props.settings.isModified
+    }));
+  };
+
   render(): JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
 
@@ -233,7 +242,27 @@ export class SettingsFormEditor extends React.Component<
 
   private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
     this.props.hasError(e.errors.length !== 0);
-    this._formData = e.formData as ReadonlyJSONObject;
+
+    // Create a deep copy of the current form data to work with
+    const updatedFormData = JSONExt.deepCopy(
+      this._formData as PartialJSONObject
+    );
+
+    // Only update fields that are actually present in the filtered view
+    if (e.formData) {
+      // Safely iterate over the keys in e.formData
+      Object.keys(e.formData).forEach(key => {
+        // Use type assertion to tell TypeScript this is safe
+        const formData = e.formData as PartialJSONObject;
+        if (formData && key in formData) {
+          updatedFormData[key] = formData[key];
+        }
+      });
+    }
+
+    // Convert back to ReadonlyJSONObject for this._formData
+    this._formData = updatedFormData as ReadonlyJSONObject;
+
     if (e.errors.length === 0) {
       this.props.updateDirtyState(true);
       void this._debouncer.invoke();
@@ -307,6 +336,7 @@ export class SettingsFormEditor extends React.Component<
     if (!filteredSchema?.properties) {
       return this._formData;
     }
+
     const filteredFormData = JSONExt.deepCopy(
       this._formData as PartialJSONObject
     );

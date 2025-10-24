@@ -80,7 +80,7 @@ describe('Debugger', () => {
     factory: ({ model }) => {
       const m = model.sharedModel as IYText;
       return EditorExtensionRegistry.createImmutableExtension(
-        ybinding({ ytext: m.ysource })
+        ybinding({ ytext: m.ysource, undoManager: m.undoManager ?? undefined })
       );
     }
   });
@@ -131,7 +131,9 @@ describe('Debugger', () => {
       editorServices: {
         factoryService,
         mimeTypeService
-      }
+      },
+      notebookTracker: null,
+      config
     });
 
     await act(async () => {

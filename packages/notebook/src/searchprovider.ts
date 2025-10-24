@@ -584,7 +584,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this._addCellProvider(changes.newIndex + index);
           this._removeCellProvider(changes.newIndex + index + 1);
         });
-
+        break;
+      case 'clear':
+        for (
+          let index = this._searchProviders.length - 1;
+          index >= 0;
+          index--
+        ) {
+          this._removeCellProvider(index);
+        }
         break;
     }
     this._stateChanged.emit();
@@ -648,6 +656,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (reverse && this.widget.content.mode === 'command') {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       const currentMatch = searchEngine.getCurrentMatch();
+
       if (!currentMatch) {
         this._currentProviderIndex -= 1;
       }

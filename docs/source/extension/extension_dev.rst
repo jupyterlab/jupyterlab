@@ -12,25 +12,21 @@ A JupyterLab extension is a package that contains a number of JupyterLab plugins
 
 See the sections below for more detailed information, or browse the rest of this page for an overview.
 
-.. warning::
-    Your extensions may break with new releases of JupyterLab. As noted in :ref:`versioning_notes`,
-    JupyterLab development and release cycles follow semantic versioning, so we recommend planning
-    your development process to account for possible future breaking changes that may disrupt users
-    of your extensions. Consider documenting your maintenance plans to users in your project, or
-    setting an upper bound on the version of JupyterLab your extension is compatible with in your
-    project's package metadata.
 
 .. toctree::
    :maxdepth: 1
 
    extension_points
    ui_components
+   components
    documents
    notebook
    virtualdom
    ui_helpers
    internationalization
    identity
+   ../developer/patterns
+   ../developer/css
    extension_tutorial
    extension_multiple_ui
    extension_migration
@@ -80,6 +76,14 @@ An extension can be published both as a source extension on NPM and as a prebuil
 
 Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multi-user systems where JupyterLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the per-user level, the per-environment level, or the system level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JupyterLab.
 
+.. warning::
+    Your extensions may break with new releases of JupyterLab. As noted in :ref:`versioning_notes`,
+    JupyterLab development and release cycles follow semantic versioning, so we recommend planning
+    your development process to account for possible future breaking changes that may disrupt users
+    of your extensions. Consider documenting your maintenance plans to users in your project, or
+    setting an upper bound on the version of JupyterLab your extension is compatible with in your
+    project's package metadata.
+
 .. tip::
 
    We recommend publishing prebuilt extensions in Python packages for user convenience.
@@ -119,6 +123,9 @@ The ``id`` and ``activate`` fields are required and the other fields may be omit
 - ``requires`` and ``optional`` are lists of :ref:`tokens <tokens>` corresponding to services other plugins provide. These services will be given as arguments to the ``activate`` function when the plugin is activated. If a ``requires`` service is not registered with JupyterLab, an error will be thrown and the plugin will not be activated.
 - ``provides`` is the :ref:`token <tokens>` associated with the service your plugin is providing to the system. If your plugin does not provide a service to the system, omit this field and do not return a value from your ``activate`` function.
 - ``activate`` is the function called when your plugin is activated. The arguments are, in order, the :ref:`application object <application_object>`, the services corresponding to the ``requires`` tokens, then the services corresponding to the ``optional`` tokens (or ``null`` if that particular ``optional`` token is not registered in the system). If a ``provides`` token is given, the return value of the ``activate`` function (or resolved return value if a promise is returned) will be registered as the service associated with the token.
+- ``deactivate`` is the optional deactivation method
+
+For more information, see the API reference for :ts:type:`application.JupyterFrontEndPlugin`.
 
 .. _application_object:
 
@@ -133,7 +140,7 @@ A Jupyter front-end application object is given to a plugin's ``activate`` funct
 -  ``serviceManager`` - low-level manager for talking to the Jupyter REST API.
 -  ``shell`` - a generic Jupyter front-end shell instance, which holds the user interface for the application. See :ref:`shell` for more details.
 
-See the JupyterLab API reference documentation for the ``JupyterFrontEnd`` class for more details.
+See the JupyterLab API reference documentation for the :ts:class:`application.JupyterFrontEnd` class for more details.
 
 .. _dependency-injection-basic-info:
 
@@ -199,7 +206,8 @@ The mime renderer can update its data by calling ``.setData()`` on the
 model it is given to render. This can be used for example to add a
 ``png`` representation of a dynamic figure, which will be picked up by a
 notebook model and added to the notebook document. When using
-``IDocumentWidgetFactoryOptions``, you can update the document model by
+:ts:interface:`rendermime.IRenderMime.IDocumentWidgetFactoryOptions`,
+you can update the document model by
 calling ``.setData()`` with updated data for the rendered MIME type. The
 document can then be saved by the user in the usual manner.
 
@@ -213,6 +221,78 @@ The extension package containing the theme plugin must include all static assets
 See the `JupyterLab Light Theme <https://github.com/jupyterlab/jupyterlab/tree/main/packages/theme-light-extension>`__ for an example.
 
 See the `TypeScript extension template <https://github.com/jupyterlab/extension-template>`__ (choosing ``theme`` as ``kind`` ) for a quick start to developing a theme plugin.
+
+Service Manager Plugins
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+   This is an advanced topic. If you are new to JupyterLab extensions, you can skip this section.
+
+The Service Manager is a core component of a JupyterLab application and the interface to the Jupyter Server REST API.
+Before JupyterLab 4.4.0, the Service Manager had to be created as a singleton object and passed when creating a JupyterLab application object.
+This was not convenient if some extensions needed to change the behavior of some of the core services provided by the Service Manager,
+as they would have to build a new JupyterLab application from scratch.
+
+.. versionadded:: 4.4
+  The Service Manager is now itself a plugin which can be provided by a third-party extension using the :ts:variable:`services.IServiceManager` token.
+  Its underlying services (such as the kernel manager and the contents manager) are also now available as plugins.
+
+The Service Manager plugins can be provided by third-party extensions via the following tokens:
+
+* :ts:variable:`services.IConnectionStatus`: The connection status service.
+* :ts:variable:`services.IContentsManager`: The contents manager service, responsible for managing files and directories.
+* :ts:variable:`services.IDefaultDrive`: The default drive service, responsible for providing the default drive in which the contents manager operates.
+* :ts:variable:`services.IServerSettings`: The server settings service, defining a set of default server settings.
+* :ts:variable:`services.IEventManager`: The event manager service for emitting events that are broadcast by an event bus managed by Jupyter Server.
+* :ts:variable:`services.IKernelManager`: The kernel manager service.
+* :ts:variable:`services.IKernelSpecManager`: The kernel spec manager service.
+* :ts:variable:`services.INbConvertManager`: The nbconvert manager service, used for exports in various formats.
+* :ts:variable:`services.ISessionManager`: The session manager service.
+* :ts:variable:`services.ISettingManager`: The setting manager service, for managing user settings.
+* :ts:variable:`services.ITerminalManager`: The terminal manager service.
+* :ts:variable:`services.IUserManager`: The user manager service.
+* :ts:variable:`services.IWorkspaceManager`: The workspace manager service, to interact with the workspace API.
+
+The following example shows how you can provide a custom contents manager service, which logs the path of the requested content in the console:
+
+.. code-block:: typescript
+
+   import {
+     Contents,
+     ContentsManager,
+     IContentsManager,
+     ServiceManagerPlugin
+   } from '@jupyterlab/services';
+
+   class CustomContents extends ContentsManager {
+     async get(
+       path: string,
+       options?: Contents.IFetchOptions
+     ): Promise<Contents.IModel> {
+       console.log('CustomContents.get', path);
+       return super.get(path, options);
+     }
+   }
+
+   const plugin: ServiceManagerPlugin<IContentsManager> = {
+     id: 'my-extension:contents-manager',
+     autoStart: true,
+     provides: IContentsManager,
+     description: 'A JupyterLab extension providing a custom contents manager',
+     activate: (_: null): Contents.IManager => {
+       return new CustomContents();
+     }
+   };
+
+   export default plugin;
+
+
+.. warning::
+   Note the use of :ts:type:`services.ServiceManagerPlugin` to declare the plugin.
+   ``ServiceManagerPlugin`` is different from :ts:type:`application.JupyterFrontEndPlugin` in that it provides a service manager plugin, which will be
+   activated before the application is set. As a consequence, the first parameter of the ``activate`` function is ``null``.
+   ``ServiceManagerPlugin<T>`` is equivalent to ``IPlugin<null, T>`` where ``T`` is the service provided by the plugin.
+
 
 .. _source_extensions:
 

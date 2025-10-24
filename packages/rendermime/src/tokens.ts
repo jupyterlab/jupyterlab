@@ -7,6 +7,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
+import type { RenderMimeRegistry } from './registry';
 
 /**
  * The rendermime token.
@@ -204,3 +205,15 @@ export const IMarkdownParser = new Token<IRenderMime.IMarkdownParser>(
 );
 
 export interface IMarkdownParser extends IRenderMime.IMarkdownParser {}
+
+/**
+ * The URL resolver factory.
+ */
+export const IUrlResolverFactory =
+  new Token<RenderMimeRegistry.IUrlResolverFactory>(
+    '@jupyterlab/rendermime:IUrlResolverFactory',
+    'A factory for resolver of asset URLs.'
+  );
+
+export interface IUrlResolverFactory
+  extends RenderMimeRegistry.IUrlResolverFactory {}

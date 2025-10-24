@@ -9,3 +9,4 @@
 @import url('~@jupyterlab/application/style/index.css');
 @import url('~@jupyterlab/filebrowser/style/index.css');
 @import url('~@jupyterlab/running/style/index.css');
+@import url('./base.css');

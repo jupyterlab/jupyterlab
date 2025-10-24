@@ -9,7 +9,9 @@ import {
   KernelAPI,
   KernelManager,
   KernelMessage,
+  ServerConnection,
   Session,
+  SessionAPI,
   SessionManager
 } from '../../src';
 import { handleRequest, SessionTester } from '../utils';
@@ -31,6 +33,7 @@ async function startNew(): Promise<Session.ISessionConnection> {
 
 describe('session', () => {
   let session: Session.ISessionConnection;
+  let sessionAPIClient: Session.ISessionAPIClient;
   let defaultSession: Session.ISessionConnection;
   let server: JupyterServer;
 
@@ -40,7 +43,9 @@ describe('session', () => {
     server = new JupyterServer();
     await server.start();
     kernelManager = new KernelManager();
-    sessionManager = new SessionManager({ kernelManager });
+    const serverSettings = ServerConnection.makeSettings();
+    sessionAPIClient = new SessionAPI.SessionAPIClient({ serverSettings });
+    sessionManager = new SessionManager({ kernelManager, sessionAPIClient });
     defaultSession = await startNew();
   }, 30000);
 
@@ -267,17 +272,17 @@ describe('session', () => {
       });
 
       it('should fail for improper response status', async () => {
-        handleRequest(defaultSession, 201, {});
+        handleRequest(sessionAPIClient, 201, {});
         await expect(defaultSession.setPath(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for error response status', async () => {
-        handleRequest(defaultSession, 500, {});
+        handleRequest(sessionAPIClient, 500, {});
         await expect(defaultSession.setPath(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for improper model', async () => {
-        handleRequest(defaultSession, 200, {});
+        handleRequest(sessionAPIClient, 200, {});
         await expect(defaultSession.setPath(UUID.uuid4())).rejects.toThrow();
       });
 
@@ -301,17 +306,17 @@ describe('session', () => {
       });
 
       it('should fail for improper response status', async () => {
-        handleRequest(defaultSession, 201, {});
+        handleRequest(sessionAPIClient, 201, {});
         await expect(defaultSession.setType(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for error response status', async () => {
-        handleRequest(defaultSession, 500, {});
+        handleRequest(sessionAPIClient, 500, {});
         await expect(defaultSession.setType(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for improper model', async () => {
-        handleRequest(defaultSession, 200, {});
+        handleRequest(sessionAPIClient, 200, {});
         await expect(defaultSession.setType(UUID.uuid4())).rejects.toThrow();
       });
 
@@ -333,17 +338,17 @@ describe('session', () => {
       });
 
       it('should fail for improper response status', async () => {
-        handleRequest(defaultSession, 201, {});
+        handleRequest(sessionAPIClient, 201, {});
         await expect(defaultSession.setName(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for error response status', async () => {
-        handleRequest(defaultSession, 500, {});
+        handleRequest(sessionAPIClient, 500, {});
         await expect(defaultSession.setName(UUID.uuid4())).rejects.toThrow();
       });
 
       it('should fail for improper model', async () => {
-        handleRequest(defaultSession, 200, {});
+        handleRequest(sessionAPIClient, 200, {});
         await expect(defaultSession.setName(UUID.uuid4())).rejects.toThrow();
       });
 
@@ -387,7 +392,7 @@ describe('session', () => {
         await previous.info;
         const path = UUID.uuid4() + '.ipynb';
         const model = { ...session.model, path };
-        handleRequest(session, 200, model);
+        handleRequest(sessionAPIClient, 200, model);
         await session.changeKernel({ name: previous.name });
         expect(session.kernel!.name).toBe(previous.name);
         expect(session.path).toBe(model.path);
@@ -412,18 +417,18 @@ describe('session', () => {
       });
 
       it('should fail for an incorrect response status', async () => {
-        handleRequest(defaultSession, 200, {});
+        handleRequest(sessionAPIClient, 200, {});
         await expect(defaultSession.shutdown()).rejects.toThrow();
       });
 
       it('should handle a 404 status', async () => {
         session = await startNew();
-        handleRequest(session, 404, {});
+        handleRequest(sessionAPIClient, 404, {});
         await expect(session.shutdown()).resolves.not.toThrow();
       });
 
       it('should handle a specific error status', async () => {
-        handleRequest(defaultSession, 410, {});
+        handleRequest(sessionAPIClient, 410, {});
         const promise = defaultSession.shutdown();
         await expect(promise).rejects.toThrow(
           'The kernel was deleted but the session was not'
@@ -431,7 +436,7 @@ describe('session', () => {
       });
 
       it('should fail for an error response status', async () => {
-        handleRequest(defaultSession, 500, {});
+        handleRequest(sessionAPIClient, 500, {});
         await expect(defaultSession.shutdown()).rejects.toThrow();
       });
 

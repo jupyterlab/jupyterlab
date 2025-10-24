@@ -81,3 +81,12 @@ test.describe('Toolbar Button', () => {
     expect(labelColor).toEqual(color);
   });
 });
+test('Toolbar widget visibility', async ({ page }) => {
+  const workspaceSelector = page.locator('div.jp-WorkspaceSelector');
+  await expect(workspaceSelector).toHaveCount(0);
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(1);
+  await expect(workspaceSelector).toHaveText('default');
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(0);
+});

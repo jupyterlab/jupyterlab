@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console-extension",
-  "version": "4.4.0-alpha.0",
+  "version": "4.5.0-beta.1",
   "description": "JupyterLab - Code Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,27 +37,27 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.0-alpha.0",
-    "@jupyterlab/apputils": "^4.5.0-alpha.0",
-    "@jupyterlab/codeeditor": "^4.4.0-alpha.0",
-    "@jupyterlab/completer": "^4.4.0-alpha.0",
-    "@jupyterlab/console": "^4.4.0-alpha.0",
-    "@jupyterlab/filebrowser": "^4.4.0-alpha.0",
-    "@jupyterlab/launcher": "^4.4.0-alpha.0",
-    "@jupyterlab/mainmenu": "^4.4.0-alpha.0",
-    "@jupyterlab/rendermime": "^4.4.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.4.0-alpha.0",
-    "@jupyterlab/translation": "^4.4.0-alpha.0",
-    "@jupyterlab/ui-components": "^4.4.0-alpha.0",
-    "@lumino/algorithm": "^2.0.2",
-    "@lumino/coreutils": "^2.2.0",
-    "@lumino/disposable": "^2.1.3",
-    "@lumino/properties": "^2.0.2",
-    "@lumino/widgets": "^2.5.0"
+    "@jupyterlab/application": "^4.5.0-beta.1",
+    "@jupyterlab/apputils": "^4.6.0-beta.1",
+    "@jupyterlab/codeeditor": "^4.5.0-beta.1",
+    "@jupyterlab/completer": "^4.5.0-beta.1",
+    "@jupyterlab/console": "^4.5.0-beta.1",
+    "@jupyterlab/filebrowser": "^4.5.0-beta.1",
+    "@jupyterlab/launcher": "^4.5.0-beta.1",
+    "@jupyterlab/mainmenu": "^4.5.0-beta.1",
+    "@jupyterlab/rendermime": "^4.5.0-beta.1",
+    "@jupyterlab/settingregistry": "^4.5.0-beta.1",
+    "@jupyterlab/translation": "^4.5.0-beta.1",
+    "@jupyterlab/ui-components": "^4.5.0-beta.1",
+    "@lumino/algorithm": "^2.0.3",
+    "@lumino/coreutils": "^2.2.1",
+    "@lumino/disposable": "^2.1.4",
+    "@lumino/properties": "^2.0.3",
+    "@lumino/widgets": "^2.7.1"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

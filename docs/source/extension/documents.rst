@@ -78,6 +78,16 @@ Document Registry
 
 Create a widget for a given file.
 
+If multiple widget factories are associated with the same file type,
+the user will be able to choose one of them using "Open with" list
+in the context menu of the file browser.
+
+.. versionadded:: 4.4
+   Widget factories now can accept a ``contentProviderId`` parameter allowing
+   the widgets to modify the way the content is provisioned. For example,
+   using a custom provider enables fetching the document content in chunks
+   rather than all at once.
+
 *Example*
 
 -  The notebook widget factory that creates NotebookPanel widgets.

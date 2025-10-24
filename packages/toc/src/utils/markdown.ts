@@ -53,8 +53,9 @@ export async function getHeadingId(
     if (!header) {
       return null;
     }
-
-    return header.id;
+    return sanitizer?.allowNamedProperties
+      ? header.id
+      : header.getAttribute('data-jupyter-id');
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
@@ -65,8 +66,57 @@ export async function getHeadingId(
 /**
  * Parses the provided string and returns a list of headings.
  *
+ * @param text - Markdown text
+ * @param parser - A Markdown parser instance used to render the content to HTML.
+ * @returns List of headings
+ *
+ * @remarks
+ * Renders Markdown to HTML and extracts `<h1>`–`<h6>` elements.
+ * Returns an empty list if the parser is `null`.
+ */
+export async function parseHeadings(
+  markdownText: string,
+  parser: IMarkdownParser | null
+): Promise<IMarkdownHeading[]> {
+  if (!parser) {
+    console.warn("Couldn't parse headings; Markdown parser is null");
+    return [];
+  }
+  const renderedHtml = await parser.render(markdownText);
+
+  const headings = new Array<IMarkdownHeading>();
+  const domParser = new DOMParser();
+  const htmlDocument = domParser.parseFromString(renderedHtml, 'text/html');
+
+  // Query all heading elements (h1-h6)
+  const headingElements = htmlDocument.querySelectorAll(
+    'h1, h2, h3, h4, h5, h6'
+  );
+
+  headingElements.forEach((headingElement, lineIdx) => {
+    const level = parseInt(headingElement.tagName.substring(1), 10);
+    const headingText = headingElement.textContent?.trim() || '';
+
+    headings.push({
+      text: headingText,
+      line: lineIdx, // Line index within the parsed HTML, not the original Markdown source line
+      level: level,
+      raw: headingElement.outerHTML, // Parsed HTML string, not raw Markdown
+      skip: skipHeading.test(headingElement.outerHTML)
+    });
+  });
+
+  return headings;
+}
+
+/**
+ * @deprecated in favour of async parseHeadings()
+ *
+ * Parses the provided string and returns a list of headings.
+ *
  * @param text - Input text
  * @returns List of headings
+ *
  */
 export function getHeadings(text: string): IMarkdownHeading[] {
   // Split the text into lines:
@@ -171,7 +221,6 @@ export function isMarkdown(mime: string): boolean {
 
 /**
  * Interface describing a parsed heading result.
- *
  * @private
  */
 interface IHeader {

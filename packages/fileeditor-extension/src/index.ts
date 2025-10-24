@@ -33,7 +33,11 @@ import {
 } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import {
+  DocumentRegistry,
+  getAvailableKernelFileTypes,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import {
@@ -42,6 +46,7 @@ import {
   FileEditorFactory,
   FileEditorSearchProvider,
   IEditorTracker,
+  IEditorWidgetFactory,
   LaTeXTableOfContentsFactory,
   MarkdownTableOfContentsFactory,
   PythonTableOfContentsFactory,
@@ -57,6 +62,7 @@ import {
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { IMarkdownParser } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -66,9 +72,10 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry, MenuSvg } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 
-import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
+import { CommandIDs, Commands, FACTORY } from './commands';
 import { editorSyntaxStatus } from './syntaxstatus';
 
 export { Commands } from './commands';
@@ -81,14 +88,15 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   id: '@jupyterlab/fileeditor-extension:plugin',
   description: 'Provides the file editor widget tracker.',
   requires: [
+    IEditorWidgetFactory,
     IEditorServices,
     IEditorExtensionRegistry,
     IEditorLanguageRegistry,
     IEditorThemeRegistry,
-    IDefaultFileBrowser,
     ISettingRegistry
   ],
   optional: [
+    IDefaultFileBrowser,
     IConsoleTracker,
     ICommandPalette,
     ILauncher,
@@ -96,12 +104,65 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILayoutRestorer,
     ISessionContextDialogs,
     ITableOfContentsRegistry,
-    IToolbarWidgetRegistry,
     ITranslator,
-    IFormRendererRegistry
+    IFormRendererRegistry,
+    IMarkdownParser
   ],
   provides: IEditorTracker,
   autoStart: true
+};
+
+/**
+ * The widget factory extension.
+ */
+const widgetFactory: JupyterFrontEndPlugin<FileEditorFactory.IFactory> = {
+  id: '@jupyterlab/fileeditor-extension:widget-factory',
+  description: 'Provides the factory for creating file editors.',
+  autoStart: true,
+  requires: [IEditorServices, ISettingRegistry],
+  optional: [IToolbarWidgetRegistry, ITranslator],
+  provides: IEditorWidgetFactory,
+  activate: (
+    app: JupyterFrontEnd,
+    editorServices: IEditorServices,
+    settingRegistry: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry | null,
+    translator_: ITranslator | null
+  ) => {
+    const id = plugin.id;
+    const translator = translator_ ?? nullTranslator;
+    const trans = translator.load('jupyterlab');
+
+    let toolbarFactory:
+      | ((
+          widget: IDocumentWidget<FileEditor>
+        ) => IObservableList<DocumentRegistry.IToolbarItem>)
+      | undefined;
+
+    if (toolbarRegistry) {
+      toolbarFactory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FACTORY,
+        id,
+        translator
+      );
+    }
+    const factory = new FileEditorFactory({
+      editorServices,
+      factoryOptions: {
+        name: FACTORY,
+        label: trans.__('Editor'),
+        fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
+        defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
+        toolbarFactory,
+        translator
+      }
+    });
+    app.docRegistry.addWidgetFactory(factory);
+
+    return factory;
+  }
 };
 
 /**
@@ -248,6 +309,7 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  widgetFactory,
   plugin,
   lineColStatus,
   completerPlugin,
@@ -263,12 +325,13 @@ export default plugins;
  */
 function activate(
   app: JupyterFrontEnd,
+  factory: FileEditorFactory.IFactory,
   editorServices: IEditorServices,
   extensions: IEditorExtensionRegistry,
   languages: IEditorLanguageRegistry,
   themes: IEditorThemeRegistry,
-  fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
+  fileBrowser: IDefaultFileBrowser | null,
   consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -276,9 +339,9 @@ function activate(
   restorer: ILayoutRestorer | null,
   sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
-  toolbarRegistry: IToolbarWidgetRegistry | null,
   translator_: ITranslator | null,
-  formRegistry: IFormRendererRegistry | null
+  formRegistry: IFormRendererRegistry | null,
+  parser: IMarkdownParser | null
 ): IEditorTracker {
   const id = plugin.id;
   const translator = translator_ ?? nullTranslator;
@@ -286,33 +349,7 @@ function activate(
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
-  let toolbarFactory:
-    | ((
-        widget: IDocumentWidget<FileEditor>
-      ) => IObservableList<DocumentRegistry.IToolbarItem>)
-    | undefined;
 
-  if (toolbarRegistry) {
-    toolbarFactory = createToolbarFactory(
-      toolbarRegistry,
-      settingRegistry,
-      FACTORY,
-      id,
-      translator
-    );
-  }
-
-  const factory = new FileEditorFactory({
-    editorServices,
-    factoryOptions: {
-      name: FACTORY,
-      label: trans.__('Editor'),
-      fileTypes: ['markdown', '*'], // Explicitly add the markdown fileType so
-      defaultFor: ['markdown', '*'], // it outranks the defaultRendered viewer.
-      toolbarFactory,
-      translator
-    }
-  });
   const { commands, restored, shell } = app;
   const tracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
     namespace
@@ -321,60 +358,66 @@ function activate(
     tracker.currentWidget !== null &&
     tracker.currentWidget === shell.currentWidget;
 
-  const commonLanguageFileTypeData = new Map<string, IFileTypeData[]>([
-    [
-      'python',
-      [
-        {
-          fileExt: 'py',
-          iconName: 'ui-components:python',
-          launcherLabel: trans.__('Python File'),
-          paletteLabel: trans.__('New Python File'),
-          caption: trans.__('Create a new Python file')
-        }
-      ]
-    ],
-    [
-      'julia',
-      [
-        {
-          fileExt: 'jl',
-          iconName: 'ui-components:julia',
-          launcherLabel: trans.__('Julia File'),
-          paletteLabel: trans.__('New Julia File'),
-          caption: trans.__('Create a new Julia file')
-        }
-      ]
-    ],
-    [
-      'R',
-      [
-        {
-          fileExt: 'r',
-          iconName: 'ui-components:r-kernel',
-          launcherLabel: trans.__('R File'),
-          paletteLabel: trans.__('New R File'),
-          caption: trans.__('Create a new R file')
-        }
-      ]
-    ]
-  ]);
+  let launcherDisposables: IDisposable | null = null;
+  let paletteDisposables: IDisposable | null = null;
+  let menuDisposables: IDisposable | null = null;
 
-  // Use available kernels to determine which common file types should have 'Create New' options in the Launcher, File Editor palette, and File menu
-  const getAvailableKernelFileTypes = async (): Promise<Set<IFileTypeData>> => {
-    const specsManager = app.serviceManager.kernelspecs;
-    await specsManager.ready;
-    let fileTypes = new Set<IFileTypeData>();
-    const specs = specsManager.specs?.kernelspecs ?? {};
-    Object.keys(specs).forEach(spec => {
-      const specModel = specs[spec];
-      if (specModel) {
-        const exts = commonLanguageFileTypeData.get(specModel.language);
-        exts?.forEach(ext => fileTypes.add(ext));
-      }
-    });
-    return fileTypes;
+  const updateKernelFileTypeComponents = (
+    fileTypes: Set<IRenderMime.IFileType>
+  ) => {
+    // Dispose of previous entries if they exist
+    if (launcherDisposables) {
+      launcherDisposables.dispose();
+      launcherDisposables = null;
+    }
+
+    if (paletteDisposables) {
+      paletteDisposables.dispose();
+      paletteDisposables = null;
+    }
+
+    if (menuDisposables) {
+      menuDisposables.dispose();
+      menuDisposables = null;
+    }
+
+    if (launcher) {
+      launcherDisposables = Commands.addKernelLanguageLauncherItems(
+        launcher,
+        trans,
+        fileTypes
+      );
+    }
+
+    if (palette) {
+      paletteDisposables = Commands.addKernelLanguagePaletteItems(
+        palette,
+        trans,
+        fileTypes
+      );
+    }
+
+    if (menu) {
+      menuDisposables = Commands.addKernelLanguageMenuItems(
+        menu,
+        trans,
+        fileTypes
+      );
+    }
   };
+
+  // Update if new specs are added later
+  const specsManager = app.serviceManager.kernelspecs;
+  specsManager.specsChanged.connect(async () => {
+    try {
+      const updatedFileTypes = await getAvailableKernelFileTypes(
+        app.serviceManager.kernelspecs
+      );
+      updateKernelFileTypeComponents(updatedFileTypes);
+    } catch (error) {
+      console.error('Error updating kernel file types:', error);
+    }
+  });
 
   // Handle state restoration.
   if (restorer) {
@@ -475,7 +518,6 @@ function activate(
     void tracker.add(widget);
     Commands.updateWidget(widget.content);
   });
-  app.docRegistry.addWidgetFactory(factory);
 
   // Handle the settings of new widgets.
   tracker.widgetAdded.connect((sender, widget) => {
@@ -537,35 +579,15 @@ function activate(
     Commands.addMenuItems(menu, tracker, consoleTracker, isEnabled);
   }
 
-  getAvailableKernelFileTypes()
-    .then(availableKernelFileTypes => {
-      if (launcher) {
-        Commands.addKernelLanguageLauncherItems(
-          launcher,
-          trans,
-          availableKernelFileTypes
-        );
-      }
-
-      if (palette) {
-        Commands.addKernelLanguagePaletteItems(
-          palette,
-          trans,
-          availableKernelFileTypes
-        );
-      }
-
-      if (menu) {
-        Commands.addKernelLanguageMenuItems(menu, availableKernelFileTypes);
-      }
-    })
+  getAvailableKernelFileTypes(app.serviceManager.kernelspecs)
+    .then(updateKernelFileTypeComponents)
     .catch((reason: Error) => {
       console.error(reason.message);
     });
 
   if (tocRegistry) {
     tocRegistry.add(new LaTeXTableOfContentsFactory(tracker));
-    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker));
+    tocRegistry.add(new MarkdownTableOfContentsFactory(tracker, parser));
     tocRegistry.add(new PythonTableOfContentsFactory(tracker));
   }
 

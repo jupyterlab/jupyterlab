@@ -19,6 +19,7 @@ import {
 import {
   crosshairCursor,
   drawSelection,
+  dropCursor,
   EditorView,
   highlightActiveLine,
   highlightSpecialChars,
@@ -185,6 +186,7 @@ export class ExtensionsHandler
    * to `IExtensionsHandler.configChanged`.
    */
   setBaseOptions(options: Record<string, any>): void {
+    // Change values of baseConfig
     const changed = this._getChangedOptions(options, this._baseConfig);
     if (changed.length > 0) {
       this._baseConfig = options;
@@ -197,6 +199,12 @@ export class ExtensionsHandler
             return agg;
           }, {})
         );
+      }
+    }
+    // Change values of config keys if present in options
+    for (const key of Object.keys(options)) {
+      if (key in this._config && this._config[key] != options[key]) {
+        this.setOption(key, options[key]);
       }
     }
   }
@@ -216,7 +224,6 @@ export class ExtensionsHandler
     const changed = this._getChangedOptions(options, this._config);
     if (changed.length > 0) {
       this._config = { ...options };
-
       this._configChanged.emit(
         changed.reduce<Record<string, any>>((agg, key) => {
           agg[key] = this._config[key] ?? this._baseConfig[key];
@@ -728,7 +735,13 @@ export namespace EditorExtensionRegistry {
             //   want to run a cell action (switch to command mode) on Esc
             // - Disable default Enter handler because it prevents us from
             //   accepting a completer suggestion with Enter.
+            // - Disable Ctrl-m (Shift-Alt-m on Mac) which toggles tab focus mode;
+            //   JupyterLab binds `Esc` to an equivalent behavior (switching
+            //   between command end edit mode) in notebooks, but has no equivalent
+            //   in the File Editor; instead, a `codemirror:toggle-tab-focus-mode`
+            //   command can be bound to invoke this behaviour.
             return ![
+              'Ctrl-m',
               'Mod-Enter',
               'Shift-Mod-k',
               'Mod-/',
@@ -762,6 +775,15 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'boolean',
           title: trans.__('Line Wrap')
+        }
+      }),
+      Object.freeze({
+        name: 'dropCursor',
+        default: true,
+        factory: () => createConditionalExtension(dropCursor()),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Drop Cursor')
         }
       }),
       Object.freeze({
@@ -1048,7 +1070,10 @@ export namespace EditorExtensionRegistry {
             Completions: trans.__('Completions'),
             // @codemirror/lint
             Diagnostics: trans.__('Diagnostics'),
-            'No diagnostics': trans.__('No diagnostics')
+            'No diagnostics': trans.__('No diagnostics'),
+            // @jupyterlab/debugger
+            Breakpoint: trans.__('Breakpoint'),
+            'Selected breakpoint': trans.__('Selected breakpoint')
           },
           factory: () =>
             createConfigurableExtension<Record<string, string>>(value =>

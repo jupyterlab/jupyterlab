@@ -4,6 +4,7 @@
  */
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { Frame, Page } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'test.html';
@@ -21,15 +22,19 @@ test.describe('HTML Viewer', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.getByRole('listitem', { name: fileName }).dblclick();
+    await page.waitForSelector('iframe[src^="blob:"]', { timeout: 5000 });
   });
 
   test('should notify links are blocked for untrusted file', async ({
     page
   }) => {
-    const frame = page.frame({ url: url => url.protocol == 'blob:' });
-    await frame!.getByRole('link', { name: 'GitHub' }).hover();
+    await page.waitForTimeout(100);
+    const frame = await waitForFrame(page, {
+      url: url => url.protocol == 'blob:'
+    });
+    await frame.getByRole('link', { name: 'GitHub' }).hover();
 
-    const warningCount = await frame!.evaluate(() => {
+    const warningCount = await frame.evaluate(() => {
       let count = 0;
       for (const link of document.querySelectorAll('a')) {
         count +=
@@ -48,10 +53,12 @@ test.describe('HTML Viewer', () => {
     await page
       .getByRole('button', { name: 'Trust HTML' })
       .click({ force: true });
-    const frame = page.frame({ url: url => url.protocol == 'blob:' });
-    await frame!.getByRole('link', { name: 'GitHub' }).hover();
+    const frame = await waitForFrame(page, {
+      url: url => url.protocol == 'blob:'
+    });
+    await frame.getByRole('link', { name: 'GitHub' }).hover();
 
-    const warningCount = await frame!.evaluate(() => {
+    const warningCount = await frame.evaluate(() => {
       let count = 0;
       for (const link of document.querySelectorAll('a')) {
         count +=
@@ -66,3 +73,19 @@ test.describe('HTML Viewer', () => {
     expect(warningCount).toEqual(0);
   });
 });
+
+async function waitForFrame(
+  page: Page,
+  frameSelector: Parameters<Page['frame']>[0]
+): Promise<Frame> {
+  const loops = 200;
+  const pause = 10;
+  for (let i = 0; i < loops; i++) {
+    const frame = page.frame(frameSelector);
+    if (frame) {
+      return frame;
+    }
+    await page.waitForTimeout(pause);
+  }
+  throw Error(`Frame was not found after ${pause * loops}ms`);
+}

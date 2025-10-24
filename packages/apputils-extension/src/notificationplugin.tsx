@@ -345,9 +345,17 @@ interface INotificationStatusProps {
 function NotificationStatus(props: INotificationStatusProps): JSX.Element {
   return (
     <GroupItem
+      role="button"
+      tabIndex={0}
+      aria-haspopup
       spacing={HALF_SPACING}
       onClick={() => {
         props.onClick();
+      }}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.onClick();
+        }
       }}
       title={
         props.count > 0
@@ -403,6 +411,67 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              description: 'The notification message text'
+            },
+            type: {
+              type: 'string',
+              description:
+                'The notification type (e.g., "default", "info", "warning", "error")'
+            },
+            options: {
+              type: 'object',
+              description: 'Additional notification options',
+              properties: {
+                autoClose: {
+                  oneOf: [{ type: 'number' }, { type: 'boolean' }],
+                  description:
+                    'Auto-close timeout in milliseconds, or false to disable'
+                },
+                actions: {
+                  type: 'array',
+                  description: 'Array of action buttons for the notification',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      label: {
+                        type: 'string',
+                        description: 'The action button label'
+                      },
+                      commandId: {
+                        type: 'string',
+                        description: 'The command ID to execute when clicked'
+                      },
+                      args: {
+                        description: 'Arguments to pass to the command'
+                      },
+                      caption: {
+                        type: 'string',
+                        description: 'The action button caption/tooltip'
+                      },
+                      className: {
+                        type: 'string',
+                        description: 'CSS class name for the action button'
+                      }
+                    },
+                    required: ['label', 'commandId']
+                  }
+                },
+                data: {
+                  description:
+                    'Additional data associated with the notification'
+                }
+              }
+            }
+          },
+          required: ['message']
+        }
+      },
       execute: args => {
         const { message, type } = args as any;
         const options = (args.options as any) ?? {};
@@ -441,6 +510,71 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The notification ID to update'
+            },
+            message: {
+              type: 'string',
+              description: 'The notification message text'
+            },
+            type: {
+              type: 'string',
+              description:
+                'The notification type (e.g., "default", "info", "warning", "error")'
+            },
+            options: {
+              type: 'object',
+              description: 'Additional notification options',
+              properties: {
+                autoClose: {
+                  oneOf: [{ type: 'number' }, { type: 'boolean' }],
+                  description:
+                    'Auto-close timeout in milliseconds, or false to disable'
+                },
+                actions: {
+                  type: 'array',
+                  description: 'Array of action buttons for the notification',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      label: {
+                        type: 'string',
+                        description: 'The action button label'
+                      },
+                      commandId: {
+                        type: 'string',
+                        description: 'The command ID to execute when clicked'
+                      },
+                      args: {
+                        description: 'Arguments to pass to the command'
+                      },
+                      caption: {
+                        type: 'string',
+                        description: 'The action button caption/tooltip'
+                      },
+                      className: {
+                        type: 'string',
+                        description: 'CSS class name for the action button'
+                      }
+                    },
+                    required: ['label', 'commandId']
+                  }
+                },
+                data: {
+                  description:
+                    'Additional data associated with the notification'
+                }
+              }
+            }
+          },
+          required: ['id', 'message']
+        }
+      },
       execute: args => {
         const { id, message, type, ...options } = args as any;
 
@@ -478,6 +612,18 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.dismiss, {
       label: trans.__('Dismiss a notification'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The notification ID to dismiss'
+            }
+          },
+          required: ['id']
+        }
+      },
       execute: args => {
         const { id } = args as any;
 
@@ -599,6 +745,12 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.display, {
       label: trans.__('Show Notifications'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: displayNotifications
     });
 

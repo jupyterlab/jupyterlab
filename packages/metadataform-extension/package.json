@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metadataform-extension",
-  "version": "4.4.0-alpha.0",
+  "version": "4.5.0-beta.1",
   "description": "A helper to build form for metadata",
   "keywords": [
     "jupyter",
@@ -39,17 +39,17 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.0-alpha.0",
-    "@jupyterlab/metadataform": "^4.4.0-alpha.0",
-    "@jupyterlab/notebook": "^4.4.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.4.0-alpha.0",
-    "@jupyterlab/translation": "^4.4.0-alpha.0",
-    "@jupyterlab/ui-components": "^4.4.0-alpha.0",
-    "@lumino/coreutils": "^2.2.0"
+    "@jupyterlab/application": "^4.5.0-beta.1",
+    "@jupyterlab/metadataform": "^4.5.0-beta.1",
+    "@jupyterlab/notebook": "^4.5.0-beta.1",
+    "@jupyterlab/settingregistry": "^4.5.0-beta.1",
+    "@jupyterlab/translation": "^4.5.0-beta.1",
+    "@jupyterlab/ui-components": "^4.5.0-beta.1",
+    "@lumino/coreutils": "^2.2.1"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

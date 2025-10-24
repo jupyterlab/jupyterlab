@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISharedDocument } from '@jupyter/ydoc';
+import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { PartialJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -24,6 +24,13 @@ const SERVICE_DRIVE_URL = 'api/contents';
  * The url for the file access.
  */
 const FILES_URL = 'files';
+
+/**
+ * A document factory for registering shared models
+ */
+export type SharedDocumentFactory = (
+  options: Contents.ISharedFactoryOptions
+) => YDocument<DocumentChange>;
 
 /**
  * A namespace for contents interfaces.
@@ -150,9 +157,20 @@ export namespace Contents {
   export type FileFormat = 'json' | 'text' | 'base64' | null;
 
   /**
+   * The options used to decode which provider to use.
+   */
+  export interface IContentProvisionOptions {
+    /**
+     * The override for the content provider.
+     * @experimental
+     */
+    contentProviderId?: string;
+  }
+
+  /**
    * The options used to fetch a file.
    */
-  export interface IFetchOptions {
+  export interface IFetchOptions extends IContentProvisionOptions {
     /**
      * The override file type for the request.
      */
@@ -259,6 +277,17 @@ export namespace Contents {
      * It should return `undefined` if the factory is not able to create a `ISharedDocument`.
      */
     createNew(options: ISharedFactoryOptions): ISharedDocument | undefined;
+
+    /**
+     * Register a SharedDocumentFactory.
+     *
+     * @param type Document type
+     * @param factory Document factory
+     */
+    registerDocumentFactory?(
+      type: Contents.ContentType,
+      factory: SharedDocumentFactory
+    ): void;
   }
 
   /**
@@ -355,7 +384,10 @@ export namespace Contents {
      * relevant backend. Returns `null` if the backend
      * does not provide one.
      */
-    getSharedModelFactory(path: string): ISharedFactory | null;
+    getSharedModelFactory(
+      path: string,
+      options?: IContentProvisionOptions
+    ): ISharedFactory | null;
 
     /**
      * Get a file or directory.
@@ -371,7 +403,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @param path A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -420,7 +452,10 @@ export namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(path: string, options?: Partial<IModel>): Promise<IModel>;
+    save(
+      path: string,
+      options?: Partial<IModel> & Partial<Contents.IContentProvisionOptions>
+    ): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -482,6 +517,12 @@ export namespace Contents {
    * in the contents manager.
    */
   export interface IDrive extends IDisposable {
+    /**
+     * An optional content provider registry, consisting of all the
+     * content providers that this drive can use to access files.
+     */
+    readonly contentProviderRegistry?: IContentProviderRegistry;
+
     /**
      * The name of the drive, which is used at the leading
      * component of file paths.
@@ -567,7 +608,10 @@ export namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(localPath: string, options?: Partial<IModel>): Promise<IModel>;
+    save(
+      localPath: string,
+      options?: Partial<IModel> & Contents.IContentProvisionOptions
+    ): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -647,6 +691,13 @@ export class ContentsManager implements Contents.IManager {
   }
 
   /**
+   * The default drive associated with the manager.
+   */
+  get defaultDrive(): Contents.IDrive {
+    return this._defaultDrive;
+  }
+
+  /**
    * The server settings associated with the manager.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -685,13 +736,23 @@ export class ContentsManager implements Contents.IManager {
   }
 
   /**
-   * Given a path, get a shared model factory from the
-   * relevant backend. Returns `null` if the backend
-   * does not provide one.
+   * Given a path, get a shared model factory from the relevant backend.
+   * The factory defined on content provider best matching the given path
+   * takes precedence over the factory defined on the drive as a whole.
+   * Returns `null` if the backend does not provide one.
    */
-  getSharedModelFactory(path: string): Contents.ISharedFactory | null {
+  getSharedModelFactory(
+    path: string,
+    options?: Contents.IContentProvisionOptions
+  ): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
-    return drive?.sharedModelFactory ?? null;
+    const provider = drive.contentProviderRegistry?.getProvider(
+      options?.contentProviderId
+    );
+    if (provider?.sharedModelFactory) {
+      return provider.sharedModelFactory;
+    }
+    return drive.sharedModelFactory ?? null;
   }
 
   /**
@@ -896,7 +957,8 @@ export class ContentsManager implements Contents.IManager {
    */
   save(
     path: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> &
+      Partial<Contents.IContentProvisionOptions> = {}
   ): Promise<Contents.IModel> {
     const globalPath = this.normalize(path);
     const [drive, localPath] = this._driveForPath(path);
@@ -914,7 +976,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1085,7 +1147,25 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    const restContentProvider = new RestContentProvider({
+      apiEndpoint: this._apiEndpoint,
+      serverSettings: this.serverSettings
+    });
+    this.contentProviderRegistry = new ContentProviderRegistry({
+      defaultProvider: restContentProvider
+    });
+    this.contentProviderRegistry.fileChanged.connect(
+      (registry, change: Contents.IChangedArgs) => {
+        this._fileChanged.emit(change);
+      }
+    );
   }
+
+  /**
+   * Content provider registry.
+   * @experimental
+   */
+  readonly contentProviderRegistry: IContentProviderRegistry;
 
   /**
    * The name of the drive, which is used at the leading
@@ -1138,27 +1218,10 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    let url = this._getUrl(localPath);
-    if (options) {
-      // The notebook type cannot take an format option.
-      if (options.type === 'notebook') {
-        delete options['format'];
-      }
-      const content = options.content ? '1' : '0';
-      const hash = options.hash ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content, hash };
-      url += URLExt.objectToQueryString(params);
-    }
-
-    const settings = this.serverSettings;
-    const response = await ServerConnection.makeRequest(url, {}, settings);
-    if (response.status !== 200) {
-      const err = await ServerConnection.ResponseError.create(response);
-      throw err;
-    }
-    const data = await response.json();
-    validate.validateContentsModel(data);
-    return data;
+    const contentProvider = this.contentProviderRegistry.getProvider(
+      options?.contentProviderId
+    );
+    return contentProvider.get(localPath, options);
   }
 
   /**
@@ -1315,22 +1378,12 @@ export class Drive implements Contents.IDrive {
    */
   async save(
     localPath: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> & Contents.IContentProvisionOptions = {}
   ): Promise<Contents.IModel> {
-    const settings = this.serverSettings;
-    const url = this._getUrl(localPath);
-    const init = {
-      method: 'PUT',
-      body: JSON.stringify(options)
-    };
-    const response = await ServerConnection.makeRequest(url, init, settings);
-    // will return 200 for an existing file and 201 for a new file
-    if (response.status !== 200 && response.status !== 201) {
-      const err = await ServerConnection.ResponseError.create(response);
-      throw err;
-    }
-    const data = await response.json();
-    validate.validateContentsModel(data);
+    const contentProvider = this.contentProviderRegistry.getProvider(
+      options?.contentProviderId
+    );
+    const data = await contentProvider.save(localPath, options);
     this._fileChanged.emit({
       type: 'save',
       oldValue: null,
@@ -1342,7 +1395,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Copy a file into a given directory.
    *
-   * @param localPath - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1575,4 +1628,273 @@ namespace Private {
     }
     return extension;
   }
+}
+
+/**
+ * The default registry of content providers.
+ */
+export class ContentProviderRegistry implements IContentProviderRegistry {
+  /**
+   * Construct a new content provider registry.
+   *
+   * @param options - The options used to initialize the registry.
+   */
+  constructor(options: ContentProviderRegistry.IOptions) {
+    this.register('default', options.defaultProvider);
+    this._defaultProvider = options.defaultProvider;
+  }
+
+  /**
+   * Add a content provider to the registry.
+   *
+   * @param identifier - The identifier of the provider; it can be reused between drives.
+   * @param provider - The content provider to register.
+   */
+  register(identifier: string, provider: IContentProvider): IDisposable {
+    if (this._providers.has(identifier)) {
+      throw Error(
+        `Provider with ${identifier} identifier was already registered on this drive`
+      );
+    }
+    this._providers.set(identifier, provider);
+
+    const fileChangedProxy = (
+      _provider: IContentProvider,
+      change: Contents.IChangedArgs
+    ) => {
+      this._fileChanged.emit(change);
+    };
+    if (provider.fileChanged) {
+      provider.fileChanged.connect(fileChangedProxy);
+    }
+
+    return new DisposableDelegate(() => {
+      if (provider.fileChanged) {
+        provider.fileChanged.disconnect(fileChangedProxy);
+      }
+
+      if (this._providers.has(identifier)) {
+        this._providers.delete(identifier);
+      }
+    });
+  }
+
+  /**
+   * Get a content provider matching provided identifier.
+   *
+   * If no identifier is provided, return the default provider.
+   * Throws an error if a provider with given identifier is not found.
+   *
+   * @param identifier - identifier of the content provider.
+   */
+  getProvider(identifier?: string): IContentProvider {
+    if (!identifier) {
+      return this._defaultProvider;
+    }
+    const provider = this._providers.get(identifier);
+    if (!provider) {
+      throw Error(`Provider ${identifier} is not registered`);
+    }
+    return provider;
+  }
+
+  /**
+   * A proxy of the file changed signal for all the providers.
+   */
+  get fileChanged(): ISignal<IContentProviderRegistry, Contents.IChangedArgs> {
+    return this._fileChanged;
+  }
+
+  private _providers: Map<string, IContentProvider> = new Map();
+  private _defaultProvider: IContentProvider;
+  private _fileChanged = new Signal<
+    IContentProviderRegistry,
+    Contents.IChangedArgs
+  >(this);
+}
+
+export namespace ContentProviderRegistry {
+  /**
+   * Initialization options for `ContentProviderRegistry`.
+   */
+  export interface IOptions {
+    /**
+     * Default provider for the registry.
+     */
+    defaultProvider: IContentProvider;
+  }
+}
+
+/**
+ * A content provider using the Jupyter REST API.
+ */
+export class RestContentProvider implements IContentProvider {
+  constructor(options: RestContentProvider.IOptions) {
+    this._options = options;
+  }
+
+  /**
+   * Get a file or directory.
+   *
+   * @param localPath The path to the file.
+   *
+   * @param options The options used to fetch the file.
+   *
+   * @returns A promise which resolves with the file content.
+   *
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   */
+  async get(
+    localPath: string,
+    options?: Contents.IFetchOptions
+  ): Promise<Contents.IModel> {
+    let url = this._getUrl(localPath);
+    if (options) {
+      // The notebook type cannot take a format option.
+      if (options.type === 'notebook') {
+        delete options['format'];
+      }
+      const content = options.content ? '1' : '0';
+      const hash = options.hash ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content, hash };
+      url += URLExt.objectToQueryString(params);
+    }
+
+    const settings = this._options.serverSettings;
+    const response = await ServerConnection.makeRequest(url, {}, settings);
+    if (response.status !== 200) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    const data = await response.json();
+    validate.validateContentsModel(data);
+    return data;
+  }
+
+  /**
+   * Save a file.
+   *
+   * @param localPath - The desired file path.
+   *
+   * @param options - Optional overrides to the model.
+   *
+   * @returns A promise which resolves with the file content model when the
+   *   file is saved.
+   *
+   * #### Notes
+   * Ensure that `model.content` is populated for the file.
+   *
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   */
+  async save(
+    localPath: string,
+    options: Partial<Contents.IModel> = {}
+  ): Promise<Contents.IModel> {
+    const settings = this._options.serverSettings;
+    const url = this._getUrl(localPath);
+    const file = new File([JSON.stringify(options)], 'data.json', {
+      type: 'application/json'
+    });
+    const init = {
+      method: 'PUT',
+      body: file
+    };
+    const response = await ServerConnection.makeRequest(url, init, settings);
+    // will return 200 for an existing file and 201 for a new file
+    if (response.status !== 200 && response.status !== 201) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    const data = await response.json();
+    validate.validateContentsModel(data);
+    return data;
+  }
+
+  /**
+   * Get a REST url for a file given a path.
+   */
+  private _getUrl(...args: string[]): string {
+    const parts = args.map(path => URLExt.encodeParts(path));
+    const baseUrl = this._options.serverSettings.baseUrl;
+    return URLExt.join(baseUrl, this._options.apiEndpoint, ...parts);
+  }
+
+  private _options: RestContentProvider.IOptions;
+}
+
+/**
+ * The namespace for RestContentProvider statics.
+ */
+export namespace RestContentProvider {
+  /**
+   * Initialization options for the REST content provider.
+   */
+  export interface IOptions {
+    /**
+     * The API endpoint for the content provider.
+     */
+    apiEndpoint: string;
+
+    /**
+     * The server settings for the content provider.
+     */
+    serverSettings: ServerConnection.ISettings;
+  }
+}
+
+/**
+ * Registry of content providers.
+ * @experimental
+ */
+export interface IContentProviderRegistry {
+  /**
+   * Add a content provider to the registry.
+   *
+   * @param identifier - The identifier of the provider; it can be reused between drives.
+   * @param provider - The content provider to register.
+   */
+  register(identifier: string, provider: IContentProvider): IDisposable;
+
+  /**
+   * Get a content provider matching provided identifier.
+   *
+   * If no identifier is provided, return the default provider.
+   * Throws an error if a provider with given identifier is not found.
+   *
+   * @param identifier - identifier of the content provider.
+   */
+  getProvider(identifier?: string): IContentProvider;
+
+  /**
+   * A proxy of the file changed signal for all the providers.
+   */
+  readonly fileChanged: ISignal<
+    IContentProviderRegistry,
+    Contents.IChangedArgs
+  >;
+}
+
+/**
+ * The content provider interface.
+ *
+ * Content providers are similar to drives, but instead of a data storage,
+ * they represent the data retrieval method (think protocol). Each drive
+ * can have multiple providers registered, and each provider ID can be
+ * used to register an instance of such provider across multiple drives.
+ *
+ * To provision file contents via a content provider:
+ * - register a widget factory with `contentProviderId` option
+ * - register a file type with in the document registry with `contentProviderId` option
+ *
+ * @experimental
+ */
+export interface IContentProvider
+  extends Pick<Contents.IDrive, 'get' | 'save' | 'sharedModelFactory'> {
+  /**
+   * A signal emitted when a file operation takes place.
+   *
+   * Content providers which perform save operations initiated on the backend
+   * may emit this signal to communicate a change in the file contents.
+   */
+  readonly fileChanged?: ISignal<IContentProvider, Contents.IChangedArgs>;
 }

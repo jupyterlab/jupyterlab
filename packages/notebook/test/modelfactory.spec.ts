@@ -93,6 +93,11 @@ describe('@jupyterlab/notebook', () => {
       notebook = new NotebookViewModelTest([]);
     });
 
+    test('should not throw if requested for cell out of bonds', () => {
+      const height = notebook.estimateWidgetSize(100);
+      expect(height).toBe(0);
+    });
+
     test('should calculate height based on number of lines in source and output (string output)', () => {
       const outputObj = [
         {

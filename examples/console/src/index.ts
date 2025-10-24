@@ -42,7 +42,7 @@ import { IYText } from '@jupyter/ydoc';
 
 async function main(): Promise<any> {
   const translator = new TranslationManager();
-  await translator.fetch('en');
+  await translator.fetch('default');
   const trans = translator.load('jupyterlab');
 
   console.debug(trans.__('in main'));

@@ -356,6 +356,11 @@
         "rank": 41
       },
       {
+        "command": "notebook:create-subshell-console",
+        "selector": ".jp-Notebook",
+        "rank": 42
+      },
+      {
         "command": "notebook:create-new",
         "selector": ".jp-DirListing-content",
         "rank": 52,
@@ -727,6 +732,12 @@
         "matchBrackets": false
       }
     },
+    "autoRenderMarkdownCells": {
+      "title": "Automatically render markdown when cursor leaves markdown cells",
+      "description": "Whether to render markdown cells when the cursor moves out of them.",
+      "type": "boolean",
+      "default": false
+    },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
       "description": "The configuration for all raw cells; it will override the CodeMirror default configuration.",
@@ -749,7 +760,7 @@
       "default": false
     },
     "overscanCount": {
-      "title": "Number of cells to render outside de the viewport",
+      "title": "Number of cells to render outside the viewport",
       "description": "In 'full' windowing mode, this is the number of cells above and below the viewport.",
       "type": "number",
       "default": 1,
@@ -821,13 +832,25 @@
     },
     "windowingMode": {
       "title": "Windowing mode",
-      "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
-      "enum": ["defer", "full", "none"],
-      "default": "full"
+      "description": "- 'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells\n- 'full': Best performance with side effects - Attach to the DOM only cells in viewport\n- 'none': Worst performance without side effects - Attach all cells to the viewport\n- 'contentVisibility': Browser-optimized rendering - Use content-visibility to skip offscreen cells",
+      "enum": ["defer", "full", "none", "contentVisibility"],
+      "default": "contentVisibility"
     },
     "accessKernelHistory": {
       "title": "Kernel history access",
       "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",
+      "type": "boolean",
+      "default": false
+    },
+    "addExtraLineOnCellMerge": {
+      "title": "Add extra line when merging cells",
+      "description": "Whether to add an extra blank line between cells when merging them. When enabled, cells are joined with double newlines. When disabled, cells are joined with single newlines.",
+      "type": "boolean",
+      "default": true
+    },
+    "showMinimap": {
+      "title": "Show minimap",
+      "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
       "type": "boolean",
       "default": false
     }

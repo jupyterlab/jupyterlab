@@ -71,9 +71,29 @@ Here is a sample block of code that adds a command to the application (given by 
       isVisible: () => true,
       isToggled: () => toggled,
       iconClass: 'some-css-icon-class',
-      execute: () => {
-        console.log(`Executed ${commandID}`);
-        toggled = !toggled;
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description: 'Optional text to log',
+              default: ''
+            },
+            count: {
+              type: 'number',
+              description: 'Optional number of times to log the text',
+              default: 1
+            }
+          }
+        }
+      },
+      execute: (args) => {
+        const text = args?.text || '';
+        const count = args?.count || 1;
+        for (let i = 0; i < count; i++) {
+          console.log(`Executed ${commandID} with text: ${text}`);
+        }
       }
     });
 
@@ -82,6 +102,7 @@ This example adds a new command, which, when triggered, calls the ``execute`` fu
 ``isToggled`` indicates whether to render a check mark next to the command.
 ``isVisible`` indicates whether to render the command at all.
 ``iconClass`` specifies a CSS class which can be used to display an icon next to renderings of the command.
+``describedBy`` is an optional but recommended property that provides a JSON schema describing the command's arguments, which is useful for documentation, tooling, and ensuring consistency in how the command is invoked.
 
 Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
@@ -104,7 +125,7 @@ Add a Command to the Command Palette
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In order to add an existing, registered command to the command palette, you need to request the
-``ICommandPalette`` token in your extension.
+:ts:interface:`apputils.ICommandPalette` token in your extension.
 Here is an example showing how to add a command to the command palette (given by ``palette``):
 
 .. code:: typescript
@@ -366,7 +387,7 @@ Launcher
 
 As with menus, keyboard shortcuts, and the command palette, new items can be added
 to the application launcher via commands.
-You can do this by requesting the ``ILauncher`` token in your extension:
+You can do this by requesting the :ts:interface:`launcher.ILauncher` token in your extension:
 
 .. code:: typescript
 
@@ -386,7 +407,7 @@ Jupyter Front-End Shell
 
 The Jupyter front-end
 `shell <../api/interfaces/application.JupyterFrontEnd.IShell.html>`__
-is used to add and interact with content in the application. The ``IShell``
+is used to add and interact with content in the application. The :ts:interface:`application.JupyterFrontEnd.IShell`
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
 
@@ -551,7 +572,7 @@ property ``disabled`` to ``true``.
 API-defined menu
 ^^^^^^^^^^^^^^^^
 
-To use the API, you should request the ``IMainMenu`` token for your extension.
+To use the API, you should request the :ts:interface:`mainmenu.IMainMenu` token for your extension.
 
 There are three main ways to extend:
 
@@ -635,15 +656,14 @@ item to determine whether to delegate the menu command to your activity, and ``i
 More examples for how to register semantic menu items are found throughout the JupyterLab code base.
 The available semantic menu items are:
 
-- ``IEditMenu.IUndoer``: an activity that knows how to undo and redo.
-- ``IEditMenu.IClearer``: an activity that knows how to clear its content.
+- :ts:interface:`mainmenu.IEditMenu.IUndoer`: an activity that knows how to undo and redo.
+- :ts:interface:`mainmenu.IEditMenu.IClearer`: an activity that knows how to clear its content.
 - ``IEditMenu.IGoToLiner``: an activity that knows how to jump to a given line.
 - ``IFileMenu.ICloseAndCleaner``: an activity that knows how to close and clean up after itself.
 - ``IFileMenu.IConsoleCreator``: an activity that knows how to create an attached code console for itself.
-- ``IHelpMenu.IKernelUser``: an activity that knows how to get a related kernel session.
-- ``IKernelMenu.IKernelUser``: an activity that can perform various kernel-related operations.
-- ``IRunMenu.ICodeRunner``: an activity that can run code from its content.
-- ``IViewMenu.IEditorViewer``: an activity that knows how to set various view-related options on a text editor that it owns.
+- :ts:interface:`mainmenu.IKernelMenu.IKernelUser`: an activity that can perform various kernel-related operations.
+- :ts:interface:`mainmenu.IRunMenu.ICodeRunner`: an activity that can run code from its content.
+- :ts:interface:`mainmenu.IViewMenu.IEditorViewer`: an activity that knows how to set various view-related options on a text editor that it owns.
 
 
 Status Bar
@@ -655,7 +675,7 @@ which might contain any kind of content. Since the status bar has limited space,
 you should endeavor to only add small widgets to it.
 
 The following example shows how to place a status item that displays the current
-"busy" status for the application. This information is available from the ``ILabStatus``
+"busy" status for the application. This information is available from the :ts:interface:`application.ILabStatus`
 token, which we reference by a variable named ``labStatus``.
 We place the ``statusWidget`` in the middle of the status bar.
 When the ``labStatus`` busy state changes, we update the text content of the
@@ -678,7 +698,7 @@ When the ``labStatus`` busy state changes, we update the text content of the
 Toolbar Registry
 ----------------
 
-JupyterLab provides an infrastructure to define and customize toolbar widgets
+JupyterLab provides a :ts:interface:`apputils.IToolbarWidgetRegistry` to define and customize toolbar widgets
 from the settings, which is similar to that defining the context menu and the main menu
 bar.
 
@@ -702,11 +722,11 @@ A typical example is the notebook toolbar as in the snippet below:
 
      // Register notebook toolbar specific widgets
      if (toolbarRegistry) {
-       toolbarRegistry.registerFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
+       toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
          ToolbarItems.createCellTypeItem(panel, translator)
        );
 
-       toolbarRegistry.registerFactory<NotebookPanel>(
+       toolbarRegistry.addFactory<NotebookPanel>(
          FACTORY,
          'kernelStatus',
          panel => Toolbar.createKernelStatusItem(panel.sessionContext, translator)
@@ -738,7 +758,7 @@ A typical example is the notebook toolbar as in the snippet below:
      });
      app.docRegistry.addWidgetFactory(factory);
 
-The registry ``registerFactory`` method allows an extension to provide special widget for a unique pair
+The registry ``addFactory`` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper ``createToolbarFactory`` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
 
@@ -801,6 +821,13 @@ providing a different rank or adding ``"disabled": true`` to remove the item).
 
    You need to set ``jupyter.lab.transform`` to ``true`` in the plugin id that will gather all items.
 
+**What are transforms?** The ``jupyter.lab.transform`` flag tells JupyterLab to wait for
+a transform function before loading the plugin. This allows dynamic modification of settings
+schemas, commonly used to merge toolbar/menu definitions from multiple extensions.
+
+**Loading order pitfall**: Extensions providing transforms must register them early in
+activation, before dependent plugins load, otherwise those plugins will timeout waiting
+for the transform.
 
 The current widget factories supporting the toolbar customization are:
 
@@ -846,7 +873,7 @@ Here is an example for enabling a toolbar on a widget:
 
      // Toolbar
      // - Define a custom toolbar item
-     toolbarRegistry.registerFactory(
+     toolbarRegistry.addFactory(
        'FileBrowser', // Factory name
        'uploader',
        (browser: FileBrowser) =>
@@ -879,10 +906,10 @@ Often extensions will want to interact with documents and activities created by 
 For instance, an extension may want to inject some text into a notebook cell,
 or set a custom keymap, or close all documents of a certain type.
 Actions like these are typically done by widget trackers.
-Extensions keep track of instances of their activities in ``WidgetTrackers``,
+Extensions keep track of instances of their activities in instances of :ts:class:`apputils.WidgetTracker` class,
 which are then provided as tokens so that other extensions may request them.
 
-For instance, if you want to interact with notebooks, you should request the ``INotebookTracker`` token.
+For instance, if you want to interact with notebooks, you should request the :ts:interface:`notebook.INotebookTracker` token.
 You can then use this tracker to iterate over, filter, and search all open notebooks.
 You can also use it to be notified via signals when notebooks are added and removed from the tracker.
 
@@ -897,14 +924,14 @@ Completion Providers
 
 Both code completer and inline completer can be extended by registering
 an (inline) completion provider on the completion manager provided by
-the ``ICompletionProviderManager`` token.
+the :ts:interface:`completer.ICompletionProviderManager` token.
 
 
 Code Completer
 ^^^^^^^^^^^^^^
 
 A minimal code completion provider needs to implement the `fetch` and `isApplicable`
-methods, and define a unique `identifier` property, but the ``ICompletionProvider``
+methods, and define a unique `identifier` property, but the :ts:interface:`completer.ICompletionProvider`
 interface allows for much more extensive customization of the completer.
 
 .. code:: typescript
@@ -964,7 +991,7 @@ Inline Completer
 A minimal inline completion provider extension would only implement the
 required method `fetch` and define `identifier` and `name` properties,
 but a number of additional fields can be used for enhanced functionality,
-such as streaming, see the ``IInlineCompletionProvider`` documentation.
+such as streaming, see the :ts:interface:`completer.IInlineCompletionProvider` documentation.
 
 .. code:: typescript
 
@@ -1008,7 +1035,7 @@ For an example of an inline completion provider with streaming support, see
 State Database
 --------------
 
-The state database can be accessed by importing ``IStateDB`` from
+The state database can be accessed by importing :ts:interface:`statedb.IStateDB` from
 ``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
 a plugin:
 
@@ -1041,10 +1068,74 @@ a plugin:
       }
     };
 
+Kernel Subshells
+----------------
+
+Kernel subshells enable concurrent code execution within kernels that support them. Subshells are separate threads of execution that allow interaction with a kernel while it's busy executing long-running code, enabling non-blocking communication and parallel execution.
+
+**Kernel Support**
+
+Subshells are supported by:
+
+- **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via ``supported_features: ['kernel subshells']`` in kernel info replies
+- Other kernels implementing `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__
+
+**User Interface**
+
+For user interface details, see :ref:`subshell-console`.
+
+**Extension Development**
+
+Extension developers can use subshell functionality through the kernel service API:
+
+.. code:: typescript
+
+  import { INotebookTracker } from '@jupyterlab/notebook';
+
+  // Get the current kernel from a notebook
+  const current = tracker.currentWidget;
+  if (!current) return;
+
+  const kernel = current.sessionContext.session?.kernel;
+  if (!kernel) return;
+
+  // Check if kernel supports subshells
+  if (kernel.supportsSubshells) {
+    // Create a new subshell
+    const reply = await kernel.requestCreateSubshell({}).done;
+    const subshellId = reply.content.subshell_id;
+    console.log(`Created subshell: ${subshellId}`);
+
+    // List existing subshells
+    const listReply = await kernel.requestListSubshell({}).done;
+    console.log(`Active subshells: ${listReply.content.subshell_id}`);
+
+    // Execute code in a specific subshell
+    const future = kernel.requestExecute(
+      { code: 'print("Hello from subshell!")' },
+      false, // disposeOnDone
+      { subshell_id: subshellId } // metadata
+    );
+    await future.done;
+
+    // Delete a subshell when done
+    await kernel.requestDeleteSubshell({ subshell_id: subshellId }).done;
+    console.log(`Deleted subshell: ${subshellId}`);
+  }
+
+
+
+For detailed specifications, see `JEP 91 <https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html>`__.
+
 LSP Features
 --------------
 
-JupyterLab provides an infrastructure to communicate with the language servers. If the LSP services are activated and users have language servers installed, JupyterLab will start the language servers for the language of the opened notebook or file. Extension authors can access the virtual documents and the associated LSP connection of opened document by requiring the ``ILSPDocumentConnectionManager`` token from ``@jupyterlab/lsp``.
+JupyterLab provides an infrastructure to communicate with the language servers.
+If the LSP services are activated and users have language servers installed,
+JupyterLab will start the language servers for the language of the opened notebook or file.
+
+Extension authors can access the virtual documents and the associated LSP connection of opened document
+by requiring the :ts:interface:`lsp.ILSPDocumentConnectionManager` token from ``@jupyterlab/lsp``.
 
 Here is an example for making requests to the language server.
 
@@ -1135,3 +1226,181 @@ Occasionally, LSP extensions include a CodeMirror extension to modify the code e
       });
     }
   };
+
+
+Content Provisioning
+--------------------
+
+The file system interactions can be customized by adding:
+
+* a content provider, selectively replacing the way in which content is fetched and synchronized
+* a drive, adding a new source of content, analogous to a physical hard drive
+
+While both the content provider and drive are meant to provide custom implementations of
+the Contents API methods such as ``get()`` and ``save()``, and optionally a custom ``sharedModelFactory``,
+the intended use cases, and the way these are exposed in the user interface are different:
+
+* Drive:
+
+  * Use case: provision of additional content, not available on the default drive.
+
+  * UI: paths of files and directories from the drive are prefixed with the drive name and colon.
+
+* Content Provider:
+
+  * Use case: modification of the protocol used for data retrieval
+    (e.g., streaming of the content, real-time collaboration),
+    by extending the Contents API methods for files which already
+    exist on one of the drives.
+
+  * UI: users will choose a widget factory with an associated content provider
+    when selecting how to open a file using the "Open with" dropdown.
+
+To register a custom drive, use the contents manager's ``addDrive`` method.
+The drive needs to follow the :ts:interface:`services.Contents.IDrive` interface. For drives that use
+a jupyter-server compliant REST API you may wish to extend or re-use
+the built-in :ts:class:`services.Drive` class, as demonstrated below:
+
+.. code:: typescript
+
+  import { Drive, ServerConnection } from '@jupyterlab/services';
+
+  const customDrivePlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-drive',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+      const myDrive = new Drive({
+        apiEndpoint: 'api/contents',
+        name: 'MyNetworkDrive',
+        serverSettings: {
+          baseUrl: 'https://your-jupyter-server.com',
+          // ...
+        } as ServerConnection.ISettings,
+      });
+      app.serviceManager.contents.addDrive(myDrive);
+    }
+  };
+
+To use a content provider, first register it on a drive (or multiple drives):
+
+.. code:: typescript
+
+  import { Contents, ContentsManager, RestContentProvider } from '@jupyterlab/services';
+
+  interface IMyContentChunk {
+    /** URL allowing to fetch the content chunk */
+    url: string;
+  }
+
+  interface CustomContentsModel extends Contents.IModel {
+    /**
+     * Specializes the content (which in `Contents.IModel` is just `any`).
+     */
+    content: IMyContentChunk[];
+  }
+
+  class CustomContentProvider extends RestContentProvider {
+    async get(
+      localPath: string,
+      options?: Contents.IFetchOptions,
+    ): Promise<CustomContentsModel> {
+      // Customize the behaviour of the `get` action to fetch a list of
+      // content chunks from a custom API endpoint instead of the `get`
+
+      try {
+        return getChunks();    // this method needs to be implemented
+      }
+      catch {
+        // fall back to the REST API on errors:
+        const model = await super.get(localPath, options);
+        return {
+          ...model,
+          content: []
+        };
+      }
+    }
+
+    // ...
+  }
+
+  const customContentProviderPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-content-provider',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+      const drive = (app.serviceManager.contents as ContentsManager).defaultDrive;
+      const registry = drive?.contentProviderRegistry;
+      if (!registry) {
+        // If content provider is a non-essential feature and support for JupyterLab <4.4 is desired:
+        console.error('Cannot initialize content provider: no content provider registry.');
+        return;
+      }
+      const customContentProvider = new CustomContentProvider({
+        // These options are only required if extending the `RestContentProvider`.
+        apiEndpoint: '/api/contents',
+        serverSettings: app.serviceManager.serverSettings,
+      });
+      registry.register('my-custom-provider', customContentProvider);
+    }
+  };
+
+and then create and register a widget factory which will understand how to make use of your custom content provider:
+
+.. code:: typescript
+
+  class ExampleWidgetFactory extends ABCWidgetFactory<ExampleDocWidget, ExampleDocModel> {
+    protected createNewWidget(
+      context: DocumentRegistry.IContext<ExampleDocModel>
+    ): ExampleDocWidget {
+
+      return new ExampleDocWidget({
+        context,
+        content: new ExamplePanel(context)
+      });
+    }
+  }
+
+  const widgetFactoryPlugin: JupyterFrontEndPlugin<void> = {
+    id: 'my-extension:custom-widget-factory',
+    autoStart: true,
+    activate: (app: JupyterFrontEnd) => {
+
+      const widgetFactory = new ExampleWidgetFactory({
+        name: FACTORY,
+        modelName: 'example-model',
+        fileTypes: ['example'],
+        defaultFor: ['example'],
+        // Instructs the document registry to use the custom provider
+        // for context of widgets created with `ExampleWidgetFactory`.
+        contentProviderId: 'my-custom-provider'
+      });
+      app.docRegistry.addWidgetFactory(widgetFactory);
+    }
+  };
+
+
+Where ``ExampleDocModel`` can now expect the ``CustomContentsModel`` rather than ``Contents.IModel``:
+
+.. code:: typescript
+
+  class ExampleDocModel implements DocumentRegistry.IModel {
+    // ...
+
+    fromJSON(chunks: IMyContentChunk[]): void {
+      this.sharedModel.transact(() => {
+        let i = 0;
+        for (const chunk of chunks) {
+          const chunk = fetch(chunk.url);
+          this.sharedModel.set(`chunk-${i}`, chunk);
+          i += 1;
+        }
+      });
+    }
+
+    fromString(data: string): void {
+      const chunks = JSON.parse(data) as IMyContentChunk[];
+      return this.fromJSON(chunks);
+    }
+  }
+
+
+For a complete example of a widget factory (although not using a content provider), see the `documents extension example <https://github.com/jupyterlab/extension-examples/tree/main/documents>`__.
