@@ -19,6 +19,8 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
+import { VariablesFilterOptionKey } from './model';
+
 /**
  * An interface describing an application's visual debugger.
  */
@@ -986,6 +988,28 @@ export namespace IDebugger {
        * Clear the model.
        */
       clear(): void;
+
+      /**
+       * Current filter options for the variables panel.
+       * Maps filter option keys to their enabled/disabled state.
+       */
+      variablesFilterOptions: Map<VariablesFilterOptionKey, boolean>;
+
+      /**
+       * Signal emitted when the variables filter options change.
+       */
+      readonly variablesFilterOptionsChanged: ISignal<
+        this,
+        Map<VariablesFilterOptionKey, boolean>
+      >;
+
+      /**
+       * Filter variables based on variablesFilterOptions settings.
+       */
+      filterVariablesByViewOptions(
+        variables: IDebugger.IVariable[],
+        variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+      ): IDebugger.IVariable[];
     }
 
     /**

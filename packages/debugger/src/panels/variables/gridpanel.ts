@@ -34,9 +34,15 @@ export class Grid extends Panel {
    */
   constructor(options: Grid.IOptions) {
     super();
-    const { commands, model, themeManager } = options;
+    const { commands, model, service, themeManager } = options;
     this.model = model;
-    const dataModel = new GridModel(options.translator);
+    this.service = service;
+
+    const dataModel = new GridModel({
+      service: service,
+      translator: options.translator
+    });
+
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
@@ -64,12 +70,21 @@ export class Grid extends Panel {
     grid.node.style.height = '100%';
     this._grid = grid;
 
+    this.service.model.variablesFilterOptionsChanged.connect(
+      this._onVariablesFilterOptionsChanged,
+      this
+    );
+
     // Compute the grid's styles based on the current theme.
     if (themeManager) {
       themeManager.themeChanged.connect(this._updateStyles, this);
     }
     this.addWidget(grid);
   }
+
+  _onVariablesFilterOptionsChanged = (): void => {
+    this.dataModel.setData(this.model.scopes ?? []);
+  };
 
   /**
    * Set the variable filter list.
@@ -119,6 +134,7 @@ export class Grid extends Panel {
 
   private _grid: DataGrid;
   protected model: IDebugger.Model.IVariables;
+  protected service: IDebugger;
 }
 
 /**
@@ -140,6 +156,11 @@ namespace Grid {
     model: IDebugger.Model.IVariables;
 
     /**
+     * The debugger service.
+     */
+    service: IDebugger;
+
+    /**
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
@@ -157,11 +178,14 @@ namespace Grid {
 export class GridModel extends DataModel {
   /**
    * Create grid model
+   * @param service The debugger service
    * @param translator optional translator
    */
-  constructor(translator?: ITranslator) {
+  // constructor(service: IDebugger, translator?: ITranslator) {
+  constructor(options: GridModel.IOptions) {
     super();
-    this._trans = (translator || nullTranslator).load('jupyterlab');
+    this._service = options.service;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
 
   /**
@@ -254,9 +278,16 @@ export class GridModel extends DataModel {
     });
     const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
     const variables = scope?.variables ?? [];
-    const filtered = variables.filter(
+
+    const filteredVariables = this._service.model.filterVariablesByViewOptions(
+      variables,
+      this._service.model.variablesFilterOptions
+    );
+
+    const filtered = filteredVariables.filter(
       variable => variable.name && !this._filter.has(variable.name)
     );
+
     filtered.forEach((variable, index) => {
       this._data.name[index] = variable.name;
       this._data.type[index] = variable.type ?? '';
@@ -285,6 +316,7 @@ export class GridModel extends DataModel {
 
   private _filter = new Set<string>();
   private _scope = '';
+  private _service: IDebugger;
   private _trans: TranslationBundle;
   private _data: {
     name: string[];
@@ -297,6 +329,26 @@ export class GridModel extends DataModel {
     value: [],
     variablesReference: []
   };
+}
+
+/**
+ * Namespace for GridModel statics
+ */
+namespace GridModel {
+  /**
+   * Options for creating a GridModel
+   */
+  export interface IOptions {
+    /**
+     * The debugger service.
+     */
+    service: IDebugger;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
 }
 
 /**
