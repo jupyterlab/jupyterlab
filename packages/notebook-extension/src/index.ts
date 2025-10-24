@@ -3398,7 +3398,7 @@ function addCommands(
         }
       }
 
-      // fallback to DOM selection (output or elsewhere)
+      // fallback to DOM selection (output)
       const domSelection = window.getSelection();
       const selectedText = domSelection?.toString();
       if (selectedText && selectedText.trim().length > 0) {
@@ -3423,7 +3423,7 @@ function addCommands(
         }
       }
 
-      // Check for text selection in output area or other DOM content
+      // Check for text selection in output area
       const domSelection = window.getSelection();
       return !!domSelection && domSelection.toString().trim().length > 0;
     },
@@ -3505,7 +3505,7 @@ function addCommands(
           editor.replaceSelection?.(text);
         }
       } catch (err) {
-        // Firefox fallback
+        // browser limitation fallback (e.g Firefox)
         void showDialog({
           title: trans.__('Paste Unavailable'),
           body: trans.__(
