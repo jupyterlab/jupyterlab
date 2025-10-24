@@ -5,9 +5,11 @@ import { findNext, gotoLine } from '@codemirror/search';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Clipboard,
+  Dialog,
   ICommandPalette,
   ISessionContextDialogs,
   MainAreaWidget,
+  showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -1223,15 +1225,26 @@ export namespace Commands {
           return;
         }
 
-        const editor: CodeEditor.IEditor = widget.editor;
+        try {
+          const editor: CodeEditor.IEditor = widget.editor;
 
-        // Get data from clipboard
-        const clipboard = window.navigator.clipboard;
-        const clipboardData: string = await clipboard.readText();
+          // Get data from clipboard
+          const clipboard = window.navigator.clipboard;
+          const clipboardData: string = await clipboard.readText();
 
-        if (clipboardData) {
-          // Paste data to the editor
-          editor.replaceSelection && editor.replaceSelection(clipboardData);
+          if (clipboardData) {
+            // Paste data to the editor
+            editor.replaceSelection && editor.replaceSelection(clipboardData);
+          }
+        } catch (err) {
+          // browser limitation fallback (e.g Firefox)
+          void showDialog({
+            title: trans.__('Paste Unavailable'),
+            body: trans.__(
+              'Due to browser security restrictions, pasting from the context menu may not be supported.\n\nPlease use Ctrl + V (or ⌘ + V on macOS) instead.'
+            ),
+            buttons: [Dialog.okButton({ label: trans.__('OK') })]
+          });
         }
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),

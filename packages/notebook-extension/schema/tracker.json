@@ -251,6 +251,21 @@
         "rank": 3
       },
       {
+        "command": "notebook:copy-selected-text",
+        "selector": ".jp-Notebook .jp-Cell",
+        "rank": 3
+      },
+      {
+        "command": "notebook:cut-selected-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
+        "command": "notebook:paste-text",
+        "selector": ".jp-Notebook .jp-InputArea-editor",
+        "rank": 3
+      },
+      {
         "type": "separator",
         "selector": ".jp-Notebook .jp-Cell",
         "rank": 4
