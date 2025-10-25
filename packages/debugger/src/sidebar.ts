@@ -17,8 +17,6 @@ import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
 
 import { Callstack as CallstackPanel } from './panels/callstack';
 
-import { Sources as SourcesPanel } from './panels/sources';
-
 import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
@@ -41,13 +39,8 @@ export class DebuggerSidebar extends SidePanel {
     this.title.icon = bugIcon;
     this.addClass('jp-DebuggerSidebar');
 
-    const {
-      callstackCommands,
-      breakpointsCommands,
-      editorServices,
-      service,
-      themeManager
-    } = options;
+    const { callstackCommands, breakpointsCommands, service, themeManager } =
+      options;
     const model = service.model;
 
     this.variables = new VariablesPanel({
@@ -71,13 +64,6 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    this.sources = new SourcesPanel({
-      model: model.sources,
-      service,
-      editorServices,
-      translator
-    });
-
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
       service,
@@ -96,7 +82,6 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    this.addWidget(this.sources);
     this.addWidget(this.kernelSources);
   }
 
@@ -116,9 +101,8 @@ export class DebuggerSidebar extends SidePanel {
   readonly breakpoints: BreakpointsPanel;
 
   /**
-   * The sources widget.
+   * The kernel sources widget.
    */
-  readonly sources: SourcesPanel;
 
   readonly kernelSources: KernelSourcesPanel;
 }

@@ -5,8 +5,6 @@ import { act } from 'react-dom/test-utils';
 
 import { Button } from '@jupyter/web-components';
 
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
@@ -34,8 +32,6 @@ import { Debugger } from '../src/debugger';
 import { DebuggerService } from '../src/service';
 
 import { DebuggerModel } from '../src/model';
-
-import { SourcesBody } from '../src/panels/sources/body';
 
 import { IYText } from '@jupyter/ydoc';
 import { IDebugger } from '../src/tokens';
@@ -187,12 +183,12 @@ describe('Debugger', () => {
         '.jp-AccordionPanel-title'
       );
     });
-    it('should have 5 child widgets', () => {
-      expect(sidebar.widgets.length).toBe(5);
+    it('should have 4 child widgets', () => {
+      expect(sidebar.widgets.length).toBe(4);
     });
 
-    it('should have 5 toolbars', () => {
-      expect(toolbarList.length).toBe(5);
+    it('should have 4 toolbars', () => {
+      expect(toolbarList.length).toBe(4);
     });
     describe('Variable toolbar', () => {
       let toolbar: Element;
@@ -263,30 +259,6 @@ describe('Debugger', () => {
       it('should have two buttons', () => {
         const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
-      });
-    });
-    describe('Source toolbar', () => {
-      let toolbar: Element;
-      beforeEach(() => {
-        toolbar = toolbarList.item(3);
-      });
-      it('should have expanding icon', () => {
-        const title = toolbar.querySelectorAll(
-          '.lm-AccordionPanel-titleCollapser'
-        );
-        expect(title[0].innerHTML).toContain('ui-components:caret-down');
-      });
-      it('should have title', () => {
-        const title = toolbar.querySelectorAll(
-          'span.lm-AccordionPanel-titleLabel'
-        );
-        expect(title.length).toBe(1);
-        expect(title[0].innerHTML).toContain('Source');
-      });
-
-      it('should have one button', () => {
-        const buttons = toolbar.querySelectorAll('jp-button');
-        expect(buttons.length).toBe(1);
       });
     });
   });
@@ -376,25 +348,6 @@ describe('Debugger', () => {
         // breakpoint display
         expect(item.innerHTML).toContain(path.slice(1));
       });
-    });
-  });
-
-  describe('#sources', () => {
-    it('should have a body', () => {
-      expect(sidebar.sources.widgets.length).toEqual(1);
-    });
-
-    it('should display the source path in the header', () => {
-      const header = sidebar.sources.toolbar;
-      const pathWidget = header.node.innerHTML;
-      expect(pathWidget).toContain(path);
-    });
-
-    it('should display the source code in the body', () => {
-      const body = sidebar.sources.widgets[0] as SourcesBody;
-      const children = Array.from(body.children());
-      const editor = children[0] as CodeEditorWrapper;
-      expect(editor.model.sharedModel.getSource()).toEqual(code);
     });
   });
 });

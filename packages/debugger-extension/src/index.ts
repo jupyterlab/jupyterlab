@@ -60,6 +60,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
+import { Widget } from '@lumino/widgets';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -763,67 +764,76 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     debuggerSources: IDebugger.ISources,
     translator: ITranslator
   ): Promise<IDebugger.ISourceViewer> => {
+    let previousEditorWidget: Widget | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
     const { model } = service;
-
-    const onCurrentFrameChanged = (
+    const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
-    ): void => {
-      debuggerSources
-        .find({
-          focus: true,
-          kernel: service.session?.connection?.kernel?.name ?? '',
-          path: service.session?.connection?.path ?? '',
-          source: frame?.source?.path ?? ''
-        })
-        .forEach(editor => {
-          requestAnimationFrame(() => {
-            void editor.reveal().then(() => {
-              const edit = editor.get();
-              if (edit) {
-                Debugger.EditorHandler.showCurrentLine(edit, frame.line);
-              }
-            });
-          });
-        });
+    ): Promise<void> => {
+      if (!service.isStarted || !frame?.source?.path) {
+        return;
+      }
+      try {
+        const source = await service.getSource({ path: frame.source.path });
+        if (source) {
+          openSource(source, frame);
+        }
+      } catch (error) {
+        console.error('Failed to fetch source:', error);
+      }
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
     const openSource = (
       source: IDebugger.Source,
-      breakpoint?: IDebugger.IBreakpoint
+      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
     ): void => {
       if (!source) {
         return;
       }
       const { content, mimeType, path } = source;
-      const results = debuggerSources.find({
-        focus: true,
-        kernel: service.session?.connection?.kernel?.name ?? '',
-        path: service.session?.connection?.path ?? '',
-        source: path
-      });
-      if (results.length > 0) {
-        if (breakpoint && typeof breakpoint.line !== 'undefined') {
+      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
+        const results = debuggerSources.find({
+          focus: true,
+          kernel: service.session?.connection?.kernel?.name ?? '',
+          path: service.session?.connection?.path ?? '',
+          source: breakpointOrFrame?.source?.path ?? ''
+        });
+
+        if (results.length > 0) {
           results.forEach(editor => {
             void editor.reveal().then(() => {
-              editor.get()?.revealPosition({
-                line: (breakpoint.line as number) - 1,
-                column: breakpoint.column || 0
-              });
+              const edit = editor.get();
+              if (edit) {
+                edit.revealPosition({
+                  line: (breakpointOrFrame.line as number) - 1,
+                  column: breakpointOrFrame.column || 0
+                });
+                Debugger.EditorHandler.showCurrentLine(
+                  edit,
+                  breakpointOrFrame.line as number
+                );
+              }
             });
           });
+          return;
         }
-        return;
       }
+
+      if (previousEditorWidget && !previousEditorWidget.isDisposed) {
+        previousEditorWidget.dispose();
+        previousEditorWidget = null;
+      }
+
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
         content,
         mimeType,
         path
       });
+
       const editor = editorWrapper.editor;
       const editorHandler = new Debugger.EditorHandler({
         debuggerService: service,
@@ -839,6 +849,16 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         caption: path,
         editorWrapper
       });
+
+      for (const widget of app.shell.widgets('main')) {
+        if (
+          widget.title.label === PathExt.basename(path) &&
+          widget.title.caption === path
+        ) {
+          previousEditorWidget = widget;
+          break;
+        }
+      }
 
       const frame = service.model.callstack.frame;
       if (frame) {
@@ -1190,6 +1210,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceViewer.open(source);
         }
       );
+
       model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
       model.breakpoints.clicked.connect(async (_, breakpoint) => {
         const path = breakpoint.source?.path;
