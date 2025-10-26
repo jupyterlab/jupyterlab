@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, JupyterLabPage, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import { Page } from '@playwright/test';
 import * as path from 'path';
 
@@ -20,9 +20,8 @@ test.use({
 });
 
 test.describe('Workspace', () => {
-  test.beforeAll(async ({ request, tmpPath, page, waitForApplication }) => {
+  test.beforeAll(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
-    await waitForApplication(page, page);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${nbFile}`),
       `${tmpPath}/${nbFile}`
