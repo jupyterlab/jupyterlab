@@ -98,12 +98,6 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
    * Shows execution count if notebook cell, [*] if running, [ ] if never executed.
    */
   getDisplayName(breakpoint: IDebugger.IBreakpoint): string {
-    console.log(
-      this._displayRegistry.getDisplayName(
-        breakpoint.source as IDebugger.Source
-      )
-    );
-
     return this._displayRegistry.getDisplayName(
       breakpoint.source as IDebugger.Source
     );
