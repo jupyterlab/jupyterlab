@@ -488,7 +488,13 @@ export class DocumentManager implements IDocumentManager {
       });
       return widget;
     }
-    return this.open(path, widgetName || 'default', kernel, options ?? {}, kernelPreference);
+    return this.open(
+      path,
+      widgetName || 'default',
+      kernel,
+      options ?? {},
+      kernelPreference
+    );
   }
 
   /**
