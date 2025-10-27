@@ -958,7 +958,13 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 
       const frame = service.model.callstack.frame;
       if (frame) {
-        Debugger.EditorHandler.showCurrentLine(editor, frame.line);
+        requestAnimationFrame(() => {
+          editor.revealPosition({
+            line: (frame.line as number) - 1,
+            column: frame.column || 0
+          });
+          Debugger.EditorHandler.showCurrentLine(editor, frame.line, 'start');
+        });
       }
     };
 
