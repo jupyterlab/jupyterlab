@@ -1147,10 +1147,12 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const restContentProvider = new RestContentProvider({
-      apiEndpoint: this._apiEndpoint,
-      serverSettings: this.serverSettings
-    });
+    const restContentProvider =
+      options.defaultContentProvider ??
+      new RestContentProvider({
+        apiEndpoint: this._apiEndpoint,
+        serverSettings: this.serverSettings
+      });
     this.contentProviderRegistry = new ContentProviderRegistry({
       defaultProvider: restContentProvider
     });
@@ -1610,6 +1612,11 @@ export namespace Drive {
      * REST API given by [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
      */
     apiEndpoint?: string;
+
+    /**
+     * The default content provider.
+     */
+    defaultContentProvider?: IContentProvider;
   }
 }
 
