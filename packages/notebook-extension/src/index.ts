@@ -1206,6 +1206,8 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
  */
 const notebookDisplayProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:debugger-display',
+  description:
+    'Registers a display name provider for notebook cells in the debugger.',
   requires: [IDebuggerDisplayRegistry, INotebookTracker, IDebugger],
   autoStart: true,
   activate: (

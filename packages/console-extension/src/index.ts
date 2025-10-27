@@ -257,6 +257,8 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
  */
 const consoleDisplayProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:debugger-display',
+  description:
+    'Registers a display name provider for console cells in the debugger.',
   requires: [IDebuggerDisplayRegistry, IConsoleTracker, IDebugger],
   autoStart: true,
   activate: (
