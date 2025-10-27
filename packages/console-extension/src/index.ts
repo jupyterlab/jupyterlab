@@ -73,11 +73,7 @@ import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Menu, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
-import {
-  DebuggerDisplayRegistry,
-  IDebugger,
-  IDebuggerDisplayRegistry
-} from '@jupyterlab/debugger';
+import { IDebugger, IDebuggerDisplayRegistry } from '@jupyterlab/debugger';
 
 /**
  * The command IDs used by the console plugin.
@@ -265,7 +261,7 @@ const consoleDisplayProvider: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    registry: DebuggerDisplayRegistry,
+    registry: IDebuggerDisplayRegistry,
     consoleTracker: IConsoleTracker,
     debuggerService: IDebugger
   ) => {

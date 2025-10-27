@@ -3,16 +3,14 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IConsoleTracker } from '@jupyterlab/console';
-import { DebuggerDisplayRegistry } from '../../displayregistry';
-
 /**
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
-  constructor(options: { displayRegistry: DebuggerDisplayRegistry }) {
+  constructor(options: { displayRegistry: IDebuggerDisplayRegistry }) {
     this._displayRegistry = options.displayRegistry;
   }
 
@@ -90,7 +88,7 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
   private _currentFrameChanged = new Signal<this, IDebugger.IStackFrame | null>(
     this
   );
-  private _displayRegistry: DebuggerDisplayRegistry;
+  private _displayRegistry: IDebuggerDisplayRegistry;
 }
 
 /**

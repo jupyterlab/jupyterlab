@@ -3,8 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
-import { DebuggerDisplayRegistry } from '../../displayregistry';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -93,7 +92,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
     SourcesModel,
     IDebugger.Source | null
   >(this);
-  private _displayRegistry: DebuggerDisplayRegistry;
+  private _displayRegistry: IDebuggerDisplayRegistry;
 }
 
 /**
@@ -115,6 +114,6 @@ export namespace SourcesModel {
     /**
      * The display registry.
      */
-    displayRegistry: DebuggerDisplayRegistry;
+    displayRegistry: IDebuggerDisplayRegistry;
   }
 }

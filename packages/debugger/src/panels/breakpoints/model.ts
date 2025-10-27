@@ -2,14 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISignal, Signal } from '@lumino/signaling';
-import { IDebugger } from '../../tokens';
-import { DebuggerDisplayRegistry } from '../../displayregistry';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 
 /**
  * A model for a list of breakpoints.
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
-  constructor(options: { displayRegistry: DebuggerDisplayRegistry }) {
+  constructor(options: { displayRegistry: IDebuggerDisplayRegistry }) {
     this._displayRegistry = options.displayRegistry;
   }
 
@@ -109,7 +108,7 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
   private _selectedBreakpoint: IDebugger.IBreakpoint;
   private _selectedChanged = new Signal<this, IDebugger.IBreakpoint>(this);
-  private _displayRegistry: DebuggerDisplayRegistry;
+  private _displayRegistry: IDebuggerDisplayRegistry;
 }
 
 /**
@@ -123,6 +122,6 @@ export namespace BreakpointsModel {
     /**
      * The debugger display registry.
      */
-    displayRegistry: DebuggerDisplayRegistry;
+    displayRegistry: IDebuggerDisplayRegistry;
   }
 }

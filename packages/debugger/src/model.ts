@@ -14,7 +14,7 @@ import { SourcesModel } from './panels/sources/model';
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
-import { DebuggerDisplayRegistry } from './displayregistry';
+import { IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A model for a debugger.
@@ -182,6 +182,6 @@ export namespace DebuggerModel {
     /**
      * The display registry.
      */
-    displayRegistry: DebuggerDisplayRegistry;
+    displayRegistry: IDebuggerDisplayRegistry;
   }
 }

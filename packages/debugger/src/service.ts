@@ -20,7 +20,7 @@ import { Debugger } from './debugger';
 import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
-import { DebuggerDisplayRegistry } from './displayregistry';
+import { IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -1052,6 +1052,6 @@ export namespace DebuggerService {
     /**
      * The display registry.
      */
-    displayRegistry: DebuggerDisplayRegistry;
+    displayRegistry: IDebuggerDisplayRegistry;
   }
 }

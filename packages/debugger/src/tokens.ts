@@ -19,7 +19,10 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
-import { DebuggerDisplayRegistry } from './displayregistry';
+import {
+  DebuggerDisplayRegistry,
+  IDebuggerSourceDisplayProvider
+} from './displayregistry';
 
 /**
  * An interface describing an application's visual debugger.
@@ -1110,6 +1113,21 @@ export namespace IDebugger {
       expandVariable(variable: IDebugger.IVariable): void;
     }
   }
+}
+
+/**
+ * Interface token for the Debugger Display Registry service.
+ */
+export interface IDebuggerDisplayRegistry {
+  /**
+   * Register a display provider.
+   */
+  register(provider: IDebuggerSourceDisplayProvider): void;
+
+  /**
+   * Get a display name for a given source.
+   */
+  getDisplayName(source: IDebugger.Source): string;
 }
 
 /**
