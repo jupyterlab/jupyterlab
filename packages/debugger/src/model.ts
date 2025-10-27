@@ -14,8 +14,6 @@ import { SourcesModel } from './panels/sources/model';
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IConsoleTracker } from '@jupyterlab/console';
 import { DebuggerDisplayRegistry } from './displayregistry';
 
 /**
@@ -26,7 +24,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const { config, notebookTracker, displayRegistry } = options;
+    const { displayRegistry } = options;
 
     this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
@@ -34,9 +32,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
-      currentFrameChanged: this.callstack.currentFrameChanged,
-      notebookTracker,
-      config
+      displayRegistry
     });
     this.kernelSources = new KernelSourcesModel();
   }
@@ -182,21 +178,6 @@ export namespace DebuggerModel {
    * Instantiation options for a DebuggerModel.
    */
   export interface IOptions {
-    /**
-     * Debugger configuration.
-     */
-    config: IDebugger.IConfig;
-
-    /**
-     * The notebook tracker.
-     */
-    notebookTracker: INotebookTracker | null;
-
-    /**
-     * The console tracker.
-     */
-    consoleTracker: IConsoleTracker | null;
-
     /**
      * The display registry.
      */

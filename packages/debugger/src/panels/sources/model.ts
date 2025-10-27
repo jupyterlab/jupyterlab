@@ -5,7 +5,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { isCodeCellModel } from '@jupyterlab/cells';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -16,10 +16,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
    *
    * @param options The Sources.Model instantiation options.
    */
-  constructor(options: SourcesModel.IOptions) {
-    this.currentFrameChanged = options.currentFrameChanged;
-    this._notebookTracker = options.notebookTracker ?? undefined;
-    this._config = options.config;
+  constructor(options: { displayRegistry: DebuggerDisplayRegistry }) {
+    this._displayRegistry = options.displayRegistry;
   }
 
   /**
@@ -73,36 +71,17 @@ export class SourcesModel implements IDebugger.Model.ISources {
    *
    * For notebook cells, shows execution count if available, [*] if running, or [ ] if never executed.
    */
+  /**
+   * Returns a human-readable display for a frame.
+   */
   getDisplayName(frame: IDebugger.IStackFrame): string {
-    let display = frame.source?.path ?? '';
-
-    if (!this._notebookTracker || !this._config || !frame.source?.path) {
-      return display;
+    let name = this._displayRegistry.getDisplayName(
+      frame.source as IDebugger.Source
+    );
+    if (frame.line !== undefined) {
+      name += `:${frame.line}`;
     }
-
-    this._notebookTracker.forEach(panel => {
-      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach(cell => {
-        if (cell.model.type !== 'code') return;
-
-        const code = cell.model.sharedModel.getSource();
-        const codeId = this._config!.getCodeId(code, kernelName);
-
-        if (codeId === frame.source?.path) {
-          if (isCodeCellModel(cell.model)) {
-            if (cell.model.executionState === 'running') {
-              display = `Cell [*]`;
-            } else if (cell.model.executionCount === null) {
-              display = `Cell [ ]`;
-            } else {
-              display = `Cell [${cell.model.executionCount}]`;
-            }
-          }
-        }
-      });
-    });
-
-    return display;
+    return name;
   }
 
   private _currentSource: IDebugger.Source | null;
@@ -114,8 +93,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
     SourcesModel,
     IDebugger.Source | null
   >(this);
-  private _notebookTracker?: INotebookTracker;
-  private _config?: IDebugger.IConfig;
+  private _displayRegistry: DebuggerDisplayRegistry;
 }
 
 /**
