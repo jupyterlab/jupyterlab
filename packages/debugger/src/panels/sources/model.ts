@@ -4,7 +4,6 @@
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
-import { INotebookTracker } from '@jupyterlab/notebook';
 import { DebuggerDisplayRegistry } from '../../displayregistry';
 
 /**
@@ -16,7 +15,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
    *
    * @param options The Sources.Model instantiation options.
    */
-  constructor(options: { displayRegistry: DebuggerDisplayRegistry }) {
+  constructor(options: SourcesModel.IOptions) {
+    this.currentFrameChanged = options.currentFrameChanged;
     this._displayRegistry = options.displayRegistry;
   }
 
@@ -113,13 +113,8 @@ export namespace SourcesModel {
     >;
 
     /**
-     * Optional notebook tracker to resolve cell execution numbers.
+     * The display registry.
      */
-    notebookTracker: INotebookTracker | null;
-
-    /**
-     * Debugger config used to get code ids.
-     */
-    config: IDebugger.IConfig;
+    displayRegistry: DebuggerDisplayRegistry;
   }
 }

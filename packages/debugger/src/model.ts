@@ -32,6 +32,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
+      currentFrameChanged: this.callstack.currentFrameChanged,
       displayRegistry
     });
     this.kernelSources = new KernelSourcesModel();
