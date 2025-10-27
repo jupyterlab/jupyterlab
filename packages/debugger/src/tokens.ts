@@ -19,10 +19,7 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
-import {
-  DebuggerDisplayRegistry,
-  IDebuggerSourceDisplayProvider
-} from './displayregistry';
+import { IDebuggerSourceDisplayProvider } from './displayregistry';
 
 /**
  * An interface describing an application's visual debugger.
@@ -1181,6 +1178,6 @@ export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
 /**
  * Debugger display registry token.
  */
-export const IDebuggerDisplayRegistry = new Token<DebuggerDisplayRegistry>(
+export const IDebuggerDisplayRegistry = new Token<IDebuggerDisplayRegistry>(
   '@jupyterlab/debugger:IDebuggerDisplayRegistry'
 );

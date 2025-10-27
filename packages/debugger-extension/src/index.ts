@@ -373,7 +373,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    displayRegistry: DebuggerDisplayRegistry,
+    displayRegistry: IDebuggerDisplayRegistry,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>
@@ -389,7 +389,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
 /**
  * A plugin providing the debugger display registry.
  */
-const displayRegistry: JupyterFrontEndPlugin<DebuggerDisplayRegistry> = {
+const displayRegistry: JupyterFrontEndPlugin<IDebuggerDisplayRegistry> = {
   id: '@jupyterlab/debugger-extension:display-registry',
   description:
     'Provides the debugger display registry for cell/file display names.',
