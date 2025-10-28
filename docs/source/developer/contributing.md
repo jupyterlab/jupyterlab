@@ -442,7 +442,7 @@ See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/window
 for instructions.
 :::
 
-% Note: The same important section is present in the extension/extension-tutorial.rst too. If you modify it here, ensure to update it there as well.
+% Note: The same important section is present in the extension/extension_tutorial.md too. If you modify it here, ensure to update it there as well.
 
 - A few of the scripts will run "python". If your target python is
   called something else (such as "python3") then parts of the build
