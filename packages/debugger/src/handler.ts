@@ -16,8 +16,10 @@ import { Debugger } from './debugger';
 import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
-import type { IDebugger } from './tokens';
-import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IDebugger } from './tokens';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IAnyMessageArgs } from '@jupyterlab/services/src/kernel/kernel';
+import { Signal } from '@lumino/signaling';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
@@ -93,6 +95,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._shell = options.shell;
     this._service = options.service;
     this._translator = options.translator || nullTranslator;
+    this._executionDone = new Signal(this);
   }
 
   /**
@@ -102,6 +105,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null {
     return this._activeWidget;
+  }
+
+  /**
+   * Returns a signal when receiving the execute_reply message on the shell websocket.
+   */
+  get executionDone(): Signal<this, void> {
+    return this._executionDone;
   }
 
   /**
@@ -168,6 +178,23 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     connection.iopubMessage.connect(iopubMessage);
     this._iopubMessageHandlers[widget.id] = iopubMessage;
     this._activeWidget = widget;
+
+    const shellMessage = (
+      _: Session.ISessionConnection,
+      args: IAnyMessageArgs
+    ): void => {
+      const { msg, direction } = args;
+      if (direction === 'recv' && msg.header.msg_type === 'execute_reply') {
+        this._executionDone.emit();
+      }
+    };
+    const shellMessageHandler = this._shellMessageHandlers[widget.id];
+    if (shellMessageHandler) {
+      connection.anyMessage.disconnect(shellMessageHandler);
+    }
+
+    connection.anyMessage.connect(shellMessage);
+    this._shellMessageHandlers[widget.id] = shellMessage;
 
     return this.updateWidget(widget, connection);
   }
@@ -468,6 +495,13 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _iconButtons: {
     [id: string]: ToolbarButton | undefined;
   } = {};
+  private _shellMessageHandlers: {
+    [id: string]: (
+      sender: Session.ISessionConnection,
+      args: IAnyMessageArgs
+    ) => void;
+  } = {};
+  private _executionDone: Signal<this, void>;
 }
 
 /**
