@@ -55,7 +55,7 @@ extensions = [
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
-myst_enable_extensions = ["html_image", "colon_fence"]
+myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
 
 # Add any paths that contain templates here, relative to this directory.
