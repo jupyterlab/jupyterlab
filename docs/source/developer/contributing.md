@@ -1142,7 +1142,7 @@ with a prefix that matches the names of the source file in which they
 are used:
 
 > ```
-> sourcefile.rst
+> sourcefile.md
 > sourcefile_filebrowser.png
 > sourcefile_editmenu.png
 > ```
