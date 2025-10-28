@@ -215,4 +215,42 @@ test.describe('Kernel', () => {
         .waitFor();
     });
   });
+
+  test('Kernel status bar shows correct status when switching notebooks', async ({
+    page,
+    tmpPath
+  }) => {
+    const statusBar = page.locator('#jp-main-statusbar');
+
+    await page.menu.clickMenuItem('File>New>Notebook');
+    await page
+      .locator('.jp-Dialog-button.jp-mod-accept:has-text("select")')
+      .click();
+
+    // Add long running script to first cell
+    await page.notebook.setCell(
+      0,
+      'code',
+      'import time\nfor i in range(5):\n    print(f"Step {i}")\n    time.sleep(1)'
+    );
+    await statusBar.getByText('Idle').waitFor();
+
+    // Execute the long running cell without waiting
+    void page.notebook.runCell(0);
+    await statusBar.getByText('Busy').waitFor();
+
+    await page.menu.clickMenuItem('File>New>Notebook');
+    await page
+      .locator('.jp-Dialog-button.jp-mod-accept:has-text("select")')
+      .click();
+    await statusBar.getByText('Idle').waitFor();
+
+    // Switch back to running notebook
+    await page.notebook.activate('Untitled.ipynb');
+    // The status bar should show Busy since the long running script is still executing
+    await page.waitForTimeout(500);
+
+    const statusText = await statusBar.textContent();
+    expect(statusText).toContain('Busy');
+  });
 });
