@@ -3696,7 +3696,16 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+
+      // Enable only if more than one cell is selected
+      const notebook = current.content;
+      return notebook && notebook.selectedCells.length > 1;
+    },
     describedBy: {
       args: {
         type: 'object',
