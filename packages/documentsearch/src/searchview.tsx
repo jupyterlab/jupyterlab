@@ -629,20 +629,6 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   }
 
   private _onReplaceToggled() {
-    // Deactivate invalid replace filters
-    if (!this.props.replaceEntryVisible) {
-      for (const key in this.props.filtersDefinition) {
-        const filter = this.props.filtersDefinition[key];
-        if (!filter.supportReplace) {
-          this.props.onFilterChanged(key, false).catch(reason => {
-            console.error(
-              `Fail to update filter value for ${filter.title}:\n${reason}`
-            );
-          });
-        }
-      }
-    }
-
     this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
 
@@ -680,20 +666,15 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
-
-          const isEnabled = !showReplace || filter.supportReplace;
-          // Show an alternate description, if one exists, when a filter is disabled in replace mode.
-          const description = isEnabled
-            ? filter.description
-            : filter.disabledDescription ?? filter.description;
           return (
             <FilterSelection
               key={name}
               title={filter.title}
               description={
-                description + (name == 'selection' ? selectionKeyHint : '')
+                filter.description +
+                (name == 'selection' ? selectionKeyHint : '')
               }
-              isEnabled={isEnabled}
+              isEnabled={true}
               onToggle={async () => {
                 await this.props.onFilterChanged(
                   name,

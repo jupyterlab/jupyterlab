@@ -233,11 +233,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
-        disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
-        ),
-        default: false,
-        supportReplace: true
+        default: false
       },
       selection: {
         title:
@@ -255,8 +251,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         description: trans.__(
           'Search only in the selected cells or text (depending on edit/command mode).'
         ),
-        default: false,
-        supportReplace: true
+        default: false
       }
     };
   }

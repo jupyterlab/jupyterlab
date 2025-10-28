@@ -39,8 +39,9 @@ export interface IFilter {
   default: boolean;
   /**
    * Does the filter support replace?
+   * @deprecated
    */
-  supportReplace: boolean;
+  supportReplace?: boolean;
 }
 
 /**
