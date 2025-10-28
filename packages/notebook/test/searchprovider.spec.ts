@@ -168,6 +168,45 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(null);
         await provider.endQuery();
       });
+
+      it('should flag all matches as read-only when cells are non-editable', async () => {
+        panel.model!.sharedModel.deleteCellRange(
+          0,
+          panel.model!.sharedModel.cells.length
+        );
+
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'test1',
+            metadata: { editable: false }
+          },
+          {
+            cell_type: 'code',
+            source: 'test2',
+            metadata: { editable: false }
+          }
+        ]);
+
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+
+        await provider.startQuery(/test/, {});
+
+        expect(provider.currentMatchIndex).toBe(0);
+
+        let match = await provider.highlightNext();
+        expect(match?.readonly).toBe(true);
+
+        match = await provider.highlightNext();
+        expect(match?.readonly).toBe(true);
+
+        // Loop back
+        match = await provider.highlightNext();
+        expect(match?.readonly).toBe(true);
+
+        await provider.endQuery();
+      });
     });
 
     describe('#highlightPrevious()', () => {
@@ -208,6 +247,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#searchOnCellOutputs', () => {
       it('should highlight all matches in code and output cells, and cycle through them correctly', async () => {
         const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.setMetadata('editable', false);
         codeCell.sharedModel.setSource('print("code1 code2")');
         codeCell.outputs.add({
           name: 'stdout',
@@ -220,16 +260,18 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(0);
 
         for (let i = 1; i < 4; i++) {
-          await provider.highlightNext();
+          const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
+          expect(match?.readonly).toBeTruthy();
         }
 
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
 
         for (let i = 3; i > 0; i--) {
-          await provider.highlightPrevious();
+          const match = await provider.highlightPrevious();
           expect(provider.currentMatchIndex).toBe(i);
+          expect(match?.readonly).toBeTruthy();
         }
 
         await provider.endQuery();
@@ -284,7 +326,8 @@ describe('@jupyterlab/notebook', () => {
           },
           {
             cell_type: 'code',
-            source: 'print("cell1 line1")\nprint("cell1 line2")'
+            source: 'print("cell1 line1")\nprint("cell1 line2")',
+            metadata: { editable: false }
           },
           {
             cell_type: 'markdown',
@@ -310,9 +353,32 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.matchesCount).toBe(10); // 4 in codeCell + 4 in codeCellOutput + 2 in markdownCell
         expect(provider.currentMatchIndex).toBe(0);
 
-        for (let i = 1; i < 10; i++) {
-          await provider.highlightNext();
+        // First cell
+        for (let i = 1; i < 2; i++) {
+          const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
+          expect(match?.readonly).toBeFalsy();
+        }
+
+        //First cell output
+        for (let i = 2; i < 4; i++) {
+          const match = await provider.highlightNext();
+          expect(provider.currentMatchIndex).toBe(i);
+          expect(match?.readonly).toBeTruthy();
+        }
+
+        //Second cell and its output
+        for (let i = 4; i < 8; i++) {
+          const match = await provider.highlightNext();
+          expect(provider.currentMatchIndex).toBe(i);
+          expect(match?.readonly).toBeTruthy();
+        }
+
+        //Markdown cell
+        for (let i = 8; i < 10; i++) {
+          const match = await provider.highlightNext();
+          expect(provider.currentMatchIndex).toBe(i);
+          expect(match?.readonly).toBeFalsy();
         }
 
         await provider.highlightNext();

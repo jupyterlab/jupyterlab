@@ -237,7 +237,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           'Search in the cell outputs (not available when replace options are shown).'
         ),
         default: false,
-        supportReplace: false
+        supportReplace: true
       },
       selection: {
         title:
@@ -422,6 +422,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
+  }
+
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this._currentProviderIndex != null) {
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
+      const match = searchEngine.getCurrentMatch();
+      return match;
+    }
+    return undefined;
   }
 
   /**

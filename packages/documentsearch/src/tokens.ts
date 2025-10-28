@@ -174,6 +174,11 @@ export interface ISearchMatch {
    * Start location of the match (in a text, this is the column)
    */
   position: number;
+
+  /**
+   * Indicates whether the match belongs to a read-only cell.
+   */
+  readonly?: boolean;
 }
 
 /**
@@ -393,4 +398,9 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * which will influence the heuristic auto-enabling "search in selection" mode.
    */
   getSelectionState?(): SelectionState;
+
+  /**
+   *
+   */
+  getCurrentMatch?(): ISearchMatch | undefined;
 }
