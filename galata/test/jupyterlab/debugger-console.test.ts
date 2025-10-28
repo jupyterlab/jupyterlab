@@ -25,11 +25,6 @@ async function setupDebuggerConsole(
   // Wait for kernel to be ready
   await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-  // Wait for debugger to be ready
-  const toolbar = await page.notebook.getToolbarLocator();
-  const button = toolbar?.locator('.jp-DebuggerBugButton');
-  await button!.locator('[aria-disabled="false"]').waitFor();
-
   // Enable debugger
   await page.debugger.switchOn();
   await page.waitForCondition(() => page.debugger.isOpen());
