@@ -21,7 +21,7 @@ import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';
-import { ArrayExt, findIndex } from '@lumino/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 import { JSONExt, MimeData } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
@@ -1879,6 +1879,17 @@ export class Notebook extends StaticNotebook {
     }
 
     this._ensureFocus();
+    if (
+      cell instanceof MarkdownCell &&
+      cell.numberChildNodes > 0 &&
+      cell.headingCollapsed
+    ) {
+      for (let i = newValue; i <= newValue + cell.numberChildNodes; i++) {
+        if (this.widgets[i]) {
+          Private.selectedProperty.set(this.widgets[i], true);
+        }
+      }
+    }
     if (newValue === oldValue) {
       return;
     }
@@ -2040,6 +2051,8 @@ export class Notebook extends StaticNotebook {
    */
   deselectAll(): void {
     let changed = false;
+    // Make sure we have a valid active cell.
+    this.activeCellIndex = this.activeCellIndex; // eslint-disable-line
     for (const widget of this.widgets) {
       if (Private.selectedProperty.get(widget)) {
         changed = true;
@@ -2097,9 +2110,26 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
+    const indexCell = this.widgets[anchor];
+    if (
+      indexCell instanceof MarkdownCell &&
+      indexCell.numberChildNodes > 0 &&
+      indexCell.headingCollapsed
+    ) {
+      index += indexCell.numberChildNodes;
+    }
+
     let selectionChanged = false;
 
     if (head < index) {
+      const headCell = this.widgets[head];
+      if (
+        headCell instanceof MarkdownCell &&
+        headCell.headingCollapsed &&
+        headCell.numberChildNodes > 0
+      ) {
+        head += headCell.numberChildNodes;
+      }
       if (head < anchor) {
         Private.selectedProperty.set(this.widgets[head], false);
         selectionChanged = true;
@@ -2186,7 +2216,11 @@ export class Notebook extends StaticNotebook {
 
     // Check that the active cell is one of the endpoints of the selection.
     const activeIndex = this.activeCellIndex;
-    if (first !== activeIndex && last !== activeIndex) {
+    const activeCell = this.widgets[activeIndex];
+    const isChildEndpoint =
+      activeCell instanceof MarkdownCell &&
+      last === activeIndex + activeCell.numberChildNodes;
+    if (first !== activeIndex && last !== activeIndex && !isChildEndpoint) {
       throw new Error('Active cell not at endpoint of selection');
     }
 
@@ -3141,19 +3175,6 @@ export class Notebook extends StaticNotebook {
       // the same notebook.
       event.dropAction = 'move';
       const toMove: Cell[] = event.mimeData.getData('internal:cells');
-
-      // For collapsed markdown headings with hidden "child" cells, move all
-      // child cells as well as the markdown heading.
-      const cell = toMove[toMove.length - 1];
-      if (cell instanceof MarkdownCell && cell.headingCollapsed) {
-        const nextParent = NotebookActions.findNextParentHeading(cell, source);
-        if (nextParent > 0) {
-          const index = findIndex(source.widgets, (possibleCell: Cell) => {
-            return cell.model.id === possibleCell.model.id;
-          });
-          toMove.push(...source.widgets.slice(index + 1, nextParent));
-        }
-      }
 
       // Compute the to/from indices for the move.
       let fromIndex = ArrayExt.firstIndexOf(this.widgets, toMove[0]);
