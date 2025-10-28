@@ -67,7 +67,7 @@
   height: 100%;
 }
 
-.jp-Notebook-ExecutionIndicator-jump-btn {
+.jp-Notebook-ExecutionIndicator-jumpButton {
   margin-top: 4px;
   margin-bottom: 3px;
   width: 100%;
@@ -77,6 +77,6 @@
   transition: all 0.1s ease;
 }
 
-.jp-Notebook-ExecutionIndicator-jump-btn:hover {
+.jp-Notebook-ExecutionIndicator-jumpButton:hover {
   background-color: var(--jp-layout-color3) !important;
 }

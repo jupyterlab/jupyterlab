@@ -675,7 +675,7 @@
         "showJumpToRecentExecutionButton": {
           "type": "boolean",
           "title": "Show jump to most recently executed/executing cell button",
-          "description": "If enabled, displays a button that scrolls to the currently executing cell or, if none, the most recently executed cell.",
+          "description": "If enabled, displays a button that scrolls to the currently executing cell or, if none, the most recently executed cell. scrolls to the currently executing cell or, if none, the most recently executed cell. The button shows when hovering over the kernel execution indicator. Enabling this option automatically enables recording of execution timing metadata.",
           "default": false
         }
       }

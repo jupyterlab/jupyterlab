@@ -114,7 +114,7 @@ export function ExecutionIndicatorComponent(
         {popup}
         {showJumpToCell && hasExecutedCell && (
           <Button
-            className="jp-Notebook-ExecutionIndicator-jump-btn"
+            className="jp-Notebook-ExecutionIndicator-jumpButton"
             onClick={onJumpToCell}
             title={trans.__('Jump to current or last executed cell')}
           >

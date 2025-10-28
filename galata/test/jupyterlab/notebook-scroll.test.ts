@@ -449,7 +449,7 @@ test.describe('Jump to execution button', () => {
     const indicator = page.locator('.jp-Notebook-ExecutionIndicator');
     await indicator.hover();
     await expect(
-      page.locator('.jp-Notebook-ExecutionIndicator-jump-btn')
+      page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
     ).toHaveCount(0);
 
     // Run first cell
@@ -460,7 +460,9 @@ test.describe('Jump to execution button', () => {
 
     // Hover and verify button exists
     await indicator.hover();
-    const jumpButton = page.locator('.jp-Notebook-ExecutionIndicator-jump-btn');
+    const jumpButton = page.locator(
+      '.jp-Notebook-ExecutionIndicator-jumpButton'
+    );
     await expect(jumpButton).toBeVisible();
 
     // Click and scroll to the first cell (currently executing)
