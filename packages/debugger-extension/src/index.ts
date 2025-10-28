@@ -847,7 +847,13 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
   id: '@jupyterlab/debugger-extension:source-viewer',
   description: 'Initialize the debugger sources viewer.',
-  requires: [IDebugger, IEditorServices, IDebuggerSources, ITranslator],
+  requires: [
+    IDebugger,
+    IEditorServices,
+    IDebuggerSources,
+    ITranslator,
+    IDebuggerHandler
+  ],
   provides: IDebuggerSourceViewer,
   autoStart: true,
   activate: async (
@@ -855,13 +861,15 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     service: IDebugger,
     editorServices: IEditorServices,
     debuggerSources: IDebugger.ISources,
-    translator: ITranslator
+    translator: ITranslator,
+    handler: Debugger.Handler
   ): Promise<IDebugger.ISourceViewer> => {
     let previousEditorWidget: Widget | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
     const { model } = service;
+
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
@@ -964,6 +972,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         });
       }
     };
+
+    /* When receiving the execute_reply message, close the last read-only editor opened if it exists */
+    handler.executionDone.connect(() => {
+      if (previousEditorWidget) previousEditorWidget.close();
+    });
 
     const trans = translator.load('jupyterlab');
 
