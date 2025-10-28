@@ -199,8 +199,8 @@ which results in sanitization of HTML and interactive outputs not being
 displayed until the notebook is explicitly trusted.
 
 The trust status of the active notebook is indicated by a shield icon in the
-status bar; a checkmark ({{ trusted }}) in the shield indicates a trusted
-notebook while a cross ({{ not-trusted }}) indicates an untrusted notebook.
+status bar; a checkmark in the shield indicates a trusted notebook while a
+cross indicates an untrusted notebook.
 To trust a notebook (and render any blocked outputs) use the `Trust Notebook`
 command available in the {ref}`command palette <commands>`.
 
