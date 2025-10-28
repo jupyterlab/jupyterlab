@@ -7,7 +7,14 @@ import { IDebugger } from './tokens';
  * Interface for display providers that can format debugger source paths.
  */
 export interface IDebuggerSourceDisplayProvider {
+  /**
+   * Whether this provider can handle the given debugger source.
+   */
   canHandle(source: IDebugger.Source): boolean;
+
+  /**
+   * Return a user-facing display name for the given source.
+   */
   getDisplayName(source: IDebugger.Source): string;
 }
 
