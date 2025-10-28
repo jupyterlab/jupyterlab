@@ -457,7 +457,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         ? this.session?.connection?.name || '-'
         : '-';
     }
-    const breakpoints = this.migrateBreakpoints(
+    const breakpoints = this._migrateBreakpoints(
       this._model.breakpoints.breakpoints
     );
 
@@ -717,7 +717,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this._dumpCell(cell);
     }
 
-    const breakpoints = this.migrateBreakpoints(state.breakpoints);
+    const breakpoints = this._migrateBreakpoints(state.breakpoints);
 
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
@@ -730,7 +730,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param breakpoints
    * @returns
    */
-  migrateBreakpoints(breakpoints: Map<string, IDebugger.IBreakpoint[]>) {
+  private _migrateBreakpoints(
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>
+  ) {
     const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     const kernel = this.session?.connection?.kernel?.name ?? '';
     const { prefix, suffix } = this._config.getTmpFileParams(kernel);
