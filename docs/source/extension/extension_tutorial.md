@@ -200,7 +200,7 @@ See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/window
 for instructions.
 :::
 
-% Note: The same important section is present in the developer/contributing.rst section too. If you modify it here, ensure to update it there as well.
+% Note: The same important section is present in the developer/contributing.md section too. If you modify it here, ensure to update it there as well.
 
 ### See the initial extension in action
 
