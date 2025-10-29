@@ -87,7 +87,7 @@ export class HTMLViewer
     super({
       ...options,
       content: new IFrame({
-        sandbox: ['allow-same-origin'],
+        sandbox: Private.common,
         loading: 'lazy'
       })
     });
@@ -116,9 +116,9 @@ export class HTMLViewer
       return;
     }
     if (value) {
-      this.content.sandbox = Private.trusted;
+      this.content.sandbox = [...Private.common, ...Private.trusted];
     } else {
-      this.content.sandbox = Private.untrusted;
+      this.content.sandbox = [...Private.common, ...Private.untrusted];
     }
     this.update(); // Force a refresh.
     this._trustedChanged.emit(value);
@@ -305,6 +305,11 @@ export namespace ToolbarItems {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Sandbox exceptions for all HTML.
+   */
+  export const common: IFrame.SandboxExceptions[] = ['allow-same-origin'];
+
   /**
    * Sandbox exceptions for untrusted HTML.
    */
