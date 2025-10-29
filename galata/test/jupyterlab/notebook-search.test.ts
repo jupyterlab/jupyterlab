@@ -169,8 +169,7 @@ test.describe('Notebook Search', () => {
     const cell = await page.notebook.getCellLocator(1);
 
     // Select a word for example here using "JupyterLab" by double clicking on it.
-    await cell!.getByText('notebook').dblclick();
-
+    await cell!.locator('span', { hasText: 'notebook' }).dblclick();
     // Open the search box.
     await page.keyboard.press('Control+f');
 
