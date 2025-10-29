@@ -44,9 +44,20 @@ export class VariablesBodyTree extends ReactWidget {
 
     const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
+    this._service.model.variablesFilterOptionsChanged.connect(
+      this._onVariablesFilterOptionsChanged,
+      this
+    );
 
     this.addClass('jp-DebuggerVariables-body');
   }
+
+  /**
+   * Handle variables filter options changes by re-filtering scopes.
+   */
+  private _onVariablesFilterOptionsChanged = (): void => {
+    this.update();
+  };
 
   /**
    * Render the VariablesBodyTree.
@@ -58,6 +69,13 @@ export class VariablesBodyTree extends ReactWidget {
     const handleSelectVariable = (variable: IDebugger.IVariable) => {
       this.model.selectedVariable = variable;
     };
+
+    const filteredVars = scope
+      ? this._service.model.filterVariablesByViewOptions(
+          scope.variables,
+          this._service.model.variablesFilterOptions
+        )
+      : [];
 
     if (scope?.name !== 'Globals') {
       this.addClass('jp-debuggerVariables-local');
@@ -72,7 +90,7 @@ export class VariablesBodyTree extends ReactWidget {
             key={scope.name}
             commands={this._commands}
             service={this._service}
-            data={scope.variables}
+            data={filteredVars}
             filter={this._filter}
             translator={this._translator}
             handleSelectVariable={handleSelectVariable}
@@ -284,7 +302,14 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 
   const fetchChildren = useCallback(async () => {
     if (expandable && !variables) {
-      setVariables(await service.inspectVariable(variable.variablesReference));
+      const variables = await service.inspectVariable(
+        variable.variablesReference
+      );
+      const filteredVariables = service.model.filterVariablesByViewOptions(
+        variables,
+        service.model.variablesFilterOptions
+      );
+      setVariables(filteredVariables);
     }
   }, [expandable, service, variable.variablesReference, variables]);
 

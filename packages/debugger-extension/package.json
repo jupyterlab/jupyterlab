@@ -52,13 +52,15 @@
     "@jupyterlab/debugger": "^4.5.0-beta.1",
     "@jupyterlab/docregistry": "^4.5.0-beta.1",
     "@jupyterlab/fileeditor": "^4.5.0-beta.1",
+    "@jupyterlab/mainmenu": "^4.5.0-beta.1",
     "@jupyterlab/nbformat": "^4.5.0-beta.1",
     "@jupyterlab/notebook": "^4.5.0-beta.1",
     "@jupyterlab/rendermime": "^4.5.0-beta.1",
     "@jupyterlab/services": "^7.5.0-beta.1",
     "@jupyterlab/settingregistry": "^4.5.0-beta.1",
     "@jupyterlab/translation": "^4.5.0-beta.1",
-    "@lumino/commands": "^2.3.2"
+    "@lumino/commands": "^2.3.2",
+    "@lumino/widgets": "^2.7.1"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.5.0-beta.1",

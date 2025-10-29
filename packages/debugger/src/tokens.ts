@@ -19,6 +19,8 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
+import { VariablesFilterOptionKey } from './model';
+
 /**
  * An interface describing an application's visual debugger.
  */
@@ -59,9 +61,22 @@ export interface IDebugger {
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession | null>;
 
   /**
+   * The editor for the last clicked console cell.
+   */
+  lastClickedConsoleEditor: CodeEditor.IEditor | null;
+
+  /**
    * Removes all the breakpoints from the current notebook or console
    */
   clearBreakpoints(): Promise<void>;
+
+  /**
+   * Toggle a brekpoint for the current line in the current editor
+   */
+  toggleBreakpoint(
+    activeEditor: CodeEditor.IEditor | null,
+    path?: string
+  ): Promise<void>;
 
   /**
    * Used to determine if kernel has pause on exception capabilities
@@ -986,6 +1001,28 @@ export namespace IDebugger {
        * Clear the model.
        */
       clear(): void;
+
+      /**
+       * Current filter options for the variables panel.
+       * Maps filter option keys to their enabled/disabled state.
+       */
+      variablesFilterOptions: Map<VariablesFilterOptionKey, boolean>;
+
+      /**
+       * Signal emitted when the variables filter options change.
+       */
+      readonly variablesFilterOptionsChanged: ISignal<
+        this,
+        Map<VariablesFilterOptionKey, boolean>
+      >;
+
+      /**
+       * Filter variables based on variablesFilterOptions settings.
+       */
+      filterVariablesByViewOptions(
+        variables: IDebugger.IVariable[],
+        variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+      ): IDebugger.IVariable[];
     }
 
     /**
