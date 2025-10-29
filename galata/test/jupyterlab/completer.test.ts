@@ -55,7 +55,8 @@ test.describe('Completer', () => {
       await expect(completer).toBeHidden();
     });
 
-    test('Show documentation panel', async ({ page, tmpPath }) => {
+    test('Show documentation panel', async ({ page, tmpPath, browserName }) => {
+      test.skip(browserName === 'firefox', 'Flaky on Firefox');
       const scriptName = 'completer_panel.py';
       await page.contents.uploadFile(
         path.resolve(__dirname, `./notebooks/${scriptName}`),

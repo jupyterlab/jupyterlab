@@ -27,6 +27,7 @@ import {
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -34,6 +35,7 @@ import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
@@ -290,6 +292,12 @@ const print: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(CommandIDs.print, {
       label: trans.__('Print…'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         const widget = app.shell.currentWidget;
         return Printing.getPrintFunction(widget) !== null;
@@ -325,6 +333,12 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
     const category: string = trans.__('Main Area');
     app.commands.addCommand(CommandIDs.toggleHeader, {
       label: trans.__('Show Header Above Content'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () =>
         app.shell.currentWidget instanceof MainAreaWidget &&
         !app.shell.currentWidget.contentHeader.isDisposed &&
@@ -357,7 +371,13 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
  * Update the browser title based on the workspace and the current
  * active item.
  */
-async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
+async function updateTabTitle(options: {
+  workspace: string;
+  db: IStateDB;
+  name: string;
+  currentWidget?: Widget;
+}) {
+  const { workspace, db, name, currentWidget } = options;
   const data: any = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (
@@ -368,23 +388,30 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
       workspace === 'default' ? '' : ` (${workspace})`
     }`;
   } else {
-    // File name from current path
-    let currentFile: string = PathExt.basename(
-      decodeURIComponent(window.location.href)
-    );
+    let currentFile: string;
+    // If we have a DocumentWidget, use its context.path for more reliable file name
+    // rather than parsing the URL which may not always reflect the actual file,
+    // may be missing, or may be formatted in a different way in other lab-based
+    // applications (for example with a query string parameter such as ?path=example.ipynb)
+    if (currentWidget instanceof DocumentWidget) {
+      currentFile = PathExt.basename(currentWidget.context.path);
+    } else {
+      // File name from current path
+      currentFile = PathExt.basename(decodeURIComponent(window.location.href));
+    }
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
         ? currentFile.slice(0, 12).concat(`…`)
         : currentFile;
-    workspace =
+    const truncatedWorkspace =
       workspace.length > 15 ? workspace.slice(0, 12).concat(`…`) : workspace;
     // Number of restorable items that are either notebooks or editors
     const count: number = Object.keys(data).filter(
       item => item.startsWith('notebook') || item.startsWith('editor')
     ).length;
     document.title = `${currentFile}${count > 1 ? ` (${count})` : ``} - ${
-      workspace === 'default' ? name : workspace
+      workspace === 'default' ? name : truncatedWorkspace
     }`;
   }
 }
@@ -432,10 +459,38 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
-    db.changed.connect(() => updateTabTitle(workspace, db, name));
+    db.changed.connect(() =>
+      updateTabTitle({
+        workspace,
+        db,
+        name,
+        currentWidget: app.shell.currentWidget ?? undefined
+      })
+    );
 
     commands.addCommand(CommandIDs.loadState, {
       label: trans.__('Load state for the current workspace.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            hash: {
+              type: 'string',
+              description: trans.__('The URL hash')
+            },
+            path: {
+              type: 'string',
+              description: trans.__('The URL path')
+            },
+            search: {
+              type: 'string',
+              description: trans.__(
+                'The URL search string containing query parameters'
+              )
+            }
+          }
+        }
+      },
       execute: async (args: IRouter.ILocation) => {
         // Since the command can be executed an arbitrary number of times, make
         // sure it is safe to call multiple times.
@@ -500,6 +555,19 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.reset, {
       label: trans.__('Reset Application State'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            reload: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether to reload the page after resetting'
+              )
+            }
+          }
+        }
+      },
       execute: async ({ reload }: { reload: boolean }) => {
         await db.clear();
         await save.invoke();
@@ -511,6 +579,27 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.resetOnLoad, {
       label: trans.__('Reset state when loading for the workspace.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            hash: {
+              type: 'string',
+              description: trans.__('The URL hash')
+            },
+            path: {
+              type: 'string',
+              description: trans.__('The URL path')
+            },
+            search: {
+              type: 'string',
+              description: trans.__(
+                'The URL search string containing query parameters'
+              )
+            }
+          }
+        }
+      },
       execute: (args: IRouter.ILocation) => {
         const { hash, path, search } = args;
         const query = URLExt.queryStringToObject(search || '');
@@ -607,6 +696,24 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     commands.addCommand(CommandIDs.runFirstEnabled, {
       label: trans.__('Run First Enabled Command'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            commands: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: trans.__('Array of command IDs to attempt to run')
+            },
+            args: {
+              description: trans.__('Arguments to pass to the commands')
+            }
+          },
+          required: ['commands']
+        }
+      },
       execute: args => {
         const commands: string[] = args.commands as string[];
         const commandArgs: any = args.args;
@@ -625,6 +732,29 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     // and running all the enabled commands.
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            commands: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: trans.__('Array of command IDs to run')
+            },
+            args: {
+              description: trans.__('Arguments to pass to the commands')
+            },
+            errorIfNotEnabled: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether to log an error if a command is not enabled'
+              )
+            }
+          }
+        }
+      },
       execute: async args => {
         const commands: string[] = (args.commands as string[]) ?? [];
         const commandArgs: any = args.args;
@@ -659,6 +789,12 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Show relevant keyboard shortcuts for the current active widget'
       ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: args => {
         const currentWidget = app.shell.currentWidget;
         const included = currentWidget?.node.contains(document.activeElement);

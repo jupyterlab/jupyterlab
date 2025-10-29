@@ -18,7 +18,9 @@ import {
   EventManager,
   IConfigSectionManager,
   IConnectionStatus,
+  IContentProvider,
   IContentsManager,
+  IDefaultContentProvider,
   IDefaultDrive,
   IEventManager,
   IKernelManager,
@@ -37,6 +39,7 @@ import {
   KernelSpecManager,
   NbConvert,
   NbConvertManager,
+  RestContentProvider,
   ServerConnection,
   ServiceManager,
   ServiceManagerPlugin,
@@ -109,6 +112,25 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
 };
 
 /**
+ * The default IContentProvider plugin.
+ */
+const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
+  id: '@jupyterlab/services-extension:default-content-provider',
+  description: 'The default content provider for the contents manager.',
+  autoStart: true,
+  provides: IDefaultContentProvider,
+  optional: [IServerSettings],
+  activate: (
+    _: null,
+    serverSettings: ServerConnection.ISettings | null
+  ): IContentProvider => {
+    const apiEndpoint = 'api/contents';
+    serverSettings = serverSettings ?? ServerConnection.makeSettings();
+    return new RestContentProvider({ serverSettings, apiEndpoint });
+  }
+};
+
+/**
  * The default drive plugin.
  */
 const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
@@ -116,12 +138,17 @@ const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
   description: 'The default drive for the contents manager.',
   autoStart: true,
   provides: IDefaultDrive,
+  requires: [IDefaultContentProvider],
   optional: [IServerSettings],
   activate: (
     _: null,
+    defaultContentProvider: IContentProvider,
     serverSettings: ServerConnection.ISettings | null
   ): Contents.IDrive => {
-    return new Drive({ serverSettings: serverSettings ?? undefined });
+    return new Drive({
+      serverSettings: serverSettings ?? undefined,
+      defaultContentProvider
+    });
   }
 };
 
@@ -395,6 +422,7 @@ export default [
   connectionStatusPlugin,
   contentsManagerPlugin,
   defaultDrivePlugin,
+  defaultContentProvider,
   eventManagerPlugin,
   kernelManagerPlugin,
   kernelSpecManagerPlugin,

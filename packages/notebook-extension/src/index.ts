@@ -107,16 +107,17 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IDisposableMenuItem,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon,
+  RankedMenu,
   refreshIcon,
   runIcon,
-  stopIcon,
-  tableRowsIcon
+  stopIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -129,7 +130,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel, Widget } from '@lumino/widgets';
+import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
@@ -627,7 +628,31 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
         return services.nbconvert.exportAs?.(exportOptions);
       },
-      isEnabled
+      isEnabled,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            format: {
+              type: 'string',
+              description: trans.__(
+                'The export format (e.g., pdf, html, latex)'
+              )
+            },
+            label: {
+              type: 'string',
+              description: trans.__('The label to display for this format')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is called from the command palette'
+              )
+            }
+          },
+          required: ['format']
+        }
+      }
     });
 
     // Add a notebook group to the File menu.
@@ -1100,6 +1125,72 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin to add "Notebook (no kernel)" to the "Open With" context menu.
+ *
+ * Follows a similar logic as the filebrowser plugin populating the "Open With" menu
+ * based on widget factories.
+ *
+ * TODO: investigate generalizing opening without a kernel to other file types that may be
+ * backed by a kernel.
+ */
+const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:open-with-no-kernel',
+  description: 'Adds the "Notebook (no kernel)" option to the Open With menu.',
+  requires: [IFileBrowserFactory],
+  optional: [ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator | null
+  ): void => {
+    const { tracker } = factory;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const items: IDisposableMenuItem[] = [];
+
+    function updateOpenWithMenu(contextMenu: ContextMenu) {
+      // Clear previous items
+      items.forEach(item => item.dispose());
+      items.length = 0;
+
+      const openWith =
+        (contextMenu.menu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-contextmenu-open-with'
+        )?.submenu as RankedMenu) ?? null;
+
+      if (!openWith) {
+        return; // Bail early if the open with menu is not displayed
+      }
+
+      const selectedItems = tracker.currentWidget
+        ? Array.from(tracker.currentWidget.selectedItems())
+        : [];
+      const hasNotebooks = selectedItems.some(item => item.type === 'notebook');
+
+      if (hasNotebooks) {
+        items.push(
+          openWith.addItem({
+            command: 'filebrowser:open',
+            args: {
+              label: trans.__('Notebook (no kernel)'),
+              factory: FACTORY,
+              kernelPreference: {
+                shouldStart: false
+              }
+            }
+          })
+        );
+      }
+    }
+
+    app.contextMenu.opened.connect(updateOpenWithMenu);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1124,7 +1215,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   languageServerPlugin,
   updateRawMimetype,
   customMetadataEditorFields,
-  activeCellTool
+  activeCellTool,
+  openWithNoKernelPlugin
 ];
 export default plugins;
 
@@ -1364,7 +1456,26 @@ function activateClonedOutputs(
         widget.dispose();
       });
     },
-    isEnabled: isEnabledAndSingleSelected
+    isEnabled: isEnabledAndSingleSelected,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__(
+              'The path to the notebook containing the cell'
+            )
+          },
+          index: {
+            type: 'number',
+            description: trans.__(
+              'The index of the cell to create an output view for'
+            )
+          }
+        }
+      }
+    }
   });
 }
 
@@ -1396,7 +1507,20 @@ function activateCodeConsole(
         args['activate'] as boolean
       );
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the console after creation'
+            )
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.createSubshellConsole, {
@@ -1420,6 +1544,19 @@ function activateCodeConsole(
       const kernel =
         tracker.currentWidget?.context.sessionContext.session?.kernel;
       return kernel?.supportsSubshells ?? false;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the console after creation'
+            )
+          }
+        }
+      }
     }
   });
 
@@ -1545,7 +1682,13 @@ function activateCodeConsole(
         metadata
       });
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 }
 
@@ -1608,6 +1751,12 @@ function activateCopyOutput(
       if (outputAreaAreas.length > 0) {
         const area = outputAreaAreas[0];
         copyElement(area as HTMLElement);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -1755,7 +1904,20 @@ function activateNotebookHandler(
             x =>
               ((settings.get(x).composite as JSONObject).autoClosingBrackets ??
                 extensions.baseConfiguration['autoClosingBrackets']) === true
-          )
+          ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              force: {
+                type: 'boolean',
+                description: trans.__(
+                  'Force toggling the auto closing brackets setting'
+                )
+              }
+            }
+          }
+        }
       });
       commands.addCommand(CommandIDs.setSideBySideRatio, {
         label: trans.__('Set side-by-side ratio'),
@@ -1771,6 +1933,12 @@ function activateNotebookHandler(
               }
             })
             .catch(console.error);
+        },
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
         }
       });
       addCommands(
@@ -1847,6 +2015,7 @@ function activateNotebookHandler(
     widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
+    widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
 
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
@@ -1862,15 +2031,8 @@ function activateNotebookHandler(
   function updateTracker(options: NotebookPanel.IConfig): void {
     tracker.forEach(widget => {
       widget.setConfig(options);
+      widget.content.scrollbar = options.notebookConfig.showMinimap ?? false;
     });
-    if (options.notebookConfig.windowingMode !== 'full') {
-      // Disable all virtual scrollbars if any was enabled
-      tracker.forEach(widget => {
-        if (widget.content.scrollbar) {
-          widget.content.scrollbar = false;
-        }
-      });
-    }
   }
 
   /**
@@ -1928,9 +2090,11 @@ function activateNotebookHandler(
       windowingMode: settings.get('windowingMode').composite as
         | 'defer'
         | 'full'
-        | 'none',
+        | 'none'
+        | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
-        .composite as boolean
+        .composite as boolean,
+      showMinimap: settings.get('showMinimap').composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -2012,6 +2176,45 @@ function activateNotebookHandler(
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelId, kernelName);
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          cwd: {
+            type: 'string',
+            description: trans.__(
+              'Current working directory for the new notebook'
+            )
+          },
+          kernelId: {
+            type: 'string',
+            description: trans.__('Kernel ID to use for the new notebook')
+          },
+          kernelName: {
+            type: 'string',
+            description: trans.__('Kernel name to use for the new notebook')
+          },
+          isLauncher: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from launcher'
+            )
+          },
+          isPalette: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from palette'
+            )
+          },
+          isContextMenu: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from context menu'
+            )
+          }
+        }
+      }
     }
   });
 
@@ -2081,6 +2284,17 @@ function activateNotebookCompleterService(
       if (panel && panel.content.activeCell?.model.type === 'code') {
         manager.invoke(panel.id);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
     }
   });
 
@@ -2091,6 +2305,17 @@ function activateNotebookCompleterService(
 
       if (id) {
         return manager.select(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
       }
     }
   });
@@ -2219,7 +2444,14 @@ function addCommands(
   const refreshCellCollapsed = (notebook: Notebook): void => {
     for (const cell of notebook.widgets) {
       if (cell instanceof MarkdownCell && cell.headingCollapsed) {
-        NotebookActions.setHeadingCollapse(cell, true, notebook);
+        cell
+          .getHeadings()
+          .then(() => {
+            NotebookActions.setHeadingCollapse(cell, true, notebook);
+          })
+          .catch(error => {
+            console.warn('Failed to resolve headings: ', error);
+          });
       }
       if (cell.model.id === notebook.activeCell?.model?.id) {
         NotebookActions.expandParent(cell, notebook);
@@ -2304,7 +2536,25 @@ function addCommands(
       }
     },
     isEnabled: args => (args.toolbar ? true : isEnabled()),
-    icon: args => (args.toolbar ? runIcon : undefined)
+    icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.run, {
     label: args => {
@@ -2329,7 +2579,20 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.runAndInsert, {
     label: args => {
@@ -2354,7 +2617,20 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.runAll, {
     label: trans.__('Run All Cells'),
@@ -2372,7 +2648,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.runAllAbove, {
     label: trans.__('Run All Above Selected Cell'),
@@ -2397,6 +2679,12 @@ function addCommands(
         isEnabledAndSingleSelected() &&
         tracker.currentWidget!.content.activeCellIndex !== 0
       );
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
   commands.addCommand(CommandIDs.runAllBelow, {
@@ -2424,6 +2712,12 @@ function addCommands(
           tracker.currentWidget!.content.activeCellIndex !==
             tracker.currentWidget!.content.widgets.length - 1)
       );
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
   commands.addCommand(CommandIDs.renderAllMarkdown, {
@@ -2435,7 +2729,13 @@ function addCommands(
         return NotebookActions.renderAllMarkdown(content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
@@ -2448,7 +2748,19 @@ function addCommands(
       }
     },
     isEnabled: args => (args.toolbar ? true : isEnabled()),
-    icon: args => (args.toolbar ? refreshIcon : undefined)
+    icon: args => (args.toolbar ? refreshIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down Kernel'),
@@ -2461,7 +2773,13 @@ function addCommands(
 
       return current.context.sessionContext.shutdown();
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.closeAndShutdown, {
     label: trans.__('Close and Shut Down Notebook…'),
@@ -2488,7 +2806,13 @@ function addCommands(
         }
       });
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
@@ -2499,7 +2823,13 @@ function addCommands(
         return NotebookActions.trust(content).then(() => context.save());
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.restartClear, {
     label: trans.__('Restart Kernel and Clear Outputs of All Cells…'),
@@ -2512,7 +2842,13 @@ function addCommands(
         await commands.execute(CommandIDs.clearAllOutputs);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.restartAndRunToSelected, {
     label: trans.__('Restart Kernel and Run up to Selected Cell…'),
@@ -2536,7 +2872,20 @@ function addCommands(
         );
       }
     },
-    isEnabled: isEnabledAndSingleSelected
+    isEnabled: isEnabledAndSingleSelected,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
@@ -2563,7 +2912,25 @@ function addCommands(
       }
     },
     isEnabled: args => (args.toolbar ? true : isEnabled()),
-    icon: args => (args.toolbar ? fastForwardIcon : undefined)
+    icon: args => (args.toolbar ? fastForwardIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: trans.__('Clear Outputs of All Cells'),
@@ -2575,7 +2942,13 @@ function addCommands(
         return NotebookActions.clearAllOutputs(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.clearOutputs, {
     label: trans.__('Clear Cell Output'),
@@ -2587,7 +2960,13 @@ function addCommands(
         return NotebookActions.clearOutputs(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
@@ -2606,7 +2985,19 @@ function addCommands(
       }
     },
     isEnabled: args => (args.toolbar ? true : isEnabled()),
-    icon: args => (args.toolbar ? stopIcon : undefined)
+    icon: args => (args.toolbar ? stopIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.toCode, {
     label: trans.__('Change to Code Cell Type'),
@@ -2621,7 +3012,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.toMarkdown, {
     label: trans.__('Change to Markdown Cell Type'),
@@ -2636,7 +3033,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.toRaw, {
     label: trans.__('Change to Raw Cell Type'),
@@ -2651,7 +3054,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.cut, {
     label: args => {
@@ -2678,7 +3087,25 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.copy, {
     label: args => {
@@ -2705,7 +3132,25 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.pasteBelow, {
     label: args => {
@@ -2735,7 +3180,25 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.pasteAbove, {
     label: args => {
@@ -2764,7 +3227,20 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.duplicateBelow, {
     label: args => {
@@ -2791,7 +3267,25 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: args => {
@@ -2812,7 +3306,20 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.deleteCell, {
     label: args => {
@@ -2839,7 +3346,25 @@ function addCommands(
         return NotebookActions.deleteCells(current.content);
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.split, {
     label: trans.__('Split Cell'),
@@ -2850,7 +3375,13 @@ function addCommands(
         return NotebookActions.splitCell(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.merge, {
     label: trans.__('Merge Selected Cells'),
@@ -2858,10 +3389,19 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.mergeAbove, {
     label: trans.__('Merge Cell Above'),
@@ -2869,10 +3409,19 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, true);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, true, addExtraLine);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.mergeBelow, {
     label: trans.__('Merge Cell Below'),
@@ -2880,10 +3429,19 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.mergeCells(current.content, false);
+        const addExtraLine =
+          (settings?.get('addExtraLineOnCellMerge').composite as boolean) ??
+          true;
+        return NotebookActions.mergeCells(current.content, false, addExtraLine);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.insertAbove, {
     label: trans.__('Insert Cell Above'),
@@ -2896,7 +3454,19 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? addAboveIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: trans.__('Insert Cell Below'),
@@ -2909,7 +3479,19 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? addBelowIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled())
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.selectAbove, {
     label: trans.__('Select Cell Above'),
@@ -2920,7 +3502,13 @@ function addCommands(
         return NotebookActions.selectAbove(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.selectBelow, {
     label: trans.__('Select Cell Below'),
@@ -2930,7 +3518,13 @@ function addCommands(
         return NotebookActions.selectBelow(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.insertHeadingAbove, {
     label: trans.__('Insert Heading Above Current Heading'),
@@ -2941,7 +3535,13 @@ function addCommands(
         return NotebookActions.insertSameLevelHeadingAbove(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.insertHeadingBelow, {
     label: trans.__('Insert Heading Below Current Heading'),
@@ -2952,7 +3552,13 @@ function addCommands(
         return NotebookActions.insertSameLevelHeadingBelow(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.selectHeadingAboveOrCollapse, {
     label: trans.__('Select Heading Above or Collapse Heading'),
@@ -2965,7 +3571,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.selectHeadingBelowOrExpand, {
     label: trans.__('Select Heading Below or Expand Heading'),
@@ -2978,7 +3590,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.extendAbove, {
     label: trans.__('Extend Selection Above'),
@@ -2989,7 +3607,13 @@ function addCommands(
         return NotebookActions.extendSelectionAbove(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.extendTop, {
     label: trans.__('Extend Selection to Top'),
@@ -3000,7 +3624,13 @@ function addCommands(
         return NotebookActions.extendSelectionAbove(current.content, true);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.extendBelow, {
     label: trans.__('Extend Selection Below'),
@@ -3011,7 +3641,13 @@ function addCommands(
         return NotebookActions.extendSelectionBelow(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.extendBottom, {
     label: trans.__('Extend Selection to Bottom'),
@@ -3022,7 +3658,13 @@ function addCommands(
         return NotebookActions.extendSelectionBelow(current.content, true);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.selectAll, {
     label: trans.__('Select All Cells'),
@@ -3033,7 +3675,13 @@ function addCommands(
         return NotebookActions.selectAll(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.deselectAll, {
     label: trans.__('Deselect All Cells'),
@@ -3044,7 +3692,13 @@ function addCommands(
         return NotebookActions.deselectAll(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.moveUp, {
     label: args => {
@@ -3081,7 +3735,25 @@ function addCommands(
       }
       return current.content.activeCellIndex >= 1;
     },
-    icon: args => (args.toolbar ? moveUpIcon : undefined)
+    icon: args => (args.toolbar ? moveUpIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: args => {
@@ -3120,7 +3792,25 @@ function addCommands(
       const length = current.content.model.cells.length;
       return current.content.activeCellIndex < length - 1;
     },
-    icon: args => (args.toolbar ? moveDownIcon : undefined)
+    icon: args => (args.toolbar ? moveDownIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
     label: trans.__('Show Line Numbers'),
@@ -3144,6 +3834,19 @@ function addCommands(
       } else {
         return false;
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.commandMode, {
@@ -3155,7 +3858,13 @@ function addCommands(
         current.content.mode = 'command';
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.editMode, {
     label: trans.__('Enter Edit Mode'),
@@ -3166,7 +3875,13 @@ function addCommands(
         current.content.mode = 'edit';
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.undoCellAction, {
     label: trans.__('Undo Cell Operation'),
@@ -3177,7 +3892,13 @@ function addCommands(
         return NotebookActions.undo(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.redoCellAction, {
     label: trans.__('Redo Cell Operation'),
@@ -3188,7 +3909,13 @@ function addCommands(
         return NotebookActions.redo(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.redo, {
     label: trans.__('Redo'),
@@ -3201,6 +3928,12 @@ function addCommands(
           cell.inputHidden = false;
           return cell.editor?.redo();
         }
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -3216,6 +3949,12 @@ function addCommands(
           return cell.editor?.undo();
         }
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
   commands.addCommand(CommandIDs.changeKernel, {
@@ -3227,7 +3966,13 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.getKernel, {
     label: trans.__('Get Kernel'),
@@ -3238,7 +3983,20 @@ function addCommands(
         return current.sessionContext.session?.kernel;
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
+    }
   });
   commands.addCommand(CommandIDs.reconnectToKernel, {
     label: trans.__('Reconnect to Kernel'),
@@ -3255,7 +4013,13 @@ function addCommands(
         return kernel.reconnect();
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.markdown1, {
     label: trans.__('Change to Heading 1'),
@@ -3270,7 +4034,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.markdown2, {
     label: trans.__('Change to Heading 2'),
@@ -3285,7 +4055,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.markdown3, {
     label: trans.__('Change to Heading 3'),
@@ -3300,7 +4076,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.markdown4, {
     label: trans.__('Change to Heading 4'),
@@ -3315,7 +4097,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.markdown5, {
     label: trans.__('Change to Heading 5'),
@@ -3330,7 +4118,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.markdown6, {
     label: trans.__('Change to Heading 6'),
@@ -3345,7 +4139,13 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.hideCode, {
     label: trans.__('Collapse Selected Code'),
@@ -3356,7 +4156,13 @@ function addCommands(
         return NotebookActions.hideCode(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.showCode, {
     label: trans.__('Expand Selected Code'),
@@ -3367,7 +4173,13 @@ function addCommands(
         return NotebookActions.showCode(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.hideAllCode, {
     label: trans.__('Collapse All Code'),
@@ -3378,7 +4190,13 @@ function addCommands(
         return NotebookActions.hideAllCode(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.showAllCode, {
     label: trans.__('Expand All Code'),
@@ -3389,7 +4207,13 @@ function addCommands(
         return NotebookActions.showAllCode(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.hideOutput, {
     label: trans.__('Collapse Selected Outputs'),
@@ -3400,7 +4224,13 @@ function addCommands(
         return NotebookActions.hideOutput(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.showOutput, {
     label: trans.__('Expand Selected Outputs'),
@@ -3411,7 +4241,13 @@ function addCommands(
         return NotebookActions.showOutput(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.toggleOutput, {
     label: trans.__('Toggle Visibility of Selected Outputs'),
@@ -3422,7 +4258,13 @@ function addCommands(
         return NotebookActions.toggleOutput(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.hideAllOutputs, {
     label: trans.__('Collapse All Outputs'),
@@ -3433,7 +4275,13 @@ function addCommands(
         return NotebookActions.hideAllOutputs(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.toggleRenderSideBySideCurrentNotebook, {
@@ -3455,6 +4303,19 @@ function addCommands(
       } else {
         return false;
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
     }
   });
 
@@ -3467,7 +4328,13 @@ function addCommands(
         return NotebookActions.showAllOutputs(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.enableOutputScrolling, {
     label: trans.__('Enable Scrolling for Outputs'),
@@ -3478,7 +4345,13 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.disableOutputScrolling, {
     label: trans.__('Disable Scrolling for Outputs'),
@@ -3489,7 +4362,13 @@ function addCommands(
         return NotebookActions.disableOutputScrolling(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.selectLastRunCell, {
     label: trans.__('Select current running or last run cell'),
@@ -3500,7 +4379,13 @@ function addCommands(
         return NotebookActions.selectLastRunCell(current.content);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Notebook Cell'),
@@ -3511,7 +4396,18 @@ function addCommands(
         return NotebookActions.replaceSelection(current.content, text);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: trans.__('Text to replace the selection with')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.toggleCollapseCmd, {
@@ -3522,7 +4418,13 @@ function addCommands(
         return NotebookActions.toggleCurrentHeadingCollapse(current.content);
       }
     },
-    isEnabled: isEnabledAndHeadingSelected
+    isEnabled: isEnabledAndHeadingSelected,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   commands.addCommand(CommandIDs.collapseAllCmd, {
     label: trans.__('Collapse All Headings'),
@@ -3530,6 +4432,12 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
       if (current) {
         return NotebookActions.collapseAllHeadings(current.content);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -3539,6 +4447,12 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
       if (current) {
         return NotebookActions.expandAllHeadings(current.content);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -3581,6 +4495,19 @@ function addCommands(
         sessionDialogs,
         translator
       );
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.accessPreviousHistory, {
@@ -3589,6 +4516,12 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
       if (current) {
         return await NotebookActions.accessPreviousHistory(current.content);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });
@@ -3599,14 +4532,18 @@ function addCommands(
       if (current) {
         return await NotebookActions.accessNextHistory(current.content);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Show Minimap'),
-    caption: trans.__(
-      'Show Minimap (virtual scrollbar, enabled with windowing mode: full)'
-    ),
+    caption: trans.__('Show Minimap'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -3614,22 +4551,19 @@ function addCommands(
         current.content.scrollbar = !current.content.scrollbar;
       }
     },
-    icon: args => (args.toolbar ? tableRowsIcon : undefined),
-    isEnabled: args => {
-      const enabled =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return enabled;
+    isEnabled: () => {
+      const current = tracker.currentWidget;
+      return !!current;
     },
     isToggled: () => {
       const current = tracker.currentWidget;
       return current?.content.scrollbar ?? false;
     },
-    isVisible: args => {
-      const visible =
-        (args.toolbar ? true : isEnabled()) &&
-        (settings?.composite.windowingMode === 'full' ?? false);
-      return visible;
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -3819,6 +4753,11 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleLineNumbers.add({
     id: CommandIDs.toggleAllLines,
     isEnabled
+  });
+
+  mainMenu.viewMenu.editorViewers.toggleMinimap.add({
+    id: CommandIDs.virtualScrollbar,
+    isEnabled: () => true
   });
 
   // Add an ICodeRunner to the application run menu

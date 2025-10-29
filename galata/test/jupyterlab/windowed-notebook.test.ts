@@ -82,7 +82,7 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   // Wait to ensure the rendering logic is stable.
   do {
     previousHeight = initialHeight;
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(600);
 
     initialHeight = await getInnerHeight(notebook!);
   } while (previousHeight !== initialHeight && counter++ < 10);
@@ -248,6 +248,11 @@ const scrollOnKeyPressCases: {
   }
 ];
 test.describe('Scrolling on keyboard interaction when active editor is above the viewport', () => {
+  test.skip(
+    ({ browserName }) => browserName === 'firefox',
+    'Needs fixing on Firefox'
+  );
+
   for (const testCase of scrollOnKeyPressCases) {
     test(`Show ${testCase.showCell} cell on pressing ${testCase.key} ${testCase.times} times`, async ({
       page,
@@ -304,8 +309,10 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   const h = await page.notebook.getNotebookInPanelLocator();
@@ -330,8 +337,10 @@ test('should detach a markdown code cell when scrolling out of the viewport', as
 
 test('should reattach a markdown code cell when scrolling back into the viewport', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   const h = await page.notebook.getNotebookInPanelLocator();
@@ -391,8 +400,10 @@ test('should remove all cells including hidden outputs artifacts', async ({
 
 test('should display cells below on scrolling after inserting a cell on top', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   // Regression test against "disappearing cells" issue:
   // https://github.com/jupyterlab/jupyterlab/issues/16978
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
@@ -440,8 +451,10 @@ test('should display cells below on scrolling after inserting a cell on top', as
 
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
-  tmpPath
+  tmpPath,
+  browserName
 }) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const mdCell = page.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
   const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');

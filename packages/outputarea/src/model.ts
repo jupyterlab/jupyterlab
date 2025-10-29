@@ -447,6 +447,13 @@ export class OutputAreaModel implements IOutputAreaModel {
           item.changed.disconnect(this._onGenericChange, this);
         });
         break;
+      case 'move':
+        break;
+      case 'clear':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
     }
     this._changed.emit(args);
   }

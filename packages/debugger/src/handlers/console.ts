@@ -14,6 +14,8 @@ import { Signal } from '@lumino/signaling';
 import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**
  * A handler for consoles.
@@ -28,6 +30,13 @@ export class ConsoleHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._consolePanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
+    this.translator = options.translator || nullTranslator;
+
+    this._pausedOverlay = new DebuggerPausedOverlay({
+      debuggerService: this._debuggerService,
+      container: this._consolePanel.node,
+      translator: this.translator
+    });
 
     const codeConsole = this._consolePanel.console;
 
@@ -45,6 +54,30 @@ export class ConsoleHandler implements IDisposable {
     };
     addHandlers();
     this._consolePanel.console.cells.changed.connect(addHandlers);
+
+    // Connect debugger events
+    this._debuggerService.session?.eventMessage.connect((_, event) => {
+      const session = this._debuggerService.session;
+      const contextSession = this._consolePanel.sessionContext.session;
+
+      if (!session || !contextSession) {
+        return;
+      }
+      if (session.connection?.kernel?.id !== contextSession.kernel?.id) {
+        return;
+      }
+
+      if (event.event === 'stopped') {
+        void this._pausedOverlay.show();
+      } else if (event.event === 'continued') {
+        void this._pausedOverlay.hide();
+      }
+    });
+
+    // If already paused when initialized
+    if (this._debuggerService.hasStoppedThreads()) {
+      void this._pausedOverlay.show();
+    }
   }
 
   /**
@@ -60,6 +93,9 @@ export class ConsoleHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
+
+    this._pausedOverlay.dispose();
+
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
     Signal.clearData(this);
@@ -95,6 +131,8 @@ export class ConsoleHandler implements IDisposable {
   private _consolePanel: ConsolePanel;
   private _debuggerService: IDebugger;
   private _cellMap: IObservableMap<EditorHandler>;
+  private _pausedOverlay: DebuggerPausedOverlay;
+  protected translator: ITranslator;
 }
 
 /**
@@ -114,5 +152,10 @@ export namespace ConsoleHandler {
      * The widget to handle.
      */
     widget: ConsolePanel;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

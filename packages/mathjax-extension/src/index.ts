@@ -14,6 +14,8 @@ import {
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
 import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
 
 namespace CommandIDs {
@@ -66,6 +68,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
     this._mathDocument.options.elements = [node];
     this._mathDocument.clear().render();
     delete this._mathDocument.options.elements;
+    Private.hardenAnchorLinks(node);
   }
 
   protected _initialized: boolean = false;
@@ -79,7 +82,9 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax-extension:plugin',
   description: 'Provides the LaTeX mathematical expression interpreter.',
   provides: ILatexTypesetter,
-  activate: (app: JupyterFrontEnd) => {
+  optional: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const typesetter = new MathJaxTypesetter();
 
     app.commands.addCommand(CommandIDs.copy, {
@@ -88,7 +93,13 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         const oJax: any = md.outputJax;
         await navigator.clipboard.writeText(oJax.math.math);
       },
-      label: 'MathJax Copy Latex'
+      label: trans.__('MathJax Copy Latex'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     app.commands.addCommand(CommandIDs.scale, {
@@ -97,9 +108,29 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         const scale = args['scale'] || 1.0;
         md.outputJax.options.scale = scale;
         md.rerender();
+
+        // Harden only the re-rendered anchors
+        for (const math of md.math) {
+          const root = math.typesetRoot as HTMLElement | null;
+          if (root) {
+            Private.hardenAnchorLinks(root);
+          }
+        }
       },
       label: args =>
-        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')
+        trans.__('Mathjax Scale ') +
+        (args['scale'] ? `x${args['scale']}` : trans.__('Reset')),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            scale: {
+              type: 'number',
+              description: trans.__('The scale factor for MathJax rendering')
+            }
+          }
+        }
+      }
     });
 
     return typesetter;
@@ -181,5 +212,28 @@ namespace Private {
     }
 
     return _loading.promise;
+  }
+
+  /**
+   * Utility function to harden anchor links in a given element
+   */
+  export function hardenAnchorLinks(element: HTMLElement): void {
+    const anchors = element.querySelectorAll<HTMLAnchorElement>('.MathJax a');
+    anchors.forEach(anchor => {
+      // Add rel="noopener" if not already present
+      const existingRel = anchor.rel || '';
+      const relValues = existingRel.split(/\s+/).filter(v => v.length > 0);
+
+      if (!relValues.includes('noopener')) {
+        relValues.push('noopener');
+      }
+
+      anchor.rel = relValues.join(' ');
+
+      // Add target="_blank" if not already present
+      if (anchor.target !== '_blank') {
+        anchor.target = '_blank';
+      }
+    });
   }
 }

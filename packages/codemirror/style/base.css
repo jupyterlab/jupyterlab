@@ -84,6 +84,7 @@
   color: var(--jp-search-unselected-match-color);
 }
 
+.jp-current-match.cm-searching,
 .jp-current-match > .cm-searching,
 .jp-current-match > .cm-searching span,
 .cm-searching > .jp-current-match,

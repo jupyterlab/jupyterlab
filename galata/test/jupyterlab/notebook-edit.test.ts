@@ -39,6 +39,54 @@ test.describe('Notebook Edit', () => {
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
+  test('Re-render Markdown after edit', async ({ page }) => {
+    // Add an image and render
+    await page.notebook.addCell('markdown', '![alt text](./image.png)');
+    await page.notebook.runCell(1, true);
+
+    // There should be no link rendered in the cell, just an image
+    const cell = await page.notebook.getCellLocator(1);
+    const image = cell!.locator('img');
+    const link = cell!.locator('a');
+    await expect(link).toHaveCount(0);
+    await expect(image).toHaveCount(1);
+
+    // Edit and re-render the cell
+    await page.notebook.setCell(1, 'markdown', '[link](https://jupyter.org)');
+    await page.notebook.runCell(1, true);
+
+    // There should be a link but not an image
+    await expect(link).toHaveCount(1);
+    await expect(image).toHaveCount(0);
+
+    // Double-check we see the right link
+    await expect(link).toContainText('link');
+  });
+
+  test('Cut from code and paste into a Markdown cell', async ({ page }) => {
+    const text = 'text to be pasted';
+    await page.notebook.addCell('code', text);
+    await page.notebook.addCell('markdown', '');
+
+    const codeCell = await page.notebook.getCellLocator(1);
+    const markdownCell = await page.notebook.getCellLocator(2);
+
+    await expect(codeCell!).toContainText(text);
+    await expect(markdownCell!).not.toContainText(text);
+
+    // Cut from the code cell
+    await page.notebook.enterCellEditingMode(1);
+    await page.keyboard.press('Control+KeyA');
+    await page.keyboard.press('Control+KeyX');
+
+    // Paste into the markdown cell
+    await page.notebook.enterCellEditingMode(2);
+    await page.keyboard.press('Control+KeyV');
+
+    await expect(codeCell!).not.toContainText(text);
+    await expect(markdownCell!).toContainText(text);
+  });
+
   test('Execute again', async ({ page }) => {
     await page.notebook.addCell('code', '2 ** 3');
     await page.notebook.runCell(1, true);
@@ -127,6 +175,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Move Cell Up');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await page.waitForTimeout(200);
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 

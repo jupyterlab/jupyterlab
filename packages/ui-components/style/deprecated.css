@@ -17,6 +17,7 @@
   --jp-icon-add: url('icons/toolbar/add.svg');
   --jp-icon-audio: url('icons/filetype/audio.svg');
   --jp-icon-bell: url('icons/statusbar/bell.svg');
+  --jp-icon-breakpoint: url('icons/debugger/breakpoint.svg');
   --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
@@ -109,6 +110,7 @@
   --jp-icon-running: url('icons/sidebar/running.svg');
   --jp-icon-save: url('icons/toolbar/save.svg');
   --jp-icon-search: url('icons/toolbar/search.svg');
+  --jp-icon-selected-breakpoint: url('icons/debugger/selected-breakpoint.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
   --jp-icon-share: url('icons/sidebar/share.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
@@ -155,6 +157,10 @@
 
 .jp-BellIcon {
   background-image: var(--jp-icon-bell);
+}
+
+.jp-BreakpointIcon {
+  background-image: var(--jp-icon-breakpoint);
 }
 
 .jp-BugDotIcon {
@@ -523,6 +529,10 @@
 
 .jp-SearchIcon {
   background-image: var(--jp-icon-search);
+}
+
+.jp-SelectedBreakpointIcon {
+  background-image: var(--jp-icon-selected-breakpoint);
 }
 
 .jp-SettingsIcon {

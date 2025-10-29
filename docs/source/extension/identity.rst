@@ -13,7 +13,8 @@ with the user's identity and their permissions. Please check out its
 to know more about the identity model implemented in Jupyter Server.
 
 The user identity API was included in JupyterLab as part of the service package by adding a new service called
-``UserManager`` to the ``ServiceManager``. This new service periodically requests the user identity to the
+:ts:class:`services.UserManager` to the :ts:class:`services.ServiceManager`.
+This new service periodically requests the user identity to the
 ``/api/me`` endpoint and keeps the information in memory until the next request. Nevertheless, it is always
 possible to refresh the information manually by calling the ``refreshUser`` method. Once the service is ready,
 it is possible to access the user's identity through the property ``identity`` or listen for changes by subscribing

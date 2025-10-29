@@ -206,7 +206,7 @@ test.describe('Reactive toolbar', () => {
     page
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
-    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(15);
+    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(14);
     await expect(
       toolbar.locator('.jp-Toolbar-responsive-opener')
     ).not.toBeVisible();
@@ -236,13 +236,12 @@ test.describe('Reactive toolbar', () => {
       'body > .jp-Toolbar-responsive-popup:visible'
     );
     const popupToolbarItems = popupToolbar.locator('.jp-Toolbar-item:visible');
-    await expect(popupToolbarItems).toHaveCount(4);
+    await expect(popupToolbarItems).toHaveCount(3);
 
     const itemChildClasses = [
       '.jp-DebuggerBugButton',
       '.jp-Toolbar-kernelName',
-      '.jp-Notebook-ExecutionIndicator',
-      '[data-command="notebook:toggle-virtual-scrollbar"]'
+      '.jp-Notebook-ExecutionIndicator'
     ];
 
     for (let i = 0; i < (await popupToolbarItems.count()); i++) {
@@ -319,5 +318,27 @@ test.describe('Reactive toolbar', () => {
     const popupToolbarItems = popupToolbar.locator('.jp-Toolbar-item:visible');
 
     await expect(popupToolbarItems.nth(1)).toHaveText('new item 1');
+  });
+
+  test('Item should be correctly removed on ignoring', async ({ page }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const imageName = 'toolbar-items.png';
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('settingeditor:open', {
+        query: 'Notebook Panel'
+      });
+    });
+
+    // Ignore Save
+    const checkboxLabel = page
+      .locator('div.checkbox >> text=Whether the item is ignored or not')
+      .first();
+    await checkboxLabel.click();
+
+    await page.locator('div.lm-TabBar-tabLabel >> text=Notebook.ipynb').click();
+    const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
+    await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
+
+    expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
   });
 });

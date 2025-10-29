@@ -26,6 +26,7 @@ import { KernelSpec } from '../kernelspec';
 
 import { KERNEL_SERVICE_URL, KernelAPIClient } from './restapi';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 // Stub for requirejs.
 declare let requirejs: any;
@@ -1121,7 +1122,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Register an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook will intercept.
+   * @param msgId - The parent_header message id the hook will intercept.
    *
    * @param hook - The callback invoked for the message.
    *
@@ -1154,7 +1155,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Remove an IOPub message hook.
    *
-   * @param msg_id - The parent_header message id the hook intercepted.
+   * @param msgId - The parent_header message id the hook intercepted.
    *
    * @param hook - The callback invoked for the message.
    *
@@ -1630,6 +1631,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
         case 'status': {
+          const untrackedMessageTypesRaw = PageConfig.getOption(
+            'untracked_message_types'
+          );
+          let untrackedMessageTypes = JSON.parse(
+            untrackedMessageTypesRaw || '[]'
+          );
+          if (untrackedMessageTypes.includes(msg.parent_header.msg_type)) {
+            break;
+          }
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;

@@ -26,7 +26,7 @@ API updates
   to export (and optionally download) a notebook to a specific format.
 - The ``NbConvertManager.IExportFormats`` interface was moved to the ``NbConvert`` namespace. You should now use ``NbConvert.IExportFormats`` instead of ``NbConvertManager.IExportFormats``.
   ``NbConvertManager.IExportFormats`` was however kept for backward compatibility.
-
+- The ``renameDialog`` function has been deprecated. To display a rename dialog, use ``DocumentManagerDialogs.rename`` instead.
 
 ``extra_labextensions_path`` ordering
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

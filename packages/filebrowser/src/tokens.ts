@@ -115,6 +115,11 @@ export namespace IFileBrowserFactory {
      * database will be automatically passed in and used for state restoration.
      */
     state?: IStateDB | null;
+
+    /**
+     * Whether to allow file uploads. Defaults to `true`.
+     */
+    allowFileUploads?: boolean;
   }
 }
 

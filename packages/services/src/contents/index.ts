@@ -403,7 +403,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @param path A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -976,7 +976,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1147,10 +1147,12 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const restContentProvider = new RestContentProvider({
-      apiEndpoint: this._apiEndpoint,
-      serverSettings: this.serverSettings
-    });
+    const restContentProvider =
+      options.defaultContentProvider ??
+      new RestContentProvider({
+        apiEndpoint: this._apiEndpoint,
+        serverSettings: this.serverSettings
+      });
     this.contentProviderRegistry = new ContentProviderRegistry({
       defaultProvider: restContentProvider
     });
@@ -1395,7 +1397,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Copy a file into a given directory.
    *
-   * @param localPath - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1610,6 +1612,11 @@ export namespace Drive {
      * REST API given by [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
      */
     apiEndpoint?: string;
+
+    /**
+     * The default content provider.
+     */
+    defaultContentProvider?: IContentProvider;
   }
 }
 
@@ -1633,7 +1640,7 @@ namespace Private {
 /**
  * The default registry of content providers.
  */
-class ContentProviderRegistry implements IContentProviderRegistry {
+export class ContentProviderRegistry implements IContentProviderRegistry {
   /**
    * Construct a new content provider registry.
    *
@@ -1713,7 +1720,7 @@ class ContentProviderRegistry implements IContentProviderRegistry {
   >(this);
 }
 
-namespace ContentProviderRegistry {
+export namespace ContentProviderRegistry {
   /**
    * Initialization options for `ContentProviderRegistry`.
    */
@@ -1792,9 +1799,12 @@ export class RestContentProvider implements IContentProvider {
   ): Promise<Contents.IModel> {
     const settings = this._options.serverSettings;
     const url = this._getUrl(localPath);
+    const file = new File([JSON.stringify(options)], 'data.json', {
+      type: 'application/json'
+    });
     const init = {
       method: 'PUT',
-      body: JSON.stringify(options)
+      body: file
     };
     const response = await ServerConnection.makeRequest(url, init, settings);
     // will return 200 for an existing file and 201 for a new file
