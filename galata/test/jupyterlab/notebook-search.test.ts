@@ -166,32 +166,32 @@ test('Populate search box with text selected in rendered markdown', async ({
 }) => {
   // Render the markdown cell to be able to select text from it.
   await page.notebook.runCell(1, true);
-  
+
   const cell = await page.notebook.getCellLocator(1);
-  
+
   // Wait for the markdown to be fully rendered
   await cell!.locator('.jp-MarkdownOutput').waitFor({ state: 'visible', timeout: 10000 });
-  
+
   // Wait a bit for rendering to stabilize
   await page.waitForTimeout(300);
-  
+
   // Select a word for example here using "JupyterLab" by double clicking on it.
   await cell!.getByText('JupyterLab').dblclick({ timeout: 10000 });
 
   // Open the search box.
   await page.keyboard.press('Control+f');
   const searchInput = page.getByPlaceholder('Find');
-  
+
   // Check if the search box is populated with the selected text.
   await expect(searchInput).toHaveValue('JupyterLab');
   await expect(searchInput).toBeFocused();
-  
+
   // Check that the search box content is selected.
   expect(await searchInput.evaluate(getSelectionRange)).toStrictEqual({
     start: 0,
     end: 'JupyterLab'.length
   });
-  
+
   // Expect that the search found a match.
   await page.locator('text=1/1').waitFor();
 });
