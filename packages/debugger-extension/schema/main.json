@@ -6,18 +6,116 @@
   "jupyter.lab.menus": {
     "main": [
       {
-        "id": "jp-mainmenu-kernel",
-        "items": [
-          { "type": "separator", "rank": 1.2 },
-          { "command": "debugger:restart-debug", "rank": 1.2 }
-        ]
-      },
-      {
         "id": "jp-mainmenu-view",
         "items": [
           {
             "command": "debugger:show-panel",
             "rank": 5
+          }
+        ]
+      },
+      {
+        "id": "jp-mainmenu-debug",
+        "label": "Debug",
+        "rank": 5.1,
+        "items": [
+          {
+            "command": "debugger:run-cells",
+            "rank": 1
+          },
+          {
+            "command": "debugger:terminate",
+            "rank": 2
+          },
+          {
+            "command": "debugger:restart-debug",
+            "rank": 3
+          },
+          {
+            "command": "debugger:restart-and-run-all",
+            "rank": 4
+          },
+          {
+            "type": "separator",
+            "rank": 5
+          },
+          {
+            "command": "debugger:next",
+            "rank": 6
+          },
+          {
+            "command": "debugger:stepIn",
+            "rank": 7
+          },
+          {
+            "command": "debugger:stepOut",
+            "rank": 8
+          },
+          {
+            "command": "debugger:continue",
+            "rank": 9
+          },
+          {
+            "type": "separator",
+            "rank": 10
+          },
+          {
+            "command": "debugger:clear-all-breakpoints",
+            "rank": 11
+          },
+          {
+            "type": "separator",
+            "rank": 12
+          },
+          {
+            "command": "debugger:evaluate",
+            "rank": 13
+          },
+          {
+            "type": "separator",
+            "rank": 14
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-debug-filter",
+              "label": "Filter Variable",
+              "items": [
+                {
+                  "command": "debugger:variables-view-options",
+                  "rank": 1,
+                  "args": {
+                    "label": "Hide Modules",
+                    "option": "module"
+                  }
+                },
+                {
+                  "command": "debugger:variables-view-options",
+                  "rank": 2,
+                  "args": {
+                    "label": "Hide Privates",
+                    "option": "private"
+                  }
+                },
+                {
+                  "command": "debugger:variables-view-options",
+                  "rank": 3,
+                  "args": {
+                    "label": "Hide All Uppercase",
+                    "option": "allCaps"
+                  }
+                },
+                {
+                  "command": "debugger:variables-view-options",
+                  "rank": 4,
+                  "args": {
+                    "label": "Hide Capitalized",
+                    "option": "capitalized"
+                  }
+                }
+              ]
+            },
+            "rank": 15
           }
         ]
       }
