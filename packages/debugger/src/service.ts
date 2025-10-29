@@ -840,6 +840,37 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Filter breakpoints and only return those associated with a known editor.
+   *
+   * @param breakpoints - Map of breakpoints.
+   *
+   */
+  /*private _filterBreakpoints(
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>
+  ): Map<string, IDebugger.IBreakpoint[]> {
+    if (!this._debuggerSources) {
+      return breakpoints;
+    }
+    let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
+    for (const collection of breakpoints) {
+      const [id, list] = collection;
+      list.forEach(() => {
+        this._debuggerSources!.find({
+          focus: false,
+          kernel: this.session?.connection?.kernel?.name ?? '',
+          path: this._session?.connection?.path ?? '',
+          source: id
+        }).forEach(() => {
+          if (list.length > 0) {
+            bpMapForRestore.set(id, list);
+          }
+        });
+      });
+    }
+    return bpMapForRestore;
+  }
+*/
+  /**
    * Get all the frames from the kernel.
    */
   private async _getAllFrames(): Promise<void> {
