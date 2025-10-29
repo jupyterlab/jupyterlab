@@ -428,7 +428,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
     const { body } = reply;
-    const breakpoints = this._mapBreakpoints(body.breakpoints);
+    const kernelBreakpoints = this._mapBreakpoints(body.breakpoints);
     const stoppedThreads = new Set(body.stoppedThreads);
 
     this._model.hasRichVariableRendering = body.richRendering === true;
@@ -456,6 +456,28 @@ export class DebuggerService implements IDebugger, IDisposable {
         ? this.session?.connection?.name || '-'
         : '-';
     }
+    const breakpoints = this._migrateBreakpoints(
+      this._model.breakpoints.breakpoints
+    );
+
+    // Merge kernel breakpoints with existing breakpoints, avoiding duplicates
+    for (const [path, kernelBpList] of kernelBreakpoints) {
+      const existingBreakpoints = breakpoints.get(path) ?? [];
+
+      // Filter out kernel breakpoints that already exist at the same line
+      const newBreakpoints = kernelBpList.filter(
+        kernelBp =>
+          !existingBreakpoints.some(
+            existingBp => existingBp.line === kernelBp.line
+          )
+      );
+
+      // Merge existing and new breakpoints
+      breakpoints.set(path, [...existingBreakpoints, ...newBreakpoints]);
+    }
+
+    // restore in kernel AND model
+    await this._restoreBreakpoints(breakpoints);
 
     if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(breakpoints);
@@ -574,6 +596,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     const localBreakpoints = breakpoints
       .filter(({ line }) => typeof line === 'number')
       .map(({ line }) => ({ line: line! }));
+
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
     // Set the local copy of breakpoints to reflect only editors that exist.
@@ -693,21 +716,36 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this._dumpCell(cell);
     }
 
-    const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
-    const kernel = this.session?.connection?.kernel?.name ?? '';
-    const { prefix, suffix } = this._config.getTmpFileParams(kernel);
-    for (const item of state.breakpoints) {
-      const [id, list] = item;
-      const unsuffixedId = id.substr(0, id.length - suffix.length);
-      const codeHash = unsuffixedId.substr(unsuffixedId.lastIndexOf('/') + 1);
-      const newId = prefix.concat(codeHash).concat(suffix);
-      breakpoints.set(newId, list);
-    }
+    const breakpoints = this._migrateBreakpoints(state.breakpoints);
 
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
     await this.restoreState(false);
     return config.success;
+  }
+
+  /**
+   * Migrate breakpoints from previous path to new path when restoring service state
+   * @param breakpoints
+   * @returns
+   */
+  private _migrateBreakpoints(
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>
+  ) {
+    const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    const { prefix, suffix } = this._config.getTmpFileParams(kernel);
+    for (const item of breakpoints) {
+      const [id, list] = item;
+      const unSuffixedId = id.substring(0, id.length - suffix.length);
+      const codeHash = unSuffixedId.substring(
+        unSuffixedId.lastIndexOf('/') + 1
+      );
+      const newId = prefix.concat(codeHash).concat(suffix);
+      migratedBreakpoints.set(newId, list);
+    }
+
+    return migratedBreakpoints;
   }
 
   /**

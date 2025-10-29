@@ -1,11 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelSpec, KernelSpecManager, Session } from '@jupyterlab/services';
+import {
+  KernelManager,
+  KernelSpec,
+  KernelSpecManager,
+  Session,
+  SessionManager
+} from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
-import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
+import {
+  acceptDialog,
+  JupyterServer,
+  signalToPromise,
+  testEmission
+} from '@jupyterlab/testing';
 
 import { JSONExt, UUID } from '@lumino/coreutils';
 
@@ -15,6 +26,7 @@ import { IDebugger } from '../src/tokens';
 
 import { handleRequest, KERNELSPECS } from './utils';
 import { DebuggerDisplayRegistry } from '../src';
+import { SessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
 
 /**
  * A Test class to mock a KernelSpecManager
@@ -243,6 +255,49 @@ describe('DebuggerService', () => {
         await service.restoreState(true);
         const bpList = model.breakpoints.getBreakpoints(sourceId);
         expect(bpList).toEqual(breakpoints);
+      });
+
+      it('should preserve breakpoints after kernel restart', async () => {
+        const kernelManager = new KernelManager();
+        const sessionManager = new SessionManager({ kernelManager });
+        const specsManager = new KernelSpecManager();
+        await Promise.all([
+          sessionManager.ready,
+          kernelManager.ready,
+          specsManager.ready
+        ]);
+
+        const path = UUID.uuid4();
+        const sessionContext = new SessionContext({
+          kernelManager,
+          path,
+          sessionManager,
+          specsManager,
+          kernelPreference: { name: specsManager.specs?.default }
+        });
+
+        const sessionContextDialogs = new SessionContextDialogs();
+
+        // Get initial breakpoints
+        const initialBps = service.model.breakpoints.getBreakpoints(sourceId);
+        expect(initialBps.length).toBeGreaterThan(0);
+
+        const emission = testEmission(sessionContext.statusChanged, {
+          find: (_, args) => args === 'restarting'
+        });
+
+        await sessionContext.initialize();
+        const restart = sessionContextDialogs.restart(sessionContext);
+
+        await acceptDialog();
+        expect(await restart).toBe(true);
+        await emission;
+
+        // Verify breakpoints are still present
+        const restoredBps = service.model.breakpoints.getBreakpoints(sourceId);
+        expect(restoredBps.length).toEqual(initialBps.length);
+        expect(restoredBps[0].line).toEqual(initialBps[0].line);
+        expect(restoredBps[1].line).toEqual(initialBps[1].line);
       });
     });
 
