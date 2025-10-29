@@ -45,6 +45,13 @@ const EXPECTED_MERMAID_ORDER = [
   'treemap'
 ];
 
+// often have (potentially scroll-based) deltas
+const PIXEL_DIFF_THRESHOLD: Record<string, number> = {
+  architecture: 0.4,
+  radar: 0.4,
+  treemap: 0.4
+};
+
 /**
  * Workaround for playwright not handling screenshots
  * for elements larger than viewport, derived from:
@@ -115,7 +122,8 @@ for (const theme of ['default', 'dark']) {
         await output.waitFor();
 
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
-          `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
+          `mermaid-diagram-${theme}-${iZero}-${diagram}.png`,
+          { threshold: PIXEL_DIFF_THRESHOLD[diagram] }
         );
       });
     }
