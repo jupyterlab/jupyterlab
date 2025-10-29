@@ -4,7 +4,7 @@
 Privacy policies
 ================
 
-Last modified: December 15, 2022
+Last modified: October 29, 2025
 
 Introduction
 ------------
