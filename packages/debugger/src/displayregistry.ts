@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDebugger } from './tokens';
+import { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * Interface for display providers that can format debugger source paths.
@@ -21,7 +21,12 @@ export interface IDebuggerSourceDisplayProvider {
 /**
  * Registry that holds display providers for different source types.
  */
-export class DebuggerDisplayRegistry {
+export class DebuggerDisplayRegistry implements IDebuggerDisplayRegistry {
+  /**
+   * Register a display provider.
+   *
+   * @param provider source display providder to register.
+   */
   register(provider: IDebuggerSourceDisplayProvider): void {
     this._providers.push(provider);
   }

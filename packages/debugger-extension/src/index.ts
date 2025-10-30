@@ -402,7 +402,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         command: Debugger.CommandIDs.restartDebug
       });
     }
-    ``;
 
     if (displayRegistry) {
       displayRegistry.register({
