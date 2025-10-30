@@ -73,8 +73,6 @@ import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Menu, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
-import { IDebugger, IDebuggerDisplayRegistry } from '@jupyterlab/debugger';
-import { isCodeCellModel } from '@jupyterlab/cells';
 
 /**
  * The command IDs used by the console plugin.
@@ -254,58 +252,6 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to provide console display names for the debugger.
- */
-const consoleDisplayProvider: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/console-extension:debugger-display',
-  description:
-    'Registers a display name provider for console cells in the debugger.',
-  requires: [IDebuggerDisplayRegistry, IConsoleTracker, IDebugger],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    registry: IDebuggerDisplayRegistry,
-    consoleTracker: IConsoleTracker,
-    debuggerService: IDebugger
-  ) => {
-    registry.register({
-      canHandle(source: IDebugger.Source): boolean {
-        return source.path?.includes('ipykernel_') ?? false;
-      },
-      getDisplayName(source: IDebugger.Source): string {
-        let displayName = source.path ?? '';
-
-        consoleTracker.forEach(panel => {
-          Array.from(panel.console.cells).forEach(cell => {
-            const code = cell.model.sharedModel.getSource();
-            const codeId = debuggerService.getCodeId(code);
-
-            if (codeId && codeId === source.path) {
-              const model = cell.model;
-              if (isCodeCellModel(model)) {
-                const exec = model.executionCount ?? null;
-                const state = model.executionState ?? null;
-
-                if (state === 'running') {
-                  displayName = 'In [*]';
-                } else if (exec === null) {
-                  displayName = 'In [ ]';
-                } else {
-                  displayName = `In [${exec}]`;
-                }
-              }
-              return;
-            }
-          });
-        });
-
-        return displayName;
-      }
-    });
-  }
-};
-
-/**
  * Export the plugins as the default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -315,8 +261,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelStatus,
   lineColStatus,
   completerPlugin,
-  cellExecutor,
-  consoleDisplayProvider
+  cellExecutor
 ];
 export default plugins;
 

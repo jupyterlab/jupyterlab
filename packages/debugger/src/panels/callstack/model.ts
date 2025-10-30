@@ -3,6 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { DebuggerDisplayRegistry } from '../../displayregistry';
 import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -10,8 +11,9 @@ import { IConsoleTracker } from '@jupyterlab/console';
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
-  constructor(options: { displayRegistry: IDebuggerDisplayRegistry }) {
-    this._displayRegistry = options.displayRegistry;
+  constructor(options: { displayRegistry?: IDebuggerDisplayRegistry }) {
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
   }
 
   /**

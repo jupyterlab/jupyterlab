@@ -3,6 +3,7 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { DebuggerDisplayRegistry } from '../../displayregistry';
 import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 
 /**
@@ -16,7 +17,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
    */
   constructor(options: SourcesModel.IOptions) {
     this.currentFrameChanged = options.currentFrameChanged;
-    this._displayRegistry = options.displayRegistry;
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
   }
 
   /**
@@ -114,6 +116,6 @@ export namespace SourcesModel {
     /**
      * The display registry.
      */
-    displayRegistry: IDebuggerDisplayRegistry;
+    displayRegistry?: IDebuggerDisplayRegistry;
   }
 }

@@ -32,13 +32,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import {
-  Cell,
-  CodeCell,
-  ICellModel,
-  ICodeCellModel,
-  MarkdownCell
-} from '@jupyterlab/cells';
+import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import {
   CodeEditor,
   IEditorServices,
@@ -145,11 +139,6 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
-import {
-  DebuggerDisplayRegistry,
-  IDebugger,
-  IDebuggerDisplayRegistry
-} from '@jupyterlab/debugger';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1202,52 +1191,6 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to provide notebook display names for the debugger.
- */
-const notebookDisplayProvider: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:debugger-display',
-  description:
-    'Registers a display name provider for notebook cells in the debugger.',
-  requires: [IDebuggerDisplayRegistry, INotebookTracker, IDebugger],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    registry: DebuggerDisplayRegistry,
-    notebookTracker: INotebookTracker,
-    debuggerService: IDebugger
-  ) => {
-    registry.register({
-      canHandle(source: IDebugger.Source): boolean {
-        return source.path?.includes('ipykernel_') ?? false;
-      },
-      getDisplayName(source: IDebugger.Source): string {
-        let displayName = source.path ?? '';
-
-        notebookTracker.forEach(panel => {
-          for (const cell of panel.content.widgets) {
-            const code = cell.model.sharedModel.getSource();
-            const codeId = debuggerService.getCodeId(code);
-
-            if (codeId === source.path) {
-              const exec = (cell.model as ICodeCellModel).executionCount;
-              if ((cell.model as ICodeCellModel).executionState === 'running') {
-                displayName = 'Cell [*]';
-              } else {
-                displayName = exec == null ? 'Cell [ ]' : `Cell [${exec}]`;
-              }
-              // Stop iteration once we found the matching cell
-              return;
-            }
-          }
-        });
-
-        return displayName;
-      }
-    });
-  }
-};
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1273,8 +1216,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   updateRawMimetype,
   customMetadataEditorFields,
   activeCellTool,
-  openWithNoKernelPlugin,
-  notebookDisplayProvider
+  openWithNoKernelPlugin
 ];
 export default plugins;
 

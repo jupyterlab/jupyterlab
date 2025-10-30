@@ -2782,7 +2782,6 @@ __metadata:
     "@jupyterlab/codeeditor": ^4.5.0-beta.1
     "@jupyterlab/completer": ^4.5.0-beta.1
     "@jupyterlab/console": ^4.5.0-beta.1
-    "@jupyterlab/debugger": ^4.5.0-beta.1
     "@jupyterlab/filebrowser": ^4.5.0-beta.1
     "@jupyterlab/launcher": ^4.5.0-beta.1
     "@jupyterlab/mainmenu": ^4.5.0-beta.1
@@ -2904,6 +2903,7 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.5.0-beta.1
     "@jupyterlab/apputils": ^4.6.0-beta.1
+    "@jupyterlab/cells": ^4.5.0-beta.1
     "@jupyterlab/codeeditor": ^4.5.0-beta.1
     "@jupyterlab/completer": ^4.5.0-beta.1
     "@jupyterlab/console": ^4.5.0-beta.1
@@ -4366,7 +4366,6 @@ __metadata:
     "@jupyterlab/codemirror": ^4.5.0-beta.1
     "@jupyterlab/completer": ^4.5.0-beta.1
     "@jupyterlab/coreutils": ^6.5.0-beta.1
-    "@jupyterlab/debugger": ^4.5.0-beta.1
     "@jupyterlab/docmanager": ^4.5.0-beta.1
     "@jupyterlab/docmanager-extension": ^4.5.0-beta.1
     "@jupyterlab/docregistry": ^4.5.0-beta.1

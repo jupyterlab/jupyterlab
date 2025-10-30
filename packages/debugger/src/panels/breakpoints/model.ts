@@ -3,13 +3,15 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
 
 /**
  * A model for a list of breakpoints.
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
-  constructor(options: { displayRegistry: IDebuggerDisplayRegistry }) {
-    this._displayRegistry = options.displayRegistry;
+  constructor(options: { displayRegistry?: IDebuggerDisplayRegistry }) {
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
   }
 
   /**

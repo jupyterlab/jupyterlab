@@ -1090,6 +1090,6 @@ export namespace DebuggerService {
     /**
      * The display registry.
      */
-    displayRegistry: IDebuggerDisplayRegistry | null;
+    displayRegistry?: IDebuggerDisplayRegistry | null;
   }
 }

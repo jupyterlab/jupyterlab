@@ -21,7 +21,6 @@
 @import url('~@jupyterlab/lsp/style/index.css');
 @import url('~@jupyterlab/notebook/style/index.css');
 @import url('~@jupyterlab/completer/style/index.css');
-@import url('~@jupyterlab/debugger/style/index.css');
 @import url('~@jupyterlab/docmanager-extension/style/index.css');
 @import url('~@jupyterlab/launcher/style/index.css');
 @import url('~@jupyterlab/logconsole/style/index.css');
