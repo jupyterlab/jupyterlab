@@ -415,3 +415,68 @@ test.describe('Notebook scroll beyond a cell with long output (with windowing)',
     expect(scrollHeightBefore).toBeCloseTo(scrollHeightAfter);
   });
 });
+
+test.describe('Jump to execution button', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        recordTiming: true,
+        kernelStatus: {
+          ...(galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker']
+            ?.kernelStatus ?? {}),
+          showJumpToRecentExecutionButton: true
+        }
+      }
+    }
+  });
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${longOutputsNb}`),
+      `${tmpPath}/${longOutputsNb}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${longOutputsNb}`);
+    await page.notebook.activate(longOutputsNb);
+  });
+  test('should show jump button after first execution and scroll to executing cells', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', 'from time import sleep\nsleep(2)');
+
+    // Button doesn't exist before execution
+    const indicator = page.locator('.jp-Notebook-ExecutionIndicator');
+    await indicator.hover();
+    await expect(
+      page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
+    ).toHaveCount(0);
+
+    // Run first cell
+    void page.notebook.runCell(0, false);
+
+    await page.notebook.addCell('code', '1');
+    const runPromise = page.notebook.runCell(3, false);
+
+    // Hover and verify button exists
+    await indicator.hover();
+    const jumpButton = page.locator(
+      '.jp-Notebook-ExecutionIndicator-jumpButton'
+    );
+    await expect(jumpButton).toBeVisible();
+
+    // Click and scroll to the first cell (currently executing)
+    await jumpButton.click();
+    const firstCell = await page.notebook.getCellLocator(0);
+    await firstCell?.waitFor({ state: 'visible', timeout: 1000 });
+
+    // Wait for all executions to complete
+    await runPromise;
+
+    // Click and scroll to last cell (last executed)
+    await indicator.hover();
+    await jumpButton.click();
+    const lastCell = await page.notebook.getCellLocator(3);
+    await lastCell?.waitFor({ state: 'visible', timeout: 1000 });
+  });
+});

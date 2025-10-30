@@ -28,8 +28,10 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Debugger,
+  DebuggerDisplayRegistry,
   IDebugger,
   IDebuggerConfig,
+  IDebuggerDisplayRegistry,
   IDebuggerHandler,
   IDebuggerSidebar,
   IDebuggerSources,
@@ -60,6 +62,7 @@ import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -88,14 +91,20 @@ const consoles: JupyterFrontEndPlugin<void> = {
   description: 'Add debugger capability to the consoles.',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
-  optional: [ILabShell, ISettingRegistry, ITranslator],
+  optional: [
+    ILabShell,
+    ISettingRegistry,
+    ITranslator,
+    IDebuggerDisplayRegistry
+  ],
   activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator
+    translator: ITranslator | NullTranslator,
+    displayRegistry: IDebuggerDisplayRegistry | null
   ) => {
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
@@ -137,6 +146,44 @@ const consoles: JupyterFrontEndPlugin<void> = {
       consoleTracker.currentChanged.connect((_, consolePanel) => {
         if (consolePanel) {
           void updateHandlerAndCommands(consolePanel);
+        }
+      });
+    }
+
+    if (displayRegistry) {
+      displayRegistry.register({
+        canHandle(source: IDebugger.Source): boolean {
+          return source.path?.includes('ipykernel_') ?? false;
+        },
+        getDisplayName(source: IDebugger.Source): string {
+          let displayName = source.path ?? '';
+
+          consoleTracker.forEach(panel => {
+            for (const cell of panel.console.cells) {
+              const model = cell.model;
+              if (!isCodeCellModel(model)) {
+                continue;
+              }
+              const code = model.sharedModel.getSource();
+              const codeId = debug.getCodeId(code);
+
+              if (codeId && codeId === source.path) {
+                const exec = model.executionCount ?? null;
+                const state = model.executionState ?? null;
+
+                if (state === 'running') {
+                  displayName = 'In [*]';
+                } else if (exec === null) {
+                  displayName = 'In [ ]';
+                } else {
+                  displayName = `In [${exec}]`;
+                }
+                return;
+              }
+            }
+          });
+
+          return displayName;
         }
       });
     }
@@ -247,7 +294,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     ICommandPalette,
     ISessionContextDialogs,
     ISettingRegistry,
-    ITranslator
+    ITranslator,
+    IDebuggerDisplayRegistry
   ],
   provides: IDebuggerHandler,
   activate: async (
@@ -258,7 +306,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     palette: ICommandPalette | null,
     sessionDialogs_: ISessionContextDialogs | null,
     settingRegistry: ISettingRegistry | null,
-    translator_: ITranslator | null
+    translator_: ITranslator | null,
+    displayRegistry: IDebuggerDisplayRegistry | null
   ): Promise<Debugger.Handler> => {
     const translator = translator_ ?? nullTranslator;
     if (settingRegistry) {
@@ -327,6 +376,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         const { sessionContext } = widget;
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
+        await handler.updateWidget(widget, sessionContext.session);
       }
       updateState(app.commands, service);
     };
@@ -353,6 +403,41 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       });
     }
 
+    if (displayRegistry) {
+      displayRegistry.register({
+        canHandle(source: IDebugger.Source): boolean {
+          return source.path?.includes('ipykernel_') ?? false;
+        },
+        getDisplayName(source: IDebugger.Source): string {
+          let displayName = source.path ?? '';
+
+          notebookTracker.forEach(panel => {
+            for (const cell of panel.content.widgets) {
+              const model = cell.model;
+              if (!isCodeCellModel(model)) {
+                continue;
+              }
+              const code = model.sharedModel.getSource();
+              const codeId = service.getCodeId(code);
+
+              if (codeId === source.path) {
+                const exec = model.executionCount;
+                if (model.executionState === 'running') {
+                  displayName = 'Cell [*]';
+                } else {
+                  displayName = exec == null ? 'Cell [ ]' : `Cell [${exec}]`;
+                }
+                // Stop iteration once we found the matching cell
+                return;
+              }
+            }
+          });
+
+          return displayName;
+        }
+      });
+    }
+
     return handler;
   }
 };
@@ -366,23 +451,33 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [INotebookTracker, IConsoleTracker, IDebuggerSources, ITranslator],
+  optional: [IDebuggerDisplayRegistry, IDebuggerSources, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    notebookTracker: INotebookTracker | null,
-    consoleTracker: IConsoleTracker | null,
+    displayRegistry: IDebuggerDisplayRegistry | null,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>
     new Debugger.Service({
       config,
-      notebookTracker,
-      consoleTracker,
+      displayRegistry,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
       translator
     })
+};
+
+/**
+ * A plugin providing the debugger display registry.
+ */
+const displayRegistry: JupyterFrontEndPlugin<IDebuggerDisplayRegistry> = {
+  id: '@jupyterlab/debugger-extension:display-registry',
+  description:
+    'Provides the debugger display registry for cell/file display names.',
+  provides: IDebuggerDisplayRegistry,
+  autoStart: true,
+  activate: () => new DebuggerDisplayRegistry()
 };
 
 /**
@@ -681,16 +776,14 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
   id: '@jupyterlab/debugger-extension:sidebar',
   description: 'Provides the debugger sidebar.',
   provides: IDebuggerSidebar,
-  requires: [IDebugger, IEditorServices, ITranslator, IDebuggerConfig],
-  optional: [INotebookTracker, IThemeManager, ISettingRegistry],
+  requires: [IDebugger, IEditorServices, ITranslator],
+  optional: [IThemeManager, ISettingRegistry],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     editorServices: IEditorServices,
     translator: ITranslator,
-    config: IDebugger.IConfig,
-    notebookTracker: INotebookTracker | null,
     themeManager: IThemeManager | null,
     settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISidebar> => {
@@ -717,8 +810,6 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       callstackCommands,
       breakpointsCommands,
       editorServices,
-      config,
-      notebookTracker,
       themeManager,
       translator
     });
@@ -1475,6 +1566,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   service,
+  displayRegistry,
   consoles,
   files,
   notebooks,

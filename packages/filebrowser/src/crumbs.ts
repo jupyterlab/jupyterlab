@@ -504,11 +504,12 @@ namespace Private {
         const hiddenStartIndex = minimumLeftItems;
         const hiddenEndIndex = parts.length - minimumRightItems;
         const hiddenParts = parts.slice(hiddenStartIndex, hiddenEndIndex);
+        const hiddenFolders = hiddenParts.join('/');
         const hiddenPath =
           hiddenParts.length > 0
             ? parts.slice(0, hiddenEndIndex).join('/')
             : parts.slice(0, minimumLeftItems).join('/');
-        breadcrumbs[Crumb.Ellipsis].title = hiddenPath;
+        breadcrumbs[Crumb.Ellipsis].title = hiddenFolders;
         breadcrumbs[Crumb.Ellipsis].dataset.path = hiddenPath;
         node.appendChild(createCrumbSeparator());
 

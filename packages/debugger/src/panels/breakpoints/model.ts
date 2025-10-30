@@ -2,19 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISignal, Signal } from '@lumino/signaling';
-import { IDebugger } from '../../tokens';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { isCodeCellModel } from '@jupyterlab/cells';
-import { IConsoleTracker } from '@jupyterlab/console';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
 
 /**
  * A model for a list of breakpoints.
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
-  constructor(options: BreakpointsModel.IOptions) {
-    this._config = options.config;
-    this._notebookTracker = options.notebookTracker;
-    this._consoleTracker = options.consoleTracker;
+  constructor(options: { displayRegistry?: IDebuggerDisplayRegistry }) {
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
   }
 
   /**
@@ -102,70 +99,18 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
    * Shows execution count if notebook cell, [*] if running, [ ] if never executed.
    */
   getDisplayName(breakpoint: IDebugger.IBreakpoint): string {
-    if (!this._notebookTracker || !this._config) {
-      return breakpoint.source?.path ?? '';
-    }
-
-    let display = breakpoint.source?.path ?? '';
-
-    this._notebookTracker.forEach(panel => {
-      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach(cell => {
-        if (cell.model.type !== 'code') return;
-
-        const code = cell.model.sharedModel.getSource();
-        const codeId = this._config?.getCodeId(code, kernelName);
-
-        if (codeId && codeId === breakpoint.source?.path) {
-          if (isCodeCellModel(cell.model)) {
-            if (cell.model.executionState === 'running') {
-              display = `Cell [*]`;
-            } else if (cell.model.executionCount === null) {
-              display = `Cell [ ]`;
-            } else {
-              display = `Cell [${cell.model.executionCount}]`;
-            }
-          }
-        }
-      });
-    });
-
-    this._consoleTracker?.forEach(panel => {
-      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-
-      Array.from(panel.console.cells).forEach(cell => {
-        const code = cell.model.sharedModel.getSource();
-        const codeId = this._config?.getCodeId(code, kernelName);
-
-        if (codeId && codeId === breakpoint.source?.path) {
-          if (isCodeCellModel(cell.model)) {
-            const executionCount = cell.model.executionCount ?? null;
-            const executionState = cell.model.executionState ?? null;
-
-            if (executionState === 'running') {
-              display = `In [*]`;
-            } else if (executionCount === null) {
-              display = `In [ ]`;
-            } else {
-              display = `In [${executionCount}]`;
-            }
-          }
-        }
-      });
-    });
-
-    return display;
+    return this._displayRegistry.getDisplayName(
+      breakpoint.source as IDebugger.Source
+    );
   }
 
-  private _config: IDebugger.IConfig;
-  private _notebookTracker: INotebookTracker | null;
-  private _consoleTracker: IConsoleTracker | null;
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
   private _selectedBreakpoint: IDebugger.IBreakpoint;
   private _selectedChanged = new Signal<this, IDebugger.IBreakpoint>(this);
+  private _displayRegistry: IDebuggerDisplayRegistry;
 }
 
 /**
@@ -177,18 +122,8 @@ export namespace BreakpointsModel {
    */
   export interface IOptions {
     /**
-     * Debugger configuration.
+     * The debugger display registry.
      */
-    config: IDebugger.IConfig;
-
-    /**
-     * The notebook tracker.
-     */
-    notebookTracker: INotebookTracker | null;
-
-    /**
-     * The console tracker.
-     */
-    consoleTracker: IConsoleTracker | null;
+    displayRegistry: IDebuggerDisplayRegistry;
   }
 }

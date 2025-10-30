@@ -93,10 +93,10 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IEditorExtensionRegistry,
     IEditorLanguageRegistry,
     IEditorThemeRegistry,
-    IDefaultFileBrowser,
     ISettingRegistry
   ],
   optional: [
+    IDefaultFileBrowser,
     IConsoleTracker,
     ICommandPalette,
     ILauncher,
@@ -330,8 +330,8 @@ function activate(
   extensions: IEditorExtensionRegistry,
   languages: IEditorLanguageRegistry,
   themes: IEditorThemeRegistry,
-  fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
+  fileBrowser: IDefaultFileBrowser | null,
   consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
