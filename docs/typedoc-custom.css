@@ -1,0 +1,33 @@
+header.tsd-page-toolbar .title {
+  --lab-logo-light: url(../../_static/logo-rectangle.svg);
+  --lab-logo-dark: url(../../_static/logo-rectangle-dark.svg);
+
+  background: var(--lab-logo-light) left center / contain no-repeat;
+  color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  header.tsd-page-toolbar .title {
+    background-image: var(--lab-logo-dark);
+  }
+}
+
+:root[data-theme='light'] header.tsd-page-toolbar .title {
+  background-image: var(--lab-logo-light);
+}
+
+:root[data-theme='dark'] header.tsd-page-toolbar .title {
+  background-image: var(--lab-logo-dark);
+}
+
+#tsd-toolbar-links {
+  --favicon-size: 16px;
+}
+#tsd-toolbar-links a[href="https://jupyter.org"]
+{
+  background: url(../../_static/jupyter_logo.svg) left center /
+    var(--favicon-size) no-repeat;
+  color: transparent;
+  font-size: 0;
+  min-width: var(--favicon-size);
+}
