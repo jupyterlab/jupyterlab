@@ -39,6 +39,7 @@ import { SourcesBody } from '../src/panels/sources/body';
 
 import { IYText } from '@jupyter/ydoc';
 import { IDebugger } from '../src/tokens';
+import { DebuggerDisplayRegistry } from '../src';
 
 const server = new JupyterServer();
 
@@ -55,7 +56,12 @@ afterAll(async () => {
 describe('Debugger', () => {
   const specsManager = new KernelSpecManager();
   const config = new Debugger.Config();
-  const service = new DebuggerService({ specsManager, config });
+  const displayRegistry = new DebuggerDisplayRegistry();
+  const service = new DebuggerService({
+    displayRegistry,
+    specsManager,
+    config
+  });
   const registry = new CommandRegistry();
   const languages = new EditorLanguageRegistry();
   const callstackToolbarCommands = {
@@ -131,9 +137,7 @@ describe('Debugger', () => {
       editorServices: {
         factoryService,
         mimeTypeService
-      },
-      notebookTracker: null,
-      config
+      }
     });
 
     await act(async () => {

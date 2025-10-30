@@ -25,6 +25,7 @@ import { Debugger } from '../src/debugger';
 import { IDebugger } from '../src/tokens';
 
 import { handleRequest, KERNELSPECS } from './utils';
+import { DebuggerDisplayRegistry } from '../src';
 import { SessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
 
 /**
@@ -60,13 +61,15 @@ describe('Debugging support', () => {
   let specsManager: TestKernelSpecManager;
   let service: Debugger.Service;
   let config: IDebugger.IConfig;
+  let displayRegistry: DebuggerDisplayRegistry;
 
   beforeAll(async () => {
     specsManager = new TestKernelSpecManager({ standby: 'never' });
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
     config = new Debugger.Config();
-    service = new Debugger.Service({ specsManager, config });
+    displayRegistry = new DebuggerDisplayRegistry();
+    service = new Debugger.Service({ displayRegistry, specsManager, config });
   });
 
   afterAll(async () => {
@@ -98,6 +101,7 @@ describe('DebuggerService', () => {
   let config: IDebugger.IConfig;
   let session: IDebugger.ISession;
   let service: IDebugger;
+  let displayRegistry: DebuggerDisplayRegistry;
 
   beforeEach(async () => {
     connection = await createSession({
@@ -108,7 +112,8 @@ describe('DebuggerService', () => {
     await connection.changeKernel({ name: 'python3' });
     config = new Debugger.Config();
     session = new Debugger.Session({ connection, config });
-    service = new Debugger.Service({ specsManager, config });
+    displayRegistry = new DebuggerDisplayRegistry();
+    service = new Debugger.Service({ displayRegistry, specsManager, config });
   });
 
   afterEach(async () => {

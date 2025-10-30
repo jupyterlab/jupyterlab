@@ -20,8 +20,7 @@ import { Debugger } from './debugger';
 import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IConsoleTracker } from '@jupyterlab/console';
+import { IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -42,9 +41,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._session = null;
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model({
-      config: options.config,
-      notebookTracker: options.notebookTracker || null,
-      consoleTracker: options.consoleTracker || null
+      displayRegistry: options.displayRegistry
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -1091,13 +1088,8 @@ export namespace DebuggerService {
     translator?: ITranslator | null;
 
     /**
-     * The notebook tracker.
+     * The display registry.
      */
-    notebookTracker?: INotebookTracker | null;
-
-    /**
-     * The console tracker.
-     */
-    consoleTracker?: IConsoleTracker | null;
+    displayRegistry?: IDebuggerDisplayRegistry | null;
   }
 }
