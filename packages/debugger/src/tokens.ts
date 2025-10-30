@@ -1179,5 +1179,6 @@ export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
  * Debugger display registry token.
  */
 export const IDebuggerDisplayRegistry = new Token<IDebuggerDisplayRegistry>(
-  '@jupyterlab/debugger:IDebuggerDisplayRegistry'
+  '@jupyterlab/debugger:IDebuggerDisplayRegistry',
+  'A service for registering display labels for cells/files in the debugger.'
 );

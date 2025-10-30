@@ -34,7 +34,7 @@
   "@jupyterlab/coreutils:IStateDB": "A service for the JupyterLab state database.\n  Use this if you want to store data that will persist across page loads.\n  See \"state database\" for more information.",
   "@jupyterlab/debugger:IDebugger": "A debugger user interface.",
   "@jupyterlab/debugger:IDebuggerConfig": "A service to handle the debugger configuration.",
-  "@jupyterlab/debugger:IDebuggerDisplayRegistry": "",
+  "@jupyterlab/debugger:IDebuggerDisplayRegistry": "A service for registering display labels for cells/files in the debugger.",
   "@jupyterlab/debugger:IDebuggerHandler": "A service for handling notebook debugger.",
   "@jupyterlab/debugger:IDebuggerSidebar": "A service for the debugger sidebar.",
   "@jupyterlab/debugger:IDebuggerSourceViewer": "A debugger source viewer.",
