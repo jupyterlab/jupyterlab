@@ -620,6 +620,60 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   /**
+   * Resolve a stable visible insertion index when inserting cells near collapsed sections.
+   */
+  protected _resolveInsertionIndex(
+    index: number,
+    expandedSet = new Set<MarkdownCell>()
+  ): number {
+    const widgets = this.widgets;
+
+    // --- Case 1: inserting below a collapsed section ---
+    if (index > 0) {
+      let aboveCellIndex = index - 1;
+      let parentHeader: MarkdownCell | null = null;
+
+      while (aboveCellIndex >= 0) {
+        const cellAbove = widgets[aboveCellIndex];
+        if (cellAbove instanceof MarkdownCell && !cellAbove.isHidden) {
+          parentHeader = cellAbove;
+          break;
+        }
+        aboveCellIndex--;
+      }
+
+      if (
+        parentHeader &&
+        parentHeader.headingCollapsed &&
+        parentHeader.numberChildNodes >= 0 &&
+        !expandedSet.has(parentHeader)
+      ) {
+        parentHeader.headingCollapsed = false;
+        expandedSet.add(parentHeader);
+
+        const headerIndex = widgets.indexOf(parentHeader);
+        index = headerIndex + parentHeader.numberChildNodes + 1;
+      }
+    }
+
+    // --- Case 2: inserting above a collapsed section ---
+    if (index < widgets.length) {
+      const below = widgets[index];
+      if (
+        below instanceof MarkdownCell &&
+        below.headingCollapsed &&
+        below.numberChildNodes >= 0 &&
+        !expandedSet.has(below)
+      ) {
+        below.headingCollapsed = false;
+        expandedSet.add(below);
+      }
+    }
+
+    return Math.max(0, Math.min(index, widgets.length));
+  }
+
+  /**
    * Handle a change cells event.
    */
   protected _onCellsChanged(
@@ -630,12 +684,16 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add': {
-        let index = 0;
-        index = args.newIndex;
-        for (const value of args.newValues) {
-          this._insertCell(index++, value);
+        let index = args.newIndex;
+
+        for (const cell of args.newValues) {
+          index = this._resolveInsertionIndex(index);
+          this._insertCell(index, cell);
+          index++;
         }
+
         this._updateDataWindowedListIndex(args.newIndex, args.newValues.length);
+
         break;
       }
       case 'remove':
@@ -1939,6 +1997,21 @@ export class Notebook extends StaticNotebook {
     this._activeCell = null;
     super.dispose();
   }
+  getCollapsedParent(cellIndex: number, widgets: Cell[]): MarkdownCell | null {
+    for (let i = cellIndex - 1; i >= 0; i--) {
+      const cell = widgets[i];
+      if (
+        cell instanceof MarkdownCell &&
+        cell.headingCollapsed &&
+        cell.numberChildNodes > 0
+      ) {
+        if (i + cell.numberChildNodes >= cellIndex) {
+          return cell; // found the collapsed parent
+        }
+      }
+    }
+    return null;
+  }
 
   /**
    * Move cells preserving widget view state.
@@ -1952,33 +2025,36 @@ export class Notebook extends StaticNotebook {
    * @param n Number of cells to move
    */
   moveCell(from: number, to: number, n = 1): void {
+    // Prevent moving into itself
+    if (to >= from && to <= from + n - 1) {
+      return;
+    }
+
+    // Expand the target section if needed,
+    const expandedSet = new Set<MarkdownCell>();
+    this._resolveInsertionIndex(to, expandedSet);
+
+    super.moveCell(from, to, n);
+
     // Save active cell id to be restored
     const newActiveCellIndex =
       from <= this.activeCellIndex && this.activeCellIndex < from + n
         ? this.activeCellIndex + to - from - (from > to ? 0 : n - 1)
         : -1;
-    const isSelected = this.widgets
-      .slice(from, from + n)
-      .map(w => this.isSelected(w));
-
-    super.moveCell(from, to, n);
 
     if (newActiveCellIndex >= 0) {
       this.activeCellIndex = newActiveCellIndex;
     }
-    if (from > to) {
-      isSelected.forEach((selected, idx) => {
-        if (selected) {
-          this.select(this.widgets[to + idx]);
-        }
-      });
-    } else {
-      isSelected.forEach((selected, idx) => {
-        if (selected) {
-          this.select(this.widgets[to - n + 1 + idx]);
-        }
-      });
-    }
+
+    const isSelected = this.widgets
+      .slice(Math.min(from, to), Math.min(from, to) + n)
+      .map(w => this.isSelected(w));
+
+    isSelected.forEach((selected, idx) => {
+      if (selected) {
+        this.select(this.widgets[to > from ? to - n + 1 + idx : to + idx]);
+      }
+    });
   }
 
   /**
@@ -2017,9 +2093,25 @@ export class Notebook extends StaticNotebook {
    * Whether a cell is selected.
    */
   isSelected(widget: Cell): boolean {
-    return Private.selectedProperty.get(widget);
+    if (Private.selectedProperty.get(widget)) {
+      return true;
+    } // Implicitly selected because parent header is selected
+    const widgets = this.widgets;
+    const index = widgets.indexOf(widget);
+    for (let i = 0; i < index; i++) {
+      const maybeHeader = widgets[i];
+      if (
+        maybeHeader instanceof MarkdownCell &&
+        maybeHeader.headingCollapsed &&
+        maybeHeader.numberChildNodes > 0 &&
+        i + maybeHeader.numberChildNodes >= index &&
+        Private.selectedProperty.get(maybeHeader)
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
-
   /**
    * Whether a cell is selected or is the active cell.
    */
@@ -2027,7 +2119,7 @@ export class Notebook extends StaticNotebook {
     if (widget === this._activeCell) {
       return true;
     }
-    return Private.selectedProperty.get(widget);
+    return this.isSelected(widget);
   }
 
   /**
@@ -2775,7 +2867,7 @@ export class Notebook extends StaticNotebook {
         }
         if (id === queryId) {
           const attribute =
-            (this.rendermime.sanitizer.allowNamedProperties ?? false)
+            this.rendermime.sanitizer.allowNamedProperties ?? false
               ? 'id'
               : 'data-jupyter-id';
           const element = this.node.querySelector(
@@ -2825,7 +2917,7 @@ export class Notebook extends StaticNotebook {
       }
 
       const attribute =
-        (this.rendermime.sanitizer.allowNamedProperties ?? false)
+        this.rendermime.sanitizer.allowNamedProperties ?? false
           ? 'id'
           : 'data-jupyter-id';
       const element = cell.node.querySelector(
