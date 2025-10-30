@@ -2778,6 +2778,7 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.5.0-beta.1
     "@jupyterlab/apputils": ^4.6.0-beta.1
+    "@jupyterlab/cells": ^4.5.0-beta.1
     "@jupyterlab/codeeditor": ^4.5.0-beta.1
     "@jupyterlab/completer": ^4.5.0-beta.1
     "@jupyterlab/console": ^4.5.0-beta.1
