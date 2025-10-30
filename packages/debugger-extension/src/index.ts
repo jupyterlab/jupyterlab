@@ -862,6 +862,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     handler: Debugger.Handler
   ): Promise<IDebugger.ISourceViewer> => {
     let previousEditorWidget: Widget | null = null;
+    let openedByDebugger: boolean = false;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
@@ -871,13 +872,14 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
     ): Promise<void> => {
+      openedByDebugger = true;
       if (!service.isStarted || !frame?.source?.path) {
         return;
       }
       try {
         const source = await service.getSource({ path: frame.source.path });
         if (source) {
-          openSource(source, frame);
+          openSource(source, openedByDebugger, frame);
         }
       } catch (error) {
         console.error('Failed to fetch source:', error);
@@ -887,6 +889,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 
     const openSource = (
       source: IDebugger.Source,
+      openedByDebugger: boolean,
       breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
     ): void => {
       if (!source) {
@@ -921,7 +924,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         }
       }
 
-      if (previousEditorWidget && !previousEditorWidget.isDisposed) {
+      if (
+        previousEditorWidget &&
+        !previousEditorWidget.isDisposed &&
+        openedByDebugger === true
+      ) {
         previousEditorWidget.dispose();
         previousEditorWidget = null;
       }
@@ -951,9 +958,11 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       for (const widget of app.shell.widgets('main')) {
         if (
           widget.title.label === PathExt.basename(path) &&
-          widget.title.caption === path
+          widget.title.caption === path &&
+          openedByDebugger === true
         ) {
           previousEditorWidget = widget;
+
           break;
         }
       }
@@ -1007,7 +1016,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         const source = await service.getSource({
           path
         });
-        return openSource(source);
+        return openSource(source, openedByDebugger);
       },
       describedBy: {
         args: {
@@ -1311,12 +1320,12 @@ const main: JupyterFrontEndPlugin<void> = {
         if (!source) {
           return;
         }
-        sourceViewer.open(source, breakpoint);
+        sourceViewer.open(source, false, breakpoint);
       };
 
       model.sources.currentSourceOpened.connect(
         (_: IDebugger.Model.ISources | null, source: IDebugger.Source) => {
-          sourceViewer.open(source);
+          sourceViewer.open(source, false);
         }
       );
 
@@ -1327,7 +1336,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceReference: 0,
           path
         });
-        sourceViewer.open(source, breakpoint);
+        sourceViewer.open(source, false, breakpoint);
       });
     }
   }
