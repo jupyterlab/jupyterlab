@@ -1226,7 +1226,7 @@ const notebookDisplayProvider: JupyterFrontEndPlugin<void> = {
         notebookTracker.forEach(panel => {
           for (const cell of panel.content.widgets) {
             const code = cell.model.sharedModel.getSource();
-            const codeId = debuggerService.getCodeId(code); // correct
+            const codeId = debuggerService.getCodeId(code);
 
             if (codeId === source.path) {
               const exec = (cell.model as ICodeCellModel).executionCount;

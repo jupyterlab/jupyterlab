@@ -373,7 +373,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    displayRegistry: IDebuggerDisplayRegistry,
+    displayRegistry: IDebuggerDisplayRegistry | null,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null
   ) =>

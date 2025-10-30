@@ -24,7 +24,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const { displayRegistry } = options;
+    const displayRegistry = options.displayRegistry ?? new DebuggerDisplayRegistry();
 
     this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
@@ -182,6 +182,6 @@ export namespace DebuggerModel {
     /**
      * The display registry.
      */
-    displayRegistry: IDebuggerDisplayRegistry;
+    displayRegistry?: IDebuggerDisplayRegistry | null;
   }
 }
