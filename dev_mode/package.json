@@ -283,11 +283,13 @@
       "@jupyterlab/workspaces-extension": ""
     },
     "mimeExtensions": {
+      "@jupyterlab/audio-extension": "lib/mime.js",
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
       "@jupyterlab/mermaid-extension": "lib/mime.js",
       "@jupyterlab/pdf-extension": "",
-      "@jupyterlab/vega5-extension": ""
+      "@jupyterlab/vega5-extension": "",
+      "@jupyterlab/video-extension": "lib/mime.js"
     },
     "buildDir": "./static",
     "outputDir": ".",

@@ -2422,6 +2422,8 @@ __metadata:
     "@jupyterlab/application": ^4.5.0-beta.1
     "@jupyterlab/apputils": ^4.6.0-beta.1
     "@jupyterlab/docregistry": ^4.5.0-beta.1
+    "@jupyterlab/rendermime": ^4.5.0-beta.1
+    "@jupyterlab/rendermime-interfaces": ^3.13.0-beta.1
     "@jupyterlab/services": ^7.5.0-beta.1
     "@jupyterlab/testutils": ^4.5.0-beta.1
     "@jupyterlab/translation": ^4.5.0-beta.1
@@ -5199,6 +5201,8 @@ __metadata:
     "@jupyterlab/application": ^4.5.0-beta.1
     "@jupyterlab/apputils": ^4.6.0-beta.1
     "@jupyterlab/docregistry": ^4.5.0-beta.1
+    "@jupyterlab/rendermime": ^4.5.0-beta.1
+    "@jupyterlab/rendermime-interfaces": ^3.13.0-beta.1
     "@jupyterlab/services": ^7.5.0-beta.1
     "@jupyterlab/testutils": ^4.5.0-beta.1
     "@jupyterlab/translation": ^4.5.0-beta.1
