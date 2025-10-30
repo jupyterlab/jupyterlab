@@ -41,7 +41,7 @@
     "@jupyterlab/mermaid": "^4.4.10",
     "@jupyterlab/rendermime": "^4.4.10",
     "@lumino/coreutils": "^2.2.1",
-    "marked": "^16.2.0",
+    "marked": "^16.2.1",
     "marked-gfm-heading-id": "^4.1.2",
     "marked-mangle": "^1.1.11"
   },
