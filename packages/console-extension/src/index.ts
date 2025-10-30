@@ -74,6 +74,7 @@ import { DockLayout, Menu, Widget } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 import { IDebugger, IDebuggerDisplayRegistry } from '@jupyterlab/debugger';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 /**
  * The command IDs used by the console plugin.
@@ -281,9 +282,9 @@ const consoleDisplayProvider: JupyterFrontEndPlugin<void> = {
 
             if (codeId && codeId === source.path) {
               const model = cell.model;
-              if ('executionCount' in model && 'executionState' in model) {
-                const exec = (model as any).executionCount ?? null;
-                const state = (model as any).executionState ?? null;
+              if (isCodeCellModel(model)) {
+                const exec = model.executionCount ?? null;
+                const state = model.executionState ?? null;
 
                 if (state === 'running') {
                   displayName = 'In [*]';

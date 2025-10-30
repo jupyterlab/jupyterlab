@@ -22,8 +22,6 @@ export interface IDebuggerSourceDisplayProvider {
  * Registry that holds display providers for different source types.
  */
 export class DebuggerDisplayRegistry {
-  private _providers: IDebuggerSourceDisplayProvider[] = [];
-
   register(provider: IDebuggerSourceDisplayProvider): void {
     this._providers.push(provider);
   }
@@ -51,4 +49,6 @@ export class DebuggerDisplayRegistry {
 
     return index;
   }
+
+  private _providers: IDebuggerSourceDisplayProvider[] = [];
 }
