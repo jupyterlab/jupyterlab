@@ -15,6 +15,7 @@ import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
 import { IDebuggerDisplayRegistry } from './tokens';
+import { DebuggerDisplayRegistry } from './displayregistry';
 
 /**
  * A model for a debugger.
@@ -24,7 +25,8 @@ export class DebuggerModel implements IDebugger.Model.IService {
    * Instantiate a new DebuggerModel
    */
   constructor(options: DebuggerModel.IOptions) {
-    const displayRegistry = options.displayRegistry ?? new DebuggerDisplayRegistry();
+    const displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
 
     this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
