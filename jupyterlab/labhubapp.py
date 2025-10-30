@@ -24,9 +24,7 @@ except ImportError:
     except ImportError as e:
         # jupyterhub is not installed at all
         venv_info = sys.prefix
-        is_venv = hasattr(sys, "real_prefix") or (
-            hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
-        )
+        is_venv = sys.base_prefix != sys.prefix
         venv_type = "virtual environment" if is_venv else "Python environment"
 
         error_msg = (
