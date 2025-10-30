@@ -862,7 +862,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     handler: Debugger.Handler
   ): Promise<IDebugger.ISourceViewer> => {
     let previousEditorWidget: Widget | null = null;
-    let openedByDebugger: boolean = false;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
@@ -872,14 +871,14 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
     ): Promise<void> => {
-      openedByDebugger = true;
+      let openedByDebugger = true;
       if (!service.isStarted || !frame?.source?.path) {
         return;
       }
       try {
         const source = await service.getSource({ path: frame.source.path });
         if (source) {
-          openSource(source, openedByDebugger, frame);
+          openSource(source, frame, openedByDebugger);
         }
       } catch (error) {
         console.error('Failed to fetch source:', error);
@@ -889,8 +888,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 
     const openSource = (
       source: IDebugger.Source,
-      openedByDebugger: boolean,
-      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
+      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame,
+      openedByDebugger = false
     ): void => {
       if (!source) {
         return;
@@ -1016,7 +1015,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         const source = await service.getSource({
           path
         });
-        return openSource(source, openedByDebugger);
+        return openSource(source);
       },
       describedBy: {
         args: {
@@ -1320,12 +1319,12 @@ const main: JupyterFrontEndPlugin<void> = {
         if (!source) {
           return;
         }
-        sourceViewer.open(source, false, breakpoint);
+        sourceViewer.open(source, breakpoint);
       };
 
       model.sources.currentSourceOpened.connect(
         (_: IDebugger.Model.ISources | null, source: IDebugger.Source) => {
-          sourceViewer.open(source, false);
+          sourceViewer.open(source);
         }
       );
 
@@ -1336,7 +1335,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceReference: 0,
           path
         });
-        sourceViewer.open(source, false, breakpoint);
+        sourceViewer.open(source, breakpoint);
       });
     }
   }
