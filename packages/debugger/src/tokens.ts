@@ -339,6 +339,7 @@ export namespace IDebugger {
      */
     open(
       source: IDebugger.Source,
+      openedByDebugger: boolean,
       breakpointorFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
     ): void;
   }
