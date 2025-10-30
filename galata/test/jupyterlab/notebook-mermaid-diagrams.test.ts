@@ -46,10 +46,10 @@ const EXPECTED_MERMAID_ORDER = [
 ];
 
 // often have (potentially scroll-based) deltas
-const PIXEL_DIFF_THRESHOLD: Record<string, number> = {
-  architecture: 0.4,
-  radar: 0.4,
-  treemap: 0.4
+const PIXEL_DIFF_RATIO: Record<string, number> = {
+  architecture: 0.02,
+  radar: 0.02,
+  treemap: 0.02
 };
 
 /**
@@ -123,7 +123,7 @@ for (const theme of ['default', 'dark']) {
 
         expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
           `mermaid-diagram-${theme}-${iZero}-${diagram}.png`,
-          { threshold: PIXEL_DIFF_THRESHOLD[diagram] }
+          { maxDiffPixelRatio: PIXEL_DIFF_RATIO[diagram] }
         );
       });
     }
