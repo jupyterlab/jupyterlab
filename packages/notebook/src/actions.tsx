@@ -506,72 +506,28 @@ export namespace NotebookActions {
       return;
     }
 
-    const state = Private.getState(notebook);
-
-    // Find the first selected or active cell
     const firstIndex = notebook.widgets.findIndex(w =>
       notebook.isSelectedOrActive(w)
     );
 
-    if (firstIndex < 0) {
-      return;
-    }
+    const state = Private.getState(notebook);
 
-    // --- NEW LOGIC: handle collapsed markdown heading ---
-    let lastIndex: number;
-    const activeCell = notebook.activeCell;
+    let lastIndex = notebook.widgets
+      .slice(firstIndex + 1)
+      .findIndex(w => !notebook.isSelectedOrActive(w));
 
-    if (activeCell instanceof MarkdownCell && activeCell.headingCollapsed) {
-      // Include all children under this collapsed heading
-      const end = getSectionEndIndex(notebook, firstIndex);
-      lastIndex = end + 1; // +1 because slice end is exclusive
+    if (lastIndex >= 0) {
+      lastIndex += firstIndex + 1;
     } else {
-      lastIndex = notebook.widgets
-        .slice(firstIndex + 1)
-        .findIndex(w => !notebook.isSelectedOrActive(w));
-
-      if (lastIndex >= 0) {
-        lastIndex += firstIndex + 1;
-      } else {
-        lastIndex = notebook.model.cells.length;
-      }
+      lastIndex = notebook.model.cells.length;
     }
 
-    // --- MOVE the block ---
     if (shift > 0) {
-      // Moving down
       notebook.moveCell(firstIndex, lastIndex, lastIndex - firstIndex);
     } else {
-      // Moving up
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
-
-    // Restore notebook selection and focus state
     void Private.handleState(notebook, state, true);
-  }
-
-  function getSectionEndIndex(notebook: Notebook, startIndex: number): number {
-    const startCell = notebook.widgets[startIndex];
-    if (!(startCell instanceof MarkdownCell)) {
-      return startIndex;
-    }
-
-    const startLevel = startCell.headingInfo.level ?? 7; // default if not a heading
-    let endIndex = startIndex;
-
-    for (let i = startIndex + 1; i < notebook.widgets.length; i++) {
-      const cell = notebook.widgets[i];
-      if (
-        cell instanceof MarkdownCell &&
-        cell.headingInfo.level &&
-        cell.headingInfo.level <= startLevel
-      ) {
-        break; // next heading of same or higher level
-      }
-      endIndex = i;
-    }
-
-    return endIndex;
   }
 
   /**
@@ -2382,6 +2338,7 @@ export namespace NotebookActions {
     if (notebook.isDisposed || activeCell.isDisposed) {
       return;
     }
+
     activeCell.node.focus({
       preventScroll
     });
