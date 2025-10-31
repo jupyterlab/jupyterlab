@@ -1,9 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  InputDialog,
+  showDialog,
+  showErrorMessage
+} from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, Time } from '@jupyterlab/coreutils';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
@@ -96,6 +101,152 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
       return null;
     }
     return context.rename(newPath);
+  }
+
+  /**
+   * Ask user whether to reload from disk.
+   */
+  async reload(
+    options: IDocumentManagerDialogs.Reload.IOptions
+  ): Promise<IDocumentManagerDialogs.Reload.IResult> {
+    const trans = this._translator.load('jupyterlab');
+    const result = await showDialog({
+      title: trans.__('Reload %1 from Disk', options.type),
+      body: trans.__(
+        'Are you sure you want to reload the %1 from the disk?',
+        options.type
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: trans.__('Reload') })
+      ]
+    });
+    return { shouldReload: !!result.button.accept };
+  }
+
+  /**
+   * Ask user whether to delete a file.
+   */
+  async delete(
+    options: IDocumentManagerDialogs.Delete.IOptions
+  ): Promise<IDocumentManagerDialogs.Delete.IResult> {
+    const trans = this._translator.load('jupyterlab');
+    const result = await showDialog({
+      title: trans.__('Delete'),
+      body: trans.__('Are you sure you want to delete %1', options.path),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: trans.__('Delete') })
+      ]
+    });
+    return { shouldDelete: !!result.button.accept };
+  }
+
+  /**
+   * Ask the user to select a checkpoint to revert to.
+   */
+  async chooseCheckpoint(
+    options: IDocumentManagerDialogs.ChooseCheckpoint.IOptions
+  ): Promise<IDocumentManagerDialogs.ChooseCheckpoint.IResult> {
+    const trans = this._translator.load('jupyterlab');
+    const items = options.checkpoints.map((checkpoint, index) => {
+      const isoDate = new Date(checkpoint.last_modified).toISOString();
+      return `${index}. ${isoDate}`;
+    });
+    const selection = await InputDialog.getItem({
+      items,
+      title: trans.__('Choose a checkpoint')
+    });
+    if (!selection.value) {
+      return { checkpoint: undefined };
+    }
+    const idx = parseInt(selection.value.split('.', 1)[0], 10);
+    const checkpoint = options.checkpoints[idx];
+    return { checkpoint };
+  }
+
+  /**
+   * Ask the user to confirm reverting to a checkpoint.
+   */
+  async revert(
+    options: IDocumentManagerDialogs.Revert.IOptions
+  ): Promise<IDocumentManagerDialogs.Revert.IResult> {
+    const trans = this._translator.load('jupyterlab');
+
+    // Build a confirmation body similar to the extension's RevertConfirmWidget
+    const body = document.createElement('div');
+    const confirmMessage = document.createElement('p');
+    const confirmText = document.createTextNode(
+      trans.__(
+        'Are you sure you want to revert the %1 to checkpoint? ',
+        options.fileType
+      )
+    );
+    const cannotUndoText = document.createElement('strong');
+    cannotUndoText.textContent = trans.__('This cannot be undone.');
+
+    confirmMessage.appendChild(confirmText);
+    confirmMessage.appendChild(cannotUndoText);
+
+    const lastCheckpointMessage = document.createElement('p');
+    const lastCheckpointText = document.createTextNode(
+      trans.__('The checkpoint was last updated at: ')
+    );
+    const lastCheckpointDate = document.createElement('p');
+    const date = new Date(options.checkpoint.last_modified);
+    lastCheckpointDate.style.textAlign = 'center';
+    lastCheckpointDate.textContent =
+      Time.format(date) + ' (' + Time.formatHuman(date) + ')';
+
+    lastCheckpointMessage.appendChild(lastCheckpointText);
+    lastCheckpointMessage.appendChild(lastCheckpointDate);
+
+    body.appendChild(confirmMessage);
+    body.appendChild(lastCheckpointMessage);
+
+    const result = await showDialog({
+      title: trans.__('Revert %1 to checkpoint', options.fileType),
+      body: new Widget({ node: body }),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({
+          label: trans.__('Revert'),
+          ariaLabel: trans.__('Revert to Checkpoint')
+        })
+      ]
+    });
+    return { shouldRevert: !!result.button.accept };
+  }
+
+  /**
+   * Prompt to rename on first save.
+   */
+  async renameOnSave(
+    options: IDocumentManagerDialogs.RenameOnSave.IOptions
+  ): Promise<IDocumentManagerDialogs.RenameOnSave.IResult> {
+    const trans = this._translator.load('jupyterlab');
+    const oldName = options.name || '';
+    const selectionRange = oldName.length - PathExt.extname(oldName).length;
+    const result = await InputDialog.getText({
+      title: trans.__('Rename file'),
+      okLabel: trans.__('Rename and Save'),
+      placeholder: trans.__('File name'),
+      text: oldName,
+      selectionRange,
+      checkbox: {
+        label: trans.__('Do not ask for rename on first save.'),
+        caption: trans.__(
+          'If checked, you will not be asked to rename future untitled files when saving them.'
+        )
+      }
+    });
+
+    return {
+      accepted: !!result.button.accept,
+      newName: result.value === null ? undefined : result.value,
+      doNotAskAgain:
+        typeof result.isChecked === 'boolean' ? result.isChecked : undefined
+    };
   }
 
   /**
