@@ -46,6 +46,7 @@ import {
   buildIcon,
   ContextMenuSvg,
   jupyterIcon,
+  Overlay,
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
@@ -118,6 +119,9 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const activateSidebarOverlays: string =
+    'application:activate-sidebar-overlays';
 }
 
 /**
@@ -447,6 +451,45 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isEnabled: () => !labShell.isEmpty('right')
       });
 
+      commands.addCommand(CommandIDs.activateSidebarOverlays, {
+        label: trans.__('Show Sidebar Overlays'),
+        execute: args => {
+          if (args.side !== 'left' && args.side !== 'right') {
+            throw Error(`Unsupported sidebar: ${args.side}`);
+          }
+
+          const widgets = Array.from(labShell.widgets(args.side));
+          for (let index = 0; index < widgets.length; index++) {
+            let elementId = widgets[index].id;
+            let focusElement = document.querySelector(
+              `[data-id='#${CSS.escape(elementId)}']`
+            );
+
+            if (focusElement && !focusElement.querySelector('.jp-Overlay')) {
+              const options: Overlay.IOptions = {
+                hostElement: focusElement
+              };
+
+              Overlay.createOverlay(options);
+            }
+
+            let getOverlayDiv = focusElement?.querySelector('.jp-Overlay');
+            if (getOverlayDiv) {
+              let shortCutNum = (1 + index).toString();
+              getOverlayDiv.innerHTML = shortCutNum;
+            }
+            if ((getOverlayDiv as HTMLElement).style) {
+              (getOverlayDiv as HTMLElement).style.cssText =
+                'visibility: visible;';
+              setTimeout(() => {
+                (getOverlayDiv as HTMLElement).style.cssText =
+                  'visibility: hidden; height: 0;';
+              }, 1000);
+            }
+          }
+        }
+      });
+
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
         label: args =>
           args === undefined ||
@@ -707,7 +750,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
-        CommandIDs.resetLayout
+        CommandIDs.resetLayout,
+        CommandIDs.activateSidebarOverlays
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
