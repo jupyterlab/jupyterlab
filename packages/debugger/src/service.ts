@@ -479,12 +479,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     // restore in kernel AND model
     await this._restoreBreakpoints(breakpoints);
 
-    if (this._debuggerSources) {
-      const filtered = this._filterBreakpoints(breakpoints);
-      this._model.breakpoints.restoreBreakpoints(filtered);
-    } else {
-      this._model.breakpoints.restoreBreakpoints(breakpoints);
-    }
+    this._model.breakpoints.restoreBreakpoints(breakpoints);
 
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
@@ -599,13 +594,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
-    // Set the local copy of breakpoints to reflect only editors that exist.
-    if (this._debuggerSources) {
-      const filtered = this._filterBreakpoints(remoteBreakpoints);
-      this._model.breakpoints.restoreBreakpoints(filtered);
-    } else {
-      this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
-    }
+    this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
 
     // Removes duplicated breakpoints. It is better to do it here than
     // in the editor, because the kernel can change the line of a
@@ -812,37 +801,6 @@ export class DebuggerService implements IDebugger, IDisposable {
       throw new Error('No active debugger session');
     }
     return this.session.sendRequest('dumpCell', { code });
-  }
-
-  /**
-   * Filter breakpoints and only return those associated with a known editor.
-   *
-   * @param breakpoints - Map of breakpoints.
-   *
-   */
-  private _filterBreakpoints(
-    breakpoints: Map<string, IDebugger.IBreakpoint[]>
-  ): Map<string, IDebugger.IBreakpoint[]> {
-    if (!this._debuggerSources) {
-      return breakpoints;
-    }
-    let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
-    for (const collection of breakpoints) {
-      const [id, list] = collection;
-      list.forEach(() => {
-        this._debuggerSources!.find({
-          focus: false,
-          kernel: this.session?.connection?.kernel?.name ?? '',
-          path: this._session?.connection?.path ?? '',
-          source: id
-        }).forEach(() => {
-          if (list.length > 0) {
-            bpMapForRestore.set(id, list);
-          }
-        });
-      });
-    }
-    return bpMapForRestore;
   }
 
   /**
