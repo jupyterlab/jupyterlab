@@ -13,7 +13,9 @@ Installation
     improvements, please consider installing the pre-release, for example with:
 
     .. code:: bash
+
         pip install --pre --upgrade jupyterlab==4.5.0rc0
+
     For the full release notes please see the `Release Notes <https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html#v4-5>`__
 
 JupyterLab can be installed as a terminal-launched application accessible via a web browser (default), or as a desktop application which is running in its own window and can be opened by clicking on a desktop shortcut (`JupyterLab Desktop <https://github.com/jupyterlab/jupyterlab-desktop>`__). This page describes installation of the default (terminal-launched) JupyterLab application using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker`` and assumes basic knowledge of the terminal. For JupyterLab Desktop instructions see the `Installation section <https://github.com/jupyterlab/jupyterlab-desktop#installation>`__ in the JupyterLab Desktop repository.
