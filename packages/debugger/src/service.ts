@@ -456,9 +456,8 @@ export class DebuggerService implements IDebugger, IDisposable {
         ? this.session?.connection?.name || '-'
         : '-';
     }
-    const breakpoints = this._migrateBreakpoints(
-      this._model.breakpoints.breakpoints
-    );
+    const debuggerState = this.getDebuggerState();
+    const breakpoints = this._migrateBreakpoints(debuggerState);
 
     // Merge kernel breakpoints with existing breakpoints, avoiding duplicates
     for (const [path, kernelBpList] of kernelBreakpoints) {
@@ -677,6 +676,9 @@ export class DebuggerService implements IDebugger, IDisposable {
   getDebuggerState(): IDebugger.State {
     const breakpoints = this._model.breakpoints.breakpoints;
     let cells: string[] = [];
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    const { prefix } = this._config.getTmpFileParams(kernel);
+    const tmpPrefix = prefix;
     if (this._debuggerSources) {
       for (const id of breakpoints.keys()) {
         const editorList = this._debuggerSources.find({
@@ -689,7 +691,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         cells = cells.concat(tmpCells);
       }
     }
-    return { cells, breakpoints };
+    return { cells, breakpoints, tmpPrefix };
   }
 
   /**
@@ -705,7 +707,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this._dumpCell(cell);
     }
 
-    const breakpoints = this._migrateBreakpoints(state.breakpoints);
+    const breakpoints = this._migrateBreakpoints(state);
 
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
@@ -718,16 +720,17 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param breakpoints
    * @returns
    */
-  private _migrateBreakpoints(
-    breakpoints: Map<string, IDebugger.IBreakpoint[]>
-  ) {
+  private _migrateBreakpoints(debuggerState: IDebugger.State) {
+    let tmpPrefix: string = debuggerState.tmpPrefix;
     const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     const kernel = this.session?.connection?.kernel?.name ?? '';
-    const { prefix, suffix } = this._config.getTmpFileParams(kernel);
+    const { suffix, prefix } = this._config.getTmpFileParams(kernel);
+    const { breakpoints } = debuggerState;
+
     for (const item of breakpoints) {
       const [id, list] = item;
-      if (id.startsWith('/tmp/')) {
-        /* only redefine id for dump cells*/
+      if (id.startsWith(tmpPrefix)) {
+        /* replace tmpPrefix by the new prefix in newId*/
         const unSuffixedId = id.substring(0, id.length - suffix.length);
         const codeHash = unSuffixedId.substring(
           unSuffixedId.lastIndexOf('/') + 1
