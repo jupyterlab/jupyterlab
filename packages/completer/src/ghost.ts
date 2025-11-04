@@ -161,7 +161,7 @@ class GhostTextWidget extends WidgetType {
   }
 
   updateDOM(dom: HTMLElement, view: EditorView): boolean {
-    this._updateDOM(dom, view);
+    void this._updateDOM(dom, view);
     return true;
   }
 
