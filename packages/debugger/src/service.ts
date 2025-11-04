@@ -721,7 +721,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @returns
    */
   private _migrateBreakpoints(debuggerState: IDebugger.State) {
-    let tmpPrefix: string = debuggerState.tmpPrefix;
+    const oldSessionPrefix: string = debuggerState.tmpPrefix;
     const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     const kernel = this.session?.connection?.kernel?.name ?? '';
     const { prefix } = this._config.getTmpFileParams(kernel);
@@ -729,12 +729,12 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     for (const item of breakpoints) {
       const [id, list] = item;
-      if (id.startsWith(tmpPrefix)) {
+      if (id.startsWith(oldSessionPrefix) && oldSessionPrefix !== prefix) {
         /* replace tmpPrefix by the new prefix in newId*/
-        const newId = id.replace(tmpPrefix, prefix);
+        const newId = id.replace(oldSessionPrefix, prefix);
         migratedBreakpoints.set(newId, list);
       } else {
-        /* keep the original id for other files, i.e. the full local path */
+        /* keep the original id otherwise */
         migratedBreakpoints.set(id, list);
       }
     }
