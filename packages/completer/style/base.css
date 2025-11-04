@@ -211,6 +211,12 @@
 .jp-GhostText {
   color: var(--jp-ui-font-color3);
   white-space: pre-wrap;
+  font-style: italic;
+  transition: opacity 0.2s ease;
+}
+
+.jp-GhostText span {
+  opacity: 0.34;
 }
 
 .jp-GhostText-lineSpacer,
