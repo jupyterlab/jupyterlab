@@ -292,7 +292,7 @@ export namespace IDebugger {
     /**
      * Prefix for temporary files associated with this kernel session
      */
-    tmpPrefix: string;
+    tmpPrefix?: string;
   };
 
   /**
