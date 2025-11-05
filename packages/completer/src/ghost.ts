@@ -290,7 +290,7 @@ class GhostTextWidget extends WidgetType {
         dom.appendChild(document.createTextNode(content));
       }
     } else {
-      dom.appendChild(document.createTextNode(content));
+      dom.innerText = content;
     }
 
     let streamedTokenHost = dom;
