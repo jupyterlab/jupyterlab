@@ -87,7 +87,9 @@ packages:
   // Warm up npx cache to avoid conflating install time with startup time,
   // also get and print out the version info for debugging while at it.
   const version = child_process
-    .execFileSync('npx', ['verdaccio', '--version'], { encoding: 'utf-8' })
+    .execFileSync('npx', ['verdaccio@6.2.1', '--version'], {
+      encoding: 'utf-8'
+    })
     .trim();
   console.log(`Verdaccio version: ${version}`);
 
@@ -99,7 +101,7 @@ packages:
 
   const subproc = child_process.spawn(
     'npx',
-    ['verdaccio'].concat(args.split(' ')),
+    ['verdaccio@6.2.1'].concat(args.split(' ')),
     options
   );
   subproc.unref();
