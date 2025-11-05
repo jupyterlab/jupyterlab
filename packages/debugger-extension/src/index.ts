@@ -21,7 +21,8 @@ import {
   IThemeManager,
   MainAreaWidget,
   SessionContextDialogs,
-  showDialog
+  showDialog,
+  showErrorMessage
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
@@ -126,6 +127,17 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
+    const trans = translator.load('jupyterlab');
+
+    handler.executionDone.connect(() => {
+      void debug.displayModules().catch(reason => {
+        void showErrorMessage(
+          trans.__('Fail to get kernel sources'),
+          trans.__('Fail to get kernel sources:\n%2', reason)
+        );
+      });
+    });
+
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
     ): Promise<void> => {
@@ -226,6 +238,17 @@ const files: JupyterFrontEndPlugin<void> = {
       shell: app.shell,
       service: debug,
       translator: translator
+    });
+
+    const trans = translator.load('jupyterlab');
+
+    handler.executionDone.connect(() => {
+      void debug.displayModules().catch(reason => {
+        void showErrorMessage(
+          trans.__('Fail to get kernel sources'),
+          trans.__('Fail to get kernel sources:\n%2', reason)
+        );
+      });
     });
 
     const activeSessions: {
@@ -333,6 +356,16 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     });
 
     const trans = translator.load('jupyterlab');
+
+    handler.executionDone.connect(() => {
+      void service.displayModules().catch(reason => {
+        void showErrorMessage(
+          trans.__('Fail to get kernel sources'),
+          trans.__('Fail to get kernel sources:\n%2', reason)
+        );
+      });
+    });
+
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
