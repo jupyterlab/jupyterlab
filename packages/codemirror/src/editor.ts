@@ -289,6 +289,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Brings browser focus to this editor text.
    */
   focus(): void {
+    // Add the focused class before the editor focus even fires
+    // to avoid layout trashing when it getcs called in response
+    // to focus event from CodeMirror.
+    this.host.classList.add('jp-mod-focused');
     this._editor.focus();
   }
 

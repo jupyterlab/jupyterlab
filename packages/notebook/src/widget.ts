@@ -2545,6 +2545,9 @@ export class Notebook extends StaticNotebook {
     editor: CodeEditor.IEditor,
     location: CodeEditor.EdgeLocation
   ): void {
+    // Ensure edit mode but do not focus yet
+    this.setMode('edit', { focus: false });
+
     const prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
@@ -3212,6 +3215,9 @@ export class Notebook extends StaticNotebook {
    */
   private _updateReadWrite(): void {
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    if (this.node.classList.contains(READ_WRITE_CLASS) === inReadWrite) {
+      return;
+    }
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
@@ -3277,14 +3283,13 @@ export class Notebook extends StaticNotebook {
    * Handle `focusout` events for the notebook.
    */
   private _evtFocusOut(event: FocusEvent): void {
-    // Update read-write class state.
-    this._updateReadWrite();
-
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test
     // assumes that we explicitly focus things rather than calling blur()
     if (!relatedTarget) {
+      // Update read-write class state.
+      this._updateReadWrite();
       return;
     }
 
@@ -3294,6 +3299,8 @@ export class Notebook extends StaticNotebook {
     if (index !== -1) {
       const widget = this.widgets[index];
       if (widget.editorWidget?.node.contains(relatedTarget)) {
+        // Do not update read-write state as there is no real loss of focus,
+        // instead we are just switching to a different cell
         return;
       }
     }
@@ -3302,6 +3309,8 @@ export class Notebook extends StaticNotebook {
     if (this.mode !== 'command') {
       this.setMode('command', { focus: false });
     }
+    // Update read-write class state.
+    this._updateReadWrite();
   }
 
   /**
