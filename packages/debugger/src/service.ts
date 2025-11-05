@@ -430,6 +430,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     const { body } = reply;
     const kernelBreakpoints = this._mapBreakpoints(body.breakpoints);
     const stoppedThreads = new Set(body.stoppedThreads);
+    const oldDebuggerState = this.getDebuggerState();
 
     this._model.hasRichVariableRendering = body.richRendering === true;
     this._model.supportCopyToGlobals = body.copyToGlobals === true;
@@ -456,8 +457,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         ? this.session?.connection?.name || '-'
         : '-';
     }
-    const debuggerState = this.getDebuggerState();
-    const breakpoints = this._migrateBreakpoints(debuggerState);
+    const breakpoints = await this._migrateBreakpoints(oldDebuggerState);
 
     // Merge kernel breakpoints with existing breakpoints, avoiding duplicates
     for (const [path, kernelBpList] of kernelBreakpoints) {
@@ -677,8 +677,8 @@ export class DebuggerService implements IDebugger, IDisposable {
     const breakpoints = this._model.breakpoints.breakpoints;
     let cells: string[] = [];
     const kernel = this.session?.connection?.kernel?.name ?? '';
-    const { prefix } = this._config.getTmpFileParams(kernel);
-    const tmpPrefix = prefix;
+    const tmpFileParams = this._config.getTmpFileParams(kernel);
+    const tmpPrefix = tmpFileParams?.prefix ?? '';
     if (this._debuggerSources) {
       for (const id of breakpoints.keys()) {
         const editorList = this._debuggerSources.find({
@@ -703,11 +703,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   async restoreDebuggerState(state: IDebugger.State): Promise<boolean> {
     await this.start();
 
-    for (const cell of state.cells) {
-      await this._dumpCell(cell);
-    }
-
-    const breakpoints = this._migrateBreakpoints(state);
+    const breakpoints = await this._migrateBreakpoints(state);
 
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
@@ -720,12 +716,18 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param breakpoints
    * @returns
    */
-  private _migrateBreakpoints(debuggerState: IDebugger.State) {
+  private async _migrateBreakpoints(debuggerState: IDebugger.State) {
     const oldSessionPrefix: string | undefined = debuggerState.tmpPrefix;
-    const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     const kernel = this.session?.connection?.kernel?.name ?? '';
     const { prefix } = this._config.getTmpFileParams(kernel);
     const { breakpoints } = debuggerState;
+
+    // Bail early if nothing to do
+    if (oldSessionPrefix === prefix) {
+      return breakpoints;
+    }
+
+    const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
 
     for (const item of breakpoints) {
       const [id, list] = item;
@@ -736,11 +738,30 @@ export class DebuggerService implements IDebugger, IDisposable {
       ) {
         /* replace tmpPrefix by the new prefix in newId*/
         const newId = id.replace(oldSessionPrefix, prefix);
-        migratedBreakpoints.set(newId, list);
+        migratedBreakpoints.set(
+          newId,
+          list.map(bp => {
+            return {
+              ...bp,
+              source: {
+                ...bp.source,
+                path: bp.source?.path
+                  ? bp.source.path.replace(oldSessionPrefix, prefix)
+                  : undefined
+              }
+            };
+          })
+        );
       } else {
         /* keep the original id otherwise */
         migratedBreakpoints.set(id, list);
       }
+    }
+
+    // The session has changed (tmpPrefix has changed), the new kernel does not know
+    // about the cells, request to dump cells
+    for (const cell of debuggerState.cells) {
+      await this._dumpCell(cell);
     }
 
     return migratedBreakpoints;
