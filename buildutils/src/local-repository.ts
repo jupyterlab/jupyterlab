@@ -84,6 +84,13 @@ packages:
     fs.unlinkSync(log_file);
   }
 
+  // Warm up npx cache to avoid conflating install time with startup time,
+  // also get and print out the version info for debugging while at it.
+  const version = child_process
+    .execFileSync('npx', ['verdaccio', '--version'], { encoding: 'utf-8' })
+    .trim();
+  console.log(`Verdaccio version: ${version}`);
+
   // Assign as `any`` for compatibility with spawn `OpenMode`` options
   const out: any = fs.openSync(log_file, 'a');
   const err: any = fs.openSync(log_file, 'a');
