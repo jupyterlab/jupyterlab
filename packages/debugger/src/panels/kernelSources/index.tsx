@@ -3,11 +3,8 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { showErrorMessage } from '@jupyterlab/apputils';
-
 import {
   PanelWithToolbar,
-  refreshIcon,
   searchIcon,
   ToolbarButton
 } from '@jupyterlab/ui-components';
@@ -50,23 +47,6 @@ export class KernelSources extends PanelWithToolbar {
           this._body.toggleFilterbox();
         },
         tooltip: trans.__('Toggle search filter')
-      })
-    );
-
-    this.toolbar.addItem(
-      'refresh',
-      new ToolbarButton({
-        icon: refreshIcon,
-        onClick: () => {
-          this._model.kernelSources = [];
-          void service.displayModules().catch(reason => {
-            void showErrorMessage(
-              trans.__('Fail to get kernel sources'),
-              trans.__('Fail to get kernel sources:\n%2', reason)
-            );
-          });
-        },
-        tooltip: trans.__('Refresh kernel sources')
       })
     );
 
