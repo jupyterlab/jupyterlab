@@ -21,8 +21,7 @@ import {
   IThemeManager,
   MainAreaWidget,
   SessionContextDialogs,
-  showDialog,
-  showErrorMessage
+  showDialog
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
@@ -127,13 +126,10 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    const trans = translator.load('jupyterlab');
-
     handler.executionDone.connect(() => {
-      void debug.displayModules().catch(reason => {
-        void showErrorMessage(
-          trans.__('Fail to get kernel sources'),
-          trans.__('Fail to get kernel sources:\n%2', reason)
+      debug.displayModules().catch(reason => {
+        console.error(
+          `Failed to display modules after execution in console: ${reason}`
         );
       });
     });
@@ -240,13 +236,10 @@ const files: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    const trans = translator.load('jupyterlab');
-
     handler.executionDone.connect(() => {
-      void debug.displayModules().catch(reason => {
-        void showErrorMessage(
-          trans.__('Fail to get kernel sources'),
-          trans.__('Fail to get kernel sources:\n%2', reason)
+      debug.displayModules().catch(reason => {
+        console.error(
+          `Failed to display modules after execution in console: ${reason}`
         );
       });
     });
@@ -355,17 +348,15 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       translator: translator
     });
 
-    const trans = translator.load('jupyterlab');
-
     handler.executionDone.connect(() => {
-      void service.displayModules().catch(reason => {
-        void showErrorMessage(
-          trans.__('Fail to get kernel sources'),
-          trans.__('Fail to get kernel sources:\n%2', reason)
+      service.displayModules().catch(reason => {
+        console.error(
+          `Failed to display modules after execution in console: ${reason}`
         );
       });
     });
 
+    const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
