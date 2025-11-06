@@ -335,13 +335,20 @@ if [[ $GROUP == usage2 ]]; then
     $TEST_INSTALL_PATH/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser &
+    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
-    sleep 5
+    timeout 60 grep -q 'is running at:' <(tail -f /tmp/jupyter_log_$$.txt) || {
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    }
+    echo "Server started successfully"
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Check the labhubapp
     $TEST_INSTALL_PATH/bin/pip install jupyterhub
@@ -466,13 +473,20 @@ if [[ $GROUP == nonode ]]; then
     ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
 
     # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
+    ./test_install/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
-    sleep 5
+    timeout 60 grep -q 'is running at:' <(tail -f /tmp/jupyter_log_$$.txt) || {
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    }
+    echo "Server started successfully"
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Make sure we can install the tarball
     virtualenv -p $(which python3) test_sdist
