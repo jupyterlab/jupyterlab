@@ -78,3 +78,68 @@ main div.jp-youtube-video iframe {
   width: 100%;
   height: 100%;
 }
+
+/* Responsive styles for mobile and medium screens */
+
+/* Medium screens and tablets (up to 768px) */
+@media (max-width: 768px) {
+  /* Make search bar responsive */
+  nav.navbar form.bd-search {
+    width: auto;
+    max-width: 10em;
+    flex-shrink: 1;
+  }
+
+  /* Adjust navbar brand padding */
+  .navbar-brand {
+    padding: 0.4em 0.5em;
+  }
+
+  /* Ensure proper spacing for header items */
+  .navbar-header-items {
+    gap: 0.5rem;
+  }
+}
+
+/* Small mobile devices (up to 576px) */
+@media (max-width: 576px) {
+  /* Further reduce search bar width */
+  nav.navbar form.bd-search {
+    width: auto;
+    max-width: 8em;
+  }
+
+  /* Reduce logo size for mobile */
+  .jupyter-nav-logo img {
+    width: 24px;
+  }
+
+  /* Reduce padding on small screens */
+  .navbar-brand {
+    padding: 0.3em 0.4em;
+  }
+
+  /* Ensure icon links wrap properly */
+  .navbar-icon-links a {
+    padding: 0.25rem;
+  }
+}
+
+/* Extra small mobile devices (up to 375px) */
+@media (max-width: 375px) {
+  /* Minimize search bar on very small screens */
+  nav.navbar form.bd-search {
+    max-width: 6em;
+  }
+
+  /* Further reduce logo size */
+  .jupyter-nav-logo img {
+    width: 20px;
+  }
+
+  /* Minimize padding */
+  .navbar-brand {
+    padding: 0.2em 0.3em;
+    font-size: 0.9em;
+  }
+}
