@@ -566,12 +566,11 @@ export namespace NotebookActions {
       return;
     }
 
+    const state = Private.getState(notebook);
+
     const firstIndex = notebook.widgets.findIndex(w =>
       notebook.isSelectedOrActive(w)
     );
-
-    const state = Private.getState(notebook);
-
     let lastIndex = notebook.widgets
       .slice(firstIndex + 1)
       .findIndex(w => !notebook.isSelectedOrActive(w));
@@ -587,6 +586,7 @@ export namespace NotebookActions {
     } else {
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
+
     void Private.handleState(notebook, state, true);
   }
 
@@ -2404,7 +2404,6 @@ export namespace NotebookActions {
     if (notebook.isDisposed || activeCell.isDisposed) {
       return;
     }
-
     activeCell.node.focus({
       preventScroll
     });
