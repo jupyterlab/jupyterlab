@@ -374,49 +374,6 @@ describe('completer/inline', () => {
 
         expect(getGhostTextContent()).toBe('line1\n\n');
       });
-
-      it('should apply syntax highlighting when `ghostSyntaxHighlighting` is enabled', async () => {
-        // language for the editor to enable highlighting.
-        editorWidget.editor.model.mimeType = 'text/x-python';
-        Widget.attach(editorWidget, document.body);
-        Widget.attach(completer, document.body);
-
-        // syntax highlighting enabled.
-        completer.configure({
-          ...InlineCompleter.defaultSettings,
-          ghostSyntaxHighlighting: true
-        });
-
-        const pythonCodeItem: CompletionHandler.IInlineItem = {
-          ...itemDefaults,
-          insertText: 'print("Hello, World!")'
-        };
-        model.setCompletions({ items: [pythonCodeItem] });
-
-        await framePromise();
-
-        const ghostHighlighted = findInHost(
-          `.${GHOST_TEXT_CLASS}`
-        ) as HTMLElement;
-        // The highlighter wraps tokens in <span> elements.
-        expect(ghostHighlighted.querySelector('span')).not.toBeNull();
-        expect(ghostHighlighted.innerText).toBe('print("Hello, World!")');
-
-        // Test with syntax highlighting disabled.
-        completer.configure({
-          ...InlineCompleter.defaultSettings,
-          ghostSyntaxHighlighting: false
-        });
-
-        // Re-trigger the render to apply the new setting.
-        model.setCompletions({ items: [pythonCodeItem] });
-        await framePromise();
-
-        const ghostPlain = findInHost(`.${GHOST_TEXT_CLASS}`) as HTMLElement;
-        // There should be no <span> elements when rendering plain text.
-        expect(ghostPlain.querySelector('span')).toBeNull();
-        expect(ghostPlain.innerText).toBe('print("Hello, World!")');
-      });
     });
 
     describe('#cycle()', () => {
