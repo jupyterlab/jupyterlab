@@ -351,7 +351,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     handler.executionDone.connect(() => {
       service.displayModules().catch(reason => {
         console.error(
-          `Failed to display modules after execution in console: ${reason}`
+          `Failed to display modules after execution in notebook: ${reason}`
         );
       });
     });
