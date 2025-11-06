@@ -335,7 +335,7 @@ test.describe('Inline Completer', () => {
     test('should apply syntax highlighting', async ({ page }) => {
       const cellEditor = (await page.notebook.getCellInputLocator(2))!;
       // Type 'sug' which matches 'suggestion_1 = 1' from the setup notebook.
-      await page.keyboard.type('sug');
+      await page.keyboard.type('ug');
 
       // Wait for the ghost text to appear.
       const ghostText = cellEditor.locator(GHOST_SELECTOR);
