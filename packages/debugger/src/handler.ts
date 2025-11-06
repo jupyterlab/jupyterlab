@@ -109,7 +109,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   /**
    * Returns a signal when receiving the execute_reply message on the shell websocket.
    */
-  get executionDone(): Signal<this, void> {
+  get executionDone(): ISignal<this, void> {
     return this._executionDone;
   }
 
