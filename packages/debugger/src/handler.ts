@@ -18,7 +18,7 @@ import { NotebookHandler } from './handlers/notebook';
 import { IDebugger } from './tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IAnyMessageArgs } from '@jupyterlab/services/src/kernel/kernel';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
