@@ -50,3 +50,8 @@
   height: 16px;
   width: 16px;
 }
+
+.jp-DebuggerKernelSource-dir {
+  cursor: pointer;
+  padding-left: 4px;
+}
