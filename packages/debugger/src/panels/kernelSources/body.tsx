@@ -128,7 +128,8 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
       if (!current[part]) {
         current[part] = {
           __children__: {},
-          __path__: parts.slice(0, i + 1).join('.')
+          __namePath__: parts.slice(0, i + 1).join('.'),
+          __filePath__: mod.path
         };
       }
       current = current[part].__children__;
@@ -141,7 +142,7 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
       const children = toArray(entry.__children__);
       return {
         name,
-        path: entry.__path__,
+        path: entry.__filePath__,
         children: children.length ? children : undefined,
         onOpen: () => undefined
       };
