@@ -18,6 +18,25 @@
   padding: 0.6em;
 }
 
+/* Global alignment fixes for navbar elements */
+.navbar-item,
+.version-switcher__container,
+.dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.version-switcher__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  align-self: center;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  transform: translateY(0) !important;
+}
+
 /* Save some space by making this just long enough for the text */
 nav.navbar form.bd-search {
   width: 14em;
@@ -81,65 +100,190 @@ main div.jp-youtube-video iframe {
 
 /* Responsive styles for mobile and medium screens */
 
-/* Medium screens and tablets (up to 768px) */
-@media (max-width: 768px) {
-  /* Make search bar responsive */
-  nav.navbar form.bd-search {
+/* Tablets and medium screens (up to 768px) */
+@media (width <= 768px) {
+  /* Prevent navbar overflow */
+  .bd-header__inner {
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  /* Reduce logo size */
+  .logo__image {
+    max-height: 2rem;
+    max-width: 6rem;
     width: auto;
-    max-width: 10em;
-    flex-shrink: 1;
+    object-fit: contain;
   }
 
-  /* Adjust navbar brand padding */
   .navbar-brand {
-    padding: 0.4em 0.5em;
+    padding: 0.25rem 0.5rem;
   }
 
-  /* Ensure proper spacing for header items */
-  .navbar-header-items {
-    gap: 0.5rem;
+  /* Compact header items with proper alignment */
+  .navbar-header-items__start,
+  .navbar-header-items__end {
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  /* Ensure navbar items are vertically centered */
+  .navbar-item {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Hide version switcher text, show only dropdown indicator */
+  .version-switcher__button {
+    font-size: 0;
+    padding: 0.4rem 0.6rem;
+    min-width: auto;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    vertical-align: middle;
+  }
+
+  .version-switcher__button .caret {
+    font-size: 0.875rem;
+    display: inline-block;
+    line-height: 1;
+  }
+
+  /* Ensure version switcher container is centered */
+  .version-switcher__container {
+    display: flex !important;
+    align-items: center !important;
+    height: 100%;
+  }
+
+  /* Force dropdown to align properly */
+  .dropdown {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Hide search button text and keyboard shortcut */
+  .search-button__default-text,
+  .search-button__kbd-shortcut {
+    display: none;
+  }
+
+  .search-button-field {
+    padding: 0.4rem 0.6rem;
+    min-width: auto;
+  }
+
+  /* Reduce icon sizes */
+  .navbar-icon-links .nav-link {
+    padding: 0.3rem;
+    font-size: 1.1rem;
+  }
+
+  .navbar-icon-links img.icon-link-image {
+    max-width: 1.1rem;
+    max-height: 1.1rem;
+  }
+
+  /* Reduce theme switcher size */
+  .theme-switch-button {
+    padding: 0.4rem;
   }
 }
 
 /* Small mobile devices (up to 576px) */
-@media (max-width: 576px) {
-  /* Further reduce search bar width */
-  nav.navbar form.bd-search {
-    width: auto;
-    max-width: 8em;
+@media (width <= 576px) {
+  /* Show only Jupyter icon without wordmark */
+  .logo__image {
+    max-height: 1.75rem;
+    max-width: 1.75rem;
+    object-fit: contain;
+    object-position: left center;
   }
 
-  /* Reduce logo size for mobile */
-  .jupyter-nav-logo img {
-    width: 24px;
-  }
-
-  /* Reduce padding on small screens */
   .navbar-brand {
-    padding: 0.3em 0.4em;
+    padding: 0.25rem;
   }
 
-  /* Ensure icon links wrap properly */
-  .navbar-icon-links a {
+  /* Very tight spacing */
+  .bd-header__inner {
+    gap: 0.15rem;
+  }
+
+  .navbar-header-items__start,
+  .navbar-header-items__end {
+    gap: 0.15rem;
+  }
+
+  /* Further reduce button sizes */
+  .version-switcher__button,
+  .search-button-field,
+  .theme-switch-button {
+    padding: 0.3rem 0.5rem;
+  }
+
+  /* Smaller icons */
+  .navbar-icon-links .nav-link {
     padding: 0.25rem;
+    font-size: 1rem;
+  }
+
+  .navbar-icon-links img.icon-link-image {
+    max-width: 1rem;
+    max-height: 1rem;
+  }
+
+  /* Hide one or two icon links on very small screens to save space */
+  .navbar-icon-links .nav-item:last-child {
+    display: none;
   }
 }
 
-/* Extra small mobile devices (up to 375px) */
-@media (max-width: 375px) {
-  /* Minimize search bar on very small screens */
-  nav.navbar form.bd-search {
-    max-width: 6em;
+/* Extra small mobile devices (up to 380px) - Show only icon without text */
+@media (width <= 380px) {
+  /* Hide the full logo with text completely */
+  .logo__image {
+    display: none;
   }
 
-  /* Further reduce logo size */
-  .jupyter-nav-logo img {
-    width: 20px;
-  }
-
-  /* Minimize padding */
+  /* Show only icon using background or favicon approach */
   .navbar-brand {
-    padding: 0.2em 0.3em;
-    font-size: 0.9em;
+    padding: 0.2rem;
+    min-width: 2rem;
+    min-height: 2rem;
+    background-image: url('../logo-icon.png');
+    background-size: 1.5rem 1.5rem;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* Even tighter spacing */
+  .bd-header__inner {
+    gap: 0.1rem;
+  }
+
+  .navbar-header-items__start,
+  .navbar-header-items__end {
+    gap: 0.1rem;
+  }
+
+  /* Further reduce button sizes */
+  .version-switcher__button,
+  .search-button-field,
+  .theme-switch-button {
+    padding: 0.25rem 0.4rem;
+  }
+
+  /* Even smaller icons */
+  .navbar-icon-links .nav-link {
+    padding: 0.2rem;
+    font-size: 0.95rem;
+  }
+
+  .navbar-icon-links img.icon-link-image {
+    max-width: 0.95rem;
+    max-height: 0.95rem;
   }
 }
