@@ -1027,11 +1027,20 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
         });
       });
+      this._setupContentVisibilityObserver();
     } else {
       // Remove intrinsic size styling when disabling content visibility
       this.cellsArray.forEach(cell => {
         cell.node.style.removeProperty('contain-intrinsic-size');
+        cell.node.style.removeProperty('content-visibility');
+        cell.node.style.removeProperty('contain');
       });
+
+      // Disconnect observer if it exists
+      if (this._contentVisibilityObserver) {
+        this._contentVisibilityObserver.disconnect();
+        this._contentVisibilityObserver = null;
+      }
     }
   }
 
@@ -1053,13 +1062,30 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       });
 
       // Use the real browser viewport for visibility detection
-      const observer = new IntersectionObserver(
+      this._setupContentVisibilityObserver();
+
+      // Disconnect observer when the notebook is detached
+      const disconnectOnDetach = () => {
+        if (this._contentVisibilityObserver) {
+          this._contentVisibilityObserver.disconnect();
+          this._contentVisibilityObserver = null;
+        }
+        this.node.removeEventListener('lm:before-detach', disconnectOnDetach);
+      };
+      this.node.addEventListener('lm:before-detach', disconnectOnDetach);
+    }
+  }
+
+  private _setupContentVisibilityObserver(): void {
+    if (!this._contentVisibilityObserver) {
+      // Create observer only once
+      this._contentVisibilityObserver = new IntersectionObserver(
         entries => {
           for (const entry of entries) {
             const cell = entry.target as HTMLElement;
             if (entry.isIntersecting) {
               (cell.style as any).contentVisibility = 'visible';
-              cell.style.contain = 'none';
+              cell.style.contain = 'style';
             } else {
               (cell.style as any).contentVisibility = 'auto';
               cell.style.contain = 'layout style paint';
@@ -1068,28 +1094,23 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         },
         { root: null, threshold: 0.1 }
       );
+    }
 
-      // Observe all existing cells
-      this.cellsArray.forEach(cell => observer.observe(cell.node));
+    // Observe all existing cells
+    this.cellsArray.forEach(cell =>
+      this._contentVisibilityObserver!.observe(cell.node)
+    );
 
-      // Watch for newly added cells and set intrinsic size for them too
-      this.model?.cells.changed.connect(() => {
-        requestAnimationFrame(() => {
-          this.cellsArray.forEach((cell, i) => {
-            const estHeight = this._viewModel.estimateWidgetSize(i);
-            cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-            observer.observe(cell.node);
-          });
+    // Watch for newly added cells and set intrinsic size for them too
+    this.model?.cells.changed.connect(() => {
+      requestAnimationFrame(() => {
+        this.cellsArray.forEach((cell, i) => {
+          const estHeight = this._viewModel.estimateWidgetSize(i);
+          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+          this._contentVisibilityObserver!.observe(cell.node);
         });
       });
-
-      // disconnecting observer on detach
-      const disconnectOnDetach = () => {
-        observer.disconnect();
-        this.node.removeEventListener('lm:before-detach', disconnectOnDetach);
-      };
-      this.node.addEventListener('lm:before-detach', disconnectOnDetach);
-    }
+    });
   }
 
   protected cellsArray: Array<Cell>;
@@ -1107,6 +1128,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _notebookModel: INotebookModel | null;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
+  private _contentVisibilityObserver: IntersectionObserver | null = null;
 }
 
 /**
