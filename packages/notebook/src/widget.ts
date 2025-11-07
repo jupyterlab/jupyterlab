@@ -1047,8 +1047,30 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this.cellsArray.forEach((cell, i) => {
           const estHeight = this._viewModel.estimateWidgetSize(i);
           cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+          (cell.node.style as any).contentVisibility = 'auto';
+          cell.node.style.contain = 'layout style paint';
         });
       });
+
+      // Use the real browser viewport for visibility detection
+      const observer = new IntersectionObserver(
+        entries => {
+          for (const entry of entries) {
+            const cell = entry.target as HTMLElement;
+            if (entry.isIntersecting) {
+              (cell.style as any).contentVisibility = 'visible';
+              cell.style.contain = 'none';
+            } else {
+              (cell.style as any).contentVisibility = 'auto';
+              cell.style.contain = 'layout style paint';
+            }
+          }
+        },
+        { root: null, threshold: 0.1 }
+      );
+
+      // Observe all existing cells
+      this.cellsArray.forEach(cell => observer.observe(cell.node));
 
       // Watch for newly added cells and set intrinsic size for them too
       this.model?.cells.changed.connect(() => {
@@ -1056,9 +1078,17 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           this.cellsArray.forEach((cell, i) => {
             const estHeight = this._viewModel.estimateWidgetSize(i);
             cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+            observer.observe(cell.node);
           });
         });
       });
+
+      // disconnecting observer on detach
+      const disconnectOnDetach = () => {
+        observer.disconnect();
+        this.node.removeEventListener('lm:before-detach', disconnectOnDetach);
+      };
+      this.node.addEventListener('lm:before-detach', disconnectOnDetach);
     }
   }
 
