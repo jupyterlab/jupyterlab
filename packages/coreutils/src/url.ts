@@ -216,8 +216,8 @@ export namespace URLExt {
    *
    * #### Notes
    * This function handles both base64-encoded and percent-encoded data URIs.
-   * - Base64 data is decoded using atob()
-   * - Non-base64 data is percent-decoded (reserved characters per RFC 3986)
+   * - Base64 data: Uses modern Uint8Array.fromBase64() if available, falls back to atob()
+   * - Non-base64 data: Percent-decoded (reserved characters per RFC 3986)
    * - For binary data like images, base64 encoding is required
    */
   export function dataURItoBlob(dataURI: string): Blob | null {
@@ -230,16 +230,26 @@ export namespace URLExt {
       const { mimeType, isBase64, data } = parsed;
 
       if (isBase64) {
-        // Decode base64 to binary
+        // Use modern Uint8Array.fromBase64() if available (baseline 2025)
+        // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
+        if (typeof Uint8Array.fromBase64 === 'function') {
+          try {
+            const uint8Array = Uint8Array.fromBase64(data);
+            return new Blob([uint8Array], { type: mimeType });
+          } catch (e) {
+            // Fall through to legacy method if modern API fails
+          }
+        }
+
+        // Legacy fallback using atob() for older browsers
         const byteString = atob(data);
-        const arrayBuffer = new ArrayBuffer(byteString.length);
-        const uint8Array = new Uint8Array(arrayBuffer);
+        const uint8Array = new Uint8Array(byteString.length);
 
         for (let i = 0; i < byteString.length; i++) {
           uint8Array[i] = byteString.charCodeAt(i);
         }
 
-        return new Blob([arrayBuffer], { type: mimeType });
+        return new Blob([uint8Array], { type: mimeType });
       } else {
         // Percent-decode the data (reserved characters are percent-encoded per RFC 3986)
         const decoded = decodeURIComponent(data);
