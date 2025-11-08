@@ -1882,6 +1882,28 @@ export class DirListing extends Widget {
       return;
     }
 
+    // Check for dragged images with data URIs first
+    const images = Private.extractImageDataFromDragEvent(event);
+    if (images.length > 0) {
+      const promises = images.map(async ({ blob, mimeType }) => {
+        const filename = await Private.generateImageFilename(
+          mimeType,
+          this._model.manager.services.contents,
+          this._model.path ?? '/'
+        );
+        // Convert Blob to File
+        const file = new File([blob], filename, { type: mimeType });
+        return this._model.upload(file);
+      });
+
+      Promise.all(promises)
+        .then(() => this._allUploaded.emit())
+        .catch(err => {
+          console.error('Error while uploading images: ', err);
+        });
+      return;
+    }
+
     const items = event.dataTransfer?.items;
     if (!items) {
       // Fallback to simple upload of files (if any)
@@ -3903,6 +3925,137 @@ namespace Private {
       }
     }
     return allEntries;
+  }
+
+  /**
+   * Convert a data URI to a Blob object.
+   */
+  export function dataURItoBlob(dataURI: string): Blob | null {
+    try {
+      // Extract the MIME type and base64 data
+      const matches = dataURI.match(/^data:([^;]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        return null;
+      }
+
+      const mimeType = matches[1];
+      const base64 = matches[2];
+
+      // Decode base64 to binary
+      const byteString = atob(base64);
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const uint8Array = new Uint8Array(arrayBuffer);
+
+      for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i);
+      }
+
+      return new Blob([arrayBuffer], { type: mimeType });
+    } catch (error) {
+      console.error('Error converting data URI to Blob:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Extract image data from a drag event.
+   * Returns an array of {blob, mimeType} objects for any images found.
+   */
+  export function extractImageDataFromDragEvent(
+    event: DragEvent
+  ): Array<{ blob: Blob; mimeType: string }> {
+    const images: Array<{ blob: Blob; mimeType: string }> = [];
+    const dataTransfer = event.dataTransfer;
+
+    if (!dataTransfer) {
+      return images;
+    }
+
+    // Try different browser-specific formats for dragged images
+
+    // Firefox: text/x-moz-url-data contains the data URI
+    const mozUrl = dataTransfer.getData('text/x-moz-url-data');
+    if (mozUrl && mozUrl.startsWith('data:image/')) {
+      const blob = dataURItoBlob(mozUrl);
+      if (blob) {
+        images.push({ blob, mimeType: blob.type });
+      }
+    }
+
+    // Chrome/Safari: text/uri-list may contain the data URI
+    if (images.length === 0) {
+      const uriList = dataTransfer.getData('text/uri-list');
+      if (uriList && uriList.startsWith('data:image/')) {
+        const blob = dataURItoBlob(uriList);
+        if (blob) {
+          images.push({ blob, mimeType: blob.type });
+        }
+      }
+    }
+
+    // Try dataTransfer.items for files (Safari may provide image as File)
+    if (images.length === 0 && dataTransfer.items) {
+      for (let i = 0; i < dataTransfer.items.length; i++) {
+        const item = dataTransfer.items[i];
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            images.push({ blob: file, mimeType: file.type });
+          }
+        }
+      }
+    }
+
+    return images;
+  }
+
+  /**
+   * Generate a unique filename for an image based on MIME type.
+   * Returns a filename like "image.png" or "image-1.png" if the file exists.
+   */
+  export async function generateImageFilename(
+    mimeType: string,
+    manager: Contents.IManager,
+    path: string
+  ): Promise<string> {
+    // Map MIME types to file extensions
+    const extensionMap: { [key: string]: string } = {
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/gif': 'gif',
+      'image/svg+xml': 'svg',
+      'image/webp': 'webp',
+      'image/bmp': 'bmp',
+      'image/tiff': 'tiff',
+      'image/x-icon': 'ico'
+    };
+
+    const extension = extensionMap[mimeType] || 'png';
+    let filename = `image.${extension}`;
+    let counter = 1;
+
+    // Check if file exists and increment counter if needed
+    try {
+      const fullPath = PathExt.join(path, filename);
+      let exists = true;
+
+      while (exists) {
+        try {
+          await manager.get(fullPath);
+          // File exists, try next number
+          filename = `image-${counter}.${extension}`;
+          counter++;
+        } catch {
+          // File doesn't exist, we can use this filename
+          exists = false;
+        }
+      }
+    } catch {
+      // Error checking, use default filename
+    }
+
+    return filename;
   }
 }
 
