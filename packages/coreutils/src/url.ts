@@ -164,36 +164,43 @@ export namespace URLExt {
    * @returns Parsed components or null if invalid
    *
    * #### Notes
-   * This function parses data URIs according to RFC 2397.
-   * The regex pattern matches: data:[<mediatype>][;charset=<charset>|;base64],<data>
+   * This function parses data URIs according to RFC 2397 and the WHATWG specification.
+   * Format: data:[<mediatype>][;base64],<data>
+   * Default MIME type is "text/plain;charset=US-ASCII" per the specification.
    */
   export function parseDataURI(dataURI: string): {
     mimeType: string;
-    encoding: string | null;
+    isBase64: boolean;
     data: string;
   } | null {
     try {
-      // Parse the data URI to verify it has the data: protocol
-      const { href, protocol } = parse(dataURI);
-      if (protocol !== 'data:') {
+      // Verify it has the data: protocol
+      if (!dataURI.startsWith('data:')) {
         return null;
       }
 
-      // Extract MIME type, encoding, and data
-      // This regex matches the data URI format:
-      // data:[<mediatype>][;charset=<charset>|;base64],<data>
-      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
-      const matches = dataURIRegex.exec(href);
-
-      if (!matches || matches.length !== 4) {
+      // Find the comma that separates metadata from data
+      const commaIndex = dataURI.indexOf(',');
+      if (commaIndex === -1) {
         return null;
       }
 
-      const mimeType = matches[1] || 'text/plain';
-      const encoding = matches[2] || null;
-      const data = matches[3];
+      // Extract metadata (everything between 'data:' and ',')
+      const metadata = dataURI.substring(5, commaIndex);
+      const data = dataURI.substring(commaIndex + 1);
 
-      return { mimeType, encoding, data };
+      // Check if data is base64-encoded
+      const isBase64 = metadata.endsWith(';base64');
+
+      // Extract MIME type (remove ;base64 suffix if present)
+      let mimeType = isBase64 ? metadata.slice(0, -7) : metadata;
+
+      // Default MIME type per RFC 2397
+      if (!mimeType) {
+        mimeType = 'text/plain;charset=US-ASCII';
+      }
+
+      return { mimeType, isBase64, data };
     } catch (error) {
       console.error('Error parsing data URI:', error);
       return null;
@@ -208,9 +215,10 @@ export namespace URLExt {
    * @returns A Blob object or null if conversion fails
    *
    * #### Notes
-   * This function handles both base64-encoded and URL-encoded data URIs.
-   * Base64-encoded data URIs are decoded using atob().
-   * Other encodings are decoded using decodeURIComponent().
+   * This function handles both base64-encoded and percent-encoded data URIs.
+   * - Base64 data is decoded using atob()
+   * - Non-base64 data is percent-decoded (reserved characters per RFC 3986)
+   * - For binary data like images, base64 encoding is required
    */
   export function dataURItoBlob(dataURI: string): Blob | null {
     try {
@@ -219,10 +227,10 @@ export namespace URLExt {
         return null;
       }
 
-      const { mimeType, encoding, data } = parsed;
+      const { mimeType, isBase64, data } = parsed;
 
-      // Decode base64 to binary
-      if (encoding === 'base64') {
+      if (isBase64) {
+        // Decode base64 to binary
         const byteString = atob(data);
         const arrayBuffer = new ArrayBuffer(byteString.length);
         const uint8Array = new Uint8Array(arrayBuffer);
@@ -233,8 +241,9 @@ export namespace URLExt {
 
         return new Blob([arrayBuffer], { type: mimeType });
       } else {
-        // If not base64, treat as URL-encoded text
-        return new Blob([decodeURIComponent(data)], { type: mimeType });
+        // Percent-decode the data (reserved characters are percent-encoded per RFC 3986)
+        const decoded = decodeURIComponent(data);
+        return new Blob([decoded], { type: mimeType });
       }
     } catch (error) {
       console.error('Error converting data URI to Blob:', error);
