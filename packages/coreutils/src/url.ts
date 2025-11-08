@@ -232,9 +232,10 @@ export namespace URLExt {
       if (isBase64) {
         // Use modern Uint8Array.fromBase64() if available (baseline 2025)
         // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
-        if (typeof Uint8Array.fromBase64 === 'function') {
+        // Typescript 5.5 does not recognize fromBase64, so we cast to any
+        if (typeof (Uint8Array as any).fromBase64 === 'function') {
           try {
-            const uint8Array = Uint8Array.fromBase64(data);
+            const uint8Array = (Uint8Array as any).fromBase64(data);
             return new Blob([uint8Array], { type: mimeType });
           } catch (e) {
             // Fall through to legacy method if modern API fails
@@ -242,6 +243,7 @@ export namespace URLExt {
         }
 
         // Legacy fallback using atob() for older browsers
+        // TODO: use core-js or another polyfill?
         const byteString = atob(data);
         const uint8Array = new Uint8Array(byteString.length);
 
