@@ -186,8 +186,8 @@ export namespace URLExt {
       }
 
       // Extract metadata (everything between 'data:' and ',')
-      const metadata = dataURI.substring(5, commaIndex);
-      const data = dataURI.substring(commaIndex + 1);
+      const metadata = dataURI.slice(5, commaIndex);
+      const data = dataURI.slice(commaIndex + 1);
 
       // Check if data is base64-encoded
       const isBase64 = metadata.endsWith(';base64');
@@ -235,8 +235,8 @@ export namespace URLExt {
         // Typescript 5.5 does not recognize fromBase64, so we cast to any
         if (typeof (Uint8Array as any).fromBase64 === 'function') {
           try {
-            const uint8Array = (Uint8Array as any).fromBase64(data);
-            return new Blob([uint8Array], { type: mimeType });
+            const array = (Uint8Array as any).fromBase64(data);
+            return new Blob([array], { type: mimeType });
           } catch (e) {
             // Fall through to legacy method if modern API fails
           }
@@ -245,13 +245,13 @@ export namespace URLExt {
         // Legacy fallback using atob() for older browsers
         // TODO: use core-js or another polyfill?
         const byteString = atob(data);
-        const uint8Array = new Uint8Array(byteString.length);
+        const array = new Uint8Array(byteString.length);
 
         for (let i = 0; i < byteString.length; i++) {
-          uint8Array[i] = byteString.charCodeAt(i);
+          array[i] = byteString.charCodeAt(i);
         }
 
-        return new Blob([uint8Array], { type: mimeType });
+        return new Blob([array], { type: mimeType });
       } else {
         // Percent-decode the data (reserved characters are percent-encoded per RFC 3986)
         const decoded = decodeURIComponent(data);
