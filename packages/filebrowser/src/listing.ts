@@ -7,7 +7,7 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, Time, URLExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { isValidFileName, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -3929,28 +3929,42 @@ namespace Private {
 
   /**
    * Convert a data URI to a Blob object.
+   * Uses the same pattern as cells/widget.ts _attachFile method.
    */
   export function dataURItoBlob(dataURI: string): Blob | null {
     try {
-      // Extract the MIME type and base64 data
-      const matches = dataURI.match(/^data:([^;]+);base64,(.+)$/);
-      if (!matches || matches.length !== 3) {
+      // Parse the data URI
+      const { href, protocol } = URLExt.parse(dataURI);
+      if (protocol !== 'data:') {
+        return null;
+      }
+
+      // Extract MIME type and encoded data using the same regex as cells/widget.ts
+      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
+      const matches = dataURIRegex.exec(href);
+      if (!matches || matches.length !== 4) {
         return null;
       }
 
       const mimeType = matches[1];
-      const base64 = matches[2];
+      const encoding = matches[2];
+      const encodedData = matches[3];
 
       // Decode base64 to binary
-      const byteString = atob(base64);
-      const arrayBuffer = new ArrayBuffer(byteString.length);
-      const uint8Array = new Uint8Array(arrayBuffer);
+      if (encoding === 'base64') {
+        const byteString = atob(encodedData);
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
 
-      for (let i = 0; i < byteString.length; i++) {
-        uint8Array[i] = byteString.charCodeAt(i);
+        for (let i = 0; i < byteString.length; i++) {
+          uint8Array[i] = byteString.charCodeAt(i);
+        }
+
+        return new Blob([arrayBuffer], { type: mimeType });
+      } else {
+        // If not base64, treat as text
+        return new Blob([decodeURIComponent(encodedData)], { type: mimeType });
       }
-
-      return new Blob([arrayBuffer], { type: mimeType });
     } catch (error) {
       console.error('Error converting data URI to Blob:', error);
       return null;
