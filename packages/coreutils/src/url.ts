@@ -157,6 +157,92 @@ export namespace URLExt {
   }
 
   /**
+   * Parse a data URI into its components.
+   *
+   * @param dataURI - The data URI to parse (e.g., "data:image/png;base64,iVBORw0KG...")
+   *
+   * @returns Parsed components or null if invalid
+   *
+   * #### Notes
+   * This function parses data URIs according to RFC 2397.
+   * The regex pattern matches: data:[<mediatype>][;charset=<charset>|;base64],<data>
+   */
+  export function parseDataURI(dataURI: string): {
+    mimeType: string;
+    encoding: string | null;
+    data: string;
+  } | null {
+    try {
+      // Parse the data URI to verify it has the data: protocol
+      const { href, protocol } = parse(dataURI);
+      if (protocol !== 'data:') {
+        return null;
+      }
+
+      // Extract MIME type, encoding, and data
+      // This regex matches the data URI format:
+      // data:[<mediatype>][;charset=<charset>|;base64],<data>
+      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
+      const matches = dataURIRegex.exec(href);
+
+      if (!matches || matches.length !== 4) {
+        return null;
+      }
+
+      const mimeType = matches[1] || 'text/plain';
+      const encoding = matches[2] || null;
+      const data = matches[3];
+
+      return { mimeType, encoding, data };
+    } catch (error) {
+      console.error('Error parsing data URI:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Convert a data URI to a Blob.
+   *
+   * @param dataURI - The data URI to convert (e.g., "data:image/png;base64,iVBORw0KG...")
+   *
+   * @returns A Blob object or null if conversion fails
+   *
+   * #### Notes
+   * This function handles both base64-encoded and URL-encoded data URIs.
+   * Base64-encoded data URIs are decoded using atob().
+   * Other encodings are decoded using decodeURIComponent().
+   */
+  export function dataURItoBlob(dataURI: string): Blob | null {
+    try {
+      const parsed = parseDataURI(dataURI);
+      if (!parsed) {
+        return null;
+      }
+
+      const { mimeType, encoding, data } = parsed;
+
+      // Decode base64 to binary
+      if (encoding === 'base64') {
+        const byteString = atob(data);
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < byteString.length; i++) {
+          uint8Array[i] = byteString.charCodeAt(i);
+        }
+
+        return new Blob([arrayBuffer], { type: mimeType });
+      } else {
+        // If not base64, treat as URL-encoded text
+        return new Blob([decodeURIComponent(data)], { type: mimeType });
+      }
+    } catch (error) {
+      console.error('Error converting data URI to Blob:', error);
+      return null;
+    }
+  }
+
+  /**
    * The interface for a URL object
    */
   export interface IUrl {
