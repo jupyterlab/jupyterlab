@@ -3928,50 +3928,6 @@ namespace Private {
   }
 
   /**
-   * Convert a data URI to a Blob object.
-   * Uses the same pattern as cells/widget.ts _attachFile method.
-   */
-  export function dataURItoBlob(dataURI: string): Blob | null {
-    try {
-      // Parse the data URI
-      const { href, protocol } = URLExt.parse(dataURI);
-      if (protocol !== 'data:') {
-        return null;
-      }
-
-      // Extract MIME type and encoded data using the same regex as cells/widget.ts
-      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
-      const matches = dataURIRegex.exec(href);
-      if (!matches || matches.length !== 4) {
-        return null;
-      }
-
-      const mimeType = matches[1];
-      const encoding = matches[2];
-      const encodedData = matches[3];
-
-      // Decode base64 to binary
-      if (encoding === 'base64') {
-        const byteString = atob(encodedData);
-        const arrayBuffer = new ArrayBuffer(byteString.length);
-        const uint8Array = new Uint8Array(arrayBuffer);
-
-        for (let i = 0; i < byteString.length; i++) {
-          uint8Array[i] = byteString.charCodeAt(i);
-        }
-
-        return new Blob([arrayBuffer], { type: mimeType });
-      } else {
-        // If not base64, treat as text
-        return new Blob([decodeURIComponent(encodedData)], { type: mimeType });
-      }
-    } catch (error) {
-      console.error('Error converting data URI to Blob:', error);
-      return null;
-    }
-  }
-
-  /**
    * Extract image data from a drag event.
    * Returns an array of {blob, mimeType} objects for any images found.
    */
@@ -3990,7 +3946,7 @@ namespace Private {
     // Firefox: text/x-moz-url-data contains the data URI
     const mozUrl = dataTransfer.getData('text/x-moz-url-data');
     if (mozUrl && mozUrl.startsWith('data:image/')) {
-      const blob = dataURItoBlob(mozUrl);
+      const blob = URLExt.dataURItoBlob(mozUrl);
       if (blob) {
         images.push({ blob, mimeType: blob.type });
       }
@@ -4000,7 +3956,7 @@ namespace Private {
     if (images.length === 0) {
       const uriList = dataTransfer.getData('text/uri-list');
       if (uriList && uriList.startsWith('data:image/')) {
-        const blob = dataURItoBlob(uriList);
+        const blob = URLExt.dataURItoBlob(uriList);
         if (blob) {
           images.push({ blob, mimeType: blob.type });
         }
