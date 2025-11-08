@@ -1882,11 +1882,11 @@ export class DirListing extends Widget {
       return;
     }
 
-    // Check for dragged images with data URIs first
-    const images = Private.extractImageDataFromDragEvent(event);
-    if (images.length > 0) {
-      const promises = images.map(async ({ blob, mimeType }) => {
-        const filename = await Private.generateImageFilename(
+    // Check for dragged media (images, audio, video) with data URIs first
+    const media = Private.extractMediaDataFromDragEvent(event);
+    if (media.length > 0) {
+      const promises = media.map(async ({ blob, mimeType }) => {
+        const filename = await Private.generateMediaFilename(
           mimeType,
           this._model.manager.services.contents,
           this._model.path ?? '/'
@@ -1899,7 +1899,7 @@ export class DirListing extends Widget {
       Promise.all(promises)
         .then(() => this._allUploaded.emit())
         .catch(err => {
-          console.error('Error while uploading images: ', err);
+          console.error('Error while uploading media files: ', err);
         });
       return;
     }
@@ -3928,68 +3928,83 @@ namespace Private {
   }
 
   /**
-   * Extract image data from a drag event.
-   * Returns an array of {blob, mimeType} objects for any images found.
+   * Extract media data (images, audio, video) from a drag event.
+   * Returns an array of {blob, mimeType} objects for any media found.
    */
-  export function extractImageDataFromDragEvent(
+  export function extractMediaDataFromDragEvent(
     event: DragEvent
   ): Array<{ blob: Blob; mimeType: string }> {
-    const images: Array<{ blob: Blob; mimeType: string }> = [];
+    const media: Array<{ blob: Blob; mimeType: string }> = [];
     const dataTransfer = event.dataTransfer;
 
     if (!dataTransfer) {
-      return images;
+      return media;
     }
 
-    // Try different browser-specific formats for dragged images
+    // Helper to check if a data URI is for supported media
+    const isMediaDataURI = (uri: string): boolean => {
+      return (
+        uri.startsWith('data:image/') ||
+        uri.startsWith('data:audio/') ||
+        uri.startsWith('data:video/')
+      );
+    };
+
+    // Try different browser-specific formats for dragged media
 
     // Firefox: text/x-moz-url-data contains the data URI
     const mozUrl = dataTransfer.getData('text/x-moz-url-data');
-    if (mozUrl && mozUrl.startsWith('data:image/')) {
+    if (mozUrl && isMediaDataURI(mozUrl)) {
       const blob = URLExt.dataURItoBlob(mozUrl);
       if (blob) {
-        images.push({ blob, mimeType: blob.type });
+        media.push({ blob, mimeType: blob.type });
       }
     }
 
     // Chrome/Safari: text/uri-list may contain the data URI
-    if (images.length === 0) {
+    if (media.length === 0) {
       const uriList = dataTransfer.getData('text/uri-list');
-      if (uriList && uriList.startsWith('data:image/')) {
+      if (uriList && isMediaDataURI(uriList)) {
         const blob = URLExt.dataURItoBlob(uriList);
         if (blob) {
-          images.push({ blob, mimeType: blob.type });
+          media.push({ blob, mimeType: blob.type });
         }
       }
     }
 
-    // Try dataTransfer.items for files (Safari may provide image as File)
-    if (images.length === 0 && dataTransfer.items) {
+    // Try dataTransfer.items for files (Safari may provide media as File)
+    if (media.length === 0 && dataTransfer.items) {
       for (let i = 0; i < dataTransfer.items.length; i++) {
         const item = dataTransfer.items[i];
-        if (item.type.startsWith('image/')) {
+        const type = item.type;
+        if (
+          type.startsWith('image/') ||
+          type.startsWith('audio/') ||
+          type.startsWith('video/')
+        ) {
           const file = item.getAsFile();
           if (file) {
-            images.push({ blob: file, mimeType: file.type });
+            media.push({ blob: file, mimeType: file.type });
           }
         }
       }
     }
 
-    return images;
+    return media;
   }
 
   /**
-   * Generate a unique filename for an image based on MIME type.
-   * Returns a filename like "image.png" or "image-1.png" if the file exists.
+   * Generate a unique filename for media (image, audio, video) based on MIME type.
+   * Returns a filename like "image.png", "audio-1.mp3", or "video.mp4" if the file exists.
    */
-  export async function generateImageFilename(
+  export async function generateMediaFilename(
     mimeType: string,
     manager: Contents.IManager,
     path: string
   ): Promise<string> {
     // Map MIME types to file extensions
     const extensionMap: { [key: string]: string } = {
+      // Image formats
       'image/png': 'png',
       'image/jpeg': 'jpg',
       'image/jpg': 'jpg',
@@ -3998,23 +4013,52 @@ namespace Private {
       'image/webp': 'webp',
       'image/bmp': 'bmp',
       'image/tiff': 'tiff',
-      'image/x-icon': 'ico'
+      'image/x-icon': 'ico',
+      // Audio formats
+      'audio/mpeg': 'mp3',
+      'audio/mp3': 'mp3',
+      'audio/wav': 'wav',
+      'audio/wave': 'wav',
+      'audio/x-wav': 'wav',
+      'audio/ogg': 'ogg',
+      'audio/webm': 'webm',
+      'audio/aac': 'aac',
+      'audio/flac': 'flac',
+      'audio/x-m4a': 'm4a',
+      // Video formats
+      'video/mp4': 'mp4',
+      'video/mpeg': 'mpeg',
+      'video/webm': 'webm',
+      'video/ogg': 'ogv',
+      'video/quicktime': 'mov',
+      'video/x-msvideo': 'avi',
+      'video/x-matroska': 'mkv'
     };
 
-    const extension = extensionMap[mimeType] || 'png';
-    let filename = `image.${extension}`;
+    // Determine base filename based on media type
+    let baseName = 'file';
+    if (mimeType.startsWith('image/')) {
+      baseName = 'image';
+    } else if (mimeType.startsWith('audio/')) {
+      baseName = 'audio';
+    } else if (mimeType.startsWith('video/')) {
+      baseName = 'video';
+    }
+
+    const extension = extensionMap[mimeType] || 'bin';
+    let filename = `${baseName}.${extension}`;
     let counter = 1;
 
     // Check if file exists and increment counter if needed
     try {
-      const fullPath = PathExt.join(path, filename);
       let exists = true;
 
       while (exists) {
         try {
+          const fullPath = PathExt.join(path, filename);
           await manager.get(fullPath);
           // File exists, try next number
-          filename = `image-${counter}.${extension}`;
+          filename = `${baseName}-${counter}.${extension}`;
           counter++;
         } catch {
           // File doesn't exist, we can use this filename
