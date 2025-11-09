@@ -2077,7 +2077,11 @@ export abstract class AttachmentsCell<
         return;
       }
 
-      const { mimeType, data } = parsed;
+      const { mimeType, isBase64, data } = parsed;
+      if (!isBase64) {
+        console.error(`Failed to attach ${blob.name} - not base64 encoded`);
+        return;
+      }
       const bundle: nbformat.IMimeBundle = { [mimeType]: data };
       const URI = this._generateURI(blob.name);
 
