@@ -3942,13 +3942,13 @@ export function formatFileSize(
     return '0 B';
   }
   const dm = decimalPoint || 2;
-  
+
   // Select appropriate unit labels and base based on unit type
   const decimalSizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
   const binarySizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
   const sizes = unitType === 'binary' ? binarySizes : decimalSizes;
   const base = unitType === 'binary' ? 1024 : 1000;
-  
+
   const i = Math.floor(Math.log(bytes) / Math.log(base));
   if (i >= 0 && i < sizes.length) {
     return parseFloat((bytes / Math.pow(base, i)).toFixed(dm)) + ' ' + sizes[i];
