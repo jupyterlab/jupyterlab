@@ -363,7 +363,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 Join us in San Diego · JupyterCon 2025 · Nov 4-5 · <a href="https://events.linuxfoundation.org/jupytercon/program/schedule/">SCHEDULE</a> · <a href="https://events.linuxfoundation.org/jupytercon/register/">REGISTER NOW</a>',
+    "announcement": '🚀 You can now test JupyterLab 4.5.0 Release Candidate · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -519,6 +519,13 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):
+    # Enable Plausible.io stats
+    app.add_js_file("https://plausible.io/js/pa-Tem97Eeu4LJFfSRY89aW1.js", loading_method="async")
+    app.add_js_file(
+        filename=None,
+        body="window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init({hashBasedRouting:true})",
+    )
+
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL

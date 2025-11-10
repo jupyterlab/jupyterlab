@@ -37,6 +37,111 @@ export const IRecentsManager = new Token<IRecentsManager>(
 );
 
 /**
+ * The document manager dialogs token.
+ */
+export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
+  '@jupyterlab/docmanager:IDocumentManagerDialogs',
+  'A service for displaying dialogs related to document management.'
+);
+
+/**
+ * Namespace for dialog-related interfaces (argument/result) used by IDocumentManagerDialogs.
+ */
+export namespace IDocumentManagerDialogs {
+  /**
+   * Options and result types for the {@link IDocumentManagerDialogs.confirmClose} dialog.
+   */
+  export namespace ConfirmClose {
+    /**
+     * Options for {@link IDocumentManagerDialogs.confirmClose} dialog.
+     *
+     * @property fileName - The name of the file to be closed.
+     * @property isDirty - Whether the file has unsaved changes.
+     */
+    export interface IOptions {
+      fileName: string;
+      isDirty: boolean;
+    }
+
+    /**
+     * Result of {@link IDocumentManagerDialogs.confirmClose} dialog.
+     *
+     * @property shouldClose - Indicates whether the document should be closed.
+     * @property ignoreSave - If true, the document will be closed without saving changes.
+     * @property doNotAskAgain - If true, the confirmation dialog should not be shown again for this document.
+     */
+    export interface IResult {
+      shouldClose: boolean;
+      ignoreSave: boolean;
+      doNotAskAgain: boolean;
+    }
+  }
+
+  /**
+   * Options and result types for the {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+   */
+  export namespace SaveBeforeClose {
+    /**
+     * Options for {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+     *
+     * @property fileName - The name of the file to be saved.
+     * @property writable - Whether the file is writable. If not specified, defaults to false
+     */
+    export interface IOptions {
+      fileName: string;
+      writable?: boolean;
+    }
+
+    /**
+     * Result of {@link IDocumentManagerDialogs.saveBeforeClose} dialog.
+     *
+     * @property shouldClose - Indicates whether the document should be closed after the operation.
+     * @property ignoreSave - Indicates whether the save operation should be ignored (i.e., close without saving).
+     */
+    export interface IResult {
+      shouldClose: boolean;
+      ignoreSave: boolean;
+    }
+  }
+}
+
+/**
+ * Dialog interfaces for document management.
+ */
+export interface IDocumentManagerDialogs {
+  /**
+   * Show a dialog to rename a file.
+   *
+   * @param context - The document context
+   * @returns A promise that resolves when rename is complete or null if cancelled
+   */
+  rename(context: DocumentRegistry.Context): Promise<void | null>;
+
+  /**
+   * Show a dialog asking whether to close a document.
+   *
+   * This dialog is shown when closing a clean (non-dirty) document
+   * and confirmClosingDocument is true.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  confirmClose(
+    options: IDocumentManagerDialogs.ConfirmClose.IOptions
+  ): Promise<IDocumentManagerDialogs.ConfirmClose.IResult>;
+
+  /**
+   * Show a dialog asking whether to save before closing a dirty document.
+   *
+   * @param options - Options for the dialog
+   * @returns A promise that resolves to a result object
+   */
+  saveBeforeClose(
+    options: IDocumentManagerDialogs.SaveBeforeClose.IOptions
+  ): Promise<IDocumentManagerDialogs.SaveBeforeClose.IResult>;
+}
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {

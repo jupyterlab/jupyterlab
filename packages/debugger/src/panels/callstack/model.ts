@@ -3,17 +3,17 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
-import { isCodeCellModel } from '@jupyterlab/cells';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 import { INotebookTracker } from '@jupyterlab/notebook';
-
+import { IConsoleTracker } from '@jupyterlab/console';
 /**
  * A model for a callstack.
  */
 export class CallstackModel implements IDebugger.Model.ICallstack {
-  constructor(options: CallstackModel.IOptions) {
-    this._config = options.config;
-    this._notebookTracker = options.notebookTracker ?? null;
+  constructor(options: { displayRegistry?: IDebuggerDisplayRegistry }) {
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
   }
 
   /**
@@ -75,45 +75,22 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
    * Returns a human-readable display for a frame.
    */
   getDisplayName(frame: IDebugger.IStackFrame): string {
-    if (!this._notebookTracker || !this._config) {
-      return frame.source?.path ?? '';
+    let name = this._displayRegistry.getDisplayName(
+      frame.source as IDebugger.Source
+    );
+    if (frame.line !== undefined) {
+      name += `:${frame.line}`;
     }
-
-    let display = frame.source?.path ?? '';
-
-    this._notebookTracker.forEach(panel => {
-      const kernelName = panel.sessionContext.session?.kernel?.name ?? '';
-      panel.content.widgets.forEach(cell => {
-        if (cell.model.type !== 'code') return;
-
-        const code = cell.model.sharedModel.getSource();
-        const codeId = this._config.getCodeId(code, kernelName);
-
-        if (codeId && codeId === frame.source?.path) {
-          if (isCodeCellModel(cell.model)) {
-            if (cell.model.executionState === 'running') {
-              display = `Cell [*]`;
-            } else if (cell.model.executionCount === null) {
-              display = `Cell [ ]`;
-            } else {
-              display = `Cell [${cell.model.executionCount}]`;
-            }
-          }
-        }
-      });
-    });
-
-    return display;
+    return name;
   }
 
-  private _config: IDebugger.IConfig;
-  private _notebookTracker: INotebookTracker | null;
   private _state: IDebugger.IStackFrame[] = [];
   private _currentFrame: IDebugger.IStackFrame | null = null;
   private _framesChanged = new Signal<this, IDebugger.IStackFrame[]>(this);
   private _currentFrameChanged = new Signal<this, IDebugger.IStackFrame | null>(
     this
   );
+  private _displayRegistry: IDebuggerDisplayRegistry;
 }
 
 /**
@@ -133,6 +110,11 @@ export namespace CallstackModel {
      * The notebook tracker.
      */
     notebookTracker: INotebookTracker | null;
+
+    /**
+     * The console tracker.
+     */
+    consoleTracker: IConsoleTracker | null;
   }
 }
 
