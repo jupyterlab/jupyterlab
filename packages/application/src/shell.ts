@@ -216,6 +216,11 @@ export namespace ILabShell {
     readonly topArea: ITopArea | null;
 
     /**
+     * The menu area of the user interface.
+     */
+    readonly menuArea?: IMenuArea | null;
+
+    /**
      * The relatives sizes of the areas of the user interface.
      */
     readonly relativeSizes: number[] | null;
@@ -306,6 +311,16 @@ export namespace ILabShell {
      */
     readonly simpleVisibility: boolean;
   }
+
+  /**
+   * The restorable description of the menu area in the user interface.
+   */
+  export interface IMenuArea {
+    /**
+     * Whether the menu bar is visible.
+     */
+    readonly visible: boolean;
+  }
 }
 
 /**
@@ -314,6 +329,11 @@ export namespace ILabShell {
  * @deprecated It has been moved to {@link ILabShell.ITopArea} for consistency.
  */
 export interface ITopArea extends ILabShell.ITopArea {}
+
+/**
+ * The restorable description of the menu area in the user interface.
+ */
+export interface IMenuArea extends ILabShell.IMenuArea {}
 
 /**
  * The application shell for JupyterLab.
@@ -610,6 +630,42 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Whether the main menu bar is visible.
+   */
+  get menuBarVisible(): boolean {
+    if (this.mode === 'multiple-document') {
+      // In multiple-document mode, menu is in top area
+      return !this._topHandler.panel.isHidden;
+    } else {
+      // In single-document mode, menu is separate
+      return !this._menuHandler.panel.isHidden;
+    }
+  }
+  set menuBarVisible(value: boolean) {
+    if (this.mode === 'multiple-document') {
+      // In multiple-document mode, hide/show the entire top area (includes logo and menu)
+      if (value) {
+        this._topHandler.panel.show();
+        this._menuHiddenByUser = false;
+      } else {
+        this._topHandler.panel.hide();
+        this._menuHiddenByUser = true;
+      }
+    } else {
+      // In single-document mode, hide/show just the menu panel
+      if (value) {
+        this._menuHandler.panel.show();
+        this._menuHiddenByUser = false;
+      } else {
+        this._menuHandler.panel.hide();
+        this._menuHiddenByUser = true;
+      }
+    }
+    // Trigger a layout save to persist the menu state
+    this._onLayoutModified();
+  }
+
+  /**
    * The main dock area's user interface mode.
    */
   get mode(): DockPanel.Mode {
@@ -640,6 +696,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._updateTitlePanelTitle();
       if (this._topHandlerHiddenByUser) {
         this._topHandler.panel.hide();
+      }
+      // Apply menu visibility state for single-document mode
+      if (this._menuHiddenByUser) {
+        this._menuHandler.panel.hide();
       }
     } else {
       // Cache a reference to every widget currently in the dock panel before
@@ -699,7 +759,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Adjust menu and title
       this.add(this._menuHandler.panel, 'top', { rank: 100 });
+      // Ensure menu handler panel is always visible in multiple-document mode
+      // (visibility will be controlled by the top handler panel)
+      this._menuHandler.panel.show();
       this._titleHandler.hide();
+      // Apply menu visibility state for multiple-document mode
+      if (this._menuHiddenByUser) {
+        this._topHandler.panel.hide();
+      } else {
+        // Ensure top handler is visible when menu should be visible
+        this._topHandler.panel.show();
+      }
     }
 
     // Set the mode data attribute on the applications shell node.
@@ -1196,6 +1266,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
     }
 
+    // Restore menu area state
+    const menuArea = (layout as ILabShell.ILayout).menuArea;
+    if (menuArea?.visible !== undefined) {
+      this._menuHiddenByUser = !menuArea.visible;
+      // Directly apply the visibility state based on current mode
+      if (this.mode === 'multiple-document') {
+        if (this._menuHiddenByUser) {
+          this._topHandler.panel.hide();
+        } else {
+          this._topHandler.panel.show();
+        }
+      } else {
+        // single-document mode
+        if (this._menuHiddenByUser) {
+          this._menuHandler.panel.hide();
+        } else {
+          this._menuHandler.panel.show();
+        }
+      }
+    }
+
     if (topArea?.simpleVisibility !== undefined) {
       this._topHandlerHiddenByUser = !topArea.simpleVisibility;
       if (this.mode === 'single-document') {
@@ -1307,6 +1398,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate(),
       topArea: { simpleVisibility: !this._topHandlerHiddenByUser },
+      menuArea: { visible: !this._menuHiddenByUser },
       relativeSizes: this._hsplitPanel.relativeSizes()
     };
     return layout;
@@ -1802,6 +1894,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _vsplitPanel: Private.RestorableSplitPanel;
   private _topHandler: Private.PanelHandler;
   private _topHandlerHiddenByUser = false;
+  private _menuHiddenByUser = false;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidget: Private.SkipLinkWidget;
   private _titleHandler: Private.TitleHandler;
