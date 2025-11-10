@@ -1032,7 +1032,8 @@ export class DirListing extends Widget {
         this._hiddenColumns,
         this.selection[item.path],
         this._modifiedStyle,
-        this._columnSizes
+        this._columnSizes,
+        this._fileSizeDisplayUnit
       );
       if (
         this.selection[item.path] &&
@@ -1375,6 +1376,19 @@ export class DirListing extends Widget {
    */
   setAllowDragDropUpload(isEnabled: boolean) {
     this._allowDragDropUpload = isEnabled;
+  }
+
+  /**
+   * The unit type for displaying file sizes
+   */
+  get fileSizeDisplayUnit(): 'decimal' | 'binary' {
+    return this._fileSizeDisplayUnit;
+  }
+
+  set fileSizeDisplayUnit(value: 'decimal' | 'binary') {
+    this._fileSizeDisplayUnit = value;
+    // Trigger a refresh to update the display
+    this._onModelRefreshed();
   }
 
   /**
@@ -2662,6 +2676,7 @@ export class DirListing extends Widget {
   private _paddingWidth: number = 0;
   private _handleWidth: number = DEFAULT_HANDLE_WIDTH;
   private _lastRenderedState = new WeakMap<HTMLElement, string>();
+  private _fileSizeDisplayUnit: 'decimal' | 'binary' = 'decimal';
 }
 
 /**
@@ -2833,7 +2848,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<IColumn['id'], number | null>
+      columnsSizes?: Record<IColumn['id'], number | null>,
+      fileSizeDisplayUnit?: 'decimal' | 'binary'
     ): void;
 
     /**
@@ -3271,7 +3287,8 @@ export namespace DirListing {
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
       selected?: boolean,
       modifiedStyle?: Time.HumanStyle,
-      columnsSizes?: Record<DirListing.IColumn['id'], number | null>
+      columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
+      fileSizeDisplayUnit: 'decimal' | 'binary' = 'decimal'
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -3355,13 +3372,13 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
-        const fileSizeText = formatFileSize(model.size, 1, 1024);
+        const fileSizeText = formatFileSize(model.size, 1, fileSizeDisplayUnit);
         if (fileSize) {
           fileSize.textContent = fileSizeText;
         }
         hoverText += trans.__(
           '\nSize: %1',
-          formatFileSize(model.size, 1, 1024)
+          formatFileSize(model.size, 1, fileSizeDisplayUnit)
         );
       } else if (fileSize) {
         fileSize.textContent = '';
@@ -3918,17 +3935,23 @@ namespace Private {
 export function formatFileSize(
   bytes: number,
   decimalPoint: number,
-  k: number
+  unitType: 'decimal' | 'binary' = 'decimal'
 ): string {
   // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
   if (bytes === 0) {
     return '0 B';
   }
   const dm = decimalPoint || 2;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  // Select appropriate unit labels and base based on unit type
+  const decimalSizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const binarySizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+  const sizes = unitType === 'binary' ? binarySizes : decimalSizes;
+  const base = unitType === 'binary' ? 1024 : 1000;
+  
+  const i = Math.floor(Math.log(bytes) / Math.log(base));
   if (i >= 0 && i < sizes.length) {
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(base, i)).toFixed(dm)) + ' ' + sizes[i];
   } else {
     return String(bytes);
   }
