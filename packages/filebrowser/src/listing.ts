@@ -1882,48 +1882,6 @@ export class DirListing extends Widget {
       return;
     }
 
-    // Check for dragged media (images, audio, video) with data URIs first
-    const media = Private.extractMediaDataFromDragEvent(event);
-    if (media.length > 0) {
-      const promises = media.map(async ({ blob, mimeType }) => {
-        const filename = await Private.generateMediaFilename(
-          mimeType,
-          this._model.manager.services.contents,
-          this._model.path ?? '/'
-        );
-        // Convert Blob to File
-        const file = new File([blob], filename, { type: mimeType });
-        return this._model.upload(file);
-      });
-
-      Promise.all(promises)
-        .then(() => this._allUploaded.emit())
-        .catch(err => {
-          console.error('Error while uploading media files: ', err);
-        });
-      return;
-    }
-
-    const items = event.dataTransfer?.items;
-    if (!items) {
-      // Fallback to simple upload of files (if any)
-      const files = event.dataTransfer?.files;
-      if (!files || files.length === 0) {
-        return;
-      }
-      const promises = [];
-      for (const file of files) {
-        const promise = this._model.upload(file);
-        promises.push(promise);
-      }
-      Promise.all(promises)
-        .then(() => this._allUploaded.emit())
-        .catch(err => {
-          console.error('Error while uploading files: ', err);
-        });
-      return;
-    }
-
     const uploadEntry = async (entry: FileSystemEntry, path: string) => {
       if (Private.isDirectoryEntry(entry)) {
         const dirPath = await Private.createDirectory(
@@ -1943,9 +1901,17 @@ export class DirListing extends Widget {
       }
     };
 
+    const items = event.dataTransfer?.items;
+    if (!items) {
+      return;
+    }
+
     const promises = [];
     for (const item of items) {
-      const entry = Private.defensiveGetAsEntry(item);
+      // In the future we should potentially use item.getAsFileSystemHandle(),
+      // but that is not widely supported, and it is an async api so requires other
+      // changes. For now we just use item.webkitGetAsEntry().
+      const entry = item.webkitGetAsEntry();
 
       if (!entry) {
         continue;
@@ -1953,11 +1919,43 @@ export class DirListing extends Widget {
       const promise = uploadEntry(entry, this._model.path ?? '/');
       promises.push(promise);
     }
-    Promise.all(promises)
-      .then(() => this._allUploaded.emit())
-      .catch(err => {
-        console.error('Error while uploading files: ', err);
-      });
+
+    if (promises.length === 0) {
+      // There were no files in the data, so we look for a data uri.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images
+
+      // https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
+      // indicates 'url' is a shortcut to getting the first url in 'text/uri-list'
+      let uri = event.dataTransfer?.getData('url');
+      if (!uri) {
+        // 'url' is not supported everywhere, so fall back to 'text/uri-list'
+        const uriList = event.dataTransfer?.getData('text/uri-list');
+        if (uriList) {
+          uri = URLExt.parseUriListFirst(uriList) ?? '';
+        }
+      }
+      if (
+        uri.startsWith('data:image/') ||
+        uri.startsWith('data:audio/') ||
+        uri.startsWith('data:video/')
+      ) {
+        const blob = URLExt.dataURItoBlob(uri);
+        if (blob) {
+          const filename = Private.getFilenameFromMimeType(blob.type);
+          const file = new File([blob], filename, { type: blob.type });
+          promises.push(this._model.upload(file));
+        }
+      }
+    }
+
+    if (promises) {
+      Promise.all(promises)
+        .then(() => this._allUploaded.emit())
+        .catch(err => {
+          console.error('Error while uploading files: ', err);
+        });
+      return;
+    }
   }
 
   /**
@@ -3887,19 +3885,6 @@ namespace Private {
     return entry.isFile;
   }
 
-  export function defensiveGetAsEntry(
-    item: DataTransferItem
-  ): FileSystemEntry | null {
-    if (item.webkitGetAsEntry) {
-      return item.webkitGetAsEntry();
-    }
-    if ('getAsEntry' in item) {
-      // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
-      return (item['getAsEntry'] as () => FileSystemEntry | null)();
-    }
-    return null;
-  }
-
   function readEntries(reader: FileSystemDirectoryReader) {
     return new Promise<FileSystemEntry[]>((resolve, reject) =>
       reader.readEntries(resolve, reject)
@@ -3925,72 +3910,6 @@ namespace Private {
       }
     }
     return allEntries;
-  }
-
-  /**
-   * Extract media data (images, audio, video) from a drag event.
-   * Returns an array of {blob, mimeType} objects for any media found.
-   */
-  export function extractMediaDataFromDragEvent(
-    event: DragEvent
-  ): Array<{ blob: Blob; mimeType: string }> {
-    const media: Array<{ blob: Blob; mimeType: string }> = [];
-    const dataTransfer = event.dataTransfer;
-
-    if (!dataTransfer) {
-      return media;
-    }
-
-    // Helper to check if a data URI is for supported media
-    const isMediaDataURI = (uri: string): boolean => {
-      return (
-        uri.startsWith('data:image/') ||
-        uri.startsWith('data:audio/') ||
-        uri.startsWith('data:video/')
-      );
-    };
-
-    // Try different browser-specific formats for dragged media
-
-    // Firefox: text/x-moz-url-data contains the data URI
-    const mozUrl = dataTransfer.getData('text/x-moz-url-data');
-    if (mozUrl && isMediaDataURI(mozUrl)) {
-      const blob = URLExt.dataURItoBlob(mozUrl);
-      if (blob) {
-        media.push({ blob, mimeType: blob.type });
-      }
-    }
-
-    // Chrome/Safari: text/uri-list may contain the data URI
-    if (media.length === 0) {
-      const uriList = dataTransfer.getData('text/uri-list');
-      if (uriList && isMediaDataURI(uriList)) {
-        const blob = URLExt.dataURItoBlob(uriList);
-        if (blob) {
-          media.push({ blob, mimeType: blob.type });
-        }
-      }
-    }
-
-    // Try dataTransfer.items for files (Safari may provide media as File)
-    if (media.length === 0 && dataTransfer.items) {
-      for (let i = 0; i < dataTransfer.items.length; i++) {
-        const item = dataTransfer.items[i];
-        const type = item.type;
-        if (
-          type.startsWith('image/') ||
-          type.startsWith('audio/') ||
-          type.startsWith('video/')
-        ) {
-          const file = item.getAsFile();
-          if (file) {
-            media.push({ blob: file, mimeType: file.type });
-          }
-        }
-      }
-    }
-
-    return media;
   }
 
   /**
@@ -4070,6 +3989,58 @@ namespace Private {
     }
 
     return filename;
+  }
+
+  /**
+   * Get a generic filename based on MIME type.
+   * Returns a filename like "image.png", "audio.mp3", or "video.mp4".
+   */
+  export function getFilenameFromMimeType(mimeType: string): string {
+    // Map MIME types to file extensions
+    const extensionMap: { [key: string]: string } = {
+      // Image formats
+      'image/png': 'png',
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/gif': 'gif',
+      'image/svg+xml': 'svg',
+      'image/webp': 'webp',
+      'image/bmp': 'bmp',
+      'image/tiff': 'tiff',
+      'image/x-icon': 'ico',
+      // Audio formats
+      'audio/mpeg': 'mp3',
+      'audio/mp3': 'mp3',
+      'audio/wav': 'wav',
+      'audio/wave': 'wav',
+      'audio/x-wav': 'wav',
+      'audio/ogg': 'ogg',
+      'audio/webm': 'webm',
+      'audio/aac': 'aac',
+      'audio/flac': 'flac',
+      'audio/x-m4a': 'm4a',
+      // Video formats
+      'video/mp4': 'mp4',
+      'video/mpeg': 'mpeg',
+      'video/webm': 'webm',
+      'video/ogg': 'ogv',
+      'video/quicktime': 'mov',
+      'video/x-msvideo': 'avi',
+      'video/x-matroska': 'mkv'
+    };
+
+    // Determine base filename based on media type
+    let baseName = 'file';
+    if (mimeType.startsWith('image/')) {
+      baseName = 'image';
+    } else if (mimeType.startsWith('audio/')) {
+      baseName = 'audio';
+    } else if (mimeType.startsWith('video/')) {
+      baseName = 'video';
+    }
+
+    const extension = extensionMap[mimeType] || 'bin';
+    return `${baseName}.${extension}`;
   }
 }
 
