@@ -837,7 +837,11 @@ describe('@jupyter/notebook', () => {
 
       it('should keep active cell when cells get reloaded', () => {
         const widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        widget.model!.fromJSON({
+          ...utils.DEFAULT_CONTENT,
+          nbformat: 4,
+          nbformat_minor: 5
+        });
 
         // Select fourth cell
         const expectedIndex = 3;
@@ -850,12 +854,14 @@ describe('@jupyter/notebook', () => {
         // Reload all cells
         const source = widget.model!.sharedModel.getSource();
         widget.model!.sharedModel.setSource(source);
+        const sourceAfter = widget.model!.sharedModel.getSource();
+        expect(sourceAfter).toEqual(source);
         const activeAfter = widget.activeCell!;
 
         // The active cell after will be a different instance
-        expect(activeBefore).not.toBe(activeAfter);
+        expect(activeAfter).not.toBe(activeBefore);
         // But still the same ID
-        expect(idBefore).toBe(activeAfter.model.id);
+        expect(activeAfter.model.id).toBe(idBefore);
         // And the same index
         expect(widget.activeCellIndex).toBe(expectedIndex);
       });
