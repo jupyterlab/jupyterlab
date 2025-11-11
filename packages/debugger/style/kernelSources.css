@@ -46,9 +46,9 @@
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DebuggerKernelSource-source > svg {
-  height: 16px;
-  width: 16px;
+.jp-DebuggerKernelSource-source .jp-Icon {
+  height: 12px;
+  width: 12px;
 }
 
 .jp-DebuggerKernelSource-dir {

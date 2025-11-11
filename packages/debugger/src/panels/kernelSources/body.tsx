@@ -70,7 +70,8 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
     }
 
     if (chain.length > 1) {
-      displayName = chain.join('/');
+      const sep = path.includes('.') ? '.' : '/';
+      displayName = chain.join(sep);
       displayChildren = currentChildren;
     }
   }
@@ -97,7 +98,7 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
                 : caretRightIcon
               : openKernelSourceIcon
           }
-          iconClass={classes('jp-Icon')}
+          className={classes('jp-Icon')}
           tag={null}
         />
         <span style={{ marginLeft: 4 }}>{displayName}</span>
@@ -120,7 +121,8 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
   const root: Record<string, any> = {};
 
   for (const mod of modules) {
-    const parts = mod.name.split('.');
+    const sep = mod.name.includes('.') ? '.' : '/';
+    const parts = mod.name.split(sep);
     let current = root;
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
