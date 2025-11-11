@@ -208,6 +208,47 @@ export namespace URLExt {
   }
 
   /**
+   * Parse a text/uri-list string and return the first URI.
+   *
+   * @param uriList - The text/uri-list formatted string
+   *
+   * @returns The first URI found, or null if none
+   *
+   * #### Notes
+   * Parses text/uri-list format per RFC 2483.
+   * - Lines are terminated with CRLF pairs
+   * - Lines starting with '#' are comments and are ignored
+   * - Returns the first valid URI found without parsing the entire list
+   *
+   * See https://www.iana.org/assignments/media-types/text/uri-list
+   */
+  export function parseUriListFirst(uriList: string): string | null {
+    if (!uriList) {
+      return null;
+    }
+
+    let start = 0;
+    while (start < uriList.length) {
+      // Find the next CRLF
+      let end = uriList.indexOf('\r\n', start);
+      if (end === -1) {
+        // No more CRLF, take the rest of the string
+        end = uriList.length;
+      }
+
+      // Skip comments (lines starting with #)
+      if (uriList[start] !== '#') {
+        return uriList.slice(start, end);
+      }
+
+      // Move past the CRLF for next iteration
+      start = end + 2;
+    }
+
+    return null;
+  }
+
+  /**
    * Convert a data URI to a Blob.
    *
    * @param dataURI - The data URI to convert (e.g., "data:image/png;base64,iVBORw0KG...")
