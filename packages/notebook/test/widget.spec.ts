@@ -834,6 +834,31 @@ describe('@jupyter/notebook', () => {
         widget.activeCellIndex = 1;
         expect(child.rendered).toBe(true);
       });
+
+      it('should keep active cell when cells get reloaded', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+
+        // Select fourth cell
+        const expectedIndex = 3;
+        widget.activeCellIndex = expectedIndex;
+        expect(widget.activeCellIndex).toBe(expectedIndex);
+        const activeBefore = widget.activeCell!;
+        const idBefore = activeBefore.model.id;
+        expect(activeBefore).not.toBe(null);
+
+        // Reload all cells
+        const source = widget.model!.sharedModel.getSource();
+        widget.model!.sharedModel.setSource(source);
+        const activeAfter = widget.activeCell!;
+
+        // The active cell after will be a different instance
+        expect(activeBefore).not.toBe(activeAfter);
+        // But still the same ID
+        expect(idBefore).toBe(activeAfter.model.id);
+        // And the same index
+        expect(widget.activeCellIndex).toBe(expectedIndex);
+      });
     });
 
     describe('#activeCell', () => {
