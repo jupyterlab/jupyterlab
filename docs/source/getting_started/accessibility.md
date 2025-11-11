@@ -12,8 +12,8 @@ This statement was last updated on the 22nd of July 2024.
 
 ## Jupyter Notebook versus JupyterLab
 
-For accessibility purposes, it is recommended to use `Jupyter Notebook
-<https://jupyter-notebook.readthedocs.io/en/stable/>` over JupyterLab.
+For accessibility purposes, it is recommended to use
+[Jupyter Notebook](https://jupyter-notebook.readthedocs.io/en/stable/) over JupyterLab.
 
 A comparison of the two apps will help to explain this recommendation. Jupyter
 Notebook and JupyterLab are both web apps for authoring computational notebooks.

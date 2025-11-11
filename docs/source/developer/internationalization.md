@@ -99,7 +99,7 @@ This is done by manually triggering the [Prepare language packs for release](htt
 
 There is one optional setting:
 
-- The new version in form _X.Y.postZ_ or a \[hatch segment\](<https://hatch.pypa.io/latest/version/#supported-segments>) - the default is `rev` that will bump the post number.
+- The new version in form _X.Y.postZ_ or a [hatch segment](https://hatch.pypa.io/latest/version/#supported-segments) - the default is `rev` that will bump the post number.
 
 ```{image} prep_language_packs.png
 :alt: The "Prepare language packs for release" workflow on GitHub Actions.

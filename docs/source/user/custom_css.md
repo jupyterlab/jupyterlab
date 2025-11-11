@@ -14,7 +14,7 @@ Custom CSS is not loaded by default. In the jupyter configuration directory, the
 `~/.jupyter/custom/custom.css` file will not be loaded unless the the application is
 initialized with the `--custom-css` flag (`LabApp.custom_css` config).
 
-# Jupyter Styling
+## Jupyter Styling
 
 You can use a custom CSS file to modify default Jupyter styling.
 
@@ -27,7 +27,7 @@ You can use a custom CSS file to modify default Jupyter styling.
 :alt: a screenshot custom jupyter styling
 :::
 
-# Markdown
+## Markdown Styling
 
 Another potential application for custom CSS is styling markdown.
 
