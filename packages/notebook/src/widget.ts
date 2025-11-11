@@ -1662,13 +1662,34 @@ export class Notebook extends StaticNotebook {
     sender: CellList,
     args: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    const activeCellId = this.activeCell?.model.id;
+    // Extract active cell ID while it is still possible;
+    // prefer restoring the saved state if any.
+    let activeCellId = this._lastActiveCellId ?? this.activeCell?.model.id;
+
+    // Make changes to the widgets list
     super._onCellsChanged(sender, args);
+
+    // If cells are being replaced, the event will be split into two phases:
+    // 1) remove all old cells
+    // 2) add new cells
+    // Since there may be an overlap between the cells,
+    // we need to carefully preserve the active cell ID.
+    // It needs to be stored outside of the widget state
+    // as activeCellIndex can only store a number within the range
+    // the widgets array (which gets squashed to zero in step 1)..
+    if (args.type === 'remove' && this.widgets.length === 0) {
+      this._lastActiveCellId = activeCellId;
+      activeCellId = undefined;
+    } else {
+      this._lastActiveCellId = undefined;
+    }
+
+    // Attempt to restore active cell ID
     if (activeCellId) {
       const newActiveCellIndex = this.model?.sharedModel.cells.findIndex(
         cell => cell.getId() === activeCellId
       );
-      if (newActiveCellIndex != null) {
+      if (newActiveCellIndex != undefined && newActiveCellIndex !== -1) {
         this.activeCellIndex = newActiveCellIndex;
       }
     }
@@ -3380,6 +3401,7 @@ export class Notebook extends StaticNotebook {
       this.kernelHistory.reset();
     }
   }
+  private _lastActiveCellId?: string;
   private _selectedCells: Cell[] = [];
 }
 

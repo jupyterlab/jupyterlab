@@ -239,6 +239,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.sharedModel.changed.connect(this.onGenericChange, this);
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
+    this._id = this.sharedModel.getId();
   }
 
   readonly sharedModel: ISharedCell;
@@ -276,7 +277,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    * The id for the cell.
    */
   get id(): string {
-    return this.sharedModel.getId();
+    return this._id;
   }
 
   /**
@@ -379,6 +380,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
 
   private _metadataChanged = new Signal<this, IMapChange>(this);
   private _trusted = false;
+  private _id: string;
 }
 
 /**
