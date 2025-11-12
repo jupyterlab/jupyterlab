@@ -1923,8 +1923,9 @@ export class DirListing extends Widget {
         continue;
       }
 
-      // In Safari, dragging and dropping an image with a data uri creates a
-      // file item (see
+      // Sometimes we have trouble reading a file from entry. For example, in
+      // Safari, dragging and dropping an image with a data uri creates a file
+      // item (see
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images).
       // However, experiments show that trying to read that file in Safari gives
       // us a "NotFoundError: Path does not exist" error. So if we happen to
@@ -1965,11 +1966,7 @@ export class DirListing extends Widget {
           uri = URLExt.parseUriListFirst(uriList) ?? '';
         }
       }
-      if (
-        uri.startsWith('data:image/') ||
-        uri.startsWith('data:audio/') ||
-        uri.startsWith('data:video/')
-      ) {
+      if (uri.startsWith('data:image/')) {
         const blob = URLExt.dataURItoBlob(uri);
         if (blob) {
           const filename = Private.getFilenameFromMimeType(blob.type);
@@ -4023,13 +4020,12 @@ namespace Private {
   }
 
   /**
-   * Get a generic filename based on MIME type.
-   * Returns a filename like "image.png", "audio.mp3", or "video.mp4".
+   * Get a generic filename for an image based on its MIME type.
+   * Returns a filename like "image-20250112-143052.png".
    */
   export function getFilenameFromMimeType(mimeType: string): string {
-    // Map MIME types to file extensions
+    // Map image MIME types to file extensions
     const extensionMap: { [key: string]: string } = {
-      // Image formats
       'image/png': 'png',
       'image/jpeg': 'jpg',
       'image/jpg': 'jpg',
@@ -4038,37 +4034,8 @@ namespace Private {
       'image/webp': 'webp',
       'image/bmp': 'bmp',
       'image/tiff': 'tiff',
-      'image/x-icon': 'ico',
-      // Audio formats
-      'audio/mpeg': 'mp3',
-      'audio/mp3': 'mp3',
-      'audio/wav': 'wav',
-      'audio/wave': 'wav',
-      'audio/x-wav': 'wav',
-      'audio/ogg': 'ogg',
-      'audio/webm': 'webm',
-      'audio/aac': 'aac',
-      'audio/flac': 'flac',
-      'audio/x-m4a': 'm4a',
-      // Video formats
-      'video/mp4': 'mp4',
-      'video/mpeg': 'mpeg',
-      'video/webm': 'webm',
-      'video/ogg': 'ogv',
-      'video/quicktime': 'mov',
-      'video/x-msvideo': 'avi',
-      'video/x-matroska': 'mkv'
+      'image/x-icon': 'ico'
     };
-
-    // Determine base filename based on media type
-    let baseName = 'file';
-    if (mimeType.startsWith('image/')) {
-      baseName = 'image';
-    } else if (mimeType.startsWith('audio/')) {
-      baseName = 'audio';
-    } else if (mimeType.startsWith('video/')) {
-      baseName = 'video';
-    }
 
     // Add "YYYYMMDD-HHMMSS" timestamp to make the filename probably unique. We
     // want this in local time for readability, so we can't just use
@@ -4080,7 +4047,7 @@ namespace Private {
     )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
     const extension = extensionMap[mimeType] || 'bin';
-    return `${baseName}-${timestamp}.${extension}`;
+    return `image-${timestamp}.${extension}`;
   }
 }
 
