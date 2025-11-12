@@ -274,7 +274,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             const value = settings.get(key).composite as boolean;
             browser[key] = value;
           }
-          browser.showFileFilter = settings.get('showSearchBarByDefault')
+          browser.showFileFilter = settings.get('showFileFilter')
             .composite as boolean;
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;

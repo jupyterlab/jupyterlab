@@ -291,7 +291,7 @@
         }
       }
     },
-    "showSearchBarByDefault": {
+    "showFileFilter": {
       "type": "boolean",
       "title": "Show Search Bar by Default",
       "description": "Show the search bar by default in the file browser.",
