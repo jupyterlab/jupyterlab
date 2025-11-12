@@ -1242,6 +1242,16 @@ namespace Private {
         imgs[i].alt = 'Image';
       }
     }
+
+    // Make audio elements draggable
+    for (const audio of node.getElementsByTagName('audio')) {
+      Private.makeMediaElementDraggable(audio);
+    }
+
+    // Make video elements draggable
+    for (const video of node.getElementsByTagName('video')) {
+      Private.makeMediaElementDraggable(video);
+    }
   }
 
   /**
@@ -1765,5 +1775,59 @@ namespace Private {
       }
     }
     return out.join('');
+  }
+
+  /**
+   * Make an audio or video element draggable by adding drag event handlers.
+   * This allows users to drag media elements (with data URIs) into the file browser.
+   */
+  export function makeMediaElementDraggable(
+    element: HTMLAudioElement | HTMLVideoElement
+  ): void {
+    // Helper to get the source URL, checking both the element and child <source> elements
+    const getSourceUrl = (): string | null => {
+      // Check the element's src attribute
+      if (element.src && element.src.startsWith('data:')) {
+        return element.src;
+      }
+
+      // Check currentSrc (the actual playing source)
+      if (element.currentSrc && element.currentSrc.startsWith('data:')) {
+        return element.currentSrc;
+      }
+
+      // Check child <source> elements
+      for (const source of element.getElementsByTagName('source')) {
+        const src = source.src;
+        if (src && src.startsWith('data:')) {
+          return src;
+        }
+      }
+
+      return null;
+    };
+
+    // Check if there's a data URI source
+    const dataUriSource = getSourceUrl();
+    if (!dataUriSource) {
+      return;
+    }
+
+    // Make the element draggable
+    element.setAttribute('draggable', 'true');
+
+    // Add drag start handler
+    element.addEventListener('dragstart', (event: DragEvent) => {
+      if (!event.dataTransfer) {
+        return;
+      }
+
+      // Get the source URL at drag time (in case it changed)
+      const source = getSourceUrl();
+      if (source) {
+        event.dataTransfer.setData('text/uri-list', source);
+        event.dataTransfer.effectAllowed = 'copy';
+      }
+    });
   }
 }

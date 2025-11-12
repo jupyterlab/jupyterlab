@@ -1966,7 +1966,11 @@ export class DirListing extends Widget {
           uri = URLExt.parseUriListFirst(uriList) ?? '';
         }
       }
-      if (uri.startsWith('data:image/')) {
+      if (
+        uri.startsWith('data:image/') ||
+        uri.startsWith('data:audio/') ||
+        uri.startsWith('data:video/')
+      ) {
         const blob = URLExt.dataURItoBlob(uri);
         if (blob) {
           const filename = Private.getFilenameFromMimeType(blob.type);
@@ -4020,12 +4024,13 @@ namespace Private {
   }
 
   /**
-   * Get a generic filename for an image based on its MIME type.
-   * Returns a filename like "image-20250112-143052.png".
+   * Get a generic filename for media (image/audio/video) based on its MIME type.
+   * Returns a filename like "image-20250112-143052.png" or "audio-20250112-143052.mp3".
    */
   export function getFilenameFromMimeType(mimeType: string): string {
-    // Map image MIME types to file extensions
+    // Map MIME types to file extensions
     const extensionMap: { [key: string]: string } = {
+      // Image formats
       'image/png': 'png',
       'image/jpeg': 'jpg',
       'image/jpg': 'jpg',
@@ -4034,8 +4039,37 @@ namespace Private {
       'image/webp': 'webp',
       'image/bmp': 'bmp',
       'image/tiff': 'tiff',
-      'image/x-icon': 'ico'
+      'image/x-icon': 'ico',
+      // Audio formats
+      'audio/mpeg': 'mp3',
+      'audio/mp3': 'mp3',
+      'audio/wav': 'wav',
+      'audio/wave': 'wav',
+      'audio/x-wav': 'wav',
+      'audio/ogg': 'ogg',
+      'audio/webm': 'webm',
+      'audio/aac': 'aac',
+      'audio/flac': 'flac',
+      'audio/x-m4a': 'm4a',
+      // Video formats
+      'video/mp4': 'mp4',
+      'video/mpeg': 'mpeg',
+      'video/webm': 'webm',
+      'video/ogg': 'ogv',
+      'video/quicktime': 'mov',
+      'video/x-msvideo': 'avi',
+      'video/x-matroska': 'mkv'
     };
+
+    // Determine base filename based on media type
+    let baseName = 'file';
+    if (mimeType.startsWith('image/')) {
+      baseName = 'image';
+    } else if (mimeType.startsWith('audio/')) {
+      baseName = 'audio';
+    } else if (mimeType.startsWith('video/')) {
+      baseName = 'video';
+    }
 
     // Add "YYYYMMDD-HHMMSS" timestamp to make the filename probably unique. We
     // want this in local time for readability, so we can't just use
@@ -4047,7 +4081,7 @@ namespace Private {
     )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
     const extension = extensionMap[mimeType] || 'bin';
-    return `image-${timestamp}.${extension}`;
+    return `${baseName}-${timestamp}.${extension}`;
   }
 }
 
