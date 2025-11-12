@@ -839,6 +839,7 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         widget.model!.fromJSON({
           ...utils.DEFAULT_CONTENT,
+          // Cell IDs are only guaranteed in nbformat 4.5
           nbformat: 4,
           nbformat_minor: 5
         });
@@ -860,10 +861,41 @@ describe('@jupyter/notebook', () => {
 
         // The active cell after will be a different instance
         expect(activeAfter).not.toBe(activeBefore);
-        // But still the same ID
+        // but still the same ID
         expect(activeAfter.model.id).toBe(idBefore);
-        // And the same index
+        // and the same index.
         expect(widget.activeCellIndex).toBe(expectedIndex);
+      });
+
+      it('should keep active cell when all cells get re-arranged', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON({
+          ...utils.DEFAULT_CONTENT,
+          // Cell IDs are only guaranteed in nbformat 4.5
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        // Select third cell
+        const expectedIndex = 2;
+        widget.activeCellIndex = expectedIndex;
+        expect(widget.activeCellIndex).toBe(expectedIndex);
+        const activeBefore = widget.activeCell!;
+        const idBefore = activeBefore.model.id;
+        expect(activeBefore).not.toBe(null);
+
+        // Reload all cells, but revert the order
+        const source = widget.model!.sharedModel.getSource() as any;
+        (source.cells as []).reverse();
+        widget.model!.sharedModel.setSource(source);
+        const activeAfter = widget.activeCell!;
+
+        // The active cell after will be a different instance
+        expect(activeAfter).not.toBe(activeBefore);
+        // but still the same ID
+        expect(activeAfter.model.id).toBe(idBefore);
+        // and this time a different index.
+        expect(widget.activeCellIndex).not.toBe(expectedIndex);
       });
     });
 
