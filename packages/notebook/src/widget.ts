@@ -1695,7 +1695,7 @@ export class Notebook extends StaticNotebook {
         if (this.mode === 'command' && this.activeCell) {
           // We also want to scroll back to the cell in the command mode,
           // we do not use `scrollToCell` method as that switches to edit mode.
-          this.scrollToItem(this.activeCellIndex);
+          void this.scrollToItem(this.activeCellIndex);
         }
       }
     }
