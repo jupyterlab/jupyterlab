@@ -1906,21 +1906,52 @@ export class DirListing extends Widget {
       return;
     }
 
-    const promises = [];
+    const uploadPromises = [];
     for (const item of items) {
-      // In the future we should potentially use item.getAsFileSystemHandle(),
-      // but that is not widely supported, and it is an async api so requires other
-      // changes. For now we just use item.webkitGetAsEntry().
-      const entry = item.webkitGetAsEntry();
+      if (item.kind !== 'file') {
+        continue;
+      }
 
+      // We have a file item! Try uploading the file or directory. We first get
+      // the file system entry so that we can handle directories.
+
+      // In the future we should potentially add support for
+      // item.getAsFileSystemHandle(), which has a more natural promise-based
+      // api, but browser support is currently limited.
+      const entry = item.webkitGetAsEntry();
       if (!entry) {
         continue;
       }
-      const promise = uploadEntry(entry, this._model.path ?? '/');
-      promises.push(promise);
+
+      // In Safari, dragging and dropping an image with a data uri creates a
+      // file item (see
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images).
+      // However, experiments show that trying to read that file in Safari gives
+      // us a "NotFoundError: Path does not exist" error. So if we happen to
+      // have a file in the root directory, we get it as a file as well as a
+      // fallback. We have to do this here since getAsFile would just return
+      // null if we called it in the async fallback error handler below (see
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#protected_mode)
+      let file: File | null = null;
+      const isInRootDirectory = entry.fullPath.indexOf('/', 1) === -1;
+      if (Private.isFileEntry(entry) && isInRootDirectory) {
+        file = item.getAsFile();
+      }
+
+      const promise = uploadEntry(entry, this._model.path ?? '/').catch(
+        async err => {
+          if (isInRootDirectory && file) {
+            await this._model.upload(file);
+            // handled error, so just return without rethrowing
+            return;
+          }
+          throw err;
+        }
+      );
+      uploadPromises.push(promise);
     }
 
-    if (promises.length === 0) {
+    if (uploadPromises.length === 0) {
       // There were no files in the data, so we look for a data uri.
       // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images
 
@@ -1943,13 +1974,13 @@ export class DirListing extends Widget {
         if (blob) {
           const filename = Private.getFilenameFromMimeType(blob.type);
           const file = new File([blob], filename, { type: blob.type });
-          promises.push(this._model.upload(file));
+          uploadPromises.push(this._model.upload(file));
         }
       }
     }
 
-    if (promises) {
-      Promise.all(promises)
+    if (uploadPromises) {
+      Promise.all(uploadPromises)
         .then(() => this._allUploaded.emit())
         .catch(err => {
           console.error('Error while uploading files: ', err);
@@ -3891,7 +3922,7 @@ namespace Private {
     );
   }
 
-  export function readFile(entry: FileSystemFileEntry) {
+  export async function readFile(entry: FileSystemFileEntry): Promise<File> {
     return new Promise<File>((resolve, reject) => entry.file(resolve, reject));
   }
 
@@ -4039,8 +4070,17 @@ namespace Private {
       baseName = 'video';
     }
 
+    // Add "YYYYMMDD-HHMMSS" timestamp to make the filename probably unique. We
+    // want this in local time for readability, so we can't just use
+    // toISOString().
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
+      now.getDate()
+    )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
     const extension = extensionMap[mimeType] || 'bin';
-    return `${baseName}.${extension}`;
+    return `${baseName}-${timestamp}.${extension}`;
   }
 }
 
