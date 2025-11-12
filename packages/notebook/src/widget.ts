@@ -379,11 +379,20 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     this._notebookModel = null;
     (this.layout as NotebookWindowedLayout).header?.dispose();
     //  Disconnect the content-visibility observer
-    if (this.contentVisibilityObserver) {
-      this.contentVisibilityObserver.disconnect();
-      this.contentVisibilityObserver = null;
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
     }
     super.dispose();
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    //  Disconnect the content-visibility observer
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
+    }
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -1042,9 +1051,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       });
 
       // Disconnect observer if it exists
-      if (this.contentVisibilityObserver) {
-        this.contentVisibilityObserver.disconnect();
-        this.contentVisibilityObserver = null;
+      if (this._contentVisibilityObserver) {
+        this._contentVisibilityObserver.disconnect();
+        this._contentVisibilityObserver = null;
       }
     }
   }
@@ -1072,9 +1081,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   private _setupContentVisibilityObserver(): void {
-    if (!this.contentVisibilityObserver) {
+    if (!this._contentVisibilityObserver) {
       // Create observer only once
-      this.contentVisibilityObserver = new IntersectionObserver(
+      this._contentVisibilityObserver = new IntersectionObserver(
         entries => {
           for (const entry of entries) {
             const cell = entry.target as HTMLElement;
@@ -1093,7 +1102,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     // Observe all existing cells
     this.cellsArray.forEach(cell =>
-      this.contentVisibilityObserver!.observe(cell.node)
+      this._contentVisibilityObserver!.observe(cell.node)
     );
 
     // Watch for newly added cells and set intrinsic size for them too
@@ -1102,7 +1111,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this.cellsArray.forEach((cell, i) => {
           const estHeight = this._viewModel.estimateWidgetSize(i);
           cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-          this.contentVisibilityObserver!.observe(cell.node);
+          this._contentVisibilityObserver!.observe(cell.node);
         });
       });
     });
@@ -1123,7 +1132,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _notebookModel: INotebookModel | null;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
-  protected contentVisibilityObserver: IntersectionObserver | null = null;
+  private _contentVisibilityObserver: IntersectionObserver | null = null;
 }
 
 /**
@@ -2385,12 +2394,6 @@ export class Notebook extends StaticNotebook {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    //  Disconnect the content-visibility observer
-    if (this.contentVisibilityObserver) {
-      this.contentVisibilityObserver.disconnect();
-      this.contentVisibilityObserver = null;
-    }
-
     const node = this.node;
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('mousedown', this, true);
