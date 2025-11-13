@@ -39,10 +39,10 @@
   },
   "dependencies": {
     "@jupyterlab/services": "^7.5.0-rc.0",
-    "@lumino/coreutils": "^2.2.1",
-    "@lumino/disposable": "^2.1.4",
-    "@lumino/polling": "^2.1.4",
-    "@lumino/signaling": "^2.1.4"
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/disposable": "^2.1.5",
+    "@lumino/polling": "^2.1.5",
+    "@lumino/signaling": "^2.1.5"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.5.0-rc.0",
