@@ -457,13 +457,11 @@ test('Ensure that fuzzy filter works properly', async ({ page }) => {
       query: 'File Browser'
     })
   );
-  await page
-    .locator('label:has-text("Filter on file name with a fuzzy search")')
-    .click();
+  await page.getByLabel('Filter on file name with a fuzzy search').uncheck();
 
-  // waits until the file 'test' is no longer visible in the directory listing.
+  // waits until the file 'test' is no longer visible in the directory listing
   await expect(
-    page.locator('.jp-DirListing-item[data-file-path$="/test.ipynb"]')
+    page.locator('.jp-DirListing-item:has-text("test.txt")')
   ).toBeHidden();
 
   // Only one file should be visible
