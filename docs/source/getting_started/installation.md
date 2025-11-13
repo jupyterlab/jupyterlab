@@ -13,7 +13,7 @@ If you are an experienced user, or just would like to test out the latest
 improvements, please consider installing the pre-release, for example with:
 
 ```bash
-pip install --pre --upgrade jupyterlab==4.5.0rc0
+pip install --pre --upgrade jupyterlab==4.5.0rc1
 ```
 
 For the full release notes please see the [Release Notes](https://jupyterlab.readthedocs.io/en/latest/getting_started/changelog.html#v4-5)
