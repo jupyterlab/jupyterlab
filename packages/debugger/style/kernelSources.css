@@ -55,3 +55,17 @@
   cursor: pointer;
   padding-left: 4px;
 }
+
+.jp-DebuggerKernelSource-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.jp-DebuggerKernelSource-label {
+  margin-left: 4px;
+}
+
+.jp-DebuggerKernelSource-children {
+  margin-left: 14px;
+}

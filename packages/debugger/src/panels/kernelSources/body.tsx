@@ -86,10 +86,7 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
 
   return (
     <div className={isDirectory ? DIR_CLASS : SOURCE_CLASS} title={path}>
-      <div
-        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-        onClick={handleClick}
-      >
+      <div className="jp-DebuggerKernelSource-item" onClick={handleClick}>
         <LabIcon.resolveReact
           icon={
             isDirectory
@@ -101,10 +98,10 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
           className={classes('jp-Icon')}
           tag={null}
         />
-        <span style={{ marginLeft: 4 }}>{displayName}</span>
+        <span className="jp-DebuggerKernelSource-label">{displayName}</span>
       </div>
       {isDirectory && isOpen && displayChildren && (
-        <div style={{ marginLeft: 14 }}>
+        <div className="jp-DebuggerKernelSource-children">
           {displayChildren.map((child, i) => (
             <TreeNode key={i} {...child} onOpen={onOpen} />
           ))}
