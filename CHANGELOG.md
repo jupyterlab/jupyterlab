@@ -603,6 +603,40 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.0rc1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.0rc0...f1675bd277961ea24d369a90237d3d218df932b6))
+
+### Bugs fixed
+
+- Update lumino to `v2025.11.13` [#18108](https://github.com/jupyterlab/jupyterlab/pull/18108) ([@krassowski](https://github.com/krassowski))
+- Use `IntersectionObserver` to disable containment for on-screen cells [#18091](https://github.com/jupyterlab/jupyterlab/pull/18091) ([@Meriem-BenIsmail](https://github.com/Meriem-BenIsmail))
+- Fix layout trashing when navigating notebook cell-by-cell [#18080](https://github.com/jupyterlab/jupyterlab/pull/18080) ([@krassowski](https://github.com/krassowski))
+- Hide “Paused in Debugger” overlay when session terminates [#18067](https://github.com/jupyterlab/jupyterlab/pull/18067) ([@arjxn-py](https://github.com/arjxn-py))
+- Debugger: Fix breakpoints lost when closing modules [#18063](https://github.com/jupyterlab/jupyterlab/pull/18063) ([@HaudinFlorence](https://github.com/HaudinFlorence))
+
+### Maintenance and upkeep improvements
+
+- Make usage2 server startup/teardown test more robust [#18087](https://github.com/jupyterlab/jupyterlab/pull/18087) ([@krassowski](https://github.com/krassowski))
+- Separate verdaccio install and startup to fix flaky `release_test` CI job [#18082](https://github.com/jupyterlab/jupyterlab/pull/18082) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Clean up references to Gitpod [#18107](https://github.com/jupyterlab/jupyterlab/pull/18107) ([@jtpio](https://github.com/jtpio))
+- Update example for disabling `buildAvailable` [#18075](https://github.com/jupyterlab/jupyterlab/pull/18075) ([@Frank-Steiner](https://github.com/Frank-Steiner))
+- Update announcement from JupyterCon to JupyterLab 4.5.0 RC [#18074](https://github.com/jupyterlab/jupyterlab/pull/18074) ([@krassowski](https://github.com/krassowski))
+- Mention JupyterLab 4.5.0 RC in the installation instructions [#18061](https://github.com/jupyterlab/jupyterlab/pull/18061) ([@krassowski](https://github.com/krassowski))
+- Add plausible and logos to API docs [#18059](https://github.com/jupyterlab/jupyterlab/pull/18059) ([@krassowski](https://github.com/krassowski))
+- Convert documentation to Markdown [#18044](https://github.com/jupyterlab/jupyterlab/pull/18044) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-10-30&to=2025-11-13&type=c))
+
+[@arjxn-py](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarjxn-py+updated%3A2025-10-30..2025-11-13&type=Issues) | [@Frank-Steiner](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFrank-Steiner+updated%3A2025-10-30..2025-11-13&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2025-10-30..2025-11-13&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2025-10-30..2025-11-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-10-30..2025-11-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-10-30..2025-11-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-10-30..2025-11-13&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-10-30..2025-11-13&type=Issues) | [@Meriem-BenIsmail](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMeriem-BenIsmail+updated%3A2025-10-30..2025-11-13&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.0b1...7f9ee36c7c27e96c1f7ffe9979dcac8ac7f374e6))
@@ -648,8 +682,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-10-16&to=2025-10-30&type=c))
 
 [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2025-10-16..2025-10-30&type=Issues) | [@Ankitaupadhaya](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAnkitaupadhaya+updated%3A2025-10-16..2025-10-30&type=Issues) | [@arjxn-py](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aarjxn-py+updated%3A2025-10-16..2025-10-30&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2025-10-16..2025-10-30&type=Issues) | [@Darshan808](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-10-16..2025-10-30&type=Issues) | [@domoritz](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adomoritz+updated%3A2025-10-16..2025-10-30&type=Issues) | [@ellisonbg](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aellisonbg+updated%3A2025-10-16..2025-10-30&type=Issues) | [@gjmooney](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agjmooney+updated%3A2025-10-16..2025-10-30&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2025-10-16..2025-10-30&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-10-16..2025-10-30&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2025-10-16..2025-10-30&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-10-16..2025-10-30&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2025-10-16..2025-10-30&type=Issues) | [@Meriem-BenIsmail](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMeriem-BenIsmail+updated%3A2025-10-16..2025-10-30&type=Issues) | [@robertstrauss](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Arobertstrauss+updated%3A2025-10-16..2025-10-30&type=Issues) | [@RRosio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2025-10-16..2025-10-30&type=Issues) | [@skapin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Askapin+updated%3A2025-10-16..2025-10-30&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.0b1
 
