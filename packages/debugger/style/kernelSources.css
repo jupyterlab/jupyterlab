@@ -58,6 +58,7 @@
 
 .jp-DebuggerKernelSource-item {
   display: flex;
+  width: 100%;
   align-items: center;
   cursor: pointer;
   padding: 2px 4px;
