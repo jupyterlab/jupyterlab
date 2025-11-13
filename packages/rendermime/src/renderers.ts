@@ -200,6 +200,8 @@ export async function renderImage(
     img.classList.add('jp-mod-unconfined');
   }
 
+  Private.makeMediaElementDraggable(img);
+
   // Add the image to the host.
   host.appendChild(img);
 }
@@ -1238,11 +1240,10 @@ namespace Private {
    * Handle the default behavior of nodes.
    */
   export function handleDefaults(node: HTMLElement): void {
-    // Handle image elements.
-    const imgs = node.getElementsByTagName('img');
-    for (let i = 0; i < imgs.length; i++) {
-      if (!imgs[i].alt) {
-        imgs[i].alt = 'Image';
+    for (const img of node.getElementsByTagName('img')) {
+      Private.makeMediaElementDraggable(img);
+      if (!img.alt) {
+        img.alt = 'Image';
       }
     }
 
@@ -1771,7 +1772,7 @@ namespace Private {
    * This allows users to drag media elements (with data URIs) into the file browser.
    */
   export function makeMediaElementDraggable(
-    element: HTMLAudioElement | HTMLVideoElement
+    element: HTMLImageElement | HTMLAudioElement | HTMLVideoElement
   ): void {
     // Helper to get the source URL, checking both the element and child <source> elements
     const getSourceUrl = (): string | null => {
@@ -1805,6 +1806,15 @@ namespace Private {
     // Make the element draggable
     element.setAttribute('draggable', 'true');
 
+    // Make a timestamp for this element that does not change for the life of
+    // the element. This is so that dragging two copies of the same element
+    // results in the same filename.
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
+      now.getDate()
+    )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
     // Add drag start handler
     element.addEventListener('dragstart', (event: DragEvent) => {
       if (!event.dataTransfer) {
@@ -1824,15 +1834,6 @@ namespace Private {
           // Generate a timestamped filename
           const extension = getExtensionFromMimeType(parsed.mimeType);
           const baseName = getBaseNameFromMimeType(parsed.mimeType);
-
-          // Add timestamp to make filename unique (in local time)
-          const now = new Date();
-          const pad = (n: number) => n.toString().padStart(2, '0');
-          const timestamp = `${now.getFullYear()}${pad(
-            now.getMonth() + 1
-          )}${pad(now.getDate())}-${pad(now.getHours())}${pad(
-            now.getMinutes()
-          )}${pad(now.getSeconds())}`;
 
           const filename = `${baseName}-${timestamp}.${extension}`;
 
