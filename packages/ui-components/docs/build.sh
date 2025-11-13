@@ -20,18 +20,18 @@ MONOREPO_DEVDOC=$(realpath $PKG_ROOT/../../docs/source/developer)
 # make the docs build dir
 mkdir -p $BUILD
 
-# paths in rst include directives are resolved relative to pwd
+# paths in markdown include directives are resolved relative to pwd
 pushd $SOURCE > /dev/null
 
-# make a copy of labicon.rst with section levels shifted down
-pandoc $SOURCE/labicon.rst -f rst -t rst --wrap=preserve --shift-heading-level-by=1 -o $BUILD/labicon.rst
+# make a copy of labicon.md with section levels shifted down
+pandoc $SOURCE/labicon.md -f markdown -t markdown --wrap=preserve --shift-heading-level-by=1 -o $BUILD/labicon.md
 
 # make the README.md at package root
-pandoc $SOURCE/generated_warning.rst $SOURCE/README.rst -f rst -t gfm -o $PKG_ROOT/README.md    #--resource-path=$SOURCE
+pandoc $SOURCE/generated_warning.md $SOURCE/README.md -f markdown -t gfm -o $PKG_ROOT/README.md    #--resource-path=$SOURCE
 echo "built $PKG_ROOT/README.md"
 
 # make the dev docs for the monorepo's docs
-pandoc $SOURCE/generated_warning.rst $SOURCE/ui_components.rst -f rst -t rst --wrap=preserve -o $MONOREPO_DEVDOC/ui_components.rst
-echo "built $MONOREPO_DEVDOC/ui_components.rst"
+pandoc $SOURCE/generated_warning.md $SOURCE/ui_components.md -f markdown -t markdown --wrap=preserve -o $MONOREPO_DEVDOC/ui_components.md
+echo "built $MONOREPO_DEVDOC/ui_components.md"
 
 popd > /dev/null
