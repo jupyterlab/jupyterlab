@@ -411,13 +411,18 @@ is used to add and interact with content in the application. The :ts:interface:`
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
 
--  A ``top`` area for things like top-level toolbars and information.
--  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
--  ``left`` and ``right`` sidebar areas for collapsible content.
--  A ``main`` work area for user activity.
--  A ``down`` area for information content; like log console, contextual help.
--  A ``bottom`` area for things like status bars.
--  A ``header`` area for custom elements.
+1.  A ``top`` area for things like top-level toolbars and information.
+2.  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
+3.  ``left`` and ``right`` sidebar areas for collapsible content.
+4.  A ``main`` work area for user activity.
+5.  A ``down`` area for information content; like log console, contextual help.
+6.  A ``bottom`` area for things like status bars.
+7.  A ``header`` area for custom elements.
+
+.. image:: ./images/extension_frontend_shell.png
+   :align: center
+   :class: jp-screenshot shadow
+   :alt:
 
 Top Area
 ^^^^^^^^
