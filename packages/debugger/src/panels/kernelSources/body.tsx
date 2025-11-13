@@ -36,6 +36,7 @@ const DIR_CLASS = 'jp-DebuggerKernelSource-dir';
 interface ITreeNodeProps {
   name: string;
   path: string;
+  modName: string;
   children?: ITreeNodeProps[];
   onOpen: (path: string) => void;
 }
@@ -44,7 +45,7 @@ interface ITreeNodeProps {
  * Recursive component for rendering a tree node (directory or file).
  */
 function TreeNode(props: ITreeNodeProps): JSX.Element {
-  const { name, path, children, onOpen } = props;
+  const { name, path, modName, children, onOpen } = props;
   const [isOpen, setIsOpen] = useState(false);
 
   const isDirectory = !!children && children.length > 0;
@@ -70,7 +71,10 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
     }
 
     if (chain.length > 1) {
-      const sep = path.includes('.') ? '.' : '/';
+      // Infer separator from first child's modName if available
+      const childModName = currentChildren?.[0]?.modName ?? modName;
+      const sep =
+        childModName.includes('.') && !childModName.includes('/') ? '.' : '/';
       displayName = chain.join(sep);
       displayChildren = currentChildren;
     }
@@ -118,7 +122,7 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
   const root: Record<string, any> = {};
 
   for (const mod of modules) {
-    const sep = mod.name.includes('.') ? '.' : '/';
+    const sep = mod.name.includes('.') && !mod.name.includes('/') ? '.' : '/';
     const parts = mod.name.split(sep);
     let current = root;
     for (let i = 0; i < parts.length; i++) {
@@ -127,8 +131,9 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
       if (!current[part]) {
         current[part] = {
           __children__: {},
-          __namePath__: parts.slice(0, i + 1).join('.'),
-          __filePath__: mod.path
+          __namePath__: parts.slice(0, i + 1).join(sep),
+          __filePath__: mod.path,
+          __modName__: mod.name
         };
       }
       current = current[part].__children__;
@@ -142,6 +147,7 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
       return {
         name,
         path: entry.__filePath__,
+        modName: entry.__modName__,
         children: children.length ? children : undefined,
         onOpen: () => undefined
       };
