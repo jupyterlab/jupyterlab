@@ -60,6 +60,11 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  padding: 2px 4px;
+}
+
+.jp-DebuggerKernelSource-item:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-DebuggerKernelSource-label {
