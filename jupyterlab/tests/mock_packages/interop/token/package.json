@@ -3,6 +3,6 @@
   "version": "4.5.0-rc.0",
   "private": true,
   "dependencies": {
-    "@lumino/coreutils": "^2.2.1"
+    "@lumino/coreutils": "^2.2.2"
   }
 }

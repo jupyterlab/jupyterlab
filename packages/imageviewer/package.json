@@ -44,9 +44,9 @@
     "@jupyterlab/apputils": "^4.6.0-rc.0",
     "@jupyterlab/coreutils": "^6.5.0-rc.0",
     "@jupyterlab/docregistry": "^4.5.0-rc.0",
-    "@lumino/coreutils": "^2.2.1",
-    "@lumino/messaging": "^2.0.3",
-    "@lumino/widgets": "^2.7.1"
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/messaging": "^2.0.4",
+    "@lumino/widgets": "^2.7.2"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.5.0-rc.0",
