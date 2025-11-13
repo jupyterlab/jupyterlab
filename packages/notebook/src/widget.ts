@@ -2545,7 +2545,9 @@ export class Notebook extends StaticNotebook {
     editor: CodeEditor.IEditor,
     location: CodeEditor.EdgeLocation
   ): void {
-    // Ensure edit mode but do not focus yet
+    // Ensure edit mode but do not focus yet; we ensure the edit mode
+    // with focus trigger at the end, as a side-effect of `this.mode = 'edit'`,
+    // which could be simplified in the future.
     this.setMode('edit', { focus: false });
 
     const prev = this.activeCellIndex;
@@ -2569,6 +2571,7 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
+    // This is potentially no longer needed with the `setMode` call at the top.
     this.mode = 'edit';
   }
 
