@@ -90,6 +90,23 @@ collapser button on left of each cell:
      <iframe src="https://www.youtube-nocookie.com/embed/WgiX3ZRaTiY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+In the collapsed or folded view, the first line of the code cell is visible.
+This is helpful in identifying long code cells without keeping them expanded.
+
+Collapsed (Folded) View:
+
+.. image:: ./images/cell-folding/code-cell-collapsed.png
+   :align: center
+   :class: jp-screenshot
+   :alt: JupyterLab with notebook titled Data.ipynb open. This notebook has some code with comments to demonstrate the collapsed view of a code cell.
+
+Expanded View:
+
+.. image:: ./images/cell-folding/code-cell-expanded.png
+   :align: center
+   :class: jp-screenshot
+   :alt: JupyterLab with notebook titled Data.ipynb open. This notebook has some code with comments to demonstrate the expanded view of a code cell.
+
 .. _enable-scrolling:
 
 Enable scrolling for long outputs by right-clicking on a cell and
