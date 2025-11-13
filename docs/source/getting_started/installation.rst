@@ -27,6 +27,33 @@ JupyterLab can be installed as a terminal-launched application accessible via a 
     upgrade procedures to account for possible breaking changes that may disrupt your usage
     of JupyterLab and any related tools that are critical to your workflows.
 
+
+JupyterLab Desktop
+------------------
+JupyterLab Desktop is the easiest way to get started with Jupyter. Use the proper download link below to install for your platform
+    .. raw:: html
+
+	 <div id="downloads" class="unknown">
+	 <h2> Download JupyterLab </h2>
+	 <a class="osLink MacIntel" href="/osx.dmg">Download for OS X</a>
+	 <a class="osLink Linux" href="linux.snap">Download for linux</a>
+	 <a class="osLink Win32" href="windows.exe">Download for Windows</a>
+	 </div>
+
+	 <script>
+	 const el = document.getElementById('downloads').className = navigator.platform
+	 </script>
+	 <style>
+	 .MacIntel a {display:none}
+	 .MacIntel .MacIntel {display:inherit;}
+	 .Linux a {display:hidden;}
+	 .Linux .Linux {display:inherit;}
+	 .Win32 a {display:none;}
+	 .Win32 .Win32 {display:inherit;}
+	 </style>
+
+
+
 conda
 -----
 
