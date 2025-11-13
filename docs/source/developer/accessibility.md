@@ -216,17 +216,6 @@ though your use of assistive tech or an accessibility accommodation will likely
 differ from someone who uses them regularly, knowing the results is helpful to
 tell if JupyterLab is behaving as you expect.
 
-### GitPod
-
-If you have a [GitPod](https://www.gitpod.io/) account and you have submitted
-a PR to JupyterLab, you can manually test it by copying the GitHub URL to your
-PR and concatenating it to `gitpod.io/#`, like so:
-
-{samp}`https://gitpod.io/#https://github.com/jupyterlab/jupyterlab/pull/{your-pr-number}`
-
-GitPod will build JupyterLab from source with your PR applied and set up a
-tunnel so that you can load the UI in your browser at localhost:8888.
-
 ## Useful tools for development
 
 Here is a list of some apps that developers have found useful while doing
@@ -242,5 +231,4 @@ accessibility work in JupyterLab:
   built in (note it's not free but it does have a free trial)
 - [Axe Accessibility Linter](https://marketplace.visualstudio.com/items?itemName=deque-systems.vscode-axe-linter),
   extension for VS Code
-- GitPod: See the GitPod section under the Testing section above.
 - And of course, screen readers such as JAWS, NVDA, and VoiceOver.

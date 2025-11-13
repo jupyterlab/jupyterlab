@@ -282,8 +282,6 @@ a local environment, directly from the Web browser:
   is suitable for contributing very small fixes,
 - more advanced [github.dev](https://docs.github.com/en/codespaces/the-githubdev-web-based-editor)
   editor can be accessed by pressing the dot (`.`) key while in the JupyterLab GitHub repository,
-- [Gitpod](https://www.gitpod.io/) integration is enabled,
-  however it is not actively maintained,
 - [jupyterlab-playground](https://github.com/jupyterlab/jupyterlab-plugin-playground),
   allows to prototype JupyterLab extensions from within JupyterLab and
   can be run without installation in the browser using Binder.
