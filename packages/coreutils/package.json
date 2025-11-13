@@ -51,6 +51,7 @@
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
     "@types/jest": "^29.2.0",
+    "@types/mime-db": "^1.43.5",
     "@types/minimist": "^1.2.0",
     "@types/url-parse": "^1.4.3",
     "jest": "^29.2.0",
