@@ -52,7 +52,7 @@ equivalent) in any of the `config` locations returned by `jupyter
 
 ```json
 {
-  "LabApp": {
+  "ServerApp": {
     "tornado_settings": {
       "page_config_data": {
         "buildCheck": false,
