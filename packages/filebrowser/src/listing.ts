@@ -7,7 +7,14 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, Time, URLExt } from '@jupyterlab/coreutils';
+import {
+  getBaseNameFromMimeType,
+  getExtensionFromMimeType,
+  PageConfig,
+  PathExt,
+  Time,
+  URLExt
+} from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { isValidFileName, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -1956,24 +1963,49 @@ export class DirListing extends Widget {
       // There were no files in the data, so we look for a data uri.
       // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images
 
-      // https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
-      // indicates 'url' is a shortcut to getting the first url in 'text/uri-list'
-      let uri = event.dataTransfer?.getData('url');
-      if (!uri) {
-        // 'url' is not supported everywhere, so fall back to 'text/uri-list'
-        const uriList = event.dataTransfer?.getData('text/uri-list');
-        if (uriList) {
-          uri = URLExt.parseUriListFirst(uriList) ?? '';
+      let uri: string | null = null;
+      let filename: string | null = null;
+
+      // First, try to get DownloadURL since it gives us an explicit filename
+      // (format: "mimeType:filename:url")
+      const downloadUrl = event.dataTransfer?.getData('DownloadURL');
+      if (downloadUrl) {
+        const firstColon = downloadUrl.indexOf(':');
+        if (firstColon !== -1) {
+          const secondColon = downloadUrl.indexOf(':', firstColon + 1);
+          if (secondColon !== -1) {
+            filename = downloadUrl.slice(firstColon + 1, secondColon);
+            uri = downloadUrl.slice(secondColon + 1);
+          }
         }
       }
+
+      // Fall back to text/uri-list if DownloadURL wasn't available
+      if (!uri) {
+        // https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
+        // indicates 'url' is a shortcut to getting the first url in 'text/uri-list'
+        uri = event.dataTransfer?.getData('url') || null;
+        if (!uri) {
+          // 'url' is not supported everywhere, so fall back to 'text/uri-list'
+          const uriList = event.dataTransfer?.getData('text/uri-list');
+          if (uriList) {
+            uri = URLExt.parseUriListFirst(uriList);
+          }
+        }
+      }
+
       if (
-        uri.startsWith('data:image/') ||
-        uri.startsWith('data:audio/') ||
-        uri.startsWith('data:video/')
+        uri &&
+        (uri.startsWith('data:image/') ||
+          uri.startsWith('data:audio/') ||
+          uri.startsWith('data:video/'))
       ) {
         const blob = URLExt.dataURItoBlob(uri);
         if (blob) {
-          const filename = Private.getFilenameFromMimeType(blob.type);
+          // Use filename from DownloadURL if available, otherwise generate one
+          if (!filename) {
+            filename = Private.getFilenameFromMimeType(blob.type);
+          }
           const file = new File([blob], filename, { type: blob.type });
           uploadPromises.push(this._model.upload(file));
         }
@@ -4028,48 +4060,9 @@ namespace Private {
    * Returns a filename like "image-20250112-143052.png" or "audio-20250112-143052.mp3".
    */
   export function getFilenameFromMimeType(mimeType: string): string {
-    // Map MIME types to file extensions
-    const extensionMap: { [key: string]: string } = {
-      // Image formats
-      'image/png': 'png',
-      'image/jpeg': 'jpg',
-      'image/jpg': 'jpg',
-      'image/gif': 'gif',
-      'image/svg+xml': 'svg',
-      'image/webp': 'webp',
-      'image/bmp': 'bmp',
-      'image/tiff': 'tiff',
-      'image/x-icon': 'ico',
-      // Audio formats
-      'audio/mpeg': 'mp3',
-      'audio/mp3': 'mp3',
-      'audio/wav': 'wav',
-      'audio/wave': 'wav',
-      'audio/x-wav': 'wav',
-      'audio/ogg': 'ogg',
-      'audio/webm': 'webm',
-      'audio/aac': 'aac',
-      'audio/flac': 'flac',
-      'audio/x-m4a': 'm4a',
-      // Video formats
-      'video/mp4': 'mp4',
-      'video/mpeg': 'mpeg',
-      'video/webm': 'webm',
-      'video/ogg': 'ogv',
-      'video/quicktime': 'mov',
-      'video/x-msvideo': 'avi',
-      'video/x-matroska': 'mkv'
-    };
-
-    // Determine base filename based on media type
-    let baseName = 'file';
-    if (mimeType.startsWith('image/')) {
-      baseName = 'image';
-    } else if (mimeType.startsWith('audio/')) {
-      baseName = 'audio';
-    } else if (mimeType.startsWith('video/')) {
-      baseName = 'video';
-    }
+    // Get base name and extension from MIME type using shared utilities
+    const baseName = getBaseNameFromMimeType(mimeType);
+    const extension = getExtensionFromMimeType(mimeType);
 
     // Add "YYYYMMDD-HHMMSS" timestamp to make the filename probably unique. We
     // want this in local time for readability, so we can't just use
@@ -4080,7 +4073,6 @@ namespace Private {
       now.getDate()
     )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
-    const extension = extensionMap[mimeType] || 'bin';
     return `${baseName}-${timestamp}.${extension}`;
   }
 }

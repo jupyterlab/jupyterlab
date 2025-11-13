@@ -3,7 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { URLExt } from '@jupyterlab/coreutils';
+import {
+  getBaseNameFromMimeType,
+  getExtensionFromMimeType,
+  URLExt
+} from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -1826,6 +1830,32 @@ namespace Private {
       const source = getSourceUrl();
       if (source) {
         event.dataTransfer.setData('text/uri-list', source);
+
+        // Set DownloadURL for Chrome:
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_files_to_an_operating_system_file_explorer
+        // Parse the data URI to get MIME type
+        const parsed = URLExt.parseDataURI(source);
+        if (parsed) {
+          // Generate a timestamped filename
+          const extension = getExtensionFromMimeType(parsed.mimeType);
+          const baseName = getBaseNameFromMimeType(parsed.mimeType);
+
+          // Add timestamp to make filename unique (in local time)
+          const now = new Date();
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          const timestamp = `${now.getFullYear()}${pad(
+            now.getMonth() + 1
+          )}${pad(now.getDate())}-${pad(now.getHours())}${pad(
+            now.getMinutes()
+          )}${pad(now.getSeconds())}`;
+
+          const filename = `${baseName}-${timestamp}.${extension}`;
+
+          event.dataTransfer.setData(
+            'DownloadURL',
+            `${parsed.mimeType}:${filename}:${source}`
+          );
+        }
         event.dataTransfer.effectAllowed = 'copy';
       }
     });
