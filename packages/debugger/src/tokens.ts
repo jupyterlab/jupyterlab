@@ -289,6 +289,10 @@ export namespace IDebugger {
      * Map of breakpoints to send back to the kernel after it has restarted
      */
     breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+    /**
+     * Prefix for temporary files associated with this kernel session
+     */
+    tmpPrefix?: string;
   };
 
   /**
