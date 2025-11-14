@@ -1061,14 +1061,47 @@ const main: JupyterFrontEndPlugin<void> = {
       command: '@jupyterlab/debugger:copy-kernel-source-path'
     });
 
+    function isKernelSourceNode(node: HTMLElement): boolean {
+      return node.classList.contains('jp-DebuggerKernelSource-source');
+    }
+
     commands.addCommand('@jupyterlab/debugger:open-kernel-source', {
       label: 'Open',
-      execute: console.log
+      execute: async () => {
+        const node = app.contextMenuHitTest(isKernelSourceNode);
+        if (!node) {
+          console.warn('No source node found from context menu');
+          return;
+        }
+
+        const path = node.getAttribute('title');
+        if (!path) {
+          console.warn('Source node missing title');
+          return;
+        }
+
+        const source = await service.getSource({
+          path
+        });
+
+        sourceViewer?.open(source);
+      }
     });
 
     commands.addCommand('@jupyterlab/debugger:copy-kernel-source-path', {
       label: 'Copy Path',
-      execute: console.log
+      execute: async () => {
+        const node = app.contextMenuHitTest(isKernelSourceNode);
+        if (!node) {
+          console.warn('No source node found from context menu');
+          return;
+        }
+
+        const path = node.getAttribute('title');
+        if (!path) return;
+
+        await navigator.clipboard.writeText(path);
+      }
     });
 
     commands.addCommand(CommandIDs.debugContinue, {
