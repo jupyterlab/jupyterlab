@@ -1049,6 +1049,28 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
+    app.contextMenu.addItem({
+      selector: '.jp-DebuggerKernelSource-source',
+      rank: 1,
+      command: '@jupyterlab/debugger:open-kernel-source'
+    });
+
+    app.contextMenu.addItem({
+      selector: '.jp-DebuggerKernelSource-source',
+      rank: 2,
+      command: '@jupyterlab/debugger:copy-kernel-source-path'
+    });
+
+    commands.addCommand('@jupyterlab/debugger:open-kernel-source', {
+      label: 'Open',
+      execute: console.log
+    });
+
+    commands.addCommand('@jupyterlab/debugger:copy-kernel-source-path', {
+      label: 'Copy Path',
+      execute: console.log
+    });
+
     commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
