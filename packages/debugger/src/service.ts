@@ -701,10 +701,8 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @returns Whether the state has been restored successfully or not
    */
   async restoreDebuggerState(state: IDebugger.State): Promise<boolean> {
-    await this.start();
-
+    /*await this.start();*/
     const breakpoints = await this._migrateBreakpoints(state);
-
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
     await this.restoreState(false);
