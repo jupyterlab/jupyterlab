@@ -991,7 +991,7 @@ export namespace IDebugger {
       /**
        * Clear the model.
        */
-      clear(): void;
+      clear(options?: { preserveBreakpoints?: boolean }): void;
     }
 
     /**
