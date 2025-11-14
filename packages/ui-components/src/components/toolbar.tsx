@@ -769,9 +769,17 @@ export namespace Toolbar {
  */
 export namespace ToolbarButtonComponent {
   /**
+   * ARIA attributes for menu buttons.
+   */
+  export type AriaMenuButtonProps = Pick<
+    React.AriaAttributes,
+    'aria-haspopup' | 'aria-expanded' | 'aria-controls'
+  >;
+
+  /**
    * Interface for ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends AriaMenuButtonProps {
     className?: string;
     /**
      * Data set of the button
@@ -859,6 +867,14 @@ export function ToolbarButtonComponent(
   const title = getTooltip();
   const disabled = props.enabled === false;
 
+  // Destructure the ARIA attributes we explicitly support
+  // for toolbar buttons that control popups/menus.
+  const {
+    ['aria-haspopup']: ariaHaspopup,
+    ['aria-expanded']: ariaExpanded,
+    ['aria-controls']: ariaControls
+  } = props;
+
   return (
     <Button
       appearance="stealth"
@@ -870,6 +886,9 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
+      aria-haspopup={ariaHaspopup}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
       {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
