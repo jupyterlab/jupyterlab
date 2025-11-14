@@ -119,6 +119,7 @@
     "eslint-plugin-jest": "~27.6.0",
     "eslint-plugin-prettier": "~5.0.1",
     "eslint-plugin-react": "~7.33.2",
+    "eslint-plugin-regexp": "~2.7.0",
     "prettier": "~3.0.0",
     "stylelint": "^15.10.1",
     "stylelint-config-prettier": "^9.0.3",

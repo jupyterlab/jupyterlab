@@ -33,7 +33,7 @@ const LATEX_LEVELS: { [label: string]: number } = {
 /**
  * Regular expression to create the outline
  */
-const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
+const SECTIONS = /^\s*\\(section|subsection|subsubsection)\{(.+)\}/;
 
 /**
  * Table of content model for LaTeX files.

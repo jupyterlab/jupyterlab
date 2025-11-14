@@ -438,7 +438,7 @@ export function stem(pathArg: string): string {
  * @returns the camel case version of the input string.
  */
 export function camelCase(str: string, upper: boolean = false): string {
-  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+|_+)/g, function (match, index) {
+  return str.replace(/^\w|[A-Z]|\b\w|\s+|-+|_+/g, function (match, index) {
     if (+match === 0 || match[0] === '-') {
       return '';
     } else if (index === 0 && !upper) {

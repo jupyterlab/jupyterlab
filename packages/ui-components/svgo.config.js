@@ -17,7 +17,7 @@ function generateSvgIdFromPath(filePath) {
 
   // Ensure the ID does not start with a digit.
   // More info: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/id#id
-  if (/^[0-9]/.test(svgId)) {
+  if (/^\d/.test(svgId)) {
     svgId = `_${svgId}`;
   }
 

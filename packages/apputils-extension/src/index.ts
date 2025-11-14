@@ -649,7 +649,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     router.register({
       command: CommandIDs.resetOnLoad,
-      pattern: /(\?reset|\&reset)($|&)/,
+      pattern: /(\?reset|&reset)($|&)/,
       rank: 20 // High priority: 20:100.
     });
 

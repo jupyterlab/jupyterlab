@@ -254,7 +254,7 @@ export function shouldOverwrite(
  * Disallows "/", "\", and ":" in file names, as well as names with zero length.
  */
 export function isValidFileName(name: string): boolean {
-  const validNameExp = /[\/\\:]/;
+  const validNameExp = /[/\\:]/;
   return name.length > 0 && !validNameExp.test(name);
 }
 
