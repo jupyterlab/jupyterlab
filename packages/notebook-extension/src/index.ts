@@ -491,8 +491,9 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
     const updateSettings = (settings: {
       showOnToolBar: boolean;
       showProgress: boolean;
+      showJumpToCell: boolean;
     }): void => {
-      let { showOnToolBar, showProgress } = settings;
+      let { showOnToolBar, showProgress, showJumpToCell } = settings;
 
       if (!showOnToolBar) {
         // Status bar mode, only one `ExecutionIndicator` is needed.
@@ -542,7 +543,8 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
 
         statusbarItem.model.displayOption = {
           showOnToolBar,
-          showProgress
+          showProgress,
+          showJumpToCell
         };
       } else {
         //Remove old indicator widget on status bar

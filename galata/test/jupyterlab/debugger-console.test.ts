@@ -71,6 +71,16 @@ test.describe('Debugger Console', () => {
   });
 
   test.afterEach(async ({ page }) => {
+    // Close the console and wait for debugger button to be active again
+    const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
+    if (await debugConsoleWidget.isVisible()) {
+      const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
+      await evaluateButton.click();
+      const toolbar = await page.notebook.getToolbarLocator();
+      const button = toolbar?.locator('.jp-DebuggerBugButton');
+      await button!.locator('[aria-pressed="true"]').waitFor();
+    }
+
     try {
       // Try to switch off debugger if it's still active
       if (await page.debugger.isOn()) {
