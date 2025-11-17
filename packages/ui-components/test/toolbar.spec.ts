@@ -442,7 +442,6 @@ describe('@jupyterlab/ui-components', () => {
         });
       });
     });
-    });
   });
 
   describe('ReactiveToolbar', () => {
