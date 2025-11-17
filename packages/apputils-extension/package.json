@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils-extension",
-  "version": "4.4.0-alpha.2",
+  "version": "4.5.0-rc.1",
   "description": "JupyterLab - Application Utilities Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,33 +37,33 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.4.0-alpha.2",
-    "@jupyterlab/apputils": "^4.5.0-alpha.2",
-    "@jupyterlab/coreutils": "^6.4.0-alpha.2",
-    "@jupyterlab/docregistry": "^4.4.0-alpha.2",
-    "@jupyterlab/mainmenu": "^4.4.0-alpha.2",
-    "@jupyterlab/rendermime-interfaces": "^3.12.0-alpha.2",
-    "@jupyterlab/services": "^7.4.0-alpha.2",
-    "@jupyterlab/settingregistry": "^4.4.0-alpha.2",
-    "@jupyterlab/statedb": "^4.4.0-alpha.2",
-    "@jupyterlab/statusbar": "^4.4.0-alpha.2",
-    "@jupyterlab/translation": "^4.4.0-alpha.2",
-    "@jupyterlab/ui-components": "^4.4.0-alpha.2",
-    "@jupyterlab/workspaces": "^4.4.0-alpha.2",
-    "@lumino/algorithm": "^2.0.2",
-    "@lumino/commands": "^2.3.1",
-    "@lumino/coreutils": "^2.2.0",
-    "@lumino/disposable": "^2.1.3",
-    "@lumino/domutils": "^2.0.2",
-    "@lumino/polling": "^2.1.3",
-    "@lumino/widgets": "^2.5.0",
+    "@jupyterlab/application": "^4.5.0-rc.1",
+    "@jupyterlab/apputils": "^4.6.0-rc.1",
+    "@jupyterlab/coreutils": "^6.5.0-rc.1",
+    "@jupyterlab/docregistry": "^4.5.0-rc.1",
+    "@jupyterlab/mainmenu": "^4.5.0-rc.1",
+    "@jupyterlab/rendermime-interfaces": "^3.13.0-rc.1",
+    "@jupyterlab/services": "^7.5.0-rc.1",
+    "@jupyterlab/settingregistry": "^4.5.0-rc.1",
+    "@jupyterlab/statedb": "^4.5.0-rc.1",
+    "@jupyterlab/statusbar": "^4.5.0-rc.1",
+    "@jupyterlab/translation": "^4.5.0-rc.1",
+    "@jupyterlab/ui-components": "^4.5.0-rc.1",
+    "@jupyterlab/workspaces": "^4.5.0-rc.1",
+    "@lumino/algorithm": "^2.0.4",
+    "@lumino/commands": "^2.3.3",
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/disposable": "^2.1.5",
+    "@lumino/domutils": "^2.0.4",
+    "@lumino/polling": "^2.1.5",
+    "@lumino/widgets": "^2.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-toastify": "^9.0.8"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

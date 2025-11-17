@@ -67,7 +67,7 @@ const ACTIVITY_CLASS = 'jp-Activity';
  */
 export const ILabShell = new Token<ILabShell>(
   '@jupyterlab/application:ILabShell',
-  'A service for interacting with the JupyterLab shell. The top-level ``application`` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
+  'A service for interacting with the JupyterLab shell. The top-level `application` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
 );
 
 /**
@@ -756,6 +756,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         'aria-label',
         trans.__('alternate sidebar')
       );
+      this._topHandler.panel.node.setAttribute(
+        'aria-label',
+        trans.__('Top Bar')
+      );
+      this._bottomPanel.node.setAttribute(
+        'aria-label',
+        trans.__('Bottom Panel')
+      );
+      this._dockPanel.node.setAttribute('aria-label', trans.__('Main Content'));
     }
   }
 

@@ -185,6 +185,9 @@ function activateCsv(
     await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
+
+    // Make sure the theme is correctly set when new widgets are created.
+    updateThemes();
   });
 
   // Keep the themes up-to-date.
@@ -227,7 +230,13 @@ function activateCsv(
         widget.content.goToLine(result.value);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (mainMenu) {
@@ -387,7 +396,13 @@ function activateTsv(
         widget.content.goToLine(result.value);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (mainMenu) {

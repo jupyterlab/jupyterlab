@@ -221,6 +221,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Set a base config options for the editor.
+   */
+  setBaseOptions(options: Record<string, any>): void {
+    this._configurator.setBaseOptions(options);
+  }
+
+  /**
    * Inject an extension into the editor
    *
    * @alpha
@@ -235,7 +242,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Returns the content for the given line number.
    */
   getLine(line: number): string | undefined {
-    // TODO: CM6 remove +1 when CM6 first line number has propagated
+    // Jupyter uses a 0-based index for line numbers, CodeMirror 6 uses a 1-based index
     line = line + 1;
     return line <= this.doc.lines ? this.doc.line(line).text : undefined;
   }
@@ -244,7 +251,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find an offset for the given position.
    */
   getOffsetAt(position: CodeEditor.IPosition): number {
-    // TODO: CM6 remove +1 when CM6 first line number has propagated
+    // Jupyter uses a 0-based index for line numbers, CodeMirror 6 uses a 1-based index
     return this.doc.line(position.line + 1).from + position.column;
   }
 
@@ -252,7 +259,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Find a position for the given offset.
    */
   getPositionAt(offset: number): CodeEditor.IPosition {
-    // TODO: CM6 remove -1 when CM6 first line number has propagated
+    // Jupyter uses a 0-based index for line numbers, CodeMirror 6 uses a 1-based index
     const line = this.doc.lineAt(offset);
     return { line: line.number - 1, column: offset - line.from };
   }
@@ -282,6 +289,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Brings browser focus to this editor text.
    */
   focus(): void {
+    // Add the focused class before the editor focus event fires
+    // to avoid layout trashing when it gets called in response
+    // to focus event from CodeMirror.
+    this.host.classList.add('jp-mod-focused');
     this._editor.focus();
   }
 
@@ -335,21 +346,33 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Reveal the given position in the editor.
    */
-  revealPosition(position: CodeEditor.IPosition): void {
+  revealPosition(
+    position: CodeEditor.IPosition,
+    options?: ScrollIntoViewOptions
+  ): void {
     const offset = this.getOffsetAt(position);
     this._editor.dispatch({
-      effects: EditorView.scrollIntoView(offset)
+      effects: EditorView.scrollIntoView(offset, {
+        y: options?.block,
+        x: options?.inline
+      })
     });
   }
 
   /**
    * Reveal the given selection in the editor.
    */
-  revealSelection(selection: CodeEditor.IRange): void {
+  revealSelection(
+    selection: CodeEditor.IRange,
+    options?: ScrollIntoViewOptions
+  ): void {
     const start = this.getOffsetAt(selection.start);
     const end = this.getOffsetAt(selection.end);
     this._editor.dispatch({
-      effects: EditorView.scrollIntoView(EditorSelection.range(start, end))
+      effects: EditorView.scrollIntoView(EditorSelection.range(start, end), {
+        y: options?.block,
+        x: options?.inline
+      })
     });
   }
 
@@ -527,10 +550,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           }
           // If the relevant leaf token has been found, stop iterating.
           if (offset >= ref.from && offset <= ref.to) {
+            let currentNode = ref;
+            // The syntax tree of the code lines ending with an incomplete string creates an erronous
+            // child of the last node, in this case the parent should be considered for the token.
+            if (ref.name === '⚠' && ref.from === ref.to && ref.node.parent) {
+              currentNode = ref.node.parent;
+            }
             token = {
-              value: this.state.sliceDoc(ref.from, ref.to),
-              offset: ref.from,
-              type: ref.name
+              value: this.state.sliceDoc(currentNode.from, currentNode.to),
+              offset: currentNode.from,
+              type: currentNode.name
             };
             return false;
           }
@@ -571,7 +600,16 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     configurator: IExtensionsHandler,
     changes: Record<string, any>
   ): void {
-    configurator.reconfigureExtensions(this._editor, changes);
+    const definedChanges = Object.keys(changes).reduce<Record<string, any>>(
+      (agg, key) => {
+        if (changes[key] != undefined) {
+          agg[key] = changes[key];
+        }
+        return agg;
+      },
+      {}
+    );
+    configurator.reconfigureExtensions(this._editor, definedChanges);
     // when customStyles change and the editor is not initialized
     if (changes['customStyles'] && !changes['fontSize']) {
       // update the state to change the gutter height

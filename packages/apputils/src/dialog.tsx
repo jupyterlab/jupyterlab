@@ -436,12 +436,16 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
 
         const activeEl = document.activeElement;
-        let index: number | undefined;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl);
+          const index = this._buttonNodes.indexOf(activeEl);
+          if (index !== -1) {
+            this.resolve(index);
+          }
+        } else if (!(activeEl instanceof HTMLTextAreaElement)) {
+          const index = this._defaultButton;
+          this.resolve(index);
         }
-        this.resolve(index);
         break;
       }
       default:
@@ -973,9 +977,12 @@ export namespace Dialog {
           '<div class="jp-Dialog-spacer"></div>'
         );
       }
+      const footerButton = document.createElement('div');
+      footerButton.classList.add('jp-Dialog-footerButtons');
       for (const button of buttons) {
-        footer.node.appendChild(button);
+        footerButton.appendChild(button);
       }
+      footer.node.appendChild(footerButton);
       Styling.styleNode(footer.node);
 
       return footer;

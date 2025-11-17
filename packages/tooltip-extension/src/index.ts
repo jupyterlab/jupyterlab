@@ -59,6 +59,12 @@ const manager: JupyterFrontEndPlugin<ITooltipManager> = {
           tooltip.dispose();
           tooltip = null;
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -122,6 +128,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
         if (!!editor && !!kernel && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
   }
@@ -163,6 +175,12 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });
@@ -260,6 +278,12 @@ const files: JupyterFrontEndPlugin<void> = {
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {
           return manager.invoke({ anchor, editor, kernel, rendermime });
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
         }
       }
     });

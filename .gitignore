@@ -122,6 +122,7 @@ jupyterlab/tests/mock_packages/test-hyphens-underscore/.yarn/*
 jupyterlab/tests/mock_packages/test-hyphens-underscore/.pnp/*
 jupyterlab/tests/mock_packages/test_no_hyphens/.yarn/*
 jupyterlab/tests/mock_packages/test_no_hyphens/.pnp/*
+jupyterlab/tests/mock_packages/test-hyphens/.yarn/*
 
 # copied changelog file
 docs/source/getting_started/changelog.md
@@ -157,3 +158,6 @@ untitled*.txt
 
 # pixi environments
 .pixi
+
+# temporary files, useful for testing
+tmp

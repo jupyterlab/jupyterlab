@@ -403,7 +403,7 @@ export namespace Contents {
     /**
      * Get an encoded download url given a file path.
      *
-     * @param A promise which resolves with the absolute POSIX
+     * @param path A promise which resolves with the absolute POSIX
      *   file path on the server.
      *
      * #### Notes
@@ -454,7 +454,7 @@ export namespace Contents {
      */
     save(
       path: string,
-      options?: Partial<IModel> & Contents.IContentProvisionOptions
+      options?: Partial<IModel> & Partial<Contents.IContentProvisionOptions>
     ): Promise<IModel>;
 
     /**
@@ -608,7 +608,10 @@ export namespace Contents {
      * @returns A promise which resolves with the file content model when the
      *   file is saved.
      */
-    save(localPath: string, options?: Partial<IModel>): Promise<IModel>;
+    save(
+      localPath: string,
+      options?: Partial<IModel> & Contents.IContentProvisionOptions
+    ): Promise<IModel>;
 
     /**
      * Copy a file into a given directory.
@@ -954,7 +957,8 @@ export class ContentsManager implements Contents.IManager {
    */
   save(
     path: string,
-    options: Partial<Contents.IModel> = {}
+    options: Partial<Contents.IModel> &
+      Partial<Contents.IContentProvisionOptions> = {}
   ): Promise<Contents.IModel> {
     const globalPath = this.normalize(path);
     const [drive, localPath] = this._driveForPath(path);
@@ -972,7 +976,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Copy a file into a given directory.
    *
-   * @param path - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1143,10 +1147,12 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const restContentProvider = new RestContentProvider({
-      apiEndpoint: this._apiEndpoint,
-      serverSettings: this.serverSettings
-    });
+    const restContentProvider =
+      options.defaultContentProvider ??
+      new RestContentProvider({
+        apiEndpoint: this._apiEndpoint,
+        serverSettings: this.serverSettings
+      });
     this.contentProviderRegistry = new ContentProviderRegistry({
       defaultProvider: restContentProvider
     });
@@ -1391,7 +1397,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Copy a file into a given directory.
    *
-   * @param localPath - The original file path.
+   * @param fromFile - The original file path.
    *
    * @param toDir - The destination directory path.
    *
@@ -1606,6 +1612,11 @@ export namespace Drive {
      * REST API given by [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
      */
     apiEndpoint?: string;
+
+    /**
+     * The default content provider.
+     */
+    defaultContentProvider?: IContentProvider;
   }
 }
 
@@ -1629,7 +1640,7 @@ namespace Private {
 /**
  * The default registry of content providers.
  */
-class ContentProviderRegistry implements IContentProviderRegistry {
+export class ContentProviderRegistry implements IContentProviderRegistry {
   /**
    * Construct a new content provider registry.
    *
@@ -1709,7 +1720,7 @@ class ContentProviderRegistry implements IContentProviderRegistry {
   >(this);
 }
 
-namespace ContentProviderRegistry {
+export namespace ContentProviderRegistry {
   /**
    * Initialization options for `ContentProviderRegistry`.
    */
@@ -1788,9 +1799,12 @@ export class RestContentProvider implements IContentProvider {
   ): Promise<Contents.IModel> {
     const settings = this._options.serverSettings;
     const url = this._getUrl(localPath);
+    const file = new File([JSON.stringify(options)], 'data.json', {
+      type: 'application/json'
+    });
     const init = {
       method: 'PUT',
-      body: JSON.stringify(options)
+      body: file
     };
     const response = await ServerConnection.makeRequest(url, init, settings);
     // will return 200 for an existing file and 201 for a new file
@@ -1815,12 +1829,22 @@ export class RestContentProvider implements IContentProvider {
   private _options: RestContentProvider.IOptions;
 }
 
+/**
+ * The namespace for RestContentProvider statics.
+ */
 export namespace RestContentProvider {
   /**
    * Initialization options for the REST content provider.
    */
   export interface IOptions {
+    /**
+     * The API endpoint for the content provider.
+     */
     apiEndpoint: string;
+
+    /**
+     * The server settings for the content provider.
+     */
     serverSettings: ServerConnection.ISettings;
   }
 }

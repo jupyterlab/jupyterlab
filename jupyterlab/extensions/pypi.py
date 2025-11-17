@@ -260,9 +260,10 @@ class PyPIExtensionManager(ExtensionManager):
             This will list the packages based on the classifier
                 Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
 
-            Then it filters it with the query
-
-            We do not try to check if they are compatible (version wise)
+            Then it filters it with the query and sorts by organization priority:
+            1. Project Jupyter (@jupyter)
+            2. JupyterLab Community (@jupyterlab-contrib)
+            3. Others
 
         Args:
             query: The search extension query
@@ -275,20 +276,13 @@ class PyPIExtensionManager(ExtensionManager):
         matches = await self.__get_all_extensions()
 
         extensions = {}
+        all_matches = []
 
-        counter = -1
-        min_index = (page - 1) * per_page
-        max_index = page * per_page
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
-            counter += 1
-            if counter < min_index or counter >= max_index:
-                continue
-
             _, latest_version = list(group)[-1]
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
-
             package_urls = data.get("project_urls") or {}
 
             source_url = package_urls.get("Source Code")
@@ -305,7 +299,7 @@ class PyPIExtensionManager(ExtensionManager):
                 or bug_tracker_url
             )
 
-            extensions[normalized_name] = ExtensionPackage(
+            extension = ExtensionPackage(
                 name=normalized_name,
                 description=data.get("summary"),
                 homepage_url=best_guess_home_url,
@@ -319,7 +313,45 @@ class PyPIExtensionManager(ExtensionManager):
                 repository_url=source_url,
             )
 
-        return extensions, math.ceil((counter + 1) / per_page)
+            # Determine organization priority
+            priority = 3  # Default priority for other packages
+            urls_to_check = [
+                str(url).lower() for url in [source_url, homepage_url, best_guess_home_url] if url
+            ]
+            exclude = [
+                "https://github.com/jupyterlab/jupyterlab_apod",
+                "https://github.com/jupyterlab/extension-examples",
+            ]
+
+            for url in urls_to_check:
+                if url in exclude:
+                    priority = 4
+                    break
+                if any(
+                    org in url
+                    for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
+                ):
+                    priority = 1
+                    break
+                elif "github.com/jupyterlab-contrib/" in url:
+                    priority = 2
+                    break
+
+            all_matches.append((priority, extension))
+
+        sorted_matches = sorted(all_matches, key=lambda x: (x[0], x[1].name))
+
+        # Apply pagination
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        page_matches = sorted_matches[start_idx:end_idx]
+
+        for _, extension in page_matches:
+            extensions[extension.name] = extension
+
+        total_pages = math.ceil(len(sorted_matches) / per_page)
+
+        return extensions, total_pages
 
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
@@ -455,7 +487,7 @@ class PyPIExtensionManager(ExtensionManager):
 
                 return ActionResult(status="ok", needs_restart=follow_ups)
             else:
-                self.log.error(f"Failed to installed {filename}: code {result.returncode}\n{error}")
+                self.log.error(f"Failed to install {name}: code {result.returncode}\n{error}")
                 return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:

@@ -204,7 +204,7 @@ export class RenderedHTML extends RenderedHTMLCommon {
     this._rendered
       .then(() => {
         if (this.latexTypesetter) {
-          this.latexTypesetter.typeset(this.node);
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
         }
       })
       .catch(console.warn);
@@ -240,7 +240,8 @@ export class RenderedLatex extends RenderedCommon {
       host: this.node,
       source: String(model.data[this.mimeType]),
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      resolver: this.resolver
     }));
   }
 
@@ -251,7 +252,7 @@ export class RenderedLatex extends RenderedCommon {
     this._rendered
       .then(() => {
         if (this.latexTypesetter) {
-          this.latexTypesetter.typeset(this.node);
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
         }
       })
       .catch(console.warn);
@@ -352,7 +353,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
     this._rendered
       .then(() => {
         if (this.latexTypesetter) {
-          this.latexTypesetter.typeset(this.node);
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
         }
       })
       .catch(console.warn);
@@ -403,7 +404,7 @@ export class RenderedSVG extends RenderedCommon {
     this._rendered
       .then(() => {
         if (this.latexTypesetter) {
-          this.latexTypesetter.typeset(this.node);
+          Private.typeset(this.node, this.latexTypesetter, this.resolver);
         }
       })
       .catch(console.warn);
@@ -492,5 +493,30 @@ export class RenderedJavaScript extends RenderedCommon {
       source: trans.__('JavaScript output is disabled in JupyterLab'),
       translator: this.translator
     });
+  }
+}
+
+/**
+ * The namespace for module implementation details.
+ */
+namespace Private {
+  /**
+   * Run typesetter on the given node and harden links.
+   */
+  export function typeset(
+    host: HTMLElement,
+    latexTypesetter: IRenderMime.ILatexTypesetter,
+    resolver?: IRenderMime.IResolver | null
+  ) {
+    const result = latexTypesetter.typeset(host);
+    // Harden anchors to contain secure target/rel attributes.
+    if (result instanceof Promise) {
+      // If promised was returned, await for rendering to complete.
+      result
+        .then(() => renderers.hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      renderers.hardenAnchorLinks(host, resolver);
+    }
   }
 }

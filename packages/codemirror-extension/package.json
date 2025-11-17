@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "4.4.0-alpha.2",
+  "version": "4.5.0-rc.1",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,22 +37,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.7.1",
-    "@codemirror/lang-markdown": "^6.3.1",
-    "@codemirror/language": "^6.10.6",
-    "@codemirror/legacy-modes": "^6.4.2",
-    "@codemirror/search": "^6.5.8",
-    "@codemirror/view": "^6.35.3",
-    "@jupyter/ydoc": "^3.0.0",
-    "@jupyterlab/application": "^4.4.0-alpha.2",
-    "@jupyterlab/codeeditor": "^4.4.0-alpha.2",
-    "@jupyterlab/codemirror": "^4.4.0-alpha.2",
-    "@jupyterlab/settingregistry": "^4.4.0-alpha.2",
-    "@jupyterlab/statusbar": "^4.4.0-alpha.2",
-    "@jupyterlab/translation": "^4.4.0-alpha.2",
-    "@jupyterlab/ui-components": "^4.4.0-alpha.2",
-    "@lumino/coreutils": "^2.2.0",
-    "@lumino/widgets": "^2.5.0",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/legacy-modes": "^6.5.1",
+    "@codemirror/search": "^6.5.10",
+    "@codemirror/view": "^6.38.1",
+    "@jupyter/ydoc": "^3.1.0",
+    "@jupyterlab/application": "^4.5.0-rc.1",
+    "@jupyterlab/apputils": "^4.6.0-rc.1",
+    "@jupyterlab/codeeditor": "^4.5.0-rc.1",
+    "@jupyterlab/codemirror": "^4.5.0-rc.1",
+    "@jupyterlab/notebook": "^4.5.0-rc.1",
+    "@jupyterlab/settingregistry": "^4.5.0-rc.1",
+    "@jupyterlab/statusbar": "^4.5.0-rc.1",
+    "@jupyterlab/translation": "^4.5.0-rc.1",
+    "@jupyterlab/ui-components": "^4.5.0-rc.1",
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/widgets": "^2.7.2",
     "@rjsf/utils": "^5.13.4",
     "@rjsf/validator-ajv8": "^5.13.4",
     "react": "^18.2.0"
@@ -60,7 +62,7 @@
   "devDependencies": {
     "@types/react": "^18.0.26",
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

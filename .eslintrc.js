@@ -44,6 +44,19 @@ module.exports = {
           }
         ]
       }
+    },
+    {
+      files: [
+        '**/*.spec.ts',
+        '**/test/**/*.ts',
+        '**/tests/**/*.ts',
+        'examples/**/*.ts',
+        'packages/*/examples/**/*.ts',
+        'packages/services/src/serverconnection.ts'
+      ],
+      rules: {
+        'no-restricted-syntax': 'off'
+      }
     }
   ],
   rules: {
@@ -72,6 +85,7 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/triple-slash-reference': 'warn',
     '@typescript-eslint/no-inferrable-types': 'off',
+    '@typescript-eslint/switch-exhaustiveness-check': 'error',
     camelcase: [
       'error',
       {
@@ -104,6 +118,7 @@ module.exports = {
           'display_id',
           'display_name',
           'embed_options',
+          'en_US',
           'execute_input',
           'execute_result',
           'execution_count',
@@ -142,6 +157,7 @@ module.exports = {
           'parent_header',
           'per_page',
           'plugin_name',
+          'plural_forms',
           'pf_re',
           'pkg_type',
           'protocol_version',
@@ -157,7 +173,8 @@ module.exports = {
           'target_module',
           'UNSAFE_componentWillUpdate',
           'UNSAFE_componentWillReceiveProps',
-          'user_expressions'
+          'user_expressions',
+          'zh_CN'
         ]
       }
     ],
@@ -178,6 +195,15 @@ module.exports = {
         ignoreMemberSort: false,
         memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
         allowSeparatedGroups: false
+      }
+    ],
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector:
+          'CallExpression[callee.type="MemberExpression"][callee.object.name="PageConfig"][callee.property.name="getBaseUrl"]',
+        message:
+          'PageConfig.getBaseUrl() should only be called in makeSettings() function and in tests/examples'
       }
     ]
   },

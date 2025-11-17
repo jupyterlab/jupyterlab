@@ -32,6 +32,10 @@ export class Sources extends PanelWithToolbar {
     this.title.label = trans.__('Source');
 
     this.toolbar.addClass('jp-DebuggerSources-header');
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      trans.__('Sources preview panel toolbar')
+    );
     const body = new SourcesBody({
       service,
       model,

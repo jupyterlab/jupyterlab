@@ -887,7 +887,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -903,7 +902,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',
@@ -924,7 +922,6 @@ describe('filebrowser/listing', () => {
           await signalToPromise(dirListing.updated);
           dirListing.setNotebooksFirstSorting(true);
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -942,7 +939,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',

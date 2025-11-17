@@ -94,6 +94,8 @@ namespace CommandIDs {
 
   export const resetLayout: string = 'application:reset-layout';
 
+  export const toggleContextMenu: string = 'application:toggle-context-menu';
+
   export const toggleHeader: string = 'application:toggle-header';
 
   export const toggleMode: string = 'application:toggle-mode';
@@ -140,6 +142,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     // Add Command to override the JLab context menu.
     commands.addCommand(JupyterFrontEndContextMenu.contextMenu, {
       label: trans.__('Shift+Right Click for Browser Menu'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => false,
       execute: () => void 0
     });
@@ -240,6 +248,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         const widget = contextMenuWidget();
         return !!widget && widget.title.closable;
@@ -254,6 +268,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.closeOtherTabs, {
       label: () => trans.__('Close All Other Tabs'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         // Ensure there are at least two widgets.
         return some(shell.widgets('main'), (_, i) => i === 1);
@@ -274,6 +294,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.closeRightTabs, {
       label: () => trans.__('Close Tabs to Right'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () =>
         !!contextMenuWidget() &&
         widgetsRightOf(contextMenuWidget()!).length > 0,
@@ -297,6 +323,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     if (labShell) {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activateNextTab();
         }
@@ -304,6 +336,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activatePreviousTab, {
         label: trans.__('Activate Previous Tab'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activatePreviousTab();
         }
@@ -311,6 +349,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activateNextTabBar, {
         label: trans.__('Activate Next Tab Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activateNextTabBar();
         }
@@ -318,6 +362,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activatePreviousTabBar, {
         label: trans.__('Activate Previous Tab Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activatePreviousTabBar();
         }
@@ -325,6 +375,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.closeAll, {
         label: trans.__('Close All Tabs'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.closeAll();
         }
@@ -332,6 +388,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleHeader, {
         label: trans.__('Show Header'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (labShell.mode === 'single-document') {
             labShell.toggleTopInSimpleModeVisibility();
@@ -343,6 +405,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleLeftArea, {
         label: trans.__('Show Left Sidebar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
@@ -359,6 +427,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleRightArea, {
         label: trans.__('Show Right Sidebar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (labShell.rightCollapsed) {
             labShell.expandRight();
@@ -388,6 +462,23 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 'Toggle Element %1 in Left Sidebar',
                 parseInt(args.index as string, 10) + 1
               ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              side: {
+                type: 'string',
+                enum: ['left', 'right'],
+                description: trans.__('The sidebar side')
+              },
+              index: {
+                type: ['string', 'number'],
+                description: trans.__('The index of the sidebar widget')
+              }
+            },
+            required: ['side', 'index']
+          }
+        },
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -422,6 +513,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.side === 'right'
             ? trans.__('Show Right Activity Bar')
             : trans.__('Show Left Activity Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              side: {
+                type: 'string',
+                enum: ['left', 'right'],
+                description: trans.__('The sidebar side')
+              }
+            },
+            required: ['side']
+          }
+        },
         execute: args => {
           if (args.side === 'right') {
             labShell.toggleSideTabBarVisibility('right');
@@ -441,6 +545,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.togglePresentationMode, {
         label: () => trans.__('Presentation Mode'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.presentationMode = !labShell.presentationMode;
         },
@@ -450,6 +560,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleFullscreenMode, {
         label: trans.__('Fullscreen Mode'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (
             document.fullscreenElement === null ||
@@ -475,6 +591,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         caption: trans.__(
           'The layout `mode` can be "single-document" or "multiple-document".'
         ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              mode: {
+                type: 'string',
+                enum: ['single-document', 'multiple-document'],
+                description: trans.__('The layout mode')
+              }
+            },
+            required: ['mode']
+          }
+        },
         isVisible: args => {
           const mode = args['mode'] as string;
           return mode === 'single-document' || mode === 'multiple-document';
@@ -491,6 +620,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleMode, {
         label: trans.__('Simple Interface'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         isToggled: () => labShell.mode === 'single-document',
         execute: () => {
           const args =
@@ -503,6 +638,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.resetLayout, {
         label: trans.__('Reset Default Layout'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           // Turn off presentation mode
           if (labShell.presentationMode) {
@@ -768,10 +909,12 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Populates the context menu.',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
+  optional: [ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator,
+    palette: ICommandPalette | null
   ): void => {
     const trans = translator.load('jupyterlab');
 
@@ -788,10 +931,19 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
       .then(() => {
         return Private.loadSettingsContextMenu(
           app.contextMenu,
+          app.commands,
           settingRegistry,
           createMenu,
           translator
         );
+      })
+      .then(() => {
+        if (palette) {
+          palette?.addItem({
+            category: trans.__('Settings'),
+            command: CommandIDs.toggleContextMenu
+          });
+        }
       })
       .catch(reason => {
         console.error(
@@ -956,11 +1108,14 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   description: 'Provides the tree route resolver',
   autoStart: true,
   requires: [IRouter],
+  optional: [ITranslator],
   provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
-    router: IRouter
+    router: IRouter,
+    translator: ITranslator | null
   ): JupyterFrontEnd.ITreeResolver => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const { commands } = app;
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
@@ -971,6 +1126,19 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
     set.add(
       commands.addCommand(CommandIDs.tree, {
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              search: {
+                type: 'string',
+                description: trans.__(
+                  'The URL search string containing query parameters'
+                )
+              }
+            }
+          }
+        },
         execute: async (args: IRouter.ILocation) => {
           if (set.isDisposed) {
             return;
@@ -1193,6 +1361,12 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
 
     app.commands.addCommand(CommandIDs.showPropertyPanel, {
       label: trans.__('Property Inspector'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         labshell.activateById(widget.id);
       }
@@ -1347,6 +1521,7 @@ namespace Private {
 
   export async function loadSettingsContextMenu(
     contextMenu: ContextMenuSvg,
+    commands: CommandRegistry,
     registry: ISettingRegistry,
     menuFactory: (options: ISettingRegistry.IMenu) => RankedMenu,
     translator: ITranslator
@@ -1355,7 +1530,6 @@ namespace Private {
     const pluginId = contextMenuPlugin.id;
     let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IContextMenuItem[] } = {};
-
     /**
      * Populate the plugin's schema defaults.
      *
@@ -1441,6 +1615,18 @@ namespace Private {
     // preloaded all initial plugins.
     const settings = await registry.load(pluginId);
 
+    // Set the suppress flag on document.body if necessary.
+    const setDisabled = (settings: ISettingRegistry.ISettings) => {
+      const root = document.body;
+      const isDisabled = root.hasAttribute('data-jp-suppress-context-menu');
+      const shouldDisable = settings.get('disabled').composite;
+      if (isDisabled && !shouldDisable) {
+        root.removeAttribute('data-jp-suppress-context-menu');
+      } else if (shouldDisable && !isDisabled) {
+        root.setAttribute('data-jp-suppress-context-menu', 'true');
+      }
+    };
+
     const contextItems: ISettingRegistry.IContextMenuItem[] =
       (settings.composite.contextMenu as any) ?? [];
 
@@ -1464,6 +1650,7 @@ namespace Private {
       if (!JSONExt.deepEqual(contextItems, newItems)) {
         void displayInformation(trans);
       }
+      setDisabled(settings);
     });
 
     registry.pluginChanged.connect(async (sender, plugin) => {
@@ -1502,6 +1689,22 @@ namespace Private {
         }
       }
     });
+
+    // Handle disabled status.
+    setDisabled(settings);
+    commands.addCommand(CommandIDs.toggleContextMenu, {
+      label: trans.__('Enable Context Menu'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      isToggleable: true,
+      isToggled: () => !settings.get('disabled').composite,
+      execute: () =>
+        void settings.set('disabled', !settings.get('disabled').composite)
+    });
   }
 
   export function activateSidebarSwitcher(
@@ -1513,6 +1716,12 @@ namespace Private {
     // Add a command to switch a side panels's side
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: trans.__('Switch Sidebar Side'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // First, try to find the correct panel based on the application
         // context menu click. Bail if we don't find a sidebar for the widget.

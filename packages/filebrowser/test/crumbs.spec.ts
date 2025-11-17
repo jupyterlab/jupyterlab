@@ -12,7 +12,10 @@ import { Widget } from '@lumino/widgets';
 import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { BreadCrumbs, FileBrowserModel } from '../src';
+import { PageConfig } from '@jupyterlab/coreutils';
 
+const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
+const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
 const ITEM_QUERY = `.${HOME_ITEM_CLASS}, .${ITEM_CLASS}`;
@@ -85,6 +88,9 @@ describe('filebrowser/model', () => {
   beforeEach(async () => {
     model = new FileBrowserModel({ manager });
     await model.cd(path);
+    // Remove leading '/' from preferredPath (as done by jupyter server)
+    const preferredPath = path.startsWith('/') ? path.slice(1) : path;
+    PageConfig.setOption('preferredPath', preferredPath);
     crumbs = new LogCrumbs({ model });
   });
 
@@ -159,6 +165,34 @@ describe('filebrowser/model', () => {
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).toBe(4);
+          expect(model.path).toBe(path);
+        });
+
+        it('should handle preferred and root breadcrumb clicks', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          // Should start at the preferred path
+          expect(model.path).toBe(path);
+
+          const rootElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          expect(rootElement).not.toBeNull();
+          let promise = signalToPromise(model.pathChanged);
+          simulate(rootElement, 'click');
+          await promise;
+          // Should navigate to the root directory on root breadcrumb click
+          expect(model.path).toBe('');
+
+          // Should find the preferred breadcrumb element as preferred path is set
+          const preferredElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_PREFERRED_CLASS}`
+          ) as HTMLElement;
+          expect(preferredElement).not.toBeNull();
+          promise = signalToPromise(model.pathChanged);
+          simulate(preferredElement, 'click');
+          await promise;
+          // Should navigate back to the preferred path on preferred breadcrumb click
           expect(model.path).toBe(path);
         });
       });
@@ -275,6 +309,63 @@ describe('filebrowser/model', () => {
 
         observer.disconnect();
         model.dispose();
+      });
+    });
+    describe('#breadcrumbitems', () => {
+      it('should show correct number of left and right directories with ellipsis', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 1,
+          minimumRightItems: 1
+        });
+        Widget.attach(customCrumbs, document.body);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect((items[1] as HTMLElement).title).toBe(`${first}`);
+        // Ellipsis
+        expect(items[2].querySelector('svg')).not.toBeNull();
+        expect(items[3].textContent).toBe(third);
+        expect((items[3] as HTMLElement).title).toBe(
+          `${first}/${second}/${third}`
+        );
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis
+        expect(items.length).toBe(2);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 2;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis, second, third
+        expect(items.length).toBe(4);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].textContent).toBe(third);
+
+        // Set minimumLeftItems = 2, minimumRightItems = 0,
+        customCrumbs.minimumLeftItems = 2;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, first, second, ellipsis
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].querySelector('svg')).not.toBeNull();
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
       });
     });
   });

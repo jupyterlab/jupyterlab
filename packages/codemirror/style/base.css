@@ -67,6 +67,10 @@
   margin-right: -5px;
 }
 
+.cm-builtin {
+  color: var(--jp-mirror-editor-builtin-color);
+}
+
 .cm-searching,
 .cm-searching span {
   /* `.cm-searching span`: we need to override syntax highlighting */
@@ -80,6 +84,7 @@
   color: var(--jp-search-unselected-match-color);
 }
 
+.jp-current-match.cm-searching,
 .jp-current-match > .cm-searching,
 .jp-current-match > .cm-searching span,
 .cm-searching > .jp-current-match,

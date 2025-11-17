@@ -978,6 +978,26 @@ describe('cells/widget', () => {
           `[${(msg as IExecuteReplyMsg).content.execution_count}]:`
         );
       });
+
+      it('should set the cell prompt properly on server-side execution', async () => {
+        const widget = new CodeCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        const sharedModel = widget.model.sharedModel;
+        // Clearing execution count should not overwrite the execution state:
+        sharedModel.executionState = 'running';
+        sharedModel.execution_count = null;
+        expect(sharedModel.executionState).toEqual('running');
+        expect(widget.promptNode!.textContent).toEqual('[*]:');
+        // Setting execution count should also set execution state to idle:
+        sharedModel.execution_count = 1;
+        expect(sharedModel.executionState).toEqual('idle');
+        expect(widget.promptNode!.textContent).toEqual('[1]:');
+      });
     });
   });
 
@@ -1016,6 +1036,20 @@ describe('cells/widget', () => {
         });
         widget.initializeState();
         expect(widget.model.mimeType).toEqual('text/x-ipythongfm');
+      });
+
+      it('should accept a custom placehodler', async () => {
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false,
+          emptyPlaceholder: 'this is empty'
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        expect(widget.node.textContent).toBe('this is empty');
       });
     });
 

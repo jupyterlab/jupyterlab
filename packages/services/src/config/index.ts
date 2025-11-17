@@ -38,6 +38,38 @@ export interface IConfigSection {
 }
 
 /**
+ * A manager for config sections.
+ */
+export class ConfigSectionManager implements ConfigSection.IManager {
+  /**
+   * Create a config section manager.
+   */
+  constructor(options: ConfigSectionManager.IOptions) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * Create a config section.
+   */
+  async create(
+    options: ConfigSectionManager.ICreateOptions
+  ): Promise<IConfigSection> {
+    const section = new DefaultConfigSection({
+      ...options,
+      serverSettings: this.serverSettings
+    });
+    await section.load();
+    return section;
+  }
+
+  /**
+   * The server settings used to make API requests.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+}
+
+/**
  * The namespace for ConfigSection statics.
  */
 export namespace ConfigSection {
@@ -45,30 +77,53 @@ export namespace ConfigSection {
    * Create a config section.
    *
    * @returns A Promise that is fulfilled with the config section is loaded.
+   *
+   * @deprecated Creating a config section via the `ConfigSection.create()` global has been deprecated and may be removed in a future version.
+   * Instead, require the config section manager via the `IConfigSectionManager` token in a plugin.
    */
-  export function create(
+  export async function create(
     options: ConfigSection.IOptions
   ): Promise<IConfigSection> {
-    const section = new DefaultConfigSection(options);
-    return section.load().then(() => {
+    if (!_configSectionManager) {
+      const section = new DefaultConfigSection(options);
+      await section.load();
       return section;
-    });
+    }
+    const section = await _configSectionManager.create(options);
+    return section;
+  }
+
+  let _configSectionManager: ConfigSectionManager | undefined;
+
+  /**
+   * Internal function to set the config section manager.
+   *
+   * @deprecated This function is an internal helper kept for backward compatiblity.
+   * It is not part of the public API and may be removed in a future version.
+   */
+  export function _setConfigSectionManager(manager: ConfigSectionManager) {
+    if (_configSectionManager) {
+      throw new Error(
+        'ConfigSectionManager already set. If you would like to create a config section, use the `IConfigSectionManager` token in a plugin.'
+      );
+    }
+    _configSectionManager = manager;
   }
 
   /**
    * The options used to create a config section.
    */
-  export interface IOptions {
-    /**
-     * The section name.
-     */
-    name: string;
-
+  export interface IOptions extends ConfigSectionManager.ICreateOptions {
     /**
      * The optional server settings.
      */
     serverSettings?: ServerConnection.ISettings;
   }
+
+  /**
+   * The interface for the build manager.
+   */
+  export interface IManager extends ConfigSectionManager {}
 }
 
 /**
@@ -79,13 +134,9 @@ class DefaultConfigSection implements IConfigSection {
    * Construct a new config section.
    */
   constructor(options: ConfigSection.IOptions) {
-    const settings = (this.serverSettings =
-      options.serverSettings ?? ServerConnection.makeSettings());
-    this._url = URLExt.join(
-      settings.baseUrl,
-      SERVICE_CONFIG_URL,
-      encodeURIComponent(options.name)
-    );
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+    this._name = options.name;
   }
 
   /**
@@ -152,7 +203,18 @@ class DefaultConfigSection implements IConfigSection {
     return this._data;
   }
 
-  private _url = 'unknown';
+  /**
+   * Get the URL for this config section.
+   */
+  private get _url(): string {
+    return URLExt.join(
+      this.serverSettings.baseUrl,
+      SERVICE_CONFIG_URL,
+      encodeURIComponent(this._name)
+    );
+  }
+
+  private _name: string;
   private _data: JSONObject;
 }
 
@@ -241,5 +303,30 @@ export namespace ConfigWithDefaults {
      * The optional classname namespace.
      */
     className?: string;
+  }
+}
+
+/**
+ * A namespace for config section API interfaces.
+ */
+export namespace ConfigSectionManager {
+  /**
+   * The instantiation options for a config section manager.
+   */
+  export interface IOptions {
+    /**
+     * The server settings used to make API requests.
+     */
+    serverSettings?: ServerConnection.ISettings;
+  }
+
+  /**
+   * The config section create options
+   */
+  export interface ICreateOptions {
+    /**
+     * The section name.
+     */
+    name: string;
   }
 }

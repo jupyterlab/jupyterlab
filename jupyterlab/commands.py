@@ -177,6 +177,20 @@ def get_app_dir():
     ):
         app_dir = "/usr/local/share/jupyter/lab"
 
+    # Check for a path relative to the site-packages directory, e.g.,
+    # `<prefix>/lib/python3.13/site-packages/jupyterlab/../../../..` This is
+    # useful for cases where the the `jupyterlab` module is outside the current
+    # Python environment, which can occur via various Python path manipulations.
+    elif not osp.exists(app_dir):
+        maybe_app_dir = pjoin(
+            osp.dirname(osp.dirname(osp.dirname(osp.dirname(HERE)))),
+            "share",
+            "jupyter",
+            "lab",
+        )
+        if osp.exists(maybe_app_dir):
+            app_dir = maybe_app_dir
+
     # We must resolve the path to get the canonical case of the path for
     # case-sensitive systems
     return str(Path(app_dir).resolve())
@@ -726,7 +740,7 @@ class _AppHandler:
         info = ["production" if production else "development"]
         if production:
             info.append("minimized" if minimize else "not minimized")
-        self.logger.info(f'Building jupyterlab assets ({", ".join(info)})')
+        self.logger.info(f"Building jupyterlab assets ({', '.join(info)})")
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -746,7 +760,7 @@ class _AppHandler:
 
         # Build the app.
         dedupe_yarn(staging, self.logger)
-        command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
+        command = f"build:{'prod' if production else 'dev'}{':minimize' if minimize else ''}"
         ret = self._run(["node", YARN_PATH, "run", command], cwd=staging)
         if ret != 0:
             msg = "JupyterLab failed to build"
@@ -1180,7 +1194,12 @@ class _AppHandler:
         # copy disabled onto lockedExtensions, ensuring the mapping format
         disabled = page_config.get("disabledExtensions", {})
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
+
+        # Short circuit if disabled is empty
+        if not disabled:
+            return False
+
         page_config["lockedExtensions"] = disabled
         write_page_config(page_config, level=level)
         return True
@@ -1310,13 +1329,13 @@ class _AppHandler:
         # handle disabledExtensions specified as a list (jupyterlab_server < 2.10)
         # see https://github.com/jupyterlab/jupyterlab_server/pull/192 for more info
         if isinstance(disabled, list):
-            disabled = {extension: True for extension in disabled}
+            disabled = dict.fromkeys(disabled, True)
 
         info["disabled"] = disabled
 
         locked = page_config.get("lockedExtensions", {})
         if isinstance(locked, list):
-            locked = {extension: True for extension in locked}
+            locked = dict.fromkeys(locked, True)
         info["locked"] = locked
 
         disabled_core = []
@@ -1738,7 +1757,7 @@ class _AppHandler:
 
         error_accumulator = {}
 
-        ext_dirs = {p: False for p in self.labextensions_path}
+        ext_dirs = dict.fromkeys(self.labextensions_path, False)
         for value in info["federated_extensions"].values():
             ext_dirs[value["ext_dir"]] = True
 
@@ -2043,8 +2062,7 @@ class _AppHandler:
             # All singleton deps in current version of lab are newer than those
             # in the latest version of the extension
             return (
-                f'The extension "{name}" does not yet support the current version of '
-                "JupyterLab.\n"
+                f'The extension "{name}" does not yet support the current version of JupyterLab.\n'
             )
 
         parts = [

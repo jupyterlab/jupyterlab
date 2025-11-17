@@ -15,7 +15,9 @@
   --jp-icon-add-above: url('icons/toolbar/add-above.svg');
   --jp-icon-add-below: url('icons/toolbar/add-below.svg');
   --jp-icon-add: url('icons/toolbar/add.svg');
+  --jp-icon-audio: url('icons/filetype/audio.svg');
   --jp-icon-bell: url('icons/statusbar/bell.svg');
+  --jp-icon-breakpoint: url('icons/debugger/breakpoint.svg');
   --jp-icon-bug-dot: url('icons/toolbar/bug-dot.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
@@ -43,6 +45,11 @@
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-delete: url('icons/toolbar/delete.svg');
+  --jp-icon-dock-bottom: url('icons/toolbar/dock-bottom.svg');
+  --jp-icon-dock-left: url('icons/toolbar/dock-left.svg');
+  --jp-icon-dock-right: url('icons/toolbar/dock-right.svg');
+  --jp-icon-dock-top: url('icons/toolbar/dock-top.svg');
+  --jp-icon-dots: url('icons/toolbar/dots.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
@@ -103,6 +110,7 @@
   --jp-icon-running: url('icons/sidebar/running.svg');
   --jp-icon-save: url('icons/toolbar/save.svg');
   --jp-icon-search: url('icons/toolbar/search.svg');
+  --jp-icon-selected-breakpoint: url('icons/debugger/selected-breakpoint.svg');
   --jp-icon-settings: url('icons/filetype/settings.svg');
   --jp-icon-share: url('icons/sidebar/share.svg');
   --jp-icon-spreadsheet: url('icons/filetype/spreadsheet.svg');
@@ -123,6 +131,7 @@
   --jp-icon-users: url('icons/sidebar/users.svg');
   --jp-icon-variable: url('icons/debugger/variable.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
+  --jp-icon-video: url('icons/filetype/video.svg');
   --jp-icon-view-breakpoint: url('icons/debugger/view-breakpoint.svg');
   --jp-icon-word: url('icons/search/word.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
@@ -142,8 +151,16 @@
   background-image: var(--jp-icon-add);
 }
 
+.jp-AudioIcon {
+  background-image: var(--jp-icon-audio);
+}
+
 .jp-BellIcon {
   background-image: var(--jp-icon-bell);
+}
+
+.jp-BreakpointIcon {
+  background-image: var(--jp-icon-breakpoint);
 }
 
 .jp-BugDotIcon {
@@ -252,6 +269,26 @@
 
 .jp-DeleteIcon {
   background-image: var(--jp-icon-delete);
+}
+
+.jp-DockBottomIcon {
+  background-image: var(--jp-icon-dock-bottom);
+}
+
+.jp-DockLeftIcon {
+  background-image: var(--jp-icon-dock-left);
+}
+
+.jp-DockRightIcon {
+  background-image: var(--jp-icon-dock-right);
+}
+
+.jp-DockTopIcon {
+  background-image: var(--jp-icon-dock-top);
+}
+
+.jp-DotsIcon {
+  background-image: var(--jp-icon-dots);
 }
 
 .jp-DownloadIcon {
@@ -494,6 +531,10 @@
   background-image: var(--jp-icon-search);
 }
 
+.jp-SelectedBreakpointIcon {
+  background-image: var(--jp-icon-selected-breakpoint);
+}
+
 .jp-SettingsIcon {
   background-image: var(--jp-icon-settings);
 }
@@ -572,6 +613,10 @@
 
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
+}
+
+.jp-VideoIcon {
+  background-image: var(--jp-icon-video);
 }
 
 .jp-ViewBreakpointIcon {

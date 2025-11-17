@@ -192,7 +192,18 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       isEnabled: args =>
-        recentsManager.recentlyOpened.includes(args.recent as RecentDocument)
+        recentsManager.recentlyOpened.includes(args.recent as RecentDocument),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            recent: {
+              type: 'object',
+              description: trans.__('Recent document to open')
+            }
+          }
+        }
+      }
     });
 
     app.commands.addCommand(CommandIDs.reopenLast, {
@@ -220,7 +231,13 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
       isEnabled: () => {
         return recentsManager.recentlyClosed.length !== 0;
       },
-      caption: trans.__('Reopen recently closed file or notebook.')
+      caption: trans.__('Reopen recently closed file or notebook.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     // Menu

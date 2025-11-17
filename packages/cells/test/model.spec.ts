@@ -499,17 +499,28 @@ describe('cells/model', () => {
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
-        model.executionCount = 1;
+        // Not executed or running: source change does not set dirty
+        model.sharedModel.setSource('foo');
         expect(model.isDirty).toBe(false);
         expect(called).toBe(0);
 
-        model.sharedModel.setSource('foo');
+        // Dirty set when running and source changes
+        model.executionState = 'running';
+        model.sharedModel.setSource('bar');
         expect(model.isDirty).toBe(true);
         expect(called).toBe(1);
 
-        model.executionCount = 2;
+        // Dirty cleared when source is restored
+        model.sharedModel.setSource('foo');
         expect(model.isDirty).toBe(false);
         expect(called).toBe(2);
+
+        // Dirty set again after idle and source changes
+        model.executionState = 'idle';
+        model.executionCount = 1;
+        model.sharedModel.setSource('bar');
+        expect(model.isDirty).toBe(true);
+        expect(called).toBe(3);
       });
     });
 
@@ -679,6 +690,23 @@ describe('cells/model', () => {
           newIndex: 0
         } as any;
         model['onOutputsChange'](null as any, newEvent0);
+        expect(sharedModel.ymodel.get('outputs').length).toBe(0);
+      });
+
+      it('should clear the outputs', () => {
+        const model = new CodeCellModel({
+          sharedModel: createStandaloneCell(cell) as ISharedCodeCell
+        });
+        const sharedModel = model.sharedModel as YCodeCell;
+        expect(sharedModel.getOutputs().length).toBe(2);
+        const clearEvent = {
+          type: 'clear',
+          newValues: [],
+          oldValues: [],
+          oldIndex: 0,
+          newIndex: 0
+        } as any;
+        model['onOutputsChange'](null as any, clearEvent);
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
       });
     });

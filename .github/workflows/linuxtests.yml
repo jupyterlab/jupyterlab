@@ -54,8 +54,14 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - name: Setup firefox
-        uses: browser-actions/setup-firefox@latest
+      - name: Restore Playwright browsers cache
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: /home/runner/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-v1
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
 
       - name: Install dependencies
         env:
@@ -153,4 +159,4 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.*"
+          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.*"
