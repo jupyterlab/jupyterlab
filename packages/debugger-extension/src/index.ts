@@ -370,22 +370,20 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         });
         if (!result.button.accept) {
           return;
-        } else {
-          const state = service.getDebuggerState();
-          await service.stop();
-          await sessionContext.restartKernel();
-          await sessionContext.isReady;
-          await service.start();
-          await service.restoreDebuggerState(state);
-          await handler.updateWidget(widget, sessionContext.session);
+        const state = service.getDebuggerState();
+        await service.stop();
+        await sessionContext.restartKernel();
+        await sessionContext.isReady;
+        await service.start();
+        await service.restoreDebuggerState(state);
+        await handler.updateWidget(widget, sessionContext.session);
 
-          await NotebookActions.runAll(
-            content,
-            sessionContext,
-            sessionDialogs,
-            translator
-          );
-        }
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     });
 
