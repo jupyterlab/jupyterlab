@@ -238,6 +238,12 @@ export class DirListing extends Widget {
     this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
     this._state = options.state || null;
+    this._allowDragDropUpload = options.allowDragDropUpload ?? true;
+    this._handleOpenFile =
+      options.handleOpenFile ||
+      ((path: string) => {
+        this._manager.openOrReveal(path);
+      });
 
     // Get the width of the "modified" column
     this._updateModifiedSize(this.node);
@@ -522,6 +528,22 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Select all listing items in the current directory.
+   */
+  async selectAll(): Promise<void> {
+    const items = this._model.items();
+    const newSelection: { [key: string]: boolean } = {};
+
+    for (const item of items) {
+      newSelection[item.path] = true;
+    }
+
+    this.selection = newSelection;
+    this._selectionChanged.emit();
+    this.update();
+  }
+
+  /**
    * Download the currently selected item(s).
    */
   async download(): Promise<void> {
@@ -715,9 +737,11 @@ export class DirListing extends Widget {
   /**
    * Clear the selected items.
    */
-  clearSelectedItems(): void {
+  clearSelectedItems(emit = true): void {
     this.selection = Object.create(null);
-    this._selectionChanged.emit();
+    if (emit) {
+      this._selectionChanged.emit();
+    }
   }
 
   /**
@@ -798,7 +822,10 @@ export class DirListing extends Widget {
         break;
       case 'dragenter':
       case 'dragover':
-        this.addClass('jp-mod-native-drop');
+        // Only show visual feedback if drag and drop upload is enabled
+        if (this._allowDragDropUpload) {
+          this.addClass('jp-mod-native-drop');
+        }
         event.preventDefault();
         break;
       case 'dragleave':
@@ -852,6 +879,7 @@ export class DirListing extends Widget {
     content.addEventListener('lm-dragleave', this);
     content.addEventListener('lm-dragover', this);
     content.addEventListener('lm-drop', this);
+    this._updateColumnSizes();
   }
 
   /**
@@ -1065,6 +1093,8 @@ export class DirListing extends Widget {
     // Fetch common variables.
     const items = this._sortedItems;
     const nodes = this._items;
+    // If we didn't get any item yet, we'll need to resize once items are added
+    const needsResize = nodes.length === 0;
     const content = DOMUtils.findElement(this.node, CONTENT_CLASS);
     const renderer = this._renderer;
 
@@ -1099,12 +1129,18 @@ export class DirListing extends Widget {
         checkbox.checked = false;
       }
 
-      // Handle `tabIndex`
+      // Handle `tabIndex` & `role`
       const nameNode = renderer.getNameNode(node);
       if (nameNode) {
         // Must check if the name node is there because it gets replaced by the
         // edit node when editing the name of the file or directory.
-        nameNode.tabIndex = i === this._focusIndex ? 0 : -1;
+        if (i === this._focusIndex) {
+          nameNode.setAttribute('tabIndex', '0');
+          nameNode.setAttribute('role', 'button');
+        } else {
+          nameNode.setAttribute('tabIndex', '-1');
+          nameNode.removeAttribute('role');
+        }
       }
     });
 
@@ -1133,6 +1169,11 @@ export class DirListing extends Widget {
     }
 
     this.updateNodes(items, nodes);
+
+    if (needsResize) {
+      this._width = this._computeContentWidth();
+      this._updateColumnSizes();
+    }
 
     this._prevPath = this._model.path;
   }
@@ -1326,6 +1367,14 @@ export class DirListing extends Widget {
    */
   setAllowSingleClickNavigation(isEnabled: boolean) {
     this._allowSingleClick = isEnabled;
+  }
+
+  /**
+   * Update the setting to allow drag and drop upload.
+   * This enables uploading files via drag and drop.
+   */
+  setAllowDragDropUpload(isEnabled: boolean) {
+    this._allowDragDropUpload = isEnabled;
   }
 
   /**
@@ -1574,7 +1623,7 @@ export class DirListing extends Widget {
         );
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path);
+      this._handleOpenFile(path);
     }
   }
 
@@ -1833,6 +1882,11 @@ export class DirListing extends Widget {
   protected evtNativeDrop(event: DragEvent): void {
     // Prevent navigation
     event.preventDefault();
+
+    // Check if drag and drop upload is disabled
+    if (!this._allowDragDropUpload) {
+      return;
+    }
 
     const items = event.dataTransfer?.items;
     if (!items) {
@@ -2468,7 +2522,7 @@ export class DirListing extends Widget {
   private _onModelRefreshed(): void {
     // Update the selection.
     const existing = Object.keys(this.selection);
-    this.clearSelectedItems();
+    this.clearSelectedItems(false);
     for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
@@ -2544,6 +2598,7 @@ export class DirListing extends Widget {
     direction: 'ascending',
     key: 'name'
   };
+  private _handleOpenFile: (path: string) => void;
   private _onItemOpened = new Signal<DirListing, Contents.IModel>(this);
   private _selectionChanged = new Signal<DirListing, void>(this);
   private _drag: Drag | null = null;
@@ -2591,6 +2646,7 @@ export class DirListing extends Widget {
   };
   private _sortNotebooksFirst = false;
   private _allowSingleClick = false;
+  private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
   // Width of the "last modified" column for an individual file
@@ -2638,6 +2694,18 @@ export namespace DirListing {
      * the columns sizes
      */
     state?: IStateDB;
+
+    /**
+     * Whether to allow drag and drop upload of files.
+     * The default is `true`.
+     */
+    allowDragDropUpload?: boolean;
+
+    /**
+     * Callback overriding action performed when user asks to open a file.
+     * The default is to open the file in the main area if it is not open already, or to reveal it otherwise.
+     */
+    handleOpenFile?: (path: string) => void;
   }
 
   /**

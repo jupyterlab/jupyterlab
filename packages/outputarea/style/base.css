@@ -169,11 +169,35 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   margin: 0;
 }
 
-.jp-ThemedContainer .jp-TrimmedOutputs pre {
-  background: var(--jp-layout-color3);
-  font-size: calc(var(--jp-code-font-size) * 1.4);
-  text-align: center;
-  text-transform: uppercase;
+.jp-TrimmedOutputs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--jp-flat-button-padding);
+  margin: 8px 0;
+  min-height: var(--jp-flat-button-height);
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  background-color: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+}
+
+.jp-TrimmedOutputs-button:hover {
+  background-color: var(--jp-layout-color2);
+  border-color: var(--jp-border-color1);
+}
+
+.jp-TrimmedOutputs-button:active {
+  background-color: var(--jp-layout-color3);
+  border-color: var(--jp-border-color1);
+}
+
+.jp-TrimmedOutputs-button:focus-visible {
+  outline: 1px solid var(--jp-brand-color1);
+  outline-offset: -1px;
 }
 
 /* Hide the gutter in case of
@@ -311,13 +335,8 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   }
 }
 
-/* Trimmed outputs warning */
-.jp-TrimmedOutputs > a {
-  margin: 10px;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.jp-TrimmedOutputs > a:hover {
-  text-decoration: none;
+/* Trimmed outputs container */
+.jp-TrimmedOutputs {
+  /* Left-align the button within the output area */
+  text-align: left;
 }

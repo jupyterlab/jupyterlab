@@ -15,6 +15,7 @@ import {
 } from './tokens';
 import { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
+import { isHintableMimeType } from './utils';
 
 // Shorthand for readability.
 export type InlineResult =
@@ -314,6 +315,11 @@ export class ProviderReconciliator implements IProviderReconciliator {
     completerIsVisible: boolean,
     changed: SourceChange
   ): boolean {
+    const mimeType = this._context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
+    }
+
     return (
       !completerIsVisible &&
       (changed.sourceChange == null ||

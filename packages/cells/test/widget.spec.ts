@@ -1037,6 +1037,20 @@ describe('cells/widget', () => {
         widget.initializeState();
         expect(widget.model.mimeType).toEqual('text/x-ipythongfm');
       });
+
+      it('should accept a custom placehodler', async () => {
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false,
+          emptyPlaceholder: 'this is empty'
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        expect(widget.node.textContent).toBe('this is empty');
+      });
     });
 
     describe('#getEditorOptions()', () => {

@@ -87,6 +87,12 @@ export function createMessage<T extends IInspectReplyMsg>(
 export function createMessage<T extends IInspectRequestMsg>(
   options: IOptions<T>
 ): T;
+export function createMessage<T extends IInterruptReplyMsg>(
+  options: IOptions<T>
+): T;
+export function createMessage<T extends IInterruptRequestMsg>(
+  options: IOptions<T>
+): T;
 export function createMessage<T extends IIsCompleteReplyMsg>(
   options: IOptions<T>
 ): T;
@@ -187,8 +193,6 @@ export type ShellMessageType =
   | 'history_request'
   | 'inspect_reply'
   | 'inspect_request'
-  | 'interrupt_reply'
-  | 'interrupt_request'
   | 'is_complete_reply'
   | 'is_complete_request'
   | 'kernel_info_reply'
@@ -205,6 +209,8 @@ export type ShellMessageType =
  * considered part of the public API, and may change without notice.
  */
 export type ControlMessageType =
+  | 'interrupt_reply'
+  | 'interrupt_request'
   | 'debug_request'
   | 'debug_reply'
   | 'create_subshell_request'
@@ -412,6 +418,8 @@ export type Message =
   | IInputRequestMsg
   | IInspectReplyMsg
   | IInspectRequestMsg
+  | IInterruptReplyMsg
+  | IInterruptRequestMsg
   | IIsCompleteReplyMsg
   | IIsCompleteRequestMsg
   | IStatusMsg
@@ -905,6 +913,43 @@ export interface IInspectReply extends IReplyOkContent {
 export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
   parent_header: IHeader<'inspect_request'>;
   content: ReplyContent<IInspectReply>;
+}
+
+/**
+ * An `'interrupt_request'` message.
+ *
+ * The interrupt messages can only be used for kernels which specify `interrupt_mode: 'message'`.
+ * By default JupyterLab interrupts kernels via jupyter-server Kernels REST API instead.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
+ *
+ * **See also:** [[IInterruptReplyMsg]], [[[IKernel.interrupt]]]
+ */
+export interface IInterruptRequestMsg
+  extends IControlMessage<'interrupt_request'> {
+  content: Record<string, never>;
+}
+
+/**
+ * A `'interrupt_reply'` message content.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
+ *
+ * **See also:** [[IInterruptRequestMsg]], [[IKernel.interrupt]]
+ */
+
+export interface IInterruptReply extends IReplyOkContent {}
+
+/**
+ * A `'interrupt_reply'` message on the `'control'` channel.
+ *
+ * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
+ *
+ * **See also:** [[IInterruptRequestMsg]], [[IKernel.interrupt]]
+ */
+export interface IInterruptReplyMsg extends IControlMessage<'interrupt_reply'> {
+  parent_header: IHeader<'interrupt_request'>;
+  content: ReplyContent<IInterruptReply>;
 }
 
 /**

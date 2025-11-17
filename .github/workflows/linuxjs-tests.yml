@@ -38,6 +38,7 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
+            js-mathjax-extension,
             js-mermaid,
             js-metadataform,
             js-metapackage,

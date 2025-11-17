@@ -1,0 +1,213 @@
+- `@jupyterlab/application-extension:commands`: Adds commands related to the shell.
+- `@jupyterlab/application-extension:context-menu`: Populates the context menu.
+- `@jupyterlab/application-extension:dirty`: Adds safeguard dialog when closing the browser tab with unsaved modifications.
+- `@jupyterlab/application-extension:faviconbusy`: Handles the favicon depending on the application status.
+- `@jupyterlab/application-extension:info`: Provides the application information.
+- `@jupyterlab/application-extension:layout`: Provides the shell layout restorer.
+- `@jupyterlab/application-extension:logo`: Sets the application logo.
+- `@jupyterlab/application-extension:main`: Initializes the application and provides the URL tree path handler.
+- `@jupyterlab/application-extension:mimedocument`: Provides a mime document widget tracker.
+- `@jupyterlab/application-extension:mode-switch`: Adds the interface mode switch
+- `@jupyterlab/application-extension:notfound`: Defines the behavior for not found URL (aka route).
+- `@jupyterlab/application-extension:paths`: Provides the application paths.
+- `@jupyterlab/application-extension:property-inspector`: Provides the property inspector.
+- `@jupyterlab/application-extension:router`: Provides the URL router
+- `@jupyterlab/application-extension:shell`: Provides the JupyterLab shell. It has an extended API compared to `app.shell`.
+- `@jupyterlab/application-extension:status`: Provides the application status.
+- `@jupyterlab/application-extension:top-bar`: Adds a toolbar to the top area (next to the main menu bar).
+- `@jupyterlab/application-extension:tree-resolver`: Provides the tree route resolver
+- `@jupyterlab/apputils-extension:announcements`: Add the announcement feature. It will fetch news on the internet and check for application updates.
+- `@jupyterlab/apputils-extension:kernel-status`: Provides the kernel status indicator model.
+- `@jupyterlab/apputils-extension:kernels-settings`: Reserves the name for kernel settings.
+- `@jupyterlab/apputils-extension:licenses-client`: The licenses client plugin for fetching licenses.
+- `@jupyterlab/apputils-extension:licenses-plugin`: Adds licenses reporting tools.
+- `@jupyterlab/apputils-extension:notification`: Add the notification center and its status indicator.
+- `@jupyterlab/apputils-extension:palette`: Provides the command palette.
+- `@jupyterlab/apputils-extension:palette-restorer`: Restores the command palette.
+- `@jupyterlab/apputils-extension:print`: Add the print capability
+- `@jupyterlab/apputils-extension:resolver`: Provides the window name resolver.
+- `@jupyterlab/apputils-extension:running-sessions-status`: Add the running sessions and terminals status bar item.
+- `@jupyterlab/apputils-extension:sanitizer`: Provides the HTML sanitizer.
+- `@jupyterlab/apputils-extension:sessionDialogs`: Provides the session context dialogs.
+- `@jupyterlab/apputils-extension:settings`: Provides the setting registry.
+- `@jupyterlab/apputils-extension:settings-connector`: Provides the settings connector.
+- `@jupyterlab/apputils-extension:splash`: Provides the splash screen.
+- `@jupyterlab/apputils-extension:state`: Provides the application state. It is stored per workspaces.
+- `@jupyterlab/apputils-extension:subshell-settings`: Kernel subshell settings.
+- `@jupyterlab/apputils-extension:themes`: Provides the theme manager.
+- `@jupyterlab/apputils-extension:themes-palette-menu`: Adds theme commands to the menu and the command palette.
+- `@jupyterlab/apputils-extension:toggle-header`: Adds a command to display the main area widget content header.
+- `@jupyterlab/apputils-extension:toolbar-registry`: Provides toolbar items registry.
+- `@jupyterlab/apputils-extension:utilityCommands`: Adds meta commands to run set of other commands.
+- `@jupyterlab/apputils-extension:workspaces`: Add workspace file type.
+- `@jupyterlab/audio-extension:plugin`: Adds a viewer for audio files
+- `@jupyterlab/cell-toolbar-extension:plugin`: Add the cells toolbar.
+- `@jupyterlab/celltags-extension:plugin`: Adds the cell tags editor.
+- `@jupyterlab/codemirror-extension:binding`: Register the CodeMirror extension factory binding the editor and the shared model.
+- `@jupyterlab/codemirror-extension:commands`: Registers commands acting on selected/active CodeMirror editor.
+- `@jupyterlab/codemirror-extension:extensions`: Provides the CodeMirror extension factory registry.
+- `@jupyterlab/codemirror-extension:languages`: Provides the CodeMirror languages registry.
+- `@jupyterlab/codemirror-extension:line-col-status`: Provides the code editor cursor position model.
+- `@jupyterlab/codemirror-extension:services`: Provides the service to instantiate CodeMirror editors.
+- `@jupyterlab/codemirror-extension:themes`: Provides the CodeMirror theme registry
+- `@jupyterlab/completer-extension:base-service`: Adds context and kernel completion providers.
+- `@jupyterlab/completer-extension:inline-completer`: Registers the inline completer factory; adds inline completer commands, shortcuts and settings.
+- `@jupyterlab/completer-extension:inline-completer-factory`: Provides a factory for inline completer.
+- `@jupyterlab/completer-extension:inline-history`: Adds inline completion provider suggesting code from execution history.
+- `@jupyterlab/completer-extension:manager`: Provides the completion provider manager.
+- `@jupyterlab/console-extension:cell-executor`: Provides the console cell executor.
+- `@jupyterlab/console-extension:completer`: Adds completion to the console.
+- `@jupyterlab/console-extension:cursor-position`: Adds the console to the code editor cursor position model.
+- `@jupyterlab/console-extension:factory`: Provides the console widget content factory.
+- `@jupyterlab/console-extension:foreign`: Add foreign handler of IOPub messages to the console.
+- `@jupyterlab/console-extension:kernel-status`: Adds the console to the kernel status indicator model.
+- `@jupyterlab/console-extension:tracker`: Provides the console widget tracker.
+- `@jupyterlab/csvviewer-extension:csv`: Adds viewer for CSV file types
+- `@jupyterlab/csvviewer-extension:tsv`: Adds viewer for TSV file types.
+- `@jupyterlab/debugger-extension:config`: Provides the debugger configuration
+- `@jupyterlab/debugger-extension:consoles`: Add debugger capability to the consoles.
+- `@jupyterlab/debugger-extension:files`: Adds debugger capabilities to files.
+- `@jupyterlab/debugger-extension:main`: Initialize the debugger user interface.
+- `@jupyterlab/debugger-extension:notebooks`: Adds debugger capability to notebooks and provides the debugger notebook handler.
+- `@jupyterlab/debugger-extension:service`: Provides the debugger service.
+- `@jupyterlab/debugger-extension:sidebar`: Provides the debugger sidebar.
+- `@jupyterlab/debugger-extension:source-viewer`: Initialize the debugger sources viewer.
+- `@jupyterlab/debugger-extension:sources`: Provides the source feature for debugging
+- `@jupyterlab/debugger-extension:variables`: Adds variables renderer and inspection in the debugger variable panel.
+- `@jupyterlab/docmanager-extension:contexts`: Adds the handling of opened documents dirty state.
+- `@jupyterlab/docmanager-extension:download`: Adds command to download files.
+- `@jupyterlab/docmanager-extension:manager`: Provides the document manager.
+- `@jupyterlab/docmanager-extension:open-browser-tab`: Adds command to open a browser tab.
+- `@jupyterlab/docmanager-extension:opener`: Provides the widget opener.
+- `@jupyterlab/docmanager-extension:path-status`: Adds a file path indicator in the status bar.
+- `@jupyterlab/docmanager-extension:plugin`: Adds commands and settings to the document manager.
+- `@jupyterlab/docmanager-extension:recents`: Provides a manager of recently opened and closed documents.
+- `@jupyterlab/docmanager-extension:saving-status`: Adds a saving status indicator.
+- `@jupyterlab/documentsearch-extension:labShellWidgetListener`: Active search on valid document
+- `@jupyterlab/documentsearch-extension:plugin`: Provides the document search registry.
+- `@jupyterlab/extensionmanager-extension:plugin`: Adds the extension manager plugin.
+- `@jupyterlab/filebrowser-extension:browser`: Set up the default file browser commands and state restoration
+- `@jupyterlab/filebrowser-extension:create-new-language-file`: Adds context menu entries for creating Python/R/Julia files
+- `@jupyterlab/filebrowser-extension:default-file-browser`: Provides the default file browser
+- `@jupyterlab/filebrowser-extension:download`: Adds the download file commands. Disabling this plugin will NOT disable downloading files from the server, if the user enters the appropriate download URLs.
+- `@jupyterlab/filebrowser-extension:factory`: Provides the file browser factory.
+- `@jupyterlab/filebrowser-extension:file-upload-status`: Adds a file upload status widget.
+- `@jupyterlab/filebrowser-extension:notify-upload`: Adds feature to auto-open supported files after upload
+- `@jupyterlab/filebrowser-extension:open-browser-tab`: Adds the open-in-new-browser-tab features.
+- `@jupyterlab/filebrowser-extension:open-url`: Adds the feature "Open files from remote URLs".
+- `@jupyterlab/filebrowser-extension:open-with`: Adds the open-with feature allowing an user to pick the non-preferred document viewer.
+- `@jupyterlab/filebrowser-extension:settings`: Set up the default file browser settings
+- `@jupyterlab/filebrowser-extension:share-file`: Adds the "Copy Shareable Link" command; useful for JupyterHub deployment for example.
+- `@jupyterlab/filebrowser-extension:widget`: Adds the file browser to the application shell.
+- `@jupyterlab/fileeditor-extension:completer`: Adds the completer capability to the file editor.
+- `@jupyterlab/fileeditor-extension:cursor-position`: Adds a file editor cursor position status widget.
+- `@jupyterlab/fileeditor-extension:editor-syntax-status`: Adds a file editor syntax status widget.
+- `@jupyterlab/fileeditor-extension:language-server`: Adds Language Server capability to the file editor.
+- `@jupyterlab/fileeditor-extension:plugin`: Provides the file editor widget tracker.
+- `@jupyterlab/fileeditor-extension:search`: Adds search capability to the file editor.
+- `@jupyterlab/fileeditor-extension:tab-space-status`: Adds a file editor indentation status widget.
+- `@jupyterlab/fileeditor-extension:widget-factory`: Provides the factory for creating file editors.
+- `@jupyterlab/help-extension:about`: Adds a "About" dialog feature.
+- `@jupyterlab/help-extension:jupyter-forum`: Adds command to open the Jupyter Forum website.
+- `@jupyterlab/help-extension:licenses-commands`: Add licenses commands for backwards compatibility.
+- `@jupyterlab/help-extension:open`: Add command to open websites as panel or browser tab.
+- `@jupyterlab/help-extension:resources`: Adds menu entries to Jupyter reference documentation websites.
+- `@jupyterlab/htmlviewer-extension:plugin`: Adds HTML file viewer and provides its tracker.
+- `@jupyterlab/hub-extension:connectionlost`: Provides a service to be notified when the connection to the hub server is lost.
+- `@jupyterlab/hub-extension:menu`: Adds hub related commands to the menu.
+- `@jupyterlab/hub-extension:plugin`: Registers commands related to the hub server
+- `@jupyterlab/imageviewer-extension:plugin`: Adds image viewer and provide its tracker.
+- `@jupyterlab/inspector-extension:consoles`: Adds code introspection support to consoles.
+- `@jupyterlab/inspector-extension:inspector`: Provides the code introspection widget.
+- `@jupyterlab/inspector-extension:notebooks`: Adds code introspection to notebooks.
+- `@jupyterlab/javascript-extension:factory`: Adds renderer for JavaScript content.
+- `@jupyterlab/json-extension:factory`: Adds renderer for JSON content.
+- `@jupyterlab/json-lines-extension:factory`: Adds renderer for JSONLines content.
+- `@jupyterlab/launcher-extension:plugin`: Provides the launcher tab service.
+- `@jupyterlab/logconsole-extension:plugin`: Provides the logger registry.
+- `@jupyterlab/lsp-extension:code-extractor-manager`: Provides the code extractor manager.
+- `@jupyterlab/lsp-extension:feature`: Provides the language server feature manager.
+- `@jupyterlab/lsp-extension:plugin`: Provides the language server connection manager.
+- `@jupyterlab/lsp-extension:settings`: Provides the language server settings.
+- `@jupyterlab/lsp-extension:tracker`: Provides the tracker of `WidgetLSPAdapter`.
+- `@jupyterlab/mainmenu-extension:plugin`: Adds and provides the application main menu.
+- `@jupyterlab/mainmenu-extension:recents`: Adds sub-menu for opening recent documents to the File section of the main menu.
+- `@jupyterlab/markdownviewer-extension:plugin`: Adds markdown file viewer and provides its tracker.
+- `@jupyterlab/markedparser-extension:plugin`: Provides the Markdown parser.
+- `@jupyterlab/mathjax-extension:plugin`: Provides the LaTeX mathematical expression interpreter.
+- `@jupyterlab/mermaid-extension:context-commands`: Provides context menu commands for mermaid diagrams.
+- `@jupyterlab/mermaid-extension:core`: Provides the Mermaid manager.
+- `@jupyterlab/mermaid-extension:factory`: Provides a renderer for mermaid text-based diagrams.
+- `@jupyterlab/mermaid-extension:markdown`: Provides the Mermaid markdown renderer.
+- `@jupyterlab/metadataform-extension:metadataforms`: Provides the metadata form registry.
+- `@jupyterlab/notebook-extension:active-cell-tool`: Adds active cell field in the metadata editor tab.
+- `@jupyterlab/notebook-extension:cell-executor`: Provides the notebook cell executor.
+- `@jupyterlab/notebook-extension:cloned-outputs`: Adds the clone output feature.
+- `@jupyterlab/notebook-extension:code-console`: Adds the notebook code consoles features.
+- `@jupyterlab/notebook-extension:completer`: Adds the code completion capability to notebooks.
+- `@jupyterlab/notebook-extension:copy-output`: Adds the copy cell outputs feature.
+- `@jupyterlab/notebook-extension:cursor-position`: Adds the notebook cursor position status.
+- `@jupyterlab/notebook-extension:execution-indicator`: Adds a notebook execution status widget.
+- `@jupyterlab/notebook-extension:export`: Adds the export notebook commands.
+- `@jupyterlab/notebook-extension:factory`: Provides the notebook cell factory.
+- `@jupyterlab/notebook-extension:kernel-status`: Adds the notebook kernel status.
+- `@jupyterlab/notebook-extension:language-server`: Adds language server capability to the notebooks.
+- `@jupyterlab/notebook-extension:log-output`: Adds cell outputs log to the application logger.
+- `@jupyterlab/notebook-extension:metadata-editor`: Adds metadata form for full metadata editor.
+- `@jupyterlab/notebook-extension:mode-status`: Adds a notebook mode status widget.
+- `@jupyterlab/notebook-extension:open-with-no-kernel`: Adds the "Notebook (no kernel)" option to the Open With menu.
+- `@jupyterlab/notebook-extension:search`: Adds search capability to notebooks.
+- `@jupyterlab/notebook-extension:toc`: Adds table of content capability to the notebooks
+- `@jupyterlab/notebook-extension:tools`: Provides the notebook tools.
+- `@jupyterlab/notebook-extension:tracker`: Provides the notebook widget tracker.
+- `@jupyterlab/notebook-extension:trust-status`: Adds the notebook trusted status widget.
+- `@jupyterlab/notebook-extension:update-raw-mimetype`: Adds metadata form editor for raw cell mimetype.
+- `@jupyterlab/notebook-extension:widget-factory`: Provides the notebook widget factory.
+- `@jupyterlab/pdf-extension:factory`: Adds renderer for PDF content.
+- `@jupyterlab/pluginmanager-extension:plugin`: Enable or disable individual plugins.
+- `@jupyterlab/rendermime-extension:plugin`: Provides the render mime registry.
+- `@jupyterlab/running-extension:plugin`: Provides the running session managers.
+- `@jupyterlab/running-extension:recently-closed`: Adds recently closed documents list.
+- `@jupyterlab/running-extension:search-tabs`: Adds a widget to search open and closed tabs.
+- `@jupyterlab/running-extension:sidebar`: Provides the running session sidebar.
+- `@jupyterlab/services-extension:config-section-manager`: Provides the config section manager.
+- `@jupyterlab/services-extension:connection-status`: Provides the default connection status.
+- `@jupyterlab/services-extension:contents-manager`: The default contents manager plugin.
+- `@jupyterlab/services-extension:default-drive`: The default drive for the contents manager.
+- `@jupyterlab/services-extension:event-manager`: The event manager plugin.
+- `@jupyterlab/services-extension:kernel-manager`: The kernel manager plugin.
+- `@jupyterlab/services-extension:kernel-spec-manager`: The kernel spec manager plugin.
+- `@jupyterlab/services-extension:nbconvert-manager`: The nbconvert manager plugin.
+- `@jupyterlab/services-extension:server-settings`: The default server settings plugin.
+- `@jupyterlab/services-extension:service-manager`: The default service manager plugin.
+- `@jupyterlab/services-extension:session-manager`: The session manager plugin.
+- `@jupyterlab/services-extension:setting-manager`: The setting manager plugin.
+- `@jupyterlab/services-extension:terminal-manager`: The terminal manager plugin.
+- `@jupyterlab/services-extension:user-manager`: The user manager plugin.
+- `@jupyterlab/services-extension:workspace-manager`: The workspace manager plugin.
+- `@jupyterlab/settingeditor-extension:form-ui`: Adds the interactive settings editor and provides its tracker.
+- `@jupyterlab/settingeditor-extension:plugin`: Adds the JSON settings editor and provides its tracker.
+- `@jupyterlab/shortcuts-extension:shortcuts`: Adds the keyboard shortcuts editor.
+- `@jupyterlab/statusbar-extension:plugin`: Provides the application status bar.
+- `@jupyterlab/terminal-extension:plugin`: Adds terminal and provides its tracker.
+- `@jupyterlab/theme-dark-extension:plugin`: Adds a dark theme.
+- `@jupyterlab/theme-dark-high-contrast-extension:plugin`: Adds a dark high contrast theme.
+- `@jupyterlab/theme-light-extension:plugin`: Adds a light theme.
+- `@jupyterlab/toc-extension:registry`: Provides the table of contents registry.
+- `@jupyterlab/toc-extension:tracker`: Adds the table of content widget and provides its tracker.
+- `@jupyterlab/tooltip-extension:consoles`: Adds the tooltip capability to consoles.
+- `@jupyterlab/tooltip-extension:files`: Adds the tooltip capability to file editors.
+- `@jupyterlab/tooltip-extension:manager`: Provides the tooltip manager.
+- `@jupyterlab/tooltip-extension:notebooks`: Adds the tooltip capability to notebooks.
+- `@jupyterlab/translation-extension:plugin`: Adds translation commands and settings.
+- `@jupyterlab/translation-extension:translator`: Provides the application translation object.
+- `@jupyterlab/translation-extension:translator-connector`: Provides the application translation connector.
+- `@jupyterlab/ui-components-extension:form-renderer-registry`: Provides the settings form renderer registry.
+- `@jupyterlab/ui-components-extension:labicon-manager`: Provides the icon manager.
+- `@jupyterlab/vega5-extension:factory`: Provides a renderer for Vega 5 and Vega-Lite 3 to 5 content.
+- `@jupyterlab/video-extension:plugin`: Adds a viewer for video files
+- `@jupyterlab/workspaces-extension:commands`: Add workspace commands.
+- `@jupyterlab/workspaces-extension:indicator`: Adds a workspace indicator element at topbar
+- `@jupyterlab/workspaces-extension:menu`: Populates "File" main menu with Workspaces submenu.
+- `@jupyterlab/workspaces-extension:model`: Provides a model for available workspaces.
+- `@jupyterlab/workspaces-extension:sidebar`: Populates running sidebar with workspaces.

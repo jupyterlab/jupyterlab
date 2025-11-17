@@ -671,6 +671,12 @@
           "type": "boolean",
           "title": "Show execution progress.",
           "default": true
+        },
+        "showJumpToRecentExecutionButton": {
+          "type": "boolean",
+          "title": "Show jump to most recently executed/executing cell button",
+          "description": "If enabled, displays a button that scrolls to the currently executing cell or, if none, the most recently executed cell. scrolls to the currently executing cell or, if none, the most recently executed cell. The button shows when hovering over the kernel execution indicator. Enabling this option automatically enables recording of execution timing metadata.",
+          "default": false
         }
       }
     }
@@ -790,7 +796,8 @@
       "$ref": "#/definitions/kernelStatusConfig",
       "default": {
         "showOnStatusBar": false,
-        "showProgress": true
+        "showProgress": true,
+        "showJumpToRecentExecutionButton": false
       }
     },
     "documentWideUndoRedo": {
@@ -832,13 +839,25 @@
     },
     "windowingMode": {
       "title": "Windowing mode",
-      "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
-      "enum": ["defer", "full", "none"],
-      "default": "full"
+      "description": "- 'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells\n- 'full': Best performance with side effects - Attach to the DOM only cells in viewport\n- 'none': Worst performance without side effects - Attach all cells to the viewport\n- 'contentVisibility': Browser-optimized rendering - Use content-visibility to skip offscreen cells",
+      "enum": ["defer", "full", "none", "contentVisibility"],
+      "default": "contentVisibility"
     },
     "accessKernelHistory": {
       "title": "Kernel history access",
       "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",
+      "type": "boolean",
+      "default": false
+    },
+    "addExtraLineOnCellMerge": {
+      "title": "Add extra line when merging cells",
+      "description": "Whether to add an extra blank line between cells when merging them. When enabled, cells are joined with double newlines. When disabled, cells are joined with single newlines.",
+      "type": "boolean",
+      "default": true
+    },
+    "showMinimap": {
+      "title": "Show minimap",
+      "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
       "type": "boolean",
       "default": false
     }

@@ -322,10 +322,17 @@ export namespace RenderMimeRegistry {
     translator?: ITranslator;
   }
 
+  export interface IUrlResolver extends IRenderMime.IResolver {
+    /**
+     * The path of the object, from which local urls can be derived.
+     */
+    path: string;
+  }
+
   /**
    * A default resolver that uses a given reference path and a contents manager.
    */
-  export class UrlResolver implements IRenderMime.IResolver {
+  export class UrlResolver implements IUrlResolver {
     /**
      * Create a new url resolver.
      */
@@ -473,6 +480,18 @@ export namespace RenderMimeRegistry {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
+  }
+
+  /**
+   * The factory of resolvers.
+   */
+  export interface IUrlResolverFactory {
+    /**
+     * Create an URL resolver.
+     */
+    createResolver(
+      options: RenderMimeRegistry.IUrlResolverOptions
+    ): IUrlResolver;
   }
 }
 

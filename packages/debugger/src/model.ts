@@ -14,6 +14,8 @@ import { SourcesModel } from './panels/sources/model';
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
+import { IDebuggerDisplayRegistry } from './tokens';
+import { DebuggerDisplayRegistry } from './displayregistry';
 
 /**
  * A model for a debugger.
@@ -22,12 +24,18 @@ export class DebuggerModel implements IDebugger.Model.IService {
   /**
    * Instantiate a new DebuggerModel
    */
-  constructor() {
-    this.breakpoints = new BreakpointsModel();
-    this.callstack = new CallstackModel();
+  constructor(options: DebuggerModel.IOptions) {
+    const displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
+
+    this.breakpoints = new BreakpointsModel({ displayRegistry });
+    this.callstack = new CallstackModel({
+      displayRegistry
+    });
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
-      currentFrameChanged: this.callstack.currentFrameChanged
+      currentFrameChanged: this.callstack.currentFrameChanged,
+      displayRegistry
     });
     this.kernelSources = new KernelSourcesModel();
   }
@@ -163,4 +171,19 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);
+}
+
+/**
+ * A namespace for DebuggerModel
+ */
+export namespace DebuggerModel {
+  /**
+   * Instantiation options for a DebuggerModel.
+   */
+  export interface IOptions {
+    /**
+     * The display registry.
+     */
+    displayRegistry?: IDebuggerDisplayRegistry | null;
+  }
 }

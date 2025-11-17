@@ -173,7 +173,7 @@ export abstract class VDomRenderer<
  */
 export interface IUseSignalProps<SENDER, ARGS> {
   /**
-   * Phosphor signal to connect to.
+   * Lumino signal to connect to.
    */
 
   signal: ISignal<SENDER, ARGS>;

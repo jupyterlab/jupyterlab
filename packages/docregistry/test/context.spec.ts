@@ -55,15 +55,16 @@ describe('docregistry/context', () => {
         expect(context).toBeInstanceOf(Context);
       });
 
-      it('should set the session path with local path', () => {
+      it('should set the session path with global path', () => {
         const localPath = `${UUID.uuid4()}.txt`;
+        const globalPath = `TestDrive:${localPath}`;
         context = new Context({
           manager,
           factory,
-          path: `TestDrive:${localPath}`
+          path: globalPath
         });
 
-        expect(context.sessionContext.path).toEqual(localPath);
+        expect(context.sessionContext.path).toEqual(globalPath);
       });
     });
 
@@ -490,8 +491,11 @@ describe('docregistry/context', () => {
 
         const changed = signalToPromise(manager.contents.fileChanged);
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true on successful save
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -533,8 +537,11 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true when overwrite is accepted
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -567,8 +574,11 @@ describe('docregistry/context', () => {
         });
         await context.initialize(true);
         const promise = func();
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return false when overwrite is cancelled
+        expect(result).toBe(false);
         expect(context.path).toBe(oldPath);
       });
 
@@ -673,10 +683,25 @@ describe('docregistry/context', () => {
     });
 
     describe('#urlResolver', () => {
+      class TestResolver extends RenderMimeRegistry.UrlResolver {
+        // no-op
+      }
       it('should be a url resolver', () => {
         expect(context.urlResolver).toBeInstanceOf(
           RenderMimeRegistry.UrlResolver
         );
+        expect(context.urlResolver).not.toBeInstanceOf(TestResolver);
+      });
+      it('should use preferred url resolver', () => {
+        context = new Context({
+          manager,
+          factory,
+          path: UUID.uuid4() + '.txt',
+          urlResolverFactory: {
+            createResolver: options => new TestResolver(options)
+          }
+        });
+        expect(context.urlResolver).toBeInstanceOf(TestResolver);
       });
     });
 

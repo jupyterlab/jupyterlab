@@ -378,7 +378,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
     this._notebookModel = null;
     (this.layout as NotebookWindowedLayout).header?.dispose();
+    //  Disconnect the content-visibility observer
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
+    }
     super.dispose();
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    //  Disconnect the content-visibility observer
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
+    }
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -806,8 +820,15 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
    * @param collapsed New collapsed status
    */
   private _onCellCollapsed(cell: Cell, collapsed: boolean): void {
-    NotebookActions.setHeadingCollapse(cell, collapsed, this);
-    this._cellCollapsed.emit(cell);
+    cell
+      .getHeadings()
+      .then(() => {
+        NotebookActions.setHeadingCollapse(cell, collapsed, this);
+        this._cellCollapsed.emit(cell);
+      })
+      .catch(error => {
+        console.warn('Failed to resolve headings: ', error);
+      });
   }
 
   /**
@@ -918,7 +939,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
+        if (
+          ['defer', 'full', 'contentVisibility'].includes(
+            this.notebookConfig.windowingMode
+          )
+        ) {
           await this._updateForDeferMode(cell, cellIdx);
           if (this.notebookConfig.windowingMode === 'full') {
             // We need to delay slightly the removal to let codemirror properly initialize
@@ -929,6 +954,13 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
               );
               this.layout.removeWidget(cell);
             });
+          } else if (
+            this.notebookConfig.windowingMode === 'contentVisibility'
+          ) {
+            // Update height estimate in the view model
+            const height = cell.node.getBoundingClientRect().height;
+            this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+            cell.node.style.containIntrinsicSize = `auto ${height}px`;
           }
         }
       }
@@ -993,6 +1025,96 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     this.viewModel.windowingActive =
       this._notebookConfig.windowingMode === 'full';
+
+    // Apply content visibility when notebook settings update (without reload)
+    const isContentVisibility =
+      this._notebookConfig.windowingMode === 'contentVisibility';
+    this.viewportNode.classList.toggle(
+      'jp-content-visibility-mode',
+      isContentVisibility
+    );
+
+    if (isContentVisibility) {
+      requestAnimationFrame(() => {
+        this.cellsArray.forEach((cell, i) => {
+          const estHeight = this._viewModel.estimateWidgetSize(i);
+          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+        });
+      });
+      this._setupContentVisibilityObserver();
+    } else {
+      // Remove intrinsic size styling when disabling content visibility
+      this.cellsArray.forEach(cell => {
+        cell.node.style.removeProperty('contain-intrinsic-size');
+        cell.node.style.removeProperty('content-visibility');
+        cell.node.style.removeProperty('contain');
+      });
+
+      // Disconnect observer if it exists
+      if (this._contentVisibilityObserver) {
+        this._contentVisibilityObserver.disconnect();
+        this._contentVisibilityObserver = null;
+      }
+    }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+
+    // Apply content visibility when notebook widget is attached to the DOM
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      this.viewportNode.classList.toggle('jp-content-visibility-mode', true);
+
+      // Update intrinsic sizes for all cells initially
+      requestAnimationFrame(() => {
+        this.cellsArray.forEach((cell, i) => {
+          const estHeight = this._viewModel.estimateWidgetSize(i);
+          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+          (cell.node.style as any).contentVisibility = 'auto';
+          cell.node.style.contain = 'layout style paint';
+        });
+      });
+
+      // Use the real browser viewport for visibility detection
+      this._setupContentVisibilityObserver();
+    }
+  }
+
+  private _setupContentVisibilityObserver(): void {
+    if (!this._contentVisibilityObserver) {
+      // Create observer only once
+      this._contentVisibilityObserver = new IntersectionObserver(
+        entries => {
+          for (const entry of entries) {
+            const cell = entry.target as HTMLElement;
+            if (entry.isIntersecting) {
+              (cell.style as any).contentVisibility = 'visible';
+              cell.style.contain = 'style';
+            } else {
+              (cell.style as any).contentVisibility = 'auto';
+              cell.style.contain = 'layout style paint';
+            }
+          }
+        },
+        { root: null, threshold: 0.1 }
+      );
+    }
+
+    // Observe all existing cells
+    this.cellsArray.forEach(cell =>
+      this._contentVisibilityObserver!.observe(cell.node)
+    );
+
+    // Watch for newly added cells and set intrinsic size for them too
+    this.model?.cells.changed.connect(() => {
+      requestAnimationFrame(() => {
+        this.cellsArray.forEach((cell, i) => {
+          const estHeight = this._viewModel.estimateWidgetSize(i);
+          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+          this._contentVisibilityObserver!.observe(cell.node);
+        });
+      });
+    });
   }
 
   protected cellsArray: Array<Cell>;
@@ -1010,6 +1132,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _notebookModel: INotebookModel | null;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
+  private _contentVisibilityObserver: IntersectionObserver | null = null;
 }
 
 /**
@@ -1230,9 +1353,18 @@ export namespace StaticNotebook {
      * - 'defer': Wait for idle CPU cycles to attach out of viewport cells
      * - 'full': Attach to the DOM only cells in viewport
      * - 'none': Attach all cells to the viewport
+     * - 'contentVisibility': Use content-visibility to skip offscreen cells
      */
-    windowingMode: 'defer' | 'full' | 'none';
+    windowingMode: 'defer' | 'full' | 'none' | 'contentVisibility';
     accessKernelHistory?: boolean;
+
+    /**
+     * Whether to show a minimap alongside the notebook.
+     *
+     * The minimap provides a scroll-synchronized view of the
+     * notebook’s content to help with navigation.
+     */
+    showMinimap?: boolean;
   }
 
   /**
@@ -1254,9 +1386,10 @@ export namespace StaticNotebook {
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
-    windowingMode: 'full',
+    windowingMode: 'contentVisibility',
     accessKernelHistory: false,
-    showInputPlaceholder: true
+    showInputPlaceholder: true,
+    showMinimap: false
   };
 
   /**
@@ -1399,6 +1532,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       'trusted' | 'isDirty' | 'executionCount' | 'executionState'
     >
   ) => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (change.name) {
       case 'executionCount':
       case 'executionState':
@@ -2099,9 +2233,9 @@ export class Notebook extends StaticNotebook {
 
     const parts = cleanedFragment.split('=');
     if (parts.length === 1) {
-      // Default to heading if no prefix is given.
+      // Default to legacy if no prefix is given.
       return {
-        kind: 'heading',
+        kind: 'legacy',
         value: cleanedFragment
       };
     }
@@ -2131,11 +2265,14 @@ export class Notebook extends StaticNotebook {
       case 'cell-id':
         result = this._findCellById(parsedFragment.value);
         break;
+      case 'legacy':
+        result = await this._findLegacy(parsedFragment.value);
+        break;
       default:
         console.warn(
           `Unknown target type for URI fragment ${fragment}, interpreting as a heading`
         );
-        result = await this._findHeading(
+        result = await this._findLegacy(
           parsedFragment.kind + '=' + parsedFragment.value
         );
         break;
@@ -2153,15 +2290,9 @@ export class Notebook extends StaticNotebook {
     if (element == null) {
       element = cell.node;
     }
-    const widgetBox = this.node.getBoundingClientRect();
-    const elementBox = element.getBoundingClientRect();
 
-    if (
-      elementBox.top > widgetBox.bottom ||
-      elementBox.bottom < widgetBox.top
-    ) {
-      element.scrollIntoView({ block: 'center' });
-    }
+    // Scroll notebook to set the target on top.
+    element.scrollIntoView();
   }
 
   /**
@@ -2277,7 +2408,7 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('lm-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
-    super.onBeforeAttach(msg);
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -2470,6 +2601,11 @@ export class Notebook extends StaticNotebook {
     editor: CodeEditor.IEditor,
     location: CodeEditor.EdgeLocation
   ): void {
+    // Ensure edit mode but do not focus yet; we ensure the edit mode
+    // with focus trigger at the end, as a side-effect of `this.mode = 'edit'`,
+    // which could be simplified in the future.
+    this.setMode('edit', { focus: false });
+
     const prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
@@ -2491,6 +2627,7 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
+    // This is potentially no longer needed with the `setMode` call at the top.
     this.mode = 'edit';
   }
 
@@ -2585,7 +2722,9 @@ export class Notebook extends StaticNotebook {
   /**
    * Find heading with given ID in any of the cells.
    */
-  async _findHeading(queryId: string): Promise<Private.IScrollTarget | null> {
+  private async _findHeading(
+    queryId: string
+  ): Promise<Private.IScrollTarget | null> {
     // Loop on cells, get headings and search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
@@ -2616,8 +2755,12 @@ export class Notebook extends StaticNotebook {
             break;
         }
         if (id === queryId) {
+          const attribute =
+            this.rendermime.sanitizer.allowNamedProperties ?? false
+              ? 'id'
+              : 'data-jupyter-id';
           const element = this.node.querySelector(
-            `h${heading.level}[id="${CSS.escape(id)}"]`
+            `h${heading.level}[${attribute}="${CSS.escape(id)}"]`
           ) as HTMLElement;
 
           return {
@@ -2633,12 +2776,46 @@ export class Notebook extends StaticNotebook {
   /**
    * Find cell by its unique ID.
    */
-  _findCellById(queryId: string): Private.IScrollTarget | null {
+  private _findCellById(queryId: string): Private.IScrollTarget | null {
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
       if (cell.model.id === queryId) {
         return {
           cell
+        };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Find anchor target by any ID in any of the cell.
+   */
+  private async _findLegacy(
+    queryId: string
+  ): Promise<Private.IScrollTarget | null> {
+    // Loop on cells, search for first matching id.
+    for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
+      const cell = this.widgets[cellIdx];
+      if (
+        cell.model.type === 'raw' ||
+        (cell.model.type === 'markdown' && !(cell as MarkdownCell).rendered)
+      ) {
+        // Bail early
+        continue;
+      }
+
+      const attribute =
+        this.rendermime.sanitizer.allowNamedProperties ?? false
+          ? 'id'
+          : 'data-jupyter-id';
+      const element = cell.node.querySelector(
+        `[${attribute}="${CSS.escape(queryId)}"]`
+      );
+      if (element !== null) {
+        return {
+          cell,
+          element: element as HTMLElement
         };
       }
     }
@@ -3097,6 +3274,9 @@ export class Notebook extends StaticNotebook {
    */
   private _updateReadWrite(): void {
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    if (this.node.classList.contains(READ_WRITE_CLASS) === inReadWrite) {
+      return;
+    }
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
@@ -3162,14 +3342,13 @@ export class Notebook extends StaticNotebook {
    * Handle `focusout` events for the notebook.
    */
   private _evtFocusOut(event: FocusEvent): void {
-    // Update read-write class state.
-    this._updateReadWrite();
-
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test
     // assumes that we explicitly focus things rather than calling blur()
     if (!relatedTarget) {
+      // Update read-write class state.
+      this._updateReadWrite();
       return;
     }
 
@@ -3179,6 +3358,8 @@ export class Notebook extends StaticNotebook {
     if (index !== -1) {
       const widget = this.widgets[index];
       if (widget.editorWidget?.node.contains(relatedTarget)) {
+        // Do not update read-write state as there is no real loss of focus,
+        // instead we are just switching to a different cell
         return;
       }
     }
@@ -3187,6 +3368,8 @@ export class Notebook extends StaticNotebook {
     if (this.mode !== 'command') {
       this.setMode('command', { focus: false });
     }
+    // Update read-write class state.
+    this._updateReadWrite();
   }
 
   /**
@@ -3437,7 +3620,7 @@ namespace Private {
     /**
      * The kind of notebook element targeted by the fragment identifier.
      */
-    kind: 'heading' | 'cell-id';
+    kind: 'legacy' | 'heading' | 'cell-id';
     /*
      * The value of the fragment query.
      */
