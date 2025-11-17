@@ -41,6 +41,13 @@ interface ITreeNodeProps {
   onOpen: (path: string) => void;
 }
 
+interface IRawNode {
+  children: Record<string, IRawNode>;
+  namePath: string;
+  filePath: string;
+  moduleName: string;
+}
+
 /**
  * Recursive component for rendering a tree node (directory or file).
  */
@@ -121,7 +128,7 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
  * Convert a flat list of kernel sources into a hierarchical directory tree.
  */
 function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
-  const root: Record<string, any> = {};
+  const root: Record<string, IRawNode> = {};
 
   for (const mod of modules) {
     const sep = mod.name.includes('.') && !mod.name.includes('/') ? '.' : '/';
@@ -132,24 +139,24 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
       if (!part) continue;
       if (!current[part]) {
         current[part] = {
-          __children__: {},
-          __namePath__: parts.slice(0, i + 1).join(sep),
-          __filePath__: mod.path,
-          __moduleName__: mod.name
+          children: {},
+          namePath: parts.slice(0, i + 1).join(sep),
+          filePath: mod.path,
+          moduleName: mod.name
         };
       }
-      current = current[part].__children__;
+      current = current[part].children;
     }
   }
 
   function toArray(node: Record<string, any>): ITreeNodeProps[] {
     const entries = Object.keys(node).map(name => {
       const entry = node[name];
-      const children = toArray(entry.__children__);
+      const children = toArray(entry.children);
       return {
         name,
-        path: entry.__filePath__,
-        moduleName: entry.__moduleName__,
+        path: entry.filePath,
+        moduleName: entry.moduleName,
         children: children.length ? children : undefined,
         onOpen: () => undefined
       };
