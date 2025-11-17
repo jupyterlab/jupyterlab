@@ -771,7 +771,7 @@ export namespace ToolbarButtonComponent {
   /**
    * ARIA attributes for menu buttons.
    */
-  export type AriaMenuButtonProps = Pick<
+  type AriaMenuButtonProps = Pick<
     React.AriaAttributes,
     'aria-haspopup' | 'aria-expanded' | 'aria-controls'
   >;
