@@ -370,6 +370,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         });
         if (!result.button.accept) {
           return;
+        }
         const state = service.getDebuggerState();
         await service.stop();
         await sessionContext.restartKernel();
