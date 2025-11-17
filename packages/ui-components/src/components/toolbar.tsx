@@ -867,14 +867,6 @@ export function ToolbarButtonComponent(
   const title = getTooltip();
   const disabled = props.enabled === false;
 
-  // Destructure the ARIA attributes we explicitly support
-  // for toolbar buttons that control popups/menus.
-  const {
-    ['aria-haspopup']: ariaHaspopup,
-    ['aria-expanded']: ariaExpanded,
-    ['aria-controls']: ariaControls
-  } = props;
-
   return (
     <Button
       appearance="stealth"
@@ -886,9 +878,9 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
-      aria-haspopup={ariaHaspopup}
-      aria-expanded={ariaExpanded}
-      aria-controls={ariaControls}
+      aria-haspopup={props['aria-haspopup']}
+      aria-expanded={props['aria-expanded']}
+      aria-controls={props['aria-controls']}
       {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
