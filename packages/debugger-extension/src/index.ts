@@ -344,6 +344,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
       },
       execute: async () => {
+        const state = service.getDebuggerState();
+
         const widget = notebookTracker.currentWidget;
         if (!widget) {
           return;
@@ -351,34 +353,23 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
         const { content, sessionContext } = widget;
 
-        const restartBtn = Dialog.warnButton({
-          label: trans.__('Restart'),
-          ariaLabel: trans.__('Confirm Kernel Restart')
-        });
-        const result = await showDialog({
-          title: trans.__('Restart Kernel?'),
-          body: trans.__(
-            'Do you want to restart the kernel of %1? All variables will be lost.',
-            sessionContext.name
-          ),
-          buttons: [
-            Dialog.cancelButton({
-              ariaLabel: trans.__('Cancel Kernel Restart')
-            }),
-            restartBtn
-          ]
-        });
-        if (!result.button.accept) {
+        const onKernelRestart = async (sender: any) => {
+          const status = sessionContext.session?.kernel?.status;
+          if (status === 'restarting') {
+            await service.stop();
+            sessionContext.statusChanged.disconnect(onKernelRestart);
+          }
+        };
+
+        sessionContext.statusChanged.connect(onKernelRestart);
+
+        const restarted = await sessionDialogs.restart(sessionContext);
+        if (!restarted) {
           return;
         }
-        const state = service.getDebuggerState();
-        await service.stop();
-        await sessionContext.restartKernel();
-        await sessionContext.isReady;
         await service.start();
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
-
         await NotebookActions.runAll(
           content,
           sessionContext,
