@@ -1017,9 +1017,10 @@ export class ToolbarButton extends ReactWidget {
  */
 export namespace CommandToolbarButtonComponent {
   /**
-   * Interface for CommandToolbarButtonComponent props.
+   * Interface for CommandToolbarButtonComponent props. It extends
+   * the ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarButtonComponent.AriaMenuButtonProps {
     /**
      * Application commands registry
      */
@@ -1398,7 +1399,10 @@ namespace Private {
       onClick,
       enabled,
       label: labelOverride ?? label,
-      pressed
+      pressed,
+      'aria-haspopup': options['aria-haspopup'],
+      'aria-expanded': options['aria-expanded'],
+      'aria-controls': options['aria-controls']
     };
   }
 
