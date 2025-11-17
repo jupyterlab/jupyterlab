@@ -55,7 +55,7 @@ extensions = [
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
-myst_enable_extensions = ["html_image"]
+myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
 
 # Add any paths that contain templates here, relative to this directory.
@@ -197,9 +197,9 @@ def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
 COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
 COMMANDS_LIST_DOC = "user/commands_list.md"
 PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
-PLUGINS_LIST_DOC = "extension/plugins_list.rst"
+PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
-TOKENS_LIST_DOC = "extension/tokens_list.rst"
+TOKENS_LIST_DOC = "extension/tokens_list.md"
 
 
 def _clean_command_data(command: dict) -> None:
@@ -345,7 +345,9 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     template = ""
 
     for _name, _description in items.items():
-        template += f"- ``{_name}``: {_description}\n"
+        # Normalize line continuation indentation to 2 spaces (prettier standard for markdown lists)
+        _description = _description.replace("\n    ", "\n  ")
+        template += f"- `{_name}`: {_description}\n"
 
     output_path.write_text(template)
 
@@ -363,7 +365,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 Join us in San Diego · JupyterCon 2025 · Nov 4-5 · <a href="https://events.linuxfoundation.org/jupytercon/program/schedule/">SCHEDULE</a> · <a href="https://events.linuxfoundation.org/jupytercon/register/">REGISTER NOW</a>',
+    "announcement": '🚀 You can now test JupyterLab 4.5.0 Release Candidate · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -519,6 +521,13 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):
+    # Enable Plausible.io stats
+    app.add_js_file("https://plausible.io/js/pa-Tem97Eeu4LJFfSRY89aW1.js", loading_method="async")
+    app.add_js_file(
+        filename=None,
+        body="window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init({hashBasedRouting:true})",
+    )
+
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL

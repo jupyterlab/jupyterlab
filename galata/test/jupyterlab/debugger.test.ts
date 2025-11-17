@@ -159,7 +159,7 @@ test.describe('Debugger Tests', () => {
     await page.menu.clickMenuItem('Run>Run All Code');
 
     await page.debugger.waitForCallStack();
-    expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
+    expect(await callStackPanel.innerText()).toMatch(/In \[\*\]/);
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
