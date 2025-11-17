@@ -36,7 +36,7 @@ const DIR_CLASS = 'jp-DebuggerKernelSource-dir';
 interface ITreeNodeProps {
   name: string;
   path: string;
-  modName: string;
+  moduleName: string;
   children?: ITreeNodeProps[];
   onOpen: (path: string) => void;
 }
@@ -45,7 +45,7 @@ interface ITreeNodeProps {
  * Recursive component for rendering a tree node (directory or file).
  */
 function TreeNode(props: ITreeNodeProps): JSX.Element {
-  const { name, path, modName, children, onOpen } = props;
+  const { name, path, moduleName, children, onOpen } = props;
   const [isOpen, setIsOpen] = useState(false);
 
   const isDirectory = !!children && children.length > 0;
@@ -71,10 +71,12 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
     }
 
     if (chain.length > 1) {
-      // Infer separator from first child's modName if available
-      const childModName = currentChildren?.[0]?.modName ?? modName;
+      // Infer separator from first child's moduleName if available
+      const childModuleName = currentChildren?.[0]?.moduleName ?? moduleName;
       const sep =
-        childModName.includes('.') && !childModName.includes('/') ? '.' : '/';
+        childModuleName.includes('.') && !childModuleName.includes('/')
+          ? '.'
+          : '/';
       displayName = chain.join(sep);
       displayChildren = currentChildren;
     }
@@ -133,7 +135,7 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
           __children__: {},
           __namePath__: parts.slice(0, i + 1).join(sep),
           __filePath__: mod.path,
-          __modName__: mod.name
+          __moduleName__: mod.name
         };
       }
       current = current[part].__children__;
@@ -147,7 +149,7 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
       return {
         name,
         path: entry.__filePath__,
-        modName: entry.__modName__,
+        moduleName: entry.__moduleName__,
         children: children.length ? children : undefined,
         onOpen: () => undefined
       };
