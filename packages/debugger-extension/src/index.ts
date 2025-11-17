@@ -1052,20 +1052,20 @@ const main: JupyterFrontEndPlugin<void> = {
     app.contextMenu.addItem({
       selector: '.jp-DebuggerKernelSource-source',
       rank: 1,
-      command: '@jupyterlab/debugger:open-kernel-source'
+      command: CommandIDs.openKernelSource
     });
 
     app.contextMenu.addItem({
       selector: '.jp-DebuggerKernelSource-source',
       rank: 2,
-      command: '@jupyterlab/debugger:copy-kernel-source-path'
+      command: CommandIDs.copyKernelSourcePath
     });
 
     function isKernelSourceNode(node: HTMLElement): boolean {
       return node.classList.contains('jp-DebuggerKernelSource-source');
     }
 
-    commands.addCommand('@jupyterlab/debugger:open-kernel-source', {
+    commands.addCommand(CommandIDs.openKernelSource, {
       label: 'Open',
       execute: async () => {
         const node = app.contextMenuHitTest(isKernelSourceNode);
@@ -1088,7 +1088,7 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand('@jupyterlab/debugger:copy-kernel-source-path', {
+    commands.addCommand(CommandIDs.copyKernelSourcePath, {
       label: 'Copy Path',
       execute: async () => {
         const node = app.contextMenuHitTest(isKernelSourceNode);
