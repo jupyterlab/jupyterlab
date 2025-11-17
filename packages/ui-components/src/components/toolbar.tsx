@@ -782,7 +782,7 @@ export namespace ToolbarButtonComponent {
     iconClass?: string;
     iconLabel?: string;
     tooltip?: string;
-    onClick?: () => void;
+    onClick?: (event?: React.SyntheticEvent) => void;
     enabled?: boolean;
     pressed?: boolean;
     pressedIcon?: LabIcon.IMaybeResolvable;
@@ -817,7 +817,7 @@ export function ToolbarButtonComponent(
       ? undefined
       : (event: React.MouseEvent) => {
           if (event.button === 0) {
-            props.onClick?.();
+            props.onClick?.(event);
             // In safari, the focus do not move to the button on click (see
             // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
             (event.target as HTMLElement).focus();
@@ -834,7 +834,7 @@ export function ToolbarButtonComponent(
           // Fire action only when left button is pressed.
           if (event.button === 0) {
             event.preventDefault();
-            props.onClick?.();
+            props.onClick?.(event);
           }
         }
       : undefined;
@@ -842,8 +842,7 @@ export function ToolbarButtonComponent(
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      event.preventDefault();
-      props.onClick?.();
+      props.onClick?.(event);
     }
   };
 
@@ -1216,7 +1215,8 @@ class ToolbarPopupOpener extends ToolbarButton {
     const trans = (props.translator || nullTranslator).load('jupyterlab');
     super({
       icon: ellipsesIcon,
-      onClick: () => {
+      onClick: event => {
+        event?.preventDefault();
         this.handleClick();
       },
       tooltip: trans.__('More commands')
