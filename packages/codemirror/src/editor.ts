@@ -94,6 +94,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
+    const cmTextarea = this._editor.contentDOM;
+    if (cmTextarea) {
+      cmTextarea.setAttribute('aria-label', 'Code editor content');
+    }
 
     this._onMimeTypeChanged();
     this._onCursorActivity();

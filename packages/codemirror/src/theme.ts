@@ -135,7 +135,11 @@ export const jupyterHighlightStyle = HighlightStyle.define([
     fontWeight: 'bold'
   },
   { tag: t.atom, color: 'var(--jp-mirror-editor-atom-color)' },
-  { tag: t.number, color: 'var(--jp-mirror-editor-number-color)' },
+  {
+    tag: t.number,
+    color: 'var(--jp-mirror-editor-builtin-color)',
+    fontWeight: 'bold'
+  },
   {
     tag: [t.definition(t.name), t.function(t.definition(t.variableName))],
     color: 'var(--jp-mirror-editor-def-color)'
