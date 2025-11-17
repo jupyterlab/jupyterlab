@@ -37,7 +37,7 @@ jupyter labextension install ./mock_packages/mimeextension --no-build --debug
 jupyter labextension develop ./mock_packages/extension --debug
 jupyter labextension build ./mock_packages/extension --debug
 
-conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets altair matplotlib-base jupyterlab_widgets
+conda install --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y ipywidgets matplotlib-base jupyterlab_widgets
 
 popd
 
