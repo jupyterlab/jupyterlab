@@ -55,7 +55,7 @@ extensions = [
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
-myst_enable_extensions = ["html_image"]
+myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
 
 # Add any paths that contain templates here, relative to this directory.
@@ -197,9 +197,9 @@ def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
 COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
 COMMANDS_LIST_DOC = "user/commands_list.md"
 PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
-PLUGINS_LIST_DOC = "extension/plugins_list.rst"
+PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
-TOKENS_LIST_DOC = "extension/tokens_list.rst"
+TOKENS_LIST_DOC = "extension/tokens_list.md"
 
 
 def _clean_command_data(command: dict) -> None:
@@ -345,7 +345,9 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     template = ""
 
     for _name, _description in items.items():
-        template += f"- ``{_name}``: {_description}\n"
+        # Normalize line continuation indentation to 2 spaces (prettier standard for markdown lists)
+        _description = _description.replace("\n    ", "\n  ")
+        template += f"- `{_name}`: {_description}\n"
 
     output_path.write_text(template)
 
