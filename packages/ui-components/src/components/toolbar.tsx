@@ -45,6 +45,14 @@ const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
 const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
 
 /**
+ * ARIA attributes shared by toolbar buttons that control menus/popups.
+ */
+type ToolbarAriaMenuButtonProps = Pick<
+  React.AriaAttributes,
+  'aria-haspopup' | 'aria-expanded' | 'aria-controls'
+>;
+
+/**
  * A layout for toolbars.
  *
  * #### Notes
@@ -769,17 +777,9 @@ export namespace Toolbar {
  */
 export namespace ToolbarButtonComponent {
   /**
-   * ARIA attributes for menu buttons.
-   */
-  type AriaMenuButtonProps = Pick<
-    React.AriaAttributes,
-    'aria-haspopup' | 'aria-expanded' | 'aria-controls'
-  >;
-
-  /**
    * Interface for ToolbarButtonComponent props.
    */
-  export interface IProps extends AriaMenuButtonProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     className?: string;
     /**
      * Data set of the button
@@ -1020,7 +1020,7 @@ export namespace CommandToolbarButtonComponent {
    * Interface for CommandToolbarButtonComponent props. It extends
    * the ToolbarButtonComponent props.
    */
-  export interface IProps extends ToolbarButtonComponent.AriaMenuButtonProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     /**
      * Application commands registry
      */
@@ -1389,6 +1389,13 @@ namespace Private {
     };
     const enabled = commands.isEnabled(id, args);
 
+    const ariaProps: ToolbarAriaMenuButtonProps = options;
+    const {
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
+    } = ariaProps;
+
     return {
       className,
       dataset: { 'data-command': options.id },
@@ -1400,9 +1407,9 @@ namespace Private {
       enabled,
       label: labelOverride ?? label,
       pressed,
-      'aria-haspopup': options['aria-haspopup'],
-      'aria-expanded': options['aria-expanded'],
-      'aria-controls': options['aria-controls']
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
     };
   }
 
