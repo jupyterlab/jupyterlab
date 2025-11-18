@@ -384,7 +384,10 @@ export class EditorHandler implements IDisposable {
    * Add the breakpoints to the editor.
    */
   private _addBreakpointsToEditor(): void {
-    if (!this.editor || this._id !== this._debuggerService.session?.connection?.id) {
+    if (
+      !this.editor ||
+      this._id !== this._debuggerService.session?.connection?.id
+    ) {
       return;
     }
 
