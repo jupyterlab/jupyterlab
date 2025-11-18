@@ -51,7 +51,7 @@ dependencies:
   - matplotlib-base
   - notebook >=7.0.4
   - numpy
-  - vega_datasets
+  - altair
   - xeus-python
   # extra conda stuff
   - jsonschema-with-format-nongpl
