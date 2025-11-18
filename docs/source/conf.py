@@ -64,7 +64,7 @@ templates_path = ["_templates"]
 # The file extensions of source files.
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {".md": "markdown"}
 
 # The master toctree document.
 master_doc = "index"
