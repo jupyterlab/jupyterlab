@@ -356,7 +356,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         const restarted = await sessionDialogs.restart(sessionContext, {
           onBeforeRestart: async (): Promise<Kernel.Status | undefined> => {
             await service.stop();
-            return sessionContext.session?.kernel?.status;
           }
         });
         if (!restarted) {
