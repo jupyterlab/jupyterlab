@@ -3985,50 +3985,8 @@ namespace Private {
     manager: Contents.IManager,
     path: string
   ): Promise<string> {
-    // Map MIME types to file extensions
-    const extensionMap: { [key: string]: string } = {
-      // Image formats
-      'image/png': 'png',
-      'image/jpeg': 'jpg',
-      'image/jpg': 'jpg',
-      'image/gif': 'gif',
-      'image/svg+xml': 'svg',
-      'image/webp': 'webp',
-      'image/bmp': 'bmp',
-      'image/tiff': 'tiff',
-      'image/x-icon': 'ico',
-      // Audio formats
-      'audio/mpeg': 'mp3',
-      'audio/mp3': 'mp3',
-      'audio/wav': 'wav',
-      'audio/wave': 'wav',
-      'audio/x-wav': 'wav',
-      'audio/ogg': 'ogg',
-      'audio/webm': 'webm',
-      'audio/aac': 'aac',
-      'audio/flac': 'flac',
-      'audio/x-m4a': 'm4a',
-      // Video formats
-      'video/mp4': 'mp4',
-      'video/mpeg': 'mpeg',
-      'video/webm': 'webm',
-      'video/ogg': 'ogv',
-      'video/quicktime': 'mov',
-      'video/x-msvideo': 'avi',
-      'video/x-matroska': 'mkv'
-    };
-
-    // Determine base filename based on media type
-    let baseName = 'file';
-    if (mimeType.startsWith('image/')) {
-      baseName = 'image';
-    } else if (mimeType.startsWith('audio/')) {
-      baseName = 'audio';
-    } else if (mimeType.startsWith('video/')) {
-      baseName = 'video';
-    }
-
-    const extension = extensionMap[mimeType] || 'bin';
+    const baseName = getBaseNameFromMimeType(mimeType);
+    const extension = getExtensionFromMimeType(mimeType);
     let filename = `${baseName}.${extension}`;
     let counter = 1;
 
