@@ -329,7 +329,10 @@ export namespace ISessionContext {
      * kernel name and resolves with `true`. If no kernel has been started,
      * this is a no-op, and resolves with `false`.
      */
-    restart(session: ISessionContext): Promise<boolean>;
+    restart(
+      session: ISessionContext,
+      restartOptions?: IRestartOptions
+    ): Promise<boolean>;
   }
 
   /**
@@ -345,6 +348,10 @@ export namespace ISessionContext {
      */
     settingRegistry?: ISettingRegistry | null;
   }
+}
+
+interface IRestartOptions {
+  onBeforeRestart: () => Promise<Kernel.Status | undefined>;
 }
 
 /**
@@ -1433,7 +1440,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    * If there is no kernel, we start a kernel with the last run
    * kernel name and resolves with `true`.
    */
-  async restart(sessionContext: ISessionContext): Promise<boolean> {
+  async restart(
+    sessionContext: ISessionContext,
+    restartOptions: IRestartOptions
+  ): Promise<boolean> {
     const trans = this._translator.load('jupyterlab');
 
     await sessionContext.initialize();
