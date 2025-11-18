@@ -15,6 +15,7 @@ import type {
 import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
+  Clipboard,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -3637,13 +3638,7 @@ function addCommands(
         }
       } catch (err) {
         // browser limitation fallback (e.g Firefox)
-        void showDialog({
-          title: trans.__('Paste Unavailable'),
-          body: trans.__(
-            'Due to browser security restrictions, pasting from the context menu may not be supported.\n\nPlease use Ctrl + V (or ⌘ + V on macOS) instead.'
-          ),
-          buttons: [Dialog.okButton({ label: trans.__('OK') })]
-        });
+        Clipboard.showPasteUnavailableDialog(trans);
       }
     },
 
