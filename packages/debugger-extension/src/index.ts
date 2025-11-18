@@ -20,7 +20,6 @@ import {
   ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
-  //SessionContext,
   SessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
@@ -51,7 +50,7 @@ import {
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { Kernel, Session } from '@jupyterlab/services';
+import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
@@ -354,7 +353,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
         const { content, sessionContext } = widget;
         const restarted = await sessionDialogs.restart(sessionContext, {
-          onBeforeRestart: async (): Promise<Kernel.Status | undefined> => {
+          onBeforeRestart: async (): Promise<void> => {
             await service.stop();
           }
         });

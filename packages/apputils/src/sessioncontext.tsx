@@ -351,7 +351,7 @@ export namespace ISessionContext {
 }
 
 interface IRestartOptions {
-  onBeforeRestart: () => Promise<Kernel.Status | undefined>;
+  onBeforeRestart: () => Promise<void>;
 }
 
 /**
@@ -1442,7 +1442,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    */
   async restart(
     sessionContext: ISessionContext,
-    restartOptions: IRestartOptions
+    restartOptions?: IRestartOptions
   ): Promise<boolean> {
     const trans = this._translator.load('jupyterlab');
 
