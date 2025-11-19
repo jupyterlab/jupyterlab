@@ -296,7 +296,10 @@ export class EditorHandler implements IDisposable {
    * Add the breakpoints to the editor.
    */
   private _addBreakpointsToEditor(): void {
-    if (this._id !== this._debuggerService.session?.connection?.id) {
+    if (
+      !this.editor ||
+      this._id !== this._debuggerService.session?.connection?.id
+    ) {
       return;
     }
 
@@ -317,6 +320,10 @@ export class EditorHandler implements IDisposable {
    * Retrieve the breakpoints from the editor.
    */
   private _getBreakpointsFromEditor(): number[] {
+    if (!this.editor) {
+      return [];
+    }
+
     const editor = this.editor as CodeMirrorEditor;
     const breakpoints = editor.editor.state.field(this._breakpointState);
     let lines: number[] = [];
