@@ -1821,15 +1821,6 @@ namespace Private {
     // Make the element draggable
     element.setAttribute('draggable', 'true');
 
-    // Make a timestamp for this element that does not change for the life of
-    // the element. This is so that dragging two copies of the same element
-    // results in the same filename.
-    const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
-      now.getDate()
-    )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-
     // Add drag start handler
     element.addEventListener('dragstart', (event: DragEvent) => {
       if (!event.dataTransfer) {
@@ -1849,6 +1840,14 @@ namespace Private {
           // Generate a timestamped filename
           const extension = getExtensionFromMimeType(parsed.mimeType);
           const baseName = getBaseNameFromMimeType(parsed.mimeType);
+
+          const now = new Date();
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          const timestamp = `${now.getFullYear()}${pad(
+            now.getMonth() + 1
+          )}${pad(now.getDate())}-${pad(now.getHours())}${pad(
+            now.getMinutes()
+          )}${pad(now.getSeconds())}`;
 
           const filename = `${baseName}-${timestamp}.${extension}`;
 
