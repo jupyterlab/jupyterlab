@@ -94,6 +94,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
+
     this._onMimeTypeChanged();
     this._onCursorActivity();
 
