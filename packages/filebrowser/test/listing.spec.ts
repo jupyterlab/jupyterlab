@@ -129,6 +129,7 @@ describe('filebrowser/listing', () => {
             }
           ]
         };
+        // We set the type to 'directory' so our Mock can recognize it as a directory.
         dt.setData('directory', JSON.stringify(directoryMock));
         const event = new DragEvent('drop', { dataTransfer: dt });
         const options = createOptionsForConstructor();
