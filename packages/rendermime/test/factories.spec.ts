@@ -329,7 +329,10 @@ describe('rendermime/factories', () => {
           '<img src="image.png">',
           '<img src="data:image.png?attribute=src&amp;tag=img" alt="Image">'
         ],
-        ['<img src="data:image">', '<img src="data:image" alt="Image">']
+        [
+          '<img src="data:image">',
+          '<img src="data:image" draggable="true" alt="Image">'
+        ]
       ])(
         'should use resolver for URLs and pass the correct URL context',
         async (source, expected) => {

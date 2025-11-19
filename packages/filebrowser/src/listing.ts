@@ -2012,13 +2012,13 @@ export class DirListing extends Widget {
       }
     }
 
-    if (uploadPromises) {
+    // Only upload (and trigger the allUploaded signal) if we have files to upload.
+    if (uploadPromises.length > 0) {
       Promise.all(uploadPromises)
         .then(() => this._allUploaded.emit())
         .catch(err => {
           console.error('Error while uploading files: ', err);
         });
-      return;
     }
   }
 
