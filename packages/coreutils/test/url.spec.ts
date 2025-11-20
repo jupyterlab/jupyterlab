@@ -196,13 +196,10 @@ describe('@jupyterlab/coreutils', () => {
           isBase64: false,
           data: '<h1>Hi</h1>'
         });
-      });
-
-      it('should handle MIME type with charset and base64', () => {
-        const result = URLExt.parseDataURI(
+        const result2 = URLExt.parseDataURI(
           'data:text/plain;charset=utf-8;base64,SGVsbG8='
         );
-        expect(result).toEqual({
+        expect(result2).toEqual({
           mimeType: 'text/plain;charset=utf-8',
           isBase64: true,
           data: 'SGVsbG8='
@@ -212,22 +209,34 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('.parseUriListFirst()', () => {
       it('should return the first URI from a single URI', () => {
-        const result = URLExt.parseUriListFirst('http://example.com\r\n');
-        expect(result).toBe('http://example.com');
+        const result = URLExt.parseUriListFirst('https://example.com\r\n');
+        expect(result).toBe('https://example.com');
       });
 
       it('should return the first URI from multiple URIs', () => {
         const result = URLExt.parseUriListFirst(
-          'http://first.com\r\nhttp://second.com\r\n'
+          'https://example.com/first\r\nhttps://example.com/second\r\n'
         );
-        expect(result).toBe('http://first.com');
+        expect(result).toBe('https://example.com/first');
       });
 
       it('should skip comments and return first URI', () => {
         const result = URLExt.parseUriListFirst(
-          '# comment\r\nhttp://actual.com\r\n'
+          '# first comment\r\n# second comment\r\nhttps://example.com\r\nhttps://example.com/second\r\n'
         );
-        expect(result).toBe('http://actual.com');
+        expect(result).toBe('https://example.com');
+      });
+
+      it('should handle URI without trailing CRLF', () => {
+        const result = URLExt.parseUriListFirst('http://example.com');
+        expect(result).toBe('http://example.com');
+      });
+
+      it('should handle data URI', () => {
+        const result = URLExt.parseUriListFirst(
+          'data:text/plain;base64,SGVsbG8=\r\n'
+        );
+        expect(result).toBe('data:text/plain;base64,SGVsbG8=');
       });
 
       it('should return null for empty string', () => {
@@ -238,18 +247,6 @@ describe('@jupyterlab/coreutils', () => {
       it('should return null for only comments', () => {
         const result = URLExt.parseUriListFirst('# comment1\r\n# comment2\r\n');
         expect(result).toBeNull();
-      });
-
-      it('should handle URI without trailing CRLF', () => {
-        const result = URLExt.parseUriListFirst('http://example.com');
-        expect(result).toBe('http://example.com');
-      });
-
-      it('should skip multiple leading comments', () => {
-        const result = URLExt.parseUriListFirst(
-          '# first comment\r\n# second comment\r\nhttp://example.com\r\n'
-        );
-        expect(result).toBe('http://example.com');
       });
 
       it('should return null for null input', () => {
@@ -284,8 +281,6 @@ describe('@jupyterlab/coreutils', () => {
 
         expect(blob).not.toBeNull();
         expect(blob!.type).toBe('text/plain');
-
-        // Verify the actual text content
         const text = await blob!.text();
         expect(text).toBe('Hello World');
       });
@@ -299,12 +294,6 @@ describe('@jupyterlab/coreutils', () => {
         const blob = URLExt.dataURItoBlob('data:text/plain;base64,');
         expect(blob).not.toBeNull();
         expect(blob!.size).toBe(0);
-      });
-
-      it('should preserve MIME type in blob', () => {
-        const blob = URLExt.dataURItoBlob('data:audio/x-wave;base64,AAAA');
-        expect(blob).not.toBeNull();
-        expect(blob!.type).toBe('audio/x-wave');
       });
 
       it('should handle base64 data', async () => {
