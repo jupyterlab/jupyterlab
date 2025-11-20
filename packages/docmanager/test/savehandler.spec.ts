@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  DocumentRegistry} from '@jupyterlab/docregistry';
 import {
   Context,
-  DocumentRegistry,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   signalToPromise,

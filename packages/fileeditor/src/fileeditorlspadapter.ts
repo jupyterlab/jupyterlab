@@ -2,18 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition,
+  IVirtualPosition} from '@jupyterlab/lsp';
+import {
   VirtualDocument,
   WidgetLSPAdapter
 } from '@jupyterlab/lsp';
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { FileEditor } from './widget';
+import type { FileEditor } from './widget';
 
 export interface IFileEditorAdapterOptions extends IAdapterOptions {
   /**

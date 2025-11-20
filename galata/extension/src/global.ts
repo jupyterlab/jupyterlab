@@ -17,11 +17,12 @@ import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import { findIndex } from '@lumino/algorithm';
 import { Signal } from '@lumino/signaling';
-import {
+import type {
   IGalataInpage,
   INotebookRunCallback,
   IPluginNameToInterfaceMap,
-  IWaitForSelectorOptions,
+  IWaitForSelectorOptions} from './tokens';
+import {
   PLUGIN_ID_GALATA_HELPERS
 } from './tokens';
 

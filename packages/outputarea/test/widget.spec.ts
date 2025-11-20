@@ -1,22 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
+import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import {
+import type {
   IOutputAreaModel,
-  OutputArea,
-  OutputAreaModel,
-  SimplifiedOutputArea,
   Stdin
 } from '@jupyterlab/outputarea';
-import { Kernel, KernelManager } from '@jupyterlab/services';
+import {
+  OutputArea,
+  OutputAreaModel,
+  SimplifiedOutputArea
+} from '@jupyterlab/outputarea';
+import type { Kernel} from '@jupyterlab/services';
+import { KernelManager } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 

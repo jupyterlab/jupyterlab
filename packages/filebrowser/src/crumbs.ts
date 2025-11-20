@@ -4,10 +4,12 @@
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { renameFile } from '@jupyterlab/docmanager';
-import {
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
+} from '@jupyterlab/translation';
+import {
+  nullTranslator
 } from '@jupyterlab/translation';
 import {
   ellipsesIcon,
@@ -15,10 +17,10 @@ import {
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
-import { Drag } from '@lumino/dragdrop';
-import { Message } from '@lumino/messaging';
+import type { Drag } from '@lumino/dragdrop';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import { FileBrowserModel } from './model';
+import type { FileBrowserModel } from './model';
 
 /**
  * The class name added to the breadcrumb node.

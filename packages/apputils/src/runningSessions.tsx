@@ -1,17 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   ServiceManager,
   Session,
   SessionManager,
   Terminal,
   TerminalManager
 } from '@jupyterlab/services';
-import {
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
+} from '@jupyterlab/translation';
+import {
+  nullTranslator
 } from '@jupyterlab/translation';
 import {
   kernelIcon,
@@ -19,7 +21,8 @@ import {
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import React, { KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React from 'react';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 
 /**

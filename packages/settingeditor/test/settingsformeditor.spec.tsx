@@ -4,10 +4,12 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { SettingsFormEditor } from '../src/SettingsFormEditor';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import {
+import type {
   ISettingRegistry,
-  SettingRegistry,
   Settings
+} from '@jupyterlab/settingregistry';
+import {
+  SettingRegistry
 } from '@jupyterlab/settingregistry';
 import { FormComponent } from '@jupyterlab/ui-components';
 import { TestConnector } from './utils';

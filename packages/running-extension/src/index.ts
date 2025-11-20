@@ -5,11 +5,13 @@
  * @module running-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILabShell,
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
 import {

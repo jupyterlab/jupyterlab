@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PathExt } from '@jupyterlab/coreutils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { TextItem } from '@jupyterlab/statusbar';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import { Title, Widget } from '@lumino/widgets';
+import type { Title, Widget } from '@lumino/widgets';
 import React from 'react';
-import { IDocumentManager } from './tokens';
+import type { IDocumentManager } from './tokens';
 
 /**
  * A namespace for PathStatusComponent statics.

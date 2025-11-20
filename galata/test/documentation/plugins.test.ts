@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { test } from '@jupyterlab/galata';
-import { Token } from '@lumino/coreutils';
+import type { Token } from '@lumino/coreutils';
 import { expect } from '@playwright/test';
 import * as fs from 'fs-extra';
 

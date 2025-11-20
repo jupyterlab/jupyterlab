@@ -17,9 +17,10 @@ import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
 import { PerformanceHelper } from './helpers';
-import {
+import type {
   IJupyterLabPage,
-  IJupyterLabPageFixture,
+  IJupyterLabPageFixture} from './jupyterlabpage';
+import {
   JupyterLabPage
 } from './jupyterlabpage';
 

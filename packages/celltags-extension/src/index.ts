@@ -6,7 +6,7 @@
  */
 
 import type { FieldProps } from '@rjsf/utils';
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -14,8 +14,9 @@ import {
 import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { CellTagField } from './celltag';
+import type {
+  IFormRenderer} from '@jupyterlab/ui-components';
 import {
-  IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 

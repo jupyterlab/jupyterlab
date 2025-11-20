@@ -16,10 +16,12 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
+import type {
+  IEnsurePackageOptions
+} from './ensure-package';
 import {
   ensurePackage,
-  ensureUiComponents,
-  IEnsurePackageOptions
+  ensureUiComponents
 } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };

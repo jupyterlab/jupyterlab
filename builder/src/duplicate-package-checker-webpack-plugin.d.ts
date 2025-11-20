@@ -18,7 +18,7 @@ declare module 'duplicate-package-checker-webpack-plugin';
 
 // Then we expand the definition with the things we use.
 declare module 'duplicate-package-checker-webpack-plugin' {
-  import * as webpack from 'webpack';
+  import type * as webpack from 'webpack';
 
   export = DuplicatePackageCheckerWebpackPlugin;
 

@@ -3,15 +3,15 @@
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import * as path from 'path';
-import { ContentsHelper } from '../contents';
+import type { ContentsHelper } from '../contents';
 import type { INotebookRunCallback } from '../extension';
-import { galata } from '../galata';
+import type { galata } from '../galata';
 import * as Utils from '../utils';
-import { ActivityHelper } from './activity';
-import { FileBrowserHelper } from './filebrowser';
-import { MenuHelper } from './menu';
+import type { ActivityHelper } from './activity';
+import type { FileBrowserHelper } from './filebrowser';
+import type { MenuHelper } from './menu';
 
 /**
  * Maximal number of retries to get a cell

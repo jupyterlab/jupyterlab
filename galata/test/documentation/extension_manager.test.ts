@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  IJupyterLabPageFixture} from '@jupyterlab/galata';
 import {
   expect,
   galata,
-  IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
 import { stubGitHubUserIcons } from './utils';

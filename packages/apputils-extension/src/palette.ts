@@ -3,18 +3,21 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-import {
+import type { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
+import type {
   ICommandPalette,
-  IPaletteItem,
+  IPaletteItem} from '@jupyterlab/apputils';
+import {
   ModalCommandPalette
 } from '@jupyterlab/apputils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator} from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { CommandPalette } from '@lumino/widgets';
 
 /**

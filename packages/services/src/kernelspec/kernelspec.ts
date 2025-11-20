@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
-import { IManager as IBaseManager } from '../basemanager';
+import type { IManager as IBaseManager } from '../basemanager';
 import { ISpecModel, ISpecModels } from './restapi';
-import { ServerConnection } from '..';
+import type { ServerConnection } from '..';
 export { ISpecModel, ISpecModels };
 
 /**

@@ -7,10 +7,12 @@
  * @module translation-extension
  */
 
+import type {
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import {
   ILabShell,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEnd
 } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { IMainMenu } from '@jupyterlab/mainmenu';

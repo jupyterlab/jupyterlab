@@ -5,10 +5,12 @@
  * @module terminal-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import {
   Clipboard,
@@ -20,11 +22,14 @@ import {
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Terminal, TerminalAPI } from '@jupyterlab/services';
+import type { IRunningSessions } from '@jupyterlab/running';
+import { IRunningSessionManagers } from '@jupyterlab/running';
+import type { Terminal} from '@jupyterlab/services';
+import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type {
+  ITerminal} from '@jupyterlab/terminal';
 import {
-  ITerminal,
   ITerminalTracker,
   Terminal as XTerm
 } from '@jupyterlab/terminal';
@@ -35,7 +40,8 @@ import {
   refreshIcon,
   terminalIcon
 } from '@jupyterlab/ui-components';
-import { Menu, Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
 
 /**

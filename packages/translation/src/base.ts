@@ -2,10 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Gettext } from './gettext';
-import {
-  DEFAULT_LANGUAGE_CODE,
+import type {
   ITranslator,
   TranslationBundle
+} from './tokens';
+import {
+  DEFAULT_LANGUAGE_CODE
 } from './tokens';
 
 /**

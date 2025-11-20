@@ -2,12 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell } from '@jupyterlab/cells';
-import { Context } from '@jupyterlab/docregistry';
+import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer } from '@jupyterlab/testing';
-import {
+import type {
   INotebookModel,
-  NotebookPanel,
+  NotebookPanel} from '@jupyterlab/notebook';
+import {
   NotebookTracker
 } from '@jupyterlab/notebook';
 import * as utils from './utils';

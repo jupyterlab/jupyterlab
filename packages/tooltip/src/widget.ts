@@ -2,14 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { HoverBox } from '@jupyterlab/ui-components';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
   IRenderMime,
-  IRenderMimeRegistry,
+  IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import {
   MimeModel
 } from '@jupyterlab/rendermime';
-import { JSONObject } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import type { JSONObject } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**

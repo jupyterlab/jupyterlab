@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  Cell} from '@jupyterlab/cells';
 import {
-  Cell,
   CodeCell,
   CodeCellModel,
   MarkdownCell,
@@ -10,8 +11,9 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
+import type {
+  INotebookModel} from '@jupyterlab/notebook';
 import {
-  INotebookModel,
   Notebook,
   NotebookModel,
   StaticNotebook
@@ -22,11 +24,12 @@ import {
   signalToPromise,
   sleep
 } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message} from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';
 import * as utils from './utils';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { yUndoManagerFacet } from '@jupyterlab/codemirror/lib/extensions/yundomanager';
 
 const server = new JupyterServer();

@@ -1,15 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   CellModel,
+  ICellModel} from '@jupyterlab/cells';
+import {
   CodeCellModel,
-  ICellModel,
   MarkdownCellModel,
   RawCellModel
 } from '@jupyterlab/cells';
-import { IObservableList } from '@jupyterlab/observables';
-import {
+import type { IObservableList } from '@jupyterlab/observables';
+import type {
   ISharedCell,
   ISharedCodeCell,
   ISharedMarkdownCell,
@@ -17,7 +18,8 @@ import {
   ISharedRawCell,
   NotebookChange
 } from '@jupyter/ydoc';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal} from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * A cell list object that supports undo/redo.

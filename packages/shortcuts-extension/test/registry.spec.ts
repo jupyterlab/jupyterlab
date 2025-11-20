@@ -4,9 +4,10 @@
  */
 import { ShortcutRegistry } from '@jupyterlab/shortcuts-extension/lib/registry';
 import { CommandRegistry } from '@lumino/commands';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type {
+  ISettingRegistry} from '@jupyterlab/settingregistry';
 import {
-  ISettingRegistry,
   SettingRegistry,
   Settings
 } from '@jupyterlab/settingregistry';

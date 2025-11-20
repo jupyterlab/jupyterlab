@@ -7,13 +7,14 @@
 
 import { NotebookTools } from '@jupyterlab/notebook';
 import { BaseSettings } from '@jupyterlab/settingregistry';
-import {
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
-  JSONExt,
+  nullTranslator
+} from '@jupyterlab/translation';
+import type {
   JSONObject,
   JSONValue,
   PartialJSONObject,
@@ -21,10 +22,13 @@ import {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import {
+  JSONExt
+} from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
 import { SingletonLayout, Widget } from '@lumino/widgets';
 
-import { MetadataForm } from './token';
+import type { MetadataForm } from './token';
 import { FormWidget } from './form';
 
 /**

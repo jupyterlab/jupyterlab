@@ -5,11 +5,13 @@
  * @module logconsole-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILabShell,
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import {
   createToolbarFactory,
@@ -19,21 +21,25 @@ import {
   setToolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  LogLevel
+} from '@jupyterlab/logconsole';
 import {
   ILoggerRegistry,
   LogConsolePanel,
-  LoggerRegistry,
-  LogLevel
+  LoggerRegistry
 } from '@jupyterlab/logconsole';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
+import type {
+  TranslationBundle
+} from '@jupyterlab/translation';
 import {
   ITranslator,
-  nullTranslator,
-  TranslationBundle
+  nullTranslator
 } from '@jupyterlab/translation';
 import {
   addIcon,
@@ -43,7 +49,7 @@ import {
   ReactWidget
 } from '@jupyterlab/ui-components';
 import { UUID } from '@lumino/coreutils';
-import { DockLayout } from '@lumino/widgets';
+import type { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
 import { LogConsoleStatus } from './status';
 

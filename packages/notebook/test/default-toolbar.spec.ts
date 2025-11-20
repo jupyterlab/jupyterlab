@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCell, MarkdownCell } from '@jupyterlab/cells';
-import { Context } from '@jupyterlab/docregistry';
+import type { MarkdownCell } from '@jupyterlab/cells';
+import { CodeCell } from '@jupyterlab/cells';
+import type { Context } from '@jupyterlab/docregistry';
 import { KernelMessage } from '@jupyterlab/services';
 import {
   acceptDialog,
@@ -13,10 +14,11 @@ import {
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
-import {
+import type {
   INotebookModel,
+  NotebookPanel} from '@jupyterlab/notebook';
+import {
   NotebookActions,
-  NotebookPanel,
   ToolbarItems
 } from '@jupyterlab/notebook';
 import * as utils from './utils';

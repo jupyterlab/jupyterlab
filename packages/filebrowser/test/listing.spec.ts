@@ -7,9 +7,10 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import type {
+  IFileSystemDirectoryEntryOptions} from '@jupyterlab/testing';
 import {
   framePromise,
-  IFileSystemDirectoryEntryOptions,
   signalToPromise
 } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';

@@ -1,21 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  StreamParser
+} from '@codemirror/language';
 import {
   LanguageDescription,
   LanguageSupport,
   LRLanguage,
-  StreamLanguage,
-  StreamParser
+  StreamLanguage
 } from '@codemirror/language';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator} from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { buildParser } from '@lezer/generator';
 import { highlightTree } from '@lezer/highlight';
 
 import { jupyterHighlightStyle } from './theme';
-import { IEditorLanguage, IEditorLanguageRegistry } from './token';
+import type { IEditorLanguage, IEditorLanguageRegistry } from './token';
 import { pythonBuiltin } from './pythonBuiltin';
 
 /**

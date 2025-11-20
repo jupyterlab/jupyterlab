@@ -5,6 +5,8 @@
  * @module application-extension
  */
 
+import type {
+  JupyterFrontEndPlugin} from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,
@@ -15,7 +17,6 @@ import {
   ITreePathUpdater,
   JupyterFrontEnd,
   JupyterFrontEndContextMenu,
-  JupyterFrontEndPlugin,
   JupyterLab,
   LabShell,
   LayoutRestorer,
@@ -37,27 +38,33 @@ import {
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
+import type {
   TranslationBundle
 } from '@jupyterlab/translation';
 import {
+  ITranslator,
+  nullTranslator
+} from '@jupyterlab/translation';
+import type {
+  ContextMenuSvg} from '@jupyterlab/ui-components';
+import {
   buildIcon,
-  ContextMenuSvg,
   jupyterIcon,
   RankedMenu,
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
+import type {
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import {
   JSONExt,
-  PromiseDelegate,
-  ReadonlyPartialJSONValue
+  PromiseDelegate
 } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
+import type { DockLayout, DockPanel} from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
 

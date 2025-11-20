@@ -32,8 +32,9 @@ import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
+import type {
+  ITranslator} from '@jupyterlab/translation';
 import {
-  ITranslator,
   nullTranslator,
   TranslationManager
 } from '@jupyterlab/translation';

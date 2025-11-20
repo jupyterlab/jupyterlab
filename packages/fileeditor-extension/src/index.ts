@@ -5,24 +5,28 @@
  * @module fileeditor-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import {
+  ILayoutRestorer
+} from '@jupyterlab/application';
+import type {
+  MainAreaWidget} from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   ICommandPalette,
   ISanitizer,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
-  MainAreaWidget,
   Sanitizer,
   SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type {
+  CodeViewerWidget} from '@jupyterlab/codeeditor';
 import {
-  CodeViewerWidget,
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
@@ -33,15 +37,18 @@ import {
 } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
-import {
+import type {
   DocumentRegistry,
-  getAvailableKernelFileTypes,
   IDocumentWidget
+} from '@jupyterlab/docregistry';
+import {
+  getAvailableKernelFileTypes
 } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import type {
+  FileEditor} from '@jupyterlab/fileeditor';
 import {
-  FileEditor,
   FileEditorAdapter,
   FileEditorFactory,
   FileEditorSearchProvider,
@@ -53,27 +60,29 @@ import {
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
+import type {
+  WidgetLSPAdapterTracker
+} from '@jupyterlab/lsp';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
-  IWidgetLSPAdapterTracker,
-  WidgetLSPAdapterTracker
+  IWidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Session } from '@jupyterlab/services';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry, MenuSvg } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import { JSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Widget } from '@lumino/widgets';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { Widget } from '@lumino/widgets';
 
 import { CommandIDs, Commands, FACTORY } from './commands';
 import { editorSyntaxStatus } from './syntaxstatus';

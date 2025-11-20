@@ -4,11 +4,12 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
-import {
+import type {
   Kernel,
   KernelManager,
+  KernelSpec} from '../../src';
+import {
   KernelMessage,
-  KernelSpec,
   KernelSpecAPI
 } from '../../src';
 import { FakeKernelManager, handleRequest, KernelTester } from '../utils';

@@ -5,11 +5,13 @@
  * @module toc-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILabShell,
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {

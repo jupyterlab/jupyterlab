@@ -1,20 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IObservableJSON } from '@jupyterlab/observables';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
-import {
+import type { IObservableJSON } from '@jupyterlab/observables';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
 import {
-  JSONExt,
+  nullTranslator
+} from '@jupyterlab/translation';
+import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
+import type {
   JSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import {
+  JSONExt
+} from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';
 

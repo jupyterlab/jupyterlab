@@ -5,14 +5,17 @@
  * @module documentsearch-extension
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import {
-  ISearchKeyBindings,
+  ILabShell
+} from '@jupyterlab/application';
+import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
+import type {
+  ISearchKeyBindings} from '@jupyterlab/documentsearch';
+import {
   ISearchProviderRegistry,
   SearchDocumentModel,
   SearchDocumentView,
@@ -20,7 +23,7 @@ import {
 } from '@jupyterlab/documentsearch';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
 
 /**

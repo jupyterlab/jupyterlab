@@ -4,11 +4,11 @@
  */
 
 import * as React from 'react';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
-import {
+import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutTarget,

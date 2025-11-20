@@ -5,10 +5,12 @@
  * @module inspector-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import {
   ICommandPalette,
@@ -26,7 +28,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the inspector plugin.

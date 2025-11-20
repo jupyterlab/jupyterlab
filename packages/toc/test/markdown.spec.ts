@@ -4,10 +4,12 @@
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { Sanitizer } from '@jupyterlab/apputils';
 import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
-import {
-  EditorLanguageRegistry,
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import type {
   IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
+import {
+  EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 
 describe('TableOfContentsUtils', () => {

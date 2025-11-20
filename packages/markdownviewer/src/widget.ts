@@ -3,24 +3,30 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
+import type {
+  DocumentRegistry} from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
-  DocumentRegistry,
   DocumentWidget
 } from '@jupyterlab/docregistry';
-import {
+import type {
   IRenderMime,
-  IRenderMimeRegistry,
+  IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import {
   MimeModel
 } from '@jupyterlab/rendermime';
-import {
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import {
+  nullTranslator
+} from '@jupyterlab/translation';
+import type { JSONObject} from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import type { ISignal} from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**

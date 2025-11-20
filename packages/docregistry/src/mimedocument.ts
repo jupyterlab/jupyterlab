@@ -4,21 +4,26 @@
 import { Printing, showErrorMessage } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import {
+import type {
   IRenderMime,
-  IRenderMimeRegistry,
+  IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import {
   MimeModel
 } from '@jupyterlab/rendermime';
-import {
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONExt, PartialJSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import {
+  nullTranslator
+} from '@jupyterlab/translation';
+import type { PartialJSONObject} from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
+import type { Message} from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { ABCWidgetFactory, DocumentWidget } from './default';
-import { DocumentRegistry } from './registry';
+import type { DocumentRegistry } from './registry';
 
 /**
  * A content widget for a rendered mimetype document.

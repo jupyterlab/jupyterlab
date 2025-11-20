@@ -6,12 +6,14 @@
 
 /// <reference types="jest" preserve="true"/>
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import {
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type {
   Kernel,
-  KernelMessage,
-  ServiceManager,
   Session
+} from '@jupyterlab/services';
+import {
+  KernelMessage,
+  ServiceManager
 } from '@jupyterlab/services';
 import {
   changeKernel,
@@ -22,10 +24,11 @@ import {
 } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal} from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Context } from './context';
 import { TextModelFactory } from './default';
-import { DocumentRegistry, IDocumentWidget } from './registry';
+import type { DocumentRegistry, IDocumentWidget } from './registry';
 
 /**
  * Create a context for a file.

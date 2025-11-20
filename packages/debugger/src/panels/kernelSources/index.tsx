@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator} from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
@@ -12,7 +13,7 @@ import {
   ToolbarButton
 } from '@jupyterlab/ui-components';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 import { KernelSourcesBody } from './body';
 

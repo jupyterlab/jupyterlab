@@ -5,11 +5,13 @@
  * @module help-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILabShell,
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import {
   Dialog,
@@ -20,14 +22,14 @@ import {
 } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
   jupyterIcon,
   jupyterlabWordmarkIcon
 } from '@jupyterlab/ui-components';
-import { Menu } from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import * as React from 'react';
 
 /**

@@ -6,10 +6,11 @@
  * @packageDocumentation
  * @module pluginmanager-extension
  */
+import type {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin} from '@jupyterlab/application';
 import {
   ILayoutRestorer,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin,
   JupyterLab
 } from '@jupyterlab/application';
 import {
@@ -23,7 +24,7 @@ import {
   extensionIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import {
   IPluginManager,
   PluginListModel,

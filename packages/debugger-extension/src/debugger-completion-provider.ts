@@ -7,11 +7,13 @@ import type {
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
-import { IDebugger } from '@jupyterlab/debugger';
-import {
+import type { IDebugger } from '@jupyterlab/debugger';
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
+} from '@jupyterlab/translation';
+import {
+  nullTranslator
 } from '@jupyterlab/translation';
 
 /**

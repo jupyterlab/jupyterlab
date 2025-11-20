@@ -3,16 +3,19 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import {
+  ILabShell
+} from '@jupyterlab/application';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  FileEditor} from '@jupyterlab/fileeditor';
 import {
   EditorSyntaxStatus,
-  FileEditor,
   IEditorTracker
 } from '@jupyterlab/fileeditor';
 import { IStatusBar } from '@jupyterlab/statusbar';

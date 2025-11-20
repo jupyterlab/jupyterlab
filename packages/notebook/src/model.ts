@@ -2,24 +2,28 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ICellModel } from '@jupyterlab/cells';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { ICellModel } from '@jupyterlab/cells';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import {
+import type { IObservableList } from '@jupyterlab/observables';
+import type {
   IMapChange,
   ISharedNotebook,
-  NotebookChange,
+  NotebookChange} from '@jupyter/ydoc';
+import {
   YNotebook
 } from '@jupyter/ydoc';
-import {
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import {
+  nullTranslator
+} from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal} from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
 /**

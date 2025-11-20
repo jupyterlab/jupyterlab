@@ -5,11 +5,13 @@
  * @module debugger-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  ILabShell,
+  ILayoutRestorer
 } from '@jupyterlab/application';
 import {
   Clipboard,
@@ -44,17 +46,19 @@ import {
   NotebookActions,
   NotebookPanel
 } from '@jupyterlab/notebook';
+import type {
+  IRenderMime} from '@jupyterlab/rendermime';
 import {
   standardRendererFactories as initialFactories,
-  IRenderMime,
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { Session } from '@jupyterlab/services';
+import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type {
+  NullTranslator} from '@jupyterlab/translation';
 import {
   ITranslator,
-  NullTranslator,
   nullTranslator
 } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';

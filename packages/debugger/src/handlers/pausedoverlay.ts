@@ -1,12 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-import { IDebugger } from '../tokens';
-import {
+import type { IDisposable } from '@lumino/disposable';
+import type { IDebugger } from '../tokens';
+import type {
   ITranslator,
-  nullTranslator,
   TranslationBundle
+} from '@jupyterlab/translation';
+import {
+  nullTranslator
 } from '@jupyterlab/translation';
 import { runIcon, stepOverIcon } from '@jupyterlab/ui-components';
 

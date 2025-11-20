@@ -7,11 +7,12 @@ import {
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import {
+import type {
   Contents,
+  IContentProvider} from '../../src';
+import {
   ContentsManager,
   Drive,
-  IContentProvider,
   ServerConnection
 } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';

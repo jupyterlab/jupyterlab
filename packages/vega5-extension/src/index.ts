@@ -7,10 +7,10 @@
  * @module vega5-extension
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { JSONObject } from '@lumino/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import * as VegaModuleType from 'vega-embed';
+import type * as VegaModuleType from 'vega-embed';
 
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.

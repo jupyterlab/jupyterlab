@@ -6,9 +6,10 @@
  * @packageDocumentation
  * @module workspaces-extension
  */
-import {
+import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
+  JupyterFrontEndPlugin} from '@jupyterlab/application';
+import {
   JupyterLab
 } from '@jupyterlab/application';
 import {

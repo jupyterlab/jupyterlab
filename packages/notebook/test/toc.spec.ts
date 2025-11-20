@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   INotebookModel,
-  NotebookPanel,
+  NotebookPanel} from '@jupyterlab/notebook';
+import {
   NotebookToCModel
 } from '@jupyterlab/notebook';
-import { Context } from '@jupyterlab/docregistry';
+import type { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { Sanitizer } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/testing';

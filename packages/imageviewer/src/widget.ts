@@ -5,16 +5,18 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import { Printing } from '@jupyterlab/apputils';
 
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
-  DocumentRegistry,
-  DocumentWidget,
-  IDocumentWidget
+  DocumentWidget
 } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 

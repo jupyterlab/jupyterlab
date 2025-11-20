@@ -3,9 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import {
-  JupyterFrontEnd,
+import type {
   JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  JupyterFrontEnd
 } from '@jupyterlab/application';
 import {
   ICommandPalette,

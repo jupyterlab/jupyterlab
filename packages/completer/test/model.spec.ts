@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   Completer,
-  CompleterModel,
   CompletionHandler
+} from '@jupyterlab/completer';
+import {
+  CompleterModel
 } from '@jupyterlab/completer';
 
 function makeState(text: string): Completer.ITextState {

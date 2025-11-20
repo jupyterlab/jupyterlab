@@ -1,18 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type {
+  IInlineCompletionProvider} from '@jupyterlab/completer';
 import {
   CompletionHandler,
-  IInlineCompletionProvider,
   InlineCompleter
 } from '@jupyterlab/completer';
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { nullTranslator } from '@jupyterlab/translation';
 import { framePromise, signalToPromise, simulate } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { MessageLoop } from '@lumino/messaging';
-import { Doc, Text } from 'yjs';
+import type { Text } from 'yjs';
+import { Doc } from 'yjs';
 import type {
   CellChange,
   FileChange,

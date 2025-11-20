@@ -9,7 +9,8 @@
 // https://nbformat.readthedocs.io/en/latest/format_description.html
 // https://github.com/jupyter/nbformat/blob/master/nbformat/v4/nbformat.v4.schema.json
 
-import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
+import type { PartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 /**
  * The earliest major version of the notebook format we support.

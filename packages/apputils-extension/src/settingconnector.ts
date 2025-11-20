@@ -4,11 +4,12 @@
  */
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import {
+import type {
   ISettingConnector,
   ISettingRegistry
 } from '@jupyterlab/settingregistry';
-import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import { DataConnector } from '@jupyterlab/statedb';
 import { Throttler } from '@lumino/polling';
 
 /**

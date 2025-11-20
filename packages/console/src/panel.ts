@@ -1,24 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  ISessionContext} from '@jupyterlab/apputils';
 import {
-  ISessionContext,
   MainAreaWidget,
   SessionContext,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time } from '@jupyterlab/coreutils';
+import type {
+  IRenderMimeRegistry} from '@jupyterlab/rendermime';
 import {
-  IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-import { ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ServiceManager } from '@jupyterlab/services';
+import type { ITranslator} from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
 import { Token, UUID } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
 import { CodeConsole } from './widget';
 import type { IConsoleCellExecutor } from './tokens';
