@@ -75,3 +75,9 @@
 .jp-DebuggerKernelSource-children {
   margin-left: 14px;
 }
+
+.jp-DebuggerKernelSource-itemSelected {
+  background: var(--jp-layout-color2);
+  outline: 1px solid var(--jp-brand-color1);
+  border-radius: 2px;
+}

@@ -39,6 +39,8 @@ interface ITreeNodeProps {
   moduleName: string;
   children?: ITreeNodeProps[];
   onOpen: (path: string) => void;
+  selectedPath: string | null;
+  onSelect: (path: string) => void;
 }
 
 interface IRawNode {
@@ -52,10 +54,13 @@ interface IRawNode {
  * Recursive component for rendering a tree node (directory or file).
  */
 function TreeNode(props: ITreeNodeProps): JSX.Element {
-  const { name, path, moduleName, children, onOpen } = props;
+  const { name, path, moduleName, children, onOpen, selectedPath, onSelect } =
+    props;
+
   const [isOpen, setIsOpen] = useState(false);
 
   const isDirectory = !!children && children.length > 0;
+  const isSelected = selectedPath === path;
 
   // Compute collapsed chain dynamically (only when expanded)
   let displayName = name;
@@ -89,7 +94,10 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
     }
   }
 
-  const handleClick = (): void => {
+  const handleClick = (e: React.MouseEvent): void => {
+    e.stopPropagation();
+    onSelect(path);
+
     if (isDirectory) {
       setIsOpen(!isOpen);
     } else {
@@ -99,7 +107,13 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
 
   return (
     <div className={isDirectory ? DIR_CLASS : SOURCE_CLASS} title={path}>
-      <div className="jp-DebuggerKernelSource-item" onClick={handleClick}>
+      <div
+        className={classes(
+          'jp-DebuggerKernelSource-item',
+          isSelected && 'jp-DebuggerKernelSource-itemSelected'
+        )}
+        onClick={handleClick}
+      >
         <LabIcon.resolveReact
           icon={
             isDirectory
@@ -116,7 +130,13 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
       {isDirectory && isOpen && displayChildren && (
         <div className="jp-DebuggerKernelSource-children">
           {displayChildren.map((child, i) => (
-            <TreeNode key={i} {...child} onOpen={onOpen} />
+            <TreeNode
+              key={i}
+              {...child}
+              selectedPath={selectedPath}
+              onSelect={onSelect}
+              onOpen={onOpen}
+            />
           ))}
         </div>
       )}
@@ -158,7 +178,9 @@ function buildTree(modules: IDebugger.KernelSource[]): ITreeNodeProps[] {
         path: entry.filePath,
         moduleName: entry.moduleName,
         children: children.length ? children : undefined,
-        onOpen: () => undefined
+        onOpen: () => undefined,
+        selectedPath: null,
+        onSelect: () => undefined
       };
     });
 
@@ -218,10 +240,22 @@ export class KernelSourcesBody extends ReactWidget {
                   );
                 });
             };
+
+            const handleSelect = (path: string): void => {
+              this._selectedPath = path;
+              this.update();
+            };
+
             return (
               <div>
                 {tree.map((node, i) => (
-                  <TreeNode key={i} {...node} onOpen={handleOpen} />
+                  <TreeNode
+                    key={i}
+                    {...node}
+                    onOpen={handleOpen}
+                    selectedPath={this._selectedPath}
+                    onSelect={handleSelect}
+                  />
                 ))}
               </div>
             );
@@ -243,6 +277,7 @@ export class KernelSourcesBody extends ReactWidget {
   private _debuggerService: IDebugger;
   private _trans: IRenderMime.TranslationBundle;
   private _showFilter = false;
+  private _selectedPath: string | null = null;
 }
 
 /**
