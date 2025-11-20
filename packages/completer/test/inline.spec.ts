@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import type {
-  IInlineCompletionProvider} from '@jupyterlab/completer';
-import {
-  CompletionHandler,
-  InlineCompleter
-} from '@jupyterlab/completer';
+import type { IInlineCompletionProvider } from '@jupyterlab/completer';
+import { CompletionHandler, InlineCompleter } from '@jupyterlab/completer';
 import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { nullTranslator } from '@jupyterlab/translation';
 import { framePromise, signalToPromise, simulate } from '@jupyterlab/testing';

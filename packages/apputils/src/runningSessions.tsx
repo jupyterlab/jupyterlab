@@ -8,13 +8,8 @@ import type {
   Terminal,
   TerminalManager
 } from '@jupyterlab/services';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   kernelIcon,
   terminalIcon,

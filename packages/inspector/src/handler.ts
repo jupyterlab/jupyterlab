@@ -3,14 +3,14 @@
 
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import type { IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { MimeModel } from '@jupyterlab/rendermime';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { IInspector } from './tokens';
 

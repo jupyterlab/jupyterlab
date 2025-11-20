@@ -3,7 +3,7 @@
 
 import { Sanitizer } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import type { IRenderMime} from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import { renderText } from '@jupyterlab/rendermime';
 import type { LabIcon } from '@jupyterlab/ui-components';
 import { HoverBox } from '@jupyterlab/ui-components';
@@ -11,7 +11,7 @@ import type { JSONObject } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 

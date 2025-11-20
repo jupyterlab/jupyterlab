@@ -5,7 +5,8 @@ import { YFile } from '@jupyter/ydoc';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import type {
   IEditorExtensionRegistry,
-  IEditorLanguageRegistry} from '@jupyterlab/codemirror';
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import {
   CodeMirrorEditor,
   EditorExtensionRegistry,

@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { Toolbar } from '@jupyterlab/ui-components';
 import { ReactiveToolbar, Spinner } from '@jupyterlab/ui-components';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';

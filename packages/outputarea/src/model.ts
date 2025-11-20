@@ -4,16 +4,15 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import type {
   IObservableList,
-  IObservableString} from '@jupyterlab/observables';
-import {
-  ObservableList
+  IObservableString
 } from '@jupyterlab/observables';
-import type { IOutputModel} from '@jupyterlab/rendermime';
+import { ObservableList } from '@jupyterlab/observables';
+import type { IOutputModel } from '@jupyterlab/rendermime';
 import { OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

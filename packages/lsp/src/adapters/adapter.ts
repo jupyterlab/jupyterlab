@@ -4,17 +4,15 @@
 import mergeWith from 'lodash.mergewith';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type { JSONObject } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { ClientCapabilities, LanguageIdentifier } from '../lsp';

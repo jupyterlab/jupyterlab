@@ -4,21 +4,15 @@
 |----------------------------------------------------------------------------*/
 
 import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
-import type {
-  IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
 import type { ISchemaValidator } from '@jupyterlab/settingregistry';
 import { DataConnector } from '@jupyterlab/statedb';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import type { RawEditor } from './raweditor';
 

@@ -10,12 +10,9 @@ import type {
   JSONObject,
   PartialJSONObject,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue} from '@lumino/coreutils';
-import {
-  JSONExt,
-  PromiseDelegate,
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
 import type { DockPanel, Widget } from '@lumino/widgets';
 import type { ILabShell } from './shell';

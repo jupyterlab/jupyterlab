@@ -1,14 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IWidgetTracker} from '@jupyterlab/apputils';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
 import { WidgetTracker } from '@jupyterlab/apputils';
-import type {
-  DocumentRegistry,
-  MimeDocument} from '@jupyterlab/docregistry';
-import {
-  MimeDocumentFactory
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
+import { MimeDocumentFactory } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator } from '@jupyterlab/translation';

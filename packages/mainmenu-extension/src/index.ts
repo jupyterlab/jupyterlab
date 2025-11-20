@@ -28,17 +28,14 @@ import type {
   IKernelMenu,
   IRunMenu,
   ITabsMenu,
-  IViewMenu} from '@jupyterlab/mainmenu';
-import {
-  IMainMenu,
-  MainMenu
+  IViewMenu
 } from '@jupyterlab/mainmenu';
+import { IMainMenu, MainMenu } from '@jupyterlab/mainmenu';
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator } from '@jupyterlab/translation';
-import type {
-  RankedMenu} from '@jupyterlab/ui-components';
+import type { RankedMenu } from '@jupyterlab/ui-components';
 import {
   fastForwardIcon,
   refreshIcon,
@@ -48,7 +45,7 @@ import {
 import { find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
-import type { Menu} from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import { recentsMenuPlugin } from './recents';
 

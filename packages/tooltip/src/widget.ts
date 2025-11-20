@@ -3,12 +3,8 @@
 
 import { HoverBox } from '@jupyterlab/ui-components';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import type {
-  IRenderMime,
-  IRenderMimeRegistry} from '@jupyterlab/rendermime';
-import {
-  MimeModel
-} from '@jupyterlab/rendermime';
+import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { MimeModel } from '@jupyterlab/rendermime';
 import type { JSONObject } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';

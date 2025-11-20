@@ -7,10 +7,9 @@ import type { ILabStatus } from '@jupyterlab/application';
 import { showDialog } from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { IStateDB } from '@jupyterlab/statedb';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type {
-  IFormRendererRegistry} from '@jupyterlab/ui-components';
+import type { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import {
   ReactWidget,
   updateFilterFunction,
@@ -19,7 +18,7 @@ import {
 import type { CommandRegistry } from '@lumino/commands';
 import type { IDisposable } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { SplitPanel } from '@lumino/widgets';
 import React from 'react';

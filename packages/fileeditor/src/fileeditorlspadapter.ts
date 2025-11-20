@@ -3,15 +3,16 @@
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition} from '@jupyterlab/lsp';
-import {
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
+import { VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import type { FileEditor } from './widget';

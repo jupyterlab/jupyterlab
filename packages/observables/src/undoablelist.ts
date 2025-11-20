@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { JSONValue } from '@lumino/coreutils';
-import type { IObservableList} from './observablelist';
+import type { IObservableList } from './observablelist';
 import { ObservableList } from './observablelist';
 
 /**

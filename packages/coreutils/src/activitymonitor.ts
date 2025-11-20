@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

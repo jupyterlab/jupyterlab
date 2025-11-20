@@ -15,10 +15,10 @@ import type { IObservableList } from '@jupyterlab/observables';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Throttler } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 

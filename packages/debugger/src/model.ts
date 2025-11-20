@@ -3,7 +3,7 @@
 
 import type { IDebugger } from './tokens';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { BreakpointsModel } from './panels/breakpoints/model';

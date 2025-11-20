@@ -4,7 +4,7 @@
 import { RestorablePool } from '@jupyterlab/statedb';
 import { signalToPromise } from '@jupyterlab/testing';
 import type { IObservableDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 const namespace = 'restorable-pool-test';

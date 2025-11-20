@@ -3,7 +3,7 @@
 
 import { ArrayExt } from '@lumino/algorithm';
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

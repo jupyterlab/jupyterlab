@@ -4,19 +4,18 @@
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
-import type { Contents} from '@jupyterlab/services';
+import type { Contents } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';
 import type { IStateDB } from '@jupyterlab/statedb';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type {
-  IScore} from '@jupyterlab/ui-components';
+import type { IScore } from '@jupyterlab/ui-components';
 import {
   FilenameSearcher,
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { createRef } from 'react';

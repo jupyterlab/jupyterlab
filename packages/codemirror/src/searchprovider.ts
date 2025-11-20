@@ -32,26 +32,21 @@
 
 import type { ISearchMatch } from '@jupyterlab/documentsearch';
 import type { CodeMirrorEditor } from './editor';
-import type {
-  Extension,
-  StateEffectType} from '@codemirror/state';
-import {
-  EditorSelection,
-  StateEffect,
-  StateField
-} from '@codemirror/state';
-import type { DecorationSet} from '@codemirror/view';
+import type { Extension, StateEffectType } from '@codemirror/state';
+import { EditorSelection, StateEffect, StateField } from '@codemirror/state';
+import type { DecorationSet } from '@codemirror/view';
 import { Decoration, EditorView } from '@codemirror/view';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type {
   IBaseSearchProvider,
   IFilters,
-  IReplaceOptions} from '@jupyterlab/documentsearch';
+  IReplaceOptions
+} from '@jupyterlab/documentsearch';
 import {
   GenericSearchProvider,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 

@@ -3,8 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type {
-  IForeignCodeExtractor} from '@jupyterlab/lsp';
+import type { IForeignCodeExtractor } from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
   TextForeignCodeExtractor

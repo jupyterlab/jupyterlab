@@ -7,7 +7,7 @@ import type {
 } from '@jupyterlab/application';
 import { Dialog, Notification } from '@jupyterlab/apputils';
 import { GalataInpage } from './global';
-import type { IGalataHelpers} from './tokens';
+import type { IGalataHelpers } from './tokens';
 import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
 
 export type {

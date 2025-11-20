@@ -4,7 +4,7 @@
 import { StringExt } from '@lumino/algorithm';
 import type { ReadonlyPartialJSONArray } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { CompletionHandler } from './handler';
 import type { Completer } from './widget';

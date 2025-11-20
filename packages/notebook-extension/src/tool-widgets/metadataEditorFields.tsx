@@ -5,7 +5,7 @@
 
 import React from 'react';
 import type { FieldProps } from '@rjsf/utils';
-import type { INotebookTracker} from '@jupyterlab/notebook';
+import type { INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { CodeEditor } from '@jupyterlab/codeeditor';

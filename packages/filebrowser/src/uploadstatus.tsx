@@ -5,13 +5,8 @@
 import type { WidgetTracker } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { GroupItem, ProgressBar, TextItem } from '@jupyterlab/statusbar';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import React from 'react';

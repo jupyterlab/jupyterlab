@@ -3,13 +3,13 @@
 
 import { JSONExt } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { BaseManager } from '../basemanager';
 import type { ServerConnection } from '../serverconnection';
 import type * as KernelSpec from './kernelspec';
-import type { ISpecModels} from './restapi';
+import type { ISpecModels } from './restapi';
 import { KernelSpecAPIClient } from './restapi';
 
 /**

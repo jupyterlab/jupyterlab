@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expectFailure, JupyterServer } from '@jupyterlab/testing';
-import type { JSONObject} from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
 import { ConfigSectionManager, ConfigWithDefaults } from '../../src';
 import { getRequestHandler, handleRequest, makeSettings } from '../utils';

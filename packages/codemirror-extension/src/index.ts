@@ -9,10 +9,8 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell
-} from '@jupyterlab/application';
-import type { CodeEditor} from '@jupyterlab/codeeditor';
+import { ILabShell } from '@jupyterlab/application';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IPositionModel, LineCol } from '@jupyterlab/codeeditor';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';

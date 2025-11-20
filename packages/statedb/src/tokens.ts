@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ReadonlyPartialJSONValue} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { IDataConnector } from './interfaces';
 

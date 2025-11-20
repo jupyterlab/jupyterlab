@@ -12,7 +12,7 @@ import { Signal } from '@lumino/signaling';
 import { EditorHandler } from '../handlers/editor';
 
 import type { IDebugger } from '../tokens';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
 

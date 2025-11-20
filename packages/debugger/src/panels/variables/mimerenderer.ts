@@ -4,15 +4,10 @@
  */
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import type { IRenderMimeRegistry} from '@jupyterlab/rendermime';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { MimeModel } from '@jupyterlab/rendermime';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
 import { murmur2 } from '../../hash';

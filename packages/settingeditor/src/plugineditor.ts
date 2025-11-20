@@ -7,17 +7,12 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';

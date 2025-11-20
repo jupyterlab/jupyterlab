@@ -6,7 +6,7 @@ import { StateDB } from '@jupyterlab/statedb';
 import { framePromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import type { Message } from '@lumino/messaging';
-import type { DockPanel} from '@lumino/widgets';
+import type { DockPanel } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 

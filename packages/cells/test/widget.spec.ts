@@ -29,7 +29,7 @@ import {
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 

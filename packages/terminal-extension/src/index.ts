@@ -9,9 +9,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
@@ -24,15 +22,11 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import type { IRunningSessions } from '@jupyterlab/running';
 import { IRunningSessionManagers } from '@jupyterlab/running';
-import type { Terminal} from '@jupyterlab/services';
+import type { Terminal } from '@jupyterlab/services';
 import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type {
-  ITerminal} from '@jupyterlab/terminal';
-import {
-  ITerminalTracker,
-  Terminal as XTerm
-} from '@jupyterlab/terminal';
+import type { ITerminal } from '@jupyterlab/terminal';
+import { ITerminalTracker, Terminal as XTerm } from '@jupyterlab/terminal';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,

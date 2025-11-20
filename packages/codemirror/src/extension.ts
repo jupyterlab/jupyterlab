@@ -9,16 +9,9 @@ import {
   indentOnInput,
   indentUnit
 } from '@codemirror/language';
-import type {
-  Extension} from '@codemirror/state';
-import {
-  Compartment,
-  EditorState,
-  Prec,
-  StateEffect
-} from '@codemirror/state';
-import type {
-  KeyBinding} from '@codemirror/view';
+import type { Extension } from '@codemirror/state';
+import { Compartment, EditorState, Prec, StateEffect } from '@codemirror/state';
+import type { KeyBinding } from '@codemirror/view';
 import {
   crosshairCursor,
   drawSelection,
@@ -34,15 +27,15 @@ import {
   scrollPastEnd,
   tooltips
 } from '@codemirror/view';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { StateCommands } from './commands';
-import type { CustomTheme} from './extensions';
+import type { CustomTheme } from './extensions';
 import { customTheme, rulers } from './extensions';
 import type {
   IConfigurableExtension,

@@ -7,9 +7,7 @@
  * @module apputils-extension
  */
 
-import type {
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ILayoutRestorer,
   IRouter,

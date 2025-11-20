@@ -3,10 +3,13 @@
 
 import type { ILabShell } from '@jupyterlab/application';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import type { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
 import type { ITranslator } from '@jupyterlab/translation';
 import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 

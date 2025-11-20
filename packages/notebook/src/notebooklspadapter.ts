@@ -7,12 +7,9 @@ import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition} from '@jupyterlab/lsp';
-import {
-  untilReady,
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
+import { untilReady, VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableList } from '@jupyterlab/observables';
 import type { Session } from '@jupyterlab/services';

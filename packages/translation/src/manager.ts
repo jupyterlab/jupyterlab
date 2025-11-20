@@ -8,11 +8,9 @@ import type {
   ITranslator,
   ITranslatorConnector,
   Language,
-  TranslationBundle} from './tokens';
-import {
-  DEFAULT_LANGUAGE_CODE,
-  TranslatorConnector
+  TranslationBundle
 } from './tokens';
+import { DEFAULT_LANGUAGE_CODE, TranslatorConnector } from './tokens';
 import { normalizeDomain } from './utils';
 
 /**

@@ -4,7 +4,7 @@
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IObservableDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { IObjectPool, IRestorable } from './interfaces';
 

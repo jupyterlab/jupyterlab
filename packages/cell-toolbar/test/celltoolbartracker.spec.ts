@@ -8,10 +8,10 @@ import {
 } from '@jupyterlab/apputils';
 import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
 import type { ToolbarRegistry } from '@jupyterlab/apputils';
-import type { NotebookPanel} from '@jupyterlab/notebook';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import { NotebookTracker } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
-import type { ISettingRegistry} from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { SettingRegistry } from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import type { ITranslator } from '@jupyterlab/translation';

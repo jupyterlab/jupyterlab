@@ -6,9 +6,7 @@ import type {
   CodeMirrorEditor,
   IHighlightAdjacentMatchOptions
 } from '@jupyterlab/codemirror';
-import {
-  EditorSearchProvider
-} from '@jupyterlab/codemirror';
+import { EditorSearchProvider } from '@jupyterlab/codemirror';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import type {
   IBaseSearchProvider,
@@ -16,9 +14,7 @@ import type {
   IReplaceOptions,
   ISearchMatch
 } from '@jupyterlab/documentsearch';
-import {
-  GenericSearchProvider
-} from '@jupyterlab/documentsearch';
+import { GenericSearchProvider } from '@jupyterlab/documentsearch';
 import type { OutputArea } from '@jupyterlab/outputarea';
 import type { ICellModel } from './model';
 import type { Cell, CodeCell, MarkdownCell } from './widget';

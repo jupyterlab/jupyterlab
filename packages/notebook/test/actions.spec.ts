@@ -3,14 +3,8 @@
 
 import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type {
-  ICodeCellModel} from '@jupyterlab/cells';
-import {
-  Cell,
-  CodeCell,
-  MarkdownCell,
-  RawCell
-} from '@jupyterlab/cells';
+import type { ICodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import {
@@ -31,7 +25,7 @@ import {
   sleep,
   waitForDialog
 } from '@jupyterlab/testing';
-import type { JSONArray, JSONObject} from '@lumino/coreutils';
+import type { JSONArray, JSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
 import * as utils from './utils';
 import uncoalescedOp from './uncoalesced_op.json';

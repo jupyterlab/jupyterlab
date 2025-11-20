@@ -14,13 +14,8 @@ import {
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
-import type {
-  INotebookModel,
-  NotebookPanel} from '@jupyterlab/notebook';
-import {
-  NotebookActions,
-  ToolbarItems
-} from '@jupyterlab/notebook';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookActions, ToolbarItems } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';

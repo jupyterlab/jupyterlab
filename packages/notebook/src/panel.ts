@@ -1,16 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
-import {
-  Dialog,
-  Printing,
-  showDialog
-} from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { Dialog, Printing, showDialog } from '@jupyterlab/apputils';
 import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
-import type { DocumentRegistry} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';

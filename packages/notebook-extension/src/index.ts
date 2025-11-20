@@ -11,13 +11,8 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell,
-  ILayoutRestorer,
-  IRouter
-} from '@jupyterlab/application';
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
+import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
@@ -35,15 +30,11 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import type { Cell, CodeCell, ICellModel} from '@jupyterlab/cells';
+import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 import { MarkdownCell } from '@jupyterlab/cells';
-import type {
-  CodeEditor} from '@jupyterlab/codeeditor';
-import {
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
-import type { IChangedArgs} from '@jupyterlab/coreutils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import {
@@ -53,16 +44,17 @@ import {
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import {
   IDefaultFileBrowser,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
-import type {
-  WidgetLSPAdapterTracker
-} from '@jupyterlab/lsp';
+import type { WidgetLSPAdapterTracker } from '@jupyterlab/lsp';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
@@ -72,8 +64,7 @@ import {
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type {
-  Notebook} from '@jupyterlab/notebook';
+import type { Notebook } from '@jupyterlab/notebook';
 import {
   CommandEditStatus,
   ExecutionIndicator,
@@ -97,12 +88,8 @@ import {
 } from '@jupyterlab/notebook';
 import type { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import type {
-  IRenderMime} from '@jupyterlab/rendermime';
-import {
-  IMarkdownParser,
-  IRenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -112,7 +99,8 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type {
   IDisposableMenuItem,
   IFormRenderer,
-  RankedMenu} from '@jupyterlab/ui-components';
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   addAboveIcon,
   addBelowIcon,
@@ -135,14 +123,12 @@ import type { CommandRegistry } from '@lumino/commands';
 import type {
   JSONObject,
   ReadonlyJSONValue,
-  ReadonlyPartialJSONObject} from '@lumino/coreutils';
-import {
-  JSONExt,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt, UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
 import { Panel } from '@lumino/widgets';

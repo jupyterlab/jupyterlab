@@ -3,13 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { HTMLSelect, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 import React, { useState } from 'react';
 import type { IDebugger } from '../../tokens';

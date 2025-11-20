@@ -9,10 +9,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell,
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   Dialog,
@@ -46,8 +43,7 @@ import {
   NotebookActions,
   NotebookPanel
 } from '@jupyterlab/notebook';
-import type {
-  IRenderMime} from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
   standardRendererFactories as initialFactories,
   IRenderMimeRegistry,
@@ -55,12 +51,8 @@ import {
 } from '@jupyterlab/rendermime';
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type {
-  NullTranslator} from '@jupyterlab/translation';
-import {
-  ITranslator,
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { NullTranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';

@@ -14,7 +14,7 @@ import { AttachmentsResolver } from '@jupyterlab/attachments';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { DOMUtils } from '@jupyterlab/apputils';
 
-import type { IChangedArgs} from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
 
 import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
@@ -23,9 +23,7 @@ import type { DirListing } from '@jupyterlab/filebrowser';
 
 import type * as nbformat from '@jupyterlab/nbformat';
 
-import type {
-  IOutputPrompt,
-  IStdin} from '@jupyterlab/outputarea';
+import type { IOutputPrompt, IStdin } from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputPrompt,
@@ -33,13 +31,8 @@ import {
   Stdin
 } from '@jupyterlab/outputarea';
 
-import type {
-  IRenderMime,
-  IRenderMimeRegistry} from '@jupyterlab/rendermime';
-import {
-  imageRendererFactory,
-  MimeModel
-} from '@jupyterlab/rendermime';
+import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { imageRendererFactory, MimeModel } from '@jupyterlab/rendermime';
 
 import type { Kernel, KernelMessage } from '@jupyterlab/services';
 
@@ -47,40 +40,34 @@ import type { IMapChange } from '@jupyter/ydoc';
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
 import { addIcon, collapseIcon, expandIcon } from '@jupyterlab/ui-components';
 
-import type { JSONObject} from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { some } from '@lumino/algorithm';
 
 import type { Drag } from '@lumino/dragdrop';
 
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 
 import { Debouncer } from '@lumino/polling';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
-import type {
-  ICellFooter,
-  ICellHeader
-} from './headerfooter';
-import {
-  CellFooter,
-  CellHeader
-} from './headerfooter';
+import type { ICellFooter, ICellHeader } from './headerfooter';
+import { CellFooter, CellHeader } from './headerfooter';
 
-import type { IInputPrompt} from './inputarea';
+import type { IInputPrompt } from './inputarea';
 import { InputArea, InputPrompt } from './inputarea';
 
 import type {

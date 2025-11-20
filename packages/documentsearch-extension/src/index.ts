@@ -9,12 +9,9 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell
-} from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-import type {
-  ISearchKeyBindings} from '@jupyterlab/documentsearch';
+import type { ISearchKeyBindings } from '@jupyterlab/documentsearch';
 import {
   ISearchProviderRegistry,
   SearchDocumentModel,

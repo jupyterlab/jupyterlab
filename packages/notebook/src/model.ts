@@ -10,19 +10,13 @@ import type { IObservableList } from '@jupyterlab/observables';
 import type {
   IMapChange,
   ISharedNotebook,
-  NotebookChange} from '@jupyter/ydoc';
-import {
-  YNotebook
+  NotebookChange
 } from '@jupyter/ydoc';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import { YNotebook } from '@jupyter/ydoc';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 

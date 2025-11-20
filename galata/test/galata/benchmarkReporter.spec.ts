@@ -3,12 +3,8 @@
 
 import { expect, test } from '@jupyterlab/galata';
 import type { TestResult } from '@playwright/test/reporter';
-import type {
-  IReportRecord
-} from '../../src/benchmarkReporter';
-import BenchmarkReporter, {
-  benchmark
-} from '../../src/benchmarkReporter';
+import type { IReportRecord } from '../../src/benchmarkReporter';
+import BenchmarkReporter, { benchmark } from '../../src/benchmarkReporter';
 import fs from 'fs';
 import path from 'path';
 import type { JSONObject } from '@lumino/coreutils';

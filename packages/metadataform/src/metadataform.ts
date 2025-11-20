@@ -7,13 +7,8 @@
 
 import { NotebookTools } from '@jupyterlab/notebook';
 import { BaseSettings } from '@jupyterlab/settingregistry';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type {
   JSONObject,
   JSONValue,
@@ -22,9 +17,7 @@ import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import {
-  JSONExt
-} from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { SingletonLayout, Widget } from '@lumino/widgets';
 

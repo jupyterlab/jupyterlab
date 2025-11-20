@@ -3,17 +3,12 @@
 
 import type { KernelSpec, Session } from '@jupyterlab/services';
 
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import type { IDisposable } from '@lumino/disposable';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { DebugProtocol } from '@vscode/debugprotocol';

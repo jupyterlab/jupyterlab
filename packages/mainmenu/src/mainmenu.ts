@@ -5,7 +5,7 @@ import type { TranslationBundle } from '@jupyterlab/translation';
 import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
-import type { Menu} from '@lumino/widgets';
+import type { Menu } from '@lumino/widgets';
 import { MenuBar } from '@lumino/widgets';
 import { EditMenu } from './edit';
 import { FileMenu } from './file';

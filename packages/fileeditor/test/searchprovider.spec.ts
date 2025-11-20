@@ -9,12 +9,8 @@ import {
   EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
-import type {
-  DocumentRegistry} from '@jupyterlab/docregistry';
-import {
-  Context,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { FileEditor } from '@jupyterlab/fileeditor';
 import type { ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';

@@ -9,9 +9,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   InputDialog,
@@ -26,7 +24,10 @@ import {
 import { CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import type { CSVViewer } from '@jupyterlab/csvviewer';
 import type { TextRenderConfig } from '@jupyterlab/csvviewer';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import type { IObservableList } from '@jupyterlab/observables';

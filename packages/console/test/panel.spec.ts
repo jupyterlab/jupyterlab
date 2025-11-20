@@ -5,7 +5,7 @@ import { createSimpleSessionContext } from '@jupyterlab/docregistry/lib/testutil
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 import { dismissDialog } from '@jupyterlab/testing';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import {

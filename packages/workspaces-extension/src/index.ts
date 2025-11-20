@@ -8,10 +8,9 @@
  */
 import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin} from '@jupyterlab/application';
-import {
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { JupyterLab } from '@jupyterlab/application';
 import {
   IWorkspaceCommands,
   IWorkspacesModel,

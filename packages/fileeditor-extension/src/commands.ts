@@ -8,14 +8,8 @@ import type {
   ISessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import {
-  Clipboard,
-  MainAreaWidget
-} from '@jupyterlab/apputils';
-import type {
-  CodeEditor,
-  IEditorServices
-} from '@jupyterlab/codeeditor';
+import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
+import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CodeViewerWidget,
   IEditorMimeTypeService
@@ -35,13 +29,8 @@ import type { ILauncher } from '@jupyterlab/launcher';
 import type { IMainMenu } from '@jupyterlab/mainmenu';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,

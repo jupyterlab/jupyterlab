@@ -5,7 +5,7 @@
 
 // Inspired by https://discuss.codemirror.net/t/how-to-implement-ruler/4616/
 
-import type { Extension} from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
 import { Facet } from '@codemirror/state';
 import type { ViewUpdate } from '@codemirror/view';
 import { EditorView, ViewPlugin } from '@codemirror/view';

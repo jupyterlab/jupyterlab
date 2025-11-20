@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  Context} from '@jupyterlab/docregistry';
+import type { Context } from '@jupyterlab/docregistry';
 import {
   DocumentRegistry,
   MimeContent,
@@ -10,7 +9,7 @@ import {
   MimeDocumentFactory
 } from '@jupyterlab/docregistry';
 import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
-import type { IRenderMime} from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import { RenderedText } from '@jupyterlab/rendermime';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import { testEmission } from '@jupyterlab/testing';

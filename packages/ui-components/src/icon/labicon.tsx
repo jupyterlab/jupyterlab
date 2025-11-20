@@ -4,7 +4,11 @@
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import type { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
+import type {
+  ElementAttrs,
+  VirtualElement,
+  VirtualNode
+} from '@lumino/virtualdom';
 import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';

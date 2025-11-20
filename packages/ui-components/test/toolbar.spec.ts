@@ -14,7 +14,7 @@ import {
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import type { PanelLayout} from '@lumino/widgets';
+import type { PanelLayout } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 

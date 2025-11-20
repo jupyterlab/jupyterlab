@@ -4,7 +4,7 @@
  */
 
 import type { Cell } from '@jupyterlab/cells';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   notTrustedIcon,

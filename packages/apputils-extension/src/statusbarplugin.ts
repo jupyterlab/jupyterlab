@@ -7,11 +7,8 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell
-} from '@jupyterlab/application';
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
+import { ILabShell } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   IKernelStatusModel,
   ISessionContextDialogs,

@@ -11,9 +11,7 @@ import type {
   PlaywrightWorkerOptions,
   TestType
 } from '@playwright/test';
-import {
-  test as base
-} from '@playwright/test';
+import { test as base } from '@playwright/test';
 import * as path from 'path';
 import { ContentsHelper } from './contents';
 import { galata } from './galata';

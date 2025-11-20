@@ -5,7 +5,7 @@
 
 import { searchIcon } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
-import type { CommandPalette} from '@lumino/widgets';
+import type { CommandPalette } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
 
 /**

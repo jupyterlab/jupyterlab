@@ -8,11 +8,8 @@ import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  ABCWidgetFactory,
-  DocumentWidget
-} from '@jupyterlab/docregistry';
-import type { ITranslator} from '@jupyterlab/translation';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
@@ -22,7 +19,7 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 import * as React from 'react';

@@ -10,8 +10,7 @@ import { LruCache } from '@jupyterlab/coreutils';
 
 import type { IThemeManager } from '@jupyterlab/apputils';
 
-import type {
-  IMermaidManager} from './tokens';
+import type { IMermaidManager } from './tokens';
 import {
   DETAILS_CLASS,
   MERMAID_CLASS,

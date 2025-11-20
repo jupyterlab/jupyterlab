@@ -8,7 +8,8 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition} from '@jupyterlab/lsp';
+  IVirtualPosition
+} from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
   DocumentConnectionManager,

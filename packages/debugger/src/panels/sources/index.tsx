@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import type { IEditorServices } from '@jupyterlab/codeeditor';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   PanelWithToolbar,

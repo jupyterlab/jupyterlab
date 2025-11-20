@@ -6,14 +6,11 @@ import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  ABCWidgetFactory,
-  DocumentWidget
-} from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type * as DataGridModule from '@lumino/datagrid';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import type * as DSVModelModule from './model';

@@ -4,7 +4,7 @@
 import { VDomModel } from '@jupyterlab/ui-components';
 import type { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type {
   IFilter,

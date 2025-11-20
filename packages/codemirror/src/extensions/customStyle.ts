@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { Extension} from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
 import { combineConfig, Facet } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 

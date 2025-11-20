@@ -4,14 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 import type { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-import type {
-  ICommandPalette,
-  IPaletteItem} from '@jupyterlab/apputils';
-import {
-  ModalCommandPalette
-} from '@jupyterlab/apputils';
+import type { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
+import { ModalCommandPalette } from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';

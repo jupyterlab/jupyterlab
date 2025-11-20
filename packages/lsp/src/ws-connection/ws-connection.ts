@@ -12,7 +12,7 @@
 import type { MessageConnection } from 'vscode-ws-jsonrpc';
 import { ConsoleLogger, listen } from 'vscode-ws-jsonrpc';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import {

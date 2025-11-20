@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  Session} from '@jupyterlab/services';
+import type { Session } from '@jupyterlab/services';
 import {
   KernelManager,
   SessionAPI,

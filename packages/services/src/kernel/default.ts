@@ -3,10 +3,10 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import type { JSONObject} from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { CommsOverSubshells, ServerConnection } from '..';
@@ -17,12 +17,8 @@ import type * as Kernel from './kernel';
 
 import * as KernelMessage from './messages';
 
-import type {
-  KernelFutureHandler} from './future';
-import {
-  KernelControlFutureHandler,
-  KernelShellFutureHandler
-} from './future';
+import type { KernelFutureHandler } from './future';
+import { KernelControlFutureHandler, KernelShellFutureHandler } from './future';
 
 import * as validate from './validate';
 import type { KernelSpec } from '../kernelspec';

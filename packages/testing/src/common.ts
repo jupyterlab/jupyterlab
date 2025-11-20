@@ -7,7 +7,7 @@ import { simulate as simulateEvent } from 'simulate-event';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { sleep } from '@jupyterlab/coreutils/lib/testutils';

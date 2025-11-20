@@ -7,7 +7,7 @@ import type {
   ILoggerRegistry
 } from '@jupyterlab/logconsole';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { listIcon, VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';

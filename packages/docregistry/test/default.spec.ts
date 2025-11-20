@@ -3,7 +3,8 @@
 
 import type {
   DocumentRegistry,
-  IDocumentWidget} from '@jupyterlab/docregistry';
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   Base64ModelFactory,

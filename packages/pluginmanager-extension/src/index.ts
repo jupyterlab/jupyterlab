@@ -8,11 +8,9 @@
  */
 import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin} from '@jupyterlab/application';
-import {
-  ILayoutRestorer,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
 import {
   ICommandPalette,
   MainAreaWidget,

@@ -2,9 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import type {
-  IMarkdownParser,
-  IRenderMime} from '@jupyterlab/rendermime';
+import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,

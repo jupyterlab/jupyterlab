@@ -13,7 +13,8 @@ import { COMPLETER_ACTIVE_CLASS } from '@jupyterlab/codeeditor';
 import { CommandToolbarButton } from '@jupyterlab/ui-components';
 import type {
   IInlineCompleterSettings,
-  IInlineCompletionProviderInfo} from '@jupyterlab/completer';
+  IInlineCompletionProviderInfo
+} from '@jupyterlab/completer';
 import {
   CompletionProviderManager,
   ContextCompleterProvider,
@@ -24,8 +25,7 @@ import {
   KernelCompleterProvider
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type {
-  IFormRenderer} from '@jupyterlab/ui-components';
+import type { IFormRenderer } from '@jupyterlab/ui-components';
 import {
   caretLeftIcon,
   caretRightIcon,

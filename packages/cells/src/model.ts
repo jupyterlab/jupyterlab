@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { IAttachmentsModel } from '@jupyterlab/attachments';
@@ -15,9 +15,12 @@ import type { IChangedArgs } from '@jupyterlab/coreutils';
 
 import type * as nbformat from '@jupyterlab/nbformat';
 
-import type { IObservableString, ObservableValue } from '@jupyterlab/observables';
+import type {
+  IObservableString,
+  ObservableValue
+} from '@jupyterlab/observables';
 
-import type { IOutputAreaModel} from '@jupyterlab/outputarea';
+import type { IOutputAreaModel } from '@jupyterlab/outputarea';
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import type {
@@ -31,10 +34,7 @@ import type {
   ISharedRawCell,
   YCodeCell
 } from '@jupyter/ydoc';
-import {
-  createMutex,
-  createStandaloneCell
-} from '@jupyter/ydoc';
+import { createMutex, createStandaloneCell } from '@jupyter/ydoc';
 
 const globalModelDBMutex = createMutex();
 

@@ -3,7 +3,7 @@
 
 import { VDomModel } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 import { TableOfContents } from './tokens';

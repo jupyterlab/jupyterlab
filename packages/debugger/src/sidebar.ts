@@ -5,7 +5,7 @@ import type { IThemeManager } from '@jupyterlab/apputils';
 
 import type { IEditorServices } from '@jupyterlab/codeeditor';
 
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon, SidePanel } from '@jupyterlab/ui-components';

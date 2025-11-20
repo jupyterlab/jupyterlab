@@ -9,10 +9,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell,
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   ICommandPalette,
@@ -23,9 +20,7 @@ import {
 } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import type {
-  LogLevel
-} from '@jupyterlab/logconsole';
+import type { LogLevel } from '@jupyterlab/logconsole';
 import {
   ILoggerRegistry,
   LogConsolePanel,
@@ -34,13 +29,8 @@ import {
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import type {
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  ITranslator,
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
   clearIcon,

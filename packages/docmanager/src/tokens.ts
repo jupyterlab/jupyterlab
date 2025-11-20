@@ -3,7 +3,10 @@
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';

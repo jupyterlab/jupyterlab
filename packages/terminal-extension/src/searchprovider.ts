@@ -4,10 +4,9 @@
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import type {
   IReplaceOptions,
-  ISearchProvider} from '@jupyterlab/documentsearch';
-import {
-  SearchProvider
+  ISearchProvider
 } from '@jupyterlab/documentsearch';
+import { SearchProvider } from '@jupyterlab/documentsearch';
 import { Terminal } from '@jupyterlab/terminal';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { Widget } from '@lumino/widgets';

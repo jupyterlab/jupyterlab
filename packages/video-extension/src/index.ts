@@ -11,24 +11,15 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  ABCWidgetFactory,
-  DocumentWidget
-} from '@jupyterlab/docregistry';
-import type {
-  Contents} from '@jupyterlab/services';
-import {
-  IDefaultDrive,
-  RestContentProvider
-} from '@jupyterlab/services';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { Contents } from '@jupyterlab/services';
+import { IDefaultDrive, RestContentProvider } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 

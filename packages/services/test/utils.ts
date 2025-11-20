@@ -1,20 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  JSONObject,
-  JSONPrimitive} from '@lumino/coreutils';
-import {
-  PromiseDelegate,
-  UUID
-} from '@lumino/coreutils';
+import type { JSONObject, JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import WebSocket from 'ws';
-import type {
-  Contents,
-  Kernel,
-  Session,
-  Terminal
-} from '../src';
+import type { Contents, Kernel, Session, Terminal } from '../src';
 import {
   KernelManager,
   KernelMessage,

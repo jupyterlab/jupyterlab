@@ -9,7 +9,7 @@ import type { DocumentWidget } from '@jupyterlab/docregistry';
 import type { FileEditor } from '@jupyterlab/fileeditor';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';

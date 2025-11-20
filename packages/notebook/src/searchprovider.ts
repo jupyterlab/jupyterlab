@@ -7,10 +7,7 @@ import type {
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import {
-  CodeCell,
-  createCellSearchProvider
-} from '@jupyterlab/cells';
+import { CodeCell, createCellSearchProvider } from '@jupyterlab/cells';
 import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
@@ -23,11 +20,9 @@ import type {
   ISearchProvider,
   SelectionState
 } from '@jupyterlab/documentsearch';
-import {
-  SearchProvider
-} from '@jupyterlab/documentsearch';
+import { SearchProvider } from '@jupyterlab/documentsearch';
 import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
 import type { Widget } from '@lumino/widgets';

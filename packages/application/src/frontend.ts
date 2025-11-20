@@ -8,7 +8,7 @@ import { ContextMenuSvg } from '@jupyterlab/ui-components';
 import type { IPlugin } from '@lumino/application';
 import { Application } from '@lumino/application';
 import { Token } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { FocusTracker, Widget } from '@lumino/widgets';
 

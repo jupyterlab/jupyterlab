@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { ReactElement, ReactNode} from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { caretDownIcon, caretUpIcon } from '../icon';
 

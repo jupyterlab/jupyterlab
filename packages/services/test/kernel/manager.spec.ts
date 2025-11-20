@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
-import type { Kernel} from '../../src';
+import type { Kernel } from '../../src';
 import { KernelAPI, KernelManager } from '../../src';
 import { makeSettings } from '../utils';
 

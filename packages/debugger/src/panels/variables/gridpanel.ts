@@ -10,18 +10,13 @@ import {
   DataModel,
   TextRenderer
 } from '@lumino/datagrid';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 
 import type { IThemeManager } from '@jupyterlab/apputils';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import type { IDebugger } from '../../tokens';
 import { Debugger } from '../../';

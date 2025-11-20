@@ -3,15 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type {
-  IDocumentManagerDialogs} from '@jupyterlab/docmanager';
+import type { IDocumentManagerDialogs } from '@jupyterlab/docmanager';
 import {
   DocumentManager,
   renameDialog,
   renameFile
 } from '@jupyterlab/docmanager';
-import type {
-  IDocumentWidget} from '@jupyterlab/docregistry';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   DocumentRegistry,

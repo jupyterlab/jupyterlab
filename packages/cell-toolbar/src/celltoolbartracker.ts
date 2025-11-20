@@ -13,7 +13,7 @@ import type {
 } from '@jupyterlab/cells';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import type { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import type { IObservableList} from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';
 import { ReactWidget, Toolbar } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
@@ -22,7 +22,7 @@ import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import type { PanelLayout, Widget } from '@lumino/widgets';
 import type { IMapChange } from '@jupyter/ydoc';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
 /*

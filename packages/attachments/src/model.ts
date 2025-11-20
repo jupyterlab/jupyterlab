@@ -2,21 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type {
-  IObservableMap,
-  IObservableValue} from '@jupyterlab/observables';
-import {
-  ObservableMap
-} from '@jupyterlab/observables';
-import type {
-  IAttachmentModel} from '@jupyterlab/rendermime';
-import {
-  AttachmentModel,
-  imageRendererFactory
-} from '@jupyterlab/rendermime';
+import type { IObservableMap, IObservableValue } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
+import type { IAttachmentModel } from '@jupyterlab/rendermime';
+import { AttachmentModel, imageRendererFactory } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

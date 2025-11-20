@@ -3,16 +3,13 @@
 
 import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type {
-  IOutputAreaModel,
-  Stdin
-} from '@jupyterlab/outputarea';
+import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputAreaModel,
   SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
-import type { Kernel} from '@jupyterlab/services';
+import type { Kernel } from '@jupyterlab/services';
 import { KernelManager } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {

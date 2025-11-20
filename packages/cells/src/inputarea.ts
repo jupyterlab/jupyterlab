@@ -7,7 +7,7 @@ import { PanelLayout } from '@lumino/widgets';
 
 import { Widget } from '@lumino/widgets';
 
-import type { CodeEditor} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import type { ICellModel } from './model';

@@ -7,7 +7,7 @@ import type { KernelMessage, Session } from '@jupyterlab/services';
 
 import type { ISharedText } from '@jupyter/ydoc';
 
-import type { ReadonlyJSONObject} from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 
 import type { IDisposable, IObservableDisposable } from '@lumino/disposable';

@@ -1,13 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   caretDownEmptyThinIcon,
   caretDownIcon,
@@ -22,7 +17,7 @@ import {
   VDomRenderer,
   wordIcon
 } from '@jupyterlab/ui-components';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { CommandRegistry } from '@lumino/commands';
 import { UseSignal } from '@jupyterlab/apputils';

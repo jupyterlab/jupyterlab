@@ -6,17 +6,12 @@ import type {
   IEditorMimeTypeService,
   IEditorServices
 } from '@jupyterlab/codeeditor';
-import {
-  CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  ABCWidgetFactory,
-  DocumentWidget
-} from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';

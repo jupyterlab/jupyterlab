@@ -32,12 +32,8 @@ import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
-import type {
-  ITranslator} from '@jupyterlab/translation';
-import {
-  nullTranslator,
-  TranslationManager
-} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator, TranslationManager } from '@jupyterlab/translation';
 
 import { addIcon, ToolbarButton } from '@jupyterlab/ui-components';
 

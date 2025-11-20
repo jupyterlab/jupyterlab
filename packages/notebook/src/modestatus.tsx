@@ -4,13 +4,8 @@
  */
 
 import { TextItem } from '@jupyterlab/statusbar';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import type { Notebook, NotebookMode } from '.';

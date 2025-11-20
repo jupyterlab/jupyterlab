@@ -5,12 +5,8 @@
 import { ShortcutRegistry } from '@jupyterlab/shortcuts-extension/lib/registry';
 import { CommandRegistry } from '@lumino/commands';
 import type { IDataConnector } from '@jupyterlab/statedb';
-import type {
-  ISettingRegistry} from '@jupyterlab/settingregistry';
-import {
-  SettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
 
 import pluginSchema from '../schema/shortcuts.json';
 

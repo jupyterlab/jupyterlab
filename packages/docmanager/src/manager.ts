@@ -1,27 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISessionContext} from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import { SessionContextDialogs } from '@jupyterlab/apputils';
-import type { IChangedArgs} from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  Context
-} from '@jupyterlab/docregistry';
+import { Context } from '@jupyterlab/docregistry';
 import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 
 import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt, find } from '@lumino/algorithm';
 import { UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { AttachedProperty } from '@lumino/properties';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';

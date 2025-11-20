@@ -5,8 +5,7 @@
  * @module application-extension
  */
 
-import type {
-  JupyterFrontEndPlugin} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,
@@ -38,15 +37,9 @@ import {
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import type {
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  ITranslator,
-  nullTranslator
-} from '@jupyterlab/translation';
-import type {
-  ContextMenuSvg} from '@jupyterlab/ui-components';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ContextMenuSvg } from '@jupyterlab/ui-components';
 import {
   buildIcon,
   jupyterIcon,
@@ -54,16 +47,11 @@ import {
   Switch
 } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
-import type {
-  ReadonlyPartialJSONValue
-} from '@lumino/coreutils';
-import {
-  JSONExt,
-  PromiseDelegate
-} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import type { DockLayout, DockPanel} from '@lumino/widgets';
+import type { DockLayout, DockPanel } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';

@@ -1,12 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { DocumentRegistry} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type {
-  SidePanel} from '@jupyterlab/ui-components';
+import type { SidePanel } from '@jupyterlab/ui-components';
 import {
   classes,
   DockPanelSvg,
@@ -17,16 +16,12 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
-import type { IMessageHandler, Message} from '@lumino/messaging';
+import type { IMessageHandler, Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type {
-  DockLayout,
-  DockPanel,
-  TabPanel,
-  Title} from '@lumino/widgets';
+import type { DockLayout, DockPanel, TabPanel, Title } from '@lumino/widgets';
 import {
   AccordionPanel,
   BoxLayout,

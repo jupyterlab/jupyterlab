@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Popup} from '@jupyterlab/statusbar';
+import type { Popup } from '@jupyterlab/statusbar';
 import { showPopup, TextItem } from '@jupyterlab/statusbar';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import type { Menu } from '@lumino/widgets';

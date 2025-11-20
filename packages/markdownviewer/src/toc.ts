@@ -3,8 +3,7 @@
 
 import type { IWidgetTracker } from '@jupyterlab/apputils';
 import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
-import type {
-  TableOfContents} from '@jupyterlab/toc';
+import type { TableOfContents } from '@jupyterlab/toc';
 import {
   TableOfContentsFactory,
   TableOfContentsModel,

@@ -4,9 +4,7 @@
  */
 
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import type {
-  Document,
-  ILSPCodeExtractorsManager} from '@jupyterlab/lsp';
+import type { Document, ILSPCodeExtractorsManager } from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
   isWithinRange,

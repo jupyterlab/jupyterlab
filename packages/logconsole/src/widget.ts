@@ -3,21 +3,16 @@
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { IOutputPrompt} from '@jupyterlab/outputarea';
+import type { IOutputPrompt } from '@jupyterlab/outputarea';
 import { OutputArea } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { Kernel, KernelMessage } from '@jupyterlab/services';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type { Panel} from '@lumino/widgets';
+import type { Panel } from '@lumino/widgets';
 import { PanelLayout, StackedPanel, Widget } from '@lumino/widgets';
 import type { LoggerOutputAreaModel, LogOutputModel } from './logger';
 import type {

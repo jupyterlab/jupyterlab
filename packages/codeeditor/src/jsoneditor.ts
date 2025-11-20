@@ -3,21 +3,11 @@
 
 import type { IObservableJSON } from '@jupyterlab/observables';
 import type { ISharedText, SourceChange } from '@jupyter/ydoc';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
-import type {
-  JSONObject,
-  ReadonlyPartialJSONObject
-} from '@lumino/coreutils';
-import {
-  JSONExt
-} from '@lumino/coreutils';
+import type { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './editor';

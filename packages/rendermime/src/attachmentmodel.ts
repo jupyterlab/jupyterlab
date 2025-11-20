@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { IObservableJSON} from '@jupyterlab/observables';
+import type { IObservableJSON } from '@jupyterlab/observables';
 import { ObservableJSON } from '@jupyterlab/observables';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type {
@@ -13,10 +13,8 @@ import type {
   PartialJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import {
-  JSONExt
-} from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import { JSONExt } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { MimeModel } from './mimemodel';
 

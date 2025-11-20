@@ -3,15 +3,10 @@
 
 import type { Session } from '@jupyterlab/services';
 import { TextItem } from '@jupyterlab/statusbar';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import type { JSONArray} from '@lumino/coreutils';
+import type { JSONArray } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { KeyboardEvent } from 'react';
 import React from 'react';

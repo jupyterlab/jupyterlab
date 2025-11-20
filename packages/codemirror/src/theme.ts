@@ -8,7 +8,7 @@ import {
 } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { tags as t } from '@lezer/highlight';
 import type { IEditorTheme, IEditorThemeRegistry } from './token';

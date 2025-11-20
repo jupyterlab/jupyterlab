@@ -9,10 +9,9 @@ import type {
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue} from '@lumino/coreutils';
-import {
-  Token
+  ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import type { ISchemaValidator } from './settingregistry';

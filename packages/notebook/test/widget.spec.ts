@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  Cell} from '@jupyterlab/cells';
+import type { Cell } from '@jupyterlab/cells';
 import {
   CodeCell,
   CodeCellModel,
@@ -11,20 +10,15 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import type {
-  INotebookModel} from '@jupyterlab/notebook';
-import {
-  Notebook,
-  NotebookModel,
-  StaticNotebook
-} from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { Notebook, NotebookModel, StaticNotebook } from '@jupyterlab/notebook';
 import {
   framePromise,
   JupyterServer,
   signalToPromise,
   sleep
 } from '@jupyterlab/testing';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { generate, simulate } from 'simulate-event';

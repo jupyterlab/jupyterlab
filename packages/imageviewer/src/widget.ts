@@ -9,10 +9,7 @@ import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  ABCWidgetFactory,
-  DocumentWidget
-} from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 

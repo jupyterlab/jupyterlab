@@ -7,15 +7,8 @@
  * It is a simplification of https://github.com/yjs/y-codemirror.next
  * licensed under MIT License by Kevin Jahns
  */
-import type {
-  Extension,
-  SelectionRange
-} from '@codemirror/state';
-import {
-  Annotation,
-  EditorSelection,
-  Facet
-} from '@codemirror/state';
+import type { Extension, SelectionRange } from '@codemirror/state';
+import { Annotation, EditorSelection, Facet } from '@codemirror/state';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import { ViewPlugin } from '@codemirror/view';
 import {

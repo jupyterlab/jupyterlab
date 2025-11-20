@@ -14,9 +14,7 @@ import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import {
-  JSONExt
-} from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import type { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';

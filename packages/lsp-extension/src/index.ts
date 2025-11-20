@@ -14,7 +14,8 @@ import type {
   ILSPConnection,
   LanguageServersExperimental,
   TLanguageServerConfigurations,
-  TLanguageServerId} from '@jupyterlab/lsp';
+  TLanguageServerId
+} from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
   DocumentConnectionManager,
@@ -31,13 +32,8 @@ import type { IRunningSessions } from '@jupyterlab/running';
 import { IRunningSessionManagers } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import type {
-  IFormRenderer,
-  LabIcon} from '@jupyterlab/ui-components';
-import {
-  IFormRendererRegistry,
-  pythonIcon
-} from '@jupyterlab/ui-components';
+import type { IFormRenderer, LabIcon } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry, pythonIcon } from '@jupyterlab/ui-components';
 import type { PartialJSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 

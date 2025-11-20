@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   MainAreaWidget,
   SessionContext,
@@ -10,13 +9,10 @@ import {
 } from '@jupyterlab/apputils';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time } from '@jupyterlab/coreutils';
-import type {
-  IRenderMimeRegistry} from '@jupyterlab/rendermime';
-import {
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ServiceManager } from '@jupyterlab/services';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { consoleIcon } from '@jupyterlab/ui-components';
 import { Token, UUID } from '@lumino/coreutils';

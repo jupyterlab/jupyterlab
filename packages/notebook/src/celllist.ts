@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  CellModel,
-  ICellModel} from '@jupyterlab/cells';
+import type { CellModel, ICellModel } from '@jupyterlab/cells';
 import {
   CodeCellModel,
   MarkdownCellModel,
@@ -18,7 +16,7 @@ import type {
   ISharedRawCell,
   NotebookChange
 } from '@jupyter/ydoc';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

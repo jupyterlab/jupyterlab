@@ -2,16 +2,16 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Cell, ICellModel } from '@jupyterlab/cells';
-import type { CodeEditor} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { JSONEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
 import type { IMapChange } from '@jupyter/ydoc';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { Collapser } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { ConflatableMessage, MessageLoop } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import type { INotebookModel } from './model';

@@ -21,10 +21,9 @@ import type {
   IGalataInpage,
   INotebookRunCallback,
   IPluginNameToInterfaceMap,
-  IWaitForSelectorOptions} from './tokens';
-import {
-  PLUGIN_ID_GALATA_HELPERS
+  IWaitForSelectorOptions
 } from './tokens';
+import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
 
 const PLUGIN_ID_DOC_MANAGER = '@jupyterlab/docmanager-extension:manager';
 const PLUGIN_ID_ROUTER = '@jupyterlab/application-extension:router';

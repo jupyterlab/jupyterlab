@@ -6,7 +6,8 @@ import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import type { Signal } from '@lumino/signaling';
 import type {
   ICompletionContext,
-  ICompletionProvider} from '@jupyterlab/completer';
+  ICompletionProvider
+} from '@jupyterlab/completer';
 import {
   Completer,
   CompleterModel,

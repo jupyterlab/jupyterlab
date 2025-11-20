@@ -7,14 +7,13 @@
 
 import type { CellType } from '@jupyterlab/nbformat';
 import type { NotebookTools } from '@jupyterlab/notebook';
-import type { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { ITranslator } from '@jupyterlab/translation';
 import type {
-  PartialJSONObject,
-  ReadonlyJSONObject} from '@lumino/coreutils';
-import {
-  Token
-} from '@lumino/coreutils';
+  BaseSettings,
+  ISettingRegistry
+} from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { PartialJSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { MetadataFormWidget } from './metadataform';
 
 export namespace MetadataForm {

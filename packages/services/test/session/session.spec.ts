@@ -3,7 +3,7 @@
 
 import { JupyterServer } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
-import type { Session} from '../../src';
+import type { Session } from '../../src';
 import { SessionAPI } from '../../src';
 import { createSessionModel, getRequestHandler, makeSettings } from '../utils';
 

@@ -7,10 +7,9 @@ import React from 'react';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type {
-  IScore} from '@jupyterlab/ui-components';
+import type { IScore } from '@jupyterlab/ui-components';
 import {
   classes,
   FilterBox,
@@ -19,10 +18,10 @@ import {
   updateFilterFunction
 } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
-import type { PartialJSONObject} from '@lumino/coreutils';
+import type { PartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { SettingsEditor } from './settingseditor';

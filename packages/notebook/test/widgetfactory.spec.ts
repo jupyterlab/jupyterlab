@@ -5,12 +5,8 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer } from '@jupyterlab/testing';
-import type {
-  INotebookModel} from '@jupyterlab/notebook';
-import {
-  NotebookPanel,
-  NotebookWidgetFactory
-} from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { NotebookPanel, NotebookWidgetFactory } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const rendermime = utils.defaultRenderMime();

@@ -3,7 +3,10 @@
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
-import type { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import type {
+  CodeEditorWrapper,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 import type { IConsoleTracker } from '@jupyterlab/console';
 import type { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { INotebookTracker } from '@jupyterlab/notebook';

@@ -7,17 +7,11 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabShell
-} from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import type { IDocumentWidget } from '@jupyterlab/docregistry';
-import type {
-  FileEditor} from '@jupyterlab/fileeditor';
-import {
-  EditorSyntaxStatus,
-  IEditorTracker
-} from '@jupyterlab/fileeditor';
+import type { FileEditor } from '@jupyterlab/fileeditor';
+import { EditorSyntaxStatus, IEditorTracker } from '@jupyterlab/fileeditor';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 

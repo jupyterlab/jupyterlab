@@ -9,11 +9,8 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILayoutRestorer
-} from '@jupyterlab/application';
-import type {
-  MainAreaWidget} from '@jupyterlab/apputils';
+import { ILayoutRestorer } from '@jupyterlab/application';
+import type { MainAreaWidget } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   ICommandPalette,
@@ -24,12 +21,8 @@ import {
   SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import type {
-  CodeViewerWidget} from '@jupyterlab/codeeditor';
-import {
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
+import type { CodeViewerWidget } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import {
   IEditorExtensionRegistry,
   IEditorLanguageRegistry,
@@ -41,13 +34,10 @@ import type {
   DocumentRegistry,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  getAvailableKernelFileTypes
-} from '@jupyterlab/docregistry';
+import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import type {
-  FileEditor} from '@jupyterlab/fileeditor';
+import type { FileEditor } from '@jupyterlab/fileeditor';
 import {
   FileEditorAdapter,
   FileEditorFactory,
@@ -60,9 +50,7 @@ import {
   TabSpaceStatus
 } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
-import type {
-  WidgetLSPAdapterTracker
-} from '@jupyterlab/lsp';
+import type { WidgetLSPAdapterTracker } from '@jupyterlab/lsp';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,

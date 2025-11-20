@@ -1,13 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  DecorationSet} from '@codemirror/view';
-import {
-  Decoration,
-  EditorView,
-  WidgetType
-} from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { Text, Transaction } from '@codemirror/state';
 import { StateEffect, StateField } from '@codemirror/state';
 

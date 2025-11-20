@@ -7,7 +7,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import type { Contents, ServerConnection } from '@jupyterlab/services';
 import type { IStateDB } from '@jupyterlab/statedb';
 import { Debouncer } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { IRecentsManager, RecentDocument } from './tokens';
 

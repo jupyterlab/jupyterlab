@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  StreamParser
-} from '@codemirror/language';
+import type { StreamParser } from '@codemirror/language';
 import {
   LanguageDescription,
   LanguageSupport,
@@ -12,7 +10,7 @@ import {
 } from '@codemirror/language';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { buildParser } from '@lezer/generator';
 import { highlightTree } from '@lezer/highlight';

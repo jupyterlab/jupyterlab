@@ -5,7 +5,7 @@
 
 import { Dialog } from '@jupyterlab/apputils';
 
-import type { Cell} from '@jupyterlab/cells';
+import type { Cell } from '@jupyterlab/cells';
 import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { IThemeManager } from '@jupyterlab/apputils';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   PanelWithToolbar,

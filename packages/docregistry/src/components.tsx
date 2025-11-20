@@ -4,7 +4,7 @@
  */
 
 import { ReactWidget } from '@jupyterlab/apputils';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { Widget } from '@lumino/widgets';
 import * as React from 'react';

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { StateDB } from '@jupyterlab/statedb';
-import type { ISettingRegistry} from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { SettingRegistry } from '@jupyterlab/settingregistry';
 
 export class TestConnector extends StateDB {

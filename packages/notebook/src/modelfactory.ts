@@ -4,7 +4,7 @@
 import type { ISharedNotebook } from '@jupyter/ydoc';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import type { Contents } from '@jupyterlab/services';
-import type { INotebookModel} from './model';
+import type { INotebookModel } from './model';
 import { NotebookModel } from './model';
 
 /**

@@ -2,26 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import type { IChangedArgs} from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
-import type { IDocumentManager} from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { shouldOverwrite } from '@jupyterlab/docmanager';
 import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
 import type { IStateDB } from '@jupyterlab/statedb';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

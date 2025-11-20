@@ -8,15 +8,15 @@ import {
   jpToolbar,
   provideJupyterDesignSystem
 } from '@jupyter/web-components';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import type { Layout} from '@lumino/widgets';
+import type { Layout } from '@lumino/widgets';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';

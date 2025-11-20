@@ -3,7 +3,7 @@
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { WidgetLSPAdapter } from './adapter';

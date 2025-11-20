@@ -3,7 +3,7 @@
 
 import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type { Notebook} from '@jupyterlab/notebook';
+import type { Notebook } from '@jupyterlab/notebook';
 import { NotebookActions, NotebookModel } from '@jupyterlab/notebook';
 import { JupyterServer } from '@jupyterlab/testing';
 import * as utils from './utils';

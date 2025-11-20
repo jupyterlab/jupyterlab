@@ -5,7 +5,7 @@
 
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ITranslator } from '@jupyterlab/translation';
-import type { ReadonlyPartialJSONObject} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { MimeModel } from './mimemodel';
 import type { RenderMimeRegistry } from './registry';

@@ -6,7 +6,7 @@
 import type { ITranslator } from '@jupyterlab/translation';
 import type { VDomRenderer } from '@jupyterlab/ui-components';
 import type { CommandRegistry } from '@lumino/commands';
-import type { ReadonlyJSONObject} from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { Widget } from '@lumino/widgets';

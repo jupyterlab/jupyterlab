@@ -3,15 +3,15 @@
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import type { IChangedArgs} from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IObservableList } from '@jupyterlab/observables';
 import type { Contents } from '@jupyterlab/services';
 import type { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { PartialJSONValue } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Title, Widget } from '@lumino/widgets';
 import type { DocumentRegistry, IDocumentWidget } from './index';

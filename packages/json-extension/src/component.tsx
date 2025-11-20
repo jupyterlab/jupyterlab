@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { jupyterHighlightStyle } from '@jupyterlab/codemirror';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
-import type { Tag} from '@lezer/highlight';
+import type { Tag } from '@lezer/highlight';
 import { tags } from '@lezer/highlight';
 import type { JSONArray, JSONObject, JSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';

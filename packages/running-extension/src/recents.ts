@@ -3,7 +3,10 @@
 
 import type { CommandRegistry } from '@lumino/commands';
 import { PathExt } from '@jupyterlab/coreutils';
-import type { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { IRecentsManager, RecentDocument } from '@jupyterlab/docmanager';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';

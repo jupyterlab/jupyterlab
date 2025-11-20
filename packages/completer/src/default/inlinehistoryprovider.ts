@@ -8,13 +8,8 @@ import type {
 import type { CompletionHandler } from '../handler';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { KernelMessage } from '@jupyterlab/services';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type { LabIcon } from '@jupyterlab/ui-components';
 import { historyIcon } from '@jupyterlab/ui-components';
 

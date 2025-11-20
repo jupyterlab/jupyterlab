@@ -4,17 +4,13 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type {
-  IConnectionStatus} from '@jupyterlab/services';
-import {
-  ConnectionStatus,
-  ServiceManager
-} from '@jupyterlab/services';
+import type { IConnectionStatus } from '@jupyterlab/services';
+import { ConnectionStatus, ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
 import type { JupyterFrontEndPlugin } from './frontend';
 import { JupyterFrontEnd } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
-import type { ILabShell} from './shell';
+import type { ILabShell } from './shell';
 import { LabShell } from './shell';
 import { LabStatus } from './status';
 

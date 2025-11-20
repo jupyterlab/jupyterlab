@@ -8,7 +8,7 @@ import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils'
 import type { ServiceManager } from '@jupyterlab/services';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';

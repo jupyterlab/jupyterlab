@@ -8,7 +8,8 @@ import { DOMUtils } from '@jupyterlab/apputils';
 import type {
   AttachmentsCellModel,
   ICodeCellModel,
-  IRawCellModel} from '@jupyterlab/cells';
+  IRawCellModel
+} from '@jupyterlab/cells';
 import {
   Cell,
   CellDragUtils,
@@ -20,17 +21,17 @@ import {
 } from '@jupyterlab/cells';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { IObservableList} from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { KernelMessage } from '@jupyterlab/services';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { JSONObject} from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { MimeData } from '@lumino/coreutils';
 import { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, SplitPanel, Widget } from '@lumino/widgets';
 import { runCell } from './cellexecutor';

@@ -7,30 +7,19 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import type {
-  NotificationManager} from '@jupyterlab/apputils';
-import {
-  Notification,
-  ReactWidget
-} from '@jupyterlab/apputils';
+import type { NotificationManager } from '@jupyterlab/apputils';
+import { Notification, ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type {
-  Popup} from '@jupyterlab/statusbar';
+import type { Popup } from '@jupyterlab/statusbar';
 import {
   GroupItem,
   IStatusBar,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-import type {
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  ITranslator,
-  nullTranslator
-} from '@jupyterlab/translation';
-import type {
-  LabIcon} from '@jupyterlab/ui-components';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   bellIcon,
   Button,
@@ -40,13 +29,8 @@ import {
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
-import type {
-  ReadonlyJSONObject,
-  ReadonlyJSONValue
-} from '@lumino/coreutils';
-import {
-  PromiseDelegate
-} from '@lumino/coreutils';
+import type { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';

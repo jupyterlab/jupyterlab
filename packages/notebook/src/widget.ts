@@ -6,14 +6,10 @@ import type {
   ICellModel,
   ICodeCellModel,
   IMarkdownCellModel,
-  IRawCellModel} from '@jupyterlab/cells';
-import {
-  Cell,
-  CodeCell,
-  MarkdownCell,
-  RawCell
+  IRawCellModel
 } from '@jupyterlab/cells';
-import type { CodeEditor} from '@jupyterlab/codeeditor';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
@@ -21,7 +17,7 @@ import type { IObservableList } from '@jupyterlab/observables';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';
 import { ArrayExt, findIndex } from '@lumino/algorithm';
@@ -30,7 +26,7 @@ import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';

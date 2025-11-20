@@ -6,8 +6,7 @@
  */
 
 import { DisposableSet } from '@lumino/disposable';
-import type {
-  JupyterFrontEndPlugin} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ILabShell,
   ILayoutRestorer,
@@ -29,11 +28,8 @@ import {
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import type {
-  DocumentRegistry} from '@jupyterlab/docregistry';
-import {
-  getAvailableKernelFileTypes
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
@@ -51,7 +47,8 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type {
   IDisposableMenuItem,
-  RankedMenu} from '@jupyterlab/ui-components';
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   addIcon,
   closeIcon,

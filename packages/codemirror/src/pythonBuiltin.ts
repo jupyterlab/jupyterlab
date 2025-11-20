@@ -3,18 +3,11 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { Language} from '@codemirror/language';
+import type { Language } from '@codemirror/language';
 import { syntaxTree } from '@codemirror/language';
 import { RangeSetBuilder } from '@codemirror/state';
-import type {
-  DecorationSet,
-  EditorView,
-  ViewUpdate
-} from '@codemirror/view';
-import {
-  Decoration,
-  ViewPlugin
-} from '@codemirror/view';
+import type { DecorationSet, EditorView, ViewUpdate } from '@codemirror/view';
+import { Decoration, ViewPlugin } from '@codemirror/view';
 import type { SyntaxNodeRef, Tree } from '@lezer/common';
 import { NodeProp } from '@lezer/common';
 

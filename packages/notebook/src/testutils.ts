@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
   SessionContextDialogs,
@@ -22,8 +21,7 @@ import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Context } from '@jupyterlab/docregistry';
 import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
 import type { INotebookContent } from '@jupyterlab/nbformat';
-import type {
-  IMarkdownParser} from '@jupyterlab/rendermime';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
 import {
   RenderMimeRegistry,
   standardRendererFactories
@@ -36,7 +34,7 @@ import { ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import * as defaultContent from './default.json';
-import type { INotebookModel} from './model';
+import type { INotebookModel } from './model';
 import { NotebookModel } from './model';
 import { NotebookModelFactory } from './modelfactory';
 import { NotebookPanel } from './panel';

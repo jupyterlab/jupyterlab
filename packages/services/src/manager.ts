@@ -5,42 +5,42 @@ import type { IDisposable } from '@lumino/disposable';
 
 import type { Poll } from '@lumino/polling';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
-import type { Builder} from './builder';
+import type { Builder } from './builder';
 import { BuildManager } from './builder';
 
-import type { Contents} from './contents';
+import type { Contents } from './contents';
 import { ContentsManager } from './contents';
 
-import type { Event} from './event';
+import type { Event } from './event';
 import { EventManager } from './event';
 
-import type { Kernel} from './kernel';
+import type { Kernel } from './kernel';
 import { KernelManager } from './kernel';
 
-import type { KernelSpec} from './kernelspec';
+import type { KernelSpec } from './kernelspec';
 import { KernelSpecManager } from './kernelspec';
 
-import type { NbConvert} from './nbconvert';
+import type { NbConvert } from './nbconvert';
 import { NbConvertManager } from './nbconvert';
 
 import { ServerConnection } from './serverconnection';
 
-import type { Session} from './session';
+import type { Session } from './session';
 import { SessionManager } from './session';
 
-import type { Setting} from './setting';
+import type { Setting } from './setting';
 import { SettingManager } from './setting';
 
-import type { Terminal} from './terminal';
+import type { Terminal } from './terminal';
 import { TerminalManager } from './terminal';
 
-import type { User} from './user';
+import type { User } from './user';
 import { UserManager } from './user';
 
-import type { Workspace} from './workspace';
+import type { Workspace } from './workspace';
 import { WorkspaceManager } from './workspace';
 
 /**

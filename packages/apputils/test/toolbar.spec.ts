@@ -1,16 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  SessionContext,
-  ToolbarRegistry} from '@jupyterlab/apputils';
+import type { SessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   SessionContextDialogs,
   Toolbar,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
-import type { ISettingRegistry} from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { SettingRegistry } from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';

@@ -20,13 +20,8 @@ import type {
 import type { LanguageServer1 as LSPLanguageServerSettings } from './plugin';
 import type * as SCHEMA from './schema';
 import type { VirtualDocument } from './virtual/document';
-import type {
-  ILspConnection,
-  ILspOptions
-} from './ws-connection/types';
-import {
-  IDocumentInfo
-} from './ws-connection/types';
+import type { ILspConnection, ILspOptions } from './ws-connection/types';
+import { IDocumentInfo } from './ws-connection/types';
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';

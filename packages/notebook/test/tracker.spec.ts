@@ -5,12 +5,8 @@ import { Cell } from '@jupyterlab/cells';
 import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer } from '@jupyterlab/testing';
-import type {
-  INotebookModel,
-  NotebookPanel} from '@jupyterlab/notebook';
-import {
-  NotebookTracker
-} from '@jupyterlab/notebook';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookTracker } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const namespace = 'notebook-tracker-test';

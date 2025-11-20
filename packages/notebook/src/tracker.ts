@@ -3,7 +3,7 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 import type { Cell } from '@jupyterlab/cells';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { NotebookPanel } from './panel';
 import type { INotebookTracker } from './tokens';

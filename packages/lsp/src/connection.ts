@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type {
@@ -19,9 +19,7 @@ import type {
   ServerNotifications,
   ServerRequests
 } from './tokens';
-import {
-  Method
-} from './tokens';
+import { Method } from './tokens';
 import { untilReady } from './utils';
 import {
   registerServerCapability,

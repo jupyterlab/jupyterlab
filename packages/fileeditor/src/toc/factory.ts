@@ -1,14 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import type {
-  TableOfContents,
-  TableOfContentsModel
-} from '@jupyterlab/toc';
-import {
-  TableOfContentsFactory
-} from '@jupyterlab/toc';
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
+import { TableOfContentsFactory } from '@jupyterlab/toc';
 import type { FileEditor } from '../widget';
 
 /**

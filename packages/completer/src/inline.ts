@@ -9,7 +9,7 @@ import type { TranslationBundle } from '@jupyterlab/translation';
 import { HoverBox, kernelIcon, Toolbar } from '@jupyterlab/ui-components';
 import type { IDisposable } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { GhostTextManager } from './ghost';

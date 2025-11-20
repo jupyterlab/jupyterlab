@@ -4,7 +4,7 @@
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import { TerminalManager } from '@jupyterlab/services';
 import { framePromise, JupyterServer, testEmission } from '@jupyterlab/testing';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Terminal } from '../src';

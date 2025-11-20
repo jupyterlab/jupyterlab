@@ -5,7 +5,7 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { Contents } from '@jupyterlab/services';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';

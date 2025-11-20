@@ -3,7 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type {
@@ -12,9 +12,7 @@ import type {
   TSessionMap,
   TSpecsMap
 } from './tokens';
-import {
-  ILanguageServerManager
-} from './tokens';
+import { ILanguageServerManager } from './tokens';
 import type { ServerSpecProperties } from './schema';
 import { PromiseDelegate } from '@lumino/coreutils';
 

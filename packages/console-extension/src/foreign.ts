@@ -6,13 +6,8 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import type {
-  CodeConsole,
-  ConsolePanel} from '@jupyterlab/console';
-import {
-  ForeignHandler,
-  IConsoleTracker
-} from '@jupyterlab/console';
+import type { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+import { ForeignHandler, IConsoleTracker } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';

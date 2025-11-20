@@ -4,22 +4,13 @@
 import { Printing, showErrorMessage } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import type {
-  IRenderMime,
-  IRenderMimeRegistry} from '@jupyterlab/rendermime';
-import {
-  MimeModel
-} from '@jupyterlab/rendermime';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
-import type { PartialJSONObject} from '@lumino/coreutils';
+import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { MimeModel } from '@jupyterlab/rendermime';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PartialJSONObject } from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { ABCWidgetFactory, DocumentWidget } from './default';

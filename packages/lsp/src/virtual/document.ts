@@ -5,7 +5,7 @@ import type { IDisposable } from '@lumino/disposable';
 import type { IDocumentInfo } from '../ws-connection/types';
 import type { IPosition } from '../positioning';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { Document, ILSPCodeExtractorsManager } from '../tokens';

@@ -7,9 +7,7 @@ import type {
   YMarkdownCell,
   YRawCell
 } from '@jupyter/ydoc';
-import {
-  createStandaloneCell
-} from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
 import {
   CellModel,
   CodeCellModel,

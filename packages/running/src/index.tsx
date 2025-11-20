@@ -8,17 +8,9 @@
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { IStateDB } from '@jupyterlab/statedb';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
-import type {
-  IScore,
-  LabIcon,
-  Toolbar} from '@jupyterlab/ui-components';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore, LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
   closeIcon,
   collapseAllIcon,
@@ -40,10 +32,10 @@ import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { isValidElement, useCallback, useRef } from 'react';
 
 /**

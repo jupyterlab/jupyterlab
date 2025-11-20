@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Message } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type { Title} from '@lumino/widgets';
+import type { Title } from '@lumino/widgets';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 
 import { caretDownIcon } from '../icon';

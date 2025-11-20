@@ -7,8 +7,7 @@
  * @module hub-extension
  */
 
-import type {
-  JupyterFrontEndPlugin} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,

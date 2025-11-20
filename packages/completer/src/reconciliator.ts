@@ -12,9 +12,7 @@ import type {
   IInlineCompletionProvider,
   IProviderReconciliator
 } from './tokens';
-import {
-  InlineCompletionTriggerKind
-} from './tokens';
+import { InlineCompletionTriggerKind } from './tokens';
 import type { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
 import { isHintableMimeType } from './utils';

@@ -11,9 +11,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   ICommandPalette,
@@ -21,8 +19,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
-import type {
-  HTMLViewer} from '@jupyterlab/htmlviewer';
+import type { HTMLViewer } from '@jupyterlab/htmlviewer';
 import {
   HTMLViewerFactory,
   IHTMLViewerTracker,

@@ -4,11 +4,7 @@
 
 import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
-import type {
-  Extension,
-  StateCommand,
-  Text
-} from '@codemirror/state';
+import type { Extension, StateCommand, Text } from '@codemirror/state';
 import {
   Compartment,
   EditorSelection,

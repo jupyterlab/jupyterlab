@@ -3,7 +3,7 @@
 
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { TextItem } from '@jupyterlab/statusbar';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import type { Widget } from '@lumino/widgets';

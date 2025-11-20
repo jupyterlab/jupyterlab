@@ -13,7 +13,7 @@ import type { YCodeCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeConsole } from '@jupyterlab/console';
-import type { Message} from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import {

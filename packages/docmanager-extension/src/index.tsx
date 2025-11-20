@@ -7,14 +7,10 @@
 
 import type {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin} from '@jupyterlab/application';
-import {
-  ILabShell,
-  ILabStatus,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
+import { ILabShell, ILabStatus, JupyterLab } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   addCommandToolbarButtonClass,
   CommandToolbarButtonComponent,
@@ -29,7 +25,7 @@ import {
   showErrorMessage,
   UseSignal
 } from '@jupyterlab/apputils';
-import type { IChangedArgs} from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt, Time } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
@@ -41,25 +37,23 @@ import {
   PathStatus,
   SavingStatus
 } from '@jupyterlab/docmanager';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import type { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import type {
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  ITranslator,
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';

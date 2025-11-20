@@ -3,7 +3,8 @@
 
 import type {
   ISessionContext,
-  ISessionContextDialogs} from '@jupyterlab/apputils';
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Toolbar as AppToolbar,
   Dialog,
@@ -12,13 +13,8 @@ import {
 } from '@jupyterlab/apputils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
   addToolbarButtonClass,

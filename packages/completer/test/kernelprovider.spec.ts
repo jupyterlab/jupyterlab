@@ -2,11 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { KernelMessage } from '@jupyterlab/services';
-import type {
-  ICompletionContext} from '@jupyterlab/completer';
-import {
-  KernelCompleterProvider
-} from '@jupyterlab/completer';
+import type { ICompletionContext } from '@jupyterlab/completer';
+import { KernelCompleterProvider } from '@jupyterlab/completer';
 import {
   KernelMock,
   SessionConnectionMock

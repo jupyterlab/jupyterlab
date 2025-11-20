@@ -3,7 +3,8 @@
 
 import type {
   ISessionContext,
-  ISessionContextDialogs} from '@jupyterlab/apputils';
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Dialog,
   SessionContext,

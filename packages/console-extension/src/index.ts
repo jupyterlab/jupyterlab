@@ -9,12 +9,8 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILabStatus,
-  ILayoutRestorer
-} from '@jupyterlab/application';
-import type {
-  ISessionContext} from '@jupyterlab/apputils';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
@@ -31,15 +27,10 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import type {
-  CodeEditor} from '@jupyterlab/codeeditor';
-import {
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
-import type {
-  CodeConsole} from '@jupyterlab/console';
+import type { CodeConsole } from '@jupyterlab/console';
 import {
   ConsolePanel,
   IConsoleCellExecutor,
@@ -48,7 +39,7 @@ import {
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import type { IRenderMime} from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -71,11 +62,9 @@ import { find } from '@lumino/algorithm';
 import type {
   JSONObject,
   ReadonlyJSONValue,
-  ReadonlyPartialJSONObject} from '@lumino/coreutils';
-import {
-  JSONExt,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt, UUID } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
 import type { DockLayout, Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';

@@ -6,13 +6,12 @@
 import type {
   CompletionHandler,
   ICompletionContext,
-  ICompletionProvider} from '@jupyterlab/completer';
-import {
-  ProviderReconciliator
+  ICompletionProvider
 } from '@jupyterlab/completer';
+import { ProviderReconciliator } from '@jupyterlab/completer';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Context } from '@jupyterlab/docregistry';
-import type { INotebookModel} from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
 import { NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';

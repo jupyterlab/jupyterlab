@@ -3,7 +3,7 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type { ServerConnection, ServiceManager } from '@jupyterlab/services';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { IConnectionLost } from './tokens';
 

@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
@@ -18,22 +18,11 @@ import type {
   Registry,
   UiSchema
 } from '@rjsf/utils';
-import {
-  ADDITIONAL_PROPERTY_FLAG,
-  canExpand,
-  getTemplate
-} from '@rjsf/utils';
+import { ADDITIONAL_PROPERTY_FLAG, canExpand, getTemplate } from '@rjsf/utils';
 
 import React from 'react';
-import type {
-  LabIcon
-} from '../icon';
-import {
-  addIcon,
-  caretDownIcon,
-  caretUpIcon,
-  closeIcon
-} from '../icon';
+import type { LabIcon } from '../icon';
+import { addIcon, caretDownIcon, caretUpIcon, closeIcon } from '../icon';
 
 /**
  * Default `ui:options` for the UiSchema.

@@ -3,8 +3,11 @@
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import type { TableOfContents} from '@jupyterlab/toc';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { TableOfContents } from '@jupyterlab/toc';
 import { TableOfContentsModel } from '@jupyterlab/toc';
 import type { Widget } from '@lumino/widgets';
 import type { FileEditor } from '../widget';

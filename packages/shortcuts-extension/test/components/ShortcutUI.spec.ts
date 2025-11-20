@@ -8,15 +8,11 @@ import type {
   IShortcutTarget
 } from '@jupyterlab/shortcuts-extension/lib/types';
 import { CommandRegistry } from '@lumino/commands';
-import type { JSONValue} from '@lumino/coreutils';
+import type { JSONValue } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import type {
-  ISettingRegistry} from '@jupyterlab/settingregistry';
-import {
-  SettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { nullTranslator } from '@jupyterlab/translation';
 import { createRoot } from 'react-dom/client';

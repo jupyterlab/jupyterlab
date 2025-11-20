@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { IObservableList} from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';
-import type { ISettingRegistry} from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { SettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import type { Toolbar } from '@jupyterlab/ui-components';

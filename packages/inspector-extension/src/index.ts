@@ -9,9 +9,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ILayoutRestorer
-} from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   ICommandPalette,
   MainAreaWidget,

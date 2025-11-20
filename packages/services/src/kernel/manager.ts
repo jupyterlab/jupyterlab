@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Poll } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import type { KernelSpec} from '..';
+import type { KernelSpec } from '..';
 import { CommsOverSubshells, ServerConnection } from '..';
 import type * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
-import type { IKernelOptions} from './restapi';
+import type { IKernelOptions } from './restapi';
 import { KernelAPIClient } from './restapi';
 import { KernelConnection } from './default';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';

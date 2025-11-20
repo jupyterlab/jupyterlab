@@ -2,15 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { IOutputAreaModel} from '@jupyterlab/outputarea';
+import type { IOutputAreaModel } from '@jupyterlab/outputarea';
 import { OutputAreaModel } from '@jupyterlab/outputarea';
-import type {
-  IOutputModel,
-  IRenderMimeRegistry} from '@jupyterlab/rendermime';
-import {
-  OutputModel
-} from '@jupyterlab/rendermime';
-import type { ISignal} from '@lumino/signaling';
+import type { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { OutputModel } from '@jupyterlab/rendermime';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type {
   IContentChange,

@@ -10,7 +10,7 @@ import type { PartialJSONObject } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';

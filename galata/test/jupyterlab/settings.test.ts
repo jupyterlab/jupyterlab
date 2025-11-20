@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IJupyterLabPageFixture} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { test } from '@jupyterlab/galata';
 import type { Locator } from '@playwright/test';
 import { expect } from '@playwright/test';

@@ -4,7 +4,7 @@
  */
 
 import { Poll } from '@lumino/polling';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Workspace } from '@jupyterlab/services';
 import type { IWorkspacesModel } from './tokens';

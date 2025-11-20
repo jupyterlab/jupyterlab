@@ -6,11 +6,9 @@ import type {
   PartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import {
-  JSONExt
-} from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import type { IObservableMap} from './observablemap';
+import type { IObservableMap } from './observablemap';
 import { ObservableMap } from './observablemap';
 
 /**

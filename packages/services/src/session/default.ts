@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { Kernel, KernelMessage } from '../kernel';
@@ -12,7 +12,7 @@ import type * as Session from './session';
 
 import { UUID } from '@lumino/coreutils';
 
-import type { DeepPartial} from './restapi';
+import type { DeepPartial } from './restapi';
 import { SessionAPIClient } from './restapi';
 
 /**

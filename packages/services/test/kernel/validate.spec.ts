@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Kernel} from '../../src';
+import type { Kernel } from '../../src';
 import { KernelMessage } from '../../src';
 import { validateMessage, validateModel } from '../../src/kernel/validate';
 

@@ -9,12 +9,8 @@ import type {
 } from '@jupyterlab/application';
 import { Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import type {
-  ConfigSection} from '@jupyterlab/services';
-import {
-  IConfigSectionManager,
-  ServerConnection
-} from '@jupyterlab/services';
+import type { ConfigSection } from '@jupyterlab/services';
+import { IConfigSectionManager, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 

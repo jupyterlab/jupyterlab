@@ -4,7 +4,7 @@
 import type { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
-import type { ReadonlyPartialJSONObject} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';

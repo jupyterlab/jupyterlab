@@ -3,12 +3,12 @@
 
 import type { KernelMessage, Session } from '@jupyterlab/services';
 
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { DebugProtocol } from '@vscode/debugprotocol';

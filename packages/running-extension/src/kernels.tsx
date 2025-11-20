@@ -5,7 +5,10 @@ import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
 import type { Kernel, KernelSpec, Session } from '@jupyterlab/services';
 import { KernelAPI } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';

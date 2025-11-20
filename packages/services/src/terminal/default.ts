@@ -3,10 +3,10 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import type { JSONPrimitive} from '@lumino/coreutils';
+import type { JSONPrimitive } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';

@@ -3,13 +3,8 @@
 
 import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
-import type {
-  Kernel} from '../../src';
-import {
-  CommsOverSubshells,
-  KernelManager,
-  KernelMessage
-} from '../../src';
+import type { Kernel } from '../../src';
+import { CommsOverSubshells, KernelManager, KernelMessage } from '../../src';
 import type { CommHandler } from '../../src/kernel/comm';
 
 const BLIP = `

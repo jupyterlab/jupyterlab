@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISerializer} from '@jupyterlab/observables';
+import type { ISerializer } from '@jupyterlab/observables';
 import { ObservableUndoableList } from '@jupyterlab/observables';
 import type { JSONObject } from '@lumino/coreutils';
 

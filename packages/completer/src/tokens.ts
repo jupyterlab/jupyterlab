@@ -6,7 +6,7 @@ import type { IRenderMime } from '@jupyterlab/rendermime';
 import type { Session } from '@jupyterlab/services';
 import type { LabIcon } from '@jupyterlab/ui-components';
 import type { SourceChange } from '@jupyter/ydoc';
-import type { JSONValue} from '@lumino/coreutils';
+import type { JSONValue } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ISignal } from '@lumino/signaling';

@@ -16,8 +16,7 @@ import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import type { PartialJSONArray } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 
-import type {
-  MetadataForm} from '@jupyterlab/metadataform';
+import type { MetadataForm } from '@jupyterlab/metadataform';
 import {
   IMetadataFormProvider,
   MetadataFormProvider,

@@ -2,14 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { WidgetTracker } from '@jupyterlab/apputils';
-import type { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import type { IMarkdownParser } from '@jupyterlab/rendermime';
 import type {
-  TableOfContents} from '@jupyterlab/toc';
-import {
-  TableOfContentsModel,
-  TableOfContentsUtils
-} from '@jupyterlab/toc';
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import type { TableOfContents } from '@jupyterlab/toc';
+import { TableOfContentsModel, TableOfContentsUtils } from '@jupyterlab/toc';
 import type { Widget } from '@lumino/widgets';
 import type { FileEditor } from '../widget';
 import type { IEditorHeading } from './factory';

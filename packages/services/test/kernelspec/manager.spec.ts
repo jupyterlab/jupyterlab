@@ -3,7 +3,7 @@
 
 import { JupyterServer } from '@jupyterlab/testing';
 import { JSONExt } from '@lumino/coreutils';
-import type { KernelSpec} from '../../src';
+import type { KernelSpec } from '../../src';
 import { KernelSpecManager } from '../../src';
 import {
   handleRequest,

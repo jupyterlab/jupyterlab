@@ -9,8 +9,7 @@ import type {
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
-import type {
-  CodeEditor} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS,
@@ -21,7 +20,7 @@ import type { IDataConnector } from '@jupyterlab/statedb';
 import type { LabIcon } from '@jupyterlab/ui-components';
 import type { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { TransactionSpec } from '@codemirror/state';
@@ -33,10 +32,7 @@ import type {
   IInlineCompletionProviderInfo,
   IProviderReconciliator
 } from './tokens';
-import {
-  CompletionTriggerKind,
-  InlineCompletionTriggerKind
-} from './tokens';
+import { CompletionTriggerKind, InlineCompletionTriggerKind } from './tokens';
 import type { Completer } from './widget';
 
 /**

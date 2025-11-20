@@ -3,13 +3,8 @@
 
 import * as path from 'path';
 import type { Page } from '@playwright/test';
-import type {
-  IJupyterLabPageFixture} from '@jupyterlab/galata';
-import {
-  expect,
-  galata,
-  test
-} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import type { ObservableJSON } from '@jupyterlab/observables';
 
 const nbFile = 'code_notebook.ipynb';

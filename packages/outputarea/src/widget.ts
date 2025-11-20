@@ -1,32 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISessionContext} from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableString } from '@jupyterlab/observables';
 import type { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type { Kernel} from '@jupyterlab/services';
+import type { Kernel } from '@jupyterlab/services';
 import { KernelMessage } from '@jupyterlab/services';
-import type {
-  ITranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  nullTranslator
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import type {
   JSONObject,
   ReadonlyJSONObject,
-  ReadonlyPartialJSONObject} from '@lumino/coreutils';
-import {
-  PromiseDelegate,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import type { IOutputAreaModel } from './model';

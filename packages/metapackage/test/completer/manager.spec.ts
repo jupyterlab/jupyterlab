@@ -9,7 +9,8 @@ import type {
   ICompletionProvider,
   IInlineCompleterActions,
   IInlineCompleterSettings,
-  IInlineCompletionProvider} from '@jupyterlab/completer';
+  IInlineCompletionProvider
+} from '@jupyterlab/completer';
 import {
   Completer,
   CompleterModel,
@@ -19,13 +20,8 @@ import {
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
-import type {
-  INotebookModel,
-  NotebookPanel
-} from '@jupyterlab/notebook';
-import {
-  NotebookModelFactory
-} from '@jupyterlab/notebook';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import { nullTranslator } from '@jupyterlab/translation';

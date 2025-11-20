@@ -5,7 +5,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 import type { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import type { IStream} from '@lumino/signaling';
+import type { IStream } from '@lumino/signaling';
 import { Signal, Stream } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 

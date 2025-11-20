@@ -7,15 +7,15 @@
 /// <reference types="jest" preserve="true"/>
 
 import { PathExt } from '@jupyterlab/coreutils';
-import type { ReadonlyJSONObject} from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { BaseManager } from './basemanager';
-import type { Contents} from './contents';
+import type { Contents } from './contents';
 import { ContentsManager } from './contents';
-import type { Kernel} from './kernel';
+import type { Kernel } from './kernel';
 import { KernelMessage } from './kernel';
 import type { KernelSpec } from './kernelspec';
 import type { ServiceManager } from './manager';

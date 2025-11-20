@@ -18,7 +18,7 @@ import type { Message } from '@lumino/messaging';
 import type { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-import type { Action, IActionOptions, IEntry} from './model';
+import type { Action, IActionOptions, IEntry } from './model';
 import { ListModel } from './model';
 
 const BADGE_SIZE = 32;

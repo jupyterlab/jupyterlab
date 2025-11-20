@@ -12,12 +12,8 @@ import {
   SearchDocumentModel,
   SearchDocumentView
 } from '@jupyterlab/documentsearch';
-import type {
-  NotebookPanel} from '@jupyterlab/notebook';
-import {
-  NotebookActions,
-  NotebookSearchProvider
-} from '@jupyterlab/notebook';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookActions, NotebookSearchProvider } from '@jupyterlab/notebook';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
@@ -32,7 +28,7 @@ import {
   stopIcon
 } from '@jupyterlab/ui-components';
 import type { CommandRegistry } from '@lumino/commands';
-import type { CommandPalette} from '@lumino/widgets';
+import type { CommandPalette } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 
 /**

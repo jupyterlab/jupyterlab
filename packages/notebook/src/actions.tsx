@@ -3,7 +3,8 @@
 
 import type {
   ISessionContext,
-  ISessionContextDialogs} from '@jupyterlab/apputils';
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Clipboard,
   Dialog,
@@ -14,7 +15,8 @@ import type {
   Cell,
   CodeCell,
   ICellModel,
-  ICodeCellModel} from '@jupyterlab/cells';
+  ICodeCellModel
+} from '@jupyterlab/cells';
 import {
   CodeCellModel,
   isMarkdownCellModel,
@@ -26,12 +28,12 @@ import { signalToPromise } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { KernelMessage } from '@jupyterlab/services';
 import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
 import type { JSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { runCell as defaultRunCell } from './cellexecutor';

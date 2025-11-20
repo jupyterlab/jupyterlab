@@ -11,7 +11,7 @@ import {
 import type { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
 import type { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 /**

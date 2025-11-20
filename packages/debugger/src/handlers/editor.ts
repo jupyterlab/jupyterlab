@@ -13,10 +13,7 @@ import { Signal } from '@lumino/signaling';
 
 import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 
-import type {
-  Line,
-  Range,
-  StateEffectType} from '@codemirror/state';
+import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
   Compartment,
   Prec,
@@ -25,14 +22,8 @@ import {
   StateField
 } from '@codemirror/state';
 
-import type {
-  DecorationSet} from '@codemirror/view';
-import {
-  Decoration,
-  EditorView,
-  gutter,
-  GutterMarker
-} from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, gutter, GutterMarker } from '@codemirror/view';
 
 import type { IDebugger } from '../tokens';
 import {

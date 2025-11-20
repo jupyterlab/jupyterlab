@@ -19,7 +19,8 @@ import type {
   Setting,
   Terminal,
   User,
-  Workspace} from '@jupyterlab/services';
+  Workspace
+} from '@jupyterlab/services';
 import {
   ConfigSection,
   ConfigSectionManager,

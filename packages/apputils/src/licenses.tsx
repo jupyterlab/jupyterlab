@@ -3,8 +3,7 @@
 
 import { ServerConnection } from '@jupyterlab/services';
 import type { TranslationBundle } from '@jupyterlab/translation';
-import type {
-  LabIcon} from '@jupyterlab/ui-components';
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   jsonIcon,
   markdownIcon,
@@ -14,7 +13,7 @@ import {
 } from '@jupyterlab/ui-components';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
-import type { ISignal} from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { VirtualElement } from '@lumino/virtualdom';
 import { h } from '@lumino/virtualdom';

@@ -3,17 +3,13 @@
 
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import type {
-  IObservableList,
-  IObservableMap} from '@jupyterlab/observables';
-import {
-  ObservableMap
-} from '@jupyterlab/observables';
+import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
+import { ObservableMap } from '@jupyterlab/observables';
 import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import type { IDebugger } from '../tokens';
 import { EditorHandler } from './editor';
-import type { ITranslator} from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
 

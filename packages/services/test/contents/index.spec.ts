@@ -7,14 +7,8 @@ import {
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import type {
-  Contents,
-  IContentProvider} from '../../src';
-import {
-  ContentsManager,
-  Drive,
-  ServerConnection
-} from '../../src';
+import type { Contents, IContentProvider } from '../../src';
+import { ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
