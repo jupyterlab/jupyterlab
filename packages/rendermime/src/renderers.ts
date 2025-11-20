@@ -1791,14 +1791,14 @@ namespace Private {
   ): void {
     // Helper to get the source URL, checking both the element and child <source> elements
     const getSourceUrl = (): string | null => {
-      // Check the element's src attribute
-      if (element.src && element.src.startsWith('data:')) {
-        return element.src;
+      // Check currentSrc (the actual playing source)
+      if (element.currentSrc?.startsWith('data:')) {
+        return element.currentSrc;
       }
 
-      // Check currentSrc (the actual playing source)
-      if (element.currentSrc && element.currentSrc.startsWith('data:')) {
-        return element.currentSrc;
+      // Check the element's src attribute
+      if (element.src?.startsWith('data:')) {
+        return element.src;
       }
 
       // Check child <source> elements

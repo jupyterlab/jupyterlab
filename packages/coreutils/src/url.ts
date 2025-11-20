@@ -259,7 +259,6 @@ export namespace URLExt {
    * This function handles both base64-encoded and percent-encoded data URIs.
    * - Base64 data: Uses modern Uint8Array.fromBase64() if available, falls back to atob()
    * - Non-base64 data: Percent-decoded (reserved characters per RFC 3986)
-   * - For binary data like images, base64 encoding is required
    */
   export function dataURItoBlob(dataURI: string): Blob | null {
     try {

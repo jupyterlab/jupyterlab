@@ -1915,14 +1915,15 @@ export class DirListing extends Widget {
 
     const uploadPromises = [];
     for (const item of items) {
+      // file and directory entries both have .kind === 'file'
       if (item.kind !== 'file') {
         continue;
       }
 
-      // We have a file item! Try uploading the file or directory. We first get
-      // the file system entry so that we can handle directories.
+      // Try uploading the file or directory. We first get the file system entry
+      // so that we can handle directories.
 
-      // In the future we should potentially add support for
+      // TODO: we should potentially add support for
       // item.getAsFileSystemHandle(), which has a more natural promise-based
       // api, but browser support is currently limited.
       const entry = item.webkitGetAsEntry();
@@ -1935,10 +1936,11 @@ export class DirListing extends Widget {
       // item (see
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images).
       // However, experiments show that trying to read that file in Safari gives
-      // us a "NotFoundError: Path does not exist" error. So if we happen to
-      // have a file in the root directory, we get it as a file as well as a
-      // fallback. We have to do this here since getAsFile would just return
-      // null if we called it in the async fallback error handler below (see
+      // us a "NotFoundError: Path does not exist" error. So if we happen to see
+      // a file in the root directory, we get it directly as a file as a
+      // fallback. We have to do this here in the code since getAsFile would
+      // just return null if we called it in the async fallback error handler
+      // below (see
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#protected_mode)
       let file: File | null = null;
       const isInRootDirectory = entry.fullPath.indexOf('/', 1) === -1;
@@ -1946,6 +1948,8 @@ export class DirListing extends Widget {
         file = item.getAsFile();
       }
 
+      // Try uploading the entry. If that fails, try uploading the file if it
+      // was in the root directory
       const promise = uploadEntry(entry, this._model.path ?? '/').catch(
         async err => {
           if (isInRootDirectory && file) {
@@ -1963,8 +1967,11 @@ export class DirListing extends Widget {
       // There were no files in the data, so we look for a data uri.
       // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images
 
-      let uri: string | null = null;
+      // We are going to assume now that there is only one thing being dropped
+      // and we need to pick the best data type representing the item.
+
       let filename: string | null = null;
+      let uri: string | null = null;
 
       // First, try to get DownloadURL since it gives us an explicit filename
       // (format: "mimeType:filename:url")
@@ -1994,6 +2001,7 @@ export class DirListing extends Widget {
         }
       }
 
+      // Only upload data uris for images, audio, and video
       if (
         uri &&
         (uri.startsWith('data:image/') ||
@@ -3974,43 +3982,6 @@ namespace Private {
       }
     }
     return allEntries;
-  }
-
-  /**
-   * Generate a unique filename for media (image, audio, video) based on MIME type.
-   * Returns a filename like "image.png", "audio-1.mp3", or "video.mp4" if the file exists.
-   */
-  export async function generateMediaFilename(
-    mimeType: string,
-    manager: Contents.IManager,
-    path: string
-  ): Promise<string> {
-    const baseName = getBaseNameFromMimeType(mimeType);
-    const extension = getExtensionFromMimeType(mimeType);
-    let filename = `${baseName}.${extension}`;
-    let counter = 1;
-
-    // Check if file exists and increment counter if needed
-    try {
-      let exists = true;
-
-      while (exists) {
-        try {
-          const fullPath = PathExt.join(path, filename);
-          await manager.get(fullPath);
-          // File exists, try next number
-          filename = `${baseName}-${counter}.${extension}`;
-          counter++;
-        } catch {
-          // File doesn't exist, we can use this filename
-          exists = false;
-        }
-      }
-    } catch {
-      // Error checking, use default filename
-    }
-
-    return filename;
   }
 
   /**
