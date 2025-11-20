@@ -105,6 +105,10 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent): void => {
+    onSelect(path);
+  };
+
   return (
     <div className={isDirectory ? DIR_CLASS : SOURCE_CLASS} title={path}>
       <div
@@ -113,6 +117,7 @@ function TreeNode(props: ITreeNodeProps): JSX.Element {
           isSelected && 'jp-DebuggerKernelSource-itemSelected'
         )}
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
       >
         <LabIcon.resolveReact
           icon={
