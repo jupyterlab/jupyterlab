@@ -77,7 +77,12 @@
 }
 
 .jp-DebuggerKernelSource-itemSelected {
-  background: var(--jp-layout-color2);
-  outline: 1px solid var(--jp-brand-color1);
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
   border-radius: 2px;
+}
+
+.jp-DebuggerKernelSource-itemSelected:hover {
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
 }
