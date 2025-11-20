@@ -8,7 +8,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import type { IFileSystemDirectoryEntryOptions, IFileSystemFileEntryOptions } from '@jupyterlab/testing';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise, sleep } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -114,7 +114,7 @@ describe('filebrowser/listing', () => {
             bits: ['content']
           }
         };
-        // We set the type to 'directory' so our Mock can recognize it as a directory.
+        // We set the type to 'file' so our Mock can recognize it as a file.
         dt.setData('file', JSON.stringify(fileMock));
         const event = new DragEvent('drop', { dataTransfer: dt });
         const options = createOptionsForConstructor();
@@ -122,10 +122,8 @@ describe('filebrowser/listing', () => {
         Widget.attach(dirListing, document.body);
         dirListing.handleEvent(event);
         await signalToPromise(dirListing.allUploaded);
-        // console.log('all uploaded signal received');
         await dirListing.model.refresh();
         const topLevel = getItemTitles(dirListing);
-        // console.log(topLevel)
         expect(topLevel).toStrictEqual(['file.txt']);
       });
 
@@ -172,9 +170,9 @@ describe('filebrowser/listing', () => {
 
       it('should upload an image from data URI on drag', async () => {
         const dt = new DataTransfer();
-        // Create a simple 1x1 red PNG as a data URI
+        // Create a simple PNG as a data URI
         const dataUri =
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
         dt.setData('url', dataUri);
         const event = new DragEvent('drop', { dataTransfer: dt });
         const options = createOptionsForConstructor();
@@ -229,7 +227,7 @@ describe('filebrowser/listing', () => {
       it('should prioritize DownloadURL over other data transfer types', async () => {
         const dt = new DataTransfer();
         const dataUri =
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
         // Set all three types, DownloadURL should take priority
         dt.setData('DownloadURL', `image/png:priority-test.png:${dataUri}`);
         dt.setData('url', dataUri);
@@ -250,7 +248,7 @@ describe('filebrowser/listing', () => {
       it('should fallback to url when DownloadURL is not available', async () => {
         const dt = new DataTransfer();
         const dataUri =
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
         // Set url and uri-list, but not DownloadURL
         dt.setData('url', dataUri);
         dt.setData('text/uri-list', 'data:image/jpeg;base64,ABC123');
@@ -296,7 +294,16 @@ describe('filebrowser/listing', () => {
         const dirListing = new TestDirListing(options);
         Widget.attach(dirListing, document.body);
         dirListing.handleEvent(event);
-        // Should not trigger upload signal for non-media types
+        // Should not trigger upload signal for non-media types. We'll test by
+        // waiting for the signal for a few milliseconds.
+        const uploadedPromise = signalToPromise(dirListing.allUploaded).then(
+          () => {
+            throw new Error(
+              'allUploaded should not trigger for non-media types'
+            );
+          }
+        );
+        await Promise.race([sleep(50), uploadedPromise]);
         const items = getItemTitles(dirListing);
         expect(items.length).toBe(0);
       });
