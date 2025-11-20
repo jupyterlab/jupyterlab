@@ -42,7 +42,7 @@
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
     "@lumino/signaling": "^2.1.5",
-    "mime-db": "^1.52.0",
+    "mime-db": "^1.54.0",
     "minimist": "~1.2.0",
     "path-browserify": "^1.0.0",
     "url-parse": "~1.5.4"
