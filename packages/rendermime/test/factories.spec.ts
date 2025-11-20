@@ -638,6 +638,112 @@ describe('rendermime/factories', () => {
           '<a href="https://jupyter.org" rel="noopener" target="_blank">link</a>'
         );
       });
+
+      it('should make audio elements with data URIs draggable', async () => {
+        const source =
+          '<audio src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA"></audio>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        const audio = w.node.querySelector('audio');
+        expect(audio).not.toBe(null);
+        expect(audio!.getAttribute('draggable')).toBe('true');
+      });
+
+      it('should make video elements with data URIs draggable', async () => {
+        const source =
+          '<video src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAA"></video>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        const video = w.node.querySelector('video');
+        expect(video).not.toBe(null);
+        expect(video!.getAttribute('draggable')).toBe('true');
+      });
+
+      it('should make audio elements with source child elements draggable', async () => {
+        const source =
+          '<audio><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA"></source></audio>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        // Use trusted to allow source elements.
+        const model = createModel(mimeType, source, true);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        const audio = w.node.querySelector('audio');
+        expect(audio).not.toBe(null);
+        expect(audio!.getAttribute('draggable')).toBe('true');
+      });
+
+      it('should set correct drag data for audio elements', async () => {
+        const source =
+          '<audio src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA"></audio>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        const audio = w.node.querySelector('audio') as HTMLAudioElement;
+
+        const dragEvent = new DragEvent('dragstart', {
+          bubbles: true,
+          cancelable: true,
+          dataTransfer: new DataTransfer()
+        });
+
+        audio.dispatchEvent(dragEvent);
+
+        const dataTransfer = dragEvent.dataTransfer!;
+        const uriList = dataTransfer.getData('text/uri-list');
+        expect(uriList).toContain('data:audio/mp3;base64,');
+
+        const downloadURL = dataTransfer.getData('DownloadURL');
+        expect(downloadURL).toMatch(/^audio\/mp3:audio-\d{8}-\d{6}\.mp3:data:/);
+      });
+
+      it('should set correct drag data for video elements', async () => {
+        const source =
+          '<video src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAA"></video>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        const video = w.node.querySelector('video') as HTMLVideoElement;
+
+        const dragEvent = new DragEvent('dragstart', {
+          bubbles: true,
+          cancelable: true,
+          dataTransfer: new DataTransfer()
+        });
+
+        video.dispatchEvent(dragEvent);
+
+        const dataTransfer = dragEvent.dataTransfer!;
+        const uriList = dataTransfer.getData('text/uri-list');
+        expect(uriList).toContain('data:video/mp4;base64,');
+
+        const downloadURL = dataTransfer.getData('DownloadURL');
+        expect(downloadURL).toMatch(/^video\/mp4:video-\d{8}-\d{6}\.mp4:data:/);
+      });
+
+      it('should not make elements draggable without data URIs', async () => {
+        const source =
+          '<audio src="https://example.com/audio.mp3"></audio><video src="https://example.com/video.mp4"></video>';
+        const f = htmlRendererFactory;
+        const mimeType = 'text/html';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        const audio = w.node.querySelector('audio');
+        const video = w.node.querySelector('video');
+        expect(audio!.getAttribute('draggable')).toBe(null);
+        expect(video!.getAttribute('draggable')).toBe(null);
+      });
     });
 
     it('should sanitize html', async () => {
@@ -695,6 +801,47 @@ describe('rendermime/factories', () => {
         expect(el.src).toBe('data:image/gif;base64,' + source);
         expect(el.localName).toBe('img');
         expect(el.innerHTML).toBe('');
+      });
+
+      it('should make images with data URIs draggable', async () => {
+        const source =
+          'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        const f = imageRendererFactory;
+        const mimeType = 'image/png';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+        const el = w.node.firstChild as HTMLImageElement;
+        expect(el.getAttribute('draggable')).toBe('true');
+      });
+
+      it('should set correct drag data for images', async () => {
+        const source =
+          'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        const f = imageRendererFactory;
+        const mimeType = 'image/png';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+        const el = w.node.firstChild as HTMLImageElement;
+
+        // Create a mock drag event
+        const dragEvent = new DragEvent('dragstart', {
+          bubbles: true,
+          cancelable: true,
+          dataTransfer: new DataTransfer()
+        });
+
+        el.dispatchEvent(dragEvent);
+
+        const dataTransfer = dragEvent.dataTransfer!;
+        const uriList = dataTransfer.getData('text/uri-list');
+        expect(uriList).toContain('data:image/png;base64,');
+
+        const downloadURL = dataTransfer.getData('DownloadURL');
+        expect(downloadURL).toMatch(/^image\/png:image-\d{8}-\d{6}\.png:data:/);
       });
     });
   });
