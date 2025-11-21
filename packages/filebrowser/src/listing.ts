@@ -1970,8 +1970,8 @@ export class DirListing extends Widget {
       // We are going to assume now that there is only one thing being dropped
       // and we need to pick the best data type representing the item.
 
-      let filename: string | null = null;
-      let uri: string | null = null;
+      let filename: string | undefined = undefined;
+      let uri: string | undefined = undefined;
 
       // First, try to get DownloadURL since it gives us an explicit filename
       // (format: "mimeType:filename:url")
@@ -1991,32 +1991,48 @@ export class DirListing extends Widget {
       if (!uri) {
         // https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
         // indicates 'url' is a shortcut to getting the first url in 'text/uri-list'
-        uri = event.dataTransfer?.getData('url') || null;
+        uri = event.dataTransfer?.getData('url') || undefined;
         if (!uri) {
           // 'url' is not supported everywhere, so fall back to 'text/uri-list'
-          const uriList = event.dataTransfer?.getData('text/uri-list');
+          const uriList =
+            event.dataTransfer?.getData('text/uri-list') || undefined;
           if (uriList) {
-            uri = URLExt.parseUriListFirst(uriList);
+            uri = URLExt.parseUriListFirst(uriList) ?? undefined;
           }
         }
       }
 
-      // Only upload data uris for images, audio, and video
+      const uploadURI = async (uri: string, filename?: string) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        // For now, limit uploads to image, audio, and video blobs. We may relax
+        // this in the future if desired, but these types seem safe to try at
+        // first.
+        if (
+          !(
+            blob.type.startsWith('image/') ||
+            blob.type.startsWith('audio/') ||
+            blob.type.startsWith('video/')
+          )
+        ) {
+          throw new Error(`Unsupported file type for upload: ${blob.type}`);
+        }
+
+        filename = filename ?? Private.getFilenameFromMimeType(blob.type);
+        const file = new File([blob], filename, { type: blob.type });
+        return this._model.upload(file);
+      };
+
+      // For now, only upload local urls, and only data urls that are explicitly image, audio, or video.
       if (
         uri &&
         (uri.startsWith('data:image/') ||
           uri.startsWith('data:audio/') ||
-          uri.startsWith('data:video/'))
+          uri.startsWith('data:video/') ||
+          uri.startsWith('blob:'))
       ) {
-        const blob = URLExt.dataURItoBlob(uri);
-        if (blob) {
-          // Use filename from DownloadURL if available, otherwise generate one
-          if (!filename) {
-            filename = Private.getFilenameFromMimeType(blob.type);
-          }
-          const file = new File([blob], filename, { type: blob.type });
-          uploadPromises.push(this._model.upload(file));
-        }
+        uploadPromises.push(uploadURI(uri, filename));
       }
     }
 
