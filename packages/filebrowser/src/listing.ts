@@ -2002,13 +2002,25 @@ export class DirListing extends Widget {
         }
       }
 
-      const uploadURI = async (uri: string, filename?: string) => {
+      const uploadLocalURI = async (uri: string, filename?: string) => {
+        // For now, to have a safe thing to try first, we only allow local data or blob urls that are image, audio, or video mimetypes.
+        if (
+          !(
+            uri.startsWith('data:image') ||
+            uri.startsWith('data:audio') ||
+            uri.startsWith('data:video') ||
+            uri.startsWith('blob:')
+          )
+        ) {
+          throw new Error(
+            `Can only upload local image, video, or audio data uris and blob uris, got: ${uri}`
+          );
+        }
         const response = await fetch(uri);
         const blob = await response.blob();
 
-        // For now, limit uploads to image, audio, and video blobs. We may relax
-        // this in the future if desired, but these types seem safe to try at
-        // first.
+        // Even though we check the mimetype above, a blob may come back as a
+        // different mimetype, so we check the mimetypes again.
         if (
           !(
             blob.type.startsWith('image/') ||
@@ -2025,14 +2037,8 @@ export class DirListing extends Widget {
       };
 
       // For now, only upload local urls, and only data urls that are explicitly image, audio, or video.
-      if (
-        uri &&
-        (uri.startsWith('data:image/') ||
-          uri.startsWith('data:audio/') ||
-          uri.startsWith('data:video/') ||
-          uri.startsWith('blob:'))
-      ) {
-        uploadPromises.push(uploadURI(uri, filename));
+      if (uri) {
+        uploadPromises.push(uploadLocalURI(uri, filename));
       }
     }
 
