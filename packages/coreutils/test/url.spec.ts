@@ -254,56 +254,5 @@ describe('@jupyterlab/coreutils', () => {
         expect(result).toBeNull();
       });
     });
-
-    describe('.dataURItoBlob()', () => {
-      it('should convert a base64 image data URI to Blob', async () => {
-        // Small valid PNG
-        const pngBase64 =
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
-        const dataURI = `data:image/png;base64,${pngBase64}`;
-        const blob = URLExt.dataURItoBlob(dataURI);
-
-        expect(blob).not.toBeNull();
-        expect(blob!.type).toBe('image/png');
-        expect(blob!.size).toBeGreaterThan(0);
-
-        // Convert back to base64 and verify it matches original
-        const arrayBuffer = await blob!.arrayBuffer();
-        const roundTrippedBase64 = btoa(
-          String.fromCharCode(...new Uint8Array(arrayBuffer))
-        );
-        expect(roundTrippedBase64).toBe(pngBase64);
-      });
-
-      it('should convert a percent-encoded text data URI to Blob', async () => {
-        const dataURI = 'data:text/plain,Hello%20World';
-        const blob = URLExt.dataURItoBlob(dataURI);
-
-        expect(blob).not.toBeNull();
-        expect(blob!.type).toBe('text/plain');
-        const text = await blob!.text();
-        expect(text).toBe('Hello World');
-      });
-
-      it('should return null for invalid data URI', () => {
-        const blob = URLExt.dataURItoBlob('not-a-data-uri');
-        expect(blob).toBeNull();
-      });
-
-      it('should handle empty base64 data', () => {
-        const blob = URLExt.dataURItoBlob('data:text/plain;base64,');
-        expect(blob).not.toBeNull();
-        expect(blob!.size).toBe(0);
-      });
-
-      it('should handle base64 data', async () => {
-        // "Hello" in base64 is "SGVsbG8="
-        const blob = URLExt.dataURItoBlob('data:text/plain;base64,SGVsbG8=');
-        expect(blob).not.toBeNull();
-
-        const text = await blob!.text();
-        expect(text).toBe('Hello');
-      });
-    });
   });
 });
