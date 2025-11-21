@@ -2019,7 +2019,7 @@ export class DirListing extends Widget {
           )
         ) {
           throw new Error(
-            `Can only upload local image, video, or audio data uris and blob uris, got: ${uri}`
+            `Can only upload local image, video, or audio files through local data and blob urls`
           );
         }
         const response = await fetch(uri);
@@ -2034,7 +2034,9 @@ export class DirListing extends Widget {
             blob.type.startsWith('video/')
           )
         ) {
-          throw new Error(`Unsupported file type for upload: ${blob.type}`);
+          throw new Error(
+            `Can only upload local image, video, or audio files through local data and blob urls`
+          );
         }
 
         filename = filename ?? Private.getFilenameFromMimeType(blob.type);
