@@ -249,61 +249,6 @@ export namespace URLExt {
   }
 
   /**
-   * Convert a data URI to a Blob.
-   *
-   * @param dataURI - The data URI to convert (e.g., "data:image/png;base64,iVBORw0KG...")
-   *
-   * @returns A Blob object or null if conversion fails
-   *
-   * #### Notes
-   * This function handles both base64-encoded and percent-encoded data URIs.
-   * - Base64 data: Uses modern Uint8Array.fromBase64() if available, falls back to atob()
-   * - Non-base64 data: Percent-decoded (reserved characters per RFC 3986)
-   */
-  export function dataURItoBlob(dataURI: string): Blob | null {
-    try {
-      const parsed = parseDataURI(dataURI);
-      if (!parsed) {
-        return null;
-      }
-
-      const { mimeType, isBase64, data } = parsed;
-
-      if (isBase64) {
-        // Use modern Uint8Array.fromBase64() if available (baseline 2025)
-        // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
-        // Typescript 5.5 does not recognize fromBase64, so we cast to any
-        if (typeof (Uint8Array as any).fromBase64 === 'function') {
-          try {
-            const array = (Uint8Array as any).fromBase64(data);
-            return new Blob([array], { type: mimeType });
-          } catch (e) {
-            // Fall through to legacy method if modern API fails
-          }
-        }
-
-        // Legacy fallback using atob() for older browsers
-        // TODO: use core-js or another polyfill?
-        const byteString = atob(data);
-        const array = new Uint8Array(byteString.length);
-
-        for (let i = 0; i < byteString.length; i++) {
-          array[i] = byteString.charCodeAt(i);
-        }
-
-        return new Blob([array], { type: mimeType });
-      } else {
-        // Percent-decode the data (reserved characters are percent-encoded per RFC 3986)
-        const decoded = decodeURIComponent(data);
-        return new Blob([decoded], { type: mimeType });
-      }
-    } catch (error) {
-      console.error('Error converting data URI to Blob:', error);
-      return null;
-    }
-  }
-
-  /**
    * The interface for a URL object
    */
   export interface IUrl {
