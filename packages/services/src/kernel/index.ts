@@ -14,5 +14,6 @@ export {
   KernelMessage,
   KernelAPI,
   KernelConnection,
-  CommsOverSubshells
+  CommsOverSubshells,
+  setKernelInfoTimeout
 };

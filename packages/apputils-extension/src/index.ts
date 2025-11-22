@@ -48,6 +48,7 @@ import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
+import { setKernelInfoTimeout } from '@jupyterlab/services';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -877,6 +878,27 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
   }
 };
 
+export const kernelInfoTimeoutSetting: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:kernels-info-timeout-setting',
+  description: 'Provides the kernel info timeout setting.',
+  autoStart: true,
+  requires: [ISettingRegistry],
+  activate: async (
+    _app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry
+  ) => {
+    const settings = await settingRegistry.load(kernelSettings.id);
+    const patch = (settings: ISettingRegistry.ISettings): void => {
+      const kernelInfoTimeout = settings.get('kernelInfoTimeout')
+        .composite as number;
+      console.log(`set kernel info timeout as ${kernelInfoTimeout}`);
+      setKernelInfoTimeout(kernelInfoTimeout);
+    };
+    patch(settings);
+    settings.changed.connect(patch);
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -904,6 +926,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   toggleHeader,
   toolbarRegistry,
   utilityCommands,
-  workspacesPlugin
+  workspacesPlugin,
+  kernelInfoTimeoutSetting
 ];
 export default plugins;
