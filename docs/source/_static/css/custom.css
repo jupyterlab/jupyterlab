@@ -98,192 +98,53 @@ main div.jp-youtube-video iframe {
   height: 100%;
 }
 
-/* Responsive styles for mobile and medium screens */
+/* Simplified responsive styles based on feedback */
 
-/* Tablets and medium screens (up to 768px) */
+/* Mobile and tablet responsive styles */
 @media (width <= 768px) {
-  /* Prevent navbar overflow */
-  .bd-header__inner {
-    gap: 0.25rem;
-    align-items: center;
-  }
-
-  /* Reduce logo size */
+  /* Fix logo scaling - main responsive issue */
   .logo__image {
     max-height: 2rem;
-    max-width: 6rem;
     width: auto;
     object-fit: contain;
   }
 
-  .navbar-brand {
-    padding: 0.25rem 0.5rem;
+  /* Generalized gap for header inner elements */
+  .bd-header__inner {
+    gap: 0.5rem;
   }
 
-  /* Compact header items with proper alignment */
-  .navbar-header-items__start,
-  .navbar-header-items__end {
-    gap: 0.25rem;
-    flex-wrap: nowrap;
-    align-items: center;
+  /* Fix button alignment */
+  .version-switcher__button,
+  .search-button-field,
+  .theme-switch-button {
+    margin-bottom: 0 !important;
   }
 
-  /* Ensure navbar items are vertically centered */
-  .navbar-item {
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  /* Hide version switcher text, show only dropdown indicator */
-  .version-switcher__button {
-    font-size: 0;
-    padding: 0.4rem 0.6rem;
-    min-width: auto;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    line-height: 1 !important;
-    vertical-align: middle;
-  }
-
-  .version-switcher__button .caret {
-    font-size: 0.875rem;
-    display: inline-block;
-    line-height: 1;
-  }
-
-  /* Ensure version switcher container is centered */
-  .version-switcher__container {
-    display: flex !important;
-    align-items: center !important;
-    height: 100%;
-  }
-
-  /* Force dropdown to align properly */
-  .dropdown {
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  /* Hide search button text and keyboard shortcut */
+  /* Hide search button text on smaller screens */
   .search-button__default-text,
   .search-button__kbd-shortcut {
     display: none;
   }
-
-  .search-button-field {
-    padding: 0.4rem 0.6rem;
-    min-width: auto;
-  }
-
-  /* Reduce icon sizes */
-  .navbar-icon-links .nav-link {
-    padding: 0.3rem;
-    font-size: 1.1rem;
-  }
-
-  .navbar-icon-links img.icon-link-image {
-    max-width: 1.1rem;
-    max-height: 1.1rem;
-  }
-
-  /* Reduce theme switcher size */
-  .theme-switch-button {
-    padding: 0.4rem;
-  }
 }
 
-/* Small mobile devices (up to 576px) */
+/* Small mobile specific adjustments */
 @media (width <= 576px) {
-  /* Show only Jupyter icon without wordmark */
   .logo__image {
-    max-height: 1.75rem;
-    max-width: 1.75rem;
-    object-fit: contain;
-    object-position: left center;
+    max-height: 1.5rem;
   }
 
-  .navbar-brand {
-    padding: 0.25rem;
-  }
-
-  /* Very tight spacing */
   .bd-header__inner {
-    gap: 0.15rem;
+    gap: 0.25rem;
   }
 
-  .navbar-header-items__start,
-  .navbar-header-items__end {
-    gap: 0.15rem;
-  }
-
-  /* Further reduce button sizes */
-  .version-switcher__button,
-  .search-button-field,
-  .theme-switch-button {
-    padding: 0.3rem 0.5rem;
-  }
-
-  /* Smaller icons */
-  .navbar-icon-links .nav-link {
-    padding: 0.25rem;
-    font-size: 1rem;
-  }
-
-  .navbar-icon-links img.icon-link-image {
-    max-width: 1rem;
-    max-height: 1rem;
-  }
-
-  /* Hide one or two icon links on very small screens to save space */
-  .navbar-icon-links .nav-item:last-child {
-    display: none;
-  }
-}
-
-/* Extra small mobile devices (up to 380px) - Show only icon without text */
-@media (width <= 380px) {
-  /* Hide the full logo with text completely */
-  .logo__image {
-    display: none;
-  }
-
-  /* Show only icon using background or favicon approach */
-  .navbar-brand {
-    padding: 0.2rem;
-    min-width: 2rem;
-    min-height: 2rem;
-    background-image: url('../logo-icon.png');
-    background-size: 1.5rem 1.5rem;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  /* Even tighter spacing */
-  .bd-header__inner {
-    gap: 0.1rem;
-  }
-
-  .navbar-header-items__start,
-  .navbar-header-items__end {
-    gap: 0.1rem;
-  }
-
-  /* Further reduce button sizes */
-  .version-switcher__button,
-  .search-button-field,
-  .theme-switch-button {
-    padding: 0.25rem 0.4rem;
-  }
-
-  /* Even smaller icons */
-  .navbar-icon-links .nav-link {
-    padding: 0.2rem;
-    font-size: 0.95rem;
-  }
-
-  .navbar-icon-links img.icon-link-image {
-    max-width: 0.95rem;
-    max-height: 0.95rem;
+  /* Fix scroll issues with large headings on mobile */
+  h1,
+  h2,
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 }
