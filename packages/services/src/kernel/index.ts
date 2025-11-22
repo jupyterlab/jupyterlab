@@ -6,7 +6,7 @@ import { CommsOverSubshells } from './comm';
 import * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 import * as KernelAPI from './restapi';
-import { KernelConnection } from './default';
+import { KernelConnection, setKernelInfoTimeout } from './default';
 
 export * from './manager';
 export {
