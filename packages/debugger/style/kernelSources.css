@@ -38,7 +38,6 @@
 .jp-DebuggerKernelSource-source {
   display: flex;
   align-items: center;
-  padding: 4px;
   cursor: pointer;
 }
 
@@ -61,7 +60,7 @@
   width: 100%;
   align-items: center;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 6px 10px;
 }
 
 .jp-DebuggerKernelSource-item:hover {
@@ -79,7 +78,6 @@
 .jp-DebuggerKernelSource-itemSelected {
   background: var(--jp-brand-color1);
   color: var(--jp-ui-inverse-font-color1);
-  border-radius: 2px;
 }
 
 .jp-DebuggerKernelSource-itemSelected:hover {
