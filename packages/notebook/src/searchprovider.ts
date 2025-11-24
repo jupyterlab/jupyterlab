@@ -470,7 +470,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop, { from: 'previous-match' });
+        await this.highlightNext(loop, {
+          from: 'previous-match',
+          skipReadOnly: true
+        });
       }
     }
 
@@ -696,7 +699,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
     do {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
+      let searchEngine = this._searchProviders[this._currentProviderIndex];
+
+      while (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
+        if (this._currentProviderIndex + 1 < this._searchProviders.length)
+          this._currentProviderIndex += 1;
+        else {
+          this._currentProviderIndex = 0;
+        }
+        searchEngine = this._searchProviders[this._currentProviderIndex];
+      }
 
       const match = reverse
         ? await searchEngine.highlightPrevious(false, options)

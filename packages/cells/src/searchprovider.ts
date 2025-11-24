@@ -75,6 +75,11 @@ export class CellSearchProvider
     const isEditable = this.model.getMetadata('editable') !== false;
     return { ...match, readonly: !isEditable };
   }
+
+  public isReadOnlyProvider(): boolean {
+    const isEditable = this.model.getMetadata('editable') !== false;
+    return !isEditable;
+  }
 }
 
 /**
