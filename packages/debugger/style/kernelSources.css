@@ -80,6 +80,10 @@
   color: var(--jp-ui-inverse-font-color1);
 }
 
+.jp-DebuggerKernelSource-itemSelected .jp-Icon path {
+  fill: var(--jp-ui-inverse-font-color1) !important;
+}
+
 .jp-DebuggerKernelSource-itemSelected:hover {
   background: var(--jp-brand-color1);
   color: var(--jp-ui-inverse-font-color1);
