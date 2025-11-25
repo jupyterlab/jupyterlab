@@ -536,7 +536,7 @@ const openInTerminalPlugin: JupyterFrontEndPlugin<void> = {
 
     app.contextMenu.addItem({
       command: CommandIDs.openInTerminal,
-      selector: '.jp-DirListing',
+      selector: '.jp-DirListing-item',
       rank: 2 // positioning it near the top of the menu(after menu)"
     });
   }
