@@ -490,6 +490,10 @@ export interface IInlineCompleterSettings {
    */
   reserveSpaceForLongest: boolean;
   /**
+   * If true, applies syntax highlighting to the ghost text suggestion instead of showing it as plain, faded text.
+   */
+  ghostSyntaxHighlighting: boolean;
+  /**
    * Provider settings.
    */
   providers: {
