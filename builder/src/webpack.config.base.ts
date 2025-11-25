@@ -4,6 +4,12 @@ import * as rspack from '@rspack/core';
 import miniSVGDataURI from 'mini-svg-data-uri';
 
 const rules = [
+  {
+    test: /\.css$/,
+    exclude: /\.raw\.css$/,
+    type: 'javascript/auto',
+    use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
+  },
   { test: /\.raw\.css$/, type: 'asset/source' },
   { test: /\.txt$/, type: 'asset/source' },
   { test: /\.md$/, type: 'asset/source' },
@@ -84,6 +90,9 @@ module.exports = {
   plugins: [
     new rspack.ProvidePlugin({
       process: 'process/browser'
+    }),
+    new rspack.CssExtractRspackPlugin({
+      filename: '[name].[contenthash:8].css'
     })
   ]
 };
