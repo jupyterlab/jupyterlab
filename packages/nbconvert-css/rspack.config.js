@@ -19,7 +19,8 @@ module.exports = {
     rules: [
       {
         test: /\.css$/i,
-        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
+        type: 'javascript/auto'
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
