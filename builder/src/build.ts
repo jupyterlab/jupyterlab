@@ -205,7 +205,7 @@ export namespace Build {
             {
               test: /\.css$/i,
               use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
-              type: 'css/auto'
+              type: 'javascript/auto'
             },
             {
               test: /\.svg/,
