@@ -66,6 +66,7 @@ import {
   RankedMenu,
   refreshIcon,
   stopIcon,
+  terminalIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
 import { map } from '@lumino/algorithm';
@@ -108,6 +109,8 @@ namespace CommandIDs {
   export const openUrl = 'filebrowser:open-url';
 
   export const open = 'filebrowser:open';
+
+  export const openInTerminal = 'filebrowser:open-in-terminal';
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
@@ -475,6 +478,66 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       }
+    });
+  }
+};
+
+/**
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
+ */
+const openInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-in-terminal',
+  description:
+    'Adds a context menu item to open a terminal in the file browser directory.',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { commands } = app;
+    const { tracker } = factory;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openInTerminal, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const item = widget.selectedItems().next().value;
+        if (!item) {
+          return;
+        }
+
+        let path = '';
+        if (item.type === 'directory') {
+          path = item.path;
+        } else {
+          path = PathExt.dirname(item.path);
+        }
+
+        try {
+          const terminal = await commands.execute('terminal:create-new', {
+            cwd: path
+          });
+          if (terminal) {
+            app.shell.activateById(terminal.id);
+          }
+        } catch (e) {
+          console.error(`Failed to open terminal in '${path}'`, e);
+        }
+      }
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.openInTerminal,
+      selector: '.jp-DirListing',
+      rank: 2 // positioning it near the top of the menu(after menu)"
     });
   }
 };
@@ -1882,6 +1945,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shareFile,
   fileUploadStatus,
   downloadPlugin,
+  openInTerminalPlugin,
   browserWidget,
   openWithPlugin,
   openBrowserTabPlugin,
