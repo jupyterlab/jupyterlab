@@ -346,6 +346,129 @@ describe('cells/widget', () => {
       });
     });
 
+    describe('#loadTagsState()', () => {
+      it('should load the tags state from the model and set data attributes', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model,
+          placeholder: false
+        }).initializeState();
+
+        // Initially no tag attributes
+        expect(widget.node.getAttribute('data-tag-test')).toBeNull();
+        expect(widget.node.getAttribute('data-tag-another')).toBeNull();
+
+        // Set tags in metadata
+        model.setMetadata('tags', ['test', 'another-tag']);
+        widget.loadTagsState();
+
+        // Verify data attributes are set
+        expect(widget.node.getAttribute('data-tag-test')).toEqual('true');
+        expect(widget.node.getAttribute('data-tag-another-tag')).toEqual(
+          'true'
+        );
+
+        // Update tags
+        model.setMetadata('tags', ['different']);
+        widget.loadTagsState();
+
+        // Old attributes should be removed, new ones added
+        expect(widget.node.getAttribute('data-tag-test')).toBeNull();
+        expect(widget.node.getAttribute('data-tag-another-tag')).toBeNull();
+        expect(widget.node.getAttribute('data-tag-different')).toEqual('true');
+
+        // Remove all tags
+        model.setMetadata('tags', []);
+        widget.loadTagsState();
+
+        // All tag attributes should be removed
+        expect(widget.node.getAttribute('data-tag-different')).toBeNull();
+      });
+
+      it('should sanitize tag names for data attributes', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model,
+          placeholder: false
+        }).initializeState();
+
+        // Set tags with special characters
+        model.setMetadata('tags', [
+          'tag with spaces',
+          'tag/with/slashes',
+          'tag@with!symbols'
+        ]);
+        widget.loadTagsState();
+
+        // Verify sanitized data attributes are set
+        expect(widget.node.getAttribute('data-tag-tag-with-spaces')).toEqual(
+          'true'
+        );
+        expect(widget.node.getAttribute('data-tag-tag-with-slashes')).toEqual(
+          'true'
+        );
+        expect(widget.node.getAttribute('data-tag-tag-with-symbols')).toEqual(
+          'true'
+        );
+      });
+
+      it('should be called when tags metadata changes', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model,
+          placeholder: false
+        }).initializeState();
+
+        // Set initial tags
+        model.setMetadata('tags', ['initial']);
+        expect(widget.node.getAttribute('data-tag-initial')).toEqual('true');
+
+        // Change tags via metadata change (should trigger onMetadataChanged)
+        model.setMetadata('tags', ['updated']);
+        expect(widget.node.getAttribute('data-tag-initial')).toBeNull();
+        expect(widget.node.getAttribute('data-tag-updated')).toEqual('true');
+      });
+
+      it('should respect syncTags setting', () => {
+        const model = new TestModel({
+          sharedModel: createStandaloneCell({ cell_type: 'code' }) as YCodeCell
+        });
+        const widget = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
+          model,
+          placeholder: false
+        }).initializeState();
+
+        // syncTags defaults to true
+        expect(widget.syncTags).toEqual(true);
+
+        // Disable syncTags
+        widget.syncTags = false;
+
+        // Set tags - should not create attributes when syncTags is false
+        model.setMetadata('tags', ['test']);
+        expect(widget.node.getAttribute('data-tag-test')).toBeNull();
+
+        // Enable syncTags - should trigger loadTagsState
+        widget.syncTags = true;
+        expect(widget.node.getAttribute('data-tag-test')).toEqual('true');
+
+        // Change tags - should update attributes when syncTags is true
+        model.setMetadata('tags', ['updated']);
+        expect(widget.node.getAttribute('data-tag-test')).toBeNull();
+        expect(widget.node.getAttribute('data-tag-updated')).toEqual('true');
+      });
+    });
+
     describe('#saveCollapseState()', () => {
       it('should save the collapse state to the model', () => {
         const model = new TestModel({
