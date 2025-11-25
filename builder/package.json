@@ -45,7 +45,7 @@
     "@lumino/signaling": "^2.1.5",
     "@lumino/virtualdom": "^2.0.4",
     "@lumino/widgets": "^2.7.2",
-    "@rspack/core": "^1.0.0-beta.2",
+    "@rspack/core": "^1.6.4",
     "ajv": "^8.12.0",
     "commander": "^9.4.1",
     "css-loader": "^7.1.1",

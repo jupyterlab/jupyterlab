@@ -18,7 +18,7 @@
     "@lumino/widgets": "^2.7.2"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.0.0-beta.2",
+    "@rspack/cli": "^1.6.4",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.5.4"

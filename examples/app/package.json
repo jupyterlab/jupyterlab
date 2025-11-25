@@ -44,8 +44,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.0.0-beta.2",
-    "@rspack/core": "^1.0.0-beta.2",
+    "@rspack/cli": "^1.6.4",
+    "@rspack/core": "^1.6.4",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
     "mini-svg-data-uri": "^1.4.4",

@@ -15,8 +15,8 @@
     "@lumino/coreutils": "^2.2.2"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.0.0-beta.2",
-    "@rspack/core": "^1.0.0-beta.2",
+    "@rspack/cli": "^1.6.4",
+    "@rspack/core": "^1.6.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.5.4"
   }
