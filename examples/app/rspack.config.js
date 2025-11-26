@@ -24,6 +24,13 @@ module.exports = [
     mode: 'development',
     module: {
       rules: [
+        {
+          test: /\.css$/,
+          exclude: /\.raw\.css$/,
+          type: 'javascript/auto',
+          use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
+        },
+        { test: /\.raw\.css$/, type: 'asset/source' },
         { test: /\.html$/, type: 'asset/resource' },
         { test: /\.md$/, type: 'asset/source' },
         { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
@@ -66,6 +73,9 @@ module.exports = [
       new rspack.DefinePlugin({
         // Needed for various packages using cwd(), like the path polyfill
         process: { cwd: () => '/', env: {} }
+      }),
+      new rspack.CssExtractRspackPlugin({
+        filename: '[name].[contenthash:8].css'
       })
     ]
   }
