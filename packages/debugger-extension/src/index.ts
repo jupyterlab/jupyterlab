@@ -1585,6 +1585,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(Debugger.CommandIDs.setVariablesFilterOptions, {
       label: args => trans.__(args.label as string),
       caption: args => trans.__(args.label as string),
+      isEnabled: () => debug.isStarted,
       isToggled: args => {
         return !!debug.model.variablesFilterOptions.get(
           args.option as VariablesFilterOptionKey
@@ -1630,6 +1631,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(Debugger.CommandIDs.clearAllBreakpoints, {
       label: trans.__('Clear All Breakpoints'),
       caption: trans.__('Clear All Breakpoints'),
+      isEnabled: () => debug.isStarted,
       execute: async () => {
         await debug.clearBreakpoints();
       },
@@ -1645,6 +1647,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(Debugger.CommandIDs.runCells, {
       label: trans.__('Run All Cells'),
       caption: trans.__('Run All Cells'),
+      isEnabled: () => debug.isStarted,
       execute: async () => {
         const widget = notebookTracker.currentWidget;
         if (!widget) {
@@ -1671,6 +1674,7 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(Debugger.CommandIDs.restartAndRunAll, {
       label: trans.__('Restart Kernel and Run Without Debugging'),
       caption: trans.__('Restart Kernel and Run Without Debugging'),
+      isEnabled: () => debug.isStarted,
       execute: async () => {
         const widget = notebookTracker.currentWidget;
         if (!widget) {
