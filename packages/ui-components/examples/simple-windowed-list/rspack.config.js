@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+const rspack = require('@rspack/core');
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
@@ -15,6 +16,13 @@ module.exports = {
   mode: 'development',
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        exclude: /\.raw\.css$/,
+        type: 'javascript/auto',
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
+      },
+      { test: /\.raw\.css$/, type: 'asset/source' },
       { test: /\.html$/, type: 'asset/resource' },
       { test: /\.js.map$/, type: 'asset/resource' },
       {
@@ -37,5 +45,10 @@ module.exports = {
         type: 'asset/source'
       }
     ]
-  }
+  },
+  plugins: [
+    new rspack.CssExtractRspackPlugin({
+      filename: '[name].[contenthash:8].css'
+    })
+  ]
 };
