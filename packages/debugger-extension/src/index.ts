@@ -126,13 +126,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    handler.executionDone.connect(() => {
-      debug.displayModules().catch(reason => {
-        console.error(
-          `Failed to display modules after execution in console: ${reason}`
-        );
-      });
-    });
+    handler.executionDone.connect(debug.displayModules);
 
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
@@ -236,13 +230,7 @@ const files: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    handler.executionDone.connect(() => {
-      debug.displayModules().catch(reason => {
-        console.error(
-          `Failed to display modules after execution in console: ${reason}`
-        );
-      });
-    });
+    handler.executionDone.connect(debug.displayModules);
 
     const activeSessions: {
       [id: string]: Session.ISessionConnection;
@@ -348,13 +336,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       translator: translator
     });
 
-    handler.executionDone.connect(() => {
-      service.displayModules().catch(reason => {
-        console.error(
-          `Failed to display modules after execution in notebook: ${reason}`
-        );
-      });
-    });
+    handler.executionDone.connect(service.displayModules);
 
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
