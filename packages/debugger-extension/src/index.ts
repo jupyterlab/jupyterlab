@@ -828,7 +828,6 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
         const hide = setting.get('hideFilteredKernelSources')
           .composite as boolean;
-        console.log(hide);
 
         if (hide) {
           service.model.kernelSources.hiddenSources = filtersData;
