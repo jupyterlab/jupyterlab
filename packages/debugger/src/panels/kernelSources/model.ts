@@ -52,6 +52,14 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   /**
+   * Set hidden sources list
+   */
+  set hiddenSources(list: string[]) {
+    this._hiddenSources = new Set(list);
+    void this._refreshDebouncer.invoke();
+  }
+
+  /**
    * Whether the kernel sources model is disposed or not.
    */
   get isDisposed(): boolean {
@@ -123,6 +131,11 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
       this._filteredKernelSources = this._filter
         ? this.getFilteredKernelSources()
         : this._kernelSources;
+
+      this._filteredKernelSources = this._filteredKernelSources.filter(
+        m => !this._hiddenSources.has(m.name)
+      );
+
       this._filteredKernelSources.sort(compare);
     } else {
       this._kernelSources = new Array<IDebugger.KernelSource>();
@@ -131,6 +144,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._changed.emit(this._filteredKernelSources);
   }
 
+  private _hiddenSources: Set<string> = new Set(); // NEW
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
   private _isDisposed = false;

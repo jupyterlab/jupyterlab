@@ -63,6 +63,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
+import filtersData from '../kernelSourcesFilters.json';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -824,6 +825,17 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
+
+        const hide = setting.get('hideFilteredKernelSources')
+          .composite as boolean;
+        console.log(hide);
+
+        if (hide) {
+          service.model.kernelSources.hiddenSources = filtersData;
+        } else {
+          service.model.kernelSources.hiddenSources = [];
+        }
+
         const kernelSourcesFilter = setting.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
