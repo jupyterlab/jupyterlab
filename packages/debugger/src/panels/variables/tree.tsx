@@ -55,9 +55,9 @@ export class VariablesBodyTree extends ReactWidget {
   /**
    * Handle variables filter options changes by re-filtering scopes.
    */
-  private _onVariablesFilterOptionsChanged = (): void => {
+  private _onVariablesFilterOptionsChanged(): void {
     this.update();
-  };
+  }
 
   /**
    * Render the VariablesBodyTree.
