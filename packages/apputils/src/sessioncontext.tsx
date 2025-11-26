@@ -331,7 +331,7 @@ export namespace ISessionContext {
      */
     restart(
       session: ISessionContext,
-      restartOptions?: IRestartOptions
+      restartOptions?: ISessionContext.IRestartOptions
     ): Promise<boolean>;
   }
 
@@ -348,10 +348,12 @@ export namespace ISessionContext {
      */
     settingRegistry?: ISettingRegistry | null;
   }
-}
-
-interface IRestartOptions {
-  onBeforeRestart: () => Promise<void>;
+  /**
+   * On before restarting the kernel options
+   */
+  export interface IRestartOptions {
+    onBeforeRestart: () => Promise<void>;
+  }
 }
 
 /**
@@ -1442,7 +1444,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    */
   async restart(
     sessionContext: ISessionContext,
-    restartOptions?: IRestartOptions
+    restartOptions?: ISessionContext.IRestartOptions
   ): Promise<boolean> {
     const trans = this._translator.load('jupyterlab');
 
