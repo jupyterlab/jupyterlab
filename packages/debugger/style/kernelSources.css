@@ -37,3 +37,8 @@
   height: 16px;
   width: 16px;
 }
+
+.jp-DebuggerKernelSources-header .jp-Toolbar-item[data-jp-item-name='filter'] {
+  flex: 1 1 0;
+  min-width: 0;
+}
