@@ -82,9 +82,9 @@ export class Grid extends Panel {
     this.addWidget(grid);
   }
 
-  _onVariablesFilterOptionsChanged = (): void => {
+  private _onVariablesFilterOptionsChanged(): void {
     this.dataModel.setData(this.model.scopes ?? []);
-  };
+  }
 
   /**
    * Set the variable filter list.
@@ -181,7 +181,6 @@ export class GridModel extends DataModel {
    * @param service The debugger service
    * @param translator optional translator
    */
-  // constructor(service: IDebugger, translator?: ITranslator) {
   constructor(options: GridModel.IOptions) {
     super();
     this._service = options.service;
