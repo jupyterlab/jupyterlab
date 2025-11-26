@@ -2039,9 +2039,14 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
-    // Expand the target section if needed,
+    // Expand the target section if needed
     const expandedSet = new Set<MarkdownCell>();
     this._resolveInsertionIndex(to, expandedSet);
+
+    // Capture selection before moving
+    const originallySelected = this.widgets
+      .slice(from, from + n)
+      .map(w => this.isSelected(w));
 
     super.moveCell(from, to, n);
 
@@ -2055,13 +2060,14 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = newActiveCellIndex;
     }
 
-    const isSelected = this.widgets
-      .slice(Math.min(from, to), Math.min(from, to) + n)
-      .map(w => this.isSelected(w));
+    //Restore selection
+    this.deselectAll();
 
-    isSelected.forEach((selected, idx) => {
+    // re-select the moved cells according to the original selection
+    originallySelected.forEach((selected, i) => {
       if (selected) {
-        this.select(this.widgets[to > from ? to - n + 1 + idx : to + idx]);
+        const newIndex = to > from ? to - n + i + 1 : to + i;
+        this.select(this.widgets[newIndex]);
       }
     });
   }
