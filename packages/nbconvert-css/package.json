@@ -22,6 +22,7 @@
   },
   "files": [
     "style/*.js",
+    "style/*.js.map",
     "style/*.css",
     "style/*.css.map"
   ],
