@@ -364,6 +364,11 @@ if [[ $GROUP == usage2 ]]; then
     rm -f /tmp/jupyter_log_$$.txt
 
     # Check the labhubapp
+    # Test that the labhubapp fails to start if jupyterhub is not installed
+    # and provides a helpful error message.
+    ($TEST_INSTALL_PATH/bin/jupyter-labhub 2>&1 || true) | tee labhub.log
+    grep -q "JupyterHub is not installed" labhub.log || exit 1
+    # Install jupyterhub and test that the labhubapp starts successfully.
     $TEST_INSTALL_PATH/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
     $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
