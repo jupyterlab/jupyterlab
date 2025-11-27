@@ -63,6 +63,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
 import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
+import { Widget } from '@lumino/widgets';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -843,7 +844,13 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
   id: '@jupyterlab/debugger-extension:source-viewer',
   description: 'Initialize the debugger sources viewer.',
-  requires: [IDebugger, IEditorServices, IDebuggerSources, ITranslator],
+  requires: [
+    IDebugger,
+    IEditorServices,
+    IDebuggerSources,
+    ITranslator,
+    IDebuggerHandler
+  ],
   provides: IDebuggerSourceViewer,
   autoStart: true,
   activate: async (
@@ -851,69 +858,86 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     service: IDebugger,
     editorServices: IEditorServices,
     debuggerSources: IDebugger.ISources,
-    translator: ITranslator
+    translator: ITranslator,
+    handler: Debugger.Handler
   ): Promise<IDebugger.ISourceViewer> => {
+    let previousEditorWidget: Widget | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
     const { model } = service;
 
-    const onCurrentFrameChanged = (
+    const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
-    ): void => {
-      debuggerSources
-        .find({
-          focus: true,
-          kernel: service.session?.connection?.kernel?.name ?? '',
-          path: service.session?.connection?.path ?? '',
-          source: frame?.source?.path ?? ''
-        })
-        .forEach(editor => {
-          requestAnimationFrame(() => {
-            void editor.reveal().then(() => {
-              const edit = editor.get();
-              if (edit) {
-                Debugger.EditorHandler.showCurrentLine(edit, frame.line);
-              }
-            });
-          });
-        });
+    ): Promise<void> => {
+      let openedByDebugger = true;
+      if (!service.isStarted || !frame?.source?.path) {
+        return;
+      }
+      try {
+        const source = await service.getSource({ path: frame.source.path });
+        if (source) {
+          openSource(source, frame, openedByDebugger);
+        }
+      } catch (error) {
+        console.error('Failed to fetch source:', error);
+      }
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
     const openSource = (
       source: IDebugger.Source,
-      breakpoint?: IDebugger.IBreakpoint
+      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame,
+      openedByDebugger = false
     ): void => {
       if (!source) {
         return;
       }
       const { content, mimeType, path } = source;
-      const results = debuggerSources.find({
-        focus: true,
-        kernel: service.session?.connection?.kernel?.name ?? '',
-        path: service.session?.connection?.path ?? '',
-        source: path
-      });
-      if (results.length > 0) {
-        if (breakpoint && typeof breakpoint.line !== 'undefined') {
+      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
+        const results = debuggerSources.find({
+          focus: true,
+          kernel: service.session?.connection?.kernel?.name ?? '',
+          path: service.session?.connection?.path ?? '',
+          source: breakpointOrFrame?.source?.path ?? ''
+        });
+
+        if (results.length > 0) {
           results.forEach(editor => {
             void editor.reveal().then(() => {
-              editor.get()?.revealPosition({
-                line: (breakpoint.line as number) - 1,
-                column: breakpoint.column || 0
-              });
+              const edit = editor.get();
+              if (edit) {
+                edit.revealPosition({
+                  line: (breakpointOrFrame.line as number) - 1,
+                  column: breakpointOrFrame.column || 0
+                });
+                Debugger.EditorHandler.showCurrentLine(
+                  edit,
+                  breakpointOrFrame.line as number
+                );
+              }
             });
           });
+          return;
         }
-        return;
       }
+
+      if (
+        previousEditorWidget &&
+        !previousEditorWidget.isDisposed &&
+        openedByDebugger === true
+      ) {
+        previousEditorWidget.dispose();
+        previousEditorWidget = null;
+      }
+
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
         content,
         mimeType,
         path
       });
+
       const editor = editorWrapper.editor;
       const editorHandler = new Debugger.EditorHandler({
         debuggerService: service,
@@ -930,11 +954,34 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         editorWrapper
       });
 
+      for (const widget of app.shell.widgets('main')) {
+        if (
+          widget.title.label === PathExt.basename(path) &&
+          widget.title.caption === path &&
+          openedByDebugger === true
+        ) {
+          previousEditorWidget = widget;
+
+          break;
+        }
+      }
+
       const frame = service.model.callstack.frame;
       if (frame) {
-        Debugger.EditorHandler.showCurrentLine(editor, frame.line);
+        requestAnimationFrame(() => {
+          editor.revealPosition({
+            line: (frame.line as number) - 1,
+            column: frame.column || 0
+          });
+          Debugger.EditorHandler.showCurrentLine(editor, frame.line, 'start');
+        });
       }
     };
+
+    /* When receiving the execute_reply message, close the last read-only editor opened if it exists */
+    handler.executionDone.connect(() => {
+      if (previousEditorWidget) previousEditorWidget.close();
+    });
 
     const trans = translator.load('jupyterlab');
 
@@ -1280,6 +1327,7 @@ const main: JupyterFrontEndPlugin<void> = {
           sourceViewer.open(source);
         }
       );
+
       model.kernelSources.kernelSourceOpened.connect(onKernelSourceOpened);
       model.breakpoints.clicked.connect(async (_, breakpoint) => {
         const path = breakpoint.source?.path;
