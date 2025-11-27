@@ -121,11 +121,11 @@
       "type": "string",
       "default": ""
     },
-    "hideFilteredKernelSources": {
-      "title": "Hide filtered kernel sources",
+    "hideNativeFilteredKernelSources": {
+      "title": "Hide native filtered kernel sources",
       "description": "If true, apply the filter automatically.",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "autoCollapseDebuggerSidebar": {
       "title": "Auto Collapse Debugger Sidebar",
