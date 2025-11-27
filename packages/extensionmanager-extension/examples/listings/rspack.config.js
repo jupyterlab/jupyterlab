@@ -29,7 +29,6 @@ module.exports = [
     mode: 'development',
     module: {
       rules: [
-        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
         { test: /\.html$/, type: 'asset/resource' },
         { test: /\.md$/, type: 'asset/source' },
         { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
@@ -53,7 +52,10 @@ module.exports = [
           issuer: /\.css$/,
           type: 'asset',
           generator: {
-            dataUrl: content => miniSVGDataURI(content.toString())
+            dataUrl: {
+              content: content => miniSVGDataURI(content.content),
+              mimetype: 'image/svg+xml'
+            }
           }
         },
         {

@@ -47,8 +47,9 @@ from jupyterlab.jlpmapp import HERE, YARN_PATH
 from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
 # The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
-
+# TODO: check if we can only keep the previous one
+# WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
 
 # The repo root directory
 REPO_ROOT = osp.abspath(osp.join(HERE, ".."))
@@ -1453,6 +1454,15 @@ class _AppHandler:
 
         # Handle splicing of packages
         if splice_source:
+            # Get devDependencies from the source_dir package.json
+            source_pkg_path = pjoin(source_dir, "package.json")
+            with open(source_pkg_path) as fid:
+                source_data = json.load(fid)
+            data["devDependencies"] = source_data["devDependencies"]
+
+            # Handle potential changes in the scripts sections
+            data["scripts"] = source_data["scripts"]
+
             # Splice workspace tree as linked dependencies
             for path in glob(pjoin(REPO_ROOT, "packages", "*", "package.json")):
                 local_path = osp.dirname(osp.abspath(path))
