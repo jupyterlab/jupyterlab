@@ -3,10 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
-import { MimeModel } from './mimemodel';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
+import type { MimeModel } from './mimemodel';
 import type { RenderMimeRegistry } from './registry';
 
 /**

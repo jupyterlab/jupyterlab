@@ -6,7 +6,7 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import miniSVGDataURI from 'mini-svg-data-uri';
 
-import * as webpack from 'webpack';
+import type * as webpack from 'webpack';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';

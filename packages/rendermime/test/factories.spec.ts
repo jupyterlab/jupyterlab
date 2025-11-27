@@ -2,19 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
+import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
 import {
   errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
-  IMarkdownParser,
-  IRenderMime,
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
   svgRendererFactory,
   textRendererFactory
 } from '@jupyterlab/rendermime';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 function createModel(

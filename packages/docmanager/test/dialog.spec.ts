@@ -3,21 +3,21 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import type { IDocumentManagerDialogs } from '@jupyterlab/docmanager';
 import {
   DocumentManager,
-  IDocumentManagerDialogs,
   renameDialog,
   renameFile
 } from '@jupyterlab/docmanager';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   DocumentRegistry,
   DocumentWidget,
-  IDocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { dismissDialog } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Widget } from '@lumino/widgets';

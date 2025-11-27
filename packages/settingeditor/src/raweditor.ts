@@ -2,13 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { CommandToolbarButton, Toolbar } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { CommandRegistry } from '@lumino/commands';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { BoxLayout, SplitPanel, Widget } from '@lumino/widgets';
 import { createInspector } from './inspector';
 

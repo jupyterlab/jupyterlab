@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { BreakpointsModel } from './panels/breakpoints/model';
 
@@ -14,7 +15,7 @@ import { SourcesModel } from './panels/sources/model';
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
-import { IDebuggerDisplayRegistry } from './tokens';
+import type { IDebuggerDisplayRegistry } from './tokens';
 import { DebuggerDisplayRegistry } from './displayregistry';
 
 /**

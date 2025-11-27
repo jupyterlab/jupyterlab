@@ -1,29 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Kernel, KernelAPI, KernelSpec, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
+import type { Kernel, KernelSpec, Session } from '@jupyterlab/services';
+import { KernelAPI } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import type {
+  IDisposableMenuItem,
+  LabIcon,
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   cleaningIcon,
   closeIcon,
   CommandToolbarButton,
   consoleIcon,
-  IDisposableMenuItem,
   jupyterIcon,
   kernelIcon,
-  LabIcon,
-  notebookIcon,
-  RankedMenu
+  notebookIcon
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { CommandIDs } from '.';
 
 const KERNEL_ITEM_CLASS = 'jp-mod-kernel';

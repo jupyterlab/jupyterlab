@@ -8,11 +8,11 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { LruCache } from '@jupyterlab/coreutils';
 
-import { IThemeManager } from '@jupyterlab/apputils';
+import type { IThemeManager } from '@jupyterlab/apputils';
 
+import type { IMermaidManager } from './tokens';
 import {
   DETAILS_CLASS,
-  IMermaidManager,
   MERMAID_CLASS,
   MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,

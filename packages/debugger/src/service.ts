@@ -1,26 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelSpec, Session } from '@jupyterlab/services';
+import type { KernelSpec, Session } from '@jupyterlab/services';
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
 
-import { VariablesModel } from './panels/variables/model';
+import type { VariablesModel } from './panels/variables/model';
 
-import { IDebugger } from './tokens';
-import { IDebuggerDisplayRegistry } from './tokens';
+import type { IDebugger } from './tokens';
+import type { IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A concrete implementation of the IDebugger interface.

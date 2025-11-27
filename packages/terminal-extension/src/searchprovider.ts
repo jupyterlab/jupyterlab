@@ -2,14 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import {
+import type {
   IReplaceOptions,
-  ISearchProvider,
-  SearchProvider
+  ISearchProvider
 } from '@jupyterlab/documentsearch';
+import { SearchProvider } from '@jupyterlab/documentsearch';
 import { Terminal } from '@jupyterlab/terminal';
-import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { Widget } from '@lumino/widgets';
 import type {
   ISearchDecorationOptions,
   ISearchOptions

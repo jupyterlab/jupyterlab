@@ -1,26 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import type { SessionContext } from '@jupyterlab/apputils';
+import type { Cell, ICellModel } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import {
+import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition,
-  untilReady,
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import { Session } from '@jupyterlab/services';
+import { untilReady, VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Session } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 
-import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
-import { CellList } from './celllist';
+import type { NotebookPanel } from './panel';
+import type { Notebook } from './widget';
+import type { CellList } from './celllist';
 
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 

@@ -12,13 +12,14 @@ import {
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { KernelSourcesFilter } from './filter';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 import { UseSignal } from '@jupyterlab/ui-components';
-import { IRenderMime } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 
 /**
  * The class name added to the filterbox node.

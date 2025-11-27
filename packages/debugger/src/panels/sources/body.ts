@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   CodeEditorWrapper,
   IEditorMimeTypeService,
   IEditorServices
@@ -15,7 +15,7 @@ import { Debugger } from '../..';
 
 import { EditorHandler } from '../../handlers/editor';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 /**
  * The body for a Sources Panel.

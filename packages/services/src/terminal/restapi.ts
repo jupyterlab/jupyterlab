@@ -3,7 +3,7 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
-import { ITerminal, ITerminalAPIClient } from './terminal';
+import type { ITerminal, ITerminalAPIClient } from './terminal';
 
 /**
  * The url for the terminal service.

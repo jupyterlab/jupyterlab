@@ -19,9 +19,9 @@ import {
   unfoldCode,
   unfoldEffect
 } from '@codemirror/language';
-import { EditorView } from '@codemirror/view';
+import type { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';

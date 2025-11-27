@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { Dialog, Notification } from '@jupyterlab/apputils';
 import { GalataInpage } from './global';
-import { IGalataHelpers, PLUGIN_ID_GALATA_HELPERS } from './tokens';
+import type { IGalataHelpers } from './tokens';
+import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
 
 export type {
   IGalataInpage,

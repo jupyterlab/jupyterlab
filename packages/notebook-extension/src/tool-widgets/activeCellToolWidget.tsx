@@ -4,12 +4,14 @@
  */
 
 import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
-import { ISharedText } from '@jupyter/ydoc';
+import type { FieldProps } from '@rjsf/utils';
+import type { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+import type { INotebookTracker } from '@jupyterlab/notebook';
+import { NotebookTools } from '@jupyterlab/notebook';
+import type { ISharedText } from '@jupyter/ydoc';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { CodeCellModel, ICellModel, InputPrompt } from '@jupyterlab/cells';
+import type { CodeCellModel, ICellModel } from '@jupyterlab/cells';
+import { InputPrompt } from '@jupyterlab/cells';
 import { Debouncer } from '@lumino/polling';
 
 /**

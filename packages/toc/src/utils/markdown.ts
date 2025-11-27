@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { TableOfContents } from '../tokens';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import { renderMarkdown } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { TableOfContents } from '../tokens';
 
 /**
  * Markdown heading

@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
-  IChangedArgs as IChangedArgsGeneric,
-  PathExt
-} from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Contents, Kernel } from '@jupyterlab/services';
-import { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ISessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IChangedArgs as IChangedArgsGeneric } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Contents, Kernel } from '@jupyterlab/services';
+import type { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
   audioIcon,
   fileIcon,
@@ -19,22 +19,25 @@ import {
   imageIcon,
   jsonIcon,
   juliaIcon,
-  LabIcon,
   markdownIcon,
   notebookIcon,
   pdfIcon,
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
-  Toolbar,
   videoIcon,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find } from '@lumino/algorithm';
-import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { DockLayout, Widget } from '@lumino/widgets';
+import type {
+  PartialJSONValue,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { DockLayout, Widget } from '@lumino/widgets';
 import { TextModelFactory } from './default';
 
 /**

@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
 import * as plugin from '@jupyterlab/shortcuts-extension';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { Platform } from '@lumino/domutils';
 import { signalToPromise } from '@jupyterlab/testing';
