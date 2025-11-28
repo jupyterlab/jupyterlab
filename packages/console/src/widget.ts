@@ -230,7 +230,10 @@ export class CodeConsole extends Widget {
    * The console input prompt cell.
    */
   get promptCell(): CodeCell | null {
-    const inputLayout = this._input.layout as PanelLayout;
+    const inputLayout = this._input.layout as PanelLayout | null;
+    if (!inputLayout) {
+      return null;
+    }
     return (inputLayout.widgets[0] as CodeCell) || null;
   }
 
@@ -1065,7 +1068,12 @@ export class CodeConsole extends Widget {
    * Adjust split panel sizes when the input cell grows or shrinks.
    */
   private _adjustSplitPanelForInputGrowth(): void {
-    if (!this._input.node || !this._content.node || this._hasManualResize) {
+    if (
+      this.isDisposed ||
+      !this._input.node ||
+      !this._content.node ||
+      this._hasManualResize
+    ) {
       return;
     }
 
