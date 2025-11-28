@@ -419,6 +419,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hboxPanel.addWidget(vsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
+    const ariaLiveRegion = document.createElement('div');
+    ariaLiveRegion.setAttribute('aria-live', 'polite');
+    ariaLiveRegion.setAttribute('role', 'region');
+    ariaLiveRegion.setAttribute('id', 'commands-aria-live');
+    ariaLiveRegion.className = 'jp-ContentPanel-ariaLive';
+    hboxPanel.node.appendChild(ariaLiveRegion);
+
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
     // Use relative sizing to set the width of the side panels.
