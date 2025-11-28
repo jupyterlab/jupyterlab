@@ -73,6 +73,10 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this.refresh();
   }
 
+  get filteredKernelSources(): IDebugger.KernelSource[] | null {
+    return this._filteredKernelSources;
+  }
+
   /**
    * Signal emitted when the current source changes.
    */

@@ -1056,6 +1056,11 @@ export namespace IDebugger {
       filter: string;
 
       /**
+       * The filtered kernel sources (after applying the filter).
+       */
+      filteredKernelSources: IDebugger.KernelSource[] | null;
+
+      /**
        * Signal emitted when the kernel sources have changed.
        */
       readonly changed: ISignal<
