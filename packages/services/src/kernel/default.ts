@@ -31,9 +31,18 @@ import { PageConfig } from '@jupyterlab/coreutils';
 // Stub for requirejs.
 declare let requirejs: any;
 
-const KERNEL_INFO_TIMEOUT = 3000;
+const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 const STARTING_KERNEL_SESSION = '';
+
+let KERNEL_INFO_TIMEOUT = DEFAULT_KERNEL_INFO_TIMEOUT;
+export const setKernelInfoTimeout = (timeout: number) => {
+  if (timeout <= 0) {
+    console.log(`KERNEL_INFO_TIMEOUT must be larger than 0, get ${timeout}`);
+    return;
+  }
+  KERNEL_INFO_TIMEOUT = timeout;
+};
 
 /**
  * Implementation of the Kernel object.
