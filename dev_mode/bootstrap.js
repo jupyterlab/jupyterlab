@@ -40,14 +40,30 @@ function getOption(name) {
 // eslint-disable-next-line no-undef
 __webpack_public_path__ = getOption('fullStaticUrl') + '/';
 
+function isESModule(url) {
+  // Check file extension
+  if (url.endsWith('.mjs')) {
+    return true;
+  }
+
+  // Check server-declared ES module metadata
+  const extensionData = getOption('federated_extensions') || [];
+  const match = extensionData.find(ext => `${ext.name}/${ext.load}` === url);
+  return match?.esModule === true;
+}
+
+
 function loadScript(url) {
   return new Promise((resolve, reject) => {
     const newScript = document.createElement('script');
     newScript.onerror = reject;
     newScript.onload = resolve;
     newScript.async = true;
-    document.head.appendChild(newScript);
+    if (isESModule(url)) {
+      newScript.type = 'module';
+    }
     newScript.src = url;
+    document.head.appendChild(newScript);
   });
 }
 
