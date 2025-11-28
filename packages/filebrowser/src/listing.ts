@@ -1387,8 +1387,8 @@ export class DirListing extends Widget {
 
   set fileSizeDisplayUnit(value: 'decimal' | 'binary') {
     this._fileSizeDisplayUnit = value;
-    // Trigger a refresh to update the display
-    this._onModelRefreshed();
+    // Trigger a re-render to update the display
+    this.update();
   }
 
   /**
@@ -3307,7 +3307,8 @@ export namespace DirListing {
         modifiedStyle,
         hiddenColumns,
         columnsSizes,
-        fileSize: model.size
+        fileSize: model.size,
+        fileSizeDisplayUnit
       });
 
       const checkboxWrapper = DOMUtils.findElement(
