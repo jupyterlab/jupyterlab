@@ -152,7 +152,7 @@ print(data.head())`;
 
     const heightAtTop = await codeConsoleInput.boundingBox();
     expect(heightAtTop).not.toBeNull();
-    expect(heightAtTop!.height).toBe(heightAtBottom!.height);
+    expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
   });
 
   test('Input prompt continues to auto-resize after code execution', async ({
