@@ -16,6 +16,7 @@ import {
   RawCellModel
 } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -134,10 +135,24 @@ export class CodeConsole extends Widget {
 
     layout.addWidget(this._splitPanel);
 
-    // Listen for manual split panel resizing
+    // Listen for manual split panel resizing.
     this._splitPanel.handleMoved.connect(() => {
-      this._hasManualResize = true;
+      this._setManualResize();
     }, this);
+
+    // Listen for pointerdown to detect when user starts dragging the split
+    // handle. We need to catch this early to prevent the ResizeObserver from
+    // fighting with the user during the first drag.
+    this._splitPanel.node.addEventListener(
+      'pointerdown',
+      event => {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('lm-SplitPanel-handle')) {
+          this._setManualResize();
+        }
+      },
+      true
+    );
 
     // initialize the console with defaults
     this.setConfig({
@@ -323,14 +338,20 @@ export class CodeConsole extends Widget {
       return;
     }
 
-    // Clean up ResizeObserver from the current prompt cell
+    // Clean up ResizeObserver and content listener from the current prompt cell
     const promptCell = this.promptCell;
     if (promptCell) {
       if (this._promptResizeObserver) {
         this._promptResizeObserver.disconnect();
         this._promptResizeObserver = null;
       }
+      promptCell.model.sharedModel.changed.disconnect(
+        this._onPromptContentChanged,
+        this
+      );
     }
+
+    this._cancelPendingResizeAdjustment();
 
     this._msgIdCells = null!;
     this._msgIds = null!;
@@ -686,6 +707,12 @@ export class CodeConsole extends Widget {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
 
+      // Disconnect the content change listener
+      promptCell.model.sharedModel.changed.disconnect(
+        this._onPromptContentChanged,
+        this
+      );
+
       // Schedule execution of signal clearance to happen later so that
       // the `readOnly` configuration gets updated before editor signals
       // get disconnected (see `Cell.onUpdateRequest`).
@@ -720,23 +747,21 @@ export class CodeConsole extends Widget {
     // Add the prompt cell to the DOM, making `this.promptCell` valid again.
     this._input.addWidget(promptCell);
 
-    // Reset input size to default (unless the split has manually been resized)
-    this._resetInputSize();
-
     this._history.editor = promptCell.editor;
 
-    // Detect height changes
+    // Detect height changes via ResizeObserver for when the cell grows
     if (promptCell.node) {
       this._promptResizeObserver = new ResizeObserver(() => {
-        if (!this._hasManualResize) {
-          this._resetInputSize();
-        }
-        requestAnimationFrame(() => {
-          this._adjustSplitPanelForInputGrowth();
-        });
+        this._scheduleInputSizeAdjustment();
       });
       this._promptResizeObserver.observe(promptCell.node);
     }
+
+    // Also listen for content changes to handle shrinking when content is removed (e.g. line deletes)
+    promptCell.model.sharedModel.changed.connect(
+      this._onPromptContentChanged,
+      this
+    );
 
     if (!this._config.clearCodeContentOnExecute) {
       promptCell.model.sharedModel.setSource(previousContent);
@@ -995,21 +1020,45 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Reset input area size to default when new prompt is created.
+   * Set the manual resize flag and cancel any pending auto-resize.
    */
-  private _resetInputSize(): void {
+  private _setManualResize(): void {
+    this._hasManualResize = true;
+    this._cancelPendingResizeAdjustment();
+  }
+
+  /**
+   * Cancel any pending resize adjustment animation frame.
+   */
+  private _cancelPendingResizeAdjustment(): void {
+    if (this._resizeAnimationFrameId !== null) {
+      cancelAnimationFrame(this._resizeAnimationFrameId);
+      this._resizeAnimationFrameId = null;
+    }
+  }
+
+  /**
+   * Schedule an input size adjustment using requestAnimationFrame to coalesce
+   * multiple rapid events into a single layout update.
+   */
+  private _scheduleInputSizeAdjustment(): void {
+    // Don't schedule if manual resize is active
     if (this._hasManualResize) {
       return;
     }
-
-    const { promptCellPosition = 'bottom' } = this._config;
-
-    // Only reset for vertical layouts (top/bottom positions)
-    if (promptCellPosition === 'left' || promptCellPosition === 'right') {
-      return;
+    if (this._resizeAnimationFrameId === null) {
+      this._resizeAnimationFrameId = requestAnimationFrame(() => {
+        this._resizeAnimationFrameId = null;
+        this._adjustSplitPanelForInputGrowth();
+      });
     }
+  }
 
-    this._splitPanel.setRelativeSizes(this._calculateRelativeSizes());
+  /**
+   * Handle changes to the prompt cell content.
+   */
+  private _onPromptContentChanged(): void {
+    this._scheduleInputSizeAdjustment();
   }
 
   /**
@@ -1027,7 +1076,20 @@ export class CodeConsole extends Widget {
       return;
     }
 
-    const inputHeight = this._input.node.scrollHeight;
+    const promptCell = this.promptCell;
+    if (!promptCell || !promptCell.editor) {
+      return;
+    }
+
+    // Get the editor's content height directly from CodeMirror.
+    // This gives us the intrinsic height needed regardless of container size.
+    const cmEditor = promptCell.editor as CodeMirrorEditor;
+    const editorContentHeight = cmEditor.editor.contentHeight;
+
+    // Get additional padding from the input area and cell
+    const cellPadding = this._getInputCellPadding();
+    const inputHeight = editorContentHeight + cellPadding;
+
     const totalHeight = this._splitPanel.node.clientHeight;
 
     if (totalHeight <= 0 || inputHeight <= 0) {
@@ -1057,6 +1119,38 @@ export class CodeConsole extends Widget {
 
       this._splitPanel.setRelativeSizes(normalizedSizes);
     }
+  }
+
+  /**
+   * Get the total vertical padding for the input cell (excluding editor content).
+   */
+  private _getInputCellPadding(): number {
+    const inputPanelNode = this._input.node;
+    const inputPanelStyle = window.getComputedStyle(inputPanelNode);
+    const inputPanelPadding =
+      parseFloat(inputPanelStyle.paddingTop) +
+      parseFloat(inputPanelStyle.paddingBottom);
+
+    const promptCell = this.promptCell;
+    if (!promptCell) {
+      return inputPanelPadding;
+    }
+
+    const cellStyle = window.getComputedStyle(promptCell.node);
+    const cellPadding =
+      parseFloat(cellStyle.paddingTop) + parseFloat(cellStyle.paddingBottom);
+
+    // Account for editor wrapper border (CodeMirror's contentHeight includes its own padding)
+    const editorWrapper = promptCell.editorWidget?.node;
+    let editorBorder = 0;
+    if (editorWrapper) {
+      const editorStyle = window.getComputedStyle(editorWrapper);
+      editorBorder =
+        parseFloat(editorStyle.borderTopWidth) +
+        parseFloat(editorStyle.borderBottomWidth);
+    }
+
+    return inputPanelPadding + cellPadding + editorBorder;
   }
 
   /**
@@ -1118,6 +1212,7 @@ export class CodeConsole extends Widget {
   private _splitPanel: SplitPanel;
   private _promptResizeObserver: ResizeObserver | null = null;
   private _hasManualResize = false;
+  private _resizeAnimationFrameId: number | null = null;
 }
 
 /**
