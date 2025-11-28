@@ -1,0 +1,147 @@
+- `@jupyterlab/application:IConnectionLost`: A service for invoking the dialog shown
+  when JupyterLab has lost its connection to the server. Use this if, for some reason,
+  you want to bring up the "connection lost" dialog under new circumstances.
+- `@jupyterlab/application:IConnectionStatus`: A service providing the application connection status.
+- `@jupyterlab/application:IInfo`: A service providing metadata about the current application, including disabled extensions and whether dev mode is enabled.
+- `@jupyterlab/application:ILabShell`: A service for interacting with the JupyterLab shell. The top-level `application` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.
+- `@jupyterlab/application:ILabStatus`: A service for interacting with the application busy/dirty
+  status. Use this if you want to set the application "busy" favicon, or to set
+  the application "dirty" status, which asks the user for confirmation before leaving the application page.
+- `@jupyterlab/application:ILayoutRestorer`: A service providing application layout restoration functionality. Use this to have your activities restored across page loads.
+- `@jupyterlab/application:IMimeDocumentTracker`: A widget tracker for documents rendered using a mime renderer extension. Use this if you want to list and interact with documents rendered by such extensions.
+- `@jupyterlab/application:IPaths`: A service providing information about various
+  URLs and server paths for the current application. Use this service if you want to
+  assemble URLs to use the JupyterLab REST API.
+- `@jupyterlab/application:IRouter`: The URL router used by the application. Use this to add custom URL-routing for your extension (e.g., to invoke a command if the user navigates to a sub-path).
+- `@jupyterlab/application:ITreePathUpdater`: A service to update the tree path.
+- `@jupyterlab/application:ITreeResolver`: A service to resolve the tree path.
+- `@jupyterlab/apputils:ICommandPalette`: A service for the application command palette
+  in the left panel. Use this to add commands to the palette.
+- `@jupyterlab/apputils:IKernelStatusModel`: A service to register kernel session provider to the kernel status indicator.
+- `@jupyterlab/apputils:ILicensesClient`: A service for fetching licenses.
+- `@jupyterlab/apputils:ISanitizer`: A service for sanitizing HTML strings.
+- `@jupyterlab/apputils:ISessionContextDialogs`: A service for handling the session dialogs.
+- `@jupyterlab/apputils:ISplashScreen`: A service for the splash screen for the application.
+  Use this if you want to show the splash screen for your own purposes.
+- `@jupyterlab/apputils:IThemeManager`: A service for the theme manager for the application. This is used primarily in theme extensions to register new themes.
+- `@jupyterlab/apputils:IToolbarWidgetRegistry`: A registry for toolbar widgets. Require this
+  if you want to build the toolbar dynamically from a data definition (stored in settings for example).
+- `@jupyterlab/apputils:IWindowResolver`: A service for a window resolver for the
+  application. JupyterLab workspaces are given a name, which are determined using
+  the window resolver. Require this if you want to use the name of the current workspace.
+- `@jupyterlab/codeeditor:IEditorServices`: A service for the text editor provider
+  for the application. Use this to create new text editors and host them in your
+  UI elements.
+- `@jupyterlab/codeeditor:IPositionModel`: A service to handle an code editor cursor position.
+- `@jupyterlab/codemirror:IEditorExtensionRegistry`: A registry for CodeMirror extension factories.
+- `@jupyterlab/codemirror:IEditorLanguageRegistry`: A registry for CodeMirror languages.
+- `@jupyterlab/codemirror:IEditorThemeRegistry`: A registry for CodeMirror theme.
+- `@jupyterlab/completer:ICompletionProviderManager`: A service for the completion providers management.
+- `@jupyterlab/completer:IInlineCompleterFactory`: A factory of inline completer widgets.
+- `@jupyterlab/console:IConsoleCellExecutor`: The console cell executor
+- `@jupyterlab/console:IConsoleTracker`: A widget tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with code consoles
+  created by the application.
+- `@jupyterlab/console:IContentFactory`: A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.
+- `@jupyterlab/coreutils:ISettingConnector`: A service to connect to the settings endpoint.
+- `@jupyterlab/coreutils:ISettingRegistry`: A service for the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See "schemaDir" for more information.
+- `@jupyterlab/coreutils:IStateDB`: A service for the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See "state database" for more information.
+- `@jupyterlab/debugger:IDebugger`: A debugger user interface.
+- `@jupyterlab/debugger:IDebuggerConfig`: A service to handle the debugger configuration.
+- `@jupyterlab/debugger:IDebuggerHandler`: A service for handling notebook debugger.
+- `@jupyterlab/debugger:IDebuggerSidebar`: A service for the debugger sidebar.
+- `@jupyterlab/debugger:IDebuggerSourceViewer`: A debugger source viewer.
+- `@jupyterlab/debugger:IDebuggerSources`: A service to display sources in debug mode.
+- `@jupyterlab/docmanager:IDocumentManager`: A service for the manager for all
+  documents used by the application. Use this if you want to open and close documents,
+  create and delete files, and otherwise interact with the file system.
+- `@jupyterlab/docmanager:IDocumentWidgetOpener`: A service to open a widget.
+- `@jupyterlab/docmanager:IRecentsManager`: A service providing information about recently opened and closed documents
+- `@jupyterlab/documentsearch:ISearchProviderRegistry`: A service for a registry of search
+  providers for the application. Plugins can register their UI elements with this registry
+  to provide find/replace support.
+- `@jupyterlab/filebrowser:IDefaultFileBrowser`: A service for the default file browser.
+- `@jupyterlab/filebrowser:IFileBrowserCommands`: A token to ensure file browser commands are loaded.
+- `@jupyterlab/filebrowser:IFileBrowserFactory`: A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.
+- `@jupyterlab/fileeditor:IEditorTracker`: A widget tracker for file editors.
+  Use this if you want to be able to iterate over and interact with file editors
+  created by the application.
+- `@jupyterlab/fileeditor:IEditorWidgetFactory`: A factory for creating file editors.
+- `@jupyterlab/htmlviewer:IHTMLViewerTracker`: A widget tracker for rendered HTML documents.
+  Use this if you want to be able to iterate over and interact with HTML documents
+  viewed by the application.
+- `@jupyterlab/imageviewer:IImageTracker`: A widget tracker for images.
+  Use this if you want to be able to iterate over and interact with images
+  viewed by the application.
+- `@jupyterlab/inspector:IInspector`: A service for adding contextual help to widgets (visible using "Show Contextual Help" from the Help menu).
+  Use this to hook into the contextual help system in your extension.
+- `@jupyterlab/launcher:ILauncher`: A service for the application activity launcher.
+  Use this to add your extension activities to the launcher panel.
+- `@jupyterlab/logconsole:ILoggerRegistry`: A service providing a logger infrastructure.
+- `@jupyterlab/lsp:ILSPCodeExtractorsManager`: Provides the code extractor manager. This token is required in your extension to register code extractor allowing the creation of multiple virtual document from an opened document.
+- `@jupyterlab/lsp:ILSPDocumentConnectionManager`: Provides the virtual documents and language server connections service.
+- `@jupyterlab/lsp:ILSPFeatureManager`: Provides the language server feature manager. This token is required to register new client capabilities.
+- `@jupyterlab/lsp:IWidgetLSPAdapterTracker`: Provides the WidgetLSPAdapter tracker. This token is required in your extension to track WidgetLSPAdapters.
+- `@jupyterlab/mainmenu:IMainMenu`: A service for the main menu bar for the application.
+  Use this if you want to add your own menu items or provide implementations for standardized menu items for specific activities.
+- `@jupyterlab/markdownviewer:IMarkdownViewerTracker`: A widget tracker for markdown
+  document viewers. Use this if you want to iterate over and interact with rendered markdown documents.
+- `@jupyterlab/mermaid:IMermaidManager`: a manager for rendering mermaid text-based diagrams
+- `@jupyterlab/mermaid:IMermaidMarkdown`: a manager for rendering mermaid text-based diagrams in markdown fenced code blocks
+- `@jupyterlab/metadataform:IMetadataFormProvider`: A service to register new metadata editor widgets.
+- `@jupyterlab/notebook:IContentFactory`: A factory object that creates new notebooks.
+  Use this if you want to create and host notebooks in your own UI elements.
+- `@jupyterlab/notebook:INotebookCellExecutor`: The notebook cell executor
+- `@jupyterlab/notebook:INotebookTools`: A service for the "Notebook Tools" panel in the
+  right sidebar. Use this to add your own functionality to the panel.
+- `@jupyterlab/notebook:INotebookTracker`: A widget tracker for notebooks.
+  Use this if you want to be able to iterate over and interact with notebooks
+  created by the application.
+- `@jupyterlab/notebook:INotebookWidgetFactory`: A service to create the notebook viewer.
+- `@jupyterlab/pluginmanager:IPluginManager`: A canary for plugin manager presence, with a method to open the plugin manager widget.
+- `@jupyterlab/property-inspector:IPropertyInspectorProvider`: A service to register new widgets in the property inspector side panel.
+- `@jupyterlab/rendermime:ILatexTypesetter`: A service for the LaTeX typesetter for the application. Use this if you want to typeset math in your extension.
+- `@jupyterlab/rendermime:IMarkdownParser`: A service for rendering markdown syntax as HTML content.
+- `@jupyterlab/rendermime:IRenderMimeRegistry`: A service for the rendermime registry for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a "mime renderer extension" rather than using this service directly.
+- `@jupyterlab/rendermime:IUrlResolverFactory`: A factory for resolver of asset URLs.
+- `@jupyterlab/running:IRunningSessionManagers`: A service to add running session managers.
+- `@jupyterlab/running:IRunningSessionsSidebar`: A token allowing to modify the running sessions sidebar.
+- `@jupyterlab/services:IConfigSectionManager`: A service providing the config section manager.
+- `@jupyterlab/services:IContentsManager`: The contents manager token.
+- `@jupyterlab/services:IDefaultDrive`: The default drive for the contents manager.
+- `@jupyterlab/services:IEventManager`: The event manager token.
+- `@jupyterlab/services:IKernelManager`: The kernel manager token.
+- `@jupyterlab/services:IKernelSpecManager`: The kernel spec manager token.
+- `@jupyterlab/services:INbConvertManager`: The nbconvert manager token.
+- `@jupyterlab/services:IServerSettings`: The server settings for the application.
+- `@jupyterlab/services:IServiceManager`: The service manager for the application.
+- `@jupyterlab/services:ISessionManager`: The session manager token.
+- `@jupyterlab/services:ISettingManager`: The setting manager token.
+- `@jupyterlab/services:ITerminalManager`: The terminal manager token.
+- `@jupyterlab/services:IUserManager`: The user manager token.
+- `@jupyterlab/services:IWorkspaceManager`: The workspace manager token.
+- `@jupyterlab/settingeditor:IJSONSettingEditorTracker`: A widget tracker for the JSON setting editor.
+  Use this if you want to be able to iterate over and interact with setting editors
+  created by the application.
+- `@jupyterlab/settingeditor:ISettingEditorTracker`: A widget tracker for the interactive setting editor.
+  Use this if you want to be able to iterate over and interact with setting editors
+  created by the application.
+- `@jupyterlab/statusbar:IStatusBar`: A service for the status bar on the application. Use this if you want to add new status bar items.
+- `@jupyterlab/terminal:ITerminalTracker`: A widget tracker for terminals.
+  Use this if you want to be able to iterate over and interact with terminals
+  created by the application.
+- `@jupyterlab/toc:ITableOfContentsRegistry`: A service to register table of content factory.
+- `@jupyterlab/toc:ITableOfContentsTracker`: A widget tracker for table of contents.
+- `@jupyterlab/tooltip:ITooltipManager`: A service for the tooltip manager for the application. Use this to allow your extension to invoke a tooltip.
+- `@jupyterlab/translation:ITranslator`: A service to translate strings.
+- `@jupyterlab/translation:ITranslatorConnector`: A service to connect to the server translation endpoint.
+- `@jupyterlab/ui-components:IFormRendererRegistry`: A service for settings form renderer registration.
+- `@jupyterlab/ui-components:ILabIconManager`: A service to register and request icons.
+- `@jupyterlab/workspaces:IWorkspaceCommands`: Provides identifiers of workspace commands.
+- `@jupyterlab/workspaces:IWorkspacesModel`: Provides a model for available workspaces.

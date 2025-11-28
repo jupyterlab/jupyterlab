@@ -17,6 +17,7 @@ import { h, VirtualElement } from '@lumino/virtualdom';
 import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { ILicensesClient } from './tokens';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 const FILTER_SECTION_TITLE_CLASS = 'jp-Licenses-Filters-title';
 
@@ -303,7 +304,7 @@ export namespace Licenses {
      * Create a new license client.
      */
     constructor(options: ILicenseClientOptions = {}) {
-      this._licensesUrl = options.licensesUrl || '';
+      this._preferredLicensesUrl = options.licensesUrl;
       this._serverSettings =
         options.serverSettings ?? ServerConnection.makeSettings();
     }
@@ -335,8 +336,23 @@ export namespace Licenses {
       return response.json();
     }
 
+    /**
+     * The licences URL.
+     *
+     * This respects runtime changes to the `licensesUrl` page config option.
+     */
+    private get _licensesUrl(): string {
+      return (
+        this._preferredLicensesUrl ??
+        URLExt.join(
+          this._serverSettings.baseUrl,
+          PageConfig.getOption('licensesUrl')
+        ) + '/'
+      );
+    }
+
     private _serverSettings: ServerConnection.ISettings;
-    private _licensesUrl: string;
+    private _preferredLicensesUrl: string | undefined;
   }
 
   /**

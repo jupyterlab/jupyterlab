@@ -491,8 +491,11 @@ describe('docregistry/context', () => {
 
         const changed = signalToPromise(manager.contents.fileChanged);
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true on successful save
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -534,8 +537,11 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true when overwrite is accepted
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -568,8 +574,11 @@ describe('docregistry/context', () => {
         });
         await context.initialize(true);
         const promise = func();
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return false when overwrite is cancelled
+        expect(result).toBe(false);
         expect(context.path).toBe(oldPath);
       });
 

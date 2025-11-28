@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-simple-list",
-  "version": "4.5.0-beta.0",
+  "version": "4.5.0",
   "private": true,
   "style": "style/index.css",
   "scripts": {
@@ -9,13 +9,13 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.0-beta.0",
-    "@jupyterlab/coreutils": "^6.5.0-beta.0",
-    "@jupyterlab/observables": "^5.5.0-beta.0",
-    "@jupyterlab/theme-light-extension": "^4.5.0-beta.0",
-    "@jupyterlab/ui-components": "^4.5.0-beta.0",
-    "@lumino/messaging": "^2.0.3",
-    "@lumino/widgets": "^2.7.1"
+    "@jupyterlab/application": "^4.5.0",
+    "@jupyterlab/coreutils": "^6.5.0",
+    "@jupyterlab/observables": "^5.5.0",
+    "@jupyterlab/theme-light-extension": "^4.5.0",
+    "@jupyterlab/ui-components": "^4.5.0",
+    "@lumino/messaging": "^2.0.4",
+    "@lumino/widgets": "^2.7.2"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",

@@ -3,7 +3,8 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../../tokens';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -16,6 +17,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
    */
   constructor(options: SourcesModel.IOptions) {
     this.currentFrameChanged = options.currentFrameChanged;
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
   }
 
   /**
@@ -64,6 +67,24 @@ export class SourcesModel implements IDebugger.Model.ISources {
     this._currentSourceOpened.emit(this._currentSource);
   }
 
+  /**
+   * Get a human-readable display for a frame.
+   *
+   * For notebook cells, shows execution count if available, [*] if running, or [ ] if never executed.
+   */
+  /**
+   * Returns a human-readable display for a frame.
+   */
+  getDisplayName(frame: IDebugger.IStackFrame): string {
+    let name = this._displayRegistry.getDisplayName(
+      frame.source as IDebugger.Source
+    );
+    if (frame.line !== undefined) {
+      name += `:${frame.line}`;
+    }
+    return name;
+  }
+
   private _currentSource: IDebugger.Source | null;
   private _currentSourceOpened = new Signal<
     SourcesModel,
@@ -73,6 +94,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
     SourcesModel,
     IDebugger.Source | null
   >(this);
+  private _displayRegistry: IDebuggerDisplayRegistry;
 }
 
 /**
@@ -90,5 +112,10 @@ export namespace SourcesModel {
       IDebugger.Model.ICallstack,
       IDebugger.IStackFrame | null
     >;
+
+    /**
+     * The display registry.
+     */
+    displayRegistry?: IDebuggerDisplayRegistry;
   }
 }

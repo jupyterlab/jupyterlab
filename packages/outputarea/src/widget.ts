@@ -381,8 +381,8 @@ export class OutputArea extends Widget {
       ) as HTMLElement;
       if (panel) {
         overlay.style.height = `${Math.max(
-          panel.scrollHeight,
-          this.node.scrollHeight
+          panel.getBoundingClientRect().height,
+          this.node.getBoundingClientRect().height
         )}px`;
       }
     };
@@ -624,11 +624,15 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
 
     if (index === this._maxNumberOutputs) {
-      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
-        const lastShown = this._maxNumberOutputs;
-        this._maxNumberOutputs = Infinity;
-        this._showTrimmedOutputs(lastShown);
-      });
+      const warning = new Private.TrimmedOutputs(
+        this._maxNumberOutputs,
+        () => {
+          const lastShown = this._maxNumberOutputs;
+          this._maxNumberOutputs = Infinity;
+          this._showTrimmedOutputs(lastShown);
+        },
+        this._translator
+      );
       layout.insertWidget(index, this._wrappedOutput(warning));
     } else {
       let output = this.createOutputItem(model);
@@ -1552,23 +1556,22 @@ namespace Private {
      */
     constructor(
       maxNumberOutputs: number,
-      onClick: (event: MouseEvent) => void
+      onClick: (event: MouseEvent) => void,
+      translator?: ITranslator
     ) {
       const node = document.createElement('div');
-      const title = `The first ${maxNumberOutputs} are displayed`;
-      const msg = 'Show more outputs';
-      node.insertAdjacentHTML(
-        'afterbegin',
-        `<a title=${title}>
-          <pre>${msg}</pre>
-        </a>`
-      );
+      const trans = (translator ?? nullTranslator).load('jupyterlab');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'jp-TrimmedOutputs-button';
+      button.title = trans.__('The first %1 are displayed', maxNumberOutputs);
+      button.textContent = trans.__('Show more outputs');
+      node.appendChild(button);
       super({
         node
       });
       this._onClick = onClick;
       this.addClass('jp-TrimmedOutputs');
-      this.addClass('jp-RenderedHTMLCommon');
     }
 
     /**

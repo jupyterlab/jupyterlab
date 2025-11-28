@@ -2,13 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { IDebugger } from '../../tokens';
+import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import { DebuggerDisplayRegistry } from '../../displayregistry';
 
 /**
  * A model for a list of breakpoints.
  */
 export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
+  constructor(options: { displayRegistry?: IDebuggerDisplayRegistry }) {
+    this._displayRegistry =
+      options.displayRegistry ?? new DebuggerDisplayRegistry();
+  }
+
   /**
    * Signal emitted when the model changes.
    */
@@ -89,10 +94,36 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
     this._restored.emit();
   }
 
+  /**
+   * Get a human-readable display string for a breakpoint.
+   * Shows execution count if notebook cell, [*] if running, [ ] if never executed.
+   */
+  getDisplayName(breakpoint: IDebugger.IBreakpoint): string {
+    return this._displayRegistry.getDisplayName(
+      breakpoint.source as IDebugger.Source
+    );
+  }
+
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
   private _selectedBreakpoint: IDebugger.IBreakpoint;
   private _selectedChanged = new Signal<this, IDebugger.IBreakpoint>(this);
+  private _displayRegistry: IDebuggerDisplayRegistry;
+}
+
+/**
+ * Namespace for BreakpointsModel
+ */
+export namespace BreakpointsModel {
+  /**
+   * Instantiation options for a BreakpointsModel.
+   */
+  export interface IOptions {
+    /**
+     * The debugger display registry.
+     */
+    displayRegistry: IDebuggerDisplayRegistry;
+  }
 }

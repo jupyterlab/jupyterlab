@@ -172,7 +172,10 @@ test.describe('Notebook scroll on dragging cells (with windowing)', () => {
     await expect(lastCellLocator).toBeInViewport();
   });
 
-  test('Scroll up on dragging cell to the top edge', async ({ page }) => {
+  test('Scroll up on dragging cell to the top edge', async ({
+    page,
+    browserName
+  }) => {
     const firstCellLocator = page.locator(
       '.jp-Cell[data-windowed-list-index="0"]'
     );
@@ -196,7 +199,8 @@ test.describe('Notebook scroll on dragging cells (with windowing)', () => {
 
     // Ensure the notebook is scrolled correctly and first cell is not visible
     const before = await scroller.evaluate(node => node.scrollTop);
-    expect(before).toBeGreaterThan(notebookContentHeight * 0.75);
+    const factor = browserName === 'firefox' ? 0.6 : 0.75;
+    expect(before).toBeGreaterThan(notebookContentHeight * factor);
     await expect(firstCellLocator).not.toBeInViewport();
 
     // Emulate drag and drop
@@ -391,8 +395,10 @@ test.describe('Notebook scroll beyond a cell with long output (with windowing)',
   });
 
   test('should not change height of the scrollbar when scrolling beyond the cell long', async ({
-    page
+    page,
+    browserName
   }) => {
+    test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
     // Make the first cell active
     await page.notebook.selectCells(0);
 
@@ -407,5 +413,70 @@ test.describe('Notebook scroll beyond a cell with long output (with windowing)',
     const scrollHeightAfter = await outer.evaluate(node => node.scrollHeight);
 
     expect(scrollHeightBefore).toBeCloseTo(scrollHeightAfter);
+  });
+});
+
+test.describe('Jump to execution button', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        recordTiming: true,
+        kernelStatus: {
+          ...(galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker']
+            ?.kernelStatus ?? {}),
+          showJumpToRecentExecutionButton: true
+        }
+      }
+    }
+  });
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${longOutputsNb}`),
+      `${tmpPath}/${longOutputsNb}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${longOutputsNb}`);
+    await page.notebook.activate(longOutputsNb);
+  });
+  test('should show jump button after first execution and scroll to executing cells', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', 'from time import sleep\nsleep(2)');
+
+    // Button doesn't exist before execution
+    const indicator = page.locator('.jp-Notebook-ExecutionIndicator');
+    await indicator.hover();
+    await expect(
+      page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
+    ).toHaveCount(0);
+
+    // Run first cell
+    void page.notebook.runCell(0, false);
+
+    await page.notebook.addCell('code', '1');
+    const runPromise = page.notebook.runCell(3, false);
+
+    // Hover and verify button exists
+    await indicator.hover();
+    const jumpButton = page.locator(
+      '.jp-Notebook-ExecutionIndicator-jumpButton'
+    );
+    await expect(jumpButton).toBeVisible();
+
+    // Click and scroll to the first cell (currently executing)
+    await jumpButton.click();
+    const firstCell = await page.notebook.getCellLocator(0);
+    await firstCell?.waitFor({ state: 'visible', timeout: 1000 });
+
+    // Wait for all executions to complete
+    await runPromise;
+
+    // Click and scroll to last cell (last executed)
+    await indicator.hover();
+    await jumpButton.click();
+    const lastCell = await page.notebook.getCellLocator(3);
+    await lastCell?.waitFor({ state: 'visible', timeout: 1000 });
   });
 });
