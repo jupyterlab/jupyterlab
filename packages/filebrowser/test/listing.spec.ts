@@ -116,13 +116,13 @@ describe('filebrowser/listing', () => {
         const options = createOptionsForConstructor();
         const dirListing = new TestDirListing(options);
         Widget.attach(dirListing, document.body);
-        
+
         const updateSpy = jest.fn();
         dirListing.updated.connect(updateSpy);
-        
+
         dirListing.fileSizeDisplayUnit = 'binary';
         await signalToPromise(dirListing.updated);
-        
+
         expect(updateSpy).toHaveBeenCalled();
         dirListing.updated.disconnect(updateSpy);
         Widget.detach(dirListing);
