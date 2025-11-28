@@ -119,7 +119,7 @@ export namespace Debugger {
 
     export const evaluate = 'debugger:evaluate';
 
-    export const restartDebug = 'debugger:restart-debug';
+    export const restartAndDebug = 'debugger:restart-debug';
 
     export const pauseOnExceptions = 'debugger:pause-on-exceptions';
 
@@ -134,6 +134,14 @@ export namespace Debugger {
     export const executeConsole = 'debugger:run-in-console';
 
     export const openSource = 'debugger:open-source';
+
+    export const setVariablesFilterOptions = 'debugger:variables-view-options';
+
+    export const clearAllBreakpoints = 'debugger:clear-all-breakpoints';
+
+    export const runCells = 'debugger:run-cells';
+
+    export const restartAndRunAll = 'debugger:restart-and-run-all';
   }
 
   /**

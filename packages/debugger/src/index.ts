@@ -9,6 +9,8 @@ export { Debugger } from './debugger';
 
 export { DebuggerDisplayRegistry } from './displayregistry';
 
+export { variablesFilterOptions, VariablesFilterOptionKey } from './model';
+
 export {
   IDebugger,
   IDebuggerConfig,
