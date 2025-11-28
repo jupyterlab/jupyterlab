@@ -215,3 +215,42 @@ implementation details of relevance to advanced users:
    it is unusual to see a notebook with a single untrusted cell, this can occur
    when copy-pasting cells from an untrusted notebook),
 3. only code cells can be trusted; the Markdown cells are always sanitised.
+
+(plotting)=
+
+## Plotting and Visualization
+
+JupyterLab supports data visualization using libraries like matplotlib, plotly, and others.
+
+**Static Plots with IPython Kernel**
+
+For static plots in JupyterLab with IPython kernel, simply import and use your plotting library of choice - no magic commands are needed:
+
+```python
+import matplotlib.pyplot as plt
+
+plt.plot([1, 2, 3, 4])
+plt.ylabel('some numbers')
+plt.show()
+```
+
+```{note}
+Unlike classic Jupyter Notebook, JupyterLab with IPython kernel displays matplotlib plots automatically
+without requiring `%matplotlib inline`.
+```
+
+**Interactive Plots, Widgets or Plotting with Other Kernels**
+
+Interactive plots, widgets, or plotting with other kernels may require additional packages to be installed and sometimes a magic command or other kernel native instructions (please refer to the respective library documentation). Common options include:
+
+**Python:**
+
+- [ipywidgets](https://ipywidgets.readthedocs.io/) - Interactive widgets for Jupyter notebooks
+- [ipympl](https://github.com/matplotlib/ipympl) - Interactive matplotlib backend
+- [plotly](https://plotly.com/python/getting-started/#jupyterlab-support) - Interactive plotting library
+- [bokeh](https://docs.bokeh.org/en/latest/docs/user_guide/output/jupyter.html) - Interactive visualization library
+- [altair](https://altair-viz.github.io/) - Declarative visualization library
+
+**R:**
+
+- [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
