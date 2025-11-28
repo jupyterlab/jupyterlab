@@ -46,6 +46,7 @@
     "@jupyterlab/apputils": "^4.6.0",
     "@jupyterlab/cells": "^4.5.0",
     "@jupyterlab/codeeditor": "^4.5.0",
+    "@jupyterlab/codemirror": "^4.5.0",
     "@jupyterlab/coreutils": "^6.5.0",
     "@jupyterlab/nbformat": "^4.5.0",
     "@jupyterlab/observables": "^5.5.0",
