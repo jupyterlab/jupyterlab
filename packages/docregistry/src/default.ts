@@ -624,35 +624,9 @@ export class DocumentWidget<
     path: string
   ): void {
     const newName = PathExt.basename(sender.localPath);
-    // Get the old basename from our tracked value
-    const oldName = this._previousBasename;
-
-    // Only set isUntitled to false if:
-    // 1. We have a valid previous basename to compare (not the first call)
-    // 2. The basename actually changed (user renamed the file, not just moved it)
-    // 3. isUntitled is currently true
-    // This preserves isUntitled = true when a file is moved to another directory
-    // without renaming it.
-    if (
-      oldName !== undefined &&
-      oldName !== '' &&
-      newName !== oldName &&
-      this.isUntitled === true
-    ) {
-      // Basename changed and file was untitled - user renamed the file
+    if (newName !== this.title.label) {
       this.isUntitled = false;
-    } else if (oldName !== undefined && oldName !== '' && newName === oldName) {
-      // Basename hasn't changed (file was just moved) - preserve isUntitled state
-      // If the filename contains "untitled", ensure isUntitled is true
-      const isUntitledName = /untitled/i.test(newName);
-      if (isUntitledName) {
-        this.isUntitled = true;
-      } else if (this.isUntitled === true) {
-        // Preserve true state even if name doesn't contain "untitled"
-      }
     }
-    // Update tracked basename and title
-    this._previousBasename = newName;
     this.title.label = newName;
   }
 
@@ -697,7 +671,6 @@ export class DocumentWidget<
 
   readonly context: DocumentRegistry.IContext<U>;
   protected readonly _trans;
-  private _previousBasename: string | undefined = undefined;
 
   /**
    * Whether the document has an auto-generated name or not.
