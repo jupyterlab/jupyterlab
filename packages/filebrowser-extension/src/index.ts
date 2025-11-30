@@ -531,13 +531,13 @@ const openInTerminalPlugin: JupyterFrontEndPlugin<void> = {
         } catch (e) {
           console.error(`Failed to open terminal in '${path}'`, e);
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
-    });
-
-    app.contextMenu.addItem({
-      command: CommandIDs.openInTerminal,
-      selector: '.jp-DirListing-item',
-      rank: 2 // positioning it near the top of the menu(after menu)"
     });
   }
 };

@@ -42,6 +42,11 @@
         "rank": 1
       },
       {
+        "command": "filebrowser:open-in-terminal",
+        "selector": ".jp-DirListing-item",
+        "rank": 2
+      },
+      {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 4
