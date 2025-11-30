@@ -352,6 +352,9 @@ export namespace ISessionContext {
    * On before restarting the kernel options
    */
   export interface IRestartOptions {
+    /**
+     * Method to be called before restarting the kernel
+     */
     onBeforeRestart: () => Promise<void>;
   }
 }
