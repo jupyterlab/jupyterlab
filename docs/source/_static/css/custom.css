@@ -19,22 +19,13 @@
 }
 
 /* Global alignment fixes for navbar elements */
-.navbar-item,
-.version-switcher__container,
-.dropdown {
+.navbar-item {
   display: flex;
   align-items: center;
 }
 
-.version-switcher__button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  align-self: center;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  transform: translateY(0) !important;
+.pst-navbar-icon {
+  margin-right: 0 !important;
 }
 
 /* Save some space by making this just long enough for the text */
