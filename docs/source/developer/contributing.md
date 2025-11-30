@@ -837,9 +837,7 @@ jlpm run build:packages
 
 ## Writing Documentation
 
-Documentation is written in Markdown and reStructuredText. In
-particular, the documentation on our Read the Docs page is written in
-reStructuredText. To ensure that the Read the Docs page builds, you'll
+Documentation is written in Markdown. To ensure that the Read the Docs page builds, you'll
 need to install the documentation dependencies with `pip`:
 
 ```bash
