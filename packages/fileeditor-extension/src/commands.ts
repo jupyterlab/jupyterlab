@@ -269,7 +269,7 @@ export namespace Commands {
           return args.isMenu
             ? trans.__('Increase Text Editor Font Size')
             : trans.__('Increase Font Size');
-        } else if(delta < 0) {
+        } else if (delta < 0) {
           return args.isMenu
             ? trans.__('Decrease Text Editor Font Size')
             : trans.__('Decrease Font Size');
