@@ -4,6 +4,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import os
+import sys
 
 from jupyter_server.serverapp import ServerApp
 from traitlets import default
@@ -18,7 +19,27 @@ try:
     from jupyterhub.singleuser.mixins import make_singleuser_app
 except ImportError:
     # backward-compat with jupyterhub < 1.3
-    from jupyterhub.singleuser import SingleUserNotebookApp as SingleUserServerApp
+    try:
+        from jupyterhub.singleuser import SingleUserNotebookApp as SingleUserServerApp
+    except ImportError as e:
+        # jupyterhub is not installed at all
+        venv_info = sys.prefix
+        is_venv = sys.base_prefix != sys.prefix
+        venv_type = "virtual environment" if is_venv else "Python environment"
+
+        error_msg = (
+            f"JupyterHub is not installed and is required to run this application.\n\n"
+            f"Current {venv_type}: {venv_info}\n\n"
+            f"Python sys.path entries searched:\n"
+        )
+        for path in sys.path:
+            error_msg += f"  - {path}\n"
+        error_msg += (
+            f"\nTo fix this issue, install jupyterhub:\n"
+            f"  pip install jupyterhub\n\n"
+            f"Original error: {e}"
+        )
+        raise ImportError(error_msg) from e
 else:
     SingleUserServerApp = make_singleuser_app(ServerApp)
 
