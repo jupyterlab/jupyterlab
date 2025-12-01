@@ -506,13 +506,16 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
     })
   );
 
-  const settingLabel = page.locator(
-    'label:has-text("Show Filter Bar by Default")'
+  const settingContainer = page.locator(
+    '.form-group:has-text("Show Filter Bar by Default")'
   );
+
+  const settingLabel = settingContainer.locator('label');
+  const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
   await settingLabel.click();
+  await expect(modifiedIndicator).toBeVisible();
 
   await page.reload();
-
   await expect(filterBox).toBeVisible();
 
   await page.evaluate(() =>
@@ -523,7 +526,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   // turn the setting OFF
   await settingLabel.click();
-
+  await expect(modifiedIndicator).toBeHidden();
   await page.reload();
 
   // The filter bar should now be hidden oonce the setting is disabled
