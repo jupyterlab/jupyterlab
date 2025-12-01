@@ -49,7 +49,7 @@ async function setupDebuggerConsole(
     console.warn('Variables not loaded, continuing with test:', error);
   }
 
-  // Click the evaluate button in the callstack toolbar to open the debug console
+  // Open the debug console
   const openDebuggerConsoleButton = page.locator(
     'jp-button[title*="Open Debugger Console"]'
   );
@@ -110,21 +110,21 @@ test.describe('Debugger Console', () => {
     const debugConsole = page.locator(DEBUG_CONSOLE_SELECTOR);
     await expect(debugConsole).toBeVisible();
 
-    // Get the evaluate button
-    const evaluateButton = page.locator(
+    // Get the open console button button
+    const openDebuggerConsoleButton = page.locator(
       'jp-button[title*="Open Debugger Console"]'
     );
-    await expect(evaluateButton).toBeVisible();
+    await expect(openDebuggerConsoleButton).toBeVisible();
 
     // Click the evaluate button to close the console
-    await evaluateButton.click();
+    await openDebuggerConsoleButton.click();
     await page.waitForTimeout(500);
 
     // Verify the console is now closed
     await expect(debugConsole).not.toBeVisible();
 
     // Click the evaluate button again to reopen the console
-    await evaluateButton.click();
+    await openDebuggerConsoleButton.click();
     await page.waitForTimeout(500);
 
     // Verify the console is open again
