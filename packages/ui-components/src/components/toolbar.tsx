@@ -45,6 +45,14 @@ const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
 const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
 
 /**
+ * ARIA attributes shared by toolbar buttons that control menus/popups.
+ */
+type ToolbarAriaMenuButtonProps = Pick<
+  React.AriaAttributes,
+  'aria-haspopup' | 'aria-expanded' | 'aria-controls'
+>;
+
+/**
  * A layout for toolbars.
  *
  * #### Notes
@@ -771,7 +779,7 @@ export namespace ToolbarButtonComponent {
   /**
    * Interface for ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     className?: string;
     /**
      * Data set of the button
@@ -870,6 +878,9 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
+      aria-haspopup={props['aria-haspopup']}
+      aria-expanded={props['aria-expanded']}
+      aria-controls={props['aria-controls']}
       {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
@@ -1004,9 +1015,10 @@ export class ToolbarButton extends ReactWidget {
  */
 export namespace CommandToolbarButtonComponent {
   /**
-   * Interface for CommandToolbarButtonComponent props.
+   * Interface for CommandToolbarButtonComponent props. It extends
+   * the ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     /**
      * Application commands registry
      */
@@ -1375,6 +1387,13 @@ namespace Private {
     };
     const enabled = commands.isEnabled(id, args);
 
+    const ariaProps: ToolbarAriaMenuButtonProps = options;
+    const {
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
+    } = ariaProps;
+
     return {
       className,
       dataset: { 'data-command': options.id },
@@ -1385,7 +1404,10 @@ namespace Private {
       onClick,
       enabled,
       label: labelOverride ?? label,
-      pressed
+      pressed,
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
     };
   }
 
