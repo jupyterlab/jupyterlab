@@ -457,12 +457,9 @@ test('Ensure that fuzzy filter works properly', async ({ page }) => {
       query: 'File Browser'
     })
   );
-  await page.getByLabel('Filter on file name with a fuzzy search').uncheck();
-
-  // waits until the file 'test' is no longer visible in the directory listing
-  await expect(
-    page.locator('.jp-DirListing-item:has-text("test.txt")')
-  ).toBeHidden();
+  await page
+    .locator('label:has-text("Filter on file name with a fuzzy search")')
+    .click();
 
   // Only one file should be visible
   await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
@@ -492,4 +489,45 @@ test('Read-only cells should remain read-only after changing settings', async ({
   // Assert the first cell is still read-only
   const cell = page.locator('.jp-Notebook-cell').nth(0);
   await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
+});
+
+test('Setting for "Show Filter Bar by Default" should work on reload', async ({
+  page
+}) => {
+  const filterBox = page.locator(
+    '.jp-FileBrowser-filterBox input[placeholder="Filter files by name"]'
+  );
+
+  await expect(filterBox).toBeHidden();
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'File Browser'
+    })
+  );
+
+  const settingLabel = page.locator(
+    'label:has-text("Show Filter Bar by Default")'
+  );
+  await settingLabel.click();
+
+  await page.reload();
+  await page.locator('#jp-filebrowser').waitFor();
+
+  await expect(filterBox).toBeVisible();
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'File Browser'
+    })
+  );
+
+  // turn the setting OFF
+  await settingLabel.click();
+
+  await page.reload();
+  await page.locator('#jp-filebrowser').waitFor();
+
+  // The filter bar should now be hidden oonce the setting is disabled
+  await expect(filterBox).toBeHidden();
 });
