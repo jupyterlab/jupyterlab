@@ -1085,6 +1085,12 @@ const main: JupyterFrontEndPlugin<void> = {
         });
 
         sourceViewer?.open(source);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -1101,6 +1107,12 @@ const main: JupyterFrontEndPlugin<void> = {
         if (!path) return;
 
         await navigator.clipboard.writeText(path);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
