@@ -15,4 +15,3 @@ import '@jupyterlab/console/style/index.js';
 import '@jupyterlab/fileeditor/style/index.js';
 import '@jupyterlab/notebook/style/index.js';
 import '@jupyterlab/debugger/style/index.js';
-import '@jupyterlab/mainmenu/style/index.js';
