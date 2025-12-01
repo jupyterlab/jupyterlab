@@ -502,7 +502,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   await page.evaluate(() =>
     window.jupyterapp.commands.execute('settingeditor:open', {
-      query: 'File Browser'
+      query: 'Show Filter Bar by Default'
     })
   );
 
@@ -517,7 +517,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   await page.evaluate(() =>
     window.jupyterapp.commands.execute('settingeditor:open', {
-      query: 'File Browser'
+      query: 'Show Filter Bar by Default'
     })
   );
 
