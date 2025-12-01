@@ -512,7 +512,6 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   await settingLabel.click();
 
   await page.reload();
-  await page.locator('#jp-filebrowser').waitFor();
 
   await expect(filterBox).toBeVisible();
 
@@ -526,7 +525,6 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   await settingLabel.click();
 
   await page.reload();
-  await page.locator('#jp-filebrowser').waitFor();
 
   // The filter bar should now be hidden oonce the setting is disabled
   await expect(filterBox).toBeHidden();
