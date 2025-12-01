@@ -10,6 +10,8 @@ updates:
       actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 14
   # Set update schedule for pip
   - package-ecosystem: "pip"
     directory: "/"

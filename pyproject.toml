@@ -86,7 +86,7 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.5.0",
+    "altair==6.0.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
@@ -95,7 +95,6 @@ docs-screenshots = [
     "nbconvert>=7.0.0",
     "pandas==2.2.3",
     "scipy==1.15.1",
-    "vega_datasets==0.9.0",
 ]
 test = [
     "coverage",
