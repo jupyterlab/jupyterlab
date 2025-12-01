@@ -59,11 +59,10 @@ describe('DebuggerModel', () => {
         ['capitalized', false]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(mockVariables, filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        mockVariables,
+        filterOptions
+      );
 
       expect(result).toHaveLength(6);
       expect(result.find(v => v.name === 'module')).toBeUndefined();
@@ -78,11 +77,10 @@ describe('DebuggerModel', () => {
         ['capitalized', false]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(mockVariables, filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        mockVariables,
+        filterOptions
+      );
 
       expect(result).toHaveLength(5);
       expect(result.find(v => v.name === '_privateVar')).toBeUndefined();
@@ -98,11 +96,10 @@ describe('DebuggerModel', () => {
         ['capitalized', false]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(mockVariables, filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        mockVariables,
+        filterOptions
+      );
 
       expect(result).toHaveLength(5);
       expect(result.find(v => v.name === 'CONSTANT')).toBeUndefined();
@@ -118,11 +115,10 @@ describe('DebuggerModel', () => {
         ['capitalized', true]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(mockVariables, filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        mockVariables,
+        filterOptions
+      );
 
       expect(result).toHaveLength(6);
       expect(result.find(v => v.name === 'MyClass')).toBeUndefined();
@@ -139,11 +135,10 @@ describe('DebuggerModel', () => {
         ['capitalized', false]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(mockVariables, filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        mockVariables,
+        filterOptions
+      );
 
       expect(result).toHaveLength(4);
       expect(result.find(v => v.name === 'module')).toBeUndefined();
@@ -160,11 +155,10 @@ describe('DebuggerModel', () => {
         ['capitalized', false]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(mockVariables, filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        mockVariables,
+        filterOptions
+      );
 
       expect(result).toHaveLength(7);
       expect(result).toEqual(mockVariables);
@@ -178,11 +172,10 @@ describe('DebuggerModel', () => {
         ['capitalized', true]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions([], filterOptions);
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
+        [],
+        filterOptions
+      );
 
       expect(result).toHaveLength(0);
       expect(result).toEqual([]);
@@ -205,11 +198,7 @@ describe('DebuggerModel', () => {
         ['capitalized', false]
       ]);
 
-      const result = new DebuggerModel({
-        config: {} as any,
-        notebookTracker: null,
-        consoleTracker: null
-      }).filterVariablesByViewOptions(
+      const result = new DebuggerModel({}).filterVariablesByViewOptions(
         variablesWithUndefinedType,
         filterOptions
       );
