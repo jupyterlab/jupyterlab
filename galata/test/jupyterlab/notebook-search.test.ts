@@ -168,7 +168,32 @@ test.describe('Notebook Search', () => {
     await page.notebook.runCell(1, true);
     const cell = await page.notebook.getCellLocator(1);
 
-    await cell!.locator('.jp-MarkdownOutput').getByText('notebook').dblclick();
+    await cell!.locator('.jp-MarkdownOutput').evaluate(element => {
+      const textToSelect = 'notebook';
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.textContent && node.textContent.includes(textToSelect)) {
+          const startIndex = node.textContent.indexOf(textToSelect);
+          const endIndex = startIndex + textToSelect.length;
+
+          const range = document.createRange();
+          range.setStart(node, startIndex);
+          range.setEnd(node, endIndex);
+
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          break;
+        }
+      }
+    });
+
     // Open the search box.
     await page.keyboard.press('Control+f');
 
