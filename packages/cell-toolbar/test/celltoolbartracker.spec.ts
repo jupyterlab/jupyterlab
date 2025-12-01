@@ -7,12 +7,14 @@ import {
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
 import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
-import { ToolbarRegistry } from '@jupyterlab/apputils';
-import { NotebookPanel, NotebookTracker } from '@jupyterlab/notebook';
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookTracker } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { IDataConnector } from '@jupyterlab/statedb';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type { ITranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
 import { framePromise } from '@jupyterlab/testing';

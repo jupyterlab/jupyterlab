@@ -2,10 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { StringExt } from '@lumino/algorithm';
-import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { CompletionHandler } from './handler';
-import { Completer } from './widget';
+import type { ReadonlyPartialJSONArray } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { CompletionHandler } from './handler';
+import type { Completer } from './widget';
 
 /**
  * Escape HTML by native means of the browser.

@@ -7,7 +7,7 @@
  * @module cell-toolbar-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';

@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
-import { CodeCell } from '@jupyterlab/cells';
-import * as nbformat from '@jupyterlab/nbformat';
-import { KernelMessage } from '@jupyterlab/services';
-import { IDisposable } from '@lumino/disposable';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { CodeCell } from '@jupyterlab/cells';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 const FOREIGN_CELL_CLASS = 'jp-CodeConsole-foreignCell';

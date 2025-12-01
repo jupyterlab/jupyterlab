@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   CellChange,
   FileChange,
   ISharedBaseCell,
@@ -9,31 +9,31 @@ import {
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import {
-  CodeEditor,
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS,
   COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { IDataConnector } from '@jupyterlab/statedb';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import type { TransactionSpec } from '@codemirror/state';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { InlineCompleter } from './inline';
-import {
-  CompletionTriggerKind,
+import type { InlineCompleter } from './inline';
+import type {
   IInlineCompletionItem,
   IInlineCompletionList,
   IInlineCompletionProviderInfo,
-  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
-import { Completer } from './widget';
+import { CompletionTriggerKind, InlineCompletionTriggerKind } from './tokens';
+import type { Completer } from './widget';
 
 /**
  * A completion handler for editors.

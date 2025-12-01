@@ -1,19 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Context } from '@jupyterlab/docregistry';
-import {
-  INotebookModel,
-  NotebookPanel,
-  NotebookTools,
-  NotebookTracker
-} from '@jupyterlab/notebook';
+import type { Context } from '@jupyterlab/docregistry';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookTools, NotebookTracker } from '@jupyterlab/notebook';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
-import { ObservableJSON } from '@jupyterlab/observables';
+import type { ObservableJSON } from '@jupyterlab/observables';
 import { JupyterServer, sleep } from '@jupyterlab/testing';
-import { Collapser } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
-import { PanelLayout, TabPanel, Widget } from '@lumino/widgets';
+import type { Collapser } from '@jupyterlab/ui-components';
+import type { Message } from '@lumino/messaging';
+import type { PanelLayout } from '@lumino/widgets';
+import { TabPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 import * as utils from './utils';
 

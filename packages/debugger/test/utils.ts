@@ -5,7 +5,7 @@
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 export const KERNELSPECS: JSONObject = {
   default: 'python3',

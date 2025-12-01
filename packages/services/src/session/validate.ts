@@ -3,7 +3,7 @@
 
 import { validateModel as validateKernelModel } from '../kernel/validate';
 
-import * as Session from './session';
+import type * as Session from './session';
 
 import { validateProperty } from '../validate';
 

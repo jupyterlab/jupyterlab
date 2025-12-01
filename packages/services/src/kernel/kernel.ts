@@ -1,21 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
-import { CommsOverSubshells, ServerConnection } from '..';
+import type { CommsOverSubshells, ServerConnection } from '..';
 
-import * as KernelMessage from './messages';
+import type * as KernelMessage from './messages';
 
-import { IManager as IBaseManager } from '../basemanager';
+import type { IManager as IBaseManager } from '../basemanager';
 
-import { KernelSpec } from '../kernelspec';
+import type { KernelSpec } from '../kernelspec';
 
-import { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
+import type { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
 
 import { IKernelOptions, IModel } from './restapi';
 

@@ -2,17 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   closeAllIcon,
   exceptionsIcon,
   PanelWithToolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
-import { Panel } from '@lumino/widgets';
-import { IDebugger } from '../../tokens';
+import type { Panel } from '@lumino/widgets';
+import type { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
 import { PauseOnExceptionsWidget } from './pauseonexceptions';
 

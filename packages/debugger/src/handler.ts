@@ -1,22 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { ConsolePanel } from '@jupyterlab/console';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentWidget } from '@jupyterlab/docregistry';
-import { FileEditor } from '@jupyterlab/fileeditor';
-import { NotebookPanel } from '@jupyterlab/notebook';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ConsolePanel } from '@jupyterlab/console';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { DocumentWidget } from '@jupyterlab/docregistry';
+import type { FileEditor } from '@jupyterlab/fileeditor';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';
 import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
-import { IDebugger } from './tokens';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IDebugger } from './tokens';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 

@@ -1,18 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import {
-  Completer,
-  CompleterModel,
-  CompletionHandler
-} from '@jupyterlab/completer';
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CompletionHandler } from '@jupyterlab/completer';
+import { Completer, CompleterModel } from '@jupyterlab/completer';
 import {
   createEditorWidget,
   getBoundingClientRectMock
 } from '@jupyterlab/completer/lib/testutils';
 import { framePromise, simulate, sleep } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 
 const TEST_ITEM_CLASS = 'jp-TestItem';

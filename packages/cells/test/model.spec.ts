@@ -1,24 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  createStandaloneCell,
+import type {
   ISharedCodeCell,
   YCodeCell,
   YMarkdownCell,
   YRawCell
 } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
 import {
   CellModel,
   CodeCellModel,
   MarkdownCellModel,
   RawCellModel
 } from '@jupyterlab/cells';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type * as nbformat from '@jupyterlab/nbformat';
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 import { DEFAULT_OUTPUTS } from '@jupyterlab/rendermime/lib/testutils';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {

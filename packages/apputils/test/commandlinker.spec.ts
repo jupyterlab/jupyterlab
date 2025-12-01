@@ -3,7 +3,8 @@
 
 import { CommandLinker } from '@jupyterlab/apputils';
 import { CommandRegistry } from '@lumino/commands';
-import { h, VirtualDOM, VirtualNode } from '@lumino/virtualdom';
+import type { VirtualNode } from '@lumino/virtualdom';
+import { h, VirtualDOM } from '@lumino/virtualdom';
 import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/apputils', () => {

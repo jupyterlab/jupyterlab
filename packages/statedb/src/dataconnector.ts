@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDataConnector } from './interfaces';
+import type { IDataConnector } from './interfaces';
 
 /**
  * An abstract class that adheres to the data connector interface.
