@@ -47,10 +47,7 @@ export class KernelSourcesBody extends ReactWidget {
         <UseSignal signal={this._model.changed}>
           {(_, kernelSources) => {
             const keymap: { [key: string]: number } = {};
-            const query = (this._model.filter ?? '').toLowerCase();
-            const filtered = (kernelSources ?? []).filter(module =>
-              module.name.toLowerCase().includes(query)
-            );
+            const filtered = kernelSources ?? [];
 
             return filtered.map(module => {
               const name = module.name;
