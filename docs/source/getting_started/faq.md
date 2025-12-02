@@ -62,7 +62,7 @@ See [How to create a jupyter_server_config.py](https://jupyter-server.readthedoc
 ## Development
 
 - [How can you
-  contribute?](https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md)
+  contribute?](https://github.com/jupyterlab/jupyterlab/blob/4.5.x/CONTRIBUTING.md)
 
 - {ref}`How can you extend or customize JupyterLab? <user-extensions>`
 

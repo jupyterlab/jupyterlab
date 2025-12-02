@@ -2,9 +2,9 @@ name: Linux Tests
 
 on:
   push:
-    branches: [main]
+    branches: [4.5.x]
   pull_request:
-    branches: [main]
+    branches: [4.5.x]
   release:
     types: [published]
 
