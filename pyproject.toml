@@ -117,7 +117,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.14.17",
+    "ruff==0.14.7",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
