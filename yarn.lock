@@ -4883,6 +4883,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/shortcuts-extension@workspace:packages/shortcuts-extension"
   dependencies:
+    "@jupyter/react-components": ^0.16.6
     "@jupyterlab/application": ^4.6.0-alpha.3
     "@jupyterlab/settingregistry": ^4.6.0-alpha.3
     "@jupyterlab/testing": ^4.6.0-alpha.3

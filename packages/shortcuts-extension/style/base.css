@@ -326,24 +326,29 @@
 }
 
 .jp-Shortcuts-AdvancedOptions {
-  padding-left: 12px;
+  position: relative;
 }
 
-.jp-Shortcuts-AdvancedOptionsLink {
-  color: var(--jp-content-link-color);
-  margin-right: 15px;
+.jp-Shortcuts-AdvancedOptionsButton {
+  padding: 4px 8px;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton:hover {
+  background-color: var(--jp-layout-color2);
+  border-radius: 4px;
+}
+
+.jp-Shortcuts-AdvancedOptionsMenu {
+  margin-top: 4px;
+  right: 0;
+  border-radius: 5px;
+}
+
+.jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-itemIcon {
+  min-width: 21px;
+  align-items: center;
   display: inline-block;
-  cursor: pointer;
-}
-
-.jp-Shortcuts-AdvancedOptionsLink:hover {
-  color: var(--jp-brand-color0);
-  text-decoration: underline;
-}
-
-.jp-Shortcuts-AdvancedOptionsLink:active {
-  color: var(--jp-brand-color0);
-  text-decoration: underline;
+  vertical-align: middle;
 }
 
 .jp-Shortcuts-HeaderRowContainer {
