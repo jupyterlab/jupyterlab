@@ -490,7 +490,6 @@ test('Read-only cells should remain read-only after changing settings', async ({
   const cell = page.locator('.jp-Notebook-cell').nth(0);
   await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
 });
-
 test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   page
 }) => {
@@ -516,7 +515,7 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   await page.locator('button.jp-RestoreButton').waitFor();
   await expect(modifiedIndicator).toBeVisible();
 
-  await page.reload({waitForIsReady: false});
+  await page.reload({ waitForIsReady: false });
   await expect(filterBox).toBeVisible();
   await page.evaluate(() =>
     window.jupyterapp.commands.execute('settingeditor:open', {
@@ -526,9 +525,9 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   // turn the setting OFF
   await settingLabel.click();
-  await page.locator('button.jp-RestoreButton').waitFor({state: 'hidden'});
+  await page.locator('button.jp-RestoreButton').waitFor({ state: 'hidden' });
   await expect(modifiedIndicator).toBeHidden();
-  await page.reload({waitForIsReady: false});
+  await page.reload({ waitForIsReady: false });
 
   // The filter bar should now be hidden oonce the setting is disabled
   await expect(filterBox).toBeHidden();
