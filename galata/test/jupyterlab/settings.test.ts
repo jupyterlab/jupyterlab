@@ -513,11 +513,11 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   const settingLabel = settingContainer.locator('label');
   const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
   await settingLabel.click();
+  await page.locator('button.jp-RestoreButton').waitFor();
   await expect(modifiedIndicator).toBeVisible();
 
-  await page.reload();
+  await page.reload({waitForIsReady: false});
   await expect(filterBox).toBeVisible();
-
   await page.evaluate(() =>
     window.jupyterapp.commands.execute('settingeditor:open', {
       query: 'Show Filter Bar by Default'
@@ -526,8 +526,9 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   // turn the setting OFF
   await settingLabel.click();
+  await page.locator('button.jp-RestoreButton').waitFor({state: 'hidden'});
   await expect(modifiedIndicator).toBeHidden();
-  await page.reload();
+  await page.reload({waitForIsReady: false});
 
   // The filter bar should now be hidden oonce the setting is disabled
   await expect(filterBox).toBeHidden();
