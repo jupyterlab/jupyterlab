@@ -270,6 +270,14 @@ lint.ignore = [
 [tool.ruff.lint.per-file-ignores]
 # F821 Undefined name `c`
 "binder/jupyter_config.py" = ["F821"]
+# PLC0415 `import` should be at the top-level of a file
+"jupyterlab/__init__.py" = ["PLC0415"]
+# PLC0415 `import` should be at the top-level of a file
+"jupyterlab/federated_labextensions.py" = ["PLC0415"]
+# PLC0415 `import` should be at the top-level of a file
+"jupyterlab/jlpmapp.py" = ["PLC0415"]
+# PLC0415 `import` should be at the top-level of a file
+"jupyterlab/serverextension.py" = ["PLC0415"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "examples/example_check.py" = ["RUF012"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
@@ -291,7 +299,8 @@ lint.ignore = [
 "jupyterlab/extensions/manager.py" = ["C901"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 # T201 `print` found
-"jupyterlab/labapp.py" = ["RUF012", "T201"]
+# PLC0415 `import` should be at the top-level of a file
+"jupyterlab/labapp.py" = ["PLC0415", "RUF012", "T201"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/labextensions.py" = ["RUF012"]
 # C901 method is too complex
@@ -311,7 +320,8 @@ lint.ignore = [
 # PLR5501 Use `elif` instead of `else` then `if`, to reduce indentation
 "jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901", "PLR1714", "PLR5501"]
 # T201 `print` found
-"jupyterlab/upgrade_extension.py" = ["T201"]
+# PLC0415 `import` should be at the top-level of a file
+"jupyterlab/upgrade_extension.py" = ["PLC0415", "T201"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "packages/services/examples/node/main.py" = ["RUF012"]
 # T201 `print` found
