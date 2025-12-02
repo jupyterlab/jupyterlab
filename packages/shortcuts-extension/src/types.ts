@@ -210,6 +210,10 @@ export interface IShortcutUI {
     keybinding: IKeybinding,
     keys: string[]
   ): Promise<void>;
+  /**
+   * Toggles showing all shortcuts, including the one without default shortcut.
+   */
+  toggleAllCommands(): void;
 }
 
 /**

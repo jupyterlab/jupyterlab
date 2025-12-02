@@ -40,6 +40,7 @@ export interface IShortcutUIState {
   searchQuery: string;
   showSelectors: boolean;
   currentSort: IShortcutUI.ColumnId;
+  showAllCommands: boolean;
 }
 
 /** Search result data **/
@@ -202,14 +203,15 @@ export class ShortcutUI
       shortcutsFetched: false,
       searchQuery: '',
       showSelectors: false,
-      currentSort: 'category'
+      currentSort: 'category',
+      showAllCommands: false
     };
   }
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
     this.props.external.actionRequested.connect(this._onActionRequested, this);
-    void this._refreshShortcutList();
+    void this._refreshShortcutList(this.state.showAllCommands);
   }
 
   componentWillUnmount(): void {
@@ -232,18 +234,20 @@ export class ShortcutUI
   }
 
   /** Fetch shortcut list from SettingRegistry  */
-  private async _refreshShortcutList(): Promise<void> {
+  private async _refreshShortcutList(allCommands: boolean): Promise<void> {
     const settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> =
       await this.props.external.getSettings();
     const shortcutRegistry = new ShortcutRegistry({
       commandRegistry: this.props.external.commandRegistry,
-      settings
+      settings,
+      allCommands
     });
     this.setState(
       {
         shortcutRegistry: shortcutRegistry,
         filteredShortcutList: this._searchFilterShortcuts(shortcutRegistry),
-        shortcutsFetched: true
+        shortcutsFetched: true,
+        showAllCommands: allCommands
       },
       () => {
         this.sortShortcuts();
@@ -292,7 +296,7 @@ export class ShortcutUI
   resetShortcuts = async (): Promise<void> => {
     const settings = await this.props.external.getSettings();
     await settings.set('shortcuts', []);
-    await this._refreshShortcutList();
+    await this._refreshShortcutList(this.state.showAllCommands);
   };
 
   /**
@@ -413,12 +417,19 @@ export class ShortcutUI
       }
     }
     await settings.set('shortcuts', newUserShortcuts as any);
-    await this._refreshShortcutList();
+    await this._refreshShortcutList(this.state.showAllCommands);
   }
 
   /** Toggles showing command selectors */
   toggleSelectors = (): void => {
     this.setState({ showSelectors: !this.state.showSelectors });
+  };
+
+  /**
+   * Toggle showing all commands, including the ones without default shortcut.
+   */
+  toggleAllCommands = (): void => {
+    this._refreshShortcutList(!this.state.showAllCommands);
   };
 
   /**
@@ -473,6 +484,8 @@ export class ShortcutUI
           showSelectors={this.state.showSelectors}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
+          toggleAllCommands={this.toggleAllCommands}
+          showAllCommands={this.state.showAllCommands}
           width={this.props.width}
           translator={this.props.external.translator}
         />
