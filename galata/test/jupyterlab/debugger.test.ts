@@ -326,6 +326,31 @@ test.describe('Debugger Variables', () => {
 
     await page.click('jp-button[title^=Continue]');
   });
+
+  test.describe('Debugger Kernel Sources Auto-Refresh', () => {
+    test('Kernel Sources panel updates after execute_reply', async ({
+      page
+    }) => {
+      // Create a notebook
+      await page.notebook.createNew('auto-refresh.ipynb');
+
+      // Open debugger sidebar
+      await page.sidebar.openTab('jp-debugger-sidebar');
+
+      // Run a cell
+      await page.notebook.setCell(0, 'code', 'a = 123');
+      await page.notebook.runCell(0);
+
+      // Look for kernel source entries
+      const locator = page.locator(
+        '.jp-DebuggerKernelSource-body .jp-DebuggerKernelSource-item'
+      );
+
+      // Ensure that some entries appear
+      const count = await locator.count();
+      expect(count).toBeGreaterThan(0);
+    });
+  });
 });
 
 async function createNotebook(page: IJupyterLabPageFixture) {
