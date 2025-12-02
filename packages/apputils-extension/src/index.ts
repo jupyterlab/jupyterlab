@@ -891,7 +891,6 @@ export const kernelInfoTimeoutSetting: JupyterFrontEndPlugin<void> = {
     const patch = (settings: ISettingRegistry.ISettings): void => {
       const kernelInfoTimeout = settings.get('kernelInfoTimeout')
         .composite as number;
-      console.log(`set kernel info timeout as ${kernelInfoTimeout}`);
       setKernelInfoTimeout(kernelInfoTimeout);
     };
     patch(settings);
