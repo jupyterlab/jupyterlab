@@ -58,6 +58,37 @@ export class ShortcutRegistry
         });
       }
     }
+
+    if (options.allCommands) {
+      const commandsWithShortcut = new Set(
+        luminoKeybindings.map(keyBinding => keyBinding.command)
+      );
+      const commandsWithoutShortcut = commandRegistry
+        .listCommands()
+        .filter(command => !commandsWithShortcut.has(command));
+      for (const command of commandsWithoutShortcut) {
+        const shortcut: Omit<CommandRegistry.IKeyBindingOptions, 'keys'> = {
+          command,
+          selector: 'body'
+        };
+        const targetKey = this._computeTargetId(shortcut);
+        const commandParts = shortcut.command.split(':');
+        const label =
+          commandRegistry.label(shortcut.command, shortcut.args) ??
+          (commandParts.length > 1 ? commandParts[1] : undefined);
+        const category = commandParts[0];
+        const shortcutTarget: IShortcutTarget = {
+          ...shortcut,
+          id: targetKey,
+          keybindings: [],
+          category,
+          label,
+          args: {}
+        };
+
+        this.set(targetKey, shortcutTarget);
+      }
+    }
   }
 
   /**
@@ -151,8 +182,12 @@ export namespace ShortcutRegistry {
      */
     commandRegistry: Omit<CommandRegistry, 'execute'>;
     /**
-     * Shortcut settings
+     * Shortcut settings.
      */
     settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout>;
+    /**
+     * Display the list of all the commands.
+     */
+    allCommands?: boolean;
   }
 }
