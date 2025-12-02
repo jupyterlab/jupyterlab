@@ -2563,6 +2563,7 @@ __metadata:
     process: ^0.11.10
     rimraf: ~5.0.5
     source-map-loader: ~1.0.2
+    style-loader: ~3.3.1
     supports-color: ^7.2.0
     terser-webpack-plugin: ^5.3.7
     typescript: ~5.5.4
