@@ -76,8 +76,10 @@ test.describe('Debugger Console', () => {
     // Close the console and wait for debugger button to be active again
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     if (await debugConsoleWidget.isVisible()) {
-      const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
-      await evaluateButton.click();
+      const debuggerConsoleButton = page.locator(
+        'jp-button[title*="Open Debugger Console"]'
+      );
+      await debuggerConsoleButton.click();
       const toolbar = await page.notebook.getToolbarLocator();
       const button = toolbar?.locator('.jp-DebuggerBugButton');
       await button!.locator('[aria-pressed="true"]').waitFor();
@@ -103,7 +105,7 @@ test.describe('Debugger Console', () => {
     }
   });
 
-  test('Debug console toggles when evaluate button is clicked', async ({
+  test('Debug console toggles when Open Debugger Console button is clicked', async ({
     page
   }) => {
     // Verify debug console is visible (already opened by setupDebuggerConsole)
@@ -116,14 +118,14 @@ test.describe('Debugger Console', () => {
     );
     await expect(openDebuggerConsoleButton).toBeVisible();
 
-    // Click the evaluate button to close the console
+    // Click the Open Debugger Console button to close the console
     await openDebuggerConsoleButton.click();
     await page.waitForTimeout(500);
 
     // Verify the console is now closed
     await expect(debugConsole).not.toBeVisible();
 
-    // Click the evaluate button again to reopen the console
+    // Click the Open Debugger Console button again to reopen the console
     await openDebuggerConsoleButton.click();
     await page.waitForTimeout(500);
 
