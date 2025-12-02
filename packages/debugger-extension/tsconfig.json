@@ -4,9 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": [
-    "src/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../application"
@@ -39,6 +37,9 @@
       "path": "../fileeditor"
     },
     {
+      "path": "../mainmenu"
+    },
+    {
       "path": "../nbformat"
     },
     {
@@ -55,9 +56,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../mainmenu"
     }
   ]
 }
