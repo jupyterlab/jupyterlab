@@ -565,7 +565,7 @@ bumped their major version (following semver convention). We want to point out p
   `token.findByFileName(widget.context.path)?.name ?? ''`.
 - `@jupyterlab/docprovider` from 3.x to 4.x
   : This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
-  [RTC's documentation](https://jupyterlab.readthedocs.io/en/latest/user/rtc.html)
+  [RTC's documentation](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html)
 - `@jupyterlab/docregistry` from 3.x to 4.x
   : - Removed the property `docProviderFactory` from the interface `Context.IOptions`.
   - The constructor of the class `DocumentModel` receives a parameter `DocumentModel.IOptions`.
@@ -1019,7 +1019,7 @@ the APIs that extension authors might be using:
 The `@phosphor/*` libraries that JupyterLab 1.x uses have been renamed to
 `@lumino/*`. Updating your `package.json` is straightforward. The easiest
 way to do this is to look in the
-[JupyterLab core packages code base](https://github.com/jupyterlab/jupyterlab/tree/main/packages)
+[JupyterLab core packages code base](https://github.com/jupyterlab/jupyterlab/tree/4.5.x/packages)
 and to simply adopt the versions of the relevant libraries that are used
 there.
 
@@ -1144,7 +1144,7 @@ updating these libraries.
 :::{note}
 For full API documentation and examples of how to use
 `@jupyterlab/services`,
-[consult the repository](https://github.com/jupyterlab/jupyterlab/tree/main/packages/services#readme).
+[consult the repository](https://github.com/jupyterlab/jupyterlab/tree/4.5.x/packages/services#readme).
 :::
 
 `ConsolePanel` and `NotebookPanel` now expose a
@@ -1180,5 +1180,5 @@ from a new kernel connection), you can do `await kernel.info`.
 :::{note}
 For full API documentation and examples of how to use
 the new icon support based on `LabIcon` from `@jupyterlab/ui-components`,
-[consult the repository](https://github.com/jupyterlab/jupyterlab/tree/main/packages/ui-components#readme).
+[consult the repository](https://github.com/jupyterlab/jupyterlab/tree/4.5.x/packages/ui-components#readme).
 :::

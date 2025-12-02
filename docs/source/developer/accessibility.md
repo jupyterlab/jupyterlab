@@ -73,7 +73,7 @@ When fixing contrast or other visual accessibility issues in JupyterLab, it can
 be tempting to pick a color and apply it to the part of the UI that you are
 working on. However, it quickly becomes unmanageable to have color values spread
 throughout the app across different CSS files. Therefore, the JupyterLab
-codebase defines a set of [color variables](https://github.com/jupyterlab/jupyterlab/blob/main/packages/theme-light-extension/style/variables.css)
+codebase defines a set of [color variables](https://github.com/jupyterlab/jupyterlab/blob/4.5.x/packages/theme-light-extension/style/variables.css)
 that can be used for borders, icons, and such. If you're adding any CSS that
 needs a color value, please use one of the variables defined.
 

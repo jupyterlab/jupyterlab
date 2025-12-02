@@ -140,7 +140,7 @@ In other words, each element of your svg that a `fill="..."` or a `stroke="..."`
 ### Available icon classes
 
 ```{raw} html
-<em>Icon-related CSS classes are defined in <a href="https://github.com/jupyterlab/jupyterlab/blob/main/packages/ui-components/style/icons.css">ui-components/style/icons.css</a></em>
+<em>Icon-related CSS classes are defined in <a href="https://github.com/jupyterlab/jupyterlab/blob/4.5.x/packages/ui-components/style/icons.css">ui-components/style/icons.css</a></em>
 ```
 
 All colors shown are for the standard light/dark theme, mouse over for hex values.
