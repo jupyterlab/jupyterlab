@@ -15,6 +15,8 @@ export interface IAdvancedOptionsProps {
   showSelectors: boolean;
   resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
+  toggleAllCommands: IShortcutUI['toggleAllCommands'];
+  showAllCommands: boolean;
 }
 
 export interface ISymbolsProps {}
@@ -68,6 +70,14 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
       >
         {trans.__('Reset All')}
       </a>
+      <a
+        className="jp-Shortcuts-AdvancedOptionsLink"
+        onClick={() => props.toggleAllCommands()}
+      >
+        {props.showAllCommands
+          ? trans.__('Show default')
+          : trans.__('Show all')}
+      </a>
     </div>
   );
 }
@@ -80,6 +90,8 @@ export interface ITopNavProps {
   showSelectors: boolean;
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
+  toggleAllCommands: IShortcutUI['toggleAllCommands'];
+  showAllCommands: boolean;
   width: number;
   translator: ITranslator;
 }
@@ -121,6 +133,8 @@ export class TopNav extends React.Component<ITopNavProps> {
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
+            toggleAllCommands={this.props.toggleAllCommands}
+            showAllCommands={this.props.showAllCommands}
             translator={this.props.translator}
           />
         </div>
