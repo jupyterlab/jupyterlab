@@ -17,23 +17,23 @@ This guide will give you an overview of compatibility features, then a
 tutorial and reference code covering some of the topics mentioned here.
 If you don't know how to make extensions, you can read more about the
 basics at :ref:`the Extension Tutorial <extension_tutorial>` or the
-`Extensions page <https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html>`_.
+`Extensions page <https://jupyterlab.readthedocs.io/en/4.4.x/extension/extension_dev.html>`_.
 
 Getting started
 ---------------
 
 At a high level, extensions for JupyterLab and Jupyter Notebook both
 typically start from a template project, which you can download and set up
-using instructions from `the extension tutorial <https://jupyterlab.readthedocs.io/en/stable/extension/extension_tutorial.html>`_).
+using instructions from `the extension tutorial <https://jupyterlab.readthedocs.io/en/4.4.x/extension/extension_tutorial.html>`_).
 Once your template is ready, you can start adding components and features to build your extension.
 
 How Compatibility Works
 -----------------------
 
-An extension for JupyterLab (and for Notebook 7) is made up of a `series <https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html>`_
+An extension for JupyterLab (and for Notebook 7) is made up of a `series <https://jupyterlab.readthedocs.io/en/4.4.x/extension/extension_dev.html>`_
 of bundled `plugins <https://lumino.readthedocs.io/en/latest/api/interfaces/application.IPlugin.html#requires>`_,
 and those plugins typically use components from the interface toolkit `Lumino <https://lumino.readthedocs.io/en/latest/api/index.html>`_
-as well as the `JupyterLab API <https://jupyterlab.readthedocs.io/en/stable/api/index.html>`_
+as well as the `JupyterLab API <https://jupyterlab.readthedocs.io/en/4.4.x/api/index.html>`_
 (among others) to help build your extension's look and behavior. Both
 Lumino and JupyterLab API are written in Typescript.
 
@@ -122,7 +122,7 @@ use them to make checks in your extensions that will allow them to function in
 both JupyterLab and Jupyter Notebook 7 (and others).
 
 JupyterLab itself is a :ref:`provider <dependency-injection-basic-info>` of many features through its built-in plugins,
-which you can read more about in the `Common Extension Points document <https://jupyterlab.readthedocs.io/en/stable/extension/extension_points.html>`_.
+which you can read more about in the `Common Extension Points document <https://jupyterlab.readthedocs.io/en/4.4.x/extension/extension_points.html>`_.
 It's a good idea to use these extension points while you're building your extensions (and
 by doing so you are acting as the *consumer* in JupyterLab's :ref:`Provider-Consumer pattern <dependency-injection-basic-info>`.
 

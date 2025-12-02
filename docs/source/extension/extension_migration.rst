@@ -584,7 +584,7 @@ bumped their major version (following semver convention). We want to point out p
      ``token.findByFileName(widget.context.path)?.name ?? ''``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
-   `RTC's documentation <https://jupyterlab.readthedocs.io/en/stable/user/rtc.html>`_
+   `RTC's documentation <https://jupyterlab.readthedocs.io/en/4.4.x/user/rtc.html>`_
 - ``@jupyterlab/docregistry`` from 3.x to 4.x
    * Removed the property ``docProviderFactory`` from the interface ``Context.IOptions``.
    * The constructor of the class ``DocumentModel`` receives a parameter ``DocumentModel.IOptions``.

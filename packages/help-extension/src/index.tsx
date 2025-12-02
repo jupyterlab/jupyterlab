@@ -344,11 +344,11 @@ const resources: JupyterFrontEndPlugin<void> = {
     const resources = [
       {
         text: trans.__('JupyterLab Reference'),
-        url: 'https://jupyterlab.readthedocs.io/en/stable/'
+        url: 'https://jupyterlab.readthedocs.io/en/4.4.x/'
       },
       {
         text: trans.__('JupyterLab FAQ'),
-        url: 'https://jupyterlab.readthedocs.io/en/stable/getting_started/faq.html'
+        url: 'https://jupyterlab.readthedocs.io/en/4.4.x/getting_started/faq.html'
       },
       {
         text: trans.__('Jupyter Reference'),
