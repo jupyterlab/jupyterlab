@@ -22,7 +22,7 @@ IDE-like experience. However, developers are encouraged to use these to bring
 to life their own visions of what a computational environment should look
 like.
 
-The JupyterLab repository has [many examples](https://github.com/jupyterlab/jupyterlab/tree/main/examples)
+The JupyterLab repository has [many examples](https://github.com/jupyterlab/jupyterlab/tree/4.5.x/examples)
 to get you started.
 
 The `examples` directory contains:

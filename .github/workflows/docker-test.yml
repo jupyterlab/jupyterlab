@@ -4,9 +4,9 @@ on:
   schedule:
     - cron: '0 0 * * *'
   push:
-    branches: [main]
+    branches: [4.5.x]
   pull_request:
-    branches: [main]
+    branches: [4.5.x]
 
 jobs:
   docker:
