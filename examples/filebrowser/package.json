@@ -26,8 +26,10 @@
   "devDependencies": {
     "@rspack/cli": "^1.6.4",
     "@rspack/core": "^1.6.4",
+    "css-loader": "^6.7.1",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
+    "style-loader": "~3.3.1",
     "typescript": "~5.5.4"
   }
 }

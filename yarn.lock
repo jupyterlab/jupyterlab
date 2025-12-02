@@ -2553,7 +2553,7 @@ __metadata:
     "@types/webpack-sources": ^3.2.3
     ajv: ^8.12.0
     commander: ^9.4.1
-    css-loader: ^7.1.1
+    css-loader: ^6.7.1
     duplicate-package-checker-webpack-plugin: ^3.0.0
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3230,12 +3230,14 @@ __metadata:
     "@jupyterlab/ui-components-extension": ^4.5.0
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
+    css-loader: ^6.7.1
     fs-extra: ^10.1.0
     glob: ~7.1.6
     mini-svg-data-uri: ^1.4.4
     react: ^18.2.0
     react-dom: ^18.2.0
     rimraf: ~5.0.5
+    style-loader: ~3.3.1
   languageName: unknown
   linkType: soft
 
@@ -3259,8 +3261,10 @@ __metadata:
     "@lumino/widgets": ^2.7.2
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
+    css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
+    style-loader: ~3.3.1
     typescript: ~5.5.4
   languageName: unknown
   linkType: soft
@@ -3283,7 +3287,9 @@ __metadata:
     "@lumino/widgets": ^2.7.2
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
+    css-loader: ^6.7.1
     rimraf: ~5.0.5
+    style-loader: ~3.3.1
     typescript: ~5.5.4
   languageName: unknown
   linkType: soft
@@ -3395,8 +3401,10 @@ __metadata:
     "@lumino/widgets": ^2.7.2
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
+    css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
+    style-loader: ~3.3.1
     typescript: ~5.5.4
   languageName: unknown
   linkType: soft
@@ -3427,8 +3435,10 @@ __metadata:
     "@lumino/widgets": ^2.7.2
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
+    css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
+    style-loader: ~3.3.1
     typescript: ~5.5.4
   languageName: unknown
   linkType: soft
@@ -3493,8 +3503,10 @@ __metadata:
     "@lumino/widgets": ^2.7.2
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
+    css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
+    style-loader: ~3.3.1
     typescript: ~5.5.4
   languageName: unknown
   linkType: soft
@@ -4390,7 +4402,7 @@ __metadata:
     "@jupyterlab/rendermime": ^4.5.0
     "@rspack/cli": ^1.6.4
     "@rspack/core": ^1.6.4
-    css-loader: ^7.1.1
+    css-loader: ^6.7.1
     null-loader: ^4.0.0
     rimraf: ~5.0.5
   languageName: unknown
@@ -10655,9 +10667,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-loader@npm:^7.1.1":
-  version: 7.1.2
-  resolution: "css-loader@npm:7.1.2"
+"css-loader@npm:^6.7.1":
+  version: 6.11.0
+  resolution: "css-loader@npm:6.11.0"
   dependencies:
     icss-utils: ^5.1.0
     postcss: ^8.4.33
@@ -10669,13 +10681,13 @@ __metadata:
     semver: ^7.5.4
   peerDependencies:
     "@rspack/core": 0.x || 1.x
-    webpack: ^5.27.0
+    webpack: ^5.0.0
   peerDependenciesMeta:
     "@rspack/core":
       optional: true
     webpack:
       optional: true
-  checksum: 15bfd90d778ddab90ee1d04c8c8bcc13ea6c0791d01b52b09d1b1c753b3410f7a7788a510d93726a9878e70b7c1a140f21efdf5c96e1857872107551d3897822
+  checksum: 5c8d35975a7121334905394e88e28f05df72f037dbed2fb8fec4be5f0b313ae73a13894ba791867d4a4190c35896da84a7fd0c54fb426db55d85ba5e714edbe3
   languageName: node
   linkType: hard
 
@@ -20678,6 +20690,15 @@ __metadata:
   bin:
     sl-log-transformer: bin/sl-log-transformer.js
   checksum: abf9a4ac143118f26c3a0771b204b02f5cf4fa80384ae158f25e02bfbff761038accc44a7f65869ccd5a5995a7f2c16b1466b83149644ba6cecd3072a8927297
+  languageName: node
+  linkType: hard
+
+"style-loader@npm:~3.3.1":
+  version: 3.3.4
+  resolution: "style-loader@npm:3.3.4"
+  peerDependencies:
+    webpack: ^5.0.0
+  checksum: caac3f2fe2c3c89e49b7a2a9329e1cfa515ecf5f36b9c4885f9b218019fda207a9029939b2c35821dec177a264a007e7c391ccdd3ff7401881ce6287b9c8f38b
   languageName: node
   linkType: hard
 
