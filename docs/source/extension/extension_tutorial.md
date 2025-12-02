@@ -225,7 +225,7 @@ After you reload the page with the console open, you should see a message that s
 `JupyterLab extension jupyterlab_apod is activated!` in the console.
 If you do, congratulations, you're ready to start modifying the extension!
 If not, go back make sure you didn't miss a step, and [reach
-out](https://github.com/jupyterlab/jupyterlab/blob/main/README.md#getting-help) if you're stuck.
+out](https://github.com/jupyterlab/jupyterlab/blob/4.5.x/README.md#getting-help) if you're stuck.
 
 :::{note}
 Leave the terminal running the `jupyter lab` command open and running
