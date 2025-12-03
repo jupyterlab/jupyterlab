@@ -16,6 +16,7 @@ import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { CommandPalette } from '@lumino/widgets';
+import { NotebookPanel } from '@jupyterlab/notebook';
 
 /**
  * The command IDs used by the apputils extension.
@@ -92,7 +93,23 @@ export namespace Palette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
-    const modalPalette = new ModalCommandPalette({ commandPalette: palette });
+    const modalPalette = new ModalCommandPalette({
+      commandPalette: palette,
+      restore: () => {
+        const widget = app.shell.currentWidget;
+
+        if (widget) {
+          widget.activate();
+          if (widget instanceof NotebookPanel) {
+            const notebook = widget.content;
+
+            if (notebook?.activeCell) {
+              notebook.activate();
+            }
+          }
+        }
+      }
+    });
     let modal = false;
 
     palette.node.setAttribute('role', 'region');
