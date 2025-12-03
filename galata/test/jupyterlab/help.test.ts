@@ -60,6 +60,7 @@ test.describe('Licenses', () => {
         .getByRole('button', {
           name: `Download All Licenses as ${licenseFormat.name}`
         })
+        .first()
         .click();
       const download = await downloadPromise;
 
