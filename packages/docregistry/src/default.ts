@@ -623,9 +623,11 @@ export class DocumentWidget<
     sender: DocumentRegistry.IContext<U>,
     path: string
   ): void {
-    this.title.label = PathExt.basename(sender.localPath);
-    // The document is not untitled any more.
-    this.isUntitled = false;
+    const newName = PathExt.basename(sender.localPath);
+    if (newName !== this.title.label) {
+      this.isUntitled = false;
+    }
+    this.title.label = newName;
   }
 
   /**

@@ -47,3 +47,8 @@ as greyed out "ghost" text. Compared to the completer widget, the inline complet
 
 The inline completer is disabled by default and can be enabled in the Settings Editor
 by enabling the History Provider.
+
+The appearance of the ghost text is customizable. In the Settings Editor, under the
+**Inline Completer** section, enable the **Syntax Highlighting for Ghost Text**
+setting to apply the language's syntax highlighting to suggestions, improving
+readability over the default gray text.

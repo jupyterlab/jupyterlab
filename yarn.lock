@@ -2744,6 +2744,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/completer@workspace:packages/completer"
   dependencies:
+    "@codemirror/language": ^6.11.0
     "@codemirror/state": ^6.5.2
     "@codemirror/view": ^6.38.1
     "@jupyter/ydoc": ^3.1.0
@@ -3634,7 +3635,7 @@ __metadata:
     "@jupyterlab/services": ^7.5.0
     "@jupyterlab/settingregistry": ^4.5.0
     "@lumino/coreutils": ^2.2.2
-    "@playwright/test": ^1.56.0
+    "@playwright/test": ^1.57.0
     "@stdlib/stats": ~0.0.13
     fs-extra: ^10.1.0
     json5: ^2.2.3
@@ -6057,14 +6058,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.56.0":
-  version: 1.56.0
-  resolution: "@playwright/test@npm:1.56.0"
+"@playwright/test@npm:^1.57.0":
+  version: 1.57.0
+  resolution: "@playwright/test@npm:1.57.0"
   dependencies:
-    playwright: 1.56.0
+    playwright: 1.57.0
   bin:
     playwright: cli.js
-  checksum: 66e7470d1e015a778e7fa3e88d027f095f07fc57fe00ef5ce3a1c17b7f99a5c85aa13dd3a62734b57849d0558a33103828bfcf5a110e092cff6100d086e35aa0
+  checksum: 1a84783a240d69c2c8081a127b446f812a8dc86fe6f60a9511dd501cc0e6229cbec7e7753972678f3f063ad2bebb2cedbe9caebc5faa41014aebed35773ea242
   languageName: node
   linkType: hard
 
@@ -17705,27 +17706,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.56.0":
-  version: 1.56.0
-  resolution: "playwright-core@npm:1.56.0"
+"playwright-core@npm:1.57.0":
+  version: 1.57.0
+  resolution: "playwright-core@npm:1.57.0"
   bin:
     playwright-core: cli.js
-  checksum: 29240317dc8ddcfa389899ac9dbce8a6f451e85b50c9ee105282c72d7a4cc37dad274b18037c8021d88e1317ebd5a779d56e3dc15aa358a5a8a9de87762918ef
+  checksum: 960e80d6ec06305b11a3ca9e78e8e4201cc17f37dd37279cb6fece4df43d74bf589833f4f94535fadd284b427f98c5f1cf09368e22f0f00b6a9477571ce6b03b
   languageName: node
   linkType: hard
 
-"playwright@npm:1.56.0":
-  version: 1.56.0
-  resolution: "playwright@npm:1.56.0"
+"playwright@npm:1.57.0":
+  version: 1.57.0
+  resolution: "playwright@npm:1.57.0"
   dependencies:
     fsevents: 2.3.2
-    playwright-core: 1.56.0
+    playwright-core: 1.57.0
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 1756504fb60338dc18d8887866b3ef079b24e150c54052ba6a94099c6fc8fa018ebbe9aa93e618b703cfa357fd55193f990d080dbb173529c93a0e3df49f1d01
+  checksum: 176fd9fd890f390e0aa00d42697b70072d534243b15467d9430f3af329e77b3225b67a0afa12ea76fb440300dabd92d4cf040baf5edceee8eeff0ee1590ae5b7
   languageName: node
   linkType: hard
 
