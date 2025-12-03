@@ -14,7 +14,7 @@
     "build:stats": "rspack --profile --json > stats.json",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
-    "watch": "rspack --watch"
+    "watch": "rspack --watch --config webpack.config.js"
   },
   "resolutions": {
     "@codemirror/language": "^6.0.0",
