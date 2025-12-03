@@ -4,8 +4,7 @@
 import * as path from 'path';
 import * as rspack from '@rspack/core';
 import { Build } from './build';
-// TODO: fix handling of licenses
-// import { WPPlugin } from './webpack-plugins';
+import { WPPlugin } from './webpack-plugins';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -237,14 +236,13 @@ function generateConfig({
     new CleanupPlugin()
   ];
 
-  // TODO: re-enable
-  // if (mode === 'production') {
-  //   plugins.push(
-  //     new WPPlugin.JSONLicenseWebpackPlugin({
-  //       excludedPackageTest: packageName => packageName === data.name
-  //     })
-  //   );
-  // }
+  if (mode === 'production') {
+    plugins.push(
+      new WPPlugin.JSONLicenseWebpackPlugin({
+        excludedPackageTest: packageName => packageName === data.name
+      })
+    );
+  }
 
   // Add version argument when in production so the Jupyter server
   // allows caching of files (i.e., does not set the CacheControl header to no-cache to prevent caching static files)
