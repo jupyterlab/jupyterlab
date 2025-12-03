@@ -109,7 +109,7 @@ test.describe('Debugger Tests', () => {
 
     await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
-    await page.getByRole('button', { name: 'Continue (F9)' }).click();
+    await page.locator('jp-button[aria-label="Continue (F9)"]').click();
     await expect.soft(variablesPanel.getByRole('tree')).toHaveCount(1);
     await page.debugger.waitForVariables();
 
