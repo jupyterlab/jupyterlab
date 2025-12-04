@@ -87,8 +87,8 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
         <ul className="lm-Menu lm-MenuBar-menu jp-Shortcuts-AdvancedOptionsMenu">
           <li
             className="lm-Menu-item"
-            onClick={() => {
-              props.resetShortcuts();
+            onClick={async () => {
+              await props.resetShortcuts();
               setMenuOpen(false);
             }}
           >
@@ -97,7 +97,7 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
           </li>
           <li
             className="lm-Menu-item"
-            onClick={() => {
+            onClick={async () => {
               props.toggleSelectors();
               setMenuOpen(false);
             }}
