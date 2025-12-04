@@ -109,9 +109,9 @@ export class DebuggerSidebar extends SidePanel {
     if (value === this._showSourcePanel) {
       return;
     }
-    
+
     this._showSourcePanel = value;
-    
+
     if (value) {
       if (this.sources) {
         return;
