@@ -812,20 +812,23 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       pauseOnExceptions: CommandIDs.pauseOnExceptions
     };
 
-    let sidebar = new Debugger.Sidebar({
+    const sidebar = new Debugger.Sidebar({
       service,
       callstackCommands,
       breakpointsCommands,
       editorServices,
       themeManager,
       translator,
-      settings: null
     });
 
     if (settingRegistry) {
       const settings = await settingRegistry.load(main.id);
 
-      sidebar.setSettings(settings);
+      settings.changed.connect(() => {
+        const showSourcesInMainArea = settings.get('showSourcesInMainArea')
+      .composite as boolean;
+        sidebar.showSources = !!showSourcesInMainArea;
+      });
 
       const updateSettings = (): void => {
         const filters = settings.get('variableFilters').composite as {
