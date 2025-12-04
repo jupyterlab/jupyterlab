@@ -116,6 +116,11 @@
   vertical-align: middle;
 }
 
+.jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
+  vertical-align: inherit;
+  margin-left: 10px;
+}
+
 .jp-Shortcuts-ShortcutCell {
   display: flex;
   min-width: max-content;
@@ -326,24 +331,33 @@
 }
 
 .jp-Shortcuts-AdvancedOptions {
-  padding-left: 12px;
+  position: relative;
 }
 
-.jp-Shortcuts-AdvancedOptionsLink {
-  color: var(--jp-content-link-color);
-  margin-right: 15px;
+.jp-Shortcuts-AdvancedOptionsButton {
+  padding: 4px 8px;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton:hover {
+  background-color: var(--jp-layout-color2);
+  border-radius: 4px;
+}
+
+.jp-Shortcuts-AdvancedOptionsMenu {
+  margin-top: 4px;
+  right: 0;
+  border-radius: 5px;
+}
+
+.jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-item:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-itemIcon {
+  min-width: 21px;
+  align-items: center;
   display: inline-block;
-  cursor: pointer;
-}
-
-.jp-Shortcuts-AdvancedOptionsLink:hover {
-  color: var(--jp-brand-color0);
-  text-decoration: underline;
-}
-
-.jp-Shortcuts-AdvancedOptionsLink:active {
-  color: var(--jp-brand-color0);
-  text-decoration: underline;
+  vertical-align: middle;
 }
 
 .jp-Shortcuts-HeaderRowContainer {
@@ -371,4 +385,35 @@
 .jp-Shortcuts-controlIcon {
   margin-left: 8px;
   margin-right: 16px;
+}
+
+.jp-Shortcuts-CustomOptionsDialogBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 500px;
+  height: 400px;
+  padding: 12px;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container label {
+  margin: 0;
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Shortcuts-CustomOptionDialog-container input {
+  padding: 8px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 2px;
+}
+
+.jp-JSONEditor {
+  flex: 1;
 }
