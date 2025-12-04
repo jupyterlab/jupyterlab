@@ -1554,6 +1554,18 @@
     }
   },
   {
+    "id": "debugger:invoke-console-completer",
+    "label": "Display the tab completion widget.",
+    "caption": "",
+    "shortcuts": [
+      "Tab"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "debugger:next",
     "label": "Next",
     "caption": "Next",
@@ -1622,6 +1634,30 @@
     "label": "Restart Kernel and Debug…",
     "caption": "Restart Kernel and Debug…",
     "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:run-in-console",
+    "label": "Execute the current line in debug console.",
+    "caption": "",
+    "shortcuts": [
+      "Shift Enter"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:select-console-completion",
+    "label": "Select the completion suggestion.",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ],
     "args": {
       "type": "object",
       "properties": {}

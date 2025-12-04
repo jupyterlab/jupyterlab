@@ -123,7 +123,9 @@ const openerPlugin: JupyterFrontEndPlugin<IDocumentWidgetOpener> = {
         if (!widget.isAttached) {
           shell.add(widget, 'main', options || {});
         }
-        shell.activateById(widget.id);
+        if (options?.activate ?? true) {
+          shell.activateById(widget.id);
+        }
         this._opened.emit(widget);
       }
 

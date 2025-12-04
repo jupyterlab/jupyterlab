@@ -12,6 +12,20 @@ export YARN_ENABLE_GLOBAL_CACHE=1
 # display verbose output for pkg builds run during `jlpm install`
 export YARN_ENABLE_INLINE_BUILDS=1
 
+# Helper function to wait for a condition with timeout
+# Usage: wait_for_condition TIMEOUT_SECONDS COMMAND [ARGS...]
+wait_for_condition() {
+    local timeout=$1
+    shift
+    for i in $(seq 1 $timeout); do
+        if "$@"; then
+            return 0
+        fi
+        sleep 1
+    done
+    return 1
+}
+
 
 if [[ $GROUP != nonode ]]; then
     python -c "from jupyterlab.commands import build_check; build_check()"
@@ -335,15 +349,26 @@ if [[ $GROUP == usage2 ]]; then
     $TEST_INSTALL_PATH/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser &
+    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
+    if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
+        echo "Server started successfully"
+    else
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    fi
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Check the labhubapp
+    # Test that the labhubapp fails to start if jupyterhub is not installed
+    # and provides a helpful error message.
+    ($TEST_INSTALL_PATH/bin/jupyter-labhub 2>&1 || true) | tee labhub.log
+    grep -q "JupyterHub is not installed" labhub.log || exit 1
+    # Install jupyterhub and test that the labhubapp starts successfully.
     $TEST_INSTALL_PATH/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
     $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
@@ -466,13 +491,19 @@ if [[ $GROUP == nonode ]]; then
     ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
 
     # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
+    ./test_install/bin/jupyter lab --no-browser > /tmp/jupyter_log_$$.txt 2>&1 &
     TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
+    if wait_for_condition 60 grep -q 'is running at:' /tmp/jupyter_log_$$.txt; then
+        echo "Server started successfully"
+    else
+        echo "Server failed to start within 60 seconds"
+        cat /tmp/jupyter_log_$$.txt
+        rm -f /tmp/jupyter_log_$$.txt
+        exit 1
+    fi
     kill $TASK_PID
     wait $TASK_PID
+    rm -f /tmp/jupyter_log_$$.txt
 
     # Make sure we can install the tarball
     virtualenv -p $(which python3) test_sdist

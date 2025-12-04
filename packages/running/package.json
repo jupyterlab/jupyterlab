@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running",
-  "version": "4.5.0-beta.1",
+  "version": "4.5.0",
   "description": "JupyterLab - Running Sessions Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,16 +37,16 @@
   },
   "dependencies": {
     "@jupyter/react-components": "^0.16.6",
-    "@jupyterlab/apputils": "^4.6.0-beta.1",
-    "@jupyterlab/statedb": "^4.5.0-beta.1",
-    "@jupyterlab/translation": "^4.5.0-beta.1",
-    "@jupyterlab/ui-components": "^4.5.0-beta.1",
-    "@lumino/coreutils": "^2.2.1",
-    "@lumino/disposable": "^2.1.4",
-    "@lumino/domutils": "^2.0.3",
-    "@lumino/messaging": "^2.0.3",
-    "@lumino/signaling": "^2.1.4",
-    "@lumino/widgets": "^2.7.1",
+    "@jupyterlab/apputils": "^4.6.0",
+    "@jupyterlab/statedb": "^4.5.0",
+    "@jupyterlab/translation": "^4.5.0",
+    "@jupyterlab/ui-components": "^4.5.0",
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/disposable": "^2.1.5",
+    "@lumino/domutils": "^2.0.4",
+    "@lumino/messaging": "^2.0.4",
+    "@lumino/signaling": "^2.1.5",
+    "@lumino/widgets": "^2.7.2",
     "react": "^18.2.0"
   },
   "devDependencies": {
