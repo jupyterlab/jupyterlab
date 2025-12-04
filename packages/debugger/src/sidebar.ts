@@ -50,8 +50,13 @@ export class DebuggerSidebar extends SidePanel {
       themeManager
     } = options;
 
-    this.settings = options.settings ?? null;
     const model = service.model;
+    this._sourcesOptions = {
+      model: model.sources,
+      service,
+      editorServices,
+      translator
+    };
 
     this.variables = new VariablesPanel({
       model: model.variables,
@@ -74,12 +79,7 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    this.sources = new SourcesPanel({
-      model: model.sources,
-      service,
-      editorServices,
-      translator
-    });
+    //this.sources = new SourcesPanel(this._sourcesOptions);
 
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
@@ -99,57 +99,31 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    if (this.settings) {
-      this.setSettings(this.settings);
-    }
     this.addWidget(this.kernelSources);
   }
 
-  set showSourcePanel(value: boolean): void {
-    if (value === this._showSourcePanel) {
+  get showSourcesPanel(): boolean {
+    return this._showSourcesPanel;
+  }
+
+  set showSourcesPanel(value: boolean) {
+    if (value === this._showSourcesPanel) {
       return;
     }
 
-    this._showSourcePanel = value;
+    this._showSourcesPanel = value;
 
     if (value) {
-      if (this.sources) {
-        return;
+      // ShowSourcesPanel is true => ensure widget exists
+      if (!this.sources || this.sources.isDisposed) {
+        this.sources = new SourcesPanel(this._sourcesOptions);
+        this.addWidget(this.sources);
       }
-      this.sources = new SourcesPanel({
-        model: model.sources,
-        service,
-        editorServices,
-        translator
-      });
-      this.addWidget(this.sources);
     } else {
-      this.sources.dispose();
-      this.sources = null;
-    }
-  }
-    if (this.settings) {
-      this.settings.changed.disconnect(this.updateSidebarFromSettings, this);
-    }
-
-    this.settings = settings;
-    this.settings.changed.connect(this.updateSidebarFromSettings, this);
-
-    this.updateSidebarFromSettings();
-  }
-
-  private updateSidebarFromSettings(): void {
-    if (!this.settings) {
-      return;
-    }
-
-    const showSourcesInMainArea = this.settings.get('showSourcesInMainArea')
-      .composite as boolean;
-
-    if (!showSourcesInMainArea) {
-      this.addWidget(this.sources);
-    } else {
-      this.sources.close();
+      // ShowSourcesPanel is false => remove widget if present
+      if (this.sources && !this.sources.isDisposed) {
+        this.sources.dispose();
+      }
     }
   }
 
@@ -175,7 +149,9 @@ export class DebuggerSidebar extends SidePanel {
 
   readonly kernelSources: KernelSourcesPanel;
 
-  settings: ISettingRegistry.ISettings | null;
+  private _showSourcesPanel: boolean;
+
+  private _sourcesOptions: SourcesPanel.IOptions;
 }
 
 /**
