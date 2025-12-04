@@ -822,7 +822,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       breakpointsCommands,
       editorServices,
       themeManager,
-      translator,
+      translator
     });
 
     if (settingRegistry) {
@@ -830,8 +830,8 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
       settings.changed.connect(() => {
         const showSourcesInMainArea = settings.get('showSourcesInMainArea')
-      .composite as boolean;
-        sidebar.showSources = !!showSourcesInMainArea;
+          .composite as boolean;
+        sidebar.showSourcesPanel = !showSourcesInMainArea;
       });
 
       const updateSettings = (): void => {
