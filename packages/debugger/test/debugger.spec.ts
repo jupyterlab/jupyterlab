@@ -192,12 +192,12 @@ describe('Debugger', () => {
         '.jp-AccordionPanel-title'
       );
     });
-    it('should have 4 child widgets', () => {
-      expect(sidebar.widgets.length).toBe(4);
+    it('should have 5 child widgets', () => {
+      expect(sidebar.widgets.length).toBe(5);
     });
 
-    it('should have 4 toolbars', () => {
-      expect(toolbarList.length).toBe(4);
+    it('should have 5 toolbars', () => {
+      expect(toolbarList.length).toBe(5);
     });
     describe('Variable toolbar', () => {
       let toolbar: Element;
@@ -268,6 +268,30 @@ describe('Debugger', () => {
       it('should have two buttons', () => {
         const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(3);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Source');
+      });
+
+      it('should have one button', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(1);
       });
     });
   });
