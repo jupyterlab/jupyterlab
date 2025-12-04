@@ -22,7 +22,8 @@ import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
 
-import type { IDebugger } from './tokens';
+import { IDebugger } from './tokens';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A debugger sidebar.
@@ -47,6 +48,8 @@ export class DebuggerSidebar extends SidePanel {
       service,
       themeManager
     } = options;
+
+    this.settings = options.settings;
     const model = service.model;
 
     this.variables = new VariablesPanel({
@@ -95,8 +98,36 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    this.addWidget(this.sources);
+    if (this.settings) {
+      this.setSettings(this.settings);
+    }
     this.addWidget(this.kernelSources);
+  }
+
+  setSettings(settings: ISettingRegistry.ISettings): void {
+    if (this.settings) {
+      this.settings.changed.disconnect(this.updateSidebarFromSettings, this);
+    }
+
+    this.settings = settings;
+    this.settings.changed.connect(this.updateSidebarFromSettings, this);
+
+    this.updateSidebarFromSettings();
+  }
+
+  private updateSidebarFromSettings(): void {
+    if (!this.settings) {
+      return;
+    }
+
+    const showSourcesInMainArea = this.settings.get('showSourcesInMainArea')
+      .composite as boolean;
+
+    if (!showSourcesInMainArea) {
+      this.addWidget(this.sources);
+    } else {
+      this.sources.close();
+    }
   }
 
   /**
@@ -117,9 +148,11 @@ export class DebuggerSidebar extends SidePanel {
   /**
    * The sources widget.
    */
-  readonly sources: SourcesPanel;
+  sources: SourcesPanel;
 
   readonly kernelSources: KernelSourcesPanel;
+
+  settings: ISettingRegistry.ISettings | null;
 }
 
 /**
@@ -149,6 +182,11 @@ export namespace DebuggerSidebar {
      * The editor services.
      */
     editorServices: IEditorServices;
+
+    /**
+     * Settings from the setting registry
+     */
+    settings: ISettingRegistry.ISettings | null;
 
     /**
      * An optional application theme manager to detect theme changes.
