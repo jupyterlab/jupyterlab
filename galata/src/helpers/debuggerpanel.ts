@@ -174,6 +174,32 @@ export class DebuggerHelper {
       .waitFor();
   }
 
+  /**
+   * Returns handle to sources panel content
+   *
+   * @deprecated You should use locator instead {@link getSourcePanelLocator}
+   */
+  async getSourcePanel(): Promise<ElementHandle<Element> | null> {
+    return (await this.getSourcePanelLocator()).elementHandle();
+  }
+
+  /**
+   * Returns locator to sources panel content
+   */
+  async getSourcePanelLocator(): Promise<Locator> {
+    return this._getPanel('.jp-DebuggerSources');
+  }
+
+  /**
+   * Waits for sources to be populated in the sources panel
+   */
+  async waitForSources(): Promise<void> {
+    await this.page
+      .locator('.jp-DebuggerSources-body >> .jp-Editor')
+      .first()
+      .waitFor({ state: 'visible' });
+  }
+
   private async _getPanel(selector: string): Promise<Locator> {
     const panel = this.sidebar.getContentPanelLocator('right');
     return panel.locator(selector);
