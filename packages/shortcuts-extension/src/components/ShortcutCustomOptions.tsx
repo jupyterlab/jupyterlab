@@ -9,9 +9,9 @@ import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
-import { IAdvancedOptions, IShortcutTarget } from '../types';
+import { ICustomOptions, IShortcutTarget } from '../types';
 
-export class AdvancedOptionDialog extends Dialog<IAdvancedOptions> {
+export class CustomOptionsDialog extends Dialog<ICustomOptions> {
   constructor(options: {
     shortcut: IShortcutTarget;
     editorFactory: CodeEditor.Factory;
@@ -20,7 +20,7 @@ export class AdvancedOptionDialog extends Dialog<IAdvancedOptions> {
     const { shortcut, translator, editorFactory } = options;
     const trans = translator.load('jupyterlab');
 
-    const body = new AdvancedOptionDialogBody(
+    const body = new CustomOptionsDialogBody(
       shortcut,
       translator,
       editorFactory,
@@ -28,7 +28,7 @@ export class AdvancedOptionDialog extends Dialog<IAdvancedOptions> {
     );
 
     super({
-      title: trans.__('Advanced Shortcut Options'),
+      title: trans.__('Custom Shortcut Options'),
       body,
       buttons: [
         Dialog.cancelButton({ label: trans.__('Cancel') }),
@@ -47,11 +47,11 @@ export class AdvancedOptionDialog extends Dialog<IAdvancedOptions> {
 }
 
 /**
- * Body widget for the advanced options dialog.
+ * Body widget for the custom options dialog.
  */
-class AdvancedOptionDialogBody
+class CustomOptionsDialogBody
   extends Widget
-  implements Dialog.IBodyWidget<IAdvancedOptions>
+  implements Dialog.IBodyWidget<ICustomOptions>
 {
   private _selectorInput: HTMLInputElement;
   private _editorWidget: JSONEditorWidget;
@@ -65,11 +65,11 @@ class AdvancedOptionDialogBody
     super();
     const trans = translator.load('jupyterlab');
 
-    this.addClass('jp-Shortcuts-AdvancedOptionDialogBody');
+    this.addClass('jp-Shortcuts-CustomOptionsDialogBody');
 
     // Create main container
     const container = document.createElement('div');
-    container.className = 'jp-Shortcuts-AdvancedOptionDialog-container';
+    container.className = 'jp-Shortcuts-CustomOptionDialog-container';
 
     // Selector section
     const selectorLabel = document.createElement('label');
@@ -77,7 +77,6 @@ class AdvancedOptionDialogBody
     selectorLabel.className = 'jp-Dialog-label';
 
     this._selectorInput = document.createElement('input');
-    this._selectorInput.id = 'selector-input';
     this._selectorInput.type = 'text';
     this._selectorInput.value = shortcut.selector;
     this._selectorInput.className = 'jp-mod-styled';
@@ -105,7 +104,7 @@ class AdvancedOptionDialogBody
   /**
    * Get the value from the dialog body.
    */
-  getValue(): IAdvancedOptions {
+  getValue(): ICustomOptions {
     const argsText = this._editorWidget.getJSON();
     let args: JSONObject;
 

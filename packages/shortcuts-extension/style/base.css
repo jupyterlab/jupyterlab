@@ -116,7 +116,7 @@
   vertical-align: middle;
 }
 
-.jp-Shortcuts-Cell jp-button.jp-Shortcuts-AdvancedOptions {
+.jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
   vertical-align: inherit;
   margin-left: 10px;
 }
@@ -387,13 +387,13 @@
   margin-right: 16px;
 }
 
-.jp-Shortcuts-AdvancedOptionDialogBody {
+.jp-Shortcuts-CustomOptionsDialogBody {
   padding: 12px;
   display: flex;
   flex-direction: column;
 }
 
-.jp-Shortcuts-AdvancedOptionDialog-container {
+.jp-Shortcuts-CustomOptionDialog-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -402,13 +402,13 @@
   padding: 12px;
 }
 
-.jp-Shortcuts-AdvancedOptionDialog-container label {
+.jp-Shortcuts-CustomOptionDialog-container label {
   margin: 0;
   font-weight: bold;
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-Shortcuts-AdvancedOptionDialog-container input {
+.jp-Shortcuts-CustomOptionDialog-container input {
   padding: 8px;
   border: 1px solid var(--jp-border-color1);
   border-radius: 2px;
@@ -416,6 +416,4 @@
 
 .jp-JSONEditor {
   flex: 1;
-  display: flex;
-  flex-direction: column;
 }

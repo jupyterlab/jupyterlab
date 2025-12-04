@@ -52,7 +52,7 @@ export interface IKeybinding {
 /**
  * The advanced options.
  */
-export interface IAdvancedOptions {
+export interface ICustomOptions {
   /**
    * The DOM selector that catch the shortcut.
    */
@@ -236,9 +236,9 @@ export interface IShortcutUI {
   /**
    * Update the selector and args for a user defined shortcut.
    */
-  setAdvancedOptions(
+  setCustomOptions(
     target: IShortcutTarget,
-    options: IAdvancedOptions
+    options: ICustomOptions
   ): Promise<void>;
   /**
    * Toggles showing all shortcuts, including the one without default shortcut.

@@ -8,7 +8,7 @@ import type { TranslationBundle } from '@jupyterlab/translation';
 import { editIcon } from '@jupyterlab/ui-components';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
-import { AdvancedOptionDialog } from './ShortcutAdvancedOptions';
+import { CustomOptionsDialog } from './ShortcutCustomOptions';
 import type { IConflicts } from './ShortcutInput';
 import { CONFLICT_CONTAINER_CLASS, ShortcutInput } from './ShortcutInput';
 import type {
@@ -26,7 +26,7 @@ export interface IShortcutItemProps {
   resetKeybindings: IShortcutUI['resetKeybindings'];
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
-  setAdvancedOptions: IShortcutUI['setAdvancedOptions'];
+  setCustomOptions: IShortcutUI['setCustomOptions'];
   showSelectors: boolean;
   external: IShortcutUI.IExternalBundle;
 }
@@ -157,13 +157,13 @@ export class ShortcutItem extends React.Component<
         {this.props.shortcut.userDefined &&
         this.props.external.editorFactory ? (
           <Button
-            className="jp-mod-styled jp-mod-reject jp-Shortcuts-AdvancedOptions"
+            className="jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions"
             onClick={async () => {
               if (!this.props.external.editorFactory) {
-                console.error('Cannot build the advanced options form');
+                console.error('Cannot build the custom options form');
                 return;
               }
-              const dialog = new AdvancedOptionDialog({
+              const dialog = new CustomOptionsDialog({
                 shortcut: this.props.shortcut,
                 translator: this.props.external.translator,
                 editorFactory: this.props.external.editorFactory
@@ -171,13 +171,13 @@ export class ShortcutItem extends React.Component<
 
               const result = await dialog.launch();
               if (result.button.accept && result.value) {
-                await this.props.setAdvancedOptions(
+                await this.props.setCustomOptions(
                   this.props.shortcut,
                   result.value
                 );
               }
             }}
-            title={this._trans.__('Advanced options')}
+            title={this._trans.__('Custom options')}
             appearance={'neutral'}
           >
             <editIcon.react tag={null} />
