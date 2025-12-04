@@ -16,7 +16,6 @@ import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { CommandPalette } from '@lumino/widgets';
-import { NotebookPanel } from '@jupyterlab/notebook';
 
 /**
  * The command IDs used by the apputils extension.
@@ -100,13 +99,6 @@ export namespace Palette {
 
         if (widget) {
           widget.activate();
-          if (widget instanceof NotebookPanel) {
-            const notebook = widget.content;
-
-            if (notebook?.activeCell) {
-              notebook.activate();
-            }
-          }
         }
       }
     });
