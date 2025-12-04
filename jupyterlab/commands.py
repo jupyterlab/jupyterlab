@@ -46,10 +46,10 @@ from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.jlpmapp import HERE, YARN_PATH
 from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
-# The regex for expecting the webpack output.
-# TODO: check if we can only keep the previous one
-# WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
-WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
+# The regex for expecting the rspack output.
+# TODO: check if we can just keep the theme.css regex like is commented below
+# RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
 
 # The repo root directory
 REPO_ROOT = osp.abspath(osp.join(HERE, ".."))
@@ -329,12 +329,12 @@ def watch_dev(logger=None):
 
     package_procs = watch_packages(logger)
 
-    # Run webpack watch and wait for compilation.
+    # Run rspack watch and wait for compilation.
     wp_proc = WatchHelper(
         ["node", YARN_PATH, "run", "watch"],
         cwd=DEV_DIR,
         logger=logger,
-        startup_regex=WEBPACK_EXPECT,
+        startup_regex=RSPACK_EXPECT,
     )
 
     return [*package_procs, wp_proc]
@@ -783,7 +783,7 @@ class _AppHandler:
         proc = WatchHelper(
             ["node", YARN_PATH, "run", "watch"],
             cwd=pjoin(self.app_dir, "staging"),
-            startup_regex=WEBPACK_EXPECT,
+            startup_regex=RSPACK_EXPECT,
             logger=self.logger,
         )
         return [proc]

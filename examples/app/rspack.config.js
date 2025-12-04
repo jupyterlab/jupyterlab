@@ -5,7 +5,7 @@ const rspack = require('@rspack/core');
 const Build = require('@jupyterlab/builder').Build;
 const miniSVGDataURI = require('mini-svg-data-uri');
 
-// Generate webpack config to copy extension assets to the build directory,
+// Generate rspack config to copy extension assets to the build directory,
 // such as setting schema files, theme assets, etc.
 const extensionAssetConfig = Build.ensureAssets({
   packageNames: data.jupyterlab.extensions,

@@ -715,7 +715,7 @@ helpers from various core packages. The exported helpers are the same as before 
 
 ### Testing with Galata
 
-The in-page helpers are now in an JupyterLab extension to live in the common Webpack shared scoped. That new extension
+The in-page helpers are now in a JupyterLab extension to live in the common Webpack shared scoped. That new extension
 is contained in the JupyterLab python package at `jupyterlab.galata`. It requires to update your Jupyter server
 configuration by adding the following line:
 

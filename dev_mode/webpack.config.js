@@ -3,9 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+const RsdoctorRspackPlugin = require('@rsdoctor/rspack-plugin');
+
 const path = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
+// TODO: investigate using https://rspack.rs/plugins/rspack/html-rspack-plugin instead of html-webpack-plugin
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
@@ -258,7 +261,7 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   // custom plugin for ignoring files during a `--watch` build
-  // TODO: re-addd
+  // TODO: re-add
   // new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
   new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir),
@@ -269,8 +272,14 @@ const plugins = [
     },
     name: 'CORE_FEDERATION',
     shared
-  })
-];
+  }),
+  // Register the plugin only when RSDOCTOR is true, as the plugin increases build time
+  process.env.RSDOCTOR &&
+    new RsdoctorRspackPlugin.RsdoctorRspackPlugin({
+      // plugin options
+      port: 9222
+    })
+].filter(Boolean);
 
 if (process.argv.includes('--analyze')) {
   plugins.push(new BundleAnalyzerPlugin());
@@ -314,12 +323,14 @@ module.exports = [
   })
 ].concat(extensionAssetConfig);
 
+// TODO: potentially delete?
 // Needed to watch changes in linked extensions in node_modules
 // (jupyter lab --watch)
 // See https://github.com/webpack/webpack/issues/11612
-if (watchNodeModules) {
-  module.exports[0].snapshot = { managedPaths: [] };
-}
+// if (watchNodeModules) {
+//   module.exports[0].snapshot = { managedPaths: [] };
+// }
 
 const logPath = path.join(buildDir, 'build_log.json');
-fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+// TODO: this errors out because of circular references with rsdoctor above
+// fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));

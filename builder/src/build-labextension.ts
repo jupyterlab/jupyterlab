@@ -12,7 +12,7 @@
 // Output path (defaults to <extension>/build)
 
 // Outputs
-// Webpack build assets
+// Build assets
 
 ///////////////////////////////////////////////////////
 // Portions of the below code handling watch mode and displaying output were
@@ -109,24 +109,24 @@ commander
     }
 
     if (options.watch) {
-      compiler.hooks.watchRun.tap('WebpackInfo', () => {
+      compiler.hooks.watchRun.tap('CompilationInfo', () => {
         console.error('\nWatch Compilation starting…\n');
       });
-      compiler.hooks.done.tap('WebpackInfo', () => {
+      compiler.hooks.done.tap('CompilationInfo', () => {
         console.error('\nWatch Compilation finished\n');
       });
     } else {
-      compiler.hooks.run.tap('WebpackInfo', () => {
+      compiler.hooks.run.tap('CompilationInfo', () => {
         console.error('\nCompilation starting…\n');
       });
-      compiler.hooks.done.tap('WebpackInfo', () => {
+      compiler.hooks.done.tap('CompilationInfo', () => {
         console.error('\nCompilation finished\n');
       });
     }
 
     if (options.watch) {
       compiler.watch(config[0].watchOptions || {}, compilerCallback);
-      console.error('\nwebpack is watching the files…\n');
+      console.error('\nrspack is watching the files…\n');
     } else {
       compiler.run((err: any, stats: any) => {
         if (compiler.close) {

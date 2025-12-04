@@ -3,7 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-// const TerserPlugin = require('terser-webpack-plugin');
 const merge = require('webpack-merge').default;
 const WPPlugin = require('@jupyterlab/builder').WPPlugin;
 const config = require('./webpack.config');

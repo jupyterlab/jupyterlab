@@ -8,10 +8,12 @@
     "build:dev": "npm run build",
     "build:prod": "rspack --config webpack.prod.config.js",
     "build:prod:minimize": "rspack --config webpack.prod.minimize.config.js",
-    "build:prod:minimize:report": "npm run build:prod:minimize:stats && webpack-bundle-analyzer --no-open --mode static --report static/webpack-bundle-analyzer.html stats.json static",
-    "build:prod:minimize:stats": "rspack --profile --config webpack.prod.minimize.config.js --json > stats.json",
+    "build:prod:minimize:doctor": "RSDOCTOR=true rspack --config webpack.prod.minimize.config.js",
+    "build:prod:minimize:report": "rspack --profile --config webpack.prod.minimize.config.js --analyze",
+    "build:prod:minimize:stats": "rspack --profile --config webpack.prod.minimize.config.js --json stats.json",
     "build:prod:release": "rspack --config webpack.prod.release.config.js",
-    "build:stats": "rspack --profile --json > stats.json",
+    "build:prod:release:doctor": "RSDOCTOR=true rspack --config webpack.prod.release.config.js",
+    "build:stats": "rspack --profile --json stats.json",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
     "watch": "rspack --watch --config webpack.config.js"
@@ -205,6 +207,7 @@
   "devDependencies": {
     "@jupyterlab/builder": "^4.5.0",
     "@jupyterlab/buildutils": "^4.5.0",
+    "@rsdoctor/rspack-plugin": "^1.3.12",
     "@rspack/cli": "^1.6.4",
     "@rspack/core": "^1.6.4",
     "chokidar": "^3.4.0",
@@ -219,8 +222,6 @@
     "rimraf": "~5.0.5",
     "sort-package-json": "~1.53.1",
     "source-map-loader": "~1.0.2",
-    "terser-webpack-plugin": "^5.3.7",
-    "webpack-bundle-analyzer": "^4.8.0",
     "webpack-merge": "^5.8.0",
     "worker-loader": "^3.0.2"
   },

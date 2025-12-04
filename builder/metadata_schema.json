@@ -92,8 +92,8 @@
       "default": "static"
     },
     "webpackConfig": {
-      "title": "Custom Webpack (or rspack) config",
-      "description": "The relative path to a custom webpack (or rspack) config",
+      "title": "Custom Rspack config",
+      "description": "The relative path to a custom Rspack config",
       "$ref": "#/definitions/relativePath",
       "default": null
     },
