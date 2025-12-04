@@ -340,6 +340,99 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
   );
 });
 
+test('Keyboard Shortcuts: should display all commands', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const rows = shortcutsForm.locator('.jp-Shortcuts-Row');
+  await rows.first().waitFor();
+  const initialCount = await rows.count();
+
+  await shortcutsForm
+    .locator('jp-button.jp-Shortcuts-AdvancedOptionsButton')
+    .click();
+  const menu = shortcutsForm.locator('.jp-Shortcuts-AdvancedOptionsMenu');
+  await menu.waitFor();
+  await menu.getByText('Show all commands').click();
+
+  expect(await rows.count()).toBeGreaterThan(initialCount);
+});
+
+test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
+  // Function that get the shortcuts related to a command.
+  const getShortcut = async (command: string) => {
+    return await page.evaluate(async command => {
+      const settingsRegistry = window.jupyterapp.pluginRegistry._plugins.get(
+        '@jupyterlab/apputils-extension:settings'
+      ).service;
+      const shortcuts = (
+        await settingsRegistry.load('@jupyterlab/shortcuts-extension:shortcuts')
+      ).composite.shortcuts as any[];
+      return shortcuts.filter(shortcut => shortcut.command === command);
+    }, command);
+  };
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const selector = '.jp-Launcher';
+  const args = { a: 'b' };
+
+  // Ensure there is no shortcut defined yet for 'notebook:restart-run-all'.
+  expect(await getShortcut('notebook:restart-run-all')).toHaveLength(0);
+
+  // Search for shortcut for 'notebook:restart-run-all' command.
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('restart kernel and run all cells');
+  const row = shortcutsForm.locator('.jp-Shortcuts-Row');
+  expect(await row.count()).toBe(0);
+
+  // Display all commands to find 'notebook:restart-run-all' command.
+  await shortcutsForm
+    .locator('jp-button.jp-Shortcuts-AdvancedOptionsButton')
+    .click();
+  const menu = shortcutsForm.locator('.jp-Shortcuts-AdvancedOptionsMenu');
+  await menu.waitFor();
+  await menu.getByText('Show all commands').click();
+  expect(await row.count()).toBe(1);
+
+  // Display the shortcut input.
+  await row.locator('.jp-Shortcuts-EmptyCell').first().hover();
+  await row.locator('.jp-Shortcuts-EmptyCell a').click();
+  // Add a shortcut for this command.
+  const shortcutKey = row.locator('.jp-Shortcuts-Input').first();
+  await shortcutKey.press('Control+r');
+  await row.locator('.jp-Shortcuts-Submit').click();
+
+  // Open the custom command dialog.
+  await row.locator('.jp-Shortcuts-CustomOptions').waitFor();
+  await row.locator('.jp-Shortcuts-CustomOptions').click();
+
+  // Fil some custom value for the selector and the args.
+  const dialog = page.locator('.jp-Dialog-content');
+  await dialog.waitFor();
+  await dialog.getByRole('textbox').first().fill(selector);
+  const jsonEditorLine = dialog.locator('.jp-JSONEditor-host .cm-line').first();
+  await jsonEditorLine.click();
+  await jsonEditorLine.selectText();
+  await jsonEditorLine.fill(JSON.stringify(args));
+  await dialog.locator('button.jp-mod-accept').click();
+
+  // The shortcut should now be listed with the correct selector and args.
+  const shortcut = await getShortcut('notebook:restart-run-all');
+  expect(shortcut).toHaveLength(1);
+  expect(shortcut[0].selector).toBe(selector);
+  expect(JSON.stringify(shortcut[0].args)).toBe(JSON.stringify(args));
+});
+
 test('Settings Export: Clicking the export button triggers a download and matches content', async ({
   page
 }) => {
