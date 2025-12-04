@@ -455,8 +455,8 @@ export class ShortcutUI
   /**
    * Toggle showing all commands, including the ones without default shortcut.
    */
-  toggleAllCommands = (): void => {
-    this._refreshShortcutList(!this.state.showAllCommands);
+  toggleAllCommands = async (): Promise<void> => {
+    await this._refreshShortcutList(!this.state.showAllCommands);
   };
 
   /**
