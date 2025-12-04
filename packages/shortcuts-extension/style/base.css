@@ -116,6 +116,11 @@
   vertical-align: middle;
 }
 
+.jp-Shortcuts-Cell jp-button {
+  vertical-align: inherit;
+  margin-left: 10px;
+}
+
 .jp-Shortcuts-ShortcutCell {
   display: flex;
   min-width: max-content;
@@ -344,6 +349,10 @@
   border-radius: 5px;
 }
 
+.jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-item:hover {
+  background: var(--jp-layout-color2);
+}
+
 .jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-itemIcon {
   min-width: 21px;
   align-items: center;
@@ -376,4 +385,37 @@
 .jp-Shortcuts-controlIcon {
   margin-left: 8px;
   margin-right: 16px;
+}
+
+.jp-AdvancedOptionDialogBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-AdvancedOptionDialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 500px;
+  height: 400px;
+  padding: 12px;
+}
+
+.jp-AdvancedOptionDialog-container label {
+  margin: 0;
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-AdvancedOptionDialog-container input {
+  padding: 8px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 2px;
+}
+
+.jp-JSONEditor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
