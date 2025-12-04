@@ -176,6 +176,10 @@ export class ModalCommandPalette extends Panel {
 export namespace ModalCommandPalette {
   export interface IOptions {
     commandPalette: CommandPalette;
+    /**
+     * A callback executed when the modal palette is closed.
+     * Used to restore focus to the previously active widget.
+     */
     restore?: () => void;
   }
 }
