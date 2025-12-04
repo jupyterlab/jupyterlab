@@ -10,7 +10,7 @@
 
 ### IDefaultContentProvider
 
-As part of the 4.5.0 release, a new token `IDefaultContentProvider` was  wrongfully made public. The 4.5.1 release removes that token.
+As part of the 4.5.0 release, a new token `IDefaultContentProvider` was wrongfully made public. The 4.5.1 release removes that token.
 
 ## JupyterLab 4.4 to 4.5
 
