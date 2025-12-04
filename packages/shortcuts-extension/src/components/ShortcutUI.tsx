@@ -6,17 +6,18 @@
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ArrayExt, StringExt } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
+import * as React from 'react';
 import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
 import type {
+  IAdvancedOptions,
   IKeybinding,
   IShortcutRegistry,
   IShortcutsSettingsLayout,
   IShortcutTarget,
   IShortcutUI
 } from '../types';
-import * as React from 'react';
 
 const enum MatchType {
   Label,
@@ -418,6 +419,32 @@ export class ShortcutUI
     await this._refreshShortcutList(this.state.showAllCommands);
   }
 
+  /**
+   * Update the selector and args for a user defined shortcut.
+   */
+  setAdvancedOptions = async (
+    target: IShortcutTarget,
+    options: IAdvancedOptions
+  ): Promise<void> => {
+    const settings = await this.props.external.getSettings();
+    const userShortcuts = settings.user.shortcuts ?? [];
+    const index = userShortcuts.findIndex(
+      shortcut =>
+        shortcut.command === target.command &&
+        shortcut.selector === target.selector &&
+        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
+    );
+    if (index === -1) {
+      console.error('Error writing the advanced options: target not found');
+      return;
+    }
+    userShortcuts[index].selector = options.selector;
+    userShortcuts[index].args = options.args;
+
+    await settings.set('shortcuts', userShortcuts as any);
+    await this._refreshShortcutList(this.state.showAllCommands);
+  };
+
   /** Toggles showing command selectors */
   toggleSelectors = (): void => {
     this.setState({ showSelectors: !this.state.showSelectors });
@@ -493,6 +520,7 @@ export class ShortcutUI
           addKeybinding={this.addKeybinding}
           replaceKeybinding={this.replaceKeybinding}
           deleteKeybinding={this.deleteKeybinding}
+          setAdvancedOptions={this.setAdvancedOptions}
           showSelectors={this.state.showSelectors}
           findConflictsFor={(keys: string[], selector: string) => {
             if (this.state.shortcutRegistry) {

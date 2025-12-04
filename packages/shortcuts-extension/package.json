@@ -42,6 +42,9 @@
   "dependencies": {
     "@jupyter/react-components": "^0.16.6",
     "@jupyterlab/application": "^4.6.0-alpha.3",
+    "@jupyterlab/apputils": "^4.7.0-alpha.3",
+    "@jupyterlab/codeeditor": "^4.6.0-alpha.3",
+    "@jupyterlab/observables": "^5.6.0-alpha.3",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.3",
     "@jupyterlab/translation": "^4.6.0-alpha.3",
     "@jupyterlab/ui-components": "^4.6.0-alpha.3",
@@ -51,7 +54,9 @@
     "@lumino/disposable": "^2.1.5",
     "@lumino/domutils": "^2.0.4",
     "@lumino/keyboard": "^2.0.4",
+    "@lumino/messaging": "^2.0.4",
     "@lumino/signaling": "^2.1.5",
+    "@lumino/widgets": "^2.7.3",
     "react": "^18.2.0"
   },
   "devDependencies": {

@@ -3,11 +3,15 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import type { CommandRegistry } from '@lumino/commands';
-import type { ISignal } from '@lumino/signaling';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * Identifiers of commands registered by shortcuts UI.
@@ -43,6 +47,20 @@ export interface IKeybinding {
    * Whether this keybinding comes from default values (schema or default overrides), or is set by user.
    */
   readonly isDefault: boolean;
+}
+
+/**
+ * The advanced options.
+ */
+export interface IAdvancedOptions {
+  /**
+   * The DOM selector that catch the shortcut.
+   */
+  selector: string;
+  /**
+   * The args sent to the command.
+   */
+  args: ReadonlyJSONObject;
 }
 
 /**
@@ -89,6 +107,10 @@ export interface IShortcutTarget {
    * Arguments influence the command label and execution.
    */
   readonly args: ReadonlyPartialJSONObject | undefined;
+  /**
+   * Whether this shortcut has been defined by the user or not.
+   */
+  readonly userDefined?: boolean;
 }
 
 /**
@@ -164,6 +186,7 @@ export namespace IShortcutUI {
     >;
     commandRegistry: Omit<CommandRegistry, 'execute'>;
     actionRequested: ISignal<unknown, ActionRequest>;
+    editorFactory?: CodeEditor.Factory;
   }
 }
 
@@ -209,6 +232,13 @@ export interface IShortcutUI {
     target: IShortcutTarget,
     keybinding: IKeybinding,
     keys: string[]
+  ): Promise<void>;
+  /**
+   * Update the selector and args for a user defined shortcut.
+   */
+  setAdvancedOptions(
+    target: IShortcutTarget,
+    options: IAdvancedOptions
   ): Promise<void>;
   /**
    * Toggles showing all shortcuts, including the one without default shortcut.

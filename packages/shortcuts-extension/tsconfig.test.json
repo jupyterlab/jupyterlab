@@ -6,6 +6,15 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../observables"
+    },
+    {
       "path": "../settingregistry"
     },
     {

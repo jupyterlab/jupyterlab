@@ -4,6 +4,7 @@
  */
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { CommandRegistry } from '@lumino/commands';
+import type { PartialJSONArray } from '@lumino/coreutils';
 import type {
   IKeybinding,
   IShortcutRegistry,
@@ -28,6 +29,14 @@ export class ShortcutRegistry
     );
 
     const luminoKeybindings = settings.composite.shortcuts ?? [];
+    // Compute the target ID for the shortcuts defined by an extension.
+    const shortcutsFromExtensions = (
+      settings.default('shortcuts') as PartialJSONArray
+    ).map(shortcut => {
+      return this._computeTargetId(
+        shortcut as unknown as CommandRegistry.IKeyBindingOptions
+      );
+    });
 
     for (const shortcut of luminoKeybindings) {
       const targetKey = this._computeTargetId(shortcut);
@@ -54,7 +63,8 @@ export class ShortcutRegistry
           category,
           label,
           args: shortcut.args,
-          keybindings: [keybinding]
+          keybindings: [keybinding],
+          userDefined: !shortcutsFromExtensions.includes(targetKey)
         });
       }
     }
