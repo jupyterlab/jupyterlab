@@ -23,6 +23,7 @@ import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 import { Variables as VariablesPanel } from './panels/variables';
 
 import { IDebugger } from './tokens';
+
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
@@ -49,7 +50,7 @@ export class DebuggerSidebar extends SidePanel {
       themeManager
     } = options;
 
-    this.settings = options.settings;
+    this.settings = options.settings ?? null;
     const model = service.model;
 
     this.variables = new VariablesPanel({
@@ -186,7 +187,7 @@ export namespace DebuggerSidebar {
     /**
      * Settings from the setting registry
      */
-    settings: ISettingRegistry.ISettings | null;
+    settings?: ISettingRegistry.ISettings | null;
 
     /**
      * An optional application theme manager to detect theme changes.
