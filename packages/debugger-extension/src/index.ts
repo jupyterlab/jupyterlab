@@ -345,7 +345,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       },
       execute: async () => {
         const state = service.getDebuggerState();
-        await service.stop();
 
         const widget = notebookTracker.currentWidget;
         if (!widget) {
@@ -353,11 +352,15 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext, {
+          onBeforeRestart: async (): Promise<void> => {
+            await service.stop();
+          }
+        });
         if (!restarted) {
           return;
         }
-
+        await service.start();
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
         await NotebookActions.runAll(
