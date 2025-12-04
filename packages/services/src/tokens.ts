@@ -78,6 +78,7 @@ export const IContentsManager = new Token<Contents.IManager>(
 
 /**
  * The default content provider token.
+ * @deprecated Since 4.5.1
  */
 export const IDefaultContentProvider = new Token<IContentProvider>(
   '@jupyterlab/services:IDefaultContentProvider',

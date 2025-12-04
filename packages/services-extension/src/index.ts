@@ -113,6 +113,8 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
 
 /**
  * The default IContentProvider plugin.
+ *
+ * @deprecated Since 4.5.1
  */
 const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
   id: '@jupyterlab/services-extension:default-content-provider',
@@ -138,17 +140,13 @@ const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
   description: 'The default drive for the contents manager.',
   autoStart: true,
   provides: IDefaultDrive,
-  requires: [IDefaultContentProvider],
+  requires: [],
   optional: [IServerSettings],
   activate: (
     _: null,
-    defaultContentProvider: IContentProvider,
     serverSettings: ServerConnection.ISettings | null
   ): Contents.IDrive => {
-    return new Drive({
-      serverSettings: serverSettings ?? undefined,
-      defaultContentProvider
-    });
+    return new Drive({ serverSettings: serverSettings ?? undefined });
   }
 };
 

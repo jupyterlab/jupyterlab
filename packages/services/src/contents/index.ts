@@ -1147,15 +1147,14 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const restContentProvider =
-      options.defaultContentProvider ??
-      new RestContentProvider({
-        apiEndpoint: this._apiEndpoint,
-        serverSettings: this.serverSettings
+
+    if (options.defaultContentProvider) {
+      this.contentProviderRegistry = new ContentProviderRegistry({
+        defaultProvider: options.defaultContentProvider
       });
-    this.contentProviderRegistry = new ContentProviderRegistry({
-      defaultProvider: restContentProvider
-    });
+    } else {
+      this.contentProviderRegistry = new ContentProviderRegistry();
+    }
     this.contentProviderRegistry.fileChanged.connect(
       (registry, change: Contents.IChangedArgs) => {
         this._fileChanged.emit(change);
@@ -1223,7 +1222,32 @@ export class Drive implements Contents.IDrive {
     const contentProvider = this.contentProviderRegistry.getProvider(
       options?.contentProviderId
     );
-    return contentProvider.get(localPath, options);
+
+    if (contentProvider) {
+      return contentProvider.get(localPath, options);
+    }
+
+    let url = this._getUrl(localPath);
+    if (options) {
+      // The notebook type cannot take a format option.
+      if (options.type === 'notebook') {
+        delete options['format'];
+      }
+      const content = options.content ? '1' : '0';
+      const hash = options.hash ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content, hash };
+      url += URLExt.objectToQueryString(params);
+    }
+
+    const settings = this.serverSettings;
+    const response = await ServerConnection.makeRequest(url, {}, settings);
+    if (response.status !== 200) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    const data = await response.json();
+    validate.validateContentsModel(data);
+    return data;
   }
 
   /**
@@ -1385,7 +1409,32 @@ export class Drive implements Contents.IDrive {
     const contentProvider = this.contentProviderRegistry.getProvider(
       options?.contentProviderId
     );
-    const data = await contentProvider.save(localPath, options);
+
+    let data: Contents.IModel;
+
+    if (contentProvider) {
+      data = await contentProvider.save(localPath, options);
+    } else {
+      const settings = this.serverSettings;
+      const url = this._getUrl(localPath);
+      const file = new File([JSON.stringify(options)], 'data.json', {
+        type: 'application/json'
+      });
+      const init = {
+        method: 'PUT',
+        body: file
+      };
+      const response = await ServerConnection.makeRequest(url, init, settings);
+      // will return 200 for an existing file and 201 for a new file
+      if (response.status !== 200 && response.status !== 201) {
+        const err = await ServerConnection.ResponseError.create(response);
+        throw err;
+      }
+      const data = await response.json();
+      validate.validateContentsModel(data);
+      return data;
+    }
+
     this._fileChanged.emit({
       type: 'save',
       oldValue: null,
@@ -1615,6 +1664,8 @@ export namespace Drive {
 
     /**
      * The default content provider.
+     *
+     * @deprecated since 4.5.1
      */
     defaultContentProvider?: IContentProvider;
   }
@@ -1646,9 +1697,10 @@ export class ContentProviderRegistry implements IContentProviderRegistry {
    *
    * @param options - The options used to initialize the registry.
    */
-  constructor(options: ContentProviderRegistry.IOptions) {
-    this.register('default', options.defaultProvider);
-    this._defaultProvider = options.defaultProvider;
+  constructor(options?: ContentProviderRegistry.IOptions) {
+    if (options?.defaultProvider) {
+      this.register('default', options.defaultProvider);
+    }
   }
 
   /**
@@ -1694,9 +1746,9 @@ export class ContentProviderRegistry implements IContentProviderRegistry {
    *
    * @param identifier - identifier of the content provider.
    */
-  getProvider(identifier?: string): IContentProvider {
+  getProvider(identifier?: string): IContentProvider | null {
     if (!identifier) {
-      return this._defaultProvider;
+      return null;
     }
     const provider = this._providers.get(identifier);
     if (!provider) {
@@ -1713,7 +1765,6 @@ export class ContentProviderRegistry implements IContentProviderRegistry {
   }
 
   private _providers: Map<string, IContentProvider> = new Map();
-  private _defaultProvider: IContentProvider;
   private _fileChanged = new Signal<
     IContentProviderRegistry,
     Contents.IChangedArgs
@@ -1727,13 +1778,15 @@ export namespace ContentProviderRegistry {
   export interface IOptions {
     /**
      * Default provider for the registry.
+     * @deprecated Since 4.5.1
      */
-    defaultProvider: IContentProvider;
+    defaultProvider?: IContentProvider;
   }
 }
 
 /**
  * A content provider using the Jupyter REST API.
+ * @deprecated You should depend on the IDefaultDrive if you want to call REST content APIs
  */
 export class RestContentProvider implements IContentProvider {
   constructor(options: RestContentProvider.IOptions) {
@@ -1865,12 +1918,11 @@ export interface IContentProviderRegistry {
   /**
    * Get a content provider matching provided identifier.
    *
-   * If no identifier is provided, return the default provider.
-   * Throws an error if a provider with given identifier is not found.
+   * If no identifier is provided or the provider is not found, returns null.
    *
    * @param identifier - identifier of the content provider.
    */
-  getProvider(identifier?: string): IContentProvider;
+  getProvider(identifier?: string): IContentProvider | null;
 
   /**
    * A proxy of the file changed signal for all the providers.
