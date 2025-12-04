@@ -806,34 +806,37 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       pauseOnExceptions: CommandIDs.pauseOnExceptions
     };
 
-    const sidebar = new Debugger.Sidebar({
+    let sidebar = new Debugger.Sidebar({
       service,
       callstackCommands,
       breakpointsCommands,
       editorServices,
       themeManager,
-      translator
+      translator,
+      settings: null
     });
 
     if (settingRegistry) {
-      const setting = await settingRegistry.load(main.id);
+      const settings = await settingRegistry.load(main.id);
+
+      sidebar.setSettings(settings);
+
       const updateSettings = (): void => {
-        const filters = setting.get('variableFilters').composite as {
+        const filters = settings.get('variableFilters').composite as {
           [key: string]: string[];
         };
         const kernel = service.session?.connection?.kernel?.name ?? '';
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
-        const kernelSourcesFilter = setting.get('defaultKernelSourcesFilter')
+        const kernelSourcesFilter = settings.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
       };
       updateSettings();
-      setting.changed.connect(updateSettings);
+      settings.changed.connect(updateSettings);
       service.sessionChanged.connect(updateSettings);
     }
-
     return sidebar;
   }
 };
@@ -849,7 +852,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     IEditorServices,
     IDebuggerSources,
     ITranslator,
-    IDebuggerHandler
+    IDebuggerHandler,
+    ISettingRegistry
   ],
   provides: IDebuggerSourceViewer,
   autoStart: true,
@@ -859,19 +863,36 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     editorServices: IEditorServices,
     debuggerSources: IDebugger.ISources,
     translator: ITranslator,
-    handler: Debugger.Handler
+    handler: Debugger.Handler,
+    settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISourceViewer> => {
     let previousEditorWidget: Widget | null = null;
     const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
       editorServices
     });
     const { model } = service;
+    let showSourcesInMainArea: boolean = true;
+    if (settingRegistry) {
+      const settings = await settingRegistry.load(main.id);
+      const updateShowSourcesSetting = (): void => {
+        showSourcesInMainArea =
+          (settings.composite['showSourcesInMainArea'] as boolean) ?? true;
+      };
+      updateShowSourcesSetting();
+      settings.changed.connect(updateShowSourcesSetting);
+    }
 
     const onCurrentFrameChanged = async (
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
     ): Promise<void> => {
       let openedByDebugger = true;
+
+      if (!showSourcesInMainArea) {
+        /* display sources in the sources panel*/
+        return;
+      }
+
       if (!service.isStarted || !frame?.source?.path) {
         return;
       }
@@ -887,6 +908,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
     const openSource = (
+      /* method to open sources in the main area*/
       source: IDebugger.Source,
       breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame,
       openedByDebugger = false
@@ -922,7 +944,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           return;
         }
       }
-
+      /* Check on the previous widget editor */
       if (
         previousEditorWidget &&
         !previousEditorWidget.isDisposed &&
@@ -932,6 +954,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         previousEditorWidget = null;
       }
 
+      /*Create a new read-only editor */
       const editorWrapper = readOnlyEditorFactory.createNewEditor({
         content,
         mimeType,
@@ -948,12 +971,14 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       });
       editorWrapper.disposed.connect(() => editorHandler.dispose());
 
+      /*Open a read only editor in the main area */
       debuggerSources.open({
         label: PathExt.basename(path),
         caption: path,
         editorWrapper
       });
 
+      /* Loop on all widgets to assign to the previousEditorWidget the editor opened by the debugger and fitting the right path*/
       for (const widget of app.shell.widgets('main')) {
         if (
           widget.title.label === PathExt.basename(path) &&
@@ -961,7 +986,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           openedByDebugger === true
         ) {
           previousEditorWidget = widget;
-
           break;
         }
       }
