@@ -274,12 +274,8 @@ const plugins = [
     shared
   }),
   // Register the plugin only when RSDOCTOR is true, as the plugin increases build time
-  process.env.RSDOCTOR &&
-    new RsdoctorRspackPlugin.RsdoctorRspackPlugin({
-      // plugin options
-      port: 9222
-    })
-].filter(Boolean);
+  process.env.RSDOCTOR && new RsdoctorRspackPlugin.RsdoctorRspackPlugin({})
+];
 
 if (process.env.WEBPACK_BUNDLE_ANALYZER) {
   plugins.push(
@@ -338,5 +334,8 @@ module.exports = [
 // }
 
 const logPath = path.join(buildDir, 'build_log.json');
-// TODO: this errors out because of circular references with rsdoctor above
-// fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+if (!process.env.RSDOCTOR) {
+  // rsdoctor plugin has circular refs that prevent logging the full config
+  // so we only log if we are not running rsdoctor
+  fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+}
