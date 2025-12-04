@@ -11,7 +11,7 @@ import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
 import {
-  IAdvancedOptions,
+  ICustomOptions,
   IKeybinding,
   IShortcutRegistry,
   IShortcutsSettingsLayout,
@@ -424,9 +424,9 @@ export class ShortcutUI
   /**
    * Update the selector and args for a user defined shortcut.
    */
-  setAdvancedOptions = async (
+  setCustomOptions = async (
     target: IShortcutTarget,
-    options: IAdvancedOptions
+    options: ICustomOptions
   ): Promise<void> => {
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
@@ -437,7 +437,7 @@ export class ShortcutUI
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
     );
     if (index === -1) {
-      console.error('Error writing the advanced options: target not found');
+      console.error('Error writing the custom options: target not found');
       return;
     }
     userShortcuts[index].selector = options.selector;
@@ -522,7 +522,7 @@ export class ShortcutUI
           addKeybinding={this.addKeybinding}
           replaceKeybinding={this.replaceKeybinding}
           deleteKeybinding={this.deleteKeybinding}
-          setAdvancedOptions={this.setAdvancedOptions}
+          setCustomOptions={this.setCustomOptions}
           showSelectors={this.state.showSelectors}
           findConflictsFor={(keys: string[], selector: string) => {
             if (this.state.shortcutRegistry) {
