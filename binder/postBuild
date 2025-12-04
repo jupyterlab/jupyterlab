@@ -14,11 +14,9 @@ mkdir _reports_
 
 # pre-install nodejs deps and build outside of editable python install
 (time yarn)                                            2>&1 | tee _reports_/00_yarn.txt
-# TODO: this target does not work right now
 (time yarn build:dev:prod:minimize:report)             2>&1 | tee _reports_/01_build.txt
 
 # hoist report to where a reviewer might see it
-# TODO: get a different report, or delete this report
 mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
 
 # overload best-effort versions from conda-forge for all deps

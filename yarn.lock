@@ -2390,6 +2390,7 @@ __metadata:
     rimraf: ~5.0.5
     sort-package-json: ~1.53.1
     source-map-loader: ~1.0.2
+    webpack-bundle-analyzer: ^4.8.0
     webpack-merge: ^5.8.0
     worker-loader: ^3.0.2
   languageName: unknown
@@ -22724,7 +22725,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-bundle-analyzer@npm:4.10.2":
+"webpack-bundle-analyzer@npm:4.10.2, webpack-bundle-analyzer@npm:^4.8.0":
   version: 4.10.2
   resolution: "webpack-bundle-analyzer@npm:4.10.2"
   dependencies:

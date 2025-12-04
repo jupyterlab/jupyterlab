@@ -281,8 +281,14 @@ const plugins = [
     })
 ].filter(Boolean);
 
-if (process.argv.includes('--analyze')) {
-  plugins.push(new BundleAnalyzerPlugin());
+if (process.env.WEBPACK_BUNDLE_ANALYZER) {
+  plugins.push(
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      reportFilename: 'webpack-bundle-analyzer.html',
+      openAnalyzer: false
+    })
+  );
 }
 
 module.exports = [

@@ -9,7 +9,7 @@
     "build:prod": "rspack --config webpack.prod.config.js",
     "build:prod:minimize": "rspack --config webpack.prod.minimize.config.js",
     "build:prod:minimize:doctor": "RSDOCTOR=true rspack --config webpack.prod.minimize.config.js",
-    "build:prod:minimize:report": "rspack --profile --config webpack.prod.minimize.config.js --analyze",
+    "build:prod:minimize:report": "WEBPACK_BUNDLE_ANALYZER=true rspack --profile --config webpack.prod.minimize.config.js",
     "build:prod:minimize:stats": "rspack --profile --config webpack.prod.minimize.config.js --json stats.json",
     "build:prod:release": "rspack --config webpack.prod.release.config.js",
     "build:prod:release:doctor": "RSDOCTOR=true rspack --config webpack.prod.release.config.js",
@@ -222,6 +222,7 @@
     "rimraf": "~5.0.5",
     "sort-package-json": "~1.53.1",
     "source-map-loader": "~1.0.2",
+    "webpack-bundle-analyzer": "^4.8.0",
     "webpack-merge": "^5.8.0",
     "worker-loader": "^3.0.2"
   },
