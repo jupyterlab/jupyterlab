@@ -5,7 +5,6 @@ import {
   ConfigSection,
   Contents,
   Event,
-  IContentProvider,
   Kernel,
   KernelSpec,
   NbConvert,
