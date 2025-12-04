@@ -1430,9 +1430,8 @@ export class Drive implements Contents.IDrive {
         const err = await ServerConnection.ResponseError.create(response);
         throw err;
       }
-      const data = await response.json();
+      data = await response.json();
       validate.validateContentsModel(data);
-      return data;
     }
 
     this._fileChanged.emit({
