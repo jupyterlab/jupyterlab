@@ -105,7 +105,29 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.kernelSources);
   }
 
-  setSettings(settings: ISettingRegistry.ISettings): void {
+  set showSourcePanel(value: boolean): void {
+    if (value === this._showSourcePanel) {
+      return;
+    }
+    
+    this._showSourcePanel = value;
+    
+    if (value) {
+      if (this.sources) {
+        return;
+      }
+      this.sources = new SourcesPanel({
+        model: model.sources,
+        service,
+        editorServices,
+        translator
+      });
+      this.addWidget(this.sources);
+    } else {
+      this.sources.dispose();
+      this.sources = null;
+    }
+  }
     if (this.settings) {
       this.settings.changed.disconnect(this.updateSidebarFromSettings, this);
     }
