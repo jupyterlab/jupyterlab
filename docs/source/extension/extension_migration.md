@@ -6,6 +6,12 @@
 
 # Extension Migration Guide
 
+## JupyterLab 4.5.0 to 4.5.1
+
+### IDefaultContentProvider
+
+As part of the 4.5.0 release, a new token `IDefaultContentProvider` was  wrongfully made public. The 4.5.1 release removes that token.
+
 ## JupyterLab 4.4 to 4.5
 
 ### File Browser updates
