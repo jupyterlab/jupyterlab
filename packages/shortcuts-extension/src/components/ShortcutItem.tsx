@@ -171,7 +171,7 @@ export class ShortcutItem extends React.Component<
 
               const result = await dialog.launch();
               if (result.button.accept && result.value) {
-                this.props.setAdvancedOptions(
+                await this.props.setAdvancedOptions(
                   this.props.shortcut,
                   result.value
                 );
