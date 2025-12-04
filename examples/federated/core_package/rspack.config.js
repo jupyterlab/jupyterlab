@@ -70,7 +70,7 @@ const entryPoint = path.join(buildDir, 'bootstrap.js');
 fs.copySync('./bootstrap.js', entryPoint);
 
 /**
- * Create the webpack ``shared`` configuration
+ * Create the module federation ``shared`` configuration
  */
 function createShared(packageData) {
   // Set up module federation sharing config

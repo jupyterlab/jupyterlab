@@ -261,8 +261,7 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   // custom plugin for ignoring files during a `--watch` build
-  // TODO: re-add
-  // new WPPlugin.FilterWatchIgnorePlugin(ignored),
+  new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
   new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir),
   new ModuleFederationPlugin({
@@ -324,14 +323,6 @@ module.exports = [
     plugins
   })
 ].concat(extensionAssetConfig);
-
-// TODO: potentially delete?
-// Needed to watch changes in linked extensions in node_modules
-// (jupyter lab --watch)
-// See https://github.com/webpack/webpack/issues/11612
-// if (watchNodeModules) {
-//   module.exports[0].snapshot = { managedPaths: [] };
-// }
 
 const logPath = path.join(buildDir, 'build_log.json');
 if (!process.env.RSDOCTOR) {
