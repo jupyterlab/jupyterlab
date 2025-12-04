@@ -65,9 +65,7 @@ export class ModalCommandPalette extends Panel {
     this.hide();
     this._commandPalette.inputNode.value = '';
     this._commandPalette.refresh();
-    if (this._options.restore) {
-      this._options.restore();
-    }
+    this._options.restore?.();
   }
 
   /**
