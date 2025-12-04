@@ -18,9 +18,7 @@ import {
   EventManager,
   IConfigSectionManager,
   IConnectionStatus,
-  IContentProvider,
   IContentsManager,
-  IDefaultContentProvider,
   IDefaultDrive,
   IEventManager,
   IKernelManager,
@@ -39,7 +37,6 @@ import {
   KernelSpecManager,
   NbConvert,
   NbConvertManager,
-  RestContentProvider,
   ServerConnection,
   ServiceManager,
   ServiceManagerPlugin,
@@ -108,27 +105,6 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
       defaultDrive,
       serverSettings
     });
-  }
-};
-
-/**
- * The default IContentProvider plugin.
- *
- * @deprecated Since 4.5.1
- */
-const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
-  id: '@jupyterlab/services-extension:default-content-provider',
-  description: 'The default content provider for the contents manager.',
-  autoStart: true,
-  provides: IDefaultContentProvider,
-  optional: [IServerSettings],
-  activate: (
-    _: null,
-    serverSettings: ServerConnection.ISettings | null
-  ): IContentProvider => {
-    const apiEndpoint = 'api/contents';
-    serverSettings = serverSettings ?? ServerConnection.makeSettings();
-    return new RestContentProvider({ serverSettings, apiEndpoint });
   }
 };
 
@@ -420,7 +396,6 @@ export default [
   connectionStatusPlugin,
   contentsManagerPlugin,
   defaultDrivePlugin,
-  defaultContentProvider,
   eventManagerPlugin,
   kernelManagerPlugin,
   kernelSpecManagerPlugin,
