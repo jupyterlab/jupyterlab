@@ -65,11 +65,11 @@ class AdvancedOptionDialogBody
     super();
     const trans = translator.load('jupyterlab');
 
-    this.addClass('jp-AdvancedOptionDialogBody');
+    this.addClass('jp-Shortcuts-AdvancedOptionDialogBody');
 
     // Create main container
     const container = document.createElement('div');
-    container.className = 'jp-AdvancedOptionDialog-container';
+    container.className = 'jp-Shortcuts-AdvancedOptionDialog-container';
 
     // Selector section
     const selectorLabel = document.createElement('label');

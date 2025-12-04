@@ -157,7 +157,7 @@ export class ShortcutItem extends React.Component<
         {this.props.shortcut.userDefined &&
         this.props.external.editorFactory ? (
           <Button
-            className="jp-mod-styled jp-mod-reject"
+            className="jp-mod-styled jp-mod-reject jp-Shortcuts-AdvancedOptions"
             onClick={async () => {
               if (!this.props.external.editorFactory) {
                 console.error('Cannot build the advanced options form');
