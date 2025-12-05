@@ -63,7 +63,7 @@ export namespace PageConfig {
           fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
         }
         if (fullPath) {
-          // Force Webpack to ignore this require.
+          // Force Rspack to ignore this require and not treat it as requiring a package.
           // eslint-disable-next-line
           configData = eval('require')(fullPath) as { [key: string]: string };
         }

@@ -12,7 +12,7 @@ __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 const styles = import('./build/style.js');
 
 // These extension and mimeExtension imports should match the list of extensions in package.json. They are listed
-// separately in package.json so the webpack config Build.ensureAssets step can copy
+// separately in package.json so the rspack config Build.ensureAssets step can copy
 // extension assets to the build directory. These import statements assume
 // the JupyterLab plugins are the default export from each package.
 const extensions = [

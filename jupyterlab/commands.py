@@ -46,9 +46,10 @@ from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.jlpmapp import HERE, YARN_PATH
 from jupyterlab.semver import Range, gt, gte, lt, lte, make_semver
 
-# The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
-
+# The regex for expecting the rspack output.
+# TODO: check if we can just keep the theme.css regex like is commented below
+# RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css")
+RSPACK_EXPECT = re.compile(r".*theme-light-extension/style/theme.css|Rspack compiled")
 
 # The repo root directory
 REPO_ROOT = osp.abspath(osp.join(HERE, ".."))
@@ -328,12 +329,12 @@ def watch_dev(logger=None):
 
     package_procs = watch_packages(logger)
 
-    # Run webpack watch and wait for compilation.
+    # Run rspack watch and wait for compilation.
     wp_proc = WatchHelper(
         ["node", YARN_PATH, "run", "watch"],
         cwd=DEV_DIR,
         logger=logger,
-        startup_regex=WEBPACK_EXPECT,
+        startup_regex=RSPACK_EXPECT,
     )
 
     return [*package_procs, wp_proc]
@@ -782,7 +783,7 @@ class _AppHandler:
         proc = WatchHelper(
             ["node", YARN_PATH, "run", "watch"],
             cwd=pjoin(self.app_dir, "staging"),
-            startup_regex=WEBPACK_EXPECT,
+            startup_regex=RSPACK_EXPECT,
             logger=self.logger,
         )
         return [proc]
@@ -1453,6 +1454,15 @@ class _AppHandler:
 
         # Handle splicing of packages
         if splice_source:
+            # Get devDependencies from the source_dir package.json
+            source_pkg_path = pjoin(source_dir, "package.json")
+            with open(source_pkg_path) as fid:
+                source_data = json.load(fid)
+            data["devDependencies"] = source_data["devDependencies"]
+
+            # Handle potential changes in the scripts sections
+            data["scripts"] = source_data["scripts"]
+
             # Splice workspace tree as linked dependencies
             for path in glob(pjoin(REPO_ROOT, "packages", "*", "package.json")):
                 local_path = osp.dirname(osp.abspath(path))

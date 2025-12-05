@@ -4,7 +4,7 @@
  */
 
 const path = require('path');
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 
 module.exports = {
   entry: ['./build/index.js'],
@@ -15,7 +15,13 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      {
+        test: /\.css$/,
+        exclude: /\.raw\.css$/,
+        type: 'javascript/auto',
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
+      },
+      { test: /\.raw\.css$/, type: 'asset/source' },
       { test: /\.md$/, type: 'asset/source' },
       { test: /\.txt$/, type: 'asset/source' },
       {
@@ -52,9 +58,12 @@ module.exports = {
   },
   bail: true,
   plugins: [
-    new webpack.DefinePlugin({
+    new rspack.DefinePlugin({
       // Needed for various packages using cwd(), like the path polyfill
       process: { cwd: () => '/', env: {} }
+    }),
+    new rspack.CssExtractRspackPlugin({
+      filename: '[name].[contenthash:8].css'
     })
   ]
 };

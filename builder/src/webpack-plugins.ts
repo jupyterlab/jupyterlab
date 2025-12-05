@@ -5,7 +5,7 @@
 
 import DuplicatePackageCheckerPlugin from 'duplicate-package-checker-webpack-plugin';
 import * as fs from 'fs-extra';
-import * as webpack from 'webpack';
+import * as rspack from '@rspack/core';
 import { LicenseWebpackPlugin } from 'license-webpack-plugin';
 import { LicenseIdentifiedModule } from 'license-webpack-plugin/dist/LicenseIdentifiedModule';
 import { PluginOptions } from 'license-webpack-plugin/dist/PluginOptions';
@@ -26,7 +26,7 @@ export namespace WPPlugin {
       this._first = true;
     }
 
-    apply(compiler: webpack.Compiler): void {
+    apply(compiler: rspack.Compiler): void {
       compiler.hooks.afterEmit.tap('FrontEndPlugin', () => {
         // bail if no staticDir
         if (!this.staticDir) {
@@ -125,6 +125,15 @@ export namespace WPPlugin {
             fileTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
           return fileTimestamps;
+        },
+        getInfo: () => {
+          const info = watcher.getInfo();
+          return {
+            changes: info.changes,
+            removals: info.removals,
+            fileTimeInfoEntries: info.fileTimeInfoEntries,
+            contextTimeInfoEntries: info.contextTimeInfoEntries
+          };
         }
       };
     }
@@ -134,7 +143,7 @@ export namespace WPPlugin {
   }
 
   /**
-   * A WebPack Plugin that ignores files files that are filtered
+   * A WebPack Plugin that ignores files that are filtered
    * by a callback during a `--watch` build
    */
   export class FilterWatchIgnorePlugin {
@@ -142,7 +151,7 @@ export namespace WPPlugin {
       this.ignored = ignored;
     }
 
-    apply(compiler: webpack.Compiler): void {
+    apply(compiler: rspack.Compiler): void {
       compiler.hooks.afterEnvironment.tap('FilterWatchIgnorePlugin', () => {
         compiler.watchFileSystem = new FilterIgnoringWatchFileSystem(
           compiler.watchFileSystem,
@@ -155,7 +164,7 @@ export namespace WPPlugin {
   }
 
   export class NowatchDuplicatePackageCheckerPlugin extends DuplicatePackageCheckerPlugin {
-    apply(compiler: webpack.Compiler): void {
+    apply(compiler: rspack.Compiler): void {
       const options = this.options;
 
       compiler.hooks.run.tap(
@@ -242,7 +251,7 @@ export namespace WPPlugin {
       for (const mod of modules) {
         report.packages.push({
           name: mod.name || '',
-          versionInfo: mod.packageJson.version || '',
+          versionInfo: mod.packageJson?.version || '',
           licenseId: mod.licenseId || '',
           extractedText: mod.licenseText || ''
         });

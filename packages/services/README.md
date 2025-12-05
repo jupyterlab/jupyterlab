@@ -91,7 +91,7 @@ jupyter lab
 
 Follow the package install instructions first.
 
-See `examples/browser` for an example of using Webpack to bundle the library.
+See `examples/browser` for an example of using Rspack to bundle the library.
 
 ## Usage from Node.js
 

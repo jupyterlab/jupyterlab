@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
@@ -18,6 +18,7 @@ module.exports = {
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.raw\.css$/, type: 'asset/source' },
       { test: /\.html$/, type: 'asset/resource' },
       { test: /\.md$/, type: 'asset/source' },
       { test: /\.js.map$/, type: 'asset/resource' },
@@ -25,9 +26,12 @@ module.exports = {
         // In .css files, svg is loaded as a data URI.
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.css$/,
-        type: 'asset/inline',
+        type: 'asset',
         generator: {
-          dataUrl: content => miniSVGDataURI(content.toString())
+          dataUrl: {
+            content: content => miniSVGDataURI(content.content),
+            mimetype: 'image/svg+xml'
+          }
         }
       },
       {
@@ -44,7 +48,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.DefinePlugin({
+    new rspack.DefinePlugin({
       // Needed for various packages using cwd(), like the path polyfill
       process: { cwd: () => '/', env: {} }
     })
