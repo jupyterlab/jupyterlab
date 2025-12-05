@@ -1147,6 +1147,11 @@ export class Drive implements Contents.IDrive {
     this._apiEndpoint = options.apiEndpoint ?? SERVICE_DRIVE_URL;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
+    this._restContentProvider = new RestContentProvider({
+      ...options,
+      apiEndpoint: this._apiEndpoint,
+      serverSettings: this.serverSettings
+    });
 
     if (options.defaultContentProvider) {
       this.contentProviderRegistry = new ContentProviderRegistry({
@@ -1227,27 +1232,7 @@ export class Drive implements Contents.IDrive {
       return contentProvider.get(localPath, options);
     }
 
-    let url = this._getUrl(localPath);
-    if (options) {
-      // The notebook type cannot take a format option.
-      if (options.type === 'notebook') {
-        delete options['format'];
-      }
-      const content = options.content ? '1' : '0';
-      const hash = options.hash ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content, hash };
-      url += URLExt.objectToQueryString(params);
-    }
-
-    const settings = this.serverSettings;
-    const response = await ServerConnection.makeRequest(url, {}, settings);
-    if (response.status !== 200) {
-      const err = await ServerConnection.ResponseError.create(response);
-      throw err;
-    }
-    const data = await response.json();
-    validate.validateContentsModel(data);
-    return data;
+    return await this._restContentProvider.get(localPath, options);
   }
 
   /**
@@ -1415,23 +1400,7 @@ export class Drive implements Contents.IDrive {
     if (contentProvider) {
       data = await contentProvider.save(localPath, options);
     } else {
-      const settings = this.serverSettings;
-      const url = this._getUrl(localPath);
-      const file = new File([JSON.stringify(options)], 'data.json', {
-        type: 'application/json'
-      });
-      const init = {
-        method: 'PUT',
-        body: file
-      };
-      const response = await ServerConnection.makeRequest(url, init, settings);
-      // will return 200 for an existing file and 201 for a new file
-      if (response.status !== 200 && response.status !== 201) {
-        const err = await ServerConnection.ResponseError.create(response);
-        throw err;
-      }
-      data = await response.json();
-      validate.validateContentsModel(data);
+      data = await this._restContentProvider.save(localPath, options);
     }
 
     this._fileChanged.emit({
@@ -1610,6 +1579,7 @@ export class Drive implements Contents.IDrive {
     return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
   }
 
+  private _restContentProvider: RestContentProvider;
   private _apiEndpoint: string;
   private _isDisposed = false;
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
@@ -1785,7 +1755,6 @@ export namespace ContentProviderRegistry {
 
 /**
  * A content provider using the Jupyter REST API.
- * @deprecated You should depend on the IDefaultDrive if you want to call REST content APIs
  */
 export class RestContentProvider implements IContentProvider {
   constructor(options: RestContentProvider.IOptions) {
