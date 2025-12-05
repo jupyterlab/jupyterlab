@@ -6,6 +6,18 @@
 
 # Extension Migration Guide
 
+## JupyterLab 4.5 to 4.6 (not released yet)
+
+### Building extensions with Rspack
+
+In the upcoming 4.6, JupyterLab will use [Rspack](https://rspack.rs/) instead of
+[Webpack](https://webpack.js.org/) to build extensions. Since Rspack strives for
+compatibility with Webpack, no changes should be needed in most extensions and
+extensions built with either system should interoperate with each other.
+However, if an extension uses the experimental {ref}`webpackConfig` option, it
+may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
+Webpack config to Rspack.
+
 ## JupyterLab 4.4 to 4.5
 
 ### File Browser updates
