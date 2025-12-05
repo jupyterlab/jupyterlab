@@ -29,8 +29,8 @@ const FilterBox = (props: IFilterBoxProps) => {
   };
   return (
     <Search
-      onChange={onFilterChange}
-      placeholder={props.trans.__('Filter the kernel sources')}
+      onInput={onFilterChange}
+      placeholder={props.trans.__('Filter sources')}
       value={props.model.filter}
     />
   );

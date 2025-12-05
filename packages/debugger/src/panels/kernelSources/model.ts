@@ -114,7 +114,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   private getFilteredKernelSources() {
-    const regexp = new RegExp(this._filter);
+    const regexp = new RegExp(this._filter, 'i');
     return this._kernelSources!.filter(module => regexp.test(module.name));
   }
 
