@@ -52,7 +52,8 @@
     "@lumino/algorithm": "^2.0.4",
     "@lumino/commands": "^2.3.3",
     "@lumino/disposable": "^2.1.5",
-    "@lumino/widgets": "^2.7.2"
+    "@lumino/widgets": "^2.7.2",
+    "@jupyterlab/terminal": "~4.5.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

@@ -72,6 +72,7 @@ import {
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
+import { ITerminalTracker } from '@jupyterlab/terminal';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -490,12 +491,18 @@ const openInTerminalPlugin: JupyterFrontEndPlugin<void> = {
   description:
     'Adds a context menu item to open a terminal in the file browser directory.',
   requires: [IFileBrowserFactory, ITranslator],
+  optional: [ITerminalTracker],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     factory: IFileBrowserFactory,
-    translator: ITranslator
+    translator: ITranslator,
+    terminalTracker: ITerminalTracker | null
   ): void => {
+    if (!terminalTracker || !app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
+
     const { commands } = app;
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
@@ -528,8 +535,11 @@ const openInTerminalPlugin: JupyterFrontEndPlugin<void> = {
           if (terminal) {
             app.shell.activateById(terminal.id);
           }
-        } catch (e) {
-          console.error(`Failed to open terminal in '${path}'`, e);
+        } catch (error) {
+          void showErrorMessage(
+            trans.__('Failed to open new terminal'),
+            error as Error
+          );
         }
       },
       describedBy: {
