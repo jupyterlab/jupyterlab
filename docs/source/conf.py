@@ -200,6 +200,7 @@ PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
 PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.md"
+TOKENS_BLACKLIST = ['@jupyterlab/services-extension:default-content-provider']
 
 
 def _clean_command_data(command: dict) -> None:
@@ -345,6 +346,9 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     template = ""
 
     for _name, _description in items.items():
+        if _name in TOKENS_BLACKLIST:
+            continue
+
         # Normalize line continuation indentation to 2 spaces (prettier standard for markdown lists)
         _description = _description.replace("\n    ", "\n  ")
         template += f"- `{_name}`: {_description}\n"
