@@ -116,7 +116,6 @@ const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
   description: 'The default drive for the contents manager.',
   autoStart: true,
   provides: IDefaultDrive,
-  requires: [],
   optional: [IServerSettings],
   activate: (
     _: null,
