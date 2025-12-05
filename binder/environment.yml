@@ -7,7 +7,7 @@ channels:
 dependencies:
   # runtimes
   - nodejs >=20,<21
-  - python =3.11
+  - python =3.14
   # package managers
   - pip
   - yarn >=3,<4
