@@ -23,6 +23,8 @@ import { Variables as VariablesPanel } from './panels/variables';
 
 import { IDebugger } from './tokens';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 /**
  * A debugger sidebar.
  */
@@ -46,7 +48,14 @@ export class DebuggerSidebar extends SidePanel {
       service,
       themeManager
     } = options;
+
     const model = service.model;
+    this._sourcesOptions = {
+      model: model.sources,
+      service,
+      editorServices,
+      translator
+    };
 
     this.variables = new VariablesPanel({
       model: model.variables,
@@ -69,12 +78,7 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    this.sources = new SourcesPanel({
-      model: model.sources,
-      service,
-      editorServices,
-      translator
-    });
+    //this.sources = new SourcesPanel(this._sourcesOptions);
 
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
@@ -94,8 +98,32 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.variables);
     this.addWidget(this.callstack);
     this.addWidget(this.breakpoints);
-    this.addWidget(this.sources);
     this.addWidget(this.kernelSources);
+  }
+
+  get showSourcesPanel(): boolean {
+    return this._showSourcesPanel;
+  }
+
+  set showSourcesPanel(value: boolean) {
+    if (value === this._showSourcesPanel) {
+      return;
+    }
+
+    this._showSourcesPanel = value;
+
+    if (value) {
+      // ShowSourcesPanel is true => ensure widget exists
+      if (!this.sources || this.sources.isDisposed) {
+        this.sources = new SourcesPanel(this._sourcesOptions);
+        this.addWidget(this.sources);
+      }
+    } else {
+      // ShowSourcesPanel is false => remove widget if present
+      if (this.sources && !this.sources.isDisposed) {
+        this.sources.dispose();
+      }
+    }
   }
 
   /**
@@ -116,9 +144,13 @@ export class DebuggerSidebar extends SidePanel {
   /**
    * The sources widget.
    */
-  readonly sources: SourcesPanel;
+  sources: SourcesPanel;
 
   readonly kernelSources: KernelSourcesPanel;
+
+  private _showSourcesPanel: boolean;
+
+  private _sourcesOptions: SourcesPanel.IOptions;
 }
 
 /**
@@ -148,6 +180,11 @@ export namespace DebuggerSidebar {
      * The editor services.
      */
     editorServices: IEditorServices;
+
+    /**
+     * Settings from the setting registry
+     */
+    settings?: ISettingRegistry.ISettings | null;
 
     /**
      * An optional application theme manager to detect theme changes.
