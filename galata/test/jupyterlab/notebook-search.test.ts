@@ -187,8 +187,10 @@ test.describe('Notebook Search', () => {
           range.setEnd(node, endIndex);
 
           const selection = window.getSelection();
-          selection?.removeAllRanges();
-          selection?.addRange(range);
+          if (selection) {
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
           break;
         }
       }
@@ -209,7 +211,7 @@ test.describe('Notebook Search', () => {
     });
 
     // Expect that the search found a match.
-    await page.locator('text=1/1').waitFor();
+    await page.locator('text=2/2').waitFor();
   });
 
   test('Restore previous search query if there is no selection', async ({
