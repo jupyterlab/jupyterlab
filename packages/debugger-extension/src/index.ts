@@ -825,6 +825,8 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       translator
     });
 
+    sidebar.showSourcesPanel = false;
+
     if (settingRegistry) {
       const settings = await settingRegistry.load(main.id);
 

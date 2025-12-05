@@ -78,8 +78,6 @@ export class DebuggerSidebar extends SidePanel {
       translator
     });
 
-    //this.sources = new SourcesPanel(this._sourcesOptions);
-
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
       service,
@@ -101,6 +99,12 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.kernelSources);
   }
 
+  updateSourceCode() {
+    console.log('Updating source code...');
+    const source = this._sourcesOptions.model.currentSource;
+    console.log('Source code:', source);
+  }
+
   get showSourcesPanel(): boolean {
     return this._showSourcesPanel;
   }
@@ -114,6 +118,7 @@ export class DebuggerSidebar extends SidePanel {
 
     if (value) {
       // ShowSourcesPanel is true => ensure widget exists
+
       if (!this.sources || this.sources.isDisposed) {
         this.sources = new SourcesPanel(this._sourcesOptions);
         this.addWidget(this.sources);
