@@ -1492,6 +1492,9 @@ export namespace NotebookActions {
             typeof cell.id === 'string'
               ? cell.id
               : undefined;
+          if (cell.metadata.hasOwnProperty('execution')) {
+            delete cell.metadata['execution'];
+          }
           return cell;
         })
       );
