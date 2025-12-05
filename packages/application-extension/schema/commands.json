@@ -291,6 +291,10 @@
                   "rank": 0
                 },
                 {
+                  "command": "application:toggle-main-menu",
+                  "rank": 5
+                },
+                {
                   "command": "application:toggle-fullscreen-mode",
                   "rank": 0
                 },
