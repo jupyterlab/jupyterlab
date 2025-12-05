@@ -37,13 +37,13 @@
       "path": "../statusbar"
     },
     {
+      "path": "../terminal"
+    },
+    {
       "path": "../translation"
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../terminal"
     }
   ]
 }
