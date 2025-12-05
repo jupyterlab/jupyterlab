@@ -5,6 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { NumberField } from '@jupyter/react-components';
 import type { FieldProps } from '@rjsf/utils';
 import React, { useState } from 'react';
 
@@ -61,12 +62,14 @@ export function renderAvailableProviders(props: FieldProps): JSX.Element {
               <div>
                 <h3> {key}</h3>
                 <div className="inputFieldWrapper">
-                  <input
+                  <NumberField
                     className="form-control"
-                    type="number"
                     value={settingValue[key]}
-                    onChange={e => {
-                      onSettingChange(key, e);
+                    onChange={(e: any) => {
+                      onSettingChange(
+                        key,
+                        e as React.ChangeEvent<HTMLInputElement>
+                      );
                     }}
                   />
                 </div>
