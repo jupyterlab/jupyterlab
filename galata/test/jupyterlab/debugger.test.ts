@@ -337,7 +337,7 @@ test.describe('Debugger Variables', () => {
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
 
-    await page.notebook.setCell(0, 'code', 'a = 123');
+    await page.notebook.setCell(0, 'code', 'import math');
     await page.notebook.runCell(0);
 
     await page.debugger.waitForSources();
@@ -345,8 +345,10 @@ test.describe('Debugger Variables', () => {
     const sourcesPanel = await page.debugger.getSourcePanelLocator();
     const items = sourcesPanel.locator('.jp-DebuggerKernelSource-item');
 
-    const count = await items.count();
-    expect(count).toBeGreaterThan(0);
+    expect(await items.count()).toBeGreaterThan(0);
+
+    const mathEntry = items.filter({ hasText: 'math' });
+    expect(await mathEntry.count()).toBeGreaterThan(0);
   });
 });
 
