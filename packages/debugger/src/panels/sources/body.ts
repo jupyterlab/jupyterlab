@@ -27,6 +27,7 @@ export class SourcesBody extends Widget {
    */
   constructor(options: SourcesBody.IOptions) {
     super();
+    console.log('You are in the beginning of the constructor');
     this._model = options.model;
     this._debuggerService = options.service;
 
@@ -39,6 +40,7 @@ export class SourcesBody extends Widget {
       mimeType: '',
       path: ''
     });
+
     this._editor.hide();
 
     void this._showSource();
