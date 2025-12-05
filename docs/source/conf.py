@@ -200,7 +200,7 @@ PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
 PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.md"
-TOKENS_BLACKLIST = ['@jupyterlab/services-extension:default-content-provider']
+TOKENS_BLACKLIST = ["@jupyterlab/services-extension:default-content-provider"]
 
 
 def _clean_command_data(command: dict) -> None:
