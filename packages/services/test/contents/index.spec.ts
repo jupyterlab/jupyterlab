@@ -1340,8 +1340,6 @@ describe('drive', () => {
           format: null
         };
       }
-
-      drive: Contents.IDrive;
     }
 
     class ChangeEmittingContentProvider extends DummyContentProvider {
