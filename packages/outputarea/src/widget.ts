@@ -177,6 +177,13 @@ export class OutputArea extends Widget {
   readonly outputLengthChanged = new Signal<this, number>(this);
 
   /**
+   * A static signal that emits when a page payload is requested.
+   */
+  static pageRequested = new Signal<typeof OutputArea, OutputArea.IPageRequest>(
+    OutputArea
+  );
+
+  /**
    * The kernel future associated with the output area.
    */
   get future(): Kernel.IShellFuture<
@@ -797,10 +804,18 @@ export class OutputArea extends Widget {
     if (!pages.length) {
       return;
     }
-    const page = JSON.parse(JSON.stringify(pages[0]));
+
+    const page = pages[0];
+    const request: OutputArea.IPageRequest = { payload: page, handled: false };
+    OutputArea.pageRequested.emit(request);
+    if (request.handled) {
+      return;
+    }
+
+    const pageData = JSON.parse(JSON.stringify(page));
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data: (pageData as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -930,6 +945,22 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
+  }
+
+  /**
+   * payload request for a 'page' source.
+   */
+  export interface IPageRequest {
+    /**
+     * The message content payload.
+     */
+    payload: any;
+
+    /**
+     * Whether the request has been handled.
+     * If true, the output area will skip default rendering.
+     */
+    handled: boolean;
   }
 
   /**
