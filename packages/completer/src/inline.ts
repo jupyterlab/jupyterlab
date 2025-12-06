@@ -210,6 +210,7 @@ export class InlineCompleter extends Widget {
     this._maxLines = settings.maxLines;
     this._reserveSpaceForLongest = settings.reserveSpaceForLongest;
     this._suppressIfTabCompleterActive = settings.suppressIfTabCompleterActive;
+    GhostTextManager.ghostSyntaxHighlighting = settings.ghostSyntaxHighlighting;
   }
 
   /**
@@ -584,6 +585,7 @@ export namespace InlineCompleter {
     showWidget: 'onHover',
     showShortcuts: true,
     streamingAnimation: 'uncover',
+    ghostSyntaxHighlighting: false,
     providers: {},
     minLines: 2,
     maxLines: 4,
