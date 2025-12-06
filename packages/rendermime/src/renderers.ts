@@ -842,6 +842,16 @@ function nativeSanitize(source: string): string {
 const ansiPrefix = '\x1b';
 
 /**
+ * Enum used exclusively for static analysis to ensure that each
+ * branch in `renderFrame` leads to explicit rendering decision.
+ */
+enum RenderingResult {
+  stop,
+  delay,
+  continue
+}
+
+/**
  * Render the textual representation into a host node.
  *
  * Implements the shared logic for `renderText` and `renderError`.
@@ -853,84 +863,250 @@ function renderTextual(
   // Unpack the options.
   const { host, sanitizer, source } = options;
 
-  const hasAnsiPrefix = source.includes(ansiPrefix);
+  // We want to only manipulate DOM once per animation frame whether
+  // the autolink is enabled or not, because a stream can also choke
+  // rendering pipeline even if autolink is disabled. This acts as
+  // an effective debouncer which matches the refresh rate of the
+  // screen.
+  Private.cancelRenderingRequest(host);
 
-  // Create the HTML content:
-  // If no ANSI codes are present use a fast path for escaping.
-  const content = hasAnsiPrefix
-    ? sanitizer.sanitize(Private.ansiSpan(source), {
-        allowedTags: ['span']
-      })
-    : nativeSanitize(source);
+  // Stop rendering after 10 minutes (assuming 60 Hz)
+  const maxIterations = 60 * 60 * 10;
+  let iteration = 0;
 
-  // Set the sanitized content for the host node.
-  const pre = document.createElement('pre');
-  pre.innerHTML = content;
+  let fullPreTextContent: string | null = null;
+  let pre: HTMLPreElement;
 
-  const preTextContent = pre.textContent;
+  let isVisible = false;
+  isVisible = true;
 
-  const cacheStoreOptions = [];
-  if (autoLinkOptions.checkWeb) {
-    cacheStoreOptions.push('web');
-  }
-  if (autoLinkOptions.checkPaths) {
-    cacheStoreOptions.push('paths');
-  }
-  const cacheStoreKey = cacheStoreOptions.join('-');
-  let cacheStore = Private.autoLinkCache.get(cacheStoreKey);
-  if (!cacheStore) {
-    cacheStore = new WeakMap();
-    Private.autoLinkCache.set(cacheStoreKey, cacheStore);
-  }
-
-  let ret: HTMLPreElement;
-  if (preTextContent) {
-    // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
-    let linkedNodes: (HTMLAnchorElement | Text)[];
-    if (sanitizer.getAutolink?.() ?? true) {
-      const cache = getApplicableLinkCache(
-        cacheStore.get(host),
-        preTextContent
-      );
-      if (cache) {
-        const { cachedNodes: fromCache, addedText } = cache;
-        const newAdditions = autolink(addedText, autoLinkOptions);
-        const lastInCache = fromCache[fromCache.length - 1];
-        const firstNewNode = newAdditions[0];
-
-        if (lastInCache instanceof Text && firstNewNode instanceof Text) {
-          const joiningNode = lastInCache;
-          joiningNode.data += firstNewNode.data;
-          linkedNodes = [
-            ...fromCache.slice(0, -1),
-            joiningNode,
-            ...newAdditions.slice(1)
-          ];
-        } else {
-          linkedNodes = [...fromCache, ...newAdditions];
+  // We will use the observer to pause rendering if the element
+  // is not visible; this is helpful when opening a notebook
+  // with a large number of large textual outputs.
+  let observer: IntersectionObserver | null = null;
+  if (typeof IntersectionObserver !== 'undefined') {
+    observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          isVisible = entry.isIntersecting;
+          if (isVisible) {
+            wasEverVisible = true;
+          }
         }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(host);
+  }
+  let wasEverVisible = false;
+  wasEverVisible = true;
+
+  const stopRendering = () => {
+    // Remove the host from rendering queue
+    Private.removeFromQueue(host);
+    // Disconnect the intersection observer.
+    observer?.disconnect();
+    return RenderingResult.stop;
+  };
+
+  const continueRendering = () => {
+    iteration += 1;
+    Private.scheduleRendering(host, renderFrame);
+    return RenderingResult.continue;
+  };
+
+  const delayRendering = () => {
+    Private.scheduleRendering(host, renderFrame);
+    return RenderingResult.delay;
+  };
+
+  const renderFrame = (timestamp: number): RenderingResult => {
+    if (!host.isConnected) {
+      // Abort rendering if host is no longer in DOM; note, that even in
+      // full windowing notebook mode the output nodes are never removed,
+      // but instead the cell gets hidden (usually with `display: none`
+      // or in case of the active cell - opacity tricks).
+      if (!wasEverVisible) {
+        // If the host was never visible, it means it was not yet
+        // attached when loading notebook for the first time.
+        return delayRendering();
       } else {
-        linkedNodes = autolink(preTextContent, autoLinkOptions);
+        return stopRendering();
       }
+    }
+
+    // Delay rendering of this output if the output is not visible due to
+    // scrolling away in full windowed notebook mode, or if another output
+    // should be rendered first.
+    // Note: cannot use `checkVisibility` as it triggers style recalculation
+    // before we appended the new nodes from the stream, which leads to layout
+    // trashing. Instead we use intersection observer
+    if (!isVisible || !Private.canRenderInFrame(timestamp, host)) {
+      return delayRendering();
+    }
+
+    const start = performance.now();
+    Private.beginRendering(host);
+
+    if (fullPreTextContent === null) {
+      const hasAnsiPrefix = source.includes(ansiPrefix);
+
+      // Create the HTML content:
+      // If no ANSI codes are present use a fast path for escaping.
+      const content = hasAnsiPrefix
+        ? sanitizer.sanitize(Private.ansiSpan(source), {
+            allowedTags: ['span']
+          })
+        : nativeSanitize(source);
+
+      // Set the sanitized content for the host node.
+      pre = document.createElement('pre');
+      pre.innerHTML = content;
+
+      const maybePreTextContent = pre.textContent;
+
+      if (!maybePreTextContent) {
+        // Short-circuit if there is no content to auto-link
+        host.replaceChildren(pre);
+        return stopRendering();
+      }
+      fullPreTextContent = maybePreTextContent;
+    }
+
+    const shouldAutoLink = sanitizer.getAutolink?.() ?? true;
+
+    if (!shouldAutoLink) {
+      host.replaceChildren(pre.cloneNode(true));
+      return stopRendering();
+    }
+    const cacheStore = Private.getCacheStore(autoLinkOptions);
+    const cache = cacheStore.get(host);
+    const applicableCache = getApplicableLinkCache(cache, fullPreTextContent);
+    const hasCache = cache && applicableCache;
+    if (iteration > 0 && !hasCache) {
+      throw Error('Each iteration should set cache!');
+    }
+
+    let alreadyAutoLinked = hasCache ? applicableCache.processedText : '';
+    let toBeAutoLinked = hasCache
+      ? applicableCache.addedText
+      : fullPreTextContent;
+    let moreWorkToBeDone: boolean;
+
+    const budget = 10;
+    let linkedNodes: (HTMLAnchorElement | Text)[];
+    let elapsed: number;
+    let newRequest: number | undefined;
+
+    do {
+      // find first space (or equivalent) which follows a non-space character.
+      const breakIndex = toBeAutoLinked.search(/(?<=\S)\s/);
+
+      const before =
+        breakIndex === -1
+          ? toBeAutoLinked
+          : toBeAutoLinked.slice(0, breakIndex);
+      const after = breakIndex === -1 ? '' : toBeAutoLinked.slice(breakIndex);
+      const fragment = alreadyAutoLinked + before;
+      linkedNodes = incrementalAutoLink(
+        cacheStore,
+        options,
+        autoLinkOptions,
+        fragment
+      );
+      alreadyAutoLinked = fragment;
+      toBeAutoLinked = after;
+      moreWorkToBeDone = toBeAutoLinked != '';
+      elapsed = performance.now() - start;
+      newRequest = Private.hasNewRenderingRequest(host);
+    } while (elapsed < budget && moreWorkToBeDone && !newRequest);
+
+    // Note: we set `keepExisting` to `true` in `IRenderMime.IRenderer`s which
+    // use this method to ensure that the previous node is not removed from DOM
+    // when new chunks of data comes from the stream.
+    if (linkedNodes.length === 1 && linkedNodes[0] instanceof Text) {
+      if (host.childNodes.length === 1 && host.childNodes[0] === pre) {
+        // no-op
+      } else {
+        Private.replaceChangedNodes(host, pre);
+      }
+    } else {
+      // Persist nodes in cache by cloning them
       cacheStore.set(host, {
-        preTextContent,
+        preTextContent: alreadyAutoLinked,
         // Clone the nodes before storing them in the cache in case if another component
         // attempts to modify (e.g. dispose of) them - which is the case for search highlights!
         linkedNodes: linkedNodes.map(
           node => node.cloneNode(true) as HTMLAnchorElement | Text
         )
       });
-    } else {
-      linkedNodes = [document.createTextNode(content)];
+
+      const preNodes = Array.from(pre.cloneNode(true).childNodes) as (
+        | Text
+        | HTMLSpanElement
+      )[];
+      const node = mergeNodes(preNodes, [
+        ...linkedNodes,
+        document.createTextNode(toBeAutoLinked)
+      ]);
+
+      Private.replaceChangedNodes(host, node);
     }
 
-    const preNodes = Array.from(pre.childNodes) as (Text | HTMLSpanElement)[];
-    ret = mergeNodes(preNodes, linkedNodes);
-  } else {
-    ret = document.createElement('pre');
-  }
+    // Continue unless:
+    // - no more text needs to be linkified,
+    // - new stream part was received (and new request sent),
+    // - maximum iterations limit was exceeded,
+    if (moreWorkToBeDone && !newRequest && iteration < maxIterations) {
+      return continueRendering();
+    } else {
+      return stopRendering();
+    }
+  };
 
-  host.appendChild(ret);
+  Private.scheduleRendering(host, renderFrame);
+}
+
+function incrementalAutoLink(
+  cacheStore: WeakMap<HTMLElement, IAutoLinkCacheEntry>,
+  options: renderText.IRenderOptions,
+  autoLinkOptions: IAutoLinkOptions,
+  preFragmentToAutoLink: string
+): (HTMLAnchorElement | Text)[] {
+  const { host } = options;
+
+  // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
+  let linkedNodes: (HTMLAnchorElement | Text)[];
+
+  const cache = getApplicableLinkCache(
+    cacheStore.get(host),
+    preFragmentToAutoLink
+  );
+  if (cache) {
+    const { cachedNodes: fromCache, addedText } = cache;
+    const newAdditions = autolink(addedText, autoLinkOptions);
+    const lastInCache = fromCache[fromCache.length - 1];
+    const firstNewNode = newAdditions[0];
+
+    if (lastInCache instanceof Text && firstNewNode instanceof Text) {
+      const joiningNode = lastInCache;
+      joiningNode.data += firstNewNode.data;
+      linkedNodes = [
+        ...fromCache.slice(0, -1),
+        joiningNode,
+        ...newAdditions.slice(1)
+      ];
+    } else {
+      linkedNodes = [...fromCache, ...newAdditions];
+    }
+  } else {
+    linkedNodes = autolink(preFragmentToAutoLink, autoLinkOptions);
+  }
+  cacheStore.set(host, {
+    preTextContent: preFragmentToAutoLink,
+    linkedNodes
+  });
+  return linkedNodes;
 }
 
 /**
@@ -978,6 +1154,7 @@ function getApplicableLinkCache(
 ): {
   cachedNodes: IAutoLinkCacheEntry['linkedNodes'];
   addedText: string;
+  processedText: string;
 } | null {
   if (!cachedResult) {
     return null;
@@ -991,6 +1168,7 @@ function getApplicableLinkCache(
   let cachedNodes = cachedResult.linkedNodes;
   const lastCachedNode =
     cachedResult.linkedNodes[cachedResult.linkedNodes.length - 1];
+  let processedText = cachedResult.preTextContent;
 
   // Only use cached nodes if:
   // - the last cached node is a text node
@@ -1011,6 +1189,12 @@ function getApplicableLinkCache(
     // we need to pass `bbb www.` + `two.com` through linkify again.
     cachedNodes = cachedNodes.slice(0, -1);
     addedText = lastCachedNode.textContent + addedText;
+    processedText = processedText.slice(0, -lastCachedNode.textContent!.length);
+  } else if (lastCachedNode instanceof HTMLAnchorElement) {
+    // TODO: why did I not include this condition before?
+    cachedNodes = cachedNodes.slice(0, -1);
+    addedText = lastCachedNode.textContent + addedText;
+    processedText = processedText.slice(0, -lastCachedNode.textContent!.length);
   } else {
     return null;
   }
@@ -1021,7 +1205,8 @@ function getApplicableLinkCache(
   }
   return {
     cachedNodes,
-    addedText
+    addedText,
+    processedText
   };
 }
 
@@ -1185,13 +1370,338 @@ export function hardenAnchorLinks(
  * The namespace for module implementation details.
  */
 namespace Private {
+  let lastFrameTimestamp: number | null = null;
+
+  /**
+   * Check if frame rendering can proceed in frame identified by timestamp
+   * from the first `requestAnimationFrame` callback argument. This argument
+   * is guaranteed to be the same for multiple requests executed on the same
+   * frame, which allows to limit number of animations to one per frame,
+   * and in turn avoids choking the rendering pipeline by creating tasks
+   * longer than the delta between frames.
+   *
+   * Also, we want to distribute the rendering between outputs to avoid
+   * displaying blank space while waiting for the previous output to be fully rendered.
+   */
+  export function canRenderInFrame(
+    timestamp: number,
+    host: HTMLElement
+  ): boolean {
+    if (lastFrameTimestamp !== timestamp) {
+      // progress queue
+      const last = renderQueue.shift();
+      if (last) {
+        renderQueue.push(last);
+      } else {
+        throw Error('Render queue cannot be empty here!');
+      }
+      lastFrameTimestamp = timestamp;
+    }
+    // check queue
+    if (renderQueue[0] === host) {
+      return true;
+    }
+    return false;
+  }
+
+  const renderQueue = new Array<HTMLElement>();
+  const frameRequests = new WeakMap<HTMLElement, number>();
+
+  export function cancelRenderingRequest(host: HTMLElement) {
+    // do not remove from queue - the expectation is that rendering will resume
+    const previousRequest = frameRequests.get(host);
+    if (previousRequest) {
+      window.cancelAnimationFrame(previousRequest);
+    }
+  }
+
+  export function scheduleRendering(
+    host: HTMLElement,
+    render: (timetamp: number) => void
+  ) {
+    // push at the end of the queue
+    if (!renderQueue.includes(host)) {
+      renderQueue.push(host);
+    }
+    const thisRequest = window.requestAnimationFrame(render);
+    frameRequests.set(host, thisRequest);
+  }
+
+  export function beginRendering(host: HTMLElement) {
+    frameRequests.delete(host);
+  }
+
+  export function removeFromQueue(host: HTMLElement) {
+    const index = renderQueue.indexOf(host);
+    if (index !== -1) {
+      renderQueue.splice(index, 1);
+    }
+  }
+
+  export function hasNewRenderingRequest(host: HTMLElement) {
+    return frameRequests.get(host);
+  }
+
+  /**
+   * Selection offset in character relative to a root node.
+   */
+  interface ISelectionOffsets {
+    /**
+     * Offset of the selection anchor end.
+     */
+    anchor: number | null;
+    /**
+     * Offset of the selection focus end.
+     */
+    focus: number | null;
+  }
+
+  /**
+   * Internal structure used for selection offset computation
+   */
+  interface ISelectionComputation extends ISelectionOffsets {
+    /**
+     * Number of characters already processed
+     * by the recursive DOM traversal algorithm.
+     */
+    processedCharacters: number;
+  }
+
+  /**
+   * Compute the position (anchor and focus) of the given selection
+   * as characters offsets relative to the `root` node.
+   *
+   * For example, given the selection encompassing `am` in the sentence
+   * `I am` we would expect to get anchor and focus with values 2 and 3
+   * (depending on the selection direction). These character offsets are
+   * stable, regardless of the number of DOM nodes encompassing the selection.
+   *
+   * This differs from the DOM-based selection representation used by browsers
+   * where the offsets mean either characters, or position of nodes (depending
+   * on parent node type), and are thus not suitable for retaining selection
+   * when content of the root node is replaced.
+   */
+  function computeSelectionCharacterOffset(
+    root: Node,
+    selection: Selection
+  ): ISelectionComputation {
+    let anchor: number | null = null;
+    let focus: number | null = null;
+    let offset = 0;
+    for (const node of [...root.childNodes]) {
+      if (node === selection.focusNode) {
+        focus = offset + selection.focusOffset;
+      }
+      if (node === selection.anchorNode) {
+        anchor = offset + selection.anchorOffset;
+      }
+      if (node.childNodes.length > 0) {
+        const result = computeSelectionCharacterOffset(node, selection);
+        if (result.anchor) {
+          anchor = offset + result.anchor;
+        }
+        if (result.focus) {
+          focus = offset + result.focus;
+        }
+        offset += result.processedCharacters;
+      } else {
+        offset += node.textContent!.length;
+      }
+      if (anchor && focus) {
+        break;
+      }
+    }
+    return {
+      processedCharacters: offset,
+      anchor,
+      focus
+    };
+  }
+
+  /**
+   * Finds a text node and offset within the given root node
+   * where the selection should be anchored to select exactly
+   * from n-th character given by `textOffset`.
+   */
+  function findTextSelectionNode(
+    root: Node,
+    textOffset: number | null,
+    offset: number = 0
+  ) {
+    if (textOffset !== null) {
+      for (const node of [...root.childNodes]) {
+        // As much as possible avoid calling `textContent` here as it is slower
+        const nodeEnd =
+          node instanceof Text
+            ? node.nodeValue!.length
+            : (node instanceof HTMLAnchorElement
+                ? node.childNodes[0].nodeValue?.length ??
+                  node.textContent?.length
+                : node.textContent?.length) ?? 0;
+        if (textOffset > offset && textOffset < offset + nodeEnd) {
+          if (node instanceof Text) {
+            return { node, positionOffset: textOffset - offset };
+          } else {
+            return findTextSelectionNode(node, textOffset, offset);
+          }
+        } else {
+          offset += nodeEnd;
+        }
+      }
+    }
+    return {
+      node: null,
+      positionOffset: null
+    };
+  }
+
+  /**
+   * Modify given `selection` object to span between the
+   * given selection offsets, within the given `root` node.
+   */
+  function selectByOffsets(
+    root: Node,
+    selection: Selection,
+    offsets: ISelectionOffsets
+  ) {
+    const { node: focusNode, positionOffset: focusOffset } =
+      findTextSelectionNode(root, offsets.focus, 0);
+    const { node: anchorNode, positionOffset: anchorOffset } =
+      findTextSelectionNode(root, offsets.anchor, 0);
+    if (
+      anchorNode &&
+      focusNode &&
+      anchorOffset !== null &&
+      focusOffset !== null
+    ) {
+      selection.setBaseAndExtent(
+        anchorNode,
+        anchorOffset,
+        focusNode,
+        focusOffset
+      );
+    }
+  }
+
+  /**
+   * Replace nodes in `target` using nodes from `source`, minimising DOM operations
+   * and preserving selection (mapped using character offsets) if any.
+   *
+   * In the worst-case scenario (when no optimizations can be applied),
+   * this is equivalent to `target.replaceChildren(source)`. However,
+   * if nodes of the same type and with identical content are found
+   * at the start of the `target` and `source` child list, these are
+   * reused, improving the performance for stream operations.
+   */
+  export function replaceChangedNodes(
+    target: HTMLElement,
+    source: HTMLPreElement
+  ) {
+    const result = checkChangedNodes(target, source);
+    const selection = window.getSelection();
+    const hasSelection = selection && selection.containsNode(target, true);
+    const selectionOffsets = hasSelection
+      ? computeSelectionCharacterOffset(target, selection)
+      : null;
+    const pre = result ? result.parent : source;
+    if (result) {
+      for (const element of result.toDelete) {
+        result.parent.removeChild(element);
+      }
+      result.parent.append(...result.toAppend);
+    } else {
+      target.replaceChildren(source);
+    }
+    // Restore selection - if there is a meaningful one.
+    if (selection && selectionOffsets) {
+      selectByOffsets(pre, selection, selectionOffsets);
+    }
+  }
+
+  /**
+   * Find nodes in `node` which do not have the same content or type and thus need to be appended.
+   */
+  function checkChangedNodes(host: HTMLElement, node: HTMLPreElement) {
+    const oldPre = host.childNodes[0];
+    if (!oldPre) {
+      return;
+    }
+    if (!(oldPre instanceof HTMLPreElement)) {
+      return;
+    }
+    // Normalization at this point should be cheap as the new node is not in the DOM yet.
+    node.normalize();
+    const newNodes = node.childNodes;
+    const oldNodes = oldPre.childNodes;
+
+    if (
+      // This could be generalized to appending a mix of text and non-text
+      // to a block of text too, but for now handles the most common case
+      // of just streaming text.
+      newNodes.length === 1 &&
+      newNodes[0] instanceof Text &&
+      [...oldNodes].every(n => n instanceof Text) &&
+      node.textContent!.startsWith(oldPre.textContent!)
+    ) {
+      const textNodeToAppend = document.createTextNode(
+        node.textContent!.slice(oldPre.textContent!.length)
+      );
+      return {
+        parent: oldPre,
+        toDelete: [],
+        toAppend: [textNodeToAppend]
+      };
+    }
+
+    let lastSharedNode: number = -1;
+    for (let i = 0; i < oldNodes.length; i++) {
+      const oldChild = oldNodes[i];
+      const newChild = newNodes[i];
+      if (
+        newChild &&
+        oldChild.nodeType === newChild.nodeType &&
+        oldChild.textContent === newChild.textContent
+      ) {
+        lastSharedNode = i;
+      } else {
+        break;
+      }
+    }
+
+    if (lastSharedNode === -1) {
+      return;
+    }
+    return {
+      parent: oldPre,
+      toDelete: [...oldNodes].slice(lastSharedNode),
+      toAppend: [...newNodes].slice(lastSharedNode)
+    };
+  }
+
   /**
    * Cache for auto-linking results to provide better performance when streaming outputs.
    */
-  export const autoLinkCache = new Map<
+  const autoLinkCache = new Map<
     string,
     WeakMap<HTMLElement, IAutoLinkCacheEntry>
   >();
+
+  export function getCacheStore(autoLinkOptions: IAutoLinkOptions) {
+    const cacheStoreOptions = [];
+    if (autoLinkOptions.checkWeb) {
+      cacheStoreOptions.push('web');
+    }
+    if (autoLinkOptions.checkPaths) {
+      cacheStoreOptions.push('paths');
+    }
+    const cacheStoreKey = cacheStoreOptions.join('-');
+    let cacheStore = autoLinkCache.get(cacheStoreKey);
+    if (!cacheStore) {
+      cacheStore = new WeakMap();
+      autoLinkCache.set(cacheStoreKey, cacheStore);
+    }
+    return cacheStore;
+  }
 
   /**
    * Eval the script tags contained in a host populated by `innerHTML`.
