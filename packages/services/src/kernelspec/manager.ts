@@ -5,10 +5,11 @@ import { JSONExt } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { BaseManager } from '../basemanager';
 import { ServerConnection } from '../serverconnection';
 import * as KernelSpec from './kernelspec';
-import * as restapi from './restapi';
-import { BaseManager } from '../basemanager';
+import { ISpecModels, KernelSpecAPIClient } from './restapi';
+
 /**
  * An implementation of a kernel spec manager.
  */
@@ -23,6 +24,10 @@ export class KernelSpecManager
    */
   constructor(options: KernelSpecManager.IOptions = {}) {
     super(options);
+
+    this._kernelSpecAPIClient =
+      options.kernelSpecAPIClient ??
+      new KernelSpecAPIClient({ serverSettings: this.serverSettings });
 
     // Initialize internal data.
     this._ready = Promise.all([this.requestSpecs()])
@@ -73,14 +78,14 @@ export class KernelSpecManager
   /**
    * Get the most recently fetched kernel specs.
    */
-  get specs(): restapi.ISpecModels | null {
+  get specs(): ISpecModels | null {
     return this._specs;
   }
 
   /**
    * A signal emitted when the specs change.
    */
-  get specsChanged(): ISignal<this, restapi.ISpecModels> {
+  get specsChanged(): ISignal<this, ISpecModels> {
     return this._specsChanged;
   }
 
@@ -117,7 +122,7 @@ export class KernelSpecManager
    * Execute a request to the server to poll specs and update state.
    */
   protected async requestSpecs(): Promise<void> {
-    const specs = await restapi.getSpecs(this.serverSettings);
+    const specs = await this._kernelSpecAPIClient.get();
     if (this.isDisposed) {
       return;
     }
@@ -133,8 +138,10 @@ export class KernelSpecManager
   private _pollSpecs: Poll;
   private _ready: Promise<void>;
 
-  private _specs: restapi.ISpecModels | null = null;
-  private _specsChanged = new Signal<this, restapi.ISpecModels>(this);
+  private _specs: ISpecModels | null = null;
+  private _specsChanged = new Signal<this, ISpecModels>(this);
+
+  private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
 }
 
 /**
@@ -149,5 +156,10 @@ export namespace KernelSpecManager {
      * When the manager stops polling the API. Defaults to `when-hidden`.
      */
     standby?: Poll.Standby | (() => boolean | Poll.Standby);
+
+    /**
+     * The kernel spec API client.
+     */
+    kernelSpecAPIClient?: KernelSpec.IKernelSpecAPIClient;
   }
 }

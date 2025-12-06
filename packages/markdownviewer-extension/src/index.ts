@@ -158,6 +158,22 @@ function activate(
         factory: FACTORY,
         options: args['options']
       });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('The path to the markdown file to preview')
+          },
+          options: {
+            type: 'object',
+            description: trans.__('Options for opening the preview')
+          }
+        },
+        required: ['path']
+      }
     }
   });
 
@@ -182,7 +198,13 @@ function activate(
         (widget && PathExt.extname(widget.context.path) === '.md') || false
       );
     },
-    label: trans.__('Show Markdown Editor')
+    label: trans.__('Show Markdown Editor'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (tocRegistry) {

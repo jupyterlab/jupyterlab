@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '../serverconnection';
+import { IKernelSpecAPIClient } from './kernelspec';
 import { validateSpecModels } from './validate';
 
 import { URLExt } from '@jupyterlab/coreutils';
@@ -16,7 +17,6 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
  * Fetch all of the kernel specs.
  *
  * @param settings - The optional server settings.
- * @param useCache - Whether to use the cache. If false, always request.
  *
  * @returns A promise that resolves with the kernel specs.
  *
@@ -34,6 +34,42 @@ export async function getSpecs(
   }
   const data = await response.json();
   return validateSpecModels(data);
+}
+
+/**
+ * The Kernel Spec API client.
+ *
+ * #### Notes
+ * Use this class to interact with the Jupyter Server Kernel Spec API.
+ * This class adheres to the Jupyter Server API endpoints.
+ */
+export class KernelSpecAPIClient implements IKernelSpecAPIClient {
+  /**
+   * Create a new Kernel Spec API client.
+   *
+   * @param options - The options used to create the client.
+   */
+  constructor(options: { serverSettings?: ServerConnection.ISettings } = {}) {
+    this.serverSettings =
+      options.serverSettings ?? ServerConnection.makeSettings();
+  }
+
+  /**
+   * The server settings for the client.
+   */
+  readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * Fetch all of the kernel specs.
+   *
+   * @returns A promise that resolves with the kernel specs.
+   *
+   * #### Notes
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernelspecs).
+   */
+  async get(): Promise<ISpecModels> {
+    return getSpecs(this.serverSettings);
+  }
 }
 
 /**

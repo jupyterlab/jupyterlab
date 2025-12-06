@@ -83,6 +83,15 @@ all of MD as it is not optimized for dense, information rich UIs.
     0 24px 38px 3px var(--jp-shadow-penumbra-color),
     0 9px 46px 8px var(--jp-shadow-ambient-color);
 
+  /* shortcut buttons
+   *
+   * The following css variables are used to specify the visual
+   * styling of the keyboard shortcut buttons
+   */
+
+  --jp-shortcuts-button-background: var(--jp-brand-color2);
+  --jp-shortcuts-button-hover-background: var(--jp-brand-color1);
+
   /* Borders
    *
    * The following variables, specify the visual styling of borders in JupyterLab.
@@ -345,7 +354,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-variable-3-color: var(--md-green-600, #43a047);
   --jp-mirror-editor-punctuation-color: var(--md-blue-400, #42a5f5);
   --jp-mirror-editor-property-color: var(--md-blue-400, #42a5f5);
-  --jp-mirror-editor-operator-color: #a2f;
+  --jp-mirror-editor-operator-color: #d48fff;
   --jp-mirror-editor-comment-color: #408080;
   --jp-mirror-editor-string-color: #ff7070;
   --jp-mirror-editor-string-2-color: var(--md-purple-300, #ba68c8);

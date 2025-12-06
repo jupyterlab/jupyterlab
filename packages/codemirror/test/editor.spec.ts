@@ -70,7 +70,12 @@ describe('CodeMirrorEditor', () => {
       model,
       languages,
       // Binding between the editor and the Yjs model
-      extensions: [ybinding({ ytext: sharedModel.ysource })]
+      extensions: [
+        ybinding({
+          ytext: sharedModel.ysource,
+          undoManager: sharedModel.undoManager ?? undefined
+        })
+      ]
     });
   });
 
@@ -473,6 +478,17 @@ describe('CodeMirrorEditor', () => {
         type: 'import',
         offset: 0,
         value: 'import'
+      });
+    });
+    it('should return token of parent when erronous leaf is found', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('a = "/home');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokenAt(10)).toStrictEqual({
+        offset: 4,
+        type: 'String',
+        value: '"/home'
       });
     });
   });

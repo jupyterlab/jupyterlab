@@ -64,6 +64,7 @@ interface ISearchInputProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   autoFocus: boolean;
   autoUpdate: boolean;
+  lastSearchText?: string;
 }
 
 /**
@@ -128,7 +129,7 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
         tabIndex={0}
         ref={props.inputRef}
         title={props.title}
-        defaultValue={props.initialValue}
+        defaultValue={props.initialValue || props.lastSearchText}
         autoFocus={props.autoFocus}
       ></textarea>
     </label>
@@ -146,6 +147,7 @@ interface ISearchEntryProps {
   useRegex: boolean;
   wholeWords: boolean;
   initialSearchText: string;
+  lastSearchText: string;
   translator?: ITranslator;
 }
 
@@ -175,6 +177,7 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
         initialValue={props.initialSearchText}
+        lastSearchText={props.lastSearchText}
         title={trans.__('Find')}
         autoFocus={true}
         autoUpdate={true}
@@ -471,6 +474,10 @@ interface ISearchOverlayProps {
    */
   initialSearchText: string;
   /**
+   * The last searched query used to prepopulate the search field when the widget is reopened.
+   */
+  lastSearchText: string;
+  /**
    * Search input reference.
    */
   searchInputRef: React.RefObject<HTMLTextAreaElement>;
@@ -728,6 +735,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               this._onSearchChange(e)
             }
             initialSearchText={this.props.initialSearchText}
+            lastSearchText={this.props.lastSearchText}
             translator={this.translator}
           />
           {filterToggle}
@@ -913,6 +921,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
         initialSearchText={this.model.initialQuery}
+        lastSearchText={this.model.searchExpression}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>
         }

@@ -421,6 +421,11 @@ export namespace IRenderMime {
      * @returns The sanitized string.
      */
     sanitize(dirty: string, options?: ISanitizerOptions): string;
+
+    /**
+     * @returns Whether to allow name and id properties.
+     */
+    readonly allowNamedProperties?: boolean;
   }
 
   /**
@@ -474,7 +479,7 @@ export namespace IRenderMime {
     /**
      * Resolve a relative url to an absolute url path.
      */
-    resolveUrl(url: string): Promise<string>;
+    resolveUrl(url: string, context?: IResolveUrlContext): Promise<string>;
 
     /**
      * Get the download url for a given absolute url path.
@@ -507,6 +512,40 @@ export namespace IRenderMime {
     resolvePath?: (path: string) => Promise<IResolvedLocation | null>;
   }
 
+  type UrlAttributes = 'href' | 'src';
+
+  type TagsAcceptingUrls = {
+    [K in keyof HTMLElementTagNameMap]: Extract<
+      keyof HTMLElementTagNameMap[K],
+      UrlAttributes
+    > extends never
+      ? never
+      : K;
+  }[keyof HTMLElementTagNameMap];
+
+  /**
+   * Context in which the URL is being resolved.
+   *
+   * This is useful to specify for applications which wish to base64-encode
+   * contents of certain local files referenced by URLs, e.g. images, short
+   * videos, or CSS styles. Because base64-encoding is not advisable or even
+   * impossible for some combinations of tags and attributes, the resolving
+   * function needs know both the tag and the attribute to decide whether
+   * to base64-encode or not. For example, passing encoding contents to `href`
+   * in the `<link>` context can be used to provide CSS styles, but doing the
+   * same for `href` in `<a>` context URL will prevent navigation.
+   */
+  export interface IResolveUrlContext {
+    /**
+     * Attribute for which the URL is being resolved.
+     */
+    attribute?: UrlAttributes;
+    /**
+     * Tag for which the URL is being resolved, e.g. `a` or `img`.
+     */
+    tag?: TagsAcceptingUrls;
+  }
+
   /**
    * The interface for a LaTeX typesetter.
    */
@@ -517,7 +556,7 @@ export namespace IRenderMime {
      * @param element - the DOM element to typeset. The typesetting may
      *   happen synchronously or asynchronously.
      */
-    typeset(element: HTMLElement): void;
+    typeset(element: HTMLElement): void | Promise<void>;
   }
 
   /**

@@ -64,6 +64,15 @@ test.describe('Debugger', () => {
     // Wait for breakpoint to finish appearing
     await page.waitForTimeout(150);
 
+    const breakpointIcon = page
+      .locator('.jp-NotebookPanel-notebook')
+      .first()
+      .locator('.jp-Cell[data-windowed-list-index="0"]')
+      .locator('.cm-gutter.cm-breakpoint-gutter .cm-gutterElement')
+      .nth(2)
+      .locator('span.cm-breakpoint-icon');
+
+    await breakpointIcon.waitFor();
     expect(
       await page.screenshot({
         clip: { y: 100, x: 300, width: 300, height: 80 }
@@ -160,6 +169,12 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
+    // Wait for the red debug indicator box to appear
+    const firstCell = (await page.notebook.getCellLocator(0))!;
+    await firstCell.locator('.jp-DebuggerEditor-highlight').waitFor({
+      state: 'visible',
+      timeout: 1000
+    });
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
@@ -182,13 +197,22 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
+    // Wait for the red debug indicator box to appear
+    await firstCell.locator('.jp-DebuggerEditor-highlight').waitFor({
+      state: 'visible',
+      timeout: 1000
+    });
     expect(
       await page.screenshot({
         clip: { y: 110, x: 300, width: 300, height: 80 }
       })
     ).toMatchSnapshot('debugger_stop_on_raised_exception.png');
-    await page.click('jp-button[title^=Continue]');
-    await page.click('jp-button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]'); // Pauses as the error is raised (try block)
+    await page.debugger.waitForCallStack();
+    await page.click('jp-button[title^=Continue]'); // Pauses as the error is raised (catch block)
+    await page.debugger.waitForCallStack();
+    await page.click('jp-button[title^=Continue]'); // Pauses again as the error is unhandled
+    await page.notebook.waitForRun(0);
   });
 
   test('Debugger sidebar', async ({ page, tmpPath }) => {
@@ -292,7 +316,7 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
-    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel.*\/\d+.py/);
+    expect(await breakpointsPanel.innerText()).toMatch(/Cell \[\d+\]/);
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path
@@ -321,7 +345,7 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
     await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
-      '/tmp/ipykernel_'
+      'Cell ['
     );
 
     // Don't compare screenshot as the kernel id varies

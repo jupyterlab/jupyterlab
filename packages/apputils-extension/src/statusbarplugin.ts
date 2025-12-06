@@ -16,8 +16,10 @@ import {
   RunningSessions,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { IDisposable } from '@lumino/disposable';
 import { Title, Widget } from '@lumino/widgets';
 import { KeyboardEvent } from 'react';
 
@@ -139,39 +141,120 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   description: 'Add the running sessions and terminals status bar item.',
   autoStart: true,
   requires: [IStatusBar, ITranslator],
+  optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    translator: ITranslator
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
   ) => {
-    const item = new RunningSessions({
-      onClick: () => app.shell.activateById('jp-running-sessions'),
-      onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
-        if (
-          event.key === 'Enter' ||
-          event.key === 'Spacebar' ||
-          event.key === ' '
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          app.shell.activateById('jp-running-sessions');
+    const createStatusItem = (options: {
+      showKernels: boolean;
+      showTerminals?: boolean;
+    }) => {
+      const item = new RunningSessions({
+        onClick: () => app.shell.activateById('jp-running-sessions'),
+        onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
+          if (
+            event.key === 'Enter' ||
+            event.key === 'Spacebar' ||
+            event.key === ' '
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+            app.shell.activateById('jp-running-sessions');
+          }
+        },
+        serviceManager: app.serviceManager,
+        translator,
+        ...options
+      });
+
+      item.model.sessions = Array.from(
+        app.serviceManager.sessions.running()
+      ).length;
+      item.model.terminals = Array.from(
+        app.serviceManager.terminals.running()
+      ).length;
+
+      return item;
+    };
+
+    const registerItem = (options: {
+      showKernels: boolean;
+      showTerminals?: boolean;
+    }) => {
+      const item = createStatusItem(options);
+      return statusBar.registerStatusItem(runningSessionsStatus.id, {
+        item,
+        align: 'left',
+        rank: 0
+      });
+    };
+
+    if (settingRegistry) {
+      let disposable: IDisposable;
+      const onSettingsUpdated = (
+        kernelSettings?: ISettingRegistry.ISettings,
+        terminalsSettings?: ISettingRegistry.ISettings
+      ): void => {
+        const showTerminalsMap = {
+          'if-any': undefined,
+          never: false,
+          always: true
+        };
+        const showKernels =
+          (kernelSettings?.get('showStatusBarItem').composite as
+            | boolean
+            | undefined) ?? true;
+        const showTerminals =
+          showTerminalsMap[
+            (terminalsSettings?.get('showStatusBarItem').composite as
+              | 'if-any'
+              | 'never'
+              | 'always'
+              | undefined) ?? 'if-any'
+          ];
+
+        disposable?.dispose();
+        if (showKernels || showTerminals !== false) {
+          disposable = registerItem({
+            showKernels,
+            showTerminals
+          });
         }
-      },
-      serviceManager: app.serviceManager,
-      translator
-    });
+      };
 
-    item.model.sessions = Array.from(
-      app.serviceManager.sessions.running()
-    ).length;
-    item.model.terminals = Array.from(
-      app.serviceManager.terminals.running()
-    ).length;
+      const kernelsPluginId = '@jupyterlab/apputils-extension:kernels-settings';
+      const terminalPluginId = '@jupyterlab/terminal-extension:plugin';
 
-    statusBar.registerStatusItem(runningSessionsStatus.id, {
-      item,
-      align: 'left',
-      rank: 0
-    });
+      void Promise.all([
+        // Settings may be missing if the respective plugins are not enabled/included.
+        kernelsPluginId in settingRegistry.plugins
+          ? settingRegistry.load(kernelsPluginId).catch(() => undefined)
+          : Promise.resolve(undefined),
+        terminalPluginId in settingRegistry.plugins
+          ? settingRegistry.load(terminalPluginId).catch(() => undefined)
+          : Promise.resolve(undefined)
+      ]).then(([kernelSettings, terminalSettings]) => {
+        onSettingsUpdated(kernelSettings, terminalSettings);
+        if (kernelSettings) {
+          kernelSettings.changed.connect(settings => {
+            kernelSettings = settings;
+            onSettingsUpdated(kernelSettings, terminalSettings);
+          });
+        }
+        if (terminalSettings) {
+          terminalSettings.changed.connect(settings => {
+            terminalSettings = settings;
+            onSettingsUpdated(kernelSettings, terminalSettings);
+          });
+        }
+      });
+    } else {
+      registerItem({
+        showKernels: true
+      });
+    }
   }
 };

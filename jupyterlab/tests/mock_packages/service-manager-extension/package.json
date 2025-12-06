@@ -1,0 +1,17 @@
+{
+  "name": "@jupyterlab/mock-service-manager-extension",
+  "version": "4.5.0",
+  "private": true,
+  "dependencies": {
+    "@jupyterlab/services": "^7.5.0"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^4.5.0"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "disabledExtensions": [
+      "@jupyterlab/services-extension:default-drive"
+    ]
+  }
+}

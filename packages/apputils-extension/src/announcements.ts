@@ -9,7 +9,11 @@ import {
 } from '@jupyterlab/application';
 import { Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import { ConfigSection, ServerConnection } from '@jupyterlab/services';
+import {
+  ConfigSection,
+  IConfigSectionManager,
+  ServerConnection
+} from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -24,14 +28,16 @@ const PRIVACY_URL =
  *
  * @param endpoint Endpoint to request
  * @param init Initial values for the request
+ * @param serverSettings The server settings to use for the request
  * @returns The response body interpreted as JSON
  */
 async function requestAPI<T>(
   endpoint: string,
-  init: RequestInit = {}
+  init: RequestInit = {},
+  serverSettings?: ServerConnection.ISettings
 ): Promise<T> {
   // Make request to Jupyter API
-  const settings = ServerConnection.makeSettings();
+  const settings = serverSettings ?? ServerConnection.makeSettings();
   const requestUrl = URLExt.join(settings.baseUrl, endpoint);
 
   let response: Response;
@@ -55,9 +61,10 @@ export const announcements: JupyterFrontEndPlugin<void> = {
   description:
     'Add the announcement feature. It will fetch news on the internet and check for application updates.',
   autoStart: true,
-  optional: [ISettingRegistry, ITranslator],
+  optional: [IConfigSectionManager, ISettingRegistry, ITranslator],
   activate: (
     app: JupyterFrontEnd,
+    configSectionManager: ConfigSection.IManager | null,
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
@@ -69,9 +76,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         Promise.resolve(null),
       // Use config instead of state to store independently of the workspace
       // if a news has been displayed or not.
-      ConfigSection.create({
+      configSectionManager?.create({
         name: CONFIG_SECTION_NAME
-      })
+      }) ?? Promise.resolve(null)
     ]).then(async ([_, settings, config]) => {
       const trans = (translator ?? nullTranslator).load('jupyterlab');
 
@@ -85,7 +92,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
           const update: { [k: string]: INewsState } = {};
           update[id] = { seen: true, dismissed: true };
-          config.update(update as any).catch(reason => {
+          config?.update(update as any).catch(reason => {
             console.error(
               `Failed to update the announcements config:\n${reason}`
             );
@@ -127,7 +134,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 callback: () => {
                   Notification.dismiss(notificationId);
                   config
-                    .update({})
+                    ?.update({})
                     .then(() => fetchNews())
                     .catch(reason => {
                       console.error(`Failed to get the news:\n${reason}`);
@@ -164,13 +171,13 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               news: (Notification.INotification & {
                 link?: [string, string];
               })[];
-            }>(NEWS_API_URL);
+            }>(NEWS_API_URL, {}, app.serviceManager.serverSettings);
 
             for (const { link, message, type, options } of response.news) {
               // @ts-expect-error data has no index
               const id = options.data!['id'] as string;
               // Filter those notifications
-              const state = (config.data[id] as INewsState) ?? {
+              const state = (config?.data[id] as INewsState) ?? {
                 seen: false,
                 dismissed: false
               };
@@ -182,7 +189,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
-                      config.update(update as any).catch(reason => {
+                      config?.update(update as any).catch(reason => {
                         console.error(
                           `Failed to update the announcements config:\n${reason}`
                         );
@@ -204,7 +211,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
                   update[id] = { seen: true };
-                  config.update(update as any).catch(reason => {
+                  config?.update(update as any).catch(reason => {
                     console.error(
                       `Failed to update the announcements config:\n${reason}`
                     );
@@ -226,13 +233,13 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   link?: [string, string];
                 })
               | null;
-          }>(UPDATE_API_URL);
+          }>(UPDATE_API_URL, {}, app.serviceManager.serverSettings);
 
           if (response.notification) {
             const { link, message, type, options } = response.notification;
             // @ts-expect-error data has no index
             const id = options.data!['id'] as string;
-            const state = (config.data[id] as INewsState) ?? {
+            const state = (config?.data[id] as INewsState) ?? {
               seen: false,
               dismissed: false
             };
@@ -275,7 +282,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};
                 update[id] = { seen: true };
-                config.update(update as any).catch(reason => {
+                config?.update(update as any).catch(reason => {
                   console.error(
                     `Failed to update the announcements config:\n${reason}`
                   );

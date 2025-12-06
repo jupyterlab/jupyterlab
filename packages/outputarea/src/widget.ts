@@ -109,6 +109,7 @@ export class OutputArea extends Widget {
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
+    this._showInputPlaceholder = options.showInputPlaceholder ?? true;
 
     const model = (this.model = options.model);
     for (
@@ -118,6 +119,17 @@ export class OutputArea extends Widget {
     ) {
       const output = model.get(i);
       this._insertOutput(i, output);
+      if (output.type === 'stream') {
+        // This is a stream output, follow changes to the text.
+        output.streamText!.changed.connect(
+          (
+            sender: IObservableString,
+            event: IObservableString.IChangedArgs
+          ) => {
+            this._setOutput(i, output);
+          }
+        );
+      }
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
@@ -325,6 +337,9 @@ export class OutputArea extends Widget {
           }
         }
         break;
+      case 'clear':
+        this._clear();
+        break;
       case 'set':
         this._setOutput(args.newIndex, args.newValues[0]);
         break;
@@ -357,6 +372,27 @@ export class OutputArea extends Widget {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
+
+    // Update overlay height so it always matches the output panel.
+    // TODO: use CSS anchor positionning level once fully supported in all browsers
+    const resize = () => {
+      const panel = this.node.querySelector(
+        '.jp-OutputArea-child'
+      ) as HTMLElement;
+      if (panel) {
+        overlay.style.height = `${Math.max(
+          panel.getBoundingClientRect().height,
+          this.node.getBoundingClientRect().height
+        )}px`;
+      }
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(this.node);
+
+    this.disposed.connect(() => {
+      observer.disconnect();
+    });
+
     requestAnimationFrame(() => {
       this._initialize.emit();
     });
@@ -482,7 +518,8 @@ export class OutputArea extends Widget {
       password,
       future,
       translator: this._translator,
-      inputHistoryScope: this._inputHistoryScope
+      inputHistoryScope: this._inputHistoryScope,
+      showInputPlaceholder: this._showInputPlaceholder
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -587,11 +624,15 @@ export class OutputArea extends Widget {
     const layout = this.layout as PanelLayout;
 
     if (index === this._maxNumberOutputs) {
-      const warning = new Private.TrimmedOutputs(this._maxNumberOutputs, () => {
-        const lastShown = this._maxNumberOutputs;
-        this._maxNumberOutputs = Infinity;
-        this._showTrimmedOutputs(lastShown);
-      });
+      const warning = new Private.TrimmedOutputs(
+        this._maxNumberOutputs,
+        () => {
+          const lastShown = this._maxNumberOutputs;
+          this._maxNumberOutputs = Infinity;
+          this._showTrimmedOutputs(lastShown);
+        },
+        this._translator
+      );
       layout.insertWidget(index, this._wrappedOutput(warning));
     } else {
       let output = this.createOutputItem(model);
@@ -809,6 +850,7 @@ export class OutputArea extends Widget {
   private _translator: ITranslator;
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
+  private _showInputPlaceholder: boolean = true;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -883,6 +925,11 @@ export namespace OutputArea {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Whether to show placeholder text in standard input
+     */
+    showInputPlaceholder?: boolean;
   }
 
   /**
@@ -1137,7 +1184,7 @@ export class Stdin extends Widget implements IStdin {
 
     this._input = this.node.getElementsByTagName('input')[0];
     // make users aware of the line history feature
-    if (!this._password) {
+    if (options.showInputPlaceholder && !this._password) {
       this._input.placeholder = this._trans.__(
         '↑↓ for history. Search history with c-↑/c-↓'
       );
@@ -1169,6 +1216,8 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: KeyboardEvent): void {
+    // Stop bubbling
+    event.stopPropagation();
     if (this._resolved) {
       // Do not handle any more key events if the promise was resolved.
       event.preventDefault();
@@ -1346,6 +1395,11 @@ export namespace Stdin {
      * Whether to split stdin line history by kernel session or keep globally accessible.
      */
     inputHistoryScope?: 'global' | 'session';
+
+    /**
+     * Show placeholder text
+     */
+    showInputPlaceholder?: boolean;
   }
 }
 
@@ -1502,23 +1556,22 @@ namespace Private {
      */
     constructor(
       maxNumberOutputs: number,
-      onClick: (event: MouseEvent) => void
+      onClick: (event: MouseEvent) => void,
+      translator?: ITranslator
     ) {
       const node = document.createElement('div');
-      const title = `The first ${maxNumberOutputs} are displayed`;
-      const msg = 'Show more outputs';
-      node.insertAdjacentHTML(
-        'afterbegin',
-        `<a title=${title}>
-          <pre>${msg}</pre>
-        </a>`
-      );
+      const trans = (translator ?? nullTranslator).load('jupyterlab');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'jp-TrimmedOutputs-button';
+      button.title = trans.__('The first %1 are displayed', maxNumberOutputs);
+      button.textContent = trans.__('Show more outputs');
+      node.appendChild(button);
       super({
         node
       });
       this._onClick = onClick;
       this.addClass('jp-TrimmedOutputs');
-      this.addClass('jp-RenderedHTMLCommon');
     }
 
     /**

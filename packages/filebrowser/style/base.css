@@ -185,7 +185,8 @@
   flex: 0 0 75px;
 }
 
-.jp-DirListing-headerItem.jp-id-modified {
+.jp-DirListing-headerItem.jp-id-modified,
+.jp-DirListing-headerItem.jp-id-filesize {
   text-align: right;
   /* stylelint-disable */
   container-type: inline-size;
@@ -200,12 +201,16 @@
 @container (max-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    > .jp-DirListing-headerItemText-small,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
     display: inline;
   }
 
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    > .jp-DirListing-headerItemText-large,
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
     display: none;
   }
 }
@@ -214,18 +219,42 @@
 @container (min-width: 300px) {
   /* stylelint-enable */
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-small {
+    > .jp-DirListing-headerItemText-small {
     display: none;
   }
 
   .jp-DirListing-headerItem.jp-id-modified
-    > .jp-DirListing-headerItemText.jp-DirListing-headerItemText-large {
+    > .jp-DirListing-headerItemText-large {
     display: inline;
   }
 }
 
-.jp-DirListing-headerItem.jp-id-filesize {
-  text-align: right;
+/* stylelint-disable */
+@container (max-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: inline;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (min-width: 100px) {
+  /* stylelint-enable */
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-small {
+    display: none;
+  }
+
+  .jp-DirListing-headerItem.jp-id-filesize
+    > .jp-DirListing-headerItemText-large {
+    display: inline;
+  }
 }
 
 .jp-DirListing-headerItem.jp-mod-selected {
@@ -394,6 +423,7 @@
   border: none;
   color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
+  z-index: 0;
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {

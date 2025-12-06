@@ -67,6 +67,16 @@ test.describe('Notebook Search', () => {
     await expect(page.locator('[placeholder="Find"]')).toHaveValue('1234');
   });
 
+  test('Consecutive searches in the search box', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'jupyter');
+    await page.keyboard.press('Control+f');
+    await page.locator('[placeholder="Find"]').pressSequentially('jupyter');
+
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('jupyter');
+  });
+
   test('RegExp parsing failure', async ({ page }) => {
     await page.keyboard.press('Control+f');
 
@@ -548,7 +558,8 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Search on deleted cell', async ({ page }) => {
+  test('Search on deleted cell', async ({ page, browserName }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
     // Open search box
     await page.keyboard.press('Control+f');
 

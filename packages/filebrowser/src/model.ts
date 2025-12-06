@@ -11,7 +11,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { IScore } from '@jupyterlab/ui-components';
+import { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
 import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -60,6 +60,7 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
+    this._allowFileUploads = options.allowFileUploads ?? true;
     this._model = {
       path: this.rootPath,
       name: PathExt.basename(this.rootPath),
@@ -380,6 +381,17 @@ export class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Whether uploads are allowed.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this._allowFileUploads = value;
+  }
+
+  /**
    * Upload a `File` object.
    *
    * @param file - The `File` object to upload.
@@ -394,6 +406,11 @@ export class FileBrowserModel implements IDisposable {
    * chunks.
    */
   async upload(file: File, path?: string): Promise<Contents.IModel> {
+    // Check if upload is allowed
+    if (!this._allowFileUploads) {
+      throw new Error(this._trans.__('File uploads are disabled'));
+    }
+
     // We do not support Jupyter Notebook version less than 4, and Jupyter
     // Server advertises itself as version 1 and supports chunked
     // uploading. We assume any version less than 4.0.0 to be Jupyter Server
@@ -609,10 +626,15 @@ export class FileBrowserModel implements IDisposable {
     const path = this._model.path;
     const { sessions } = this.manager.services;
     const { oldValue, newValue } = change;
+    const prefix = this.driveName.length > 0 ? this.driveName + ':' : '';
     const value =
-      oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
+      oldValue &&
+      oldValue.path &&
+      prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
-        : newValue && newValue.path && PathExt.dirname(newValue.path) === path
+        : newValue &&
+          newValue.path &&
+          prefix + PathExt.dirname(newValue.path) === path
         ? newValue
         : undefined;
 
@@ -652,6 +674,7 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
+  private _allowFileUploads: boolean;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
@@ -708,6 +731,11 @@ export namespace FileBrowserModel {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Whether to allow file uploads. Defaults to `true`.
+     */
+    allowFileUploads?: boolean;
   }
 }
 
@@ -769,6 +797,7 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
         return {};
       });
     this._filterDirectories = options.filterDirectories ?? true;
+    this._useFuzzyFilter = options.useFuzzyFilter ?? true;
   }
 
   /**
@@ -779,6 +808,30 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
   }
   set filterDirectories(value: boolean) {
     this._filterDirectories = value;
+  }
+
+  /**
+   * Whether to apply fuzzy filter.
+   */
+  get useFuzzyFilter(): boolean {
+    return this._useFuzzyFilter;
+  }
+  set useFuzzyFilter(value: boolean) {
+    if (this._useFuzzyFilter === value) {
+      return;
+    }
+    this._useFuzzyFilter = value;
+    this._filterSettingsChanged.emit({ useFuzzyFilter: value });
+  }
+
+  /**
+   * Signal for settings changed
+   */
+  get filterSettingsChanged(): ISignal<
+    FileBrowserModel,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  > {
+    return this._filterSettingsChanged;
   }
 
   /**
@@ -805,6 +858,11 @@ export class FilterFileBrowserModel extends TogglableHiddenFileBrowserModel {
 
   private _filter: (value: Contents.IModel) => Partial<IScore> | null;
   private _filterDirectories: boolean;
+  private _useFuzzyFilter: boolean;
+  private _filterSettingsChanged = new Signal<
+    FileBrowserModel,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >(this);
 }
 
 /**
@@ -824,5 +882,10 @@ export namespace FilterFileBrowserModel {
      * Filter directories
      */
     filterDirectories?: boolean;
+
+    /**
+     * Use Fuzzy Filter
+     */
+    useFuzzyFilter?: boolean;
   }
 }

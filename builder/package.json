@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "4.3.0-beta.3",
+  "version": "4.5.0",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,18 +33,18 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/algorithm": "^2.0.2",
-    "@lumino/application": "^2.4.1",
-    "@lumino/commands": "^2.3.1",
-    "@lumino/coreutils": "^2.2.0",
-    "@lumino/disposable": "^2.1.3",
-    "@lumino/domutils": "^2.0.2",
-    "@lumino/dragdrop": "^2.1.5",
-    "@lumino/messaging": "^2.0.2",
-    "@lumino/properties": "^2.0.2",
-    "@lumino/signaling": "^2.1.3",
-    "@lumino/virtualdom": "^2.0.2",
-    "@lumino/widgets": "^2.5.0",
+    "@lumino/algorithm": "^2.0.4",
+    "@lumino/application": "^2.4.5",
+    "@lumino/commands": "^2.3.3",
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/disposable": "^2.1.5",
+    "@lumino/domutils": "^2.0.4",
+    "@lumino/dragdrop": "^2.1.7",
+    "@lumino/messaging": "^2.0.4",
+    "@lumino/properties": "^2.0.4",
+    "@lumino/signaling": "^2.1.5",
+    "@lumino/virtualdom": "^2.0.4",
+    "@lumino/widgets": "^2.7.2",
     "ajv": "^8.12.0",
     "commander": "^9.4.1",
     "css-loader": "^6.7.1",
@@ -71,7 +71,7 @@
     "@types/node": "^20.11.27",
     "@types/supports-color": "^5.3.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

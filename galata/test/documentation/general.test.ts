@@ -483,7 +483,9 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
-    const heading = page.locator('h2[id="Open-a-CSV-file-using-Pandas"]');
+    const heading = page.locator(
+      'h2[data-jupyter-id="Open-a-CSV-file-using-Pandas"]'
+    );
     await heading.waitFor();
     const anchor = heading.locator('text=¶');
     await heading.hover();
@@ -704,7 +706,7 @@ test.describe('General', () => {
     await page.notebook.setCell(
       0,
       'code',
-      "import altair as alt\n# load a simple dataset as a pandas DataFrame\nfrom vega_datasets import data\ncars = data.cars()\n\nalt.Chart(cars).mark_point().encode(x='Horsepower', y='Miles_per_Gallon', color='Origin').interactive()"
+      "import altair as alt\n# load a simple dataset as a pandas DataFrame\nfrom altair.datasets import data\ncars = data.cars()\n\nalt.Chart(cars).mark_point().encode(x='Horsepower', y='Miles_per_Gallon', color='Origin').interactive()"
     );
 
     await page.notebook.run();

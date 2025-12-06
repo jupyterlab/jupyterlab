@@ -19,13 +19,14 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import httpx
 import tornado
 from async_lru import alru_cache
+from packaging.version import Version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab._version import __version__
@@ -49,8 +50,6 @@ class ProxiedTransport(xmlrpc.client.Transport):
         return connection
 
 
-xmlrpc_transport_override = None
-
 all_proxy_url = environ.get("ALL_PROXY")
 # For historical reasons, we also support the lowercase environment variables.
 # Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
@@ -58,16 +57,31 @@ http_proxy_url = environ.get("http_proxy") or environ.get("HTTP_PROXY") or all_p
 https_proxy_url = (
     environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
 )
-proxies = None
+
+# sniff ``httpx`` version for version-sensitive API
+_httpx_version = Version(httpx.__version__)
+_httpx_client_args = {}
+
+xmlrpc_transport_override = None
 
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
-    proxies = {
-        "http://": http_proxy_url,
-        "https://": https_proxy_url,
-    }
+    if _httpx_version >= Version("0.28.0"):
+        _httpx_client_args = {
+            "mounts": {
+                "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
+                "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
+            }
+        }
+    else:
+        _httpx_client_args = {
+            "proxies": {
+                "http://": http_proxy_url,
+                "https://": https_proxy_url,
+            }
+        }
 
     xmlrpc_transport_override = ProxiedTransport()
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
@@ -131,7 +145,7 @@ class PyPIExtensionManager(ExtensionManager):
         parent: Optional[config.Configurable] = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = httpx.AsyncClient(proxies=proxies)
+        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
@@ -239,16 +253,17 @@ class PyPIExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> Tuple[Dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
         """List the available extensions.
 
         Note:
             This will list the packages based on the classifier
                 Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
 
-            Then it filters it with the query
-
-            We do not try to check if they are compatible (version wise)
+            Then it filters it with the query and sorts by organization priority:
+            1. Project Jupyter (@jupyter)
+            2. JupyterLab Community (@jupyterlab-contrib)
+            3. Others
 
         Args:
             query: The search extension query
@@ -261,20 +276,13 @@ class PyPIExtensionManager(ExtensionManager):
         matches = await self.__get_all_extensions()
 
         extensions = {}
+        all_matches = []
 
-        counter = -1
-        min_index = (page - 1) * per_page
-        max_index = page * per_page
         for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
-            counter += 1
-            if counter < min_index or counter >= max_index:
-                continue
-
             _, latest_version = list(group)[-1]
             data = await self._fetch_package_metadata(name, latest_version, self.base_url)
 
             normalized_name = self._normalize_name(name)
-
             package_urls = data.get("project_urls") or {}
 
             source_url = package_urls.get("Source Code")
@@ -291,7 +299,7 @@ class PyPIExtensionManager(ExtensionManager):
                 or bug_tracker_url
             )
 
-            extensions[normalized_name] = ExtensionPackage(
+            extension = ExtensionPackage(
                 name=normalized_name,
                 description=data.get("summary"),
                 homepage_url=best_guess_home_url,
@@ -305,9 +313,47 @@ class PyPIExtensionManager(ExtensionManager):
                 repository_url=source_url,
             )
 
-        return extensions, math.ceil((counter + 1) / per_page)
+            # Determine organization priority
+            priority = 3  # Default priority for other packages
+            urls_to_check = [
+                str(url).lower() for url in [source_url, homepage_url, best_guess_home_url] if url
+            ]
+            exclude = [
+                "https://github.com/jupyterlab/jupyterlab_apod",
+                "https://github.com/jupyterlab/extension-examples",
+            ]
 
-    async def __get_all_extensions(self) -> List[Tuple[str, str]]:
+            for url in urls_to_check:
+                if url in exclude:
+                    priority = 4
+                    break
+                if any(
+                    org in url
+                    for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
+                ):
+                    priority = 1
+                    break
+                elif "github.com/jupyterlab-contrib/" in url:
+                    priority = 2
+                    break
+
+            all_matches.append((priority, extension))
+
+        sorted_matches = sorted(all_matches, key=lambda x: (x[0], x[1].name))
+
+        # Apply pagination
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        page_matches = sorted_matches[start_idx:end_idx]
+
+        for _, extension in page_matches:
+            extensions[extension.name] = extension
+
+        total_pages = math.ceil(len(sorted_matches) / per_page)
+
+        return extensions, total_pages
+
+    async def __get_all_extensions(self) -> list[tuple[str, str]]:
         if self.__all_packages_cache is None or datetime.now(
             tz=timezone.utc
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
@@ -336,9 +382,10 @@ class PyPIExtensionManager(ExtensionManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
-        with tempfile.TemporaryDirectory() as ve_dir, tempfile.NamedTemporaryFile(
-            mode="w+", dir=ve_dir, delete=False
-        ) as fconstraint:
+        with (
+            tempfile.TemporaryDirectory() as ve_dir,
+            tempfile.NamedTemporaryFile(mode="w+", dir=ve_dir, delete=False) as fconstraint,
+        ):
             fconstraint.write(f"jupyterlab=={__version__}")
             fconstraint.flush()
 
@@ -440,7 +487,7 @@ class PyPIExtensionManager(ExtensionManager):
 
                 return ActionResult(status="ok", needs_restart=follow_ups)
             else:
-                self.log.error(f"Failed to installed {filename}: code {result.returncode}\n{error}")
+                self.log.error(f"Failed to install {name}: code {result.returncode}\n{error}")
                 return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:

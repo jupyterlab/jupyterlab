@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher",
-  "version": "4.3.0-beta.3",
+  "version": "4.5.0",
   "description": "JupyterLab - Launcher Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,21 +36,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.4.0-beta.3",
-    "@jupyterlab/translation": "^4.3.0-beta.3",
-    "@jupyterlab/ui-components": "^4.3.0-beta.3",
-    "@lumino/algorithm": "^2.0.2",
-    "@lumino/commands": "^2.3.1",
-    "@lumino/coreutils": "^2.2.0",
-    "@lumino/disposable": "^2.1.3",
-    "@lumino/properties": "^2.0.2",
-    "@lumino/widgets": "^2.5.0",
+    "@jupyterlab/apputils": "^4.6.0",
+    "@jupyterlab/translation": "^4.5.0",
+    "@jupyterlab/ui-components": "^4.5.0",
+    "@lumino/algorithm": "^2.0.4",
+    "@lumino/commands": "^2.3.3",
+    "@lumino/coreutils": "^2.2.2",
+    "@lumino/disposable": "^2.1.5",
+    "@lumino/properties": "^2.0.4",
+    "@lumino/widgets": "^2.7.2",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

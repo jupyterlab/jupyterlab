@@ -123,6 +123,15 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider.length = 0;
   }
 
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this.currentProviderIndex === -1) {
+      return super.getCurrentMatch();
+    } else if (this.currentProviderIndex < this.outputsProvider.length) {
+      const provider = this.outputsProvider[this.currentProviderIndex];
+      return provider.currentMatch ?? undefined;
+    }
+  }
+
   /**
    * Highlight the next match.
    *
@@ -256,11 +265,14 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     if (this.model.getMetadata('editable') === false)
       return Promise.resolve(false);
 
-    const result = await super.replaceAllMatches(newText);
+    const result = await super.replaceAllMatches(newText, options);
     return result;
   }
 
@@ -426,11 +438,14 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     if (this.model.getMetadata('editable') === false)
       return Promise.resolve(false);
 
-    const result = await super.replaceAllMatches(newText);
+    const result = await super.replaceAllMatches(newText, options);
     // if the cell is rendered force update
     if ((this.cell as MarkdownCell).rendered) {
       this.cell.update();

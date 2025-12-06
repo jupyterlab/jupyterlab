@@ -12,6 +12,9 @@
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

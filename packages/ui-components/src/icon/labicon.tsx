@@ -581,6 +581,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
       if (title) {
         Private.setTitleSvg(svgElement, title);
+      } else {
+        // mark as a decorative
+        svgElement.setAttribute('aria-hidden', 'true');
       }
     }
 

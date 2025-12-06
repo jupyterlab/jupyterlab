@@ -69,7 +69,8 @@ class MockMermaid {
       throw new Error('Intentionally failed');
     }
     return {
-      svg: '<svg></svg>'
+      svg: '<svg></svg>',
+      diagramType: 'mock-diagram'
     };
   }
 

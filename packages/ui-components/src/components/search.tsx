@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
+import { ISignal } from '@lumino/signaling';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -56,7 +57,15 @@ export interface IFilterBoxProps {
   /**
    * Whether to use the fuzzy filter.
    */
-  useFuzzyFilter: boolean;
+  useFuzzyFilter?: boolean;
+
+  /**
+   * Signal emitted when filter settings change
+   */
+  filterSettingsChanged?: ISignal<
+    unknown,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >;
 }
 
 /**
@@ -125,7 +134,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
 
 export const updateFilterFunction = (
   value: string,
-  useFuzzyFilter: boolean,
+  useFuzzyFilter?: boolean,
   caseSensitive?: boolean
 ) => {
   return (item: string): Partial<IScore> | null => {
@@ -144,7 +153,7 @@ export const updateFilterFunction = (
       return null;
     }
     return {
-      indices: [...Array(item.length).keys()].map(x => x + 1)
+      indices: [...Array(value.length).keys()].map(x => x + i)
     };
   };
 };
@@ -159,20 +168,37 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       });
     }, []);
   }
+  const firstRender = useRef(true);
+  const inputRef = props.inputRef ?? useRef<HTMLInputElement>();
 
   useEffect(() => {
     // If there is an initial search value, pass the parent the initial filter function for that value.
-    if (props.initialQuery !== undefined) {
-      props.updateFilter(
-        updateFilterFunction(
-          props.initialQuery,
-          props.useFuzzyFilter,
-          props.caseSensitive
-        ),
-        props.initialQuery
-      );
+    if (firstRender.current) {
+      firstRender.current = false;
+      if (props.initialQuery !== undefined) {
+        props.updateFilter(
+          updateFilterFunction(
+            props.initialQuery,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          props.initialQuery
+        );
+      }
+    } else {
+      if (inputRef.current) {
+        // If filter settings changed, update the filter
+        props.updateFilter(
+          updateFilterFunction(
+            inputRef.current.value,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          inputRef.current.value
+        );
+      }
     }
-  }, []);
+  }, [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]);
 
   /**
    * Handler for search input changes.
@@ -199,6 +225,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
   return (
     <Search
+      role="search"
       className="jp-FilterBox"
       ref={props.inputRef as React.Ref<any>}
       value={filter}
@@ -215,6 +242,33 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
+class FilenameSearcherWidget extends ReactWidget {
+  constructor(props: IFilterBoxProps) {
+    super();
+    this._filterBoxProps = { ...props };
+    props?.filterSettingsChanged?.connect((_, args) => {
+      this._updateProps(args);
+    }, this);
+  }
+
+  render(): JSX.Element {
+    return <FilterBox {...this._filterBoxProps} />;
+  }
+
+  /**
+   * Update a specific prop.
+   */
+  private _updateProps(props: Partial<IFilterBoxProps>): void {
+    Object.assign(this._filterBoxProps, props);
+    this.update();
+  }
+
+  private _filterBoxProps: IFilterBoxProps;
+}
+
+/**
+ * Function which returns a widget that hosts an input textbox to filter on file names.
+ */
 export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(<FilterBox {...props} />);
+  return new FilenameSearcherWidget(props);
 };

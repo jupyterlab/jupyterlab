@@ -62,11 +62,11 @@ The full process is documented in https://jupyter-releaser.readthedocs.io/en/lat
 
 Here is a quick summary of the different steps.
 
-#### Communicate on Gitter
+#### Communicate on Zulip
 
 It is good practice to let other maintainers and users know when starting a new release.
 
-For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
+For this we usually leave a small message in the "Release Coordination" topic of the `jupyterlab` channel on Zulip: https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination.
 Once the release is done, we also post a message with a link to the release notes, which include the changelog.
 
 #### 1. Prep Release
@@ -479,3 +479,5 @@ new issues show up in the future:
 - Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431
 - Wrong URLs break publishing to npm with provenance: https://github.com/jupyterlab/jupyterlab/pull/15462
 - Release team missing privileges on packages removed in 4.0: https://github.com/jupyterlab/jupyterlab/issues/15677
+- Issue publishing `4.3.0rc0`: Project size too large on PyPI: https://github.com/jupyterlab/jupyterlab/issues/16857
+- Issue publishing `4.4.0a0`: 403 Client Error: Server failed to authenticate the request: https://github.com/jupyterlab/jupyterlab/issues/16976

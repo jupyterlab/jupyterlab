@@ -92,7 +92,16 @@ export namespace Palette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
-    const modalPalette = new ModalCommandPalette({ commandPalette: palette });
+    const modalPalette = new ModalCommandPalette({
+      commandPalette: palette,
+      restore: () => {
+        const widget = app.shell.currentWidget;
+
+        if (widget) {
+          widget.activate();
+        }
+      }
+    });
     let modal = false;
 
     palette.node.setAttribute('role', 'region');
@@ -149,6 +158,12 @@ export namespace Palette {
     });
 
     commands.addCommand(CommandIDs.activate, {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         if (modal) {
           modalPalette.activate();

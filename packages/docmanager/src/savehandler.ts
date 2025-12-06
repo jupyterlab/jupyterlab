@@ -92,6 +92,8 @@ export class SaveHandler implements IDisposable {
     this._autosaveTimer = window.setTimeout(() => {
       if (this._isConnectedCallback()) {
         this._save();
+      } else {
+        this._setTimer();
       }
     }, this._interval);
   }
@@ -109,10 +111,9 @@ export class SaveHandler implements IDisposable {
       return;
     }
 
-    // Bail if the model is not dirty or the file is not writable, or the dialog
+    // Bail if the model is not dirty or the file is not non-savable, or the dialog
     // is already showing.
-    const writable = context.contentsModel && context.contentsModel.writable;
-    if (!writable || !context.model.dirty || this._inDialog) {
+    if (!(context.canSave ?? true) || !context.model.dirty || this._inDialog) {
       return;
     }
 

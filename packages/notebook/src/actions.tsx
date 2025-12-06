@@ -6,11 +6,13 @@ import {
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
-  showDialog
+  showDialog,
+  SystemClipboard
 } from '@jupyterlab/apputils';
 import {
   Cell,
   CodeCell,
+  CodeCellModel,
   ICellModel,
   ICodeCellModel,
   isMarkdownCellModel,
@@ -154,6 +156,7 @@ export namespace NotebookActions {
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
    * This action can be undone.
+   * The original cell is preserved to maintain kernel connections.
    */
   export function splitCell(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -202,32 +205,76 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
-    const cellCountAfterSplit = offsets.length - 1;
-    const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
+    const { cell_type, metadata } = child.model.sharedModel.toJSON();
+    const baseMetadata = JSON.parse(JSON.stringify(metadata ?? {}));
 
-      return {
-        cell_type,
-        metadata,
-        source: orig
-          .slice(offset, offsets[offsetIdx + 1])
-          .replace(/^\n+/, '')
-          .replace(/\n+$/, ''),
-        outputs:
-          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
-            ? outputs
-            : undefined
-      };
-    });
+    // If execution metadata is present but missing execute_reply (i.e., it is in running state),
+    // remove execution metadata entirely for new cells
+    if (
+      cell_type === 'code' &&
+      baseMetadata.execution &&
+      baseMetadata.execution['iopub.execute_input'] &&
+      !baseMetadata.execution['shell.execute_reply']
+    ) {
+      delete baseMetadata.execution;
+    }
+
+    // Create new cells for all content pieces EXCEPT the last one
+    // The last piece will remain in the original cell to preserve kernel connection
+    const newCells = offsets.slice(0, -2).map((offset, offsetIdx) => ({
+      cell_type,
+      metadata: JSON.parse(JSON.stringify(baseMetadata)),
+      source: orig
+        .slice(offset, offsets[offsetIdx + 1])
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, ''),
+      outputs: undefined
+    }));
+
+    // Prepare the content for the original cell (last piece)
+    const lastPieceStart = offsets[offsets.length - 2];
+    const lastPieceEnd = offsets[offsets.length - 1];
+    const lastPieceContent = orig
+      .slice(lastPieceStart, lastPieceEnd)
+      .replace(/^\n+/, '')
+      .replace(/\n+$/, '');
 
     nbModel.sharedModel.transact(() => {
-      nbModel.sharedModel.deleteCell(index);
-      nbModel.sharedModel.insertCells(index, clones);
+      // Insert new cells above the current cell (if any)
+      if (newCells.length > 0) {
+        nbModel.sharedModel.insertCells(index, newCells);
+      }
+
+      // Update the original cell with the last piece of content
+      child.model.sharedModel.setSource(lastPieceContent);
+      // Mark cell as dirty if it is running
+      if (child.model instanceof CodeCellModel) {
+        const codeCellModel = child.model as CodeCellModel;
+        if (codeCellModel.executionState === 'running') {
+          codeCellModel.isDirty = true;
+        }
+      }
     });
 
-    // If there is a selection the selected cell will be activated
-    const activeCellDelta = start !== end ? 2 : 1;
-    notebook.activeCellIndex = index + clones.length - activeCellDelta;
+    // If there was a selection, activate the cell containing the selection
+    let targetCellIndex: number;
+
+    if (start !== end) {
+      // Find which piece contains the selection
+      let selectionPieceIndex = 0;
+      for (let i = 0; i < offsets.length - 1; i++) {
+        if (start >= offsets[i] && start < offsets[i + 1]) {
+          selectionPieceIndex = i;
+          break;
+        }
+      }
+      targetCellIndex = index + selectionPieceIndex;
+    } else {
+      // No selection, activate the original cell (now at the end)
+      targetCellIndex = index + newCells.length;
+    }
+
+    notebook.activeCellIndex = targetCellIndex;
     notebook
       .scrollToItem(notebook.activeCellIndex)
       .then(() => {
@@ -248,6 +295,9 @@ export namespace NotebookActions {
    * @param mergeAbove - If only one cell is selected, indicates whether to merge it
    *    with the cell above (true) or below (false, default).
    *
+   * @param addExtraLine - Whether to add an extra newline between merged cell contents
+   *    (true, default) or use only a single newline (false).
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -259,7 +309,8 @@ export namespace NotebookActions {
    */
   export function mergeCells(
     notebook: Notebook,
-    mergeAbove: boolean = false
+    mergeAbove: boolean = false,
+    addExtraLine: boolean = true
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -328,7 +379,7 @@ export namespace NotebookActions {
     const newModel = {
       cell_type,
       metadata,
-      source: toMerge.join('\n\n'),
+      source: toMerge.join(addExtraLine ? '\n\n' : '\n'),
       attachments:
         primaryModel.cell_type === 'markdown' ||
         primaryModel.cell_type === 'raw'
@@ -1203,9 +1254,22 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
+   *
+   * @deprecated will be removed in a future release. Use `copyToSystemClipboard` instead.
    */
   export function copy(notebook: Notebook): void {
     Private.copyOrCut(notebook, false);
+  }
+
+  /**
+   * Copy the selected cell(s) data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function copyToSystemClipboard(
+    notebook: Notebook
+  ): Promise<void> {
+    await Private.copyOrCutToSystemClipboard(notebook, false);
   }
 
   /**
@@ -1216,9 +1280,26 @@ export namespace NotebookActions {
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
+   *
+   * @deprecated will be removed in a future release. Use `cutToSystemClipboard` instead.
    */
   export function cut(notebook: Notebook): void {
     Private.copyOrCut(notebook, true);
+  }
+
+  /**
+   * Cut the selected cell data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * #### Notes
+   * This action can be undone.
+   * A new code cell is added if all cells are cut.
+   */
+  export async function cutToSystemClipboard(
+    notebook: Notebook
+  ): Promise<void> {
+    await Private.copyOrCutToSystemClipboard(notebook, true);
   }
 
   /**
@@ -1236,6 +1317,8 @@ export namespace NotebookActions {
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
+   *
+   * @deprecated will be removed in a future release. Use `pasteFromSystemClipboard` instead.
    */
   export function paste(
     notebook: Notebook,
@@ -1248,6 +1331,39 @@ export namespace NotebookActions {
     }
 
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+
+    addCells(notebook, mode, values, true);
+    void focusActiveCell(notebook);
+  }
+
+  /**
+   * Paste cells from the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * #### Notes
+   * The last pasted cell becomes the active cell.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action can be undone.
+   */
+  export async function pasteFromSystemClipboard(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+  ): Promise<void> {
+    const clipboard = SystemClipboard.getInstance();
+
+    const stored = await clipboard.getData(JUPYTER_CELL_MIME);
+    if (stored === null || stored === undefined) {
+      return;
+    }
+
+    const values = stored as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
     void focusActiveCell(notebook);
@@ -2003,6 +2119,17 @@ export namespace NotebookActions {
     for (cellNum = which + 1; cellNum < notebook.widgets.length; cellNum++) {
       let subCell = notebook.widgets[cellNum];
       let subCellHeadingInfo = NotebookActions.getHeadingInfo(subCell);
+      const isHeadingResolved = (subCell as unknown as MarkdownCell)
+        .headingsResolved;
+
+      // Defer until subCell's asynchronous heading parsing is complete
+      if (subCellHeadingInfo.headingLevel === -1 && !isHeadingResolved) {
+        requestAnimationFrame(() => {
+          setHeadingCollapse(cell, collapsing, notebook);
+        });
+        break;
+      }
+
       if (
         subCellHeadingInfo.isHeading &&
         subCellHeadingInfo.headingLevel <= selectedHeadingInfo.headingLevel
@@ -2396,7 +2523,7 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    const lastCell = cells[-1];
+    const lastCell = cells[cells.length - 1];
     notebook.mode = 'command';
 
     let initializingDialogShown = false;
@@ -2574,6 +2701,8 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
+   *
+   * @deprecated will be removed in a future release. Use `copyOrCutToSystemClipboard` instead.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -2589,6 +2718,43 @@ namespace Private {
     const data = Private.selectedCells(notebook);
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
+    if (cut) {
+      deleteCells(notebook);
+    } else {
+      notebook.deselectAll();
+    }
+    if (cut) {
+      notebook.lastClipboardInteraction = 'cut';
+    } else {
+      notebook.lastClipboardInteraction = 'copy';
+    }
+    void handleState(notebook, state);
+  }
+
+  /**
+   * Copy or cut the selected cell data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param cut - True if the cells should be cut, false if they should be copied.
+   */
+  export async function copyOrCutToSystemClipboard(
+    notebook: Notebook,
+    cut: boolean
+  ): Promise<void> {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = getState(notebook);
+    const clipboard = SystemClipboard.getInstance();
+
+    notebook.mode = 'command';
+    clipboard.clear();
+
+    const data = Private.selectedCells(notebook);
+
+    await clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
       deleteCells(notebook);
     } else {
@@ -2665,6 +2831,7 @@ namespace Private {
             raw.metadata.trusted = undefined;
           }
           const newCell = notebookSharedModel.insertCell(index, {
+            id: raw.id,
             cell_type: value,
             source: raw.source,
             metadata: raw.metadata

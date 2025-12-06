@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-terminal",
-  "version": "4.3.0-beta.3",
+  "version": "4.5.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,12 +8,12 @@
   },
   "dependencies": {
     "@jupyter/web-components": "^0.16.6",
-    "@jupyterlab/application": "^4.3.0-beta.3",
-    "@jupyterlab/coreutils": "^6.3.0-beta.3",
-    "@jupyterlab/services": "^7.3.0-beta.3",
-    "@jupyterlab/terminal": "^4.3.0-beta.3",
-    "@jupyterlab/theme-light-extension": "^4.3.0-beta.3",
-    "@lumino/widgets": "^2.5.0"
+    "@jupyterlab/application": "^4.5.0",
+    "@jupyterlab/coreutils": "^6.5.0",
+    "@jupyterlab/services": "^7.5.0",
+    "@jupyterlab/terminal": "^4.5.0",
+    "@jupyterlab/theme-light-extension": "^4.5.0",
+    "@lumino/widgets": "^2.7.2"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
@@ -21,7 +21,7 @@
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
     "style-loader": "~3.3.1",
-    "typescript": "~5.1.6",
+    "typescript": "~5.5.4",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
   }
