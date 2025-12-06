@@ -66,12 +66,19 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         return this._workspace.metadata.id;
       }
       labelTitle() {
+        // The saved workspace layout is stored in workspace.metadata.
+        const layoutData = (this._workspace?.metadata as any)?.['layout-restorer:data'] as
+          | { main?: { dock?: { widgets?: unknown[] } } }
+          | undefined;
+
+        const widgets = layoutData?.main?.dock?.widgets;
+        const tabsCount = Array.isArray(widgets) ? widgets.length : 0;
+
         return trans.__(
           '%1 workspace with %2 tabs, last modified on %3',
-          this._workspace.metadata.id,
-          (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
-            ?.widgets?.length,
-          this._workspace.metadata['last_modified']
+          this._workspace.metadata?.id ?? '',
+          tabsCount,
+          this._workspace.metadata?.['last_modified'] ?? ''
         );
       }
 
