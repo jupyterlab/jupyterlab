@@ -6,6 +6,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+
 import { IWindowResolver } from '@jupyterlab/apputils';
 import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
@@ -46,37 +47,44 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
       }
       readonly className: string;
       readonly context: string;
+
       open() {
         return app.commands.execute(commands.open, {
           workspace: this._workspace.metadata.id
         });
       }
+
       async shutdown() {
         await app.commands.execute(commands.deleteWorkspace, {
           workspace: this._workspace.metadata.id
         });
         await model.refresh();
       }
+
       icon() {
         return resolver.name === this._workspace.metadata.id
           ? checkIcon
           : blankIcon;
       }
+
       label() {
         return this._workspace.metadata.id;
       }
+
       labelTitle() {
+        // FIX: Added '?? 0' at the end to handle undefined cases
         return trans.__(
           '%1 workspace with %2 tabs, last modified on %3',
           this._workspace.metadata.id,
           (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
-            ?.widgets?.length,
+            ?.widgets?.length ?? 0, 
           this._workspace.metadata['last_modified']
         );
       }
 
       private _workspace: Workspace.IWorkspace;
     }
+
     managers.add({
       name: trans.__('Workspaces'),
       supportsMultipleViews: false,
@@ -87,21 +95,23 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
       },
       shutdownAll: async () => {
         await Promise.all(
-          model.workspaces.map(workspace => model.remove(workspace.metadata.id))
+          model.workspaces.map(workspace =>
+            model.remove(workspace.metadata.id)
+          )
         );
         await model.refresh();
       },
+      shutdownAllLabel: trans.__('Delete All'),
+      shutdownAllConfirmationText: trans.__(
+        'Are you sure you want to delete all workspaces? Deleted workspaces cannot be recovered.'
+      ),
       shutdownItemIcon: deleteIcon,
       refreshRunning: async () => {
         await model.refresh();
       },
       runningChanged: model.refreshed,
       shutdownLabel: (item: IRunningSessions.IRunningItem) =>
-        trans.__('Delete %1', item.label() as string),
-      shutdownAllLabel: trans.__('Delete All'),
-      shutdownAllConfirmationText: trans.__(
-        'Are you sure you want to delete all workspaces? Deleted workspaces cannot be recovered.'
-      )
+        trans.__('Delete %1', item.label() as string)
     });
   }
 };
