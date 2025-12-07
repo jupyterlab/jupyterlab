@@ -331,11 +331,7 @@ test.describe('Debugger Variables', () => {
     page,
     tmpPath
   }) => {
-    await page.notebook.createNew('auto-refresh.ipynb');
-
-    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await init({ page, tmpPath });
 
     await page.notebook.setCell(0, 'code', 'import math');
     await page.notebook.runCell(0);
