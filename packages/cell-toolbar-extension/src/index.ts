@@ -40,6 +40,12 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
       label: trans.__('Delete Cell'),
       caption: trans.__('Delete the cell'),
       icon: deleteIcon,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         let confirm = true;
 
