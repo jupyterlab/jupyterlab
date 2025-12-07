@@ -64,7 +64,7 @@ templates_path = ["_templates"]
 # The file extensions of source files.
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {".md": "markdown"}
 
 # The master toctree document.
 master_doc = "index"
@@ -365,7 +365,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 You can now test JupyterLab 4.5.0 Release Candidate · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
+    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",
