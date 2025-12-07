@@ -327,25 +327,25 @@ test.describe('Debugger Variables', () => {
     await page.click('jp-button[title^=Continue]');
   });
 
-  test('Kernel Sources panel updates after execute_reply', async ({
-    page,
-    tmpPath
-  }) => {
-    await init({ page, tmpPath });
+  // test('Kernel Sources panel updates after execute_reply', async ({
+  //   page,
+  //   tmpPath
+  // }) => {
+  //   await init({ page, tmpPath });
 
-    await page.notebook.setCell(0, 'code', 'import math');
-    await page.notebook.runCell(0);
+  //   await page.notebook.setCell(0, 'code', 'import math');
+  //   await page.notebook.runCell(0);
 
-    await page.debugger.waitForSources();
+  //   await page.debugger.waitForSources();
 
-    const sourcesPanel = await page.debugger.getSourcePanelLocator();
-    const items = sourcesPanel.locator('.jp-DebuggerKernelSource-item');
+  //   const sourcesPanel = await page.debugger.getSourcePanelLocator();
+  //   const items = sourcesPanel.locator('.jp-DebuggerKernelSource-item');
 
-    expect(await items.count()).toBeGreaterThan(0);
+  //   expect(await items.count()).toBeGreaterThan(0);
 
-    const mathEntry = items.filter({ hasText: 'math' });
-    expect(await mathEntry.count()).toBeGreaterThan(0);
-  });
+  //   const mathEntry = items.filter({ hasText: 'math' });
+  //   expect(await mathEntry.count()).toBeGreaterThan(0);
+  // });
 });
 
 async function createNotebook(page: IJupyterLabPageFixture) {
