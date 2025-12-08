@@ -32,6 +32,7 @@ const FilterBox = (props: IFilterBoxProps) => {
       onInput={onFilterChange}
       placeholder={props.trans.__('Filter sources')}
       value={props.model.filter}
+      className="jp-Debugger-KernelSources-Filter"
     />
   );
 };

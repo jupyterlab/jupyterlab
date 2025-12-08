@@ -42,3 +42,7 @@
   flex: 1 1 0;
   min-width: 0;
 }
+
+.jp-Debugger-KernelSources-Filter {
+  font-weight: 400;
+}
