@@ -2528,7 +2528,6 @@ __metadata:
     "@jupyterlab/cell-toolbar": ^4.5.0
     "@jupyterlab/settingregistry": ^4.5.0
     "@jupyterlab/translation": ^4.5.0
-    "@jupyterlab/ui-components": ^4.5.0
     rimraf: ~5.0.5
     typescript: ~5.5.4
   languageName: unknown

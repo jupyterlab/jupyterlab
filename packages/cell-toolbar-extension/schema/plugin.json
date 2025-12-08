@@ -33,7 +33,7 @@
       "type": "boolean",
       "default": true
     },
-    "deleteConfirmation": {
+    "askCellDeleteConfirmation": {
       "title": "Delete confirmation",
       "description": "Whether to ask for confirmation when deleting a cell via the toolbar.",
       "type": "boolean",

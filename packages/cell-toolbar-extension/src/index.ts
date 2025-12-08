@@ -20,7 +20,6 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { deleteIcon } from '@jupyterlab/ui-components';
 
 const PLUGIN_ID = '@jupyterlab/cell-toolbar-extension:plugin';
 
@@ -39,7 +38,6 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand('cell-toolbar:delete', {
       label: trans.__('Delete Cell'),
       caption: trans.__('Delete the cell'),
-      icon: deleteIcon,
       describedBy: {
         args: {
           type: 'object',
@@ -47,14 +45,15 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: async () => {
-        let confirm = true;
+        let shouldConfirmDelete = true;
 
         if (settingRegistry) {
           const setting = await settingRegistry.load(PLUGIN_ID);
-          confirm = setting.get('deleteConfirmation').composite as boolean;
+          shouldConfirmDelete = setting.get('askCellDeleteConfirmation')
+            .composite as boolean;
         }
 
-        if (!confirm) {
+        if (!shouldConfirmDelete) {
           return app.commands.execute('notebook:delete-cell');
         }
 
@@ -74,7 +73,7 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
         if (result.button.accept) {
           if (result.isChecked && settingRegistry) {
             const setting = await settingRegistry.load(PLUGIN_ID);
-            await setting.set('deleteConfirmation', false);
+            await setting.set('askCellDeleteConfirmation', false);
           }
           return app.commands.execute('notebook:delete-cell');
         }
