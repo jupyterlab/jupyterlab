@@ -65,20 +65,77 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
       label() {
         return this._workspace.metadata.id;
       }
-      labelTitle() {
-        // The saved workspace layout is stored in workspace.metadata.
-        const layoutData = (this._workspace?.metadata as any)?.['layout-restorer:data'] as
-          | { main?: { dock?: { widgets?: unknown[] } } }
-          | undefined;
+      labelTitle(): string {
+        // Compatibility: some Workspace objects expose layout under metadata,
+        // others under data, and sometimes that payload can be a JSON string.
+        const rawMeta = (this._workspace?.metadata ?? this._workspace?.data ?? {}) as
+          | Record<string, unknown>
+          | string;
 
-        const widgets = layoutData?.main?.dock?.widgets;
-        const tabsCount = Array.isArray(widgets) ? widgets.length : 0;
+        // Helper: safely extract a field from rawMeta (supports string or object).
+        const tryGet = (obj: Record<string, unknown> | string, key: string) => {
+          if (typeof obj === 'string') {
+            return undefined;
+          }
+          return (obj as Record<string, unknown>)[key];
+        };
+
+        // Candidate can be an object, or a JSON string containing layout info.
+        const candidate =
+          tryGet(rawMeta, 'layout-restorer:data') ??
+          tryGet(rawMeta, 'layout-restorer') ??
+          tryGet(rawMeta, 'layout') ??
+          rawMeta;
+
+        type LayoutShape = { main?: { dock?: { widgets?: unknown[] } } } | undefined;
+
+        let layoutData: LayoutShape;
+
+        if (candidate == null) {
+          layoutData = undefined;
+        } else if (typeof candidate === 'string') {
+          // Try to parse string safely; if parsing fails, ignore.
+          try {
+            const parsed = JSON.parse(candidate) as Record<string, unknown> | null;
+            layoutData =
+              (parsed && (parsed['layout-restorer:data'] ?? parsed)) as LayoutShape;
+          } catch {
+            layoutData = undefined;
+          }
+        } else {
+          layoutData = candidate as LayoutShape;
+        }
+
+        const widgets = Array.isArray(layoutData?.main?.dock?.widgets)
+          ? layoutData!.main!.dock!.widgets!
+          : [];
+
+        const tabsCount = widgets.length;
+
+        // workspace id / last_modified could be in metadata or data (stringify safely)
+        const workspaceId =
+          typeof rawMeta === 'string'
+            ? rawMeta
+            : String((rawMeta as Record<string, unknown>).id ?? (rawMeta as Record<
+                string,
+                unknown
+              >).name ?? '');
+
+        const lastModifiedRaw =
+          typeof rawMeta === 'string'
+            ? undefined
+            : (rawMeta as Record<string, unknown>)['last_modified'];
+
+        const lastModified =
+          lastModifiedRaw && String(lastModifiedRaw).trim() !== ''
+            ? String(lastModifiedRaw)
+            : trans.__('unknown');
 
         return trans.__(
-          '%1 workspace with %2 tabs, last modified on %3',
-          this._workspace.metadata?.id ?? '',
-          tabsCount,
-          this._workspace.metadata?.['last_modified'] ?? ''
+          '%1 workspace with %2 tab(s), last modified on %3',
+          workspaceId,
+          String(tabsCount),
+          lastModified
         );
       }
 
