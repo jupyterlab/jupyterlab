@@ -21,13 +21,6 @@
         { "const": "perComm", "title": "One subshell per comm" },
         { "const": "perCommTarget", "title": "One subshell per comm-target" }
       ]
-    },
-    "kernelInfoTimeout": {
-      "type": "number",
-      "title": "Kernel Info Timeout",
-      "description": "Timeout (in milliseconds) for requesting Kernel Info",
-      "minimum": 1000,
-      "default": 3000
     }
   },
   "type": "object"
