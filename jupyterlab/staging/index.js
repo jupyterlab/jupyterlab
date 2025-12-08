@@ -4,8 +4,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { PageConfig } from '@jupyterlab/coreutils';
-import { PluginRegistry } from '@lumino/coreutils';
+import { PageConfig, JPPluginRegistry } from '@jupyterlab/coreutils';
 
 import './style.js';
 
@@ -57,7 +56,7 @@ export async function main() {
      };
   }
 
-  var pluginRegistry = new PluginRegistry();
+  var pluginRegistry = new JPPluginRegistry();
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
   var disabled = [];
   var deferred = [];
@@ -279,6 +278,8 @@ export async function main() {
     },
     availablePlugins: allPlugins
   });
+
+
 
   // 4. Start the application, which will activate the other plugins
   lab.start({ ignorePlugins, bubblingKeydown: true });
