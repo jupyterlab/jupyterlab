@@ -363,26 +363,24 @@ describe('cells/widget', () => {
 
         // Set tags in metadata
         model.setMetadata('tags', ['test', 'another-tag']);
-        widget.loadTagsState();
+        widget['_loadTagsState']();
 
         // Verify data attributes are set
-        expect(widget.node.getAttribute('data-tag-test')).toEqual('true');
-        expect(widget.node.getAttribute('data-tag-another-tag')).toEqual(
-          'true'
-        );
+        expect(widget.node.getAttribute('data-tag-test')).toEqual('');
+        expect(widget.node.getAttribute('data-tag-another-tag')).toEqual('');
 
         // Update tags
         model.setMetadata('tags', ['different']);
-        widget.loadTagsState();
+        widget['_loadTagsState']();
 
         // Old attributes should be removed, new ones added
         expect(widget.node.getAttribute('data-tag-test')).toBeNull();
         expect(widget.node.getAttribute('data-tag-another-tag')).toBeNull();
-        expect(widget.node.getAttribute('data-tag-different')).toEqual('true');
+        expect(widget.node.getAttribute('data-tag-different')).toEqual('');
 
         // Remove all tags
         model.setMetadata('tags', []);
-        widget.loadTagsState();
+        widget['_loadTagsState']();
 
         // All tag attributes should be removed
         expect(widget.node.getAttribute('data-tag-different')).toBeNull();
@@ -404,17 +402,17 @@ describe('cells/widget', () => {
           'tag/with/slashes',
           'tag@with!symbols'
         ]);
-        widget.loadTagsState();
+        widget['_loadTagsState']();
 
         // Verify sanitized data attributes are set
         expect(widget.node.getAttribute('data-tag-tag-with-spaces')).toEqual(
-          'true'
+          ''
         );
         expect(widget.node.getAttribute('data-tag-tag-with-slashes')).toEqual(
-          'true'
+          ''
         );
         expect(widget.node.getAttribute('data-tag-tag-with-symbols')).toEqual(
-          'true'
+          ''
         );
       });
 
@@ -428,14 +426,17 @@ describe('cells/widget', () => {
           placeholder: false
         }).initializeState();
 
+        // Enable syncTags to test automatic metadata syncing
+        widget.syncTags = true;
+
         // Set initial tags
         model.setMetadata('tags', ['initial']);
-        expect(widget.node.getAttribute('data-tag-initial')).toEqual('true');
+        expect(widget.node.getAttribute('data-tag-initial')).toEqual('');
 
         // Change tags via metadata change (should trigger onMetadataChanged)
         model.setMetadata('tags', ['updated']);
         expect(widget.node.getAttribute('data-tag-initial')).toBeNull();
-        expect(widget.node.getAttribute('data-tag-updated')).toEqual('true');
+        expect(widget.node.getAttribute('data-tag-updated')).toEqual('');
       });
 
       it('should respect syncTags setting', () => {
@@ -448,24 +449,29 @@ describe('cells/widget', () => {
           placeholder: false
         }).initializeState();
 
-        // syncTags defaults to true
-        expect(widget.syncTags).toEqual(true);
+        // syncTags defaults to false
+        expect(widget.syncTags).toEqual(false);
 
-        // Disable syncTags
-        widget.syncTags = false;
-
-        // Set tags - should not create attributes when syncTags is false
+        // Set tags while syncTags is false - should not create attributes
         model.setMetadata('tags', ['test']);
         expect(widget.node.getAttribute('data-tag-test')).toBeNull();
 
         // Enable syncTags - should trigger loadTagsState
         widget.syncTags = true;
-        expect(widget.node.getAttribute('data-tag-test')).toEqual('true');
+        expect(widget.node.getAttribute('data-tag-test')).toEqual('');
 
         // Change tags - should update attributes when syncTags is true
         model.setMetadata('tags', ['updated']);
         expect(widget.node.getAttribute('data-tag-test')).toBeNull();
-        expect(widget.node.getAttribute('data-tag-updated')).toEqual('true');
+        expect(widget.node.getAttribute('data-tag-updated')).toEqual('');
+
+        // Disable syncTags
+        widget.syncTags = false;
+
+        // Change tags again - should not update attributes when syncTags is false
+        model.setMetadata('tags', ['another']);
+        expect(widget.node.getAttribute('data-tag-updated')).toEqual(''); // Still has old value
+        expect(widget.node.getAttribute('data-tag-another')).toBeNull(); // New tag not added
       });
     });
 

@@ -221,7 +221,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this.loadCollapseState();
     this.loadEditableState();
     if (this.syncTags) {
-      this.loadTagsState();
+      this._loadTagsState();
     }
     return this;
   }
@@ -497,25 +497,40 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Load the tag state from the model.
+   *
+   * #### Notes
+   * This is a private method. It is called internally when tags metadata changes.
    */
-  loadTagsState(): void {
+  private _loadTagsState(): void {
     const tags = (this.model.getMetadata('tags') as string[]) ?? [];
+    const sanitizedTags = new Set<string>();
 
-    // Remove all existing tag data attributes
-    const attributes = Array.from(this.node.attributes) as Attr[];
-    for (const attr of attributes) {
-      if (attr.name && attr.name.startsWith('data-tag-')) {
-        this.node.removeAttribute(attr.name);
+    // Build set of sanitized tags
+    for (const tag of tags) {
+      if (typeof tag === 'string' && tag.length > 0) {
+        const sanitizedTag = tag.replace(/[^a-zA-Z0-9-_]/g, '-');
+        sanitizedTags.add(sanitizedTag);
       }
     }
 
-    // Add data attributes for current tags
-    for (const tag of tags) {
-      if (typeof tag === 'string' && tag.length > 0) {
-        // Sanitize tag name for use as data attribute
-        const sanitizedTag = tag.replace(/[^a-zA-Z0-9-_]/g, '-');
-        this.node.setAttribute(`data-tag-${sanitizedTag}`, 'true');
+    // Process existing tag data attributes
+    const attributes = Array.from(this.node.attributes) as Attr[];
+    for (const attr of attributes) {
+      if (attr.name && attr.name.startsWith('data-tag-')) {
+        const tagName = attr.name.substring('data-tag-'.length);
+        if (!sanitizedTags.has(tagName)) {
+          // Tag no longer exists, remove the attribute
+          this.node.removeAttribute(attr.name);
+        } else {
+          // Tag already exists in DOM, remove from set to avoid re-adding
+          sanitizedTags.delete(tagName);
+        }
       }
+    }
+
+    // Add any remaining tags (not already in DOM)
+    for (const sanitizedTag of sanitizedTags) {
+      this.node.setAttribute(`data-tag-${sanitizedTag}`, '');
     }
   }
 
@@ -575,7 +590,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
     this._syncTags = value;
     if (value) {
-      this.loadTagsState();
+      this._loadTagsState();
     }
   }
 
@@ -762,7 +777,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
         break;
       case 'tags':
         if (this.syncTags) {
-          this.loadTagsState();
+          this._loadTagsState();
         }
         break;
       default:
@@ -822,7 +837,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }, 0);
   private _syncCollapse = false;
   private _syncEditable = false;
-  private _syncTags = true;
+  private _syncTags = false;
 }
 
 /**
