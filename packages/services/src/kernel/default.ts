@@ -299,6 +299,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       handleComms: false,
       kernelAPIClient: this._kernelAPIClient,
       commsOverSubshells: CommsOverSubshells.Disabled,
+      kernelInfoTimeout: this._kernelInfoTimeout,
       ...options
     });
   }
