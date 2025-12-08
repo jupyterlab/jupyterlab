@@ -144,7 +144,7 @@ const contentProviderWarning: ServiceManagerPlugin<void> = {
   activate: (_: null, contentProvider: IContentProvider) => {
     if (!(contentProvider instanceof RestContentProvider)) {
       console.error(
-        'Defining a IDefaultContentProvider plugin is deprecated since JupyterLab 4.5.1 and will not be have any effect.'
+        'Defining a IDefaultContentProvider plugin is deprecated since JupyterLab 4.5.1 and does not be have any effect.'
       );
     }
   }

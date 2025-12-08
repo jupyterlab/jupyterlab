@@ -1634,7 +1634,7 @@ export namespace Drive {
     /**
      * The default content provider.
      *
-     * @deprecated since 4.5.1
+     * @deprecated since 4.5.1 and will be removed in 5.0
      */
     defaultContentProvider?: IContentProvider;
   }
@@ -1747,7 +1747,7 @@ export namespace ContentProviderRegistry {
   export interface IOptions {
     /**
      * Default provider for the registry.
-     * @deprecated Since 4.5.1
+     * @deprecated Since 4.5.1 and will be removed in 5.0
      */
     defaultProvider?: IContentProvider;
   }
