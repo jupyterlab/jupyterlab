@@ -157,7 +157,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
 
     // **FIX #18185**: Filter out invalid kernel specs with empty resources before rendering
     const kernelSpecs = this._commands.kernelSpecs || {};
-    const validKernels = Object.values(kernelSpecs).filter(spec => 
+    const validKernels = Object.values(kernelSpecs).filter(spec =>
       spec.resources && Object.keys(spec.resources).length > 0
     );
 
