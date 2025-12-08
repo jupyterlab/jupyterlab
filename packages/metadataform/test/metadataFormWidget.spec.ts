@@ -150,10 +150,8 @@ describe('metadataform/form simple', () => {
     metadataForm.form?.update();
     await sleep(100);
     expect(
-      node
-        .getElementsByClassName('jp-inputFieldWrapper')[0]
-        .children[0].getAttribute('type')
-    ).toBe('number');
+      node.getElementsByClassName('jp-inputFieldWrapper')[0].children[0].tagName
+    ).toBe('JP-NUMBER-FIELD');
   });
 
   it('should build the form', async () => {
