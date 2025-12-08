@@ -91,7 +91,7 @@ test.describe('Cell Toolbar Delete', () => {
     await page.hover('.jp-Cell >> nth=0');
 
     await page
-      .locator('.jp-Cell-toolbar button[title="Delete Cell"]')
+      .locator('.jp-Cell [data-jp-item-name="delete-cell"] jp-button')
       .first()
       .click();
 
@@ -103,16 +103,17 @@ test.describe('Cell Toolbar Delete', () => {
 
     await dialog.locator('button.jp-mod-reject').click();
 
+    // 5. Verify no deletion occurred
     await expect(dialog).toBeHidden();
     expect(await page.notebook.getCellCount()).toBe(2);
-
     expect(await page.notebook.getCellTextInput(0)).toContain('cell-A');
   });
 
   test('should delete cell when confirmed', async ({ page }) => {
     await page.hover('.jp-Cell >> nth=0');
+
     await page
-      .locator('.jp-Cell-toolbar button[title="Delete Cell"]')
+      .locator('.jp-Cell [data-jp-item-name="delete-cell"] jp-button')
       .first()
       .click();
 
@@ -128,7 +129,7 @@ test.describe('Cell Toolbar Delete', () => {
   test('should respect "Do not ask me again" preference', async ({ page }) => {
     await page.hover('.jp-Cell >> nth=0');
     await page
-      .locator('.jp-Cell-toolbar button[title="Delete Cell"]')
+      .locator('.jp-Cell [data-jp-item-name="delete-cell"] jp-button')
       .first()
       .click();
 
@@ -140,13 +141,13 @@ test.describe('Cell Toolbar Delete', () => {
 
     await dialog.locator('button.jp-mod-warn').click();
 
-    // Verify first deletion worked
+    // Verify first deletion
     expect(await page.notebook.getCellCount()).toBe(1);
     expect(await page.notebook.getCellTextInput(0)).toContain('cell-B');
 
     await page.hover('.jp-Cell >> nth=0');
     await page
-      .locator('.jp-Cell-toolbar button[title="Delete Cell"]')
+      .locator('.jp-Cell [data-jp-item-name="delete-cell"] jp-button')
       .first()
       .click();
 
