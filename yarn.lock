@@ -4710,6 +4710,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/settingeditor-extension@workspace:packages/settingeditor-extension"
   dependencies:
+    "@codemirror/commands": ^6.8.1
+    "@codemirror/view": ^6.38.1
     "@jupyterlab/application": ^4.5.0
     "@jupyterlab/apputils": ^4.6.0
     "@jupyterlab/codeeditor": ^4.5.0
