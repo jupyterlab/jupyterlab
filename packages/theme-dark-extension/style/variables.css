@@ -300,6 +300,17 @@ all of MD as it is not optimized for dense, information rich UIs.
       var(--jp-code-padding) - var(--jp-cell-padding) - 1px
   );
 
+  /* The scroll padding is calculated to provide enough space at the bottom of
+     a text editor to allow the last line of code to be positioned at the top
+     of the viewport when the editor is scrolled all the way down. We also
+     subtract one pixel to avoid showing a scrollbar when the file contains
+     only a single line. This padding enables a 'scroll past end' feature in
+     text editors. */
+  --jp-editor-scroll-padding: calc(
+    100% - var(--jp-code-font-size) * var(--jp-code-line-height) -
+      var(--jp-code-padding) - 1px
+  );
+
   /* Rendermime styles */
 
   --jp-rendermime-error-background: rgba(244, 67, 54, 0.28);
