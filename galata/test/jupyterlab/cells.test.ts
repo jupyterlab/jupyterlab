@@ -82,7 +82,7 @@ test.describe('Cell Toolbar Delete', () => {
     // Create two specific cells to identify deletions easily
     await page.notebook.setCell(0, 'code', 'print("cell-A")');
     await page.notebook.addCell('code', 'print("cell-B")');
-    await page.notebook.run();
+    await page.notebook.selectCells(0);
   });
 
   test('should show confirmation dialog and cancel deletion', async ({
@@ -95,6 +95,7 @@ test.describe('Cell Toolbar Delete', () => {
       .first()
       .click();
 
+    // 3. Verify dialog appears
     const dialog = page.locator('.jp-Dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText(
