@@ -32,15 +32,15 @@ const DEFAULT_LAUNCHER: JupyterFrontEndPlugin<ILauncher> = {
     // **BUG FIX #18185**: Filter invalid kernel specs (empty resources)
     const createLauncher = async (): Promise<ILauncher> => {
       const model = app.serviceManager.launcher;
-      
+
       // Get kernel specs with validation
       const specs = await serviceManager.kernelspec.getSpecs();
       const validKernelSpecs = Object.entries(specs.kernelspecs || {})
         .filter(([_, spec]: [string, any]) => {
           // Skip ghost kernels: empty resources after uninstall (Issue #18185)
           const resources = spec.resources || {};
-          return Object.keys(resources).length > 0 || 
-                 resources['logo-64x64'] || 
+          return Object.keys(resources).length > 0 ||
+                 resources['logo-64x64'] ||
                  resources['logo-32x32'];
         })
         .reduce((acc: any, [name, spec]: [string, any]) => {
