@@ -333,11 +333,8 @@ test.describe('Debugger Variables', () => {
   }) => {
     await init({ page, tmpPath });
 
-    await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
-
-    await page.notebook.setCell(0, 'code', 'import math');
-    await page.notebook.runCell(0);
+    await page.notebook.setCell(1, 'code', 'import math');
+    await page.notebook.runCell(1);
 
     await page.debugger.waitForSources();
 
