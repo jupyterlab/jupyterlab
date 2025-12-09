@@ -1449,6 +1449,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     sessionContext: ISessionContext,
     restartOptions?: ISessionContext.IRestartOptions
   ): Promise<boolean> {
+    restartOptions?.onBeforeRestart();
     const trans = this._translator.load('jupyterlab');
 
     await sessionContext.initialize();
