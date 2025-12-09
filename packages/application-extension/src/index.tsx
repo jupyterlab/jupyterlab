@@ -118,6 +118,14 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const moveTabLeft = 'application:move-tab-left';
+
+  export const moveTabRight = 'application:move-tab-right';
+
+  export const moveTabTop = 'application:move-tab-top';
+
+  export const moveTabBottom = 'application:move-tab-bottom';
 }
 
 /**
@@ -689,6 +697,55 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           // - by listening to this command execution.
         }
       });
+
+      commands.addCommand(CommandIDs.moveTabLeft, {
+        label: trans.__('Move Tab Left'),
+        execute: () => {
+          const widget = labShell.currentWidget;
+          if (widget) labShell.moveToLeft(widget);
+        }
+      });
+
+      commands.addCommand(CommandIDs.moveTabRight, {
+        label: trans.__('Move Tab Right'),
+        execute: () => {
+          const widget = labShell.currentWidget;
+          if (widget) labShell.moveToRight(widget);
+        }
+      });
+
+      commands.addCommand(CommandIDs.moveTabTop, {
+        label: trans.__('Move Tab Up'),
+        execute: () => {
+          const widget = labShell.currentWidget;
+          if (widget) labShell.moveToTop(widget);
+        }
+      });
+
+      commands.addCommand(CommandIDs.moveTabBottom, {
+        label: trans.__('Move Tab Down'),
+        execute: () => {
+          const widget = labShell.currentWidget;
+          if (widget) labShell.moveToBottom(widget);
+        }
+      });
+
+      app.contextMenu.addItem({
+        type: 'separator',
+        selector: '.lm-TabBar-tab'
+      });
+
+      ['left', 'right', 'top', 'bottom'].forEach(side => {
+        app.contextMenu.addItem({
+          command:
+            CommandIDs[
+              `moveTab${
+                side[0].toUpperCase() + side.slice(1)
+              }` as keyof typeof CommandIDs
+            ],
+          selector: '.lm-TabBar-tab'
+        });
+      });
     }
 
     if (palette) {
@@ -707,7 +764,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
-        CommandIDs.resetLayout
+        CommandIDs.resetLayout,
+        CommandIDs.moveTabBottom,
+        CommandIDs.moveTabLeft,
+        CommandIDs.moveTabRight,
+        CommandIDs.moveTabTop
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
