@@ -567,6 +567,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._stoppedSignal.emit();
   }
 
+  /**
+   * Signal emitted when the debugger is stopped.
+   */
   get stopped(): ISignal<IDebugger, void> {
     return this._stoppedSignal;
   }
