@@ -106,7 +106,6 @@
     "node-gyp": "^9.0.0",
     "vega-typings": "~0.22.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "~4.8.1",
     "@typescript-eslint/parser": "~4.8.1",
