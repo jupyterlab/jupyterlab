@@ -43,4 +43,4 @@ repos:
         name: integrity
         entry: 'npm run integrity --force'
         language: node
-        stages: [push]
+        stages: [pre-push]
