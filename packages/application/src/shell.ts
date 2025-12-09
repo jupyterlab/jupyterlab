@@ -1777,6 +1777,70 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return true;
   };
 
+  /**
+   * Move a widget to the left area of the main dock panel.
+   */
+  moveToLeft(widget: Widget): void {
+    const ref = this.currentWidget;
+
+    if (ref) {
+      this._dockPanel.addWidget(widget, {
+        mode: 'split-left',
+        ref
+      });
+    } else {
+      this._dockPanel.addWidget(widget);
+    }
+  }
+
+  /**
+   * Move a widget to the right area of the main dock panel.
+   */
+  moveToRight(widget: Widget): void {
+    const ref = this.currentWidget;
+
+    if (ref) {
+      this._dockPanel.addWidget(widget, {
+        mode: 'split-right',
+        ref
+      });
+    } else {
+      this._dockPanel.addWidget(widget);
+    }
+  }
+
+  /**
+   * Move a widget to the top area of the main dock panel.
+   */
+  moveToTop(widget: Widget): void {
+    const ref = this.currentWidget;
+
+    if (ref) {
+      this._dockPanel.addWidget(widget, {
+        mode: 'split-top',
+        ref
+      });
+    } else {
+      this._dockPanel.addWidget(widget);
+    }
+  }
+
+  /**
+   * Move a widget to the bottom area of the main dock panel.
+   */
+  moveToBottom(widget: Widget): void {
+    const ref = this.currentWidget;
+
+    if (ref) {
+      this._dockPanel.addWidget(widget, {
+        mode: 'split-bottom',
+        ref
+      });
+    } else {
+      this._dockPanel.addWidget(widget);
+    }
+  }
+
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
