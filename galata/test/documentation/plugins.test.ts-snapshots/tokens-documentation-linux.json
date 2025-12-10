@@ -78,7 +78,6 @@
   "@jupyterlab/running:IRunningSessionsSidebar": "A token allowing to modify the running sessions sidebar.",
   "@jupyterlab/services:IConfigSectionManager": "A service providing the config section manager.",
   "@jupyterlab/services:IContentsManager": "The contents manager token.",
-  "@jupyterlab/services:IDefaultContentProvider": "The default content provider for the contents manager.",
   "@jupyterlab/services:IDefaultDrive": "The default drive for the contents manager.",
   "@jupyterlab/services:IEventManager": "The event manager token.",
   "@jupyterlab/services:IKernelManager": "The kernel manager token.",

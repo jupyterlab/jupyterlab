@@ -131,6 +131,26 @@ const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
 };
 
 /**
+ * Content provider plugin warning
+ *
+ * A plugin that errors out if users are overwritting the deprecated defaultContentProvider
+ */
+const contentProviderWarning: ServiceManagerPlugin<void> = {
+  id: '@jupyterlab/services-extension:content-provider-warning',
+  description:
+    'Warn if user is overwriting the deprecated contentprovider plugin.',
+  autoStart: true,
+  requires: [IDefaultContentProvider],
+  activate: (_: null, contentProvider: IContentProvider) => {
+    if (!(contentProvider instanceof RestContentProvider)) {
+      console.error(
+        'Defining a IDefaultContentProvider plugin is deprecated since JupyterLab 4.5.1 and does not be have any effect.'
+      );
+    }
+  }
+};
+
+/**
  * The default drive plugin.
  */
 const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
@@ -138,17 +158,12 @@ const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
   description: 'The default drive for the contents manager.',
   autoStart: true,
   provides: IDefaultDrive,
-  requires: [IDefaultContentProvider],
   optional: [IServerSettings],
   activate: (
     _: null,
-    defaultContentProvider: IContentProvider,
     serverSettings: ServerConnection.ISettings | null
   ): Contents.IDrive => {
-    return new Drive({
-      serverSettings: serverSettings ?? undefined,
-      defaultContentProvider
-    });
+    return new Drive({ serverSettings: serverSettings ?? undefined });
   }
 };
 
@@ -421,8 +436,9 @@ export default [
   configSectionManager,
   connectionStatusPlugin,
   contentsManagerPlugin,
-  defaultDrivePlugin,
   defaultContentProvider,
+  contentProviderWarning,
+  defaultDrivePlugin,
   eventManagerPlugin,
   kernelManagerPlugin,
   kernelSpecManagerPlugin,
