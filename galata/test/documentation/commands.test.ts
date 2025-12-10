@@ -65,10 +65,24 @@ test('All commands must have a default label and describedBy', async ({
   if (!(await fs.pathExists(testInfo.snapshotDir))) {
     await fs.mkdir(testInfo.snapshotDir);
   }
-  await fs.writeJSON(testInfo.snapshotPath('commandsList.json'), commands, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
+
+  const commandsSnapshotPath = testInfo.snapshotPath('commandsList.json');
+
+  const existingCommands: typeof commands =
+    await fs.readJSON(commandsSnapshotPath);
+
+  // Update snapshots if requested
+  if (testInfo.config.updateSnapshots !== 'none') {
+    await fs.writeJSON(commandsSnapshotPath, commands, {
+      encoding: 'utf-8',
+      spaces: 2
+    });
+  }
+
+  expect(
+    commands,
+    'Commands list has changed. Run with --update-snapshots to update.'
+  ).toEqual(existingCommands);
 
   // All commands must at least define a label
   const missingLabel = commands.filter(command => !command.label);
