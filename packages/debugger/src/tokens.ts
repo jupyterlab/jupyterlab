@@ -206,7 +206,7 @@ export interface IDebugger {
   /**
    * Signal emitted when the debugger stops.
    */
-  stopped: ISignal<IDebugger, void>;
+  readonly stopped: ISignal<IDebugger, void>;
 
   /**
    * Update all breakpoints of a cell at once.
