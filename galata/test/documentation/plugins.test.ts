@@ -11,7 +11,10 @@ const IGNORED_PLUGINS = [
   /^@jupyterlab\/geojson-extension:factory$/,
   /^@jupyterlab\/galata-extension:helpers$/,
   /^@jupyter-widgets\//,
-  /^jupyterlab_pygments/
+  /^jupyterlab_pygments/,
+  // Deprecated plugins
+  /^@jupyterlab\/services-extension:default-content-provider$/,
+  /^@jupyterlab\/services-extension:content-provider-warning$/
 ];
 
 test('All plugins and tokens must have a description', async ({
