@@ -39,7 +39,9 @@ describe('JupyterPluginRegistry', () => {
       ]
     ]);
 
-    (registry as any)._plugins = mockPlugins;
+    for (const [id, plugin] of mockPlugins) {
+      (registry as any)._pluginData.set(id, plugin);
+    }
 
     // Mock super.activatePlugin to return after 31 seconds
     jest
