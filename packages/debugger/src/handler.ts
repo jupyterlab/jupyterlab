@@ -259,6 +259,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const removeHandlers = (): void => {
+      this._service.stopped.disconnect(onDebuggerStopped);
+
       const handler = this._handlers[widget.id];
       if (!handler) {
         return;
