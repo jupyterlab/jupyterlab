@@ -71,8 +71,8 @@ test('All commands must have a default label and describedBy', async ({
   const existingCommands: typeof commands =
     await fs.readJSON(commandsSnapshotPath);
 
-  // Update snapshots if requested
-  if (testInfo.config.updateSnapshots !== 'none') {
+  // Update snapshots only when explicitly requested with --update-snapshots
+  if (testInfo.config.updateSnapshots === 'all') {
     await fs.writeJSON(commandsSnapshotPath, commands, {
       encoding: 'utf-8',
       spaces: 2

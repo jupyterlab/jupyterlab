@@ -74,8 +74,8 @@ test('All plugins and tokens must have a description', async ({
   const existingTokens: Record<string, string | undefined> =
     await fs.readJSON(tokensSnapshotPath);
 
-  // Update snapshots if requested
-  if (testInfo.config.updateSnapshots !== 'none') {
+  // Update snapshots only when explicitly requested with --update-snapshots
+  if (testInfo.config.updateSnapshots === 'all') {
     await fs.writeJSON(pluginsSnapshotPath, plugins, {
       encoding: 'utf-8',
       spaces: 2
