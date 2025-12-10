@@ -147,6 +147,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     labShell: ILabShell | null,
     registry: ISettingRegistry | null
   ): Promise<IMainMenu> => {
+    await new Promise(resolve => setTimeout(resolve, 10000));
     const { commands } = app;
     const trans = translator.load('jupyterlab');
 

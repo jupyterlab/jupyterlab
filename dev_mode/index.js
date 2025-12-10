@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { PageConfig, JPPluginRegistry } from '@jupyterlab/coreutils';
+import { PageConfig, JupyterPluginRegistry} from '@jupyterlab/coreutils';
 
 import './style.js';
 
@@ -55,7 +55,7 @@ export async function main() {
      };
   }
 
-  var pluginRegistry = new JPPluginRegistry();
+  var pluginRegistry = new JupyterPluginRegistry();
   var JupyterLab = require('@jupyterlab/application').JupyterLab;
   var disabled = [];
   var deferred = [];

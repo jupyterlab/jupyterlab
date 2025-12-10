@@ -1,8 +1,30 @@
 import { PluginRegistry } from '@lumino/coreutils';
 
-export class JPPluginRegistry extends PluginRegistry {
+export class JupyterPluginRegistry extends PluginRegistry {
   constructor() {
     super();
+  }
+
+  private getDependentCount(id: string): number {
+    const plugin = (this as any)._plugins?.get(id);
+    if (!plugin?.provides) return 0;
+
+    const tokenName = plugin.provides.name;
+    let dependentCount = 0;
+
+    for (const otherPlugin of (this as any)._plugins?.values() ?? []) {
+      if (otherPlugin.id === id) continue;
+
+      const isDependant = otherPlugin.requires
+        ?.filter((token: any) => !!token)
+        .some((token: any) => token.name === tokenName);
+
+      if (isDependant) {
+        dependentCount++;
+      }
+    }
+
+    return dependentCount;
   }
 
   async activatePlugin(id: string) {
@@ -19,8 +41,13 @@ export class JPPluginRegistry extends PluginRegistry {
       const endTime = performance.now();
       const activationTime = endTime - startTime;
 
-      if (activationTime > 30000) {
-        console.warn(`Plugin ${id} took ${activationTime}ms to activate.`);
+      if (activationTime > 3000) {
+        const dependantCount = this.getDependentCount(id);
+        console.warn(
+          `Plugin ${id} (with ${dependantCount} dependants) took ${activationTime.toFixed(
+            2
+          )}ms to activate.`
+        );
       }
 
       return result;
