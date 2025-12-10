@@ -22,7 +22,14 @@ test('All commands must have a default label and describedBy', async ({
     }[] = [];
 
     for (const id of commandIds
-      .filter(id => !id.startsWith('_') && !id.startsWith('@jupyter-widgets'))
+      .filter(
+        id =>
+          !id.startsWith('_') &&
+          !id.startsWith('@jupyter-widgets') &&
+          // This command is internal and not meant to be exposed
+          // TODO: remove when the plugin has been removed from the codebase
+          id !== '@jupyterlab/services-extension:content-provider-warning'
+      )
       .sort()) {
       try {
         let args: any = undefined;
