@@ -4370,6 +4370,7 @@ __metadata:
     "@jupyterlab/nbformat": ^4.5.0
     "@jupyterlab/notebook": ^4.5.0
     "@jupyterlab/observables": ^5.5.0
+    "@jupyterlab/outputarea": ^4.5.0
     "@jupyterlab/property-inspector": ^4.5.0
     "@jupyterlab/rendermime": ^4.5.0
     "@jupyterlab/services": ^7.5.0
