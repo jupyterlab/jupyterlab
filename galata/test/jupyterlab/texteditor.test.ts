@@ -69,7 +69,7 @@ test.describe('Text Editor Tests', () => {
       await page.keyboard.press('Shift+ArrowLeft');
     }
     expect(
-      await page.locator('.jp-FileEditorCodeWrapper .cm-content').screenshot()
+      await page.locator('.jp-FileEditorCodeWrapper .cm-editor').screenshot()
     ).toMatchSnapshot(imageName, { threshold: 0.01 });
   });
 

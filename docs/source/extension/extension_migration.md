@@ -18,6 +18,12 @@ However, if an extension uses the experimental {ref}`webpackConfig` option, it
 may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
 Webpack config to Rspack.
 
+## JupyterLab 4.5.0 to 4.5.1
+
+### IDefaultContentProvider
+
+As part of the 4.5.0 release, a new token `IDefaultContentProvider` was wrongfully made public. The 4.5.1 release makes it deprecated and the token will be removed in 5.0.
+
 ## JupyterLab 4.4 to 4.5
 
 ### File Browser updates
