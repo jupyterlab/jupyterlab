@@ -1,17 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import * as React from 'react';
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import {
-  PanelWithToolbar,
-  searchIcon,
-  ToolbarButton
-} from '@jupyterlab/ui-components';
+import { PanelWithToolbar } from '@jupyterlab/ui-components';
 
 import { IDebugger } from '../../tokens';
 
 import { KernelSourcesBody } from './body';
+import { KernelSourcesFilter } from './filter';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -40,14 +39,8 @@ export class KernelSources extends PanelWithToolbar {
     });
 
     this.toolbar.addItem(
-      'open-filter',
-      new ToolbarButton({
-        icon: searchIcon,
-        onClick: async (): Promise<void> => {
-          this._body.toggleFilterbox();
-        },
-        tooltip: trans.__('Toggle search filter')
-      })
+      'filter',
+      ReactWidget.create(<KernelSourcesFilter model={model} trans={trans} />)
     );
 
     this.addClass('jp-DebuggerKernelSources-header');
