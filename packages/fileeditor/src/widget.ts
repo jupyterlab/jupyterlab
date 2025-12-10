@@ -56,6 +56,9 @@ export class FileEditor extends Widget {
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
 
+    const scrollPastEnd = FileEditor.defaultEditorConfig.scrollPastEnd;
+    this.toggleClass('jp-mod-scrollPastEnd', scrollPastEnd);
+
     void context.ready.then(() => {
       this._onContextReady();
     });
