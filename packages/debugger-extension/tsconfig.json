@@ -37,6 +37,9 @@
       "path": "../fileeditor"
     },
     {
+      "path": "../mainmenu"
+    },
+    {
       "path": "../nbformat"
     },
     {
