@@ -1477,6 +1477,29 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * TODO: remove
+ */
+const testPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:test-plugin',
+  description: 'TODO: remove',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    app.commands.addCommand('application:test-command', {
+      label: 'Test Command',
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        // no-op
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1486,6 +1509,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   mainCommands,
   layout,
   router,
+  testPlugin,
   tree,
   notfound,
   busy,
