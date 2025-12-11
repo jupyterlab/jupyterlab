@@ -9,24 +9,20 @@ import {
   classes,
   LabIcon,
   openKernelSourceIcon,
-  ReactWidget
+  ReactWidget,
+  UseSignal
 } from '@jupyterlab/ui-components';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { KernelSourcesFilter } from './filter';
-
 import { IDebugger } from '../../tokens';
-import { UseSignal } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime';
 
 /**
  * CSS class names.
  */
-const FILTERBOX_CLASS = 'jp-DebuggerKernelSource-filterBox';
-const FILTERBOX_HIDDEN_CLASS = 'jp-DebuggerKernelSource-filterBox-hidden';
 const SOURCE_CLASS = 'jp-DebuggerKernelSource-source';
 const DIR_CLASS = 'jp-DebuggerKernelSource-dir';
 
@@ -222,15 +218,8 @@ export class KernelSourcesBody extends ReactWidget {
   }
 
   render() {
-    let filterClass = FILTERBOX_CLASS;
-    if (!this._showFilter) {
-      filterClass += ' ' + FILTERBOX_HIDDEN_CLASS;
-    }
     return (
       <React.Fragment>
-        <div className={filterClass} key={'filter'}>
-          <KernelSourcesFilter model={this._model} trans={this._trans} />
-        </div>
         <UseSignal signal={this._model.changed}>
           {(_, kernelSources) => {
             const tree = buildTree(kernelSources ?? []);
@@ -260,6 +249,44 @@ export class KernelSourcesBody extends ReactWidget {
                     onOpen={handleOpen}
                     selectedPath={this._selectedPath}
                     onSelect={handleSelect}
+            const keymap: { [key: string]: number } = {};
+            const filtered = kernelSources ?? [];
+
+            return filtered.map(module => {
+              const name = module.name;
+              const path = module.path;
+              const key =
+                name + (keymap[name] = (keymap[name] ?? 0) + 1).toString();
+              return (
+                <div
+                  key={key}
+                  title={path}
+                  className={SOURCE_CLASS}
+                  onClick={() => {
+                    this._debuggerService
+                      .getSource({
+                        sourceReference: 0,
+                        path: path
+                      })
+                      .then(source => {
+                        this._model.open(source);
+                      })
+                      .catch(reason => {
+                        void showErrorMessage(
+                          this._trans.__('Fail to get source'),
+                          this._trans.__(
+                            "Fail to get '%1' source:\n%2",
+                            path,
+                            reason
+                          )
+                        );
+                      });
+                  }}
+                >
+                  <LabIcon.resolveReact
+                    icon={openKernelSourceIcon}
+                    iconClass={classes('jp-Icon')}
+                    tag={null}
                   />
                 ))}
               </div>
@@ -268,14 +295,6 @@ export class KernelSourcesBody extends ReactWidget {
         </UseSignal>
       </React.Fragment>
     );
-  }
-
-  /**
-   * Show or hide the filter box.
-   */
-  public toggleFilterbox(): void {
-    this._showFilter = !this._showFilter;
-    this.update();
   }
 
   private _model: IDebugger.Model.IKernelSources;
@@ -290,7 +309,7 @@ export class KernelSourcesBody extends ReactWidget {
  */
 export namespace KernelSourcesBody {
   /**
-   * Instantiation options for `Breakpoints`.
+   * Instantiation options for `KernelSourcesBody`.
    */
   export interface IOptions {
     /**
