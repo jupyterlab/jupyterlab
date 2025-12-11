@@ -693,17 +693,25 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
       commands.addCommand('application:move-tab', {
         label: args => {
-          const dir = args['direction'] as string;
-          return `Move Tab ${dir[0].toUpperCase() + dir.slice(1)}`;
+          const dir = args?.['direction'] as string | undefined;
+          return dir
+            ? trans.__(`Move Tab ${dir[0].toUpperCase() + dir.slice(1)}`)
+            : trans.__('Move Tab');
+        },
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
         },
         execute: args => {
-          const direction = args['direction'] as
+          const direction = args?.['direction'] as
             | 'left'
             | 'right'
             | 'top'
             | 'bottom';
           const widget = labShell.currentWidget;
-          if (widget) {
+          if (widget && direction) {
             labShell.moveTab(widget, direction);
           }
         }
@@ -726,8 +734,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
-        CommandIDs.resetLayout,
-        CommandIDs.moveTab
+        CommandIDs.resetLayout
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
