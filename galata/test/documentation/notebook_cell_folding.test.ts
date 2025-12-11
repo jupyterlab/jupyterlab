@@ -12,7 +12,7 @@ test.use({
 test.describe('Notebook Cell Folding', () => {
   test('Cell folding with first line visible', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    
+
     // Hide the development mode border
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -22,7 +22,7 @@ test.describe('Notebook Cell Folding', () => {
 
     // Create a new notebook
     await page.notebook.createNew();
-    
+
     // Add code cells with multi-line content
     await page.notebook.setCell(
       0,
@@ -65,7 +65,7 @@ print(f'Std Dev: {std_value}')`
       '.jp-Cell:first-child .jp-InputCollapser'
     );
     await firstCellCollapser.click();
-    
+
     // Wait for collapse animation
     await page.waitForTimeout(200);
 
@@ -74,7 +74,7 @@ print(f'Std Dev: {std_value}')`
       '.jp-Cell:nth-child(2) .jp-InputCollapser'
     );
     await secondCellCollapser.click();
-    
+
     // Wait for collapse animation
     await page.waitForTimeout(200);
 
@@ -87,7 +87,7 @@ print(f'Std Dev: {std_value}')`
 
   test('Cell folding interaction - expand on click', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    
+
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
         border-top: none;
@@ -95,7 +95,7 @@ print(f'Std Dev: {std_value}')`
     });
 
     await page.notebook.createNew();
-    
+
     // Add a code cell with content
     await page.notebook.setCell(
       0,
@@ -143,7 +143,7 @@ print(result)`
 
   test('Cell folding with blue bar indicator', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    
+
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
         border-top: none;
@@ -151,7 +151,7 @@ print(result)`
     });
 
     await page.notebook.createNew();
-    
+
     // Add cells with different types of content
     await page.notebook.setCell(
       0,
