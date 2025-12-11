@@ -178,7 +178,6 @@
   "@jupyterlab/services-extension:config-section-manager": "Provides the config section manager.",
   "@jupyterlab/services-extension:connection-status": "Provides the default connection status.",
   "@jupyterlab/services-extension:contents-manager": "The default contents manager plugin.",
-  "@jupyterlab/services-extension:default-content-provider": "The default content provider for the contents manager.",
   "@jupyterlab/services-extension:default-drive": "The default drive for the contents manager.",
   "@jupyterlab/services-extension:event-manager": "The event manager plugin.",
   "@jupyterlab/services-extension:kernel-manager": "The kernel manager plugin.",
