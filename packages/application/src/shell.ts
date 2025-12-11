@@ -1776,69 +1776,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     return true;
   };
-
   /**
-   * Move a widget to the left area of the main dock panel.
+   * Move a widget to the main dock panel.
    */
-  moveToLeft(widget: Widget): void {
+  moveTab(widget: Widget, direction: 'left' | 'right' | 'top' | 'bottom') {
     const ref = this.currentWidget;
 
-    if (ref) {
-      this._dockPanel.addWidget(widget, {
-        mode: 'split-left',
-        ref
-      });
-    } else {
+    if (!ref) {
       this._dockPanel.addWidget(widget);
+      return;
     }
-  }
 
-  /**
-   * Move a widget to the right area of the main dock panel.
-   */
-  moveToRight(widget: Widget): void {
-    const ref = this.currentWidget;
+    const modeMap: Record<string, DockLayout.InsertMode> = {
+      left: 'split-left',
+      right: 'split-right',
+      top: 'split-top',
+      bottom: 'split-bottom'
+    };
 
-    if (ref) {
-      this._dockPanel.addWidget(widget, {
-        mode: 'split-right',
-        ref
-      });
-    } else {
-      this._dockPanel.addWidget(widget);
-    }
-  }
+    const mode = modeMap[direction];
 
-  /**
-   * Move a widget to the top area of the main dock panel.
-   */
-  moveToTop(widget: Widget): void {
-    const ref = this.currentWidget;
-
-    if (ref) {
-      this._dockPanel.addWidget(widget, {
-        mode: 'split-top',
-        ref
-      });
-    } else {
-      this._dockPanel.addWidget(widget);
-    }
-  }
-
-  /**
-   * Move a widget to the bottom area of the main dock panel.
-   */
-  moveToBottom(widget: Widget): void {
-    const ref = this.currentWidget;
-
-    if (ref) {
-      this._dockPanel.addWidget(widget, {
-        mode: 'split-bottom',
-        ref
-      });
-    } else {
-      this._dockPanel.addWidget(widget);
-    }
+    this._dockPanel.addWidget(widget, {
+      mode,
+      ref
+    });
   }
 
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
