@@ -249,44 +249,6 @@ export class KernelSourcesBody extends ReactWidget {
                     onOpen={handleOpen}
                     selectedPath={this._selectedPath}
                     onSelect={handleSelect}
-            const keymap: { [key: string]: number } = {};
-            const filtered = kernelSources ?? [];
-
-            return filtered.map(module => {
-              const name = module.name;
-              const path = module.path;
-              const key =
-                name + (keymap[name] = (keymap[name] ?? 0) + 1).toString();
-              return (
-                <div
-                  key={key}
-                  title={path}
-                  className={SOURCE_CLASS}
-                  onClick={() => {
-                    this._debuggerService
-                      .getSource({
-                        sourceReference: 0,
-                        path: path
-                      })
-                      .then(source => {
-                        this._model.open(source);
-                      })
-                      .catch(reason => {
-                        void showErrorMessage(
-                          this._trans.__('Fail to get source'),
-                          this._trans.__(
-                            "Fail to get '%1' source:\n%2",
-                            path,
-                            reason
-                          )
-                        );
-                      });
-                  }}
-                >
-                  <LabIcon.resolveReact
-                    icon={openKernelSourceIcon}
-                    iconClass={classes('jp-Icon')}
-                    tag={null}
                   />
                 ))}
               </div>
@@ -300,7 +262,6 @@ export class KernelSourcesBody extends ReactWidget {
   private _model: IDebugger.Model.IKernelSources;
   private _debuggerService: IDebugger;
   private _trans: IRenderMime.TranslationBundle;
-  private _showFilter = false;
   private _selectedPath: string | null = null;
 }
 
