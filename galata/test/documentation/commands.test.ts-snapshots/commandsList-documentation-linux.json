@@ -1595,6 +1595,7 @@
   {
     "id": "debugger:pause-on-exceptions",
     "label": "Breakpoints on exception",
+    "caption": "",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -2575,7 +2576,7 @@
   },
   {
     "id": "fileeditor:change-font-size",
-    "label": "Decrease Font Size",
+    "label": "Change Font Size",
     "caption": "",
     "shortcuts": [],
     "args": {
