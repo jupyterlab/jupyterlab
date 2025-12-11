@@ -1152,7 +1152,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
       label: args => (args.filter as string) || 'Breakpoints on exception',
-      caption: args => args.description as string,
+      caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),
