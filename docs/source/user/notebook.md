@@ -124,13 +124,6 @@ To collapse or expand a cell, you can:
 - Unlike the legacy codefolding nbextension, collapsed cells cannot be toggled using arrow keys in edit mode
 - Keyboard navigation in command mode works with both collapsed and expanded cells
 
-This implementation differs from the classic Jupyter Notebook's codefolding extension
-in the following ways:
-
-- The collapse/expand action in JupyterLab is cell-based rather than code-block-based
-- Collapsed cells expand immediately upon selection, making the content accessible for editing
-- The first line remains visible to provide context, similar to the legacy firstline-fold feature
-
 (enable-scrolling)=
 
 Enable scrolling for long outputs by right-clicking on a cell and
