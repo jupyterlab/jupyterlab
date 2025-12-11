@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/buildutils",
+  "name": "@jupyterlab/template",
   "version": "4.5.0",
-  "description": "JupyterLab - Build Utilities",
+  "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -12,62 +12,35 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
+  "sideEffects": [
+    "style/**/*"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "bin": {
-    "get-dependency": "./lib/get-dependency.js",
-    "local-repository": "./lib/local-repository.js",
-    "remove-dependency": "./lib/remove-dependency.js",
-    "update-dependency": "./lib/update-dependency.js",
-    "update-dist-tag": "./lib/update-dist-tag.js",
-    "update-staging-lock": "./lib/update-staging-lock.js"
-  },
   "directories": {
     "lib": "lib/"
   },
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "template/package.json",
-    "template/tsconfig.json",
-    "template/src/index.ts",
-    "verdaccio.yml",
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "src/**/*.{ts,tsx}"
   ],
   "scripts": {
-    "build": "tsc && cd template && npm run build",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "watch": "tsc -w --listEmittedFiles"
-  },
-  "dependencies": {
-    "@yarnpkg/core": "^4.0.3",
-    "@yarnpkg/parsers": "^3.0.0",
-    "commander": "^9.4.1",
-    "crypto": "~1.0.1",
-    "dependency-graph": "^0.11.0",
-    "fs-extra": "^10.1.0",
-    "glob": "~7.1.6",
-    "inquirer": "^9.1.4",
-    "micromatch": "^4.0.2",
-    "minimatch": "~3.0.4",
-    "os": "~0.1.1",
-    "package-json": "^7.0.0",
-    "prettier": "~2.6.0",
-    "process": "^0.11.10",
-    "semver": "^7.5.2",
-    "sort-package-json": "~1.53.1",
-    "typescript": "~5.5.4",
-    "verdaccio": "^5.33.0"
+    "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.1",
-    "@types/glob": "^7.1.1",
-    "@types/inquirer": "^9.0.3",
-    "@types/micromatch": "^4.0.1",
-    "@types/node": "^20.11.27",
-    "@types/prettier": "~2.6.0",
-    "rimraf": "~5.0.5"
+    "@jupyterlab/testing": "^4.5.0",
+    "@types/jest": "^29.2.0",
+    "rimraf": "~5.0.5",
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

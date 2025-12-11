@@ -1,10 +1,8 @@
 {
-  "extends": "../tsconfigbase",
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src",
-    "module": "Node16",
-    "moduleResolution": "node16"
+    "rootDir": "src"
   },
   "include": ["src/*"],
   "references": []
