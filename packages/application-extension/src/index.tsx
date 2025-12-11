@@ -691,12 +691,28 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           // - by listening to this command execution.
         }
       });
+
       commands.addCommand('application:move-tab', {
         label: args => {
-          const dir = args?.['direction'] as string | undefined;
-          return dir
-            ? trans.__(`Move Tab ${dir[0].toUpperCase() + dir.slice(1)}`)
-            : trans.__('Move Tab');
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+            | undefined;
+
+          if (!direction) {
+            return trans.__('Move Tab');
+          }
+
+          const directionLabels: Record<string, string> = {
+            left: trans.__('Left'),
+            right: trans.__('Right'),
+            top: trans.__('Top'),
+            bottom: trans.__('Bottom')
+          };
+
+          return trans.__('Move Tab %1', directionLabels[direction]);
         },
         describedBy: {
           args: {
