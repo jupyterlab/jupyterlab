@@ -256,7 +256,7 @@ These lines:
     private. Use `npm access public @jupyterlab/<name>` to make it public.
   - The build will fail if we forget to include `style/` in the `files:`
     of a package (it will fail on the `jupyter lab build` command because
-    webpack cannot find the referenced styles to import.
+    webpack cannot find the referenced styles to import).
 - [ ] Update the other repos:
   - [ ] https://github.com/jupyterlab/extension-template
   - [ ] https://github.com/jupyterlab/jupyter-renderers
