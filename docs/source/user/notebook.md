@@ -96,20 +96,21 @@ Create multiple synchronized views of a single notebook:
 
 ## Collapsing Cells
 
-You can collapse and expand code and output to manage large notebooks more effectively.
-This feature allows you to hide the details of a cell while keeping the first line visible as a summary.
+When you collapse a cell, the first line of the code remains visible. This allows you
+to identify the cell's purpose without viewing the entire code block, which is
+particularly useful when working with large notebooks containing many cells.
 
-To collapse a cell:
-- Click the blue collapser button on the left of the cell input or output area.
-- Select "Collapse Selected Code" or "Collapse Selected Outputs" from the **View** menu.
-- Use the command palette to run the collapse commands.
+![Cell folding with first line visible](../_images/notebook_cell_folding_first_line.png)
 
-When a cell is collapsed, a placeholder indicates the hidden content. If the code is collapsed, the first line remains visible, allowing you to identify the cell's purpose.
+To collapse or expand a cell, you can:
+- Click the blue vertical bar on the left edge of the cell
+- Use the View menu to collapse or expand all cells
+- Click directly on a collapsed cell to expand it
 
-To expand a cell:
-- Click the collapser button again.
-- Click the collapsed placeholder (for outputs).
-- Select "Expand Selected Code" or "Expand Selected Outputs" from the **View** menu.
+**Important behavioral notes:**
+- When a cell is collapsed, clicking anywhere on the cell (not just the blue bar) will expand it
+- In command mode, you can navigate to collapsed cells using arrow keys and execute them with `Shift+Enter`
+- Keyboard navigation in command mode works with both collapsed and expanded cells
 
 Code and output collapsing:
 
