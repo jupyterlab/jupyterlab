@@ -121,7 +121,6 @@ To collapse or expand a cell, you can:
 
 - When a cell is collapsed, clicking anywhere on the cell (not just the blue bar) will expand it
 - In command mode, you can navigate to collapsed cells using arrow keys and execute them with `Shift+Enter`
-- Unlike the legacy codefolding nbextension, collapsed cells cannot be toggled using arrow keys in edit mode
 - Keyboard navigation in command mode works with both collapsed and expanded cells
 
 (enable-scrolling)=
