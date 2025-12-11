@@ -1966,7 +1966,6 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
         const initialSource = 'line1\nline2';
-        const expectedAfterMerge = 'line1\n\nline2';
         cell.model.sharedModel.setSource(initialSource);
         // Simulate running cell
         cell.model.sharedModel.executionState = 'running';
@@ -1984,13 +1983,10 @@ describe('@jupyterlab/notebook', () => {
           'running'
         );
         // Merge cells
-        widget.select(secondSplitCell);
         widget.activeCellIndex = 0;
-        NotebookActions.mergeCells(widget);
+        NotebookActions.mergeCells(widget, false, false);
         const mergedCell = widget.widgets[0] as CodeCell;
-        expect(mergedCell.model.sharedModel.getSource()).toBe(
-          expectedAfterMerge
-        );
+        expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
         expect(mergedCell.model.sharedModel.executionState).toBe('idle');
         // Undo the merge (which splits the cells again)
         NotebookActions.undo(widget);
