@@ -264,20 +264,18 @@ export namespace Commands {
           });
       },
       label: args => {
-        const delta = Number(args['delta']);
-        if (Number.isNaN(delta)) {
-          console.error(
-            `${CommandIDs.changeFontSize}: delta arg must be a number`
-          );
-        }
+        const delta = Number(args.delta ?? 0);
+
         if (delta > 0) {
           return args.isMenu
             ? trans.__('Increase Text Editor Font Size')
             : trans.__('Increase Font Size');
-        } else {
+        } else if (delta < 0) {
           return args.isMenu
             ? trans.__('Decrease Text Editor Font Size')
             : trans.__('Decrease Font Size');
+        } else {
+          return trans.__('Change Font Size');
         }
       },
       describedBy: {
