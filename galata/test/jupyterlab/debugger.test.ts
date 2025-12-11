@@ -338,8 +338,9 @@ test.describe('Debugger Variables', () => {
 
     await page.debugger.waitForSources();
 
-    const sourcesPanel = await page.debugger.getSourcePanelLocator();
-    const items = sourcesPanel.locator('.jp-DebuggerKernelSource-item');
+    const kernelSourcesRoot = page.locator('.jp-DebuggerKernelSources');
+    const body = kernelSourcesRoot.locator('.jp-DebuggerKernelSources-body');
+    const items = body.locator('.jp-DebuggerKernelSource-source');
 
     expect(await items.count()).toBeGreaterThan(0);
 
