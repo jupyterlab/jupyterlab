@@ -17,8 +17,6 @@ import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import fs from 'fs';
 import path from 'path';
 import si from 'systeminformation';
-import * as vega from 'vega';
-import * as vl from 'vega-lite';
 import * as vs from 'vega-statistics';
 import generateVegaLiteSpec from './benchmarkVLTpl';
 
@@ -473,8 +471,11 @@ class BenchmarkReporter implements Reporter {
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
       const config = this._buildVegaLiteGraph(allData, this._comparison);
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
+
+      const vl = await import('vega-lite');
       const vegaSpec = vl.compile(config as any).spec;
 
+      const vega = await import('vega');
       const view = new vega.View(vega.parse(vegaSpec), {
         renderer: 'svg'
       }).initialize();
