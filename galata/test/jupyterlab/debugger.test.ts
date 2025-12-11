@@ -336,8 +336,6 @@ test.describe('Debugger Variables', () => {
     await page.notebook.setCell(1, 'code', 'import math');
     await page.notebook.runCell(1);
 
-    await page.debugger.waitForSources();
-
     const kernelSourcesRoot = page.locator('.jp-DebuggerKernelSources');
     const body = kernelSourcesRoot.locator('.jp-DebuggerKernelSources-body');
     const items = body.locator('.jp-DebuggerKernelSource-source');
