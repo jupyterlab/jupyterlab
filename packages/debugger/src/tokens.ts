@@ -1017,6 +1017,11 @@ export namespace IDebugger {
       currentSource: IDebugger.Source | null;
 
       /**
+       * Return the current frame.
+       */
+      currentFrame: IDebugger.IStackFrame | null;
+
+      /**
        * Signal emitted when the current source changes.
        */
       readonly currentSourceChanged: ISignal<

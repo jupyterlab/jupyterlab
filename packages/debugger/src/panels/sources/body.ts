@@ -30,7 +30,6 @@ export class SourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-    this._mimeTypeService = options.editorServices.mimeTypeService;
 
     const factory = new Debugger.ReadOnlyEditorFactory({
       editorServices: options.editorServices
@@ -43,13 +42,14 @@ export class SourcesBody extends Widget {
     });
     this._editor.hide();
 
-    this._model.currentFrameChanged.connect(async (_, frame) => {
-      if (!frame) {
+    this._model.currentSourceChanged.connect(async (_, currentSource) => {
+      this._currentSource = currentSource;
+
+      if (!this._currentSource) {
         this._clearEditor();
         return;
       }
-
-      void this._showSource(frame);
+      void this._showSource(this._currentSource);
     });
 
     const layout = new PanelLayout();
@@ -84,14 +84,7 @@ export class SourcesBody extends Widget {
    *
    * @param frame The current frame.
    */
-  private async _showSource(frame: IDebugger.IStackFrame): Promise<void> {
-    const displayPath = this._model.getDisplayName(frame);
-
-    const source = await this._debuggerService.getSource({
-      sourceReference: 0,
-      path: frame.source?.path
-    });
-
+  private async _showSource(source: IDebugger.Source): Promise<void> {
     if (!source?.content) {
       this._clearEditor();
       return;
@@ -100,11 +93,12 @@ export class SourcesBody extends Widget {
     if (this._editorHandler) {
       this._editorHandler.dispose();
     }
-
     const { content, mimeType } = source;
     const editorMimeType =
       mimeType ||
-      this._mimeTypeService.getMimeTypeByFilePath(frame.source?.path ?? '');
+      this._mimeTypeService.getMimeTypeByFilePath(
+        this._model.currentFrame?.source?.path ?? ''
+      );
 
     this._editor.model.sharedModel.setSource(content);
     this._editor.model.mimeType = editorMimeType;
@@ -113,18 +107,18 @@ export class SourcesBody extends Widget {
       debuggerService: this._debuggerService,
       editorReady: () => Promise.resolve(this._editor.editor),
       getEditor: () => this._editor.editor,
-      path: frame.source?.path ?? '',
+      path: this._model.currentFrame?.source?.path ?? '',
       src: this._editor.model.sharedModel
     });
 
-    this._model.currentSource = {
-      content,
-      mimeType: editorMimeType,
-      path: displayPath
-    };
-
     requestAnimationFrame(() => {
-      EditorHandler.showCurrentLine(this._editor.editor, frame.line, 'start');
+      if (this._model.currentFrame) {
+        EditorHandler.showCurrentLine(
+          this._editor.editor,
+          this._model.currentFrame.line,
+          'start'
+        );
+      }
     });
 
     this._editor.show();
@@ -135,6 +129,7 @@ export class SourcesBody extends Widget {
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
   private _mimeTypeService: IEditorMimeTypeService;
+  private _currentSource: IDebugger.Source | null = null;
 }
 
 /**

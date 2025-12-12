@@ -16,7 +16,7 @@ import { KernelSourcesModel } from './panels/kernelSources/model';
 import { VariablesModel } from './panels/variables/model';
 import { IDebuggerDisplayRegistry } from './tokens';
 import { DebuggerDisplayRegistry } from './displayregistry';
-
+import { IEditorServices } from '@jupyterlab/codeeditor';
 /**
  * A model for a debugger.
  */
@@ -27,7 +27,6 @@ export class DebuggerModel implements IDebugger.Model.IService {
   constructor(options: DebuggerModel.IOptions) {
     const displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();
-
     this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
       displayRegistry
@@ -35,6 +34,8 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
+      editorServices: options.editorServices,
+      getSource: options.getSource,
       displayRegistry
     });
     this.kernelSources = new KernelSourcesModel();
@@ -182,8 +183,16 @@ export namespace DebuggerModel {
    */
   export interface IOptions {
     /**
+     * Get source
+     */
+    getSource(): IDebugger.Source;
+    /**
      * The display registry.
      */
     displayRegistry?: IDebuggerDisplayRegistry | null;
+    /**
+     * The editor services.
+     */
+    editorServices: IEditorServices;
   }
 }

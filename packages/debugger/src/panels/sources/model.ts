@@ -5,6 +5,10 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebuggerDisplayRegistry } from '../../displayregistry';
 import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import {
+  IEditorMimeTypeService,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -17,8 +21,41 @@ export class SourcesModel implements IDebugger.Model.ISources {
    */
   constructor(options: SourcesModel.IOptions) {
     this.currentFrameChanged = options.currentFrameChanged;
+    this._currentSource = null;
+    this._currentFrame = null;
+
     this._displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();
+
+    this._mimeTypeService = options.editorServices?.mimeTypeService;
+
+    this.currentFrameChanged.connect(async (_, frame) => {
+      if (frame) {
+        const displayPath = this.getDisplayName(frame);
+
+        const source = await options.getSource({
+          sourceReference: 0,
+          path: frame?.source?.path
+        });
+
+        if (source) {
+          const { content, mimeType } = source;
+          const editorMimeType =
+            mimeType ||
+            this._mimeTypeService.getMimeTypeByFilePath(
+              frame.source?.path ?? ''
+            );
+
+          this.currentSource = {
+            content: content,
+            mimeType: editorMimeType,
+            path: displayPath
+          };
+
+          this.currentFrame = frame;
+        }
+      }
+    });
   }
 
   /**
@@ -61,6 +98,22 @@ export class SourcesModel implements IDebugger.Model.ISources {
   }
 
   /**
+   * Return the current frame.
+   */
+  get currentFrame(): IDebugger.IStackFrame | null {
+    return this._currentFrame;
+  }
+
+  /**
+   * Set the current frame.
+   *
+   * @param frame The current frame.
+   */
+  set currentFrame(frame: IDebugger.IStackFrame | null) {
+    this._currentFrame = frame;
+  }
+
+  /**
    * Open a source in the main area.
    */
   open(): void {
@@ -95,6 +148,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
     IDebugger.Source | null
   >(this);
   private _displayRegistry: IDebuggerDisplayRegistry;
+  private _mimeTypeService: IEditorMimeTypeService;
+  private _currentFrame: IDebugger.IStackFrame | null;
 }
 
 /**
@@ -113,9 +168,18 @@ export namespace SourcesModel {
       IDebugger.IStackFrame | null
     >;
 
+    getSource(args: {
+      sourceReference: number;
+      path: string | undefined;
+    }): IDebugger.Source;
     /**
      * The display registry.
      */
+
     displayRegistry?: IDebuggerDisplayRegistry;
+    /**
+     * The editor services used to create new read-only editors.
+     */
+    editorServices: IEditorServices;
   }
 }
