@@ -118,6 +118,8 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const moveTab = 'application:move-tab';
 }
 
 /**
@@ -687,6 +689,54 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
           // Some actions are also trigger indirectly
           // - by listening to this command execution.
+        }
+      });
+
+      commands.addCommand('application:move-tab', {
+        label: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+            | undefined;
+
+          if (!direction) {
+            return trans.__('Move Tab To');
+          }
+
+          const directionLabels: Record<string, string> = {
+            left: trans.__('Left'),
+            right: trans.__('Right'),
+            top: trans.__('Top'),
+            bottom: trans.__('Bottom')
+          };
+
+          return trans.__('%1', directionLabels[direction]);
+        },
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              direction: {
+                type: 'string',
+                enum: ['left', 'right', 'top', 'bottom'],
+                description: trans.__('The direction to move the tab')
+              }
+            },
+            required: ['direction']
+          }
+        },
+        execute: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom';
+          const widget = labShell.currentWidget;
+          if (widget && direction) {
+            labShell.moveTab(widget, direction);
+          }
         }
       });
     }

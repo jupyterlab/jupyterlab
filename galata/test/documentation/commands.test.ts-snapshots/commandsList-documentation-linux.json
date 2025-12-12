@@ -90,6 +90,30 @@
     }
   },
   {
+    "id":"application:move-tab",
+    "label": "Move Tab To",
+    "caption": "",
+    "shortcuts": [],
+    "args":{
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ],
+          "description": "The direction to move the tab"
+        }
+      },
+      "required": [
+        "direction"
+      ]
+    }
+  },
+  {
     "id": "application:reset-layout",
     "label": "Reset Default Layout",
     "caption": "",
