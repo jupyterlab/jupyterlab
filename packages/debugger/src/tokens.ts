@@ -1061,6 +1061,11 @@ export namespace IDebugger {
       filter: string;
 
       /**
+       * List of source names to hide
+       */
+      hiddenSources: string[];
+
+      /**
        * Signal emitted when the kernel sources have changed.
        */
       readonly changed: ISignal<
