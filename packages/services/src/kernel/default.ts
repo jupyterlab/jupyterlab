@@ -31,7 +31,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 // Stub for requirejs.
 declare let requirejs: any;
 
-const KERNEL_INFO_TIMEOUT = 3000;
+const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 const STARTING_KERNEL_SESSION = '';
 
@@ -66,6 +66,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._subshellId = options.subshellId ?? null;
 
     this._createSocket();
+    this._kernelInfoTimeout =
+      options?.kernelInfoTimeout ?? DEFAULT_KERNEL_INFO_TIMEOUT;
   }
 
   get disposed(): ISignal<this, void> {
@@ -297,6 +299,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       handleComms: false,
       kernelAPIClient: this._kernelAPIClient,
       commsOverSubshells: CommsOverSubshells.Disabled,
+      kernelInfoTimeout: this._kernelInfoTimeout,
       ...options
     });
   }
@@ -1581,7 +1584,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
         // FIXME: if sent while zmq subscriptions are not established,
         // kernelInfo may not resolve, so use a timeout to ensure we don't hang forever.
         // It may be preferable to retry kernelInfo rather than give up after one timeout.
-        let timeoutHandle = setTimeout(sendPendingOnce, KERNEL_INFO_TIMEOUT);
+        let timeoutHandle = setTimeout(
+          sendPendingOnce,
+          this._kernelInfoTimeout
+        );
       } else {
         // If the connection is down, then we do not know what is happening
         // with the kernel, so set the status to unknown.
@@ -1887,6 +1893,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
   private _supportsSubshells = false;
   private _subshellId: string | null;
+  private _kernelInfoTimeout: number = DEFAULT_KERNEL_INFO_TIMEOUT;
 }
 
 /**
