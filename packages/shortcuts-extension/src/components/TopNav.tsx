@@ -3,8 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Button } from '@jupyter/react-components';
 import { ITranslator } from '@jupyterlab/translation';
-import { FilterBox } from '@jupyterlab/ui-components';
+import { checkIcon, dotsIcon, FilterBox } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
@@ -15,6 +16,8 @@ export interface IAdvancedOptionsProps {
   showSelectors: boolean;
   resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
+  toggleAllCommands: IShortcutUI['toggleAllCommands'];
+  showAllCommands: boolean;
 }
 
 export interface ISymbolsProps {}
@@ -52,22 +55,80 @@ function Symbols(props: ISymbolsProps): JSX.Element {
 
 function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
   const trans = props.translator.load('jupyterlab');
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      setMenuOpen(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [menuOpen]);
+
   return (
-    <div className="jp-Shortcuts-AdvancedOptions">
-      <a
-        className="jp-Shortcuts-AdvancedOptionsLink"
-        onClick={() => props.toggleSelectors()}
+    <div className="jp-Shortcuts-AdvancedOptions" ref={menuRef}>
+      <Button
+        className="jp-Shortcuts-AdvancedOptionsButton jp-mod-styled jp-mod-reject"
+        onClick={() => setMenuOpen(!menuOpen)}
+        title={trans.__('Advanced options')}
+        appearance={'neutral'}
       >
-        {props.showSelectors
-          ? trans.__('Hide Selectors')
-          : trans.__('Show Selectors')}
-      </a>
-      <a
-        className="jp-Shortcuts-AdvancedOptionsLink"
-        onClick={() => props.resetShortcuts()}
-      >
-        {trans.__('Reset All')}
-      </a>
+        <dotsIcon.react tag={null} />
+      </Button>
+      {menuOpen && (
+        <ul className="lm-Menu lm-MenuBar-menu jp-Shortcuts-AdvancedOptionsMenu">
+          <li
+            className="lm-Menu-item"
+            onClick={async () => {
+              await props.resetShortcuts();
+              setMenuOpen(false);
+            }}
+          >
+            <div className="lm-Menu-itemIcon" />
+            <div className="lm-Menu-itemLabel">{trans.__('Reset All')}</div>
+          </li>
+          <li
+            className="lm-Menu-item"
+            onClick={async () => {
+              props.toggleSelectors();
+              setMenuOpen(false);
+            }}
+          >
+            {props.showSelectors ? (
+              <checkIcon.react className="lm-Menu-itemIcon" />
+            ) : (
+              <div className="lm-Menu-itemIcon" />
+            )}
+            <div className="lm-Menu-itemLabel">
+              {trans.__('Show Selectors')}
+            </div>
+          </li>
+          <li
+            className="lm-Menu-item"
+            onClick={() => {
+              props.toggleAllCommands();
+              setMenuOpen(false);
+            }}
+          >
+            {props.showAllCommands ? (
+              <checkIcon.react className="lm-Menu-itemIcon" />
+            ) : (
+              <div className="lm-Menu-itemIcon" />
+            )}
+            <div className="lm-Menu-itemLabel">
+              {trans.__('Show all commands')}
+            </div>
+          </li>
+        </ul>
+      )}
     </div>
   );
 }
@@ -80,6 +141,8 @@ export interface ITopNavProps {
   showSelectors: boolean;
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
+  toggleAllCommands: IShortcutUI['toggleAllCommands'];
+  showAllCommands: boolean;
   width: number;
   translator: ITranslator;
 }
@@ -121,6 +184,8 @@ export class TopNav extends React.Component<ITopNavProps> {
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
+            toggleAllCommands={this.props.toggleAllCommands}
+            showAllCommands={this.props.showAllCommands}
             translator={this.props.translator}
           />
         </div>
