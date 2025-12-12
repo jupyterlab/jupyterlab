@@ -712,12 +712,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             bottom: trans.__('Bottom')
           };
 
-          return trans.__('Move Tab %1', directionLabels[direction]);
+          return trans.__('%1', directionLabels[direction]);
         },
         describedBy: {
           args: {
             type: 'object',
-            properties: {}
+            properties: {
+              direction: {
+                type: 'string',
+                enum: ['left', 'right', 'top', 'bottom'],
+                description: trans.__('The direction to move the tab')
+              }
+            },
+            required: ['direction']
           }
         },
         execute: args => {
