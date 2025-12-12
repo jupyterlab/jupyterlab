@@ -702,7 +702,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             | undefined;
 
           if (!direction) {
-            return trans.__('Move Tab');
+            return trans.__('Move Tab To');
           }
 
           const directionLabels: Record<string, string> = {
