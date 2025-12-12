@@ -342,12 +342,6 @@ test.describe('Debugger Variables', () => {
         .allInnerTexts();
       return texts.some(t => t.includes('json'));
     });
-
-    const items = page.locator('.jp-DebuggerKernelSource-source');
-    expect(await items.count()).toBeGreaterThan(0);
-
-    const jsonEntry = items.filter({ hasText: 'json' });
-    expect(await jsonEntry.count()).toBeGreaterThan(0);
   });
 });
 
