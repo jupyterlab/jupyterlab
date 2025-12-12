@@ -333,17 +333,17 @@ test.describe('Debugger Variables', () => {
   }) => {
     await init({ page, tmpPath });
 
-    await page.notebook.setCell(1, 'code', 'import math');
-    await page.notebook.runCell(1);
+    await page.notebook.addCell('code', 'import json');
+    await page.notebook.runCell(2);
 
-    const kernelSourcesRoot = page.locator('.jp-DebuggerKernelSources');
-    const body = kernelSourcesRoot.locator('.jp-DebuggerKernelSources-body');
+    const body = page.locator('.jp-DebuggerKernelSources-body');
+    expect(await body.count()).toBeGreaterThan(0);
     const items = body.locator('.jp-DebuggerKernelSource-source');
 
     expect(await items.count()).toBeGreaterThan(0);
 
-    const mathEntry = items.filter({ hasText: 'math' });
-    expect(await mathEntry.count()).toBeGreaterThan(0);
+    const jsonEntry = items.filter({ hasText: 'json' });
+    expect(await jsonEntry.count()).toBeGreaterThan(0);
   });
 });
 
