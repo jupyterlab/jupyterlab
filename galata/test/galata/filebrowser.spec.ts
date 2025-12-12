@@ -118,3 +118,91 @@ test.describe('upload auto-open behavior', () => {
     });
   });
 });
+
+test.describe('Open in Terminal context menu', () => {
+  test('should open a terminal in the correct directory for a folder', async ({
+    page,
+    tmpPath
+  }) => {
+    const folderName = 'test-folder-for-terminal';
+    await page.contents.createDirectory(`${tmpPath}/${folderName}`);
+
+    const folderLocator = page.locator(
+      `.jp-DirListing-item[data-path="${tmpPath}/${folderName}"]`
+    );
+    await folderLocator.click({ button: 'right' });
+
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Verify that the terminal tab is created and active.
+    const terminalTabLocator = page.activity.getTabLocator('Terminal 1');
+    await expect(terminalTabLocator).toBeVisible();
+    expect(await page.activity.isTabActive('Terminal 1')).toBe(true);
+
+    // Get the terminal panel.
+    const terminalPanelLocator =
+      await page.activity.getPanelLocator('Terminal 1');
+    expect(terminalPanelLocator).not.toBeNull();
+    await expect(terminalPanelLocator!).toBeVisible();
+
+    // Run `pwd` to check the current working directory.
+    await terminalPanelLocator!.click();
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+
+    // Assert that the terminal's path is the folder we created.
+    await expect(terminalPanelLocator!).toContainText(folderName, {
+      timeout: 2000
+    });
+  });
+
+  test('should open a terminal in the parent directory for a file', async ({
+    page,
+    tmpPath
+  }) => {
+    const folderName = 'another-folder-for-terminal';
+    const fileName = 'test-file.txt';
+    const fullPath = `${tmpPath}/${folderName}/${fileName}`;
+    await page.contents.createDirectory(`${tmpPath}/${folderName}`);
+
+    // Create a file within the directory.
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.contents.renameFile(
+      `${tmpPath}/${folderName}/untitled.txt`,
+      fullPath
+    );
+    const fileLocator = page.locator(
+      `.jp-DirListing-item[data-path="${fullPath}"]`
+    );
+    await expect(fileLocator).toBeVisible();
+
+    await fileLocator.click({ button: 'right' });
+
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Verify that the terminal tab is created and active.
+    const terminalTabLocator = page.activity.getTabLocator('Terminal 1');
+    await expect(terminalTabLocator).toBeVisible();
+    expect(await page.activity.isTabActive('Terminal 1')).toBe(true);
+
+    // Get the terminal panel.
+    const terminalPanelLocator =
+      await page.activity.getPanelLocator('Terminal 1');
+    expect(terminalPanelLocator).not.toBeNull();
+    await expect(terminalPanelLocator!).toBeVisible();
+
+    // Run `pwd` to check the current working directory.
+    await terminalPanelLocator!.click();
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+
+    // Assert that the terminal's path is the file's PARENT directory.
+    await expect(terminalPanelLocator!).toContainText(folderName, {
+      timeout: 2000
+    });
+    // And assert that the path is not the file name itself.
+    await expect(terminalPanelLocator!).not.toContainText(fileName, {
+      timeout: 500
+    });
+  });
+});

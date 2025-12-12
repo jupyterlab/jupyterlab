@@ -66,11 +66,13 @@ import {
   RankedMenu,
   refreshIcon,
   stopIcon,
+  terminalIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
+import { ITerminalTracker } from '@jupyterlab/terminal';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -108,6 +110,8 @@ namespace CommandIDs {
   export const openUrl = 'filebrowser:open-url';
 
   export const open = 'filebrowser:open';
+
+  export const openInTerminal = 'filebrowser:open-in-terminal';
 
   export const openBrowserTab = 'filebrowser:open-browser-tab';
 
@@ -472,6 +476,75 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Download Link'),
       mnemonic: 0,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+  }
+};
+
+/**
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
+ */
+const openInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-in-terminal',
+  description:
+    'Adds a context menu item to open a terminal in the file browser directory.',
+  requires: [IFileBrowserFactory, ITranslator],
+  optional: [ITerminalTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator,
+    terminalTracker: ITerminalTracker | null
+  ): void => {
+    if (!terminalTracker || !app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
+
+    const { commands } = app;
+    const { tracker } = factory;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openInTerminal, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const item = widget.selectedItems().next().value;
+        if (!item) {
+          return;
+        }
+
+        let path = '';
+        if (item.type === 'directory') {
+          path = item.path;
+        } else {
+          path = PathExt.dirname(item.path);
+        }
+
+        try {
+          const terminal = await commands.execute('terminal:create-new', {
+            cwd: path
+          });
+          if (terminal) {
+            app.shell.activateById(terminal.id);
+          }
+        } catch (error) {
+          void showErrorMessage(
+            trans.__('Failed to open new terminal'),
+            error as Error
+          );
+        }
+      },
       describedBy: {
         args: {
           type: 'object',
@@ -1885,6 +1958,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shareFile,
   fileUploadStatus,
   downloadPlugin,
+  openInTerminalPlugin,
   browserWidget,
   openWithPlugin,
   openBrowserTabPlugin,
