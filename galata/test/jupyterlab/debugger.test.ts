@@ -336,10 +336,14 @@ test.describe('Debugger Variables', () => {
     await page.notebook.addCell('code', 'import json');
     await page.notebook.runCell(2);
 
-    const body = page.locator('.jp-DebuggerKernelSources-body');
-    expect(await body.count()).toBeGreaterThan(0);
-    const items = body.locator('.jp-DebuggerKernelSource-source');
+    await page.waitForCondition(async () => {
+      const texts = await page
+        .locator('.jp-DebuggerKernelSource-source')
+        .allInnerTexts();
+      return texts.some(t => t.includes('json'));
+    });
 
+    const items = page.locator('.jp-DebuggerKernelSource-source');
     expect(await items.count()).toBeGreaterThan(0);
 
     const jsonEntry = items.filter({ hasText: 'json' });
