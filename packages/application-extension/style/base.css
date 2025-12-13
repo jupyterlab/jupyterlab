@@ -17,3 +17,17 @@
   border: none;
   align-items: center;
 }
+
+.jp-Overlay {
+  position: absolute;
+  top: 67%;
+  left: 45%;
+  width: 47%;
+  height: 32%;
+  border-radius: 25%;
+  z-index: inherit;
+  text-align: center;
+  color: var(--md-grey-50);
+  background: var(--md-grey-700);
+  visibility: hidden;
+}
