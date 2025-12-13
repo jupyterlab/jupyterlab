@@ -3,13 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ArrayExt, StringExt } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
-import {
+import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutsSettingsLayout,

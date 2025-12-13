@@ -1,15 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
-  TableOfContents,
-  TableOfContentsModel,
-  TableOfContentsUtils
-} from '@jupyterlab/toc';
-import { Widget } from '@lumino/widgets';
-import { FileEditor } from '../widget';
-import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { TableOfContents } from '@jupyterlab/toc';
+import { TableOfContentsModel, TableOfContentsUtils } from '@jupyterlab/toc';
+import type { Widget } from '@lumino/widgets';
+import type { FileEditor } from '../widget';
+import type { IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory } from './factory';
 
 /**
  * Maps LaTeX section headings to HTML header levels.

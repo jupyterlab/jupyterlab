@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import {
   BasicKeyHandler,
   BasicMouseHandler,
@@ -10,17 +10,15 @@ import {
   DataModel,
   TextRenderer
 } from '@lumino/datagrid';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 
-import { IThemeManager } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IThemeManager } from '@jupyterlab/apputils';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 import { Debugger } from '../../';
 
 /**

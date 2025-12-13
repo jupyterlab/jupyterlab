@@ -7,13 +7,11 @@ import type {
 } from '../tokens';
 import type { CompletionHandler } from '../handler';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { KernelMessage } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { historyIcon, LabIcon } from '@jupyterlab/ui-components';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import { historyIcon } from '@jupyterlab/ui-components';
 
 /**
  * An example inline completion provider using history to populate suggestions.

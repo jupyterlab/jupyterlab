@@ -2,14 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import { Page } from '@playwright/test';
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
-import { ObservableJSON } from '@jupyterlab/observables';
+import type { Page } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import type { ObservableJSON } from '@jupyterlab/observables';
 
 const nbFile = 'code_notebook.ipynb';
 test.use({

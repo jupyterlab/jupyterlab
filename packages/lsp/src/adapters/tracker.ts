@@ -3,10 +3,11 @@
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapter';
-import { IShell, IWidgetLSPAdapterTracker } from '../tokens';
+import type { WidgetLSPAdapter } from './adapter';
+import type { IShell, IWidgetLSPAdapterTracker } from '../tokens';
 
 /**
  * A class that keeps track of widget adapter instances.

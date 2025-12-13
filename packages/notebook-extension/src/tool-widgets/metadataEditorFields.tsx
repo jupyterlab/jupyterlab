@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
-import { ITranslator } from '@jupyterlab/translation';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { FieldProps } from '@rjsf/utils';
+import type { INotebookTracker } from '@jupyterlab/notebook';
+import { NotebookTools } from '@jupyterlab/notebook';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 const CELL_METADATA_EDITOR_CLASS = 'jp-CellMetadataEditor';
 const NOTEBOOK_METADATA_EDITOR_CLASS = 'jp-NotebookMetadataEditor';

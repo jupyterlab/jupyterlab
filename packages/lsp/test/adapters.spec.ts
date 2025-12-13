@@ -5,14 +5,16 @@
 import { LabShell } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type {
+  Document,
+  IAdapterOptions,
+  IVirtualPosition
+} from '@jupyterlab/lsp';
 import {
   CodeExtractorsManager,
-  Document,
   DocumentConnectionManager,
   EditorAdapter,
   FeatureManager,
-  IAdapterOptions,
-  IVirtualPosition,
   LanguageServerManager,
   VirtualDocument,
   WidgetLSPAdapter,

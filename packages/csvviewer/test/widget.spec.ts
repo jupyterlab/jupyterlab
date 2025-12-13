@@ -1,14 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Context,
-  DocumentRegistry,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
-import { CellRenderer, DataGrid, JSONModel } from '@lumino/datagrid';
+import type { CellRenderer } from '@lumino/datagrid';
+import { DataGrid, JSONModel } from '@lumino/datagrid';
 import { CSVViewer, GridSearchService } from '../src';
 
 function createContext(): Context<DocumentRegistry.IModel> {

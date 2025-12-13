@@ -6,17 +6,14 @@
 /**
  * Set up keyboard shortcuts & commands for notebook
  */
-import { ISessionContextDialogs } from '@jupyterlab/apputils';
-import { CompletionHandler } from '@jupyterlab/completer';
+import type { ISessionContextDialogs } from '@jupyterlab/apputils';
+import type { CompletionHandler } from '@jupyterlab/completer';
 import {
   SearchDocumentModel,
   SearchDocumentView
 } from '@jupyterlab/documentsearch';
-import {
-  NotebookActions,
-  NotebookPanel,
-  NotebookSearchProvider
-} from '@jupyterlab/notebook';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookActions, NotebookSearchProvider } from '@jupyterlab/notebook';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
@@ -30,8 +27,9 @@ import {
   saveIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { CommandPalette, Widget } from '@lumino/widgets';
+import type { CommandRegistry } from '@lumino/commands';
+import type { CommandPalette } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The map of command ids used by the notebook.

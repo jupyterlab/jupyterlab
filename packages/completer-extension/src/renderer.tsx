@@ -3,8 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { FieldProps } from '@rjsf/utils';
 import React, { useState } from 'react';
 

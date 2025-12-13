@@ -3,43 +3,34 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  Notification,
-  NotificationManager,
-  ReactWidget
-} from '@jupyterlab/apputils';
+import type { NotificationManager } from '@jupyterlab/apputils';
+import { Notification, ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { Popup } from '@jupyterlab/statusbar';
 import {
   GroupItem,
   IStatusBar,
-  Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   bellIcon,
   Button,
   closeIcon,
   deleteIcon,
-  LabIcon,
   ToolbarButtonComponent,
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
-import {
-  PromiseDelegate,
-  ReadonlyJSONObject,
-  ReadonlyJSONValue
-} from '@lumino/coreutils';
+import type { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';

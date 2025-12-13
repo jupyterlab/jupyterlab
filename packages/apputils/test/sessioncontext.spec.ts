@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  ISessionContext,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Dialog,
-  ISessionContext,
-  ISessionContextDialogs,
   SessionContext,
   SessionContextDialogs
 } from '@jupyterlab/apputils';
@@ -14,7 +16,7 @@ import {
   SessionAPI,
   SessionManager
 } from '@jupyterlab/services';
-import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
+import type { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 import {
   acceptDialog,
   dismissDialog,

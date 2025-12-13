@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Palette } from '../src/palette';
-import { CommandPalette } from '@lumino/widgets';
+import type { CommandPalette } from '@lumino/widgets';
 
 describe('palette', () => {
   let palette: Palette;

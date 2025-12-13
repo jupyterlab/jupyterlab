@@ -8,7 +8,7 @@ import {
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testing';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { generate, simulate } from 'simulate-event';
