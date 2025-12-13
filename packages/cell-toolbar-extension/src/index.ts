@@ -15,7 +15,9 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import {
   createToolbarFactory,
-  IToolbarWidgetRegistry
+  Dialog,
+  IToolbarWidgetRegistry,
+  showDialog
 } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -31,6 +33,53 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
     toolbarRegistry: IToolbarWidgetRegistry | null,
     translator: ITranslator | null
   ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    app.commands.addCommand('cell-toolbar:delete', {
+      label: trans.__('Delete Cell'),
+      caption: trans.__('Delete the cell'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: async () => {
+        let shouldConfirmDelete = true;
+
+        if (settingRegistry) {
+          const setting = await settingRegistry.load(PLUGIN_ID);
+          shouldConfirmDelete = setting.get('askCellDeleteConfirmation')
+            .composite as boolean;
+        }
+
+        if (!shouldConfirmDelete) {
+          return app.commands.execute('notebook:delete-cell');
+        }
+
+        const result = await showDialog({
+          title: trans.__('Delete Cell'),
+          body: trans.__('Are you sure you want to delete this cell?'),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: trans.__('Delete') })
+          ],
+          checkbox: {
+            label: trans.__('Do not ask me again'),
+            caption: trans.__('Ignore this warning for future deletions.')
+          }
+        });
+
+        if (result.button.accept) {
+          if (result.isChecked && settingRegistry) {
+            const setting = await settingRegistry.load(PLUGIN_ID);
+            await setting.set('askCellDeleteConfirmation', false);
+          }
+          return app.commands.execute('notebook:delete-cell');
+        }
+      }
+    });
+
     /**
      * Load the settings for this extension
      *
