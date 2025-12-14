@@ -409,6 +409,34 @@ describe('rendermime/factories', () => {
         Widget.detach(w);
       });
 
+      it('should scroll to data-jupyter-id element on anchor click', async () => {
+        const f = markdownRendererFactory;
+        const mimeType = 'text/markdown';
+        const source = '<a href="#my-heading">link</a>';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({
+          mimeType,
+          ...defaultOptions,
+          markdownParser: { render: content => content }
+        });
+        await w.renderModel(model);
+        Widget.attach(w, document.body);
+
+        const target = document.createElement('h2');
+        target.setAttribute('data-jupyter-id', 'my-heading');
+        w.node.appendChild(target);
+
+        const anchor = w.node.querySelector('a') as HTMLAnchorElement;
+        const scrollMock = jest.fn();
+        target.scrollIntoView = scrollMock;
+
+        const event = new MouseEvent('click', { bubbles: true });
+        anchor.onclick!.call(anchor, event as unknown as PointerEvent);
+
+        expect(scrollMock).toHaveBeenCalled();
+        Widget.detach(w);
+      });
+
       it('should sanitize the html', async () => {
         const f = markdownRendererFactory;
         const source = '<p>hello</p><script>alert("foo")</script>';
