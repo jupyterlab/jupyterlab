@@ -1,5 +1,5 @@
 import { JupyterPluginRegistry } from '@jupyterlab/coreutils';
-import { PluginRegistry } from '@lumino/coreutils';
+import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
 
 describe('JupyterPluginRegistry', () => {
   let registry: JupyterPluginRegistry;
@@ -15,33 +15,25 @@ describe('JupyterPluginRegistry', () => {
   });
 
   it('should log plugin activation time with dependant count', async () => {
-    const mockPlugins = new Map([
-      [
-        'slow-plugin',
-        {
-          id: 'slow-plugin',
-          provides: { name: 'slow-service' }
-        }
-      ],
-      [
-        'dependent-plugin-1',
-        {
-          id: 'dependent-plugin-1',
-          requires: [{ name: 'slow-service' }]
-        }
-      ],
-      [
-        'dependent-plugin-2',
-        {
-          id: 'dependent-plugin-2',
-          requires: [{ name: 'slow-service' }]
-        }
-      ]
-    ]);
-
-    for (const [id, plugin] of mockPlugins) {
-      (registry as any)._pluginData.set(id, plugin);
-    }
+    const slowPluginToken = new Token<any>('slow-plugin-token');
+    const mockPlugins: IPlugin<any, any>[] = [
+      {
+        id: 'slow-plugin',
+        provides: slowPluginToken,
+        activate: () => {}
+      },
+      {
+        id: 'dependent-plugin-1',
+        requires: [slowPluginToken],
+        activate: () => {}
+      },
+      {
+        id: 'dependent-plugin-2',
+        requires: [slowPluginToken],
+        activate: () => {}
+      }
+    ];
+    registry.registerPlugins(mockPlugins);
 
     // Mock super.activatePlugin to return after 31 seconds
     jest

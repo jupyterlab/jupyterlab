@@ -1,4 +1,4 @@
-import { IPlugin, PluginRegistry } from '@lumino/coreutils';
+import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
 
 const PLUGIN_ACTIVATION_TIMEOUT = 3000;
 
@@ -50,8 +50,8 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
       if (otherId === id) continue;
 
       const isDependant = otherPlugin.requires
-        ?.filter((token: any) => !!token)
-        .some((token: any) => token.name === tokenName);
+        ?.filter((token: Token<any>) => !!token)
+        .some((token: Token<any>) => token.name === tokenName);
 
       if (isDependant) {
         dependentCount++;
