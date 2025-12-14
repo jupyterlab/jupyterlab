@@ -35,7 +35,7 @@ describe('JupyterPluginRegistry', () => {
     ];
     registry.registerPlugins(mockPlugins);
 
-    // Mock super.activatePlugin to return after 31 seconds
+    // Mock super.activatePlugin to return after 3 seconds
     jest
       .spyOn(PluginRegistry.prototype, 'activatePlugin')
       .mockImplementation(
