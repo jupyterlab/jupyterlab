@@ -1,8 +1,13 @@
 import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
 
-const PLUGIN_ACTIVATION_TIMEOUT = 3000;
+const PLUGIN_ACTIVATION_TIMEOUT = 5000;
 
 export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
+  constructor(options: JupyterPluginRegistry.IOptions) {
+    super(options);
+    this._expectedActivationTime =
+      options.expectedActivationTime ?? PLUGIN_ACTIVATION_TIMEOUT;
+  }
   registerPlugin(plugin: IPlugin<T, any>): void {
     this._pluginData.set(plugin.id, plugin);
     return super.registerPlugin(plugin);
@@ -14,7 +19,7 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
     // Set a timeout to detect if the plugin stalls
     let timeoutId = setTimeout(() => {
       console.warn(`Plugin ${id} is taking too long to activate.`);
-    }, PLUGIN_ACTIVATION_TIMEOUT);
+    }, this._expectedActivationTime);
 
     try {
       const result = await super.activatePlugin(id);
@@ -22,7 +27,7 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
       const endTime = performance.now();
       const activationTime = endTime - startTime;
 
-      if (activationTime >= PLUGIN_ACTIVATION_TIMEOUT) {
+      if (activationTime >= this._expectedActivationTime) {
         const dependantCount = this._getDependentCount(id);
         console.warn(
           `Plugin ${id} (with ${dependantCount} dependants) took ${activationTime.toFixed(
@@ -62,4 +67,19 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
   }
 
   private _pluginData: Map<string, IPlugin<T, any>> = new Map();
+  private _expectedActivationTime: number;
+}
+
+export namespace JupyterPluginRegistry {
+  /**
+   * Options for Jupyter plugin registry.
+   */
+  export interface IOptions extends PluginRegistry.IOptions {
+    /**
+     * Time within the plugins are expected to activate.
+     *
+     * If a plugin activation time exceed this value, a warning will be logged in the console.
+     */
+    expectedActivationTime?: number;
+  }
 }

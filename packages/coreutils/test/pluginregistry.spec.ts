@@ -6,7 +6,9 @@ describe('JupyterPluginRegistry', () => {
   let consoleWarnSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    registry = new JupyterPluginRegistry();
+    registry = new JupyterPluginRegistry({
+      expectedActivationTime: 400 // 0.5 second
+    });
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
   });
 
@@ -35,11 +37,11 @@ describe('JupyterPluginRegistry', () => {
     ];
     registry.registerPlugins(mockPlugins);
 
-    // Mock super.activatePlugin to return after 3 seconds
+    // Mock super.activatePlugin to return after 1 second
     jest
       .spyOn(PluginRegistry.prototype, 'activatePlugin')
       .mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(), 3000))
+        () => new Promise(resolve => setTimeout(() => resolve(), 500))
       );
 
     await registry.activatePlugin('slow-plugin');
@@ -51,7 +53,7 @@ describe('JupyterPluginRegistry', () => {
       expect.stringContaining('with 2 dependants')
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('300') // About 3000
+      expect.stringMatching(/5\d\d\.\d\dms/) // 500ms or slightly more
     );
   });
 });
