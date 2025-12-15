@@ -75,7 +75,6 @@ export class SourcesBody extends Widget {
    * Clear the content of the source read-only editor.
    */
   private _clearEditor(): void {
-    this._model.currentSource = null;
     this._editor.hide();
   }
 

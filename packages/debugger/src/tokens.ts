@@ -1014,12 +1014,12 @@ export namespace IDebugger {
       /**
        * Return the current source.
        */
-      currentSource: IDebugger.Source | null;
+      readonly currentSource: IDebugger.Source | null;
 
       /**
        * Return the current frame.
        */
-      currentFrame: IDebugger.IStackFrame | null;
+      readonly currentFrame: IDebugger.IStackFrame | null;
 
       /**
        * Signal emitted when the current source changes.

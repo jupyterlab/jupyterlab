@@ -54,7 +54,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
             path: displayPath
           };
 
-          this.currentFrame = frame;
+          this._currentFrame = frame;
         }
       }
     });
@@ -105,7 +105,6 @@ export class SourcesModel implements IDebugger.Model.ISources {
   get currentFrame(): IDebugger.IStackFrame | null {
     return this._currentFrame;
   }
-
 
   /**
    * Open a source in the main area.
