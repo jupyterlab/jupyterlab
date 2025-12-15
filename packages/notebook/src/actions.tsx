@@ -1918,6 +1918,18 @@ export namespace NotebookActions {
   }
 
   /**
+   * Select the last modified cell.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function selectLastModifiedCell(notebook: Notebook): void {
+    const cell = notebook.lastModifiedCell;
+    if (cell && cell !== notebook.activeCell) {
+      void notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.

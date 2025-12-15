@@ -1692,6 +1692,7 @@ export class Notebook extends StaticNotebook {
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.modelChanged.connect(this._onNotebookModelChanged, this);
 
     this.addFooter();
   }
@@ -1728,8 +1729,22 @@ export class Notebook extends StaticNotebook {
         this.activeCellIndex = newActiveCellIndex;
       }
     }
+    switch (args.type) {
+      case 'add':
+      case 'set':
+        args.newValues.forEach(model => {
+          model.contentChanged.connect(this._onCellContentChanged, this);
+        });
+        break;
+      case 'remove':
+        args.oldValues.forEach(model => {
+          model.contentChanged.disconnect(this._onCellContentChanged, this);
+        });
+        break;
+      default:
+        break;
+    }
   }
-
   /**
    * A signal emitted when the active cell changes.
    *
@@ -1932,6 +1947,10 @@ export class Notebook extends StaticNotebook {
 
     // Update the last clipboard interaction.
     this._lastClipboardInteraction = newValue;
+  }
+
+  get lastModifiedCell(): Cell | null {
+    return this._lastModifiedCell;
   }
 
   /**
@@ -3416,6 +3435,27 @@ export class Notebook extends StaticNotebook {
     }
   }
 
+  /**
+   * Handle changes to the notebook model.
+   */
+  private _onNotebookModelChanged(): void {
+    if (this.model) {
+      const cells = this.model.cells;
+      for (let i = 0; i < cells.length; i++) {
+        cells.get(i).contentChanged.connect(this._onCellContentChanged, this);
+      }
+    }
+  }
+
+  /**
+   * Handle a cell content change.
+   */
+  private _onCellContentChanged(sender: ICellModel): void {
+    const cell = this.widgets.find(w => w.model === sender) || null;
+    this._lastModifiedCell = cell;
+  }
+
+  private _lastModifiedCell: Cell | null = null;
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';

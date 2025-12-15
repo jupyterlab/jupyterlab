@@ -313,6 +313,8 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
+  export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
+
   export const replaceSelection = 'notebook:replace-selection';
 
   export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
@@ -4389,6 +4391,16 @@ function addCommands(
       }
     }
   });
+  commands.addCommand(CommandIDs.selectLastModifiedCell, {
+    label: trans.__('Select Last Modified Cell'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return NotebookActions.selectLastModifiedCell(current.content);
+      }
+    },
+    isEnabled
+  });
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Notebook Cell'),
     execute: args => {
@@ -4683,7 +4695,8 @@ function populatePalette(
     CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
-    CommandIDs.disableOutputScrolling
+    CommandIDs.disableOutputScrolling,
+    CommandIDs.selectLastModifiedCell
   ].forEach(command => {
     palette.addItem({ command, category });
   });
