@@ -417,7 +417,12 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({
           mimeType,
           ...defaultOptions,
-          markdownParser: { render: content => content }
+          markdownParser: { render: content => content },
+          resolver: {
+            resolveUrl: async (url: string) => url,
+            getDownloadUrl: async (url: string) => url,
+            isLocal: () => true
+          }
         });
         await w.renderModel(model);
         Widget.attach(w, document.body);
