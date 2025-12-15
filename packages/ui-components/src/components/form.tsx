@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Button } from '@jupyter/react-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 
@@ -24,7 +25,7 @@ import {
   addIcon,
   caretDownIcon,
   caretUpIcon,
-  closeIcon,
+  deleteIcon,
   LabIcon
 } from '../icon';
 
@@ -150,13 +151,14 @@ export const MoveButton = (
     props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
 
   return (
-    <button
-      className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+    <Button
+      className="jp-ArrayOperationsButton"
       onClick={props.item.onReorderClick(props.item.index, moveTo)}
       disabled={disabled()}
+      appearance="stealth"
     >
       {buttonContent}
-    </button>
+    </Button>
   );
 };
 
@@ -173,7 +175,7 @@ export const DropButton = (
 
   if (props.buttonStyle === 'icons') {
     buttonContent = (
-      <closeIcon.react
+      <deleteIcon.react
         tag="span"
         elementSize="xlarge"
         elementPosition="center"
@@ -184,12 +186,13 @@ export const DropButton = (
   }
 
   return (
-    <button
+    <Button
       className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
       onClick={props.item.onDropIndexClick(props.item.index)}
+      appearance="stealth"
     >
       {buttonContent}
-    </button>
+    </Button>
   );
 };
 
@@ -214,7 +217,7 @@ export const AddButton = (
 
   return (
     <button
-      className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+      className="jp-mod-styled jp-mod-accept jp-ArrayOperationsButton"
       onClick={props.onAddClick}
     >
       {buttonContent}
