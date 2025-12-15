@@ -130,6 +130,9 @@ export const MoveButton = (
     }
   };
 
+  const moveTo =
+    props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
+
   if (props.buttonStyle === 'icons') {
     const iconProps: LabIcon.IReactProps = {
       tag: 'span',
@@ -142,24 +145,29 @@ export const MoveButton = (
       ) : (
         <caretDownIcon.react {...iconProps}></caretDownIcon.react>
       );
+
+    return (
+      <Button
+        className="jp-ArrayOperationsButton"
+        onClick={props.item.onReorderClick(props.item.index, moveTo)}
+        disabled={disabled()}
+        appearance="stealth"
+        title={`Move item ${props.direction}`}
+      >
+        {buttonContent}
+      </Button>
+    );
   } else {
-    buttonContent =
-      props.direction === 'up' ? trans.__('Move up') : trans.__('Move down');
+    return (
+      <button
+        className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+        onClick={props.item.onReorderClick(props.item.index, moveTo)}
+        disabled={disabled()}
+      >
+        {props.direction === 'up' ? trans.__('Move up') : trans.__('Move down')}
+      </button>
+    );
   }
-
-  const moveTo =
-    props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
-
-  return (
-    <Button
-      className="jp-ArrayOperationsButton"
-      onClick={props.item.onReorderClick(props.item.index, moveTo)}
-      disabled={disabled()}
-      appearance="stealth"
-    >
-      {buttonContent}
-    </Button>
-  );
 };
 
 /**
@@ -174,26 +182,27 @@ export const DropButton = (
   let buttonContent: JSX.Element | string;
 
   if (props.buttonStyle === 'icons') {
-    buttonContent = (
-      <deleteIcon.react
-        tag="span"
-        elementSize="xlarge"
-        elementPosition="center"
-      />
+    buttonContent = <deleteIcon.react tag="span" elementPosition="center" />;
+    return (
+      <Button
+        className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
+        onClick={props.item.onDropIndexClick(props.item.index)}
+        appearance="stealth"
+        title="Remove item"
+      >
+        {buttonContent}
+      </Button>
     );
   } else {
-    buttonContent = trans.__('Remove');
+    return (
+      <button
+        className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
+        onClick={props.item.onDropIndexClick(props.item.index)}
+      >
+        {trans.__('Remove')}
+      </button>
+    );
   }
-
-  return (
-    <Button
-      className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
-      onClick={props.item.onDropIndexClick(props.item.index)}
-      appearance="stealth"
-    >
-      {buttonContent}
-    </Button>
-  );
 };
 
 /**
@@ -219,6 +228,7 @@ export const AddButton = (
     <button
       className="jp-mod-styled jp-mod-accept jp-ArrayOperationsButton"
       onClick={props.onAddClick}
+      title="Add item"
     >
       {buttonContent}
     </button>

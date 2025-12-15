@@ -195,7 +195,9 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
   margin-left: 7px;
 }
 
-.jp-FormGroup-contentNormal .field-array-of-string .array-item {
+.jp-FormGroup-contentNormal
+  .field-array:not(.field-array-of-object)
+  .array-item {
   /* Display `jp-ArrayOperations` buttons side-by-side with content except
     for small screens where flex-wrap will place them one below the other.
   */
