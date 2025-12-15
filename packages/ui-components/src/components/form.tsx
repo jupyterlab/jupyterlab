@@ -23,10 +23,10 @@ import {
 import React from 'react';
 import {
   addIcon,
-  caretDownIcon,
-  caretUpIcon,
   deleteIcon,
-  LabIcon
+  LabIcon,
+  moveDownIcon,
+  moveUpIcon
 } from '../icon';
 
 /**
@@ -136,14 +136,13 @@ export const MoveButton = (
   if (props.buttonStyle === 'icons') {
     const iconProps: LabIcon.IReactProps = {
       tag: 'span',
-      elementSize: 'xlarge',
       elementPosition: 'center'
     };
     buttonContent =
       props.direction === 'up' ? (
-        <caretUpIcon.react {...iconProps}></caretUpIcon.react>
+        <moveUpIcon.react {...iconProps} />
       ) : (
-        <caretDownIcon.react {...iconProps}></caretDownIcon.react>
+        <moveDownIcon.react {...iconProps} />
       );
 
     return (
