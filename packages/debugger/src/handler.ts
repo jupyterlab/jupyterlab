@@ -286,6 +286,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     };
 
     const removeHandlers = (): void => {
+      this._service.stopped.disconnect(onDebuggerStopped);
+
       const handler = this._handlers[widget.id];
       if (!handler) {
         return;
@@ -310,6 +312,18 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
       updateAttribute();
     };
+
+    const onDebuggerStopped = (): void => {
+      const debugButton = this._iconButtons[widget.id];
+
+      removeHandlers();
+
+      if (debugButton) {
+        updateIconButtonState(debugButton, false, true);
+      }
+    };
+
+    this._service.stopped.connect(onDebuggerStopped);
 
     const addToolbarButton = (enabled: boolean = true): void => {
       const debugButton = this._iconButtons[widget.id];
