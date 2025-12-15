@@ -8,6 +8,7 @@ export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
     this._expectedActivationTime =
       options.expectedActivationTime ?? PLUGIN_ACTIVATION_TIMEOUT;
   }
+
   registerPlugin(plugin: IPlugin<T, any>): void {
     this._pluginData.set(plugin.id, plugin);
     return super.registerPlugin(plugin);
