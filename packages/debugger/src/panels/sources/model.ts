@@ -106,14 +106,6 @@ export class SourcesModel implements IDebugger.Model.ISources {
     return this._currentFrame;
   }
 
-  /**
-   * Set the current frame.
-   *
-   * @param frame The current frame.
-   */
-  set currentFrame(frame: IDebugger.IStackFrame | null) {
-    this._currentFrame = frame;
-  }
 
   /**
    * Open a source in the main area.
