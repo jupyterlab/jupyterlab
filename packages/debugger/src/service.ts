@@ -13,6 +13,8 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { Debouncer } from '@lumino/polling';
+
 import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from './debugger';
@@ -21,6 +23,11 @@ import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
 import { IDebuggerDisplayRegistry } from './tokens';
+
+/**
+ * Rate limit for debouncing kernel modules display.
+ */
+const DISPLAY_MODULES_DEBOUNCE_MS = 500;
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -45,6 +52,12 @@ export class DebuggerService implements IDebugger, IDisposable {
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
+    this._applyKernelSources = this._applyKernelSources.bind(this);
+
+    this._displayModulesDebouncer = new Debouncer(
+      this._applyKernelSources,
+      DISPLAY_MODULES_DEBOUNCE_MS
+    );
   }
 
   /**
@@ -396,14 +409,18 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const modules = await this.session.sendRequest('modules', {});
-    this._model.kernelSources.kernelSources = modules.body.modules.map(
-      module => {
-        return {
-          name: module.name as string,
-          path: module.path as string
-        };
-      }
-    );
+    this._pendingKernelSources = modules.body.modules.map(module => ({
+      name: module.name as string,
+      path: module.path as string
+    }));
+
+    void this._displayModulesDebouncer.invoke();
+  }
+
+  private _applyKernelSources(): void {
+    if (this._pendingKernelSources) {
+      this._model.kernelSources.kernelSources = this._pendingKernelSources;
+    }
   }
 
   /**
@@ -1045,6 +1062,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
   private _pauseOnExceptionChanged = new Signal<IDebugger, void>(this);
+  private _displayModulesDebouncer: Debouncer;
+  private _pendingKernelSources: IDebugger.KernelSource[] | null = null;
 }
 
 /**
