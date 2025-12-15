@@ -3,10 +3,10 @@ import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
 const PLUGIN_ACTIVATION_TIMEOUT = 5000;
 
 export class JupyterPluginRegistry<T = any> extends PluginRegistry<T> {
-  constructor(options: JupyterPluginRegistry.IOptions) {
+  constructor(options?: JupyterPluginRegistry.IOptions) {
     super(options);
     this._expectedActivationTime =
-      options.expectedActivationTime ?? PLUGIN_ACTIVATION_TIMEOUT;
+      options?.expectedActivationTime ?? PLUGIN_ACTIVATION_TIMEOUT;
   }
 
   registerPlugin(plugin: IPlugin<T, any>): void {
