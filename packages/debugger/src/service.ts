@@ -44,7 +44,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._model = new Debugger.Model({
       displayRegistry: options.displayRegistry,
       getSource: this.getSource.bind(this),
-      editorServices: options.editorServices
+      editorServices: options.editorServices || null
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -1092,6 +1092,6 @@ export namespace DebuggerService {
     /**
      * The editor services.
      */
-    editorServices: IEditorServices;
+    editorServices: IEditorServices | null;
   }
 }

@@ -27,7 +27,9 @@ export class SourcesModel implements IDebugger.Model.ISources {
     this._displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();
 
-    this._mimeTypeService = options.editorServices?.mimeTypeService;
+    if (options.editorServices?.mimeTypeService) {
+      this._mimeTypeService = options.editorServices?.mimeTypeService;
+    }
 
     this.currentFrameChanged.connect(async (_, frame) => {
       if (frame) {
@@ -180,6 +182,6 @@ export namespace SourcesModel {
     /**
      * The editor services used to create new read-only editors.
      */
-    editorServices: IEditorServices;
+    editorServices: IEditorServices | null;
   }
 }

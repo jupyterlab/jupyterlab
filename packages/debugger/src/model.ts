@@ -193,6 +193,6 @@ export namespace DebuggerModel {
     /**
      * The editor services.
      */
-    editorServices: IEditorServices;
+    editorServices: IEditorServices | null;
   }
 }
