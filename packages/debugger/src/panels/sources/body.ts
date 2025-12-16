@@ -81,9 +81,9 @@ export class SourcesBody extends Widget {
   /**
    * Show the content of the source for the given frame.
    *
-  * Show the content of the current source.
-  *
-  * @param source The current source.
+   * Show the content of the current source.
+   *
+   * @param source The current source.
    */
   private async _showSource(source: IDebugger.Source): Promise<void> {
     if (!source?.content) {
