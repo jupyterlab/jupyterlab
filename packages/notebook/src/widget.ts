@@ -702,6 +702,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.inViewportChanged.connect(this._onCellInViewportChanged, this);
     widget.addClass(NB_CELL_CLASS);
 
+    // Track last modified cell for jump-to-last-modified functionality
+    widget.model.contentChanged.connect(() => {
+      const cellIndex = this.widgets.indexOf(widget);
+      this._lastModifiedCellIndex = cellIndex;
+    });
+
     ArrayExt.insert(this.cellsArray, index, widget);
     this.onCellInserted(index, widget);
 
@@ -1133,6 +1139,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
+  protected _lastModifiedCellIndex: number | null = null;
 }
 
 /**
@@ -1894,6 +1901,17 @@ export class Notebook extends StaticNotebook {
    */
   get activeCell(): Cell | null {
     return this._activeCell;
+  }
+
+  /**
+   * Get the index of the last modified cell.
+   *
+   * #### Notes
+   * This is used to jump back to the last cell that was edited.
+   * Returns null if no cell has been modified yet.
+   */
+  get lastModifiedCellIndex(): number | null {
+    return this._lastModifiedCellIndex;
   }
 
   get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {

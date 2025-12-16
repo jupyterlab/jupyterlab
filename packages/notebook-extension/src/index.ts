@@ -336,6 +336,8 @@ namespace CommandIDs {
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
+
+  export const jumpToLastModified = 'notebook:jump-to-last-modified-cell';
 }
 
 /**
@@ -4569,6 +4571,36 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.jumpToLastModified, {
+    label: trans.__('Jump to Last Modified Cell'),
+    caption: trans.__('Scroll to the most recently modified notebook cell'),
+    isEnabled: () => {
+      return tracker.currentWidget !== null;
+    },
+
+    execute: args => {
+      const panel = getCurrent(tracker, shell, args);
+      if (!panel) {
+        return;
+      }
+
+      const index = panel.content.lastModifiedCellIndex;
+      if (index === null) {
+        return;
+      }
+
+      panel.content.activeCellIndex = index;
+      const cell = panel.content.widgets[index];
+      void panel.content.scrollToCell(cell);
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
   // All commands with isEnabled defined directly or in a semantic commands
   // To simplify here we added all commands as most of them have isEnabled
   const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
@@ -4618,7 +4650,8 @@ function populatePalette(
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
-    CommandIDs.virtualScrollbar
+    CommandIDs.virtualScrollbar,
+    CommandIDs.jumpToLastModified
   ].forEach(command => {
     palette.addItem({ command, category });
   });
