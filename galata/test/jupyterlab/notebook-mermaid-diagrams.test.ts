@@ -7,6 +7,7 @@ import { Locator } from '@playwright/test';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
+// This test is flaky
 test.use({
   mockSettings: {
     ...galata.DEFAULT_SETTINGS,
