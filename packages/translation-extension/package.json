@@ -38,8 +38,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/mainmenu": "^4.6.0-alpha.0",
+    "@jupyterlab/apputils": "^0.1.1",
+    "@jupyterlab/mainmenu": "^0.2.0",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
     "@jupyterlab/translation": "^4.6.0-alpha.0"
   },
