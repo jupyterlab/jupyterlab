@@ -14,10 +14,10 @@ jobs:
     strategy:
       matrix:
         group: [integrity, python, usage, usage2]
-        python-version: [3.12]
+        python-version: [3.13]
         include:
           - group: python
-            python-version: 3.13
+            python-version: 3.14
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest
