@@ -11,7 +11,9 @@ import semver from 'semver';
 
 // Versions to ignore when determining dist-tags.
 // These were published prematurely and should not affect tag resolution.
-// See https://github.com/jupyterlab/jupyterlab/issues/14335
+// See:
+// - https://github.com/jupyterlab/jupyterlab/pull/12581
+// - https://github.com/jupyterlab/jupyterlab/issues/14335
 const IGNORED_VERSIONS: Record<string, string[]> = {
   '@jupyterlab/rendermime-interfaces': [
     '4.0.0-alpha.1',
