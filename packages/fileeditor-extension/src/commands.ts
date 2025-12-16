@@ -1226,11 +1226,16 @@ export namespace Commands {
 
         // Get data from clipboard
         const clipboard = window.navigator.clipboard;
-        const clipboardData: string = await clipboard.readText();
+        try {
+          const clipboardData: string = await clipboard.readText();
 
-        if (clipboardData) {
-          // Paste data to the editor
-          editor.replaceSelection && editor.replaceSelection(clipboardData);
+          if (clipboardData) {
+            // Paste data to the editor
+            editor.replaceSelection && editor.replaceSelection(clipboardData);
+          }
+        } catch (err) {
+          // browser limitation fallback (e.g Firefox)
+          Clipboard.showPasteUnavailableDialog(trans);
         }
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
