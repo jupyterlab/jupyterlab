@@ -692,6 +692,23 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      const contextMenuTabWidget = (): Widget | null => {
+        const test = (node: HTMLElement) =>
+          node.classList.contains('lm-TabBar-tab') && !!node.dataset.id;
+
+        const node = app.contextMenuHitTest(test);
+        if (!node) {
+          return null;
+        }
+
+        const id = node.dataset.id;
+        if (!id) {
+          return null;
+        }
+
+        return find(labShell.widgets('main'), w => w.id === id) ?? null;
+      };
+
       commands.addCommand('application:move-tab', {
         label: args => {
           const direction = args?.['direction'] as
@@ -733,7 +750,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             | 'right'
             | 'top'
             | 'bottom';
-          const widget = labShell.currentWidget;
+
+          const widget = contextMenuTabWidget();
           if (widget && direction) {
             labShell.moveTab(widget, direction);
           }
