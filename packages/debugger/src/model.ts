@@ -185,7 +185,7 @@ export namespace DebuggerModel {
     /**
      * Get source
      */
-    getSource(): IDebugger.Source;
+    getSource(): Promise<IDebugger.Source>;
     /**
      * The display registry.
      */

@@ -35,7 +35,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
       if (frame) {
         const displayPath = this.getDisplayName(frame);
 
-        const source = options.getSource({
+        const source = await options.getSource({
           sourceReference: 0,
           path: frame?.source?.path
         });
@@ -161,10 +161,14 @@ export namespace SourcesModel {
       IDebugger.IStackFrame | null
     >;
 
+    /**
+     * Get source
+     */
     getSource(args: {
       sourceReference: number;
       path: string | undefined;
-    }): IDebugger.Source;
+    }): Promise<IDebugger.Source>;
+
     /**
      * The display registry.
      */

@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditorWrapper,
-  IEditorMimeTypeService,
-  IEditorServices
-} from '@jupyterlab/codeeditor';
+import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
 
 import { Signal } from '@lumino/signaling';
 
@@ -43,13 +39,11 @@ export class SourcesBody extends Widget {
     this._editor.hide();
 
     this._model.currentSourceChanged.connect(async (_, currentSource) => {
-      this._currentSource = currentSource;
-
-      if (!this._currentSource) {
+      if (!currentSource) {
         this._clearEditor();
         return;
       }
-      void this._showSource(this._currentSource);
+      void this._showSource();
     });
 
     const layout = new PanelLayout();
@@ -85,8 +79,10 @@ export class SourcesBody extends Widget {
    *
    * @param source The current source.
    */
-  private async _showSource(source: IDebugger.Source): Promise<void> {
-    if (!source?.content) {
+  private async _showSource(): Promise<void> {
+    const source = this._model.currentSource;
+
+    if (!source || !source?.content) {
       this._clearEditor();
       return;
     }
@@ -95,11 +91,6 @@ export class SourcesBody extends Widget {
       this._editorHandler.dispose();
     }
     const { content, mimeType } = source;
-    const editorMimeType =
-      mimeType ||
-      this._mimeTypeService.getMimeTypeByFilePath(
-        this._model.currentFrame?.source?.path ?? ''
-      );
 
     this._editor.model.sharedModel.setSource(content);
     this._editor.model.mimeType = mimeType ?? 'text/plain';
@@ -129,8 +120,6 @@ export class SourcesBody extends Widget {
   private _editor: CodeEditorWrapper;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
-  private _mimeTypeService: IEditorMimeTypeService;
-  private _currentSource: IDebugger.Source | null = null;
 }
 
 /**
