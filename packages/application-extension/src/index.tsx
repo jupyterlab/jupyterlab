@@ -744,6 +744,9 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             required: ['direction']
           }
         },
+        isEnabled: () => {
+          return some(shell.widgets('main'), (_, i) => i === 1);
+        },
         execute: args => {
           const direction = args?.['direction'] as
             | 'left'
