@@ -102,7 +102,7 @@ export class SourcesBody extends Widget {
       );
 
     this._editor.model.sharedModel.setSource(content);
-    this._editor.model.mimeType = editorMimeType;
+    this._editor.model.mimeType = mimeType ?? 'text/plain';
 
     this._editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,

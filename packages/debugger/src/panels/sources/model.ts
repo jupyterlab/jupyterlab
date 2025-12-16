@@ -35,7 +35,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
       if (frame) {
         const displayPath = this.getDisplayName(frame);
 
-        const source = await options.getSource({
+        const source = options.getSource({
           sourceReference: 0,
           path: frame?.source?.path
         });
