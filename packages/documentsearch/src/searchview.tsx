@@ -846,7 +846,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    * Set the initial search text.
    */
   setSearchText(search: string): void {
-    this._showReplace = false;
+    this.setReplaceInputVisibility(false);
     this.model.initialQuery = search;
     // Only set the new search text to search expression if there is any
     // to avoid nullifying the one that was remembered from last time.
