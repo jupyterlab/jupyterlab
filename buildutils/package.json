@@ -58,7 +58,7 @@
     "semver": "^7.5.2",
     "sort-package-json": "~1.53.1",
     "typescript": "~5.5.4",
-    "verdaccio": "^5.33.0"
+    "verdaccio": "^6.1.6"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",
