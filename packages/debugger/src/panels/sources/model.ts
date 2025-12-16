@@ -48,13 +48,13 @@ export class SourcesModel implements IDebugger.Model.ISources {
               frame.source?.path ?? ''
             );
 
+          this._currentFrame = frame;
+
           this.currentSource = {
             content: content,
             mimeType: editorMimeType,
             path: displayPath
           };
-
-          this._currentFrame = frame;
         }
       }
     });
