@@ -561,20 +561,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   /**
-   * A message handler invoked on an `'update-request'` message.
-   *
-   * #### Notes
-   * The default implementation of this handler is a no-op.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this.notebookConfig.windowingMode === 'defer') {
-      void this._runOnIdleTime();
-    } else {
-      super.onUpdateRequest(msg);
-    }
-  }
-
-  /**
    * Handle a new model on the widget.
    */
   private _onModelChanged(
