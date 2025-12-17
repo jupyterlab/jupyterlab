@@ -38,10 +38,10 @@ export class SourcesBody extends Widget {
     });
     this._editor.hide();
 
-    this._showSource();
+    void this._showSource();
 
-    this._model.currentSourceChanged.connect(async (_, currentSource) => {
-      this._showSource();
+    this._model.currentSourceChanged.connect(async () => {
+      void this._showSource();
     });
 
     const layout = new PanelLayout();
