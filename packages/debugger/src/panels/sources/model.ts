@@ -32,7 +32,11 @@ export class SourcesModel implements IDebugger.Model.ISources {
     }
 
     this.currentFrameChanged.connect(async (_, frame) => {
-      if (frame) {
+      this.currentFrame = frame;
+      if (!frame) {
+        this.currentSource = null;
+        return;
+      }
         const displayPath = this.getDisplayName(frame);
 
         const source = await options.getSource({
