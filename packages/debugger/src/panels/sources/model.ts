@@ -20,7 +20,6 @@ export class SourcesModel implements IDebugger.Model.ISources {
    * @param options The Sources.Model instantiation options.
    */
   constructor(options: SourcesModel.IOptions) {
-    this.currentFrameChanged = options.currentFrameChanged;
     this._currentSource = null;
     this._currentFrame = null;
 
@@ -31,7 +30,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
       this._mimeTypeService = options.editorServices?.mimeTypeService;
     }
 
-    this.currentFrameChanged.connect(async (_, frame) => {
+    options.currentFrameChanged.connect(async (_, frame) => {
       if (frame) {
         const displayPath = this.getDisplayName(frame);
 
@@ -61,7 +60,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
   }
 
   /**
-   * Signal emitted when the current frame changes.
+   * Signal emitted when the current frame changes. @deprecated since 4.6.0, will be removed in 5.0
    */
   readonly currentFrameChanged: ISignal<
     IDebugger.Model.ICallstack,
