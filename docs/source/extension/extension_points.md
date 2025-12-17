@@ -387,6 +387,12 @@ In addition to providing a command ID, you also provide a category in which to p
 The Jupyter front-end shell ({ts:interface}`application.JupyterFrontEnd.IShell`)
 is used to add and interact with content in the application. The {ts:interface}`application.JupyterFrontEnd.IShell`
 interface provides an `add()` method for adding widgets to the application.
+
+.. image:: ../_static/shell-areas.jpg
+   :alt: Annotated screenshot showing the JupyterLab front-end shell areas including the left sidebar, main work area, right sidebar, top bar, and status bar.
+
+The image above highlights the main areas of the JupyterLab interface to help extension authors understand where UI components are rendered.
+
 In JupyterLab, the application shell consists of:
 
 - A `top` area for things like top-level toolbars and information.
