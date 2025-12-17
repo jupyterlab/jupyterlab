@@ -38,12 +38,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.6.0-alpha.0",
+    "@jupyterlab/coreutils": "^0.1.1",
     "@jupyterlab/nbformat": "^4.6.0-alpha.0",
-    "@jupyterlab/outputarea": "^4.6.0-alpha.0",
+    "@jupyterlab/outputarea": "^0.1.2",
     "@jupyterlab/rendermime": "^4.6.0-alpha.0",
     "@jupyterlab/services": "^7.6.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0",
+    "@jupyterlab/translation": "^3.0.0",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
     "@lumino/messaging": "^2.0.4",
