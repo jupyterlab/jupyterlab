@@ -923,7 +923,7 @@ export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#kernel-interrupt).
  *
- * **See also:** [[IInterruptReplyMsg]], [[[IKernel.interrupt]]]
+ * **See also:** [[IInterruptReplyMsg]], [[IKernelConnection.interrupt]]
  */
 export interface IInterruptRequestMsg
   extends IControlMessage<'interrupt_request'> {
