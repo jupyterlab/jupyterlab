@@ -52,11 +52,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
-    this._applyKernelSources = this._applyKernelSources.bind(this);
     this.displayModules = this.displayModules.bind(this);
 
     this._displayModulesDebouncer = new Debouncer(
-      this._applyKernelSources,
+      this._applyKernelSources.bind(this),
       DISPLAY_MODULES_DEBOUNCE_MS
     );
   }
