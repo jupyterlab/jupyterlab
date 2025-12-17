@@ -879,7 +879,7 @@ export interface ICompleteReplyMsg extends IShellMessage<'complete_reply'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
  *
- * **See also:** [[IInspectReplyMsg]], [[[IKernel.inspect]]]
+ * **See also:** [[IInspectReplyMsg]], [[IKernelConnection.inspect]]
  */
 export interface IInspectRequestMsg extends IShellMessage<'inspect_request'> {
   content: {
