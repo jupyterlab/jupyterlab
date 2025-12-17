@@ -237,7 +237,7 @@ test.describe('Notebook Edit (defer mode)', () => {
     }
   });
 
-  test(`Data-windowing-index consistency on merge`, async ({ page }) => {
+  test('Data-windowing-index consistency on merge', async ({ page }) => {
     // Create 10 code cells with values 1 to 10
     for (let i = 1; i <= 10; i++) {
       await page.notebook.addCell('code', `${i}`);
@@ -283,7 +283,7 @@ test.describe('Notebook Edit (defer mode)', () => {
     // We will select cells 6, 5, 4 in that order (multi-select)
     const cell6 = await page.notebook.getCellLocator(6);
 
-    // Start by selecting celll 6
+    // Start by selecting cell 6
     await cell6!.click();
 
     // Enter command mode
