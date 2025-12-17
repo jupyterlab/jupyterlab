@@ -80,6 +80,8 @@ JupyterLab notebooks operate in two primary modes: **Edit Mode** and **Command M
 
 Pressing `Esc` exits Edit Mode, while pressing `Enter` enters Edit Mode on the selected cell.
 
+## Working with Cells
+
 (drag-drop)=
 
 Drag and drop cells to rearrange your notebook:
