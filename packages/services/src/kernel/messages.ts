@@ -910,6 +910,7 @@ export interface IInspectReply extends IReplyOkContent {
  *
  * **See also:** [[IInspectRequest]], [[IKernelConnection.inspect]]
  */
+
 export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
   parent_header: IHeader<'inspect_request'>;
   content: ReplyContent<IInspectReply>;
