@@ -53,6 +53,7 @@
     "@jupyterlab/debugger": "^4.6.0-alpha.0",
     "@jupyterlab/docregistry": "^4.6.0-alpha.0",
     "@jupyterlab/fileeditor": "^4.6.0-alpha.0",
+    "@jupyterlab/mainmenu": "^4.6.0-alpha.0",
     "@jupyterlab/nbformat": "^4.6.0-alpha.0",
     "@jupyterlab/notebook": "^4.6.0-alpha.0",
     "@jupyterlab/rendermime": "^4.6.0-alpha.0",
