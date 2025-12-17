@@ -5,19 +5,19 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { DebuggerDisplayRegistry } from './displayregistry';
+
 import { BreakpointsModel } from './panels/breakpoints/model';
 
 import { CallstackModel } from './panels/callstack/model';
-
-import { DebuggerDisplayRegistry } from './displayregistry';
-
-import { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { SourcesModel } from './panels/sources/model';
 
 import { VariablesModel } from './panels/variables/model';
+
+import { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A model for a debugger.
