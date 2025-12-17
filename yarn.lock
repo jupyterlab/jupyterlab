@@ -19983,11 +19983,11 @@ __metadata:
   linkType: hard
 
 "systeminformation@npm:^5.8.6":
-  version: 5.23.14
-  resolution: "systeminformation@npm:5.23.14"
+  version: 5.27.14
+  resolution: "systeminformation@npm:5.27.14"
   bin:
     systeminformation: lib/cli.js
-  checksum: 357edd8c82f2f26635396897f647cbb190075e677f84840e151f3bdf7b6b0361ae9267ae8cf1e09c337db52be1ce114648487d3e18b923488a66a7d8162a3c28
+  checksum: a68728714c51a351f2d3dcd7ce26353916b137965e17b11889325bcec2df7ed618475146145c688fcb456d83b4c28a3ce90799e1515458701a6c9e7cf5123ad9
   conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
   languageName: node
   linkType: hard
