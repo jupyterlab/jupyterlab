@@ -26,6 +26,7 @@ export class SourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
+    this._showSource();
 
     const factory = new Debugger.ReadOnlyEditorFactory({
       editorServices: options.editorServices
@@ -39,11 +40,7 @@ export class SourcesBody extends Widget {
     this._editor.hide();
 
     this._model.currentSourceChanged.connect(async (_, currentSource) => {
-      if (!currentSource) {
-        this._clearEditor();
-        return;
-      }
-      void this._showSource();
+      this._showSource();
     });
 
     const layout = new PanelLayout();
@@ -73,11 +70,7 @@ export class SourcesBody extends Widget {
   }
 
   /**
-   * Show the content of the source for the given frame.
-   *
    * Show the content of the current source.
-   *
-   * @param source The current source.
    */
   private async _showSource(): Promise<void> {
     const source = this._model.currentSource;
