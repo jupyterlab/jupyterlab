@@ -57,7 +57,7 @@ import {
 } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
+import { DockLayout, DockPanel, TabBar, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
 
@@ -709,6 +709,17 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return find(labShell.widgets('main'), w => w.id === id) ?? null;
       };
 
+      const tabBarForWidget = (
+        dockPanel: DockPanel,
+        widget: Widget
+      ): TabBar<Widget> | null => {
+        for (const tabBar of dockPanel.tabBars()) {
+          if (tabBar.titles.includes(widget.title)) {
+            return tabBar;
+          }
+        }
+        return null;
+      };
       commands.addCommand('application:move-tab', {
         label: args => {
           const direction = args?.['direction'] as
@@ -745,7 +756,27 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
         },
         isEnabled: () => {
-          return some(shell.widgets('main'), (_, i) => i === 1);
+          const widget = contextMenuTabWidget();
+          if (!widget) {
+            return false;
+          }
+
+          if (!(labShell instanceof LabShell)) {
+            return false;
+          }
+
+          const dockPanel = (labShell as any)._dockPanel as DockPanel;
+          if (!dockPanel) {
+            return false;
+          }
+
+          const tabBar = tabBarForWidget(dockPanel, widget);
+          if (!tabBar) {
+            return false;
+          }
+
+          // Disable if only one tab in this area
+          return tabBar.titles.length > 1;
         },
         execute: args => {
           const direction = args?.['direction'] as
