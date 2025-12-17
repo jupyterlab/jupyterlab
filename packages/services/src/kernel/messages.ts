@@ -894,7 +894,7 @@ export interface IInspectRequestMsg extends IShellMessage<'inspect_request'> {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
  *
- * **See also:** [[IInspectRequest]], [[IKernel.inspect]]
+ * **See also:** [[IInspectRequest]], [[IKernelConnection.inspect]]
  */
 
 export interface IInspectReply extends IReplyOkContent {
