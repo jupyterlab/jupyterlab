@@ -21,8 +21,6 @@ import { DebuggerHandler } from './handler';
 
 import { IDebuggerSourceDisplayProvider } from './displayregistry';
 
-import { VariablesFilterOptionKey } from './model';
-
 /**
  * An interface describing an application's visual debugger.
  */
@@ -365,6 +363,15 @@ export namespace IDebugger {
      */
     variables: IVariable[];
   }
+
+  /**
+   * Keys for variable filter functions used to filter variables in the debugger view.
+   */
+  export type VariablesFilterFunctionKey =
+    | 'module'
+    | 'private'
+    | 'allCaps'
+    | 'capitalized';
 
   /**
    * A visual debugger session.
@@ -1004,14 +1011,14 @@ export namespace IDebugger {
        * Current filter options for the variables panel.
        * Maps filter option keys to their enabled/disabled state.
        */
-      variablesFilterOptions: Map<VariablesFilterOptionKey, boolean>;
+      variablesFilterOptions: Map<VariablesFilterFunctionKey, boolean>;
 
       /**
        * Signal emitted when the variables filter options change.
        */
       readonly variablesFilterOptionsChanged: ISignal<
         this,
-        Map<VariablesFilterOptionKey, boolean>
+        Map<VariablesFilterFunctionKey, boolean>
       >;
 
       /**
@@ -1019,7 +1026,7 @@ export namespace IDebugger {
        */
       filterVariablesByViewOptions(
         variables: IDebugger.IVariable[],
-        variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+        variablesFilterOptionsMap: Map<VariablesFilterFunctionKey, boolean>
       ): IDebugger.IVariable[];
     }
 

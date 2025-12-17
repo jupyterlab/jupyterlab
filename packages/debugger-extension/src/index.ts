@@ -35,8 +35,7 @@ import {
   IDebuggerHandler,
   IDebuggerSidebar,
   IDebuggerSources,
-  IDebuggerSourceViewer,
-  VariablesFilterOptionKey
+  IDebuggerSourceViewer
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -1591,11 +1590,13 @@ const debugMenu: JupyterFrontEndPlugin<void> = {
       isEnabled: () => debug.isStarted,
       isToggled: args => {
         return !!debug.model.variablesFilterOptions.get(
-          args.option as VariablesFilterOptionKey
+          args.option as IDebugger.VariablesFilterFunctionKey
         );
       },
       execute: async args => {
-        const { option } = args as { option: VariablesFilterOptionKey };
+        const { option } = args as {
+          option: IDebugger.VariablesFilterFunctionKey;
+        };
 
         if (!option) {
           console.warn(

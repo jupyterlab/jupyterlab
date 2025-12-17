@@ -14,27 +14,19 @@ import { SourcesModel } from './panels/sources/model';
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
 import { VariablesModel } from './panels/variables/model';
+
 import { IDebuggerDisplayRegistry } from './tokens';
+
 import { DebuggerDisplayRegistry } from './displayregistry';
 
-export const variablesFilterOptions = {
-  module: {
-    filter: (variable: IDebugger.IVariable) => variable.type !== 'module'
-  },
-  private: {
-    filter: (variable: IDebugger.IVariable) =>
-      !variable.name.startsWith('_') && !variable.name.startsWith('__')
-  },
-  allCaps: {
-    filter: (variable: IDebugger.IVariable) => !variable.name.match(/^[A-Z_]+$/)
-  },
-  capitalized: {
-    filter: (variable: IDebugger.IVariable) =>
-      !variable.name.match(/^[A-Z]/) || variable.name.match(/^[A-Z_]+$/)
-  }
+export const variablesFilterFunctions = {
+  module: (variable: IDebugger.IVariable) => variable.type !== 'module',
+  private: (variable: IDebugger.IVariable) =>
+    !variable.name.startsWith('_') && !variable.name.startsWith('__'),
+  allCaps: (variable: IDebugger.IVariable) => !variable.name.match(/^[A-Z_]+$/),
+  capitalized: (variable: IDebugger.IVariable) =>
+    !/^[A-Z]/.test(variable.name) || /^[A-Z_]+$/.test(variable.name)
 } as const;
-
-export type VariablesFilterOptionKey = keyof typeof variablesFilterOptions;
 
 /**
  * A model for a debugger.
@@ -59,9 +51,11 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.kernelSources = new KernelSourcesModel();
 
     // Initialize variable view options with default values
-    // TODO save/load this in settings/statedb?
-    Object.keys(variablesFilterOptions).forEach(key => {
-      this._variablesFilterOptions.set(key as VariablesFilterOptionKey, false);
+    Object.keys(variablesFilterFunctions).forEach(key => {
+      this._variablesFilterOptions.set(
+        key as IDebugger.VariablesFilterFunctionKey,
+        false
+      );
     });
   }
 
@@ -168,7 +162,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
    */
   get variablesFilterOptionsChanged(): ISignal<
     this,
-    Map<VariablesFilterOptionKey, boolean>
+    Map<IDebugger.VariablesFilterFunctionKey, boolean>
   > {
     return this._variablesFilterOptionsChanged;
   }
@@ -176,14 +170,19 @@ export class DebuggerModel implements IDebugger.Model.IService {
   /**
    * Get current variables panel filter options
    */
-  get variablesFilterOptions(): Map<VariablesFilterOptionKey, boolean> {
+  get variablesFilterOptions(): Map<
+    IDebugger.VariablesFilterFunctionKey,
+    boolean
+  > {
     return this._variablesFilterOptions;
   }
 
   /**
    * Set current variables panel filter options
    */
-  set variablesFilterOptions(options: Map<VariablesFilterOptionKey, boolean>) {
+  set variablesFilterOptions(
+    options: Map<IDebugger.VariablesFilterFunctionKey, boolean>
+  ) {
     this._variablesFilterOptions = options;
     this._variablesFilterOptionsChanged.emit(options);
   }
@@ -216,13 +215,16 @@ export class DebuggerModel implements IDebugger.Model.IService {
 
   filterVariablesByViewOptions(
     variables: IDebugger.IVariable[],
-    variablesFilterOptionsMap: Map<VariablesFilterOptionKey, boolean>
+    variablesFilterOptionsMap: Map<
+      IDebugger.VariablesFilterFunctionKey,
+      boolean
+    >
   ): IDebugger.IVariable[] {
     let filteredVariables = variables;
     for (const [key, enabled] of variablesFilterOptionsMap) {
       if (enabled) {
         const viewFilter =
-          variablesFilterOptions[key as VariablesFilterOptionKey]?.filter;
+          variablesFilterFunctions[key as IDebugger.VariablesFilterFunctionKey];
         if (viewFilter) {
           filteredVariables = filteredVariables.filter(viewFilter);
         }
@@ -240,10 +242,10 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _titleChanged = new Signal<this, string>(this);
   private _variablesFilterOptionsChanged = new Signal<
     this,
-    Map<VariablesFilterOptionKey, boolean>
+    Map<IDebugger.VariablesFilterFunctionKey, boolean>
   >(this);
   private _variablesFilterOptions = new Map<
-    VariablesFilterOptionKey,
+    IDebugger.VariablesFilterFunctionKey,
     boolean
   >();
 }
