@@ -151,7 +151,7 @@ export const MoveButton = (
         onClick={props.item.onReorderClick(props.item.index, moveTo)}
         disabled={disabled()}
         appearance="stealth"
-        title={`Move item ${props.direction}`}
+        title={trans.__('Move item %1', props.direction)}
       >
         {buttonContent}
       </Button>
@@ -187,7 +187,7 @@ export const DropButton = (
         className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
         onClick={props.item.onDropIndexClick(props.item.index)}
         appearance="stealth"
-        title="Remove item"
+        title={trans.__('Remove item')}
       >
         {buttonContent}
       </Button>
@@ -227,7 +227,7 @@ export const AddButton = (
     <button
       className="jp-mod-styled jp-mod-accept jp-ArrayOperationsButton"
       onClick={props.onAddClick}
-      title="Add item"
+      title={trans.__('Add item')}
     >
       {buttonContent}
     </button>

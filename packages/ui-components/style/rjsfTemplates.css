@@ -132,7 +132,7 @@
 /* Display the array operations toolbar on hover only for array of objects */
 .jp-arrayFieldWrapper
   .field-array-of-object
-  .array-item:not(:hover)
+  .array-item:not(:hover):not(:focus-within)
   .jp-ArrayOperations {
   display: none;
 }
