@@ -1056,9 +1056,9 @@ export namespace IDebugger {
       filter: string;
 
       /**
-       * List of source names to hide
+       * Whether to hide native sources.
        */
-      hiddenSources: string[];
+      hideNativeSources: boolean;
 
       /**
        * Signal emitted when the kernel sources have changed.
