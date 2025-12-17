@@ -908,7 +908,7 @@ export interface IInspectReply extends IReplyOkContent {
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#introspection).
  *
- * **See also:** [[IInspectRequest]], [[IKernel.inspect]]
+ * **See also:** [[IInspectRequest]], [[IKernelConnection.inspect]]
  */
 export interface IInspectReplyMsg extends IShellMessage<'inspect_reply'> {
   parent_header: IHeader<'inspect_request'>;
