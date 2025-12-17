@@ -239,46 +239,16 @@ test.describe('Notebook Edit (defer mode)', () => {
 
   test('Data-windowing-index consistency on merge', async ({ page }) => {
     // Create 10 code cells with values 1 to 10
-    for (let i = 1; i <= 10; i++) {
+    await page.notebook.setCell(0, 'code', '1');
+    for (let i = 2; i <= 10; i++) {
       await page.notebook.addCell('code', `${i}`);
     }
-    await page.notebook.selectCells(0);
-    await page.notebook.deleteCells();
 
     // Get windowing indices before merge
-    const getWindowingIndices = async () => {
-      const notebook = await page.notebook.getNotebookInPanelLocator();
-      const cellElements = await notebook!
-        .locator('[data-windowed-list-index]')
-        .all();
-      const indices: number[] = [];
-      if (cellElements) {
-        for (const element of cellElements) {
-          const idx = await element.getAttribute('data-windowed-list-index');
-          if (idx !== null) {
-            indices.push(parseInt(idx, 10));
-          }
-        }
-      }
-      return indices;
-    };
-
-    const indicesBeforeMerge = await getWindowingIndices();
+    const indicesBeforeMerge = await getWindowingIndices(page);
     expect(indicesBeforeMerge.length).toBe(10);
 
-    // Verify indices increase by 1
-    const verifyIncreasingByOne = (indices: number[]) => {
-      for (let i = 1; i < indices.length; i++) {
-        if (indices[i] !== indices[i - 1] + 1) {
-          return false;
-        }
-      }
-      return true;
-    };
-
     expect(verifyIncreasingByOne(indicesBeforeMerge)).toBeTruthy();
-
-    await page.waitForTimeout(500);
 
     // We will select cells 6, 5, 4 in that order (multi-select)
     const cell6 = await page.notebook.getCellLocator(6);
@@ -296,10 +266,36 @@ test.describe('Notebook Edit (defer mode)', () => {
     // Press M to merge
     await page.keyboard.press('Shift+KeyM');
 
-    const indicesAfterMerge = await getWindowingIndices();
+    const indicesAfterMerge = await getWindowingIndices(page);
     expect(indicesAfterMerge.length).toBe(8);
 
     // Verify windowing indices increase by 1 after merge
     expect(verifyIncreasingByOne(indicesAfterMerge)).toBeTruthy();
   });
 });
+
+const getWindowingIndices = async (page: IJupyterLabPageFixture) => {
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+  const cellElements = await notebook!
+    .locator('[data-windowed-list-index]')
+    .all();
+  const indices: number[] = [];
+  if (cellElements) {
+    for (const element of cellElements) {
+      const idx = await element.getAttribute('data-windowed-list-index');
+      if (idx !== null) {
+        indices.push(parseInt(idx, 10));
+      }
+    }
+  }
+  return indices;
+};
+
+const verifyIncreasingByOne = (indices: number[]) => {
+  for (let i = 1; i < indices.length; i++) {
+    if (indices[i] !== indices[i - 1] + 1) {
+      return false;
+    }
+  }
+  return true;
+};
