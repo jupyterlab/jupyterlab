@@ -26,7 +26,6 @@ export class SourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-    this._showSource();
 
     const factory = new Debugger.ReadOnlyEditorFactory({
       editorServices: options.editorServices
@@ -38,6 +37,8 @@ export class SourcesBody extends Widget {
       path: ''
     });
     this._editor.hide();
+
+    this._showSource();
 
     this._model.currentSourceChanged.connect(async (_, currentSource) => {
       this._showSource();
