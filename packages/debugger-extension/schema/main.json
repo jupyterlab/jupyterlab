@@ -126,6 +126,48 @@
         "selector": ".jp-DebuggerVariables-body .jp-DebuggerVariables-grid"
       },
       {
+        "type": "submenu",
+        "selector": ".jp-DebuggerVariables-body",
+        "submenu": {
+          "id": "jp-mainmenu-debug-filter",
+          "label": "Filter Variable",
+          "items": [
+            {
+              "command": "debugger:variables-view-options",
+              "rank": 1,
+              "args": {
+                "label": "Hide Modules",
+                "option": "module"
+              }
+            },
+            {
+              "command": "debugger:variables-view-options",
+              "rank": 2,
+              "args": {
+                "label": "Hide Privates",
+                "option": "private"
+              }
+            },
+            {
+              "command": "debugger:variables-view-options",
+              "rank": 3,
+              "args": {
+                "label": "Hide All Uppercase",
+                "option": "allCaps"
+              }
+            },
+            {
+              "command": "debugger:variables-view-options",
+              "rank": 4,
+              "args": {
+                "label": "Hide Capitalized",
+                "option": "capitalized"
+              }
+            }
+          ]
+        }
+      },
+      {
         "command": "debugger:render-mime-variable",
         "selector": ".jp-DebuggerVariables-body"
       },
