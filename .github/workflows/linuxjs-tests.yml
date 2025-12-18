@@ -9,59 +9,34 @@ on:
     types: [published]
 
 jobs:
+  setup:
+    name: Setup test matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      group: ${{ steps.set-matrix.outputs.group }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set matrix
+        id: set-matrix
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+
+          packages = sorted([f'js-{p.name}' for p in Path('packages').iterdir() if (p / 'test').is_dir()])
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'group={json.dumps(packages)}\n')
+
   linuxjs:
     name: JS
+    needs: setup
     strategy:
       matrix:
         python-version: ["3.14"]
-        group:
-          [
-            js-application,
-            js-apputils,
-            js-cell-toolbar,
-            js-cells,
-            js-codeeditor,
-            js-codemirror,
-            js-completer,
-            js-console,
-            js-coreutils,
-            js-csvviewer,
-            js-debugger,
-            js-docmanager,
-            js-docregistry,
-            js-documentsearch,
-            js-filebrowser,
-            js-fileeditor,
-            js-hub-extension,
-            js-imageviewer,
-            js-inspector,
-            js-logconsole,
-            js-lsp,
-            js-mainmenu,
-            js-mathjax-extension,
-            js-mermaid,
-            js-metadataform,
-            js-metapackage,
-            js-nbformat,
-            js-notebook,
-            js-observables,
-            js-outputarea,
-            js-pluginmanager,
-            js-rendermime,
-            js-services,
-            js-settingeditor,
-            js-settingregistry,
-            js-shortcuts-extension,
-            js-statedb,
-            js-statusbar,
-            js-testing,
-            js-terminal,
-            js-toc,
-            js-translation,
-            js-ui-components,
-            js-vega5-extension,
-            js-workspaces,
-          ]
+        group: ${{ fromJson(needs.setup.outputs.group) }}
       fail-fast: false
     runs-on: ubuntu-22.04
     timeout-minutes: 40
