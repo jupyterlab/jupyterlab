@@ -435,8 +435,7 @@ describe('rendermime/factories', () => {
         const scrollMock = jest.fn();
         target.scrollIntoView = scrollMock;
 
-        const event = new MouseEvent('click', { bubbles: true });
-        anchor.onclick!.call(anchor, event as unknown as PointerEvent);
+        anchor.click();
 
         expect(scrollMock).toHaveBeenCalled();
         Widget.detach(w);

@@ -1386,7 +1386,7 @@ namespace Private {
     const hash = anchor.hash;
     if (hash && hash === href) {
       anchor.target = '_self';
-      anchor.onclick = (event: MouseEvent) => {
+      anchor.addEventListener('click', (event: MouseEvent) => {
         const id = hash.slice(1);
         const escapedId = CSS.escape(id);
         const doc = anchor.ownerDocument;
@@ -1402,7 +1402,7 @@ namespace Private {
           event.preventDefault();
           el.scrollIntoView();
         }
-      };
+      });
       return;
     }
     const isLocal = resolver.isLocal
