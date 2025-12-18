@@ -25,10 +25,16 @@ jobs:
           import json, os
           from pathlib import Path
 
-          packages = sorted([f'js-{p.name}' for p in Path('packages').iterdir() if (p / 'test').is_dir()])
+          packages = []
+          for p in Path('packages').iterdir():
+              pkg_json = p / 'package.json'
+              if pkg_json.exists():
+                  data = json.loads(pkg_json.read_text())
+                  if data.get('scripts', {}).get('test:cov'):
+                      packages.append(f'js-{p.name}')
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f'group={json.dumps(packages)}\n')
+              f.write(f'group={json.dumps(sorted(packages))}\n')
 
   linuxjs:
     name: JS
