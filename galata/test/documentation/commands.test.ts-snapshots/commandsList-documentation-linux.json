@@ -2036,7 +2036,9 @@
     "id": "documentsearch:startWithReplace",
     "label": "Find and Replace…",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl H"
+    ],
     "args": {
       "type": "object",
       "properties": {
