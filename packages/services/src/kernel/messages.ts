@@ -1038,7 +1038,7 @@ export interface IHistoryReplyMsg extends IShellMessage<'history_reply'> {
  * An `'is_complete_request'` message.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-completeness).
- * @see {@link ICompleteReplyMsg}
+ * @see {@link IIsCompleteReplyMsg}
  * @see {@link IKernelConnection.isComplete}
  */
 export interface IIsCompleteRequestMsg
