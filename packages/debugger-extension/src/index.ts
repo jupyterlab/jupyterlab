@@ -126,7 +126,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    handler.executionDone.connect(debug.displayModules);
+    handler.executionDone.connect(debug.displayModules.bind(debug));
 
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
@@ -230,7 +230,7 @@ const files: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
-    handler.executionDone.connect(debug.displayModules);
+    handler.executionDone.connect(debug.displayModules.bind(debug));
 
     const activeSessions: {
       [id: string]: Session.ISessionConnection;
@@ -336,7 +336,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       translator: translator
     });
 
-    handler.executionDone.connect(service.displayModules);
+    handler.executionDone.connect(service.displayModules.bind(service));
 
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
