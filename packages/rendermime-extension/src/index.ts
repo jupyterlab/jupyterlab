@@ -11,7 +11,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ISanitizer, IThemeManager } from '@jupyterlab/apputils';
+import { ISanitizer } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
   ILatexTypesetter,
@@ -21,7 +21,6 @@ import {
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 namespace CommandIDs {
@@ -39,9 +38,7 @@ const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
     ILatexTypesetter,
     ISanitizer,
     IMarkdownParser,
-    ITranslator,
-    ISettingRegistry,
-    IThemeManager
+    ITranslator
   ],
   provides: IRenderMimeRegistry,
   activate: activate,
@@ -64,57 +61,9 @@ function activate(
   latexTypesetter: ILatexTypesetter | null,
   sanitizer: IRenderMime.ISanitizer | null,
   markdownParser: IMarkdownParser | null,
-  translator: ITranslator | null,
-  settingsRegistry: ISettingRegistry | null,
-  themeManager: IThemeManager | null
+  translator: ITranslator | null
 ): RenderMimeRegistry {
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-
-  // Set up error background color management
-  let currentSettings: ISettingRegistry.ISettings | null = null;
-
-  const loadSettings = () => {
-    if (!currentSettings || !themeManager) {
-      return;
-    }
-
-    // Detect if current theme is light or dark
-    const isLight = themeManager.theme
-      ? themeManager.isLight(themeManager.theme)
-      : true;
-
-    // Get the appropriate color from theme
-    const settingKey = isLight ? 'errorBackgroundLight' : 'errorBackgroundDark';
-    const color = currentSettings.get(settingKey).composite as string;
-
-    // Update the CSS variable
-    document.documentElement.style.setProperty(
-      '--jp-rendermime-error-background',
-      color
-    );
-  };
-
-  // Initial load of settings
-  if (settingsRegistry) {
-    settingsRegistry
-      .load(plugin.id)
-      .then(settings => {
-        currentSettings = settings;
-
-        // Initial update
-        loadSettings();
-
-        // Update when settings change
-        settings.changed.connect(loadSettings);
-      })
-      .catch(console.error);
-  }
-
-  // Update when theme changes
-  if (themeManager) {
-    themeManager.themeChanged.connect(loadSettings);
-  }
-
   if (docManager) {
     app.commands.addCommand(CommandIDs.handleLink, {
       label: trans.__('Handle Local Link'),
