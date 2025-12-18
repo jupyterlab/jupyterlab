@@ -689,8 +689,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       case 'code':
         widget = this._createCodeCell(cell as ICodeCellModel);
         widget.model.mimeType = this._mimetype;
-        widget.node.setAttribute('role', 'textbox');
-        widget.node.setAttribute('aria-label', 'Cell');
         break;
       case 'markdown':
         widget = this._createMarkdownCell(cell as IMarkdownCellModel);
@@ -703,6 +701,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
     widget.inViewportChanged.connect(this._onCellInViewportChanged, this);
     widget.addClass(NB_CELL_CLASS);
+    if (widget.syncEditable) {
+      widget.node.setAttribute('role', 'textbox');
+    }
 
     ArrayExt.insert(this.cellsArray, index, widget);
     this.onCellInserted(index, widget);
