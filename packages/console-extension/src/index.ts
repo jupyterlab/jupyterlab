@@ -638,7 +638,7 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      tracker.currentWidget.node.contains(document.activeElement)
     );
   }
 
