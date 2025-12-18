@@ -11,7 +11,7 @@ on:
 jobs:
   setup:
     name: Setup test matrix
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       group: ${{ steps.set-matrix.outputs.group }}
     steps:
@@ -44,7 +44,7 @@ jobs:
         python-version: ["3.14"]
         group: ${{ fromJson(needs.setup.outputs.group) }}
       fail-fast: false
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
       - name: Checkout
