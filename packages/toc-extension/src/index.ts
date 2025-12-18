@@ -26,6 +26,7 @@ import {
   CommandToolbarButton,
   ellipsesIcon,
   expandAllIcon,
+  historyIcon,
   MenuSvg,
   numberingIcon,
   tocIcon,
@@ -46,6 +47,8 @@ namespace CommandIDs {
   export const showPanel = 'toc:show-panel';
 
   export const toggleCollapse = 'toc:toggle-collapse';
+
+  export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
 }
 
 /**
@@ -262,6 +265,19 @@ async function activateTOC(
   toc.toolbar.addItem('display-numbering', numbering);
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+
+  toc.toolbar.addItem(
+    'select-last-modified',
+    new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.selectLastModifiedCell,
+      args: {
+        toolbar: true
+      },
+      icon: historyIcon,
+      label: ''
+    })
+  );
 
   toc.toolbar.addItem(
     'collapse-all',

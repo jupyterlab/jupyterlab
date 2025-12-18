@@ -1949,8 +1949,21 @@ export class Notebook extends StaticNotebook {
     this._lastClipboardInteraction = newValue;
   }
 
+  /**
+   * Get the last modified cell from stack
+   */
   get lastModifiedCell(): Cell | null {
-    return this._lastModifiedCell;
+    while (this._lastModifiedCellStack.length) {
+      const id =
+        this._lastModifiedCellStack[this._lastModifiedCellStack.length - 1];
+      const cell = this.widgets.find(c => c.model.id === id) || null;
+      if (cell && !cell.isDisposed) {
+        return cell;
+      }
+      // Remove dead cell IDs
+      this._lastModifiedCellStack.pop();
+    }
+    return null;
   }
 
   /**
@@ -3451,11 +3464,39 @@ export class Notebook extends StaticNotebook {
    * Handle a cell content change.
    */
   private _onCellContentChanged(sender: ICellModel): void {
-    const cell = this.widgets.find(w => w.model === sender) || null;
-    this._lastModifiedCell = cell;
+    const id = sender.id;
+    // Remove if already present to avoid duplicates
+    const idx = this._lastModifiedCellStack.lastIndexOf(id);
+    if (idx !== -1) {
+      this._lastModifiedCellStack.splice(idx, 1);
+    }
+    this._lastModifiedCellStack.push(id);
+    // Enforce stack size limit
+    if (this._lastModifiedCellStack.length > Notebook.MAX_MODIFIED_STACK) {
+      this._lastModifiedCellStack.splice(
+        0,
+        this._lastModifiedCellStack.length - Notebook.MAX_MODIFIED_STACK
+      );
+    }
   }
 
-  private _lastModifiedCell: Cell | null = null;
+  /**
+   * Pop and return the last modified cell from the stack.
+   */
+  popLastModifiedCell(): Cell | null {
+    while (this._lastModifiedCellStack.length) {
+      const id = this._lastModifiedCellStack.pop()!;
+      const cell = this.widgets.find(c => c.model.id === id) || null;
+      if (cell && !cell.isDisposed) {
+        return cell;
+      }
+      // If cell is gone, continue to next
+    }
+    return null;
+  }
+
+  private _lastModifiedCellStack: string[] = [];
+  private static readonly MAX_MODIFIED_STACK = 50;
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';

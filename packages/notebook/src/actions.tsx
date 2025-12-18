@@ -1921,11 +1921,18 @@ export namespace NotebookActions {
    * Select the last modified cell.
    *
    * @param notebook - The target notebook widget.
+   * @param pop - If true, pop the stack (like undo).
    */
-  export function selectLastModifiedCell(notebook: Notebook): void {
-    const cell = notebook.lastModifiedCell;
-    if (cell && cell !== notebook.activeCell) {
-      void notebook.scrollToCell(cell);
+  export function selectLastModifiedCell(
+    notebook: Notebook,
+    pop: boolean = false
+  ): void {
+    const cell = pop
+      ? notebook.popLastModifiedCell()
+      : notebook.lastModifiedCell;
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
+      notebook.scrollToCell(cell);
     }
   }
 

@@ -4396,7 +4396,7 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.selectLastModifiedCell(current.content);
+        return NotebookActions.selectLastModifiedCell(current.content, true);
       }
     },
     isEnabled
