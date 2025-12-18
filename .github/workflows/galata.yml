@@ -45,10 +45,6 @@ jobs:
           # Build dev-mode
           jlpm run build
 
-      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        run: |
-          pip install --upgrade --pre "ipykernel<=7.0.0a1"
-
       - name: Launch JupyterLab
         run: |
           cd galata
@@ -148,7 +144,7 @@ jobs:
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
-          pip install .[docs-screenshots] 'ipykernel<7.0'
+          pip install .[docs-screenshots]
           bash ./scripts/ci_install.sh
 
           # Build dev-mode
