@@ -12,6 +12,14 @@ test.use({
 });
 
 test.describe('Debugger', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/debugger-extension:sidebar': {
+        showSourcesInMainArea: false
+      }
+    }
+  });
   test('Kernel capability', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
@@ -352,6 +360,51 @@ test.describe('Debugger', () => {
     });
 
     await page.click('jp-button[title^=Continue]');
+  });
+  test.describe('Show sources', () => {
+    for (const showSourcesInMainArea of [false, true]) {
+      test(`should show sources when showSourcesInMainArea=${showSourcesInMainArea}`, async ({
+        page,
+        tmpPath
+      }) => {
+        await page.goto(`tree/${tmpPath}`);
+        await createNotebook(page);
+
+        await page.debugger.switchOn();
+        await page.waitForCondition(() => page.debugger.isOpen());
+        await page.sidebar.setWidth(251, 'right');
+
+        await setBreakpoint(page);
+
+        // Don't wait as it will be blocked
+        void page.notebook.runCell(1);
+
+        // Wait to be stopped on the breakpoint
+        await page.debugger.waitForCallStack();
+
+        if (showSourcesInMainArea) {
+          // ✅ Expect a read-only editor in the main area
+          const editor = page.locator('.jp-MainAreaWidget .jp-Editor');
+          await expect(editor).toHaveCount(1);
+          await expect(editor).toHaveAttribute('readonly', 'true');
+        } else {
+          // ✅ Expect sources panel in the sidebar
+          await expect(
+            page.locator('.jp-DebuggerSources-header-path')
+          ).toContainText('Cell [');
+        }
+
+        // Screenshot only for sidebar case (kernel id varies)
+        if (!showSourcesInMainArea) {
+          await page.screenshot({
+            clip: { y: 478, x: 998, width: 280, height: 138 },
+            path: 'test/documentation/screenshots/debugger-source.png'
+          });
+        }
+
+        await page.click('jp-button[title^=Continue]');
+      });
+    }
   });
 });
 
