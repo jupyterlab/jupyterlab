@@ -39,13 +39,11 @@ const EXPECTED_MERMAID_ORDER = [
   'xy',
   'block',
   'kanban',
-  'flowchart-elk'
-  // These last four diagrams have flaky tests - often the resulting snapshot differs by a pixel or two
-  // TODO: investigate and fix the root cause of the flakiness
-  // 'architecture',
-  // 'packet',
-  // 'radar',
-  // 'treemap'
+  'flowchart-elk',
+  'architecture',
+  'packet',
+  'radar',
+  'treemap'
 ];
 
 // often have (potentially scroll-based) deltas
@@ -117,6 +115,10 @@ for (const theme of ['default', 'dark']) {
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
       }) => {
+        test.fixme(
+          i >= 18,
+          `Diagram ${i} ${diagram} in ${theme} theme is flaky: sometimes the screenshot capture is 1px smaller in one dimension than expected, with other minor differences.`
+        );
         const output = page.locator(
           `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`
         );

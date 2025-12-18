@@ -212,27 +212,29 @@ test.describe('Notification center', () => {
     );
   });
 
-  // TODO: flaky test
-  test.skip('should be highlighted for silent notification', async ({
-    page
-  }) => {
-    await page.evaluate(() => {
-      return window.jupyterapp.commands.execute('apputils:notify', {
-        message: 'Simple note'
+  test.fixme(
+    'should be highlighted for silent notification',
+    async ({ page }) => {
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute('apputils:notify', {
+          message: 'Simple note'
+        });
       });
-    });
 
-    const status = page.locator('.jp-Notification-Status');
-    // TODO: sometimes we receive "lm-Widget jp-Notification-Status jp-StatusBar-Item"
-    expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
-    await expect(status).toHaveText('1');
+      const status = page.locator('.jp-Notification-Status');
+      // TODO: sometimes we receive "lm-Widget jp-Notification-Status jp-StatusBar-Item"
+      expect(await status.getAttribute('class')).toMatch(
+        /\s?jp-mod-selected\s?/
+      );
+      await expect(status).toHaveText('1');
 
-    await status.click();
+      await status.click();
 
-    await expect(page.locator('.jp-Notification-Header')).toHaveText(
-      '1 notification'
-    );
-  });
+      await expect(page.locator('.jp-Notification-Header')).toHaveText(
+        '1 notification'
+      );
+    }
+  );
 
   test('should stop the highlight once the center is closed', async ({
     page
