@@ -19,6 +19,9 @@
       "path": "../imageviewer"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../translation"
     }
   ]
