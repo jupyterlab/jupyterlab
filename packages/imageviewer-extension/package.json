@@ -37,11 +37,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@jupyterlab/application": "^4.6.0-alpha.4",
     "@jupyterlab/apputils": "^4.7.0-alpha.4",
     "@jupyterlab/docregistry": "^4.6.0-alpha.4",
     "@jupyterlab/imageviewer": "^4.6.0-alpha.4",
     "@jupyterlab/translation": "^4.6.0-alpha.4"
+=======
+    "@jupyterlab/application": "^4.6.0-alpha.0",
+    "@jupyterlab/apputils": "^4.7.0-alpha.0",
+    "@jupyterlab/docregistry": "^4.6.0-alpha.0",
+    "@jupyterlab/imageviewer": "^4.6.0-alpha.0",
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
+    "@jupyterlab/translation": "^4.6.0-alpha.0"
+>>>>>>> cdcd79c187 (update dependencies)
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
