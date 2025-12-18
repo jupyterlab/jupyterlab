@@ -1052,7 +1052,7 @@ export interface IIsCompleteRequestMsg
  * An `'is_complete_reply'` message on the `'stream'` channel.
  *
  * See [Messaging in Jupyter](https://jupyter-client.readthedocs.io/en/latest/messaging.html#code-completeness).
- * @see {@link ICompleteRequest}
+ * @see {@link IIsCompleteRequest}
  * @see {@link IKernelConnection.isComplete}
  */
 export interface IIsCompleteReplyMsg
