@@ -69,6 +69,7 @@
   "@jupyterlab/debugger-extension:config": "Provides the debugger configuration",
   "@jupyterlab/debugger-extension:consoles": "Add debugger capability to the consoles.",
   "@jupyterlab/debugger-extension:debug-console": "Debugger console to enable evaluation in debugger context.",
+  "@jupyterlab/debugger-extension:debug-menu": "Menu bar item for interacting with the debugger",
   "@jupyterlab/debugger-extension:display-registry": "Provides the debugger display registry for cell/file display names.",
   "@jupyterlab/debugger-extension:files": "Adds debugger capabilities to files.",
   "@jupyterlab/debugger-extension:main": "Initialize the debugger user interface.",

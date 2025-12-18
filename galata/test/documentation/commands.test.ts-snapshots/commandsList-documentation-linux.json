@@ -1493,6 +1493,16 @@
     }
   },
   {
+    "caption": "Clear All Breakpoints",
+     "id": "debugger:clear-all-breakpoints",
+     "label": "Clear All Breakpoints",
+     "shortcuts": [],
+     "args": {
+      "type": "object",
+      "properties": {}
+    }
+   },
+  {
     "id": "debugger:continue",
     "label": "Pause",
     "caption": "Pause",
@@ -1526,8 +1536,8 @@
   },
   {
     "id": "debugger:evaluate",
-    "label": "Evaluate Code",
-    "caption": "Evaluate Code",
+    "label": "Open Debugger Console",
+    "caption": "Open Debugger Console",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -1631,9 +1641,29 @@
     }
   },
   {
+    "id": "debugger:restart-and-run-all",
+    "label": "Restart Kernel and Run Without Debugging",
+    "caption": "Restart Kernel and Run Without Debugging",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "debugger:restart-debug",
     "label": "Restart Kernel and Debug…",
     "caption": "Restart Kernel and Debug…",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:run-cells",
+    "label": "Run All Cells",
+    "caption": "Run All Cells",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -1707,6 +1737,16 @@
     "shortcuts": [
       "Shift F9"
     ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:variables-view-options",
+    "label": "",
+    "caption": "",
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
