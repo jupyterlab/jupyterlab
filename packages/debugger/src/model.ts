@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -36,7 +36,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
-      editorServices: options.editorServices,
+      mimeTypeService: options.mimeTypeService,
       getSource: options.getSource,
       displayRegistry
     });
@@ -195,6 +195,6 @@ export namespace DebuggerModel {
     /**
      * The editor services.
      */
-    editorServices: IEditorServices | null;
+    mimeTypeService: IEditorMimeTypeService | null;
   }
 }

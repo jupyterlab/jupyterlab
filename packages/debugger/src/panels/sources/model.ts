@@ -5,10 +5,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebuggerDisplayRegistry } from '../../displayregistry';
 import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
-import {
-  IEditorMimeTypeService,
-  IEditorServices
-} from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * The model to keep track of the current source being displayed.
@@ -26,8 +23,8 @@ export class SourcesModel implements IDebugger.Model.ISources {
     this._displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();
 
-    if (options.editorServices?.mimeTypeService) {
-      this._mimeTypeService = options.editorServices?.mimeTypeService;
+    if (options.mimeTypeService) {
+      this._mimeTypeService = options.mimeTypeService;
     }
 
     options.currentFrameChanged.connect(async (_, frame) => {
@@ -172,8 +169,8 @@ export namespace SourcesModel {
 
     displayRegistry?: IDebuggerDisplayRegistry;
     /**
-     * The editor services used to create new read-only editors.
+     * The mimeTypeService.
      */
-    editorServices: IEditorServices | null;
+    mimeTypeService: IEditorMimeTypeService | null;
   }
 }

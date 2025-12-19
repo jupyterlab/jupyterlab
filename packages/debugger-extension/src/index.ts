@@ -466,7 +466,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
     displayRegistry: IDebuggerDisplayRegistry | null,
     debuggerSources: IDebugger.ISources | null,
     translator: ITranslator | null,
-    editorServices: IEditorServices | null
+    editorServices: IEditorServices
   ) =>
     new Debugger.Service({
       config,
@@ -474,7 +474,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
       translator,
-      editorServices
+      mimeTypeService: editorServices.mimeTypeService
     })
 };
 
