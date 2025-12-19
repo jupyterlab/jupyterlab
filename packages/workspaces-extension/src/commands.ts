@@ -366,13 +366,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           node?.dataset['context'] ??
           resolver.name;
 
-        const workspace = await app.serviceManager.workspaces.fetch(workspaceId);
+        const workspace =
+          await app.serviceManager.workspaces.fetch(workspaceId);
 
-        // Some workspace objects expose layout in metadata, others in data.
-        // Prefer metadata, fall back to `.data`.
         const rawLayout =
-          (workspace as any)?.metadata?.['layout-restorer:data'] ??
-          (workspace as any)?.data?.['layout-restorer:data'];
+          workspace.metadata['layout-restorer:data'] ??
+          workspace.data['layout-restorer:data'];
 
         const widgets = rawLayout?.main?.dock?.widgets;
         const tabs = Array.isArray(widgets) ? widgets.length : 0;
