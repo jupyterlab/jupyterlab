@@ -68,7 +68,7 @@ JupyterLab notebooks operate in two primary modes: **Edit Mode** and **Command M
 
 **Edit Mode**
 - Used to edit the contents of a cell.
-- Activated by pressing `Enter` on a selected cell.
+- Activated by pressing {kbd}`Enter` on a selected cell.
 - A blue cell border indicates Edit Mode.
 - Keyboard input affects the cell contents.
 
