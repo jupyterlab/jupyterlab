@@ -176,9 +176,6 @@ export class ThemeManager implements IThemeManager {
 
       document.body.appendChild(link);
       links.push(link);
-
-      // add any css overrides to document
-      this.loadCSSOverrides();
     });
   }
 
@@ -533,6 +530,10 @@ export class ThemeManager implements IThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
+
+        // Load the overrides settings
+        this.loadCSSOverrides();
+
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
