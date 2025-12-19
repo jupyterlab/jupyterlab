@@ -860,6 +860,12 @@
       "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
       "type": "boolean",
       "default": false
+    },
+    "autoScroll": {
+      "type": "boolean",
+      "title": "Auto-scroll to last cell after running all cells.",
+      "description": "Activate and scroll to the last cell after running all cells in the notebook.",
+      "default": true
     }
   },
   "additionalProperties": false,

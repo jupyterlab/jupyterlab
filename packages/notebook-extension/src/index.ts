@@ -2096,7 +2096,8 @@ function activateNotebookHandler(
         | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
         .composite as boolean,
-      showMinimap: settings.get('showMinimap').composite as boolean
+      showMinimap: settings.get('showMinimap').composite as boolean,
+      autoScroll: settings.get('autoScroll').composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -2642,11 +2643,13 @@ function addCommands(
 
       if (current) {
         const { context, content } = current;
+        const autoScroll = content.notebookConfig.autoScroll ?? true;
         return NotebookActions.runAll(
           content,
           context.sessionContext,
           sessionDialogs,
-          translator
+          translator,
+          autoScroll
         );
       }
     },
@@ -2696,12 +2699,14 @@ function addCommands(
 
       if (current) {
         const { context, content } = current;
+        const autoScroll = content.notebookConfig.autoScroll ?? true;
 
         return NotebookActions.runAllBelow(
           content,
           context.sessionContext,
           sessionDialogs,
-          translator
+          translator,
+          autoScroll
         );
       }
     },
