@@ -78,11 +78,12 @@ describe('Debugging support', () => {
     config = new Debugger.Config();
     displayRegistry = new DebuggerDisplayRegistry();
     const editorServices = getEditorServices();
+    const mimeTypeService = editorServices.mimeTypeService;
     service = new Debugger.Service({
       displayRegistry,
       specsManager,
       config,
-      editorServices
+      mimeTypeService
     });
   });
 
@@ -128,11 +129,12 @@ describe('DebuggerService', () => {
     session = new Debugger.Session({ connection, config });
     displayRegistry = new DebuggerDisplayRegistry();
     const editorServices = getEditorServices();
+    const mimeTypeService = editorServices.mimeTypeService;
     service = new Debugger.Service({
       displayRegistry,
       specsManager,
       config,
-      editorServices
+      mimeTypeService
     });
   });
 

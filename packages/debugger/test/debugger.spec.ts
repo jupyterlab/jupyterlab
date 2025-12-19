@@ -92,10 +92,7 @@ describe('Debugger', () => {
     displayRegistry,
     specsManager,
     config,
-    editorServices: {
-      factoryService,
-      mimeTypeService
-    }
+    mimeTypeService
   });
   const lines = [3, 5];
   const code = [
