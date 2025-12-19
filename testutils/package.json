@@ -32,10 +32,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/notebook": "^4.6.0-alpha.0",
+    "@jupyterlab/apputils": "^0.1.1",
+    "@jupyterlab/notebook": "^0.1.2",
     "@jupyterlab/rendermime": "^4.6.0-alpha.0",
-    "@jupyterlab/testing": "^4.6.0-alpha.0"
+    "@jupyterlab/testing": "^4.0.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
