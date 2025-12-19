@@ -1595,6 +1595,7 @@
   {
     "id": "debugger:pause-on-exceptions",
     "label": "Breakpoints on exception",
+    "caption": "",
     "shortcuts": [],
     "args": {
       "type": "object",
@@ -2035,7 +2036,9 @@
     "id": "documentsearch:startWithReplace",
     "label": "Find and Replace…",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl H"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -2575,7 +2578,7 @@
   },
   {
     "id": "fileeditor:change-font-size",
-    "label": "Decrease Font Size",
+    "label": "Change Font Size",
     "caption": "",
     "shortcuts": [],
     "args": {

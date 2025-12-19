@@ -878,6 +878,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    */
   protected onCloseRequest(msg: Message): void {
     super.onCloseRequest(msg);
+    this.setReplaceInputVisibility(false);
     this._closed.emit();
     void this.model.endQuery();
   }

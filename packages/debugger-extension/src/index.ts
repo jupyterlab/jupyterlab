@@ -345,7 +345,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       },
       execute: async () => {
         const state = service.getDebuggerState();
-        await service.stop();
 
         const widget = notebookTracker.currentWidget;
         if (!widget) {
@@ -353,11 +352,15 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext, {
+          onBeforeRestart: async (): Promise<void> => {
+            await service.stop();
+          }
+        });
         if (!restarted) {
           return;
         }
-
+        await service.start();
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
         await NotebookActions.runAll(
@@ -1149,7 +1152,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
       label: args => (args.filter as string) || 'Breakpoints on exception',
-      caption: args => args.description as string,
+      caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),
