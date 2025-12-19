@@ -108,10 +108,12 @@
           "type": "object",
           "properties": {
             "light": {
-              "type": ["string", "null"]
+              "type": ["string", "null"],
+              "description": "Background color to use in light theme"
             },
             "dark": {
-              "type": ["string", "null"]
+              "type": ["string", "null"],
+              "description": "Background color to use in dark theme"
             }
           }
         }
