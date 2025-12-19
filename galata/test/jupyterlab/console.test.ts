@@ -125,12 +125,12 @@ print(data.head())`;
     expect(afterPasteHeight!.height).toBeGreaterThan(initialHeight!.height);
   });
 
-  test.fixme(
-    'Input prompt maintains auto-resize height when moved from bottom to top',
-    async ({ page }) => {
-      const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+  test('Input prompt maintains auto-resize height when moved from bottom to top', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-      const pastedCode = `def complex_function():
+    const pastedCode = `def complex_function():
     for i in range(10):
         if i % 2 == 0:
             print(f"Even: {i}")
@@ -138,25 +138,24 @@ print(data.head())`;
             print(f"Odd: {i}")
     return "Completed"`;
 
-      await page.evaluate(async code => {
-        await navigator.clipboard.writeText(code);
-      }, pastedCode);
+    await page.evaluate(async code => {
+      await navigator.clipboard.writeText(code);
+    }, pastedCode);
 
-      await page.keyboard.press('ControlOrMeta+v');
+    await page.keyboard.press('ControlOrMeta+v');
 
-      const heightAtBottom = await codeConsoleInput.boundingBox();
-      expect(heightAtBottom).not.toBeNull();
+    const heightAtBottom = await codeConsoleInput.boundingBox();
+    expect(heightAtBottom).not.toBeNull();
 
-      await page.getByLabel('Change Console Prompt Position').first().click();
-      await page.getByText('Prompt to top').click();
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
 
-      const heightAtTop = await codeConsoleInput.boundingBox();
-      expect(heightAtTop).not.toBeNull();
+    const heightAtTop = await codeConsoleInput.boundingBox();
+    expect(heightAtTop).not.toBeNull();
 
-      // TODO: Sometimes fails when it expects 157.3125 but receives 52
-      expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
-    }
-  );
+    // TODO: Sometimes fails when it expects 157.3125 but receives 52
+    expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
+  });
 
   test('Input prompt continues to auto-resize after code execution', async ({
     page

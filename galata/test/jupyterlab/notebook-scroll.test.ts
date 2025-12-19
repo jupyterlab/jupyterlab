@@ -441,49 +441,44 @@ test.describe('Jump to execution button', () => {
     await page.notebook.activate(longOutputsNb);
   });
 
-  test.fixme(
-    'should show jump button after first execution and scroll to executing cells',
-    async ({ page }) => {
-      await page.notebook.setCell(
-        0,
-        'code',
-        'from time import sleep\nsleep(2)'
-      );
+  test('should show jump button after first execution and scroll to executing cells', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', 'from time import sleep\nsleep(2)');
 
-      // Button doesn't exist before execution
-      const indicator = page.locator('.jp-Notebook-ExecutionIndicator');
-      await indicator.hover();
-      await expect(
-        page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
-      ).toHaveCount(0);
+    // Button doesn't exist before execution
+    const indicator = page.locator('.jp-Notebook-ExecutionIndicator');
+    await indicator.hover();
+    await expect(
+      page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
+    ).toHaveCount(0);
 
-      // Run first cell
-      void page.notebook.runCell(0, false);
+    // Run first cell
+    void page.notebook.runCell(0, false);
 
-      await page.notebook.addCell('code', '1');
-      const runPromise = page.notebook.runCell(3, false);
+    await page.notebook.addCell('code', '1');
+    const runPromise = page.notebook.runCell(3, false);
 
-      // Hover and verify button exists
-      await indicator.hover();
-      const jumpButton = page.locator(
-        '.jp-Notebook-ExecutionIndicator-jumpButton'
-      );
-      await expect(jumpButton).toBeVisible();
+    // Hover and verify button exists
+    await indicator.hover();
+    const jumpButton = page.locator(
+      '.jp-Notebook-ExecutionIndicator-jumpButton'
+    );
+    await expect(jumpButton).toBeVisible();
 
-      // Click and scroll to the first cell (currently executing)
-      // TODO: this jumpButton.click fails with a timeout
-      await jumpButton.click();
-      const firstCell = await page.notebook.getCellLocator(0);
-      await firstCell?.waitFor({ state: 'visible', timeout: 1000 });
+    // Click and scroll to the first cell (currently executing)
+    // TODO: this jumpButton.click fails with a timeout
+    await jumpButton.click();
+    const firstCell = await page.notebook.getCellLocator(0);
+    await firstCell?.waitFor({ state: 'visible', timeout: 1000 });
 
-      // Wait for all executions to complete
-      await runPromise;
+    // Wait for all executions to complete
+    await runPromise;
 
-      // Click and scroll to last cell (last executed)
-      await indicator.hover();
-      await jumpButton.click();
-      const lastCell = await page.notebook.getCellLocator(3);
-      await lastCell?.waitFor({ state: 'visible', timeout: 1000 });
-    }
-  );
+    // Click and scroll to last cell (last executed)
+    await indicator.hover();
+    await jumpButton.click();
+    const lastCell = await page.notebook.getCellLocator(3);
+    await lastCell?.waitFor({ state: 'visible', timeout: 1000 });
+  });
 });

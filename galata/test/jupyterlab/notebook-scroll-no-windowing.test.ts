@@ -235,42 +235,36 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
     await page.contents.deleteDirectory(tmpPath);
   });
 
-  test.fixme(
-    'should scroll when advancing if top is only marginally visible',
-    async ({ page }) => {
-      const notebook = await page.notebook.getNotebookInPanelLocator();
-      const thirdCell = await page.notebook.getCellLocator(2);
+  test('should scroll when advancing if top is only marginally visible', async ({
+    page
+  }) => {
+    const notebook = await page.notebook.getNotebookInPanelLocator();
+    const thirdCell = await page.notebook.getCellLocator(2);
 
-      await positionCellPartiallyBelowViewport(
-        page,
-        notebook!,
-        thirdCell!,
-        0.01
-      );
-      // Select second cell
-      await page.notebook.selectCells(1);
+    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 0.01);
+    // Select second cell
+    await page.notebook.selectCells(1);
 
-      // The third cell should be positioned at the bottom, revealing between 0 to 2% of its content.
-      await expect(thirdCell!).toBeInViewport({ ratio: 0.0 });
-      await expect(thirdCell!).not.toBeInViewport({ ratio: 0.02 });
-      // Only a small fraction of notebook viewport should be taken up by that cell
-      expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeLessThan(
-        0.1
-      );
+    // The third cell should be positioned at the bottom, revealing between 0 to 2% of its content.
+    await expect(thirdCell!).toBeInViewport({ ratio: 0.0 });
+    await expect(thirdCell!).not.toBeInViewport({ ratio: 0.02 });
+    // Only a small fraction of notebook viewport should be taken up by that cell
+    expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeLessThan(
+      0.1
+    );
 
-      // Run second cell
-      await page.notebook.runCell(1);
+    // Run second cell
+    await page.notebook.runCell(1);
 
-      // After running the second cell, the third cell should be revealed, in at least 10%
-      // TODO: this expectation sometimes fails with a viewport ratio 0.009747706353664398
-      await expect(thirdCell!).toBeInViewport({ ratio: 0.1 });
+    // After running the second cell, the third cell should be revealed, in at least 10%
+    // TODO: this expectation sometimes fails with a viewport ratio 0.009747706353664398
+    await expect(thirdCell!).toBeInViewport({ ratio: 0.1 });
 
-      // The third cell should now occupy about half of the notebook viewport
-      expect(
-        await notebookViewportRatio(notebook!, thirdCell!)
-      ).toBeGreaterThan(0.4);
-    }
-  );
+    // The third cell should now occupy about half of the notebook viewport
+    expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeGreaterThan(
+      0.4
+    );
+  });
 
   test('should not scroll when advancing if top is non-marginally visible', async ({
     page
