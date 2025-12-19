@@ -74,11 +74,11 @@ JupyterLab notebooks operate in two primary modes: **Edit Mode** and **Command M
 
 **Command Mode**
 - Used to perform notebook-level actions such as running cells, adding cells, or changing cell types.
-- Activated by pressing `Esc` when not editing text.
+- Activated by pressing {kbd}`Esc` when not editing text.
 - A gray cell border indicates Command Mode.
 - Keyboard shortcuts act on entire cells rather than their contents.
 
-Pressing `Esc` exits Edit Mode, while pressing `Enter` enters Edit Mode on the selected cell.
+Pressing {kbd}`Esc` exits Edit Mode, while pressing {kbd}`Enter` enters Edit Mode on the selected cell.
 
 ## Working with Cells
 
