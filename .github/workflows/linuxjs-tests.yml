@@ -32,6 +32,7 @@ jobs:
                   data = json.loads(pkg_json.read_text())
                   if data.get('scripts', {}).get('test:cov'):
                       packages.append(f'js-{p.name}')
+          assert len(packages) > 0, "No packages found for testing"
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f'group={json.dumps(sorted(packages))}\n')
