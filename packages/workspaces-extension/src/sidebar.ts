@@ -13,7 +13,6 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Workspace } from '@jupyterlab/services';
 import { WORKSPACE_ITEM_CLASS } from './commands';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
-import { ILayoutRestorerData } from './types';
 
 /**
  * The extension populating sidebar with workspaces list.
@@ -69,7 +68,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
       labelTitle() {
         const layout =
           this._workspace.data['layout-restorer:data'] as
-            | ILayoutRestorerData
+            | { main?: { dock?: { widgets?: unknown[] } } }
             | undefined;
 
         const widgetCount = layout?.main?.dock?.widgets?.length ?? 0;
