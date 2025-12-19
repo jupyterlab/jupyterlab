@@ -61,7 +61,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
 
   /**
    * Signal emitted when the current frame changes.
-   * 
+   *
    * @deprecated since 4.6.0, will be removed in 5.0.
    */
   readonly currentFrameChanged: ISignal<
