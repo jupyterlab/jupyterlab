@@ -152,6 +152,8 @@ print(data.head())`;
 
     const heightAtTop = await codeConsoleInput.boundingBox();
     expect(heightAtTop).not.toBeNull();
+
+    // TODO: Sometimes fails when it expects 157.3125 but receives 52
     expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
   });
 
