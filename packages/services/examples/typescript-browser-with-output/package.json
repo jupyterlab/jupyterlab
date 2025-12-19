@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
-    "@jupyterlab/outputarea": "^4.6.0-alpha.0",
+    "@jupyterlab/outputarea": "^0.1.2",
     "@jupyterlab/rendermime": "^4.6.0-alpha.0",
-    "@jupyterlab/services": "^7.6.0-alpha.0"
+    "@jupyterlab/services": "^0.22.0"
   },
   "devDependencies": {
     "@rspack/cli": "^1.6.4",
