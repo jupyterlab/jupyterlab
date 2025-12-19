@@ -141,7 +141,7 @@ export class ThemeManager implements IThemeManager {
    */
   getCSS(key: string): string {
     let val = this._overrides[key];
-    if (typeof val !== 'string') {
+    if (val && typeof val !== 'string') {
       const isLight = this._current ? this.isLight(this._current) : true;
       val = isLight ? val.light : val.dark;
     }
