@@ -1,8 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { expect, galata, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
+import fs from 'fs';
+import path from 'path';
 import { positionMouseOver } from './utils';
 
 test.use({
@@ -12,14 +18,6 @@ test.use({
 });
 
 test.describe('Debugger', () => {
-  test.use({
-    mockSettings: {
-      ...galata.DEFAULT_SETTINGS,
-      '@jupyterlab/debugger-extension:sidebar': {
-        showSourcesInMainArea: false
-      }
-    }
-  });
   test('Kernel capability', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
@@ -358,15 +356,20 @@ test.describe('Debugger', () => {
       clip: { y: 478, x: 998, width: 280, height: 138 },
       path: 'test/documentation/screenshots/debugger-source.png'
     });
+  })
 
-    await page.click('jp-button[title^=Continue]');
-  });
   test.describe('Show sources', () => {
-    for (const showSourcesInMainArea of [false, true]) {
-      test(`should show sources when showSourcesInMainArea=${showSourcesInMainArea}`, async ({
-        page,
-        tmpPath
-      }) => {
+    test.describe('showSourcesInMainArea = false', () => {
+      test.use({
+        mockSettings: {
+          ...galata.DEFAULT_SETTINGS,
+          '@jupyterlab/debugger-extension:main': {
+            showSourcesInMainArea: false
+          }
+        }
+      });
+
+      test('sources in sidebar', async ({ page, tmpPath }) => {
         await page.goto(`tree/${tmpPath}`);
         await createNotebook(page);
 
@@ -382,48 +385,85 @@ test.describe('Debugger', () => {
         // Wait to be stopped on the breakpoint
         await page.debugger.waitForCallStack();
 
-        if (showSourcesInMainArea) {
-          // ✅ Expect a read-only editor in the main area
-          const editor = page.locator('.jp-MainAreaWidget .jp-Editor');
-          await expect(editor).toHaveCount(1);
-          await expect(editor).toHaveAttribute('readonly', 'true');
-        } else {
-          // ✅ Expect sources panel in the sidebar
-          await expect(
-            page.locator('.jp-DebuggerSources-header-path')
-          ).toContainText('Cell [');
-        }
+        await page.screenshot({
+          clip: { y: 334, x: 998, width: 280, height: 400 },
+          path: 'test/documentation/screenshots/debugger-with-source-panel.png'
+        });
+        await page.click('jp-button[title^=Continue]');
+        await expect(page.locator('.jp-DebuggerSources')).toBeVisible();
+      });
+    });
 
-        // Screenshot only for sidebar case (kernel id varies)
-        if (!showSourcesInMainArea) {
-          await page.screenshot({
-            clip: { y: 478, x: 998, width: 280, height: 138 },
-            path: 'test/documentation/screenshots/debugger-source.png'
-          });
+    test.describe('showSourcesInMainArea = true', () => {
+      test.use({
+        mockSettings: {
+          ...galata.DEFAULT_SETTINGS,
+          '@jupyterlab/debugger-extension:main': {
+            showSourcesInMainArea: true
+          }
         }
+      });
+
+      test('sources in main area', async ({ page, request, tmpPath }) => {
+        await page.goto(`tree/${tmpPath}`);
+        const localFile = path.resolve(__dirname, 'add.py');
+        await fs.promises.writeFile(
+          localFile,
+          `def add(x, y):\n    return x + y\n`
+        );
+
+        const contents = galata.newContentsHelper(request, page);
+        await contents.uploadFile(localFile, `${tmpPath}/add.py`);
+
+        await createNotebook(page);
+
+        await page.debugger.switchOn();
+        await page.waitForCondition(() => page.debugger.isOpen());
+
+        await page.notebook.setCell(
+          0,
+          'code',
+          'from add import add \nresult = add(1, 2)\nprint(result)'
+        );
+
+        await page.notebook.clickCellGutter(0, 2);
+
+        // Don't wait as it will be blocked
+        void page.notebook.runCell(0);
+
+        // Wait to be stopped on the breakpoint
+        await page.debugger.waitForCallStack();
+        await page.click('jp-button[aria-label="Step In (F11)"]');
+        await page.debugger.waitForCallStack();
+
+        await expect(page.locator('.cm-editor.jp-mod-readOnly')).toBeVisible();
+
+        await page.screenshot({
+          clip: { y: 0, x: 0, width: 1400, height: 1000 },
+          path: 'test/documentation/screenshots/debugger-open-module.png'
+        });
 
         await page.click('jp-button[title^=Continue]');
       });
-    }
+    });
   });
-});
+})
+  async function createNotebook(page: IJupyterLabPageFixture) {
+    await page.notebook.createNew();
 
-async function createNotebook(page: IJupyterLabPageFixture) {
-  await page.notebook.createNew();
+    await page.sidebar.setWidth();
 
-  await page.sidebar.setWidth();
+    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+  }
 
-  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
-}
+  async function setBreakpoint(page: IJupyterLabPageFixture) {
+    await page.notebook.setCell(
+      0,
+      'code',
+      'def add(a, b):\nres = a + b\nreturn res'
+    );
+    await page.notebook.run();
+    await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
 
-async function setBreakpoint(page: IJupyterLabPageFixture) {
-  await page.notebook.setCell(
-    0,
-    'code',
-    'def add(a, b):\nres = a + b\nreturn res'
-  );
-  await page.notebook.run();
-  await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');
-
-  await page.notebook.clickCellGutter(0, 2);
-}
+    await page.notebook.clickCellGutter(0, 2);
+  }

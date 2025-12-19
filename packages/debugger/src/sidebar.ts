@@ -122,7 +122,7 @@ export class DebuggerSidebar extends SidePanel {
 
       if (!this.sources || this.sources.isDisposed) {
         this.sources = new SourcesPanel(this._sourcesOptions);
-        this.addWidget(this.sources);
+        this.insertWidget(3, this.sources);
       }
     } else {
       // ShowSourcesPanel is false => remove widget if present
