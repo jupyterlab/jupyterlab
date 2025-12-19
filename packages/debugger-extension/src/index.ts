@@ -821,16 +821,11 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       translator
     });
 
+    let showSourcesInMainArea: boolean = true;
     sidebar.showSourcesPanel = false;
 
     if (settingRegistry) {
       const settings = await settingRegistry.load(main.id);
-
-      settings.changed.connect(() => {
-        const showSourcesInMainArea = settings.get('showSourcesInMainArea')
-          .composite as boolean;
-        sidebar.showSourcesPanel = !showSourcesInMainArea;
-      });
 
       const updateSettings = (): void => {
         const filters = settings.get('variableFilters').composite as {
@@ -843,6 +838,9 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         const kernelSourcesFilter = settings.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
+        showSourcesInMainArea =
+          (settings.composite['showSourcesInMainArea'] as boolean) ?? true;
+        sidebar.showSourcesPanel = !showSourcesInMainArea;
       };
       updateSettings();
       settings.changed.connect(updateSettings);
