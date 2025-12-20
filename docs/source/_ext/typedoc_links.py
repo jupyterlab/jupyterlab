@@ -26,12 +26,8 @@ class TypeDocReference(SphinxRole):
         """Create a reference node for TypeDoc API."""
         target = self.text.strip()
 
-        if "." in target:
-            # Parse `module.Member` links
-            module, name = target.rsplit(".", 1)
-        else:
-            # Handle `module` links
-            name = target
+        # Parse `module.Member` links or handle `module` links
+        name = target.rsplit(".", 1)[1] if "." in target else target
 
         api_dir = Path(self.env.srcdir) / "api"
         if not api_dir.exists():

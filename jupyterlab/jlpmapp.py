@@ -26,7 +26,7 @@ def execvp(cmd, argv):
         import signal
         import sys
 
-        p = subprocess.Popen([cmd] + argv[1:])
+        p = subprocess.Popen([cmd, *argv[1:]])
         # Don't raise KeyboardInterrupt in the parent process.
         # Set this after spawning, to avoid subprocess inheriting handler.
         signal.signal(signal.SIGINT, signal.SIG_IGN)
