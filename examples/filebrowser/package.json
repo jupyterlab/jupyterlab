@@ -14,7 +14,7 @@
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
     "@jupyterlab/docmanager": "^4.6.0-alpha.0",
     "@jupyterlab/docregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/filebrowser": "^4.6.0-alpha.0",
+    "@jupyterlab/filebrowser": "^0.1.2",
     "@jupyterlab/fileeditor": "^4.6.0-alpha.0",
     "@jupyterlab/services": "^7.6.0-alpha.0",
     "@jupyterlab/theme-light-extension": "^4.6.0-alpha.0",
