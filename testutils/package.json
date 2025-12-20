@@ -31,7 +31,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0-alpha.0",
+    "@jupyterlab/application": "^0.1.1",
     "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/notebook": "^0.1.2",
     "@jupyterlab/rendermime": "^4.6.0-alpha.0",
