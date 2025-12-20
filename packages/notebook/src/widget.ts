@@ -716,6 +716,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     cell.syncCollapse = true;
     cell.syncEditable = true;
     cell.syncScrolled = true;
+    cell.syncTags = true;
     cell.outputArea.inputRequested.connect((_, stdin) => {
       this._onInputRequested(cell).catch(reason => {
         console.error('Failed to scroll to cell requesting input.', reason);
@@ -749,6 +750,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     const cell = this.contentFactory.createMarkdownCell(options);
     cell.syncCollapse = true;
     cell.syncEditable = true;
+    cell.syncTags = true;
     // Connect collapsed signal for each markdown cell widget
     cell.headingCollapsedChanged.connect(this._onCellCollapsed, this);
     return cell;
@@ -769,6 +771,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     const cell = this.contentFactory.createRawCell(options);
     cell.syncCollapse = true;
     cell.syncEditable = true;
+    cell.syncTags = true;
     return cell;
   }
 
