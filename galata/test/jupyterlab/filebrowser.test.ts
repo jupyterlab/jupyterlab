@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
+import { changeCodeFontSize, getFileListFontSize } from './utils';
 
 test('Drag file from nested directory to parent via breadcrumb', async ({
   page,
@@ -40,4 +41,35 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
   // Verify the file is now in dir1
   await fileItem.waitFor({ state: 'visible' });
   expect(await page.filebrowser.isFileListedInBrowser(fileName)).toBeTruthy();
+});
+
+test('File rename input respects UI font size', async ({ page }) => {
+  const fileName = 'test-rename.txt';
+
+  await page.menu.clickMenuItem('File>New>Text File');
+  await page
+    .locator('.jp-DirListing-item:has-text("untitled.txt")')
+    .waitFor({ state: 'visible' });
+
+  await changeCodeFontSize(page, 'Increase UI Font Size');
+  await changeCodeFontSize(page, 'Increase UI Font Size');
+  await changeCodeFontSize(page, 'Increase UI Font Size');
+
+  // Get the filename's font size when we are not renaming
+  const normalFontSize = await getFileListFontSize(page);
+
+  // Trigger rename
+  await page
+    .locator('.jp-DirListing-itemName:has-text("untitled.txt")')
+    .click();
+  await page.keyboard.press('F2');
+
+  const renameInput = page.locator('.jp-DirListing-editor');
+  await renameInput.waitFor({ state: 'visible' });
+
+  const inputFontSize = await renameInput.evaluate(el =>
+    parseInt(getComputedStyle(el).fontSize)
+  );
+
+  expect(inputFontSize).toEqual(normalFontSize);
 });
