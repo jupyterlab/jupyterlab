@@ -39,8 +39,8 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
     "@jupyterlab/rendermime-interfaces": "^3.14.0-alpha.0",
-    "@jupyterlab/services": "^7.6.0-alpha.0",
-    "@jupyterlab/statedb": "^4.6.0-alpha.0",
+    "@jupyterlab/services": "^0.22.0",
+    "@jupyterlab/statedb": "^2.0.0",
     "@lumino/coreutils": "^2.2.2"
   },
   "devDependencies": {
