@@ -40,8 +40,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/metadataform": "^4.6.0-alpha.0",
-    "@jupyterlab/notebook": "^4.6.0-alpha.0",
+    "@jupyterlab/metadataform": "^4.0.0",
+    "@jupyterlab/notebook": "^0.1.2",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
     "@jupyterlab/translation": "^4.6.0-alpha.0",
     "@jupyterlab/ui-components": "^4.6.0-alpha.0",
