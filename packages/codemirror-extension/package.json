@@ -47,7 +47,7 @@
     "@jupyterlab/application": "^4.6.0-alpha.0",
     "@jupyterlab/apputils": "^0.1.1",
     "@jupyterlab/codeeditor": "^4.6.0-alpha.0",
-    "@jupyterlab/codemirror": "^4.6.0-alpha.0",
+    "@jupyterlab/codemirror": "^0.1.1",
     "@jupyterlab/notebook": "^0.1.2",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
     "@jupyterlab/statusbar": "^4.6.0-alpha.0",
