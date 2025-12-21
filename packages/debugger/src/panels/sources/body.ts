@@ -28,6 +28,7 @@ export class SourcesBody extends Widget {
    */
   constructor(options: SourcesBody.IOptions) {
     super();
+    console.log('You are in the beginning of the constructor');
     this._model = options.model;
     this._debuggerService = options.service;
     this._mimeTypeService = options.editorServices.mimeTypeService;
@@ -41,6 +42,7 @@ export class SourcesBody extends Widget {
       mimeType: '',
       path: ''
     });
+
     this._editor.hide();
 
     this._model.currentFrameChanged.connect(async (_, frame) => {
@@ -117,11 +119,20 @@ export class SourcesBody extends Widget {
       src: this._editor.model.sharedModel
     });
 
+    console.log(
+      'In body class, in _showSource, before setting:',
+      this._model.currentSource
+    );
     this._model.currentSource = {
       content,
       mimeType: editorMimeType,
       path: displayPath
     };
+
+    console.log(
+      'In body class, in _showSource, after setting:',
+      this._model.currentSource
+    );
 
     requestAnimationFrame(() => {
       EditorHandler.showCurrentLine(this._editor.editor, frame.line, 'start');
