@@ -42,7 +42,7 @@
   "dependencies": {
     "@jupyter/ydoc": "^3.1.0",
     "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/cells": "^4.6.0-alpha.0",
+    "@jupyterlab/cells": "^0.1.2",
     "@jupyterlab/codeeditor": "^4.6.0-alpha.0",
     "@jupyterlab/codemirror": "^4.6.0-alpha.0",
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
