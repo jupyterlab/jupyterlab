@@ -41,9 +41,9 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/toc": "^6.6.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0",
+    "@jupyterlab/settingregistry": "^2.0.0",
+    "@jupyterlab/toc": "^0.3.0",
+    "@jupyterlab/translation": "^3.0.0",
     "@jupyterlab/ui-components": "^4.6.0-alpha.0"
   },
   "devDependencies": {
