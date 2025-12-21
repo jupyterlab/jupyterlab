@@ -359,13 +359,22 @@ make the change at the source before the next major JupyterLab release.
 - Statusbar items are now hidden by default at high magnification/low resolution to prevent overlap for those using the application at high magnifications.
 - An additional `priority` property has been added to the options of `IStatusBar.registerStatusItem` method to allow the status bar item to remain visible;
   the intended usage is for small statusbar items that either add functionality that would be particularly useful at high zoom or is inaccessible otherwise.
-
 ## JupyterLab 3.x to 4.x
 
-Because of significant type changes from JupyterLab 3.x to 4.x, we recommend **publishing a new major version**
-of your extension to work with each major version of JupyterLab. For examples of extensions that use different
-major versions for Lab 3 and Lab 4, see [jupyterlab-vim](https://github.com/jupyterlab-contrib/jupyterlab-vim)
-and [jupyter-ai](https://github.com/jupyterlab/jupyter-ai).
+### CodeEditor text handling (sharedModel)
+
+In JupyterLab 4.x, extension authors should no longer update editor text
+by mutating `model.value.text` directly.
+
+In JupyterLab 3.x, the following pattern was commonly used:
+
+```ts
+widget.content.model.value.text = 'some text';
+widget.content.model.sharedModel.updateSource(0, 0, 'some text');
+```
+In JupyterLab 4.x, extensions should update editor contents exclusively through
+the shared model APIs to ensure correct synchronization and collaboration.
+
 
 ### Upgrading extension using the upgrade script
 
