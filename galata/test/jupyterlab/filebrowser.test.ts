@@ -44,7 +44,6 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
 });
 
 test('File rename input respects UI font size', async ({ page }) => {
-
   await page.menu.clickMenuItem('File>New>Text File');
   await page
     .locator('.jp-DirListing-item:has-text("untitled.txt")')
