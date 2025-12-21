@@ -180,6 +180,26 @@ prevent it from being activated, but without rebuilding the application.
 
 ### Configuring the Extension Manager
 
+#### Proxy environment variables
+
+JupyterLab’s extension manager respects standard proxy environment variables
+when accessing remote resources.
+
+The following environment variables are supported:
+
+- `ALL_PROXY`
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+
+If multiple variables are set, the extension manager follows this precedence:
+
+1. `HTTPS_PROXY`
+2. `HTTP_PROXY`
+3. `ALL_PROXY`
+
+This can be useful in enterprise or restricted network environments where
+outbound connections must go through a proxy.
+
 By default there are two extension managers provided by JupyterLab:
 
 - `pypi`: [default] Allow to un-/install extensions from PyPI.org
