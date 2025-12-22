@@ -369,7 +369,7 @@
         "rank": 5,
         "submenu": {
           "id": "jp-mainmenu-view-move-tab-submenu",
-          "label": "Move Tab To",
+          "label": "Split Tab",
           "items": [
             {
               "command": "application:move-tab",

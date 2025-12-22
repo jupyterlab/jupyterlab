@@ -719,14 +719,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             | undefined;
 
           if (!direction) {
-            return trans.__('Move Tab To');
+            return trans.__('Split Tab');
           }
 
           const directionLabels: Record<string, string> = {
             left: trans.__('Left'),
             right: trans.__('Right'),
-            top: trans.__('Top'),
-            bottom: trans.__('Bottom')
+            top: trans.__('Up'),
+            bottom: trans.__('Down')
           };
 
           return trans.__('%1', directionLabels[direction]);

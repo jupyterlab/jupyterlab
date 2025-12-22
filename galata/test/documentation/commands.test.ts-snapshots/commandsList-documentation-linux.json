@@ -91,7 +91,7 @@
   },
   {
     "id":"application:move-tab",
-    "label": "Move Tab To",
+    "label": "Split Tab",
     "caption": "",
     "shortcuts": [],
     "args":{
