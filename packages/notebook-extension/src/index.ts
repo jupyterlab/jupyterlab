@@ -2905,16 +2905,15 @@ function addCommands(
       }
       const { context, content } = current;
 
-      const cells = content.widgets;
+      const autoScroll = content.notebookConfig.autoScroll ?? true;
       const restarted = await sessionDialogs.restart(current.sessionContext);
-
       if (restarted) {
-        return NotebookActions.runCells(
+        return NotebookActions.runAll(
           content,
-          cells,
           context.sessionContext,
           sessionDialogs,
-          translator
+          translator,
+          autoScroll
         );
       }
     },
