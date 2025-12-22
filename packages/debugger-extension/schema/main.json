@@ -90,6 +90,7 @@
       "title": "Variable filter",
       "description": "Variables to filter out in the tree and table viewers",
       "$ref": "#/definitions/variableFilters",
+      "type": "object",
       "default": {
         "xpython": [
           "debugpy",

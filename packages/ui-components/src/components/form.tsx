@@ -484,12 +484,6 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
           !JSONExt.deepEqual(formData, defaultValue);
       }
 
-      const needsDescription =
-        !isRoot &&
-        schema.type != 'object' &&
-        id !=
-          'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
-
       // While we can implement "remove" button for array items in array template,
       // object templates do not provide a way to do this instead we need to add
       // buttons here (and first check if the field can be removed = is additional).
@@ -498,6 +492,13 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
       const isItem: boolean = !(
         schema.type === 'object' || schema.type === 'array'
       );
+
+      const needsDescription =
+        !isRoot &&
+        schema.description &&
+        isItem &&
+        id !=
+          'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
 
       return (
         <div
@@ -526,11 +527,6 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                   <div className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
                     {label}
                   </div>
-                  {isItem && schema.description && needsDescription && (
-                    <div className="jp-FormGroup-description">
-                      {schema.description}
-                    </div>
-                  )}
                 </div>
               ) : (
                 <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
@@ -539,6 +535,11 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
               )
             ) : (
               <></>
+            )}
+            {needsDescription && schema.type !== 'boolean' && (
+              <div className="jp-FormGroup-description">
+                {schema.description}
+              </div>
             )}
             {isAdditional && (
               <input
@@ -569,7 +570,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                 {trans.__('Remove')}
               </button>
             )}
-            {!props.compact && schema.description && needsDescription && (
+            {needsDescription && schema.type == 'boolean' && (
               <div className="jp-FormGroup-description">
                 {schema.description}
               </div>
