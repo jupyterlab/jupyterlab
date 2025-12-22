@@ -204,6 +204,11 @@ export interface IDebugger {
   stop(): Promise<void>;
 
   /**
+   * Signal emitted when the debugger stops.
+   */
+  readonly stopped: ISignal<IDebugger, void>;
+
+  /**
    * Update all breakpoints of a cell at once.
    *
    * @param code - The code in the cell where the breakpoints are set.
