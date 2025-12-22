@@ -14,6 +14,7 @@ mkdir _reports_
 
 
 # install nodejs deps and build
+yarn --version
 yarn
 echo "Now build"
 yarn build:dev:prod:minimize:report
