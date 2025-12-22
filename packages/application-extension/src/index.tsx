@@ -236,6 +236,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     };
 
+    const getCurrentWidget = (): Widget | null => {
+      return shell.currentWidget ?? null;
+    };
+    const zoomWidget = (widget: Widget, delta: number) => {
+      console.log('Zooming widget', widget, 'by', delta);
+      const node = widget.node as HTMLElement;
+      const current = Number(
+        (node.style as CSSStyleDeclaration & { zoom?: string }).zoom || 1
+      );
+      (node.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(
+        Math.min(3, Math.max(0.5, current + delta))
+      );
+    };
     // Sets tab focus on the element
     function setTabFocus(focusElement: HTMLElement | null) {
       if (focusElement) {
@@ -306,6 +319,36 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return;
         }
         closeWidgets(widgetsRightOf(widget));
+      }
+    });
+
+    commands.addCommand(CommandIDs.zoomInWidget, {
+      label: trans.__('Zoom In Active Widget'),
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          zoomWidget(widget, 0.1);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.zoomOutWidget, {
+      label: trans.__('Zoom Out Active Widget'),
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          zoomWidget(widget, -0.1);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.resetWidgetZoom, {
+      label: trans.__('Reset Widget Zoom'),
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          (widget.node.style as any).zoom = '';
+        }
       }
     });
 
@@ -801,6 +844,26 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         });
       });
     }
+
+    window.addEventListener(
+      'wheel',
+      event => {
+        if (!event.ctrlKey) {
+          return;
+        }
+
+        const widget = shell.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        event.preventDefault();
+
+        const delta = event.deltaY < 0 ? 0.1 : -0.1;
+        zoomWidget(widget, delta);
+      },
+      { passive: false, capture: true }
+    );
   }
 };
 
