@@ -57,7 +57,7 @@ import {
 } from '@lumino/coreutils';
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import { DockLayout, DockPanel, TabBar, Widget } from '@lumino/widgets';
+import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
 
