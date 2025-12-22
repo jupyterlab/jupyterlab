@@ -13,15 +13,16 @@ set -euxo pipefail
 mkdir _reports_
 
 
-# overload best-effort versions from conda-forge for all deps
-(time pip install -v -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
-
 # install nodejs deps and build
-(time jlpm)                                            2>&1 | tee _reports_/00_yarn.txt
-(time jlpm build:dev:prod:minimize:report)             2>&1 | tee _reports_/01_build.txt
+yarn
+echo "Now build"
+yarn build:dev:prod:minimize:report
 
 # hoist report to where a reviewer might see it
 mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
+
+# overload best-effort versions from conda-forge for all deps
+(time pip install -v -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
 
 # copy configuration to well-known location
 mkdir -p ~/.jupyter
