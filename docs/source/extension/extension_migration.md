@@ -376,6 +376,11 @@ In JupyterLab 4.x, extensions should update editor contents exclusively through
 the shared model APIs to ensure correct synchronization and collaboration.
 
 
+Because of significant type changes from JupyterLab 3.x to 4.x, we recommend **publishing a new major version**
+of your extension to work with each major version of JupyterLab. For examples of extensions that use different
+major versions for Lab 3 and Lab 4, see [jupyterlab-vim](https://github.com/jupyterlab-contrib/jupyterlab-vim)
+and [jupyter-ai](https://github.com/jupyterlab/jupyter-ai).
+
 ### Upgrading extension using the upgrade script
 
 JupyterLab 4.x provides a script to upgrade an existing extension to use the new extension system and packaging.
