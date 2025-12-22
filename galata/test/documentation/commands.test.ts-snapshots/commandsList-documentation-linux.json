@@ -90,7 +90,7 @@
     }
   },
   {
-    "id":"application:move-tab",
+    "id":"application:split-tab",
     "label": "Split Tab",
     "caption": "",
     "shortcuts": [],
