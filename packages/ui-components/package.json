@@ -45,7 +45,7 @@
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
     "@jupyterlab/observables": "^5.6.0-alpha.0",
     "@jupyterlab/rendermime-interfaces": "^3.14.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0",
+    "@jupyterlab/translation": "^3.0.0",
     "@lumino/algorithm": "^2.0.4",
     "@lumino/commands": "^2.3.3",
     "@lumino/coreutils": "^2.2.2",
