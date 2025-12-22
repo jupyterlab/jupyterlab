@@ -1,12 +1,19 @@
 name: UI Tests
 
 on:
-  issue_comment:
-    types: [created]
+  # We currently turned off Galata snapshot updates via issue comments
+  # We comment this trigger so the workflow runs are not swamped by comments triggering skipped runs
+  # TODO: re-enable once snapshot updates via comments are enabled again
+  # issue_comment:
+  #   types: [created]
   push:
     branches:
       - main
   pull_request:
+  schedule:
+    # Run every 6 hours to establish a baseline for flaky tests
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
