@@ -43,7 +43,7 @@
     "@jupyter/react-components": "^0.16.6",
     "@jupyter/web-components": "^0.16.6",
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
-    "@jupyterlab/observables": "^5.6.0-alpha.0",
+    "@jupyterlab/observables": "^0.2.0",
     "@jupyterlab/rendermime-interfaces": "^3.14.0-alpha.0",
     "@jupyterlab/translation": "^3.0.0",
     "@lumino/algorithm": "^2.0.4",
