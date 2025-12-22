@@ -92,7 +92,7 @@
   {
     "id":"application:split-tab",
     "label": "Split Tab",
-    "caption": "",
+    "caption": "Split the current tab",
     "shortcuts": [],
     "args":{
       "type": "object",
@@ -105,7 +105,7 @@
             "top",
             "bottom"
           ],
-          "description": "The direction to move the tab"
+          "description": "The direction to split the tab"
         }
       },
       "required": [

@@ -729,8 +729,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             bottom: trans.__('Down')
           };
 
-          return trans.__('%1', directionLabels[direction]);
+          return directionLabels[direction];
         },
+        caption: trans.__('Split the current tab'),
+
         describedBy: {
           args: {
             type: 'object',
@@ -738,7 +740,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               direction: {
                 type: 'string',
                 enum: ['left', 'right', 'top', 'bottom'],
-                description: trans.__('The direction to move the tab')
+                description: trans.__('The direction to split the tab')
               }
             },
             required: ['direction']

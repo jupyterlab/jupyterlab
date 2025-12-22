@@ -1782,11 +1782,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   moveTab(widget: Widget, direction: 'left' | 'right' | 'top' | 'bottom') {
     const ref = widget;
 
-    if (!ref) {
-      this._dockPanel.addWidget(widget);
-      return;
-    }
-
     const modeMap: Record<string, DockLayout.InsertMode> = {
       left: 'split-left',
       right: 'split-right',
