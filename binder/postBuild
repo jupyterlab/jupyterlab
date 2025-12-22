@@ -17,7 +17,9 @@ mkdir _reports_
 (time yarn build:dev:prod:minimize:report || true)             2>&1 | tee _reports_/01_build.txt
 
 # hoist report to where a reviewer might see it
-mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
+if [ -f dev_mode/static/webpack-bundle-analyzer.html ]; then
+    mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
+fi
 
 # overload best-effort versions from conda-forge for all deps
 (time pip install -v -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
