@@ -1780,7 +1780,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Move a widget to the main dock panel.
    */
   moveTab(widget: Widget, direction: 'left' | 'right' | 'top' | 'bottom') {
-    const ref = this.currentWidget;
+    const ref = widget;
 
     if (!ref) {
       this._dockPanel.addWidget(widget);

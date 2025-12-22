@@ -368,26 +368,26 @@
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
         "rank": 5,
         "submenu": {
-          "id": "jp-mainmenu-view-move-tab-submenu",
+          "id": "jp-mainmenu-view-split-tab-submenu",
           "label": "Split Tab",
           "items": [
             {
-              "command": "application:move-tab",
+              "command": "application:split-tab",
               "args": { "direction": "left" },
               "rank": 1
             },
             {
-              "command": "application:move-tab",
+              "command": "application:split-tab",
               "args": { "direction": "right" },
               "rank": 2
             },
             {
-              "command": "application:move-tab",
+              "command": "application:split-tab",
               "args": { "direction": "top" },
               "rank": 3
             },
             {
-              "command": "application:move-tab",
+              "command": "application:split-tab",
               "args": { "direction": "bottom" },
               "rank": 4
             }

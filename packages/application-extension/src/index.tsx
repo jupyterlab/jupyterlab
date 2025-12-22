@@ -119,7 +119,7 @@ namespace CommandIDs {
 
   export const switchSidebar = 'sidebar:switch';
 
-  export const moveTab = 'application:move-tab';
+  export const splitTab = 'application:split-tab';
 }
 
 /**
@@ -709,7 +709,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return find(labShell.widgets('main'), w => w.id === id) ?? null;
       };
 
-      commands.addCommand('application:move-tab', {
+      commands.addCommand('application:split-tab', {
         label: args => {
           const direction = args?.['direction'] as
             | 'left'
@@ -751,11 +751,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
 
           if (!(labShell instanceof LabShell)) {
-            return false;
-          }
-
-          const dockPanel = (labShell as any)._dockPanel as DockPanel;
-          if (!dockPanel) {
             return false;
           }
 
