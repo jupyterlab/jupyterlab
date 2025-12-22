@@ -709,17 +709,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return find(labShell.widgets('main'), w => w.id === id) ?? null;
       };
 
-      const tabBarForWidget = (
-        dockPanel: DockPanel,
-        widget: Widget
-      ): TabBar<Widget> | null => {
-        for (const tabBar of dockPanel.tabBars()) {
-          if (tabBar.titles.includes(widget.title)) {
-            return tabBar;
-          }
-        }
-        return null;
-      };
       commands.addCommand('application:move-tab', {
         label: args => {
           const direction = args?.['direction'] as
@@ -770,7 +759,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             return false;
           }
 
-          const tabBar = tabBarForWidget(dockPanel, widget);
+          const tabBar = labShell.getMainAreaTabBar(widget);
           if (!tabBar) {
             return false;
           }
