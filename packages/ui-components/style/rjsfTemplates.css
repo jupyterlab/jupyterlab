@@ -98,7 +98,8 @@
 
 /* RJSF ARRAY style */
 
-.jp-arrayFieldWrapper legend {
+.jp-arrayFieldWrapper legend,
+.jp-objectFieldWrapper legend {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;

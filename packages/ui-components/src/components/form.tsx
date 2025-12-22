@@ -262,7 +262,10 @@ function customizeForLab<P = any>(
 /**
  * Fetch field templates from RJSF.
  */
-function getTemplates(registry: Registry, uiSchema: UiSchema | undefined) {
+export function getTemplates(
+  registry: Registry,
+  uiSchema: UiSchema | undefined
+) {
   const TitleField = getTemplate<'TitleFieldTemplate'>(
     'TitleFieldTemplate',
     registry,
