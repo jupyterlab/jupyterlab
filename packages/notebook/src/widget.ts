@@ -1950,23 +1950,6 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Get the last modified cell from stack
-   */
-  get lastModifiedCell(): Cell | null {
-    while (this._lastModifiedCellStack.length) {
-      const id =
-        this._lastModifiedCellStack[this._lastModifiedCellStack.length - 1];
-      const cell = this.widgets.find(c => c.model.id === id) || null;
-      if (cell && !cell.isDisposed) {
-        return cell;
-      }
-      // Remove dead cell IDs
-      this._lastModifiedCellStack.pop();
-    }
-    return null;
-  }
-
-  /**
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
@@ -3466,26 +3449,47 @@ export class Notebook extends StaticNotebook {
   private _onCellContentChanged(sender: ICellModel): void {
     const id = sender.id;
     // Remove if already present to avoid duplicates
-    const idx = this._lastModifiedCellStack.lastIndexOf(id);
+    const idx = this._lastModifiedCellBackStack.lastIndexOf(id);
     if (idx !== -1) {
-      this._lastModifiedCellStack.splice(idx, 1);
+      this._lastModifiedCellBackStack.splice(idx, 1);
     }
-    this._lastModifiedCellStack.push(id);
+    this._lastModifiedCellBackStack.push(id);
     // Enforce stack size limit
-    if (this._lastModifiedCellStack.length > Notebook.MAX_MODIFIED_STACK) {
-      this._lastModifiedCellStack.splice(
+    if (this._lastModifiedCellBackStack.length > Notebook.MAX_MODIFIED_STACK) {
+      this._lastModifiedCellBackStack.splice(
         0,
-        this._lastModifiedCellStack.length - Notebook.MAX_MODIFIED_STACK
+        this._lastModifiedCellBackStack.length - Notebook.MAX_MODIFIED_STACK
       );
     }
+    // Clear forward stack after new modification
+    this._lastModifiedCellForwardStack = [];
   }
 
   /**
-   * Pop and return the last modified cell from the stack.
+   * Get the last modified cell (back stack).
+   */
+  get lastModifiedCell(): Cell | null {
+    while (this._lastModifiedCellBackStack.length) {
+      const id =
+        this._lastModifiedCellBackStack[
+          this._lastModifiedCellBackStack.length - 1
+        ];
+      const cell = this.widgets.find(c => c.model.id === id) || null;
+      if (cell && !cell.isDisposed) {
+        return cell;
+      }
+      this._lastModifiedCellBackStack.pop();
+    }
+    return null;
+  }
+
+  /**
+   * Pop and return the top cell from the back stack, pushing to forward stack.
    */
   popLastModifiedCell(): Cell | null {
-    while (this._lastModifiedCellStack.length) {
-      const id = this._lastModifiedCellStack.pop()!;
+    while (this._lastModifiedCellBackStack.length) {
+      const id = this._lastModifiedCellBackStack.pop()!;
+      this._lastModifiedCellForwardStack.push(id);
       const cell = this.widgets.find(c => c.model.id === id) || null;
       if (cell && !cell.isDisposed) {
         return cell;
@@ -3495,7 +3499,42 @@ export class Notebook extends StaticNotebook {
     return null;
   }
 
-  private _lastModifiedCellStack: string[] = [];
+  /**
+   * Get the next modified cell (forward stack).
+   */
+  get nextModifiedCell(): Cell | null {
+    while (this._lastModifiedCellForwardStack.length) {
+      const id =
+        this._lastModifiedCellForwardStack[
+          this._lastModifiedCellForwardStack.length - 1
+        ];
+      const cell = this.widgets.find(c => c.model.id === id) || null;
+      if (cell && !cell.isDisposed) {
+        return cell;
+      }
+      this._lastModifiedCellForwardStack.pop();
+    }
+    return null;
+  }
+
+  /**
+   * Pop and return the top cell from the forward stack, pushing to back stack.
+   */
+  popNextModifiedCell(): Cell | null {
+    while (this._lastModifiedCellForwardStack.length) {
+      const id = this._lastModifiedCellForwardStack.pop()!;
+      this._lastModifiedCellBackStack.push(id);
+      const cell = this.widgets.find(c => c.model.id === id) || null;
+      if (cell && !cell.isDisposed) {
+        return cell;
+      }
+      // If cell is gone, continue to next
+    }
+    return null;
+  }
+
+  private _lastModifiedCellBackStack: string[] = [];
+  private _lastModifiedCellForwardStack: string[] = [];
   private static readonly MAX_MODIFIED_STACK = 50;
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;

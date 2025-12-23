@@ -26,12 +26,13 @@ import {
   CommandToolbarButton,
   ellipsesIcon,
   expandAllIcon,
-  historyIcon,
   MenuSvg,
   numberingIcon,
+  redoIcon,
   tocIcon,
   Toolbar,
-  ToolbarButton
+  ToolbarButton,
+  undoIcon
 } from '@jupyterlab/ui-components';
 
 /**
@@ -49,6 +50,8 @@ namespace CommandIDs {
   export const toggleCollapse = 'toc:toggle-collapse';
 
   export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
+
+  export const selectNextModifiedCell = 'notebook:select-next-modified-cell';
 }
 
 /**
@@ -267,14 +270,27 @@ async function activateTOC(
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
   toc.toolbar.addItem(
-    'select-last-modified',
+    'select-last-modified-back',
     new CommandToolbarButton({
       commands: app.commands,
       id: CommandIDs.selectLastModifiedCell,
       args: {
         toolbar: true
       },
-      icon: historyIcon,
+      icon: undoIcon,
+      label: ''
+    })
+  );
+
+  toc.toolbar.addItem(
+    'select-last-modified-forward',
+    new CommandToolbarButton({
+      commands: app.commands,
+      id: CommandIDs.selectNextModifiedCell,
+      args: {
+        toolbar: true
+      },
+      icon: redoIcon,
       label: ''
     })
   );
