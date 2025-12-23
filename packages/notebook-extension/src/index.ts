@@ -313,6 +313,8 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
+  export const jumpToLastModified = 'notebook:jump-to-last-modified';
+
   export const replaceSelection = 'notebook:replace-selection';
 
   export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
@@ -1800,6 +1802,49 @@ function activateNotebookHandler(
 
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  // Track the last modified cell
+  let lastModifiedCell: Cell | null = null;
+
+  tracker.currentChanged.connect((sender, notebookPanel) => {
+    if (!notebookPanel) {
+      return;
+    }
+    const notebook = notebookPanel.content;
+
+    const attachListener = (cell: Cell) => {
+      cell.model.contentChanged.connect(() => {
+        lastModifiedCell = cell;
+        commands.notifyCommandChanged(CommandIDs.jumpToLastModified);
+      });
+    };
+
+    notebook.widgets.forEach(attachListener);
+
+    notebook.model?.cells.changed.connect((sender, args) => {
+      args.newValues.forEach(model => {
+        const cellWidget = notebook.widgets.find(w => w.model.id === model.id);
+        if (cellWidget) {
+          attachListener(cellWidget);
+        }
+      });
+    });
+  });
+
+  commands.addCommand(CommandIDs.jumpToLastModified, {
+    label: trans.__('Jump to Last Modified Cell'),
+    execute: () => {
+      if (lastModifiedCell && tracker.currentWidget) {
+        tracker.currentWidget.content.scrollToCell(lastModifiedCell);
+        const index =
+          tracker.currentWidget.content.widgets.indexOf(lastModifiedCell);
+        if (index !== -1) {
+          tracker.currentWidget.content.activeCellIndex = index;
+        }
+      }
+    },
+    isEnabled: () => lastModifiedCell !== null
+  });
 
   // Use the router to deal with hash navigation
   function onRouted(router: IRouter, location: IRouter.ILocation): void {
@@ -4618,7 +4663,8 @@ function populatePalette(
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
-    CommandIDs.virtualScrollbar
+    CommandIDs.virtualScrollbar,
+    CommandIDs.jumpToLastModified
   ].forEach(command => {
     palette.addItem({ command, category });
   });
