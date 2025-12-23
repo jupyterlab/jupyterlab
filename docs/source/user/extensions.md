@@ -23,6 +23,25 @@ documentation <developer-extensions>`.
 :local: true
 ```
 
+### Network proxy configuration
+
+#### Proxy environment variables
+
+JupyterLab respects standard proxy environment variables when accessing
+remote resources.
+
+The following environment variables are respected
+(in order of precedence):
+
+1. HTTPS_PROXY
+2. HTTP_PROXY
+3. ALL_PROXY
+
+
+This can be useful in enterprise or restricted network environments where
+outbound connections must go through a proxy.
+
+
 ## Installing Extensions
 
 A JupyterLab extension contains JavaScript that is installed into JupyterLab and
@@ -180,23 +199,8 @@ prevent it from being activated, but without rebuilding the application.
 
 ### Configuring the Extension Manager
 
-### Network proxy configuration
 
-#### Proxy environment variables
-
-JupyterLab’s extension manager respects standard proxy environment variables
-when accessing remote resources.
-
-The Extension Manager respects the following environment variables
-(in order of precedence):
-
-1. HTTPS_PROXY
-2. HTTP_PROXY
-3. ALL_PROXY
-
-
-This can be useful in enterprise or restricted network environments where
-outbound connections must go through a proxy.
+### Extension manager implementations
 
 By default, there are two extension managers provided by JupyterLab:
 
