@@ -15,6 +15,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  CommandToolbarButton,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -106,6 +107,7 @@ import {
   copyIcon,
   cutIcon,
   duplicateIcon,
+  editIcon,
   fastForwardIcon,
   IDisposableMenuItem,
   IFormRenderer,
@@ -925,7 +927,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
   description: 'Adds table of content capability to the notebooks',
-  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
+  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer, ILabShell],
   optional: [IMarkdownParser, ISettingRegistry],
   autoStart: true,
   activate: (
@@ -933,11 +935,31 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
     sanitizer: IRenderMime.ISanitizer,
+    labShell: ILabShell,
     mdParser: IMarkdownParser | null,
     settingRegistry: ISettingRegistry | null
   ): void => {
     const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
     tocRegistry.add(nbTocFactory);
+    app.restored.then(() => {
+      const tocWidget = Array.from(labShell.widgets('left')).find(
+        w => w.id === 'table-of-contents'
+      );
+
+      if (tocWidget && (tocWidget as any).toolbar) {
+        (tocWidget as any).toolbar.addItem(
+          'jump-to-last-modified',
+          new CommandToolbarButton({
+            commands: app.commands,
+            id: CommandIDs.jumpToLastModified,
+            icon: editIcon,
+            label: '',
+            caption: 'Jump to Last Modified Cell'
+          })
+        );
+      }
+    });
+
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
         .then(([_, setting]) => {
@@ -1833,6 +1855,7 @@ function activateNotebookHandler(
 
   commands.addCommand(CommandIDs.jumpToLastModified, {
     label: trans.__('Jump to Last Modified Cell'),
+    icon: editIcon,
     execute: () => {
       if (lastModifiedCell && tracker.currentWidget) {
         tracker.currentWidget.content.scrollToCell(lastModifiedCell);
