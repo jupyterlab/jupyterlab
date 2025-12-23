@@ -1392,12 +1392,7 @@ namespace Private {
         const doc = anchor.ownerDocument;
         const el =
           doc.querySelector(`[data-jupyter-id="${escapedId}"]`) ||
-          doc.querySelector(`#${escapedId}`) ||
-          Array.from(doc.querySelectorAll('[data-jupyter-id]')).find(
-            e =>
-              e.getAttribute('data-jupyter-id')?.toLowerCase() ===
-              id.toLowerCase()
-          );
+          doc.querySelector(`#${escapedId}`);
         if (el) {
           event.preventDefault();
           el.scrollIntoView();
