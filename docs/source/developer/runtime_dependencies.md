@@ -12,15 +12,3 @@ JupyterLab has multiple categories of dependencies:
 
 Security scanners may flag vulnerabilities in dependencies that are not part
 of the runtime bundle. This document clarifies how to distinguish these cases.
-
-## Runtime dependencies
-
-TBD
-
-## Development and test dependencies
-
-TBD
-
-## Interpreting security alerts
-
-TBD
