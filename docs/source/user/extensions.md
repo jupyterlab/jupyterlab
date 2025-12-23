@@ -23,10 +23,6 @@ documentation <developer-extensions>`.
 :local: true
 ```
 
-This can be useful in enterprise or restricted network environments where
-outbound connections must go through a proxy.
-
-
 ## Installing Extensions
 
 A JupyterLab extension contains JavaScript that is installed into JupyterLab and
@@ -187,6 +183,10 @@ prevent it from being activated, but without rebuilding the application.
 #### Network proxy configuration
 
 ##### Proxy environment variables
+
+This can be useful in enterprise or restricted network environments where
+outbound connections must go through a proxy.
+
 
 JupyterLab respects standard proxy environment variables when accessing
 remote resources.
