@@ -783,7 +783,7 @@ python main.py
 
 All methods of building JupyterLab produce source maps. The source maps
 should be available in the source files view of your browser's
-development tools under the `webpack://` header.
+development tools, potentially listed under Webpack.
 
 When running JupyterLab normally, expand the `~` header to see the
 source maps for individual packages.
@@ -837,9 +837,7 @@ jlpm run build:packages
 
 ## Writing Documentation
 
-Documentation is written in Markdown and reStructuredText. In
-particular, the documentation on our Read the Docs page is written in
-reStructuredText. To ensure that the Read the Docs page builds, you'll
+Documentation is written in Markdown. To ensure that the Read the Docs page builds, you'll
 need to install the documentation dependencies with `pip`:
 
 ```bash
