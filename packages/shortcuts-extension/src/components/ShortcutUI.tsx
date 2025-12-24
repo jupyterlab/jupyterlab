@@ -4,8 +4,10 @@
  */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 import * as React from 'react';
+import { NewShortcutItem } from './NewShortcutItem';
+import { ShortcutItem } from './ShortcutItem';
 import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
@@ -34,7 +36,8 @@ export interface IShortcutUIState {
   searchQuery: string;
   showSelectors: boolean;
   currentSort: IShortcutUI.ColumnId;
-  showAllCommands: boolean;
+  showAddCommand: boolean;
+  newShortcut: IShortcutTarget;
 }
 
 /** Top level React component for widget */
@@ -44,6 +47,21 @@ export class ShortcutUI
 {
   constructor(props: IShortcutUIProps) {
     super(props);
+    this._newShortcutItem = new NewShortcutItem({
+      showSelectors: false,
+      findConflictsFor: (keys: string[], selector: string) => {
+        if (this.state.shortcutRegistry) {
+          return this.state.shortcutRegistry.findConflictsFor(keys, selector);
+        } else {
+          console.error(
+            'Cannot search for keybinding conflicts at this time: registry is not ready'
+          );
+          return [];
+        }
+      },
+      external: this.props.external
+    });
+
     this.state = {
       shortcutRegistry: null,
       filteredShortcutList: new Array<IShortcutTarget>(),
@@ -51,14 +69,19 @@ export class ShortcutUI
       searchQuery: '',
       showSelectors: false,
       currentSort: 'category',
-      showAllCommands: false
+      showAddCommand: false,
+      newShortcut: this._newShortcutItem.shortcut
     };
+
+    this._newShortcutItem.changed.connect((_: any, newShortcutItem) => {
+      this.setState({ newShortcut: { ...this._newShortcutItem.shortcut } });
+    });
   }
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
     this.props.external.actionRequested.connect(this._onActionRequested, this);
-    void this._refreshShortcutList(this.state.showAllCommands);
+    void this._refreshShortcutList();
   }
 
   componentWillUnmount(): void {
@@ -81,20 +104,18 @@ export class ShortcutUI
   }
 
   /** Fetch shortcut list from SettingRegistry  */
-  private async _refreshShortcutList(allCommands: boolean): Promise<void> {
+  private async _refreshShortcutList(): Promise<void> {
     const settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> =
       await this.props.external.getSettings();
     const shortcutRegistry = new ShortcutRegistry({
       commandRegistry: this.props.external.commandRegistry,
-      settings,
-      allCommands
+      settings
     });
     this.setState(
       {
         shortcutRegistry: shortcutRegistry,
         filteredShortcutList: this._searchFilterShortcuts(shortcutRegistry),
-        shortcutsFetched: true,
-        showAllCommands: allCommands
+        shortcutsFetched: true
       },
       () => {
         this.sortShortcuts();
@@ -144,7 +165,7 @@ export class ShortcutUI
   resetShortcuts = async (): Promise<void> => {
     const settings = await this.props.external.getSettings();
     await settings.set('shortcuts', []);
-    await this._refreshShortcutList(this.state.showAllCommands);
+    await this._refreshShortcutList();
   };
 
   /**
@@ -263,7 +284,7 @@ export class ShortcutUI
       }
     }
     await settings.set('shortcuts', newUserShortcuts as any);
-    await this._refreshShortcutList(this.state.showAllCommands);
+    await this._refreshShortcutList();
   }
 
   /**
@@ -275,21 +296,23 @@ export class ShortcutUI
   ): Promise<void> => {
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
-    const index = userShortcuts.findIndex(
+    const shortcuts = userShortcuts.filter(
       shortcut =>
         shortcut.command === target.command &&
         shortcut.selector === target.selector &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
     );
-    if (index === -1) {
+    if (!shortcuts.length) {
       console.error('Error writing the custom options: target not found');
       return;
     }
-    userShortcuts[index].selector = options.selector;
-    userShortcuts[index].args = options.args;
+    shortcuts.forEach(shortcut => {
+      shortcut.selector = options.selector;
+      shortcut.args = options.args;
+    });
 
     await settings.set('shortcuts', userShortcuts as any);
-    await this._refreshShortcutList(this.state.showAllCommands);
+    await this._refreshShortcutList();
   };
 
   /** Toggles showing command selectors */
@@ -298,10 +321,10 @@ export class ShortcutUI
   };
 
   /**
-   * Toggle showing all commands, including the ones without default shortcut.
+   * Toggle showing add command row.
    */
-  toggleAllCommands = async (): Promise<void> => {
-    await this._refreshShortcutList(!this.state.showAllCommands);
+  toggleAddCommandRow = async (): Promise<void> => {
+    this.setState({ showAddCommand: !this.state.showAddCommand });
   };
 
   /**
@@ -343,6 +366,23 @@ export class ShortcutUI
     this.setState({ filteredShortcutList: shortcuts });
   }
 
+  /**
+   * Save a new shortcut:
+   * - creates keybindings for the command
+   * - adds the args to the shortcut commands
+   */
+  saveNewShortcut = async (): Promise<void> => {
+    const shortcut = { ...this.state.newShortcut, args: undefined };
+    for (let keybinding of shortcut.keybindings) {
+      await this.addKeybinding(shortcut, keybinding.keys);
+    }
+
+    await this.setCustomOptions(shortcut, {
+      selector: shortcut.selector,
+      args: this.state.newShortcut.args as ReadonlyJSONObject
+    });
+  };
+
   render(): JSX.Element | null {
     if (!this.state.shortcutsFetched) {
       return null;
@@ -356,11 +396,22 @@ export class ShortcutUI
           showSelectors={this.state.showSelectors}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
-          toggleAllCommands={this.toggleAllCommands}
-          showAllCommands={this.state.showAllCommands}
+          toggleAddCommandRow={this.toggleAddCommandRow}
+          showAddCommandRow={this.state.showAddCommand}
           width={this.props.width}
           translator={this.props.external.translator}
         />
+        {this.state.showAddCommand && (
+          <ShortcutItem
+            {...this._newShortcutItem}
+            shortcut={this.state.newShortcut}
+            newShortcutUtils={{
+              searchQuery: this.state.searchQuery,
+              updateCommand: this._newShortcutItem.updateCommand,
+              saveShortcut: this.saveNewShortcut
+            }}
+          />
+        )}
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
           resetKeybindings={this.resetKeybindings}
@@ -388,4 +439,6 @@ export class ShortcutUI
       </div>
     );
   }
+
+  private _newShortcutItem: NewShortcutItem;
 }

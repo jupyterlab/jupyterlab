@@ -16,8 +16,8 @@ export interface IAdvancedOptionsProps {
   showSelectors: boolean;
   resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
-  toggleAllCommands: IShortcutUI['toggleAllCommands'];
-  showAllCommands: boolean;
+  toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
+  showAddCommandRow: boolean;
 }
 
 export interface ISymbolsProps {}
@@ -114,17 +114,17 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
           <li
             className="lm-Menu-item"
             onClick={() => {
-              props.toggleAllCommands();
+              props.toggleAddCommandRow();
               setMenuOpen(false);
             }}
           >
-            {props.showAllCommands ? (
+            {props.showAddCommandRow ? (
               <checkIcon.react className="lm-Menu-itemIcon" />
             ) : (
               <div className="lm-Menu-itemIcon" />
             )}
             <div className="lm-Menu-itemLabel">
-              {trans.__('Show all commands')}
+              {trans.__('Show add command row')}
             </div>
           </li>
         </ul>
@@ -141,8 +141,8 @@ export interface ITopNavProps {
   showSelectors: boolean;
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
-  toggleAllCommands: IShortcutUI['toggleAllCommands'];
-  showAllCommands: boolean;
+  toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
+  showAddCommandRow: boolean;
   width: number;
   translator: ITranslator;
 }
@@ -184,8 +184,8 @@ export class TopNav extends React.Component<ITopNavProps> {
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
-            toggleAllCommands={this.props.toggleAllCommands}
-            showAllCommands={this.props.showAllCommands}
+            toggleAddCommandRow={this.props.toggleAddCommandRow}
+            showAddCommandRow={this.props.showAddCommandRow}
             translator={this.props.translator}
           />
         </div>

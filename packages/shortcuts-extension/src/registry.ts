@@ -24,62 +24,13 @@ export class ShortcutRegistry
 {
   constructor(options: ShortcutRegistry.IOptions) {
     super();
-    const { settings, commandRegistry } = options;
+    const { settings, commandRegistry, allCommands } = options;
 
-    const userBindings = settings.user.shortcuts ?? [];
-    const setByUser = new Set(
-      userBindings.map(this._computeKeybindingId.bind(this))
-    );
-
-    const luminoKeybindings = settings.composite.shortcuts ?? [];
-    // Compute the target ID for the shortcuts defined by an extension.
-    const shortcutsFromExtensions = (
-      settings.default('shortcuts') as PartialJSONArray
-    ).map(shortcut => {
-      return this._computeTargetId(
-        shortcut as unknown as CommandRegistry.IKeyBindingOptions
-      );
-    });
-
-    for (const shortcut of luminoKeybindings) {
-      const targetKey = this._computeTargetId(shortcut);
-      const keybindingKey = this._computeKeybindingId(shortcut);
-
-      const keybinding: IKeybinding = {
-        keys: shortcut.keys,
-        isDefault: !setByUser.has(keybindingKey)
-      };
-
-      const shortcutTarget = this.get(targetKey);
-      if (shortcutTarget) {
-        shortcutTarget.keybindings.push(keybinding);
-      } else {
-        const commandParts = shortcut.command.split(':');
-        const label =
-          commandRegistry.label(shortcut.command, shortcut.args) ??
-          (commandParts.length > 1 ? commandParts[1] : undefined);
-        const category = commandParts[0];
-        this.set(targetKey, {
-          id: targetKey,
-          selector: shortcut.selector,
-          command: shortcut.command,
-          category,
-          label,
-          args: shortcut.args,
-          keybindings: [keybinding],
-          userDefined: !shortcutsFromExtensions.includes(targetKey)
-        });
-      }
-    }
-
-    if (options.allCommands) {
-      const commandsWithShortcut = new Set(
-        luminoKeybindings.map(keyBinding => keyBinding.command)
-      );
-      const commandsWithoutShortcut = commandRegistry
-        .listCommands()
-        .filter(command => !commandsWithShortcut.has(command));
-      for (const command of commandsWithoutShortcut) {
+    // Build the registry of shortcuts.
+    // If allCommands is defined, build empty shortcuts for all the commands available,
+    // otherwise get the existing shortcuts from the settings registry.
+    if (allCommands) {
+      for (const command of commandRegistry.listCommands()) {
         const shortcut: Omit<CommandRegistry.IKeyBindingOptions, 'keys'> = {
           command,
           selector: 'body'
@@ -100,6 +51,52 @@ export class ShortcutRegistry
         };
 
         this.set(targetKey, shortcutTarget);
+      }
+    } else if (settings) {
+      const userBindings = settings.user.shortcuts ?? [];
+      const setByUser = new Set(
+        userBindings.map(this._computeKeybindingId.bind(this))
+      );
+
+      const luminoKeybindings = settings.composite.shortcuts ?? [];
+      // Compute the target ID for the shortcuts defined by an extension.
+      const shortcutsFromExtensions = (
+        settings.default('shortcuts') as PartialJSONArray
+      ).map(shortcut => {
+        return this._computeTargetId(
+          shortcut as unknown as CommandRegistry.IKeyBindingOptions
+        );
+      });
+
+      for (const shortcut of luminoKeybindings) {
+        const targetKey = this._computeTargetId(shortcut);
+        const keybindingKey = this._computeKeybindingId(shortcut);
+
+        const keybinding: IKeybinding = {
+          keys: shortcut.keys,
+          isDefault: !setByUser.has(keybindingKey)
+        };
+
+        const shortcutTarget = this.get(targetKey);
+        if (shortcutTarget) {
+          shortcutTarget.keybindings.push(keybinding);
+        } else {
+          const commandParts = shortcut.command.split(':');
+          const label =
+            commandRegistry.label(shortcut.command, shortcut.args) ??
+            (commandParts.length > 1 ? commandParts[1] : undefined);
+          const category = commandParts[0];
+          this.set(targetKey, {
+            id: targetKey,
+            selector: shortcut.selector,
+            command: shortcut.command,
+            category,
+            label,
+            args: shortcut.args,
+            keybindings: [keybinding],
+            userDefined: !shortcutsFromExtensions.includes(targetKey)
+          });
+        }
       }
     }
   }
@@ -197,7 +194,7 @@ export namespace ShortcutRegistry {
     /**
      * Shortcut settings.
      */
-    settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout>;
+    settings?: ISettingRegistry.ISettings<IShortcutsSettingsLayout>;
     /**
      * Display the list of all the commands.
      */
