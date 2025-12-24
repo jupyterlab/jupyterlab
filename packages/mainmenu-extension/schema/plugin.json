@@ -277,6 +277,7 @@
     },
     {
       "command": "editmenu:redo",
+      "winKeys": ["Ctrl Y"],
       "keys": ["Accel Shift Z"],
       "selector": "[data-jp-undoer]"
     },
