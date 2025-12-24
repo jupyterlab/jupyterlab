@@ -178,7 +178,9 @@ export class ShortcutItem extends React.Component<
         className="jp-Shortcuts-Reset"
         onClick={() => this.props.resetKeybindings(this.props.shortcut)}
       >
-        {this._trans.__('Reset')}
+        {this.props.shortcut.userDefined
+          ? this._trans.__('Delete')
+          : this._trans.__('Reset')}
       </a>
     );
   }
