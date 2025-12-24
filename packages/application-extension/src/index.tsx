@@ -118,6 +118,8 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const splitTab = 'application:split-tab';
 }
 
 /**
@@ -687,6 +689,92 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
           // Some actions are also trigger indirectly
           // - by listening to this command execution.
+        }
+      });
+
+      const contextMenuTabWidget = (): Widget | null => {
+        const test = (node: HTMLElement) =>
+          node.classList.contains('lm-TabBar-tab') && !!node.dataset.id;
+
+        const node = app.contextMenuHitTest(test);
+        if (!node) {
+          return null;
+        }
+
+        const id = node.dataset.id;
+        if (!id) {
+          return null;
+        }
+
+        return find(labShell.widgets('main'), w => w.id === id) ?? null;
+      };
+
+      commands.addCommand('application:split-tab', {
+        label: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+            | undefined;
+
+          if (!direction) {
+            return trans.__('Split Tab');
+          }
+
+          const directionLabels: Record<string, string> = {
+            left: trans.__('Left'),
+            right: trans.__('Right'),
+            top: trans.__('Up'),
+            bottom: trans.__('Down')
+          };
+
+          return directionLabels[direction];
+        },
+        caption: trans.__('Split the current tab'),
+
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              direction: {
+                type: 'string',
+                enum: ['left', 'right', 'top', 'bottom'],
+                description: trans.__('The direction to split the tab')
+              }
+            },
+            required: ['direction']
+          }
+        },
+        isEnabled: () => {
+          const widget = contextMenuTabWidget();
+          if (!widget) {
+            return false;
+          }
+
+          if (!(labShell instanceof LabShell)) {
+            return false;
+          }
+
+          const tabBar = labShell.getMainAreaTabBar(widget);
+          if (!tabBar) {
+            return false;
+          }
+
+          // Disable if only one tab in this area
+          return tabBar.titles.length > 1;
+        },
+        execute: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom';
+
+          const widget = contextMenuTabWidget();
+          if (widget && direction) {
+            labShell.moveTab(widget, direction);
+          }
         }
       });
     }
