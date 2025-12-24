@@ -1858,7 +1858,7 @@ function activateNotebookHandler(
 
         if (mimeType) {
           const renderer = rendermime.createRenderer(mimeType);
-          renderer.renderModel(
+          void renderer.renderModel(
             new MimeModel({ data, metadata, trusted: true })
           );
           content.addWidget(renderer);
