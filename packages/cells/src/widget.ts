@@ -7,15 +7,15 @@ import { Extension } from '@codemirror/state';
 
 import { EditorView } from '@codemirror/view';
 
-import { ElementExt } from '@lumino/domutils';
-
-import { AttachmentsResolver } from '@jupyterlab/attachments';
+import { IMapChange } from '@jupyter/ydoc';
 
 import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 
-import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
+import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
 import { DirListing } from '@jupyterlab/filebrowser';
 
@@ -39,17 +39,17 @@ import {
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { IMapChange } from '@jupyter/ydoc';
-
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { addIcon, collapseIcon, expandIcon } from '@jupyterlab/ui-components';
 
+import { some } from '@lumino/algorithm';
+
 import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { some } from '@lumino/algorithm';
+import { ElementExt } from '@lumino/domutils';
 
 import { Drag } from '@lumino/dragdrop';
 
@@ -94,11 +94,6 @@ const CELL_CLASS = 'jp-Cell';
  * The CSS class added to the cell header.
  */
 const CELL_HEADER_CLASS = 'jp-Cell-header';
-
-/**
- * The CSS class added to the cell footer.
- */
-const CELL_FOOTER_CLASS = 'jp-Cell-footer';
 
 /**
  * The CSS class added to the cell input wrapper.
@@ -638,7 +633,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // Footer
     const footer = this.contentFactory.createCellFooter();
-    footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
   }
 
@@ -892,9 +886,11 @@ export namespace Cell {
     createCellHeader(): ICellHeader;
 
     /**
-     * Create a new cell header for the parent widget.
+     * Create a new cell footer for the parent widget.
+     *
+     * The default position is below the output area of the cell.
      */
-    createCellFooter(): ICellFooter;
+    createCellFooter(position?: 'input' | 'output'): ICellFooter;
   }
 
   /**
