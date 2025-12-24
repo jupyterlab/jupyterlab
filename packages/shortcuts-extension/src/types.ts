@@ -239,7 +239,7 @@ export interface IShortcutUI {
   setCustomOptions(
     target: IShortcutTarget,
     options: ICustomOptions
-  ): Promise<void>;
+  ): Promise<boolean>;
   /**
    * Toggles showing add command row.
    */
