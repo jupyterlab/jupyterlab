@@ -29,13 +29,17 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
       options.readOnly
     );
 
+    const buttons: Dialog.IButton[] = [];
+    if (options.readOnly) {
+      buttons.push(Dialog.cancelButton({ label: trans.__('OK') }));
+    } else {
+      buttons.push(Dialog.cancelButton({ label: trans.__('OK') }));
+      buttons.push(Dialog.okButton({ label: trans.__('Apply') }));
+    }
     super({
       title: trans.__('Custom Shortcut Options'),
       body,
-      buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
-        Dialog.okButton({ label: trans.__('Apply') })
-      ]
+      buttons
     });
   }
 
