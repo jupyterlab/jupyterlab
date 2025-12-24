@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import type {
@@ -257,4 +257,25 @@ export interface IShortcutRegistry extends ReadonlyMap<
    * Find targets that would conflict with given keys chord under given sequence.
    */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[];
+}
+
+/**
+ * Match type to search in shortcuts.
+ */
+export const enum MatchType {
+  Label,
+  Category,
+  Split,
+  Default
+}
+
+/**
+ *  Search result data
+ **/
+export interface ISearchResult {
+  matchType: MatchType;
+  categoryIndices: number[] | null;
+  labelIndices: number[] | null;
+  score: number;
+  item: IShortcutTarget;
 }

@@ -5,11 +5,11 @@
 
 import { Dialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ITranslator } from '@jupyterlab/translation';
-import { JSONObject } from '@lumino/coreutils';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
-import { ICustomOptions, IShortcutTarget } from '../types';
+import type { ICustomOptions, IShortcutTarget } from '../types';
 
 export class CustomOptionsDialog extends Dialog<ICustomOptions> {
   constructor(options: {
