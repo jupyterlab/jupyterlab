@@ -983,13 +983,13 @@ export class ToolbarButton extends ReactWidget {
   /**
    * Returns the click handler for the button
    */
-  get onClick(): () => void {
-    return () => {
+  get onClick(): (event?: React.SyntheticEvent) => void {
+    return (event?: React.SyntheticEvent) => {
       // Toggle the `pressed` state of the button when clicked
       this.pressed = !this.pressed;
 
       // Call the original click handler, if defined
-      this._onClick();
+      this._onClick(event);
     };
   }
 
@@ -1007,7 +1007,7 @@ export class ToolbarButton extends ReactWidget {
 
   private _pressed: boolean;
   private _enabled: boolean;
-  private _onClick: () => void;
+  private _onClick: (event?: React.SyntheticEvent) => void;
 }
 
 /**
