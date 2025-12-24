@@ -7,6 +7,8 @@ import { Debouncer } from '@lumino/polling';
 
 import { IDebugger } from '../../tokens';
 
+import filterData from '../../../kernelSourcesFilters.json';
+
 /**
  * The rate limit for the filter debouncer
  */
@@ -32,6 +34,10 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
       this.refresh,
       DEBOUNCER_RATE_LIMIT_MS
     );
+
+    /* initialize native kernel sources once */
+    this.hiddenSources = filterData;
+    this._hiddenSources = new Set(filterData);
   }
 
   /**
@@ -48,6 +54,37 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   set filter(filter: string) {
     this._filter = filter;
     this._filterChanged.emit(filter);
+    void this._refreshDebouncer.invoke();
+  }
+
+  /**
+   * Set hidden sources list
+   */
+  set hiddenSources(list: string[]) {
+    this._hiddenSources = new Set(list);
+    this._hiddenSourcesList = list;
+    void this._refreshDebouncer.invoke();
+  }
+
+  /**
+   * Get hidden sources list
+   */
+  get hiddenSources(): string[] {
+    return this._hiddenSourcesList;
+  }
+
+  /**
+   * Whether native kernel sources should be hidden.
+   */
+  get hideNativeSources(): boolean {
+    return this._hideNativeSources;
+  }
+
+  set hideNativeSources(value: boolean) {
+    if (this._hideNativeSources === value) {
+      return;
+    }
+    this._hideNativeSources = value;
     void this._refreshDebouncer.invoke();
   }
 
@@ -123,6 +160,13 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
       this._filteredKernelSources = this._filter
         ? this.getFilteredKernelSources()
         : this._kernelSources;
+
+      if (this._hideNativeSources) {
+        this._filteredKernelSources = this._filteredKernelSources.filter(
+          m => !this._hiddenSources.has(m.name)
+        );
+      }
+
       this._filteredKernelSources.sort(compare);
     } else {
       this._kernelSources = new Array<IDebugger.KernelSource>();
@@ -131,6 +175,9 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._changed.emit(this._filteredKernelSources);
   }
 
+  private _hiddenSources: Set<string> = new Set();
+  private _hiddenSourcesList: string[] = [];
+  private _hideNativeSources = false;
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
   private _isDisposed = false;
