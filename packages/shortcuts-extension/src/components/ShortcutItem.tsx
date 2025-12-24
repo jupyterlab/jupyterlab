@@ -140,7 +140,7 @@ export class ShortcutItem extends React.Component<
       return (
         <div className="jp-Shortcuts-Cell">
           <HTMLSelect
-            defaultValue={this.props.shortcut.command}
+            value={this.props.shortcut.command}
             options={[
               { value: '', label: 'Select a command' },
               ...filteredShortcuts.map(shortcut => ({
@@ -235,9 +235,7 @@ export class ShortcutItem extends React.Component<
         {!!this.props.newShortcutUtils && (
           <Button
             className="jp-mod-styled jp-mod-accept jp-Shortcuts-CustomOptions"
-            onClick={async () => {
-              this.props.newShortcutUtils?.saveShortcut();
-            }}
+            onClick={this.props.newShortcutUtils?.saveShortcut}
             title={this._trans.__('Save shortcut')}
             appearance="neutral"
             disabled={false}

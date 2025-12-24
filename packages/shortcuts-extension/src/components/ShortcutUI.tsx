@@ -293,7 +293,7 @@ export class ShortcutUI
   setCustomOptions = async (
     target: IShortcutTarget,
     options: ICustomOptions
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
     const shortcuts = userShortcuts.filter(
@@ -304,7 +304,7 @@ export class ShortcutUI
     );
     if (!shortcuts.length) {
       console.error('Error writing the custom options: target not found');
-      return;
+      return false;
     }
     shortcuts.forEach(shortcut => {
       shortcut.selector = options.selector;
@@ -313,6 +313,7 @@ export class ShortcutUI
 
     await settings.set('shortcuts', userShortcuts as any);
     await this._refreshShortcutList();
+    return true;
   };
 
   /** Toggles showing command selectors */
@@ -377,10 +378,14 @@ export class ShortcutUI
       await this.addKeybinding(shortcut, keybinding.keys);
     }
 
-    await this.setCustomOptions(shortcut, {
+    const created = await this.setCustomOptions(shortcut, {
       selector: shortcut.selector,
       args: this.state.newShortcut.args as ReadonlyJSONObject
     });
+
+    if (created) {
+      this._newShortcutItem.reset();
+    }
   };
 
   render(): JSX.Element | null {

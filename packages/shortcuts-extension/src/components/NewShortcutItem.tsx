@@ -50,6 +50,21 @@ export class NewShortcutItem implements IShortcutItemProps {
   }
 
   /**
+   * Reset the shortcut.
+   */
+  reset = () => {
+    this._shortcut = {
+      id: 'new shortcut',
+      command: '',
+      keybindings: [],
+      selector: 'body',
+      category: '',
+      args: {}
+    };
+    this._changed.emit();
+  };
+
+  /**
    * Add a new keybinding.
    */
   addKeybinding = async (target: IShortcutTarget, keys: string[]) => {
@@ -71,7 +86,7 @@ export class NewShortcutItem implements IShortcutItemProps {
     if (index > -1) {
       this._shortcut.keybindings[index] = { keys, isDefault: false };
     } else {
-      this.addKeybinding(target, keys);
+      void this.addKeybinding(target, keys);
     }
     this._changed.emit();
   };
@@ -109,13 +124,14 @@ export class NewShortcutItem implements IShortcutItemProps {
   setCustomOptions = async (
     target: IShortcutTarget,
     options: ICustomOptions
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     this._shortcut = {
       ...this._shortcut,
       selector: options.selector,
       args: options.args
     };
     this._changed.emit();
+    return true;
   };
 
   updateCommand = (command: string, category: string): void => {
