@@ -241,9 +241,9 @@ export interface IShortcutUI {
     options: ICustomOptions
   ): Promise<void>;
   /**
-   * Toggles showing all shortcuts, including the one without default shortcut.
+   * Toggles showing add command row.
    */
-  toggleAllCommands(): void;
+  toggleAddCommandRow(): void;
 }
 
 /**
