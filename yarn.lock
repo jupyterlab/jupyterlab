@@ -4436,37 +4436,37 @@ __metadata:
   resolution: "@jupyterlab/notebook-extension@workspace:packages/notebook-extension"
   dependencies:
     "@jupyter/ydoc": ^3.1.0
-    "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/cell-toolbar": "^4.6.0-alpha.0",
-    "@jupyterlab/cells": "^4.6.0-alpha.0",
-    "@jupyterlab/codeeditor": "^4.6.0-alpha.0",
-    "@jupyterlab/codemirror": "^4.6.0-alpha.0",
-    "@jupyterlab/completer": "^4.6.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.6.0-alpha.0",
-    "@jupyterlab/docmanager": "^4.6.0-alpha.0",
-    "@jupyterlab/docmanager-extension": "^4.6.0-alpha.0",
-    "@jupyterlab/docregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/documentsearch": "^4.6.0-alpha.0",
-    "@jupyterlab/filebrowser": "^4.6.0-alpha.0",
-    "@jupyterlab/launcher": "^4.6.0-alpha.0",
-    "@jupyterlab/logconsole": "^4.6.0-alpha.0",
-    "@jupyterlab/lsp": "^4.6.0-alpha.0",
-    "@jupyterlab/mainmenu": "^4.6.0-alpha.0",
-    "@jupyterlab/metadataform": "^4.6.0-alpha.0",
-    "@jupyterlab/nbformat": "^4.6.0-alpha.0",
-    "@jupyterlab/notebook": "^4.6.0-alpha.0",
-    "@jupyterlab/observables": "^5.6.0-alpha.0",
-    "@jupyterlab/outputarea": "^4.6.0-alpha.0",
-    "@jupyterlab/property-inspector": "^4.6.0-alpha.0",
-    "@jupyterlab/rendermime": "^4.6.0-alpha.0",
-    "@jupyterlab/services": "^7.6.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/statedb": "^4.6.0-alpha.0",
-    "@jupyterlab/statusbar": "^4.6.0-alpha.0",
-    "@jupyterlab/toc": "^6.6.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0",
-    "@jupyterlab/ui-components": "^4.6.0-alpha.0",
+    "@jupyterlab/application": "^4.6.0-alpha.0"
+    "@jupyterlab/apputils": "^4.7.0-alpha.0"
+    "@jupyterlab/cell-toolbar": "^4.6.0-alpha.0"
+    "@jupyterlab/cells": "^4.6.0-alpha.0"
+    "@jupyterlab/codeeditor": "^4.6.0-alpha.0"
+    "@jupyterlab/codemirror": "^4.6.0-alpha.0"
+    "@jupyterlab/completer": "^4.6.0-alpha.0"
+    "@jupyterlab/coreutils": "^6.6.0-alpha.0"
+    "@jupyterlab/docmanager": "^4.6.0-alpha.0"
+    "@jupyterlab/docmanager-extension": "^4.6.0-alpha.0"
+    "@jupyterlab/docregistry": "^4.6.0-alpha.0"
+    "@jupyterlab/documentsearch": "^4.6.0-alpha.0"
+    "@jupyterlab/filebrowser": "^4.6.0-alpha.0"
+    "@jupyterlab/launcher": "^4.6.0-alpha.0"
+    "@jupyterlab/logconsole": "^4.6.0-alpha.0"
+    "@jupyterlab/lsp": "^4.6.0-alpha.0"
+    "@jupyterlab/mainmenu": "^4.6.0-alpha.0"
+    "@jupyterlab/metadataform": "^4.6.0-alpha.0"
+    "@jupyterlab/nbformat": "^4.6.0-alpha.0"
+    "@jupyterlab/notebook": "^4.6.0-alpha.0"
+    "@jupyterlab/observables": "^5.6.0-alpha.0"
+    "@jupyterlab/outputarea": "^4.6.0-alpha.0"
+    "@jupyterlab/property-inspector": "^4.6.0-alpha.0"
+    "@jupyterlab/rendermime": "^4.6.0-alpha.0"
+    "@jupyterlab/services": "^7.6.0-alpha.0"
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.0"
+    "@jupyterlab/statedb": "^4.6.0-alpha.0"
+    "@jupyterlab/statusbar": "^4.6.0-alpha.0"
+    "@jupyterlab/toc": "^6.6.0-alpha.0"
+    "@jupyterlab/translation": "^4.6.0-alpha.0"
+    "@jupyterlab/ui-components": "^4.6.0-alpha.0"
     "@lumino/algorithm": ^2.0.4
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
