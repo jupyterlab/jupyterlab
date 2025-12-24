@@ -16,6 +16,7 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
     shortcut: IShortcutTarget;
     editorFactory: CodeEditor.Factory;
     translator: ITranslator;
+    readOnly: boolean;
   }) {
     const { shortcut, translator, editorFactory } = options;
     const trans = translator.load('jupyterlab');
@@ -24,7 +25,8 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
       shortcut,
       translator,
       editorFactory,
-      () => this._checkValidation()
+      () => this._checkValidation(),
+      options.readOnly
     );
 
     super({
@@ -60,7 +62,8 @@ class CustomOptionsDialogBody
     shortcut: IShortcutTarget,
     translator: ITranslator,
     editorFactory: CodeEditor.Factory,
-    checkValidation: () => void
+    checkValidation: () => void,
+    readOnly: boolean
   ) {
     super();
     const trans = translator.load('jupyterlab');
@@ -78,6 +81,7 @@ class CustomOptionsDialogBody
 
     this._selectorInput = document.createElement('input');
     this._selectorInput.type = 'text';
+    this._selectorInput.disabled = readOnly ?? false;
     this._selectorInput.value = shortcut.selector;
     this._selectorInput.className = 'jp-mod-styled';
 
@@ -90,14 +94,20 @@ class CustomOptionsDialogBody
     argsLabel.className = 'jp-Dialog-label';
     container.appendChild(argsLabel);
 
-    // Create dedicated JSON editor widget
-    this._editorWidget = new JSONEditorWidget(
-      shortcut.args ?? {},
-      editorFactory,
-      checkValidation
-    );
+    if (readOnly) {
+      const argsPre = document.createElement('pre');
+      argsPre.textContent = JSON.stringify(shortcut.args ?? {}, undefined, 2);
+      container.appendChild(argsPre);
+    } else {
+      // Create dedicated JSON editor widget
+      this._editorWidget = new JSONEditorWidget(
+        shortcut.args ?? {},
+        editorFactory,
+        checkValidation
+      );
+      container.appendChild(this._editorWidget.node);
+    }
 
-    container.appendChild(this._editorWidget.node);
     this.node.appendChild(container);
   }
 

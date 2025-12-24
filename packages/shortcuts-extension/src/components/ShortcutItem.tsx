@@ -5,7 +5,7 @@
 
 import { Button } from '@jupyter/react-components';
 import type { TranslationBundle } from '@jupyterlab/translation';
-import { editIcon } from '@jupyterlab/ui-components';
+import { editIcon, infoIcon } from '@jupyterlab/ui-components';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { CustomOptionsDialog } from './ShortcutCustomOptions';
@@ -148,14 +148,14 @@ export class ShortcutItem extends React.Component<
     const allDefault = this.props.shortcut.keybindings.every(
       binding => binding.isDefault
     );
+    const editable = this.props.shortcut.userDefined;
     return (
       <div className="jp-Shortcuts-Cell">
         <div className="jp-Shortcuts-SourceCell">
           {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
         </div>
         {!allDefault ? this.getResetShortCutLink() : ''}
-        {this.props.shortcut.userDefined &&
-        this.props.external.editorFactory ? (
+        {this.props.external.editorFactory && (
           <Button
             className="jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions"
             onClick={async () => {
@@ -166,24 +166,31 @@ export class ShortcutItem extends React.Component<
               const dialog = new CustomOptionsDialog({
                 shortcut: this.props.shortcut,
                 translator: this.props.external.translator,
-                editorFactory: this.props.external.editorFactory
+                editorFactory: this.props.external.editorFactory,
+                readOnly: !editable
               });
 
               const result = await dialog.launch();
-              if (result.button.accept && result.value) {
+              if (result.button.accept && editable && result.value) {
                 await this.props.setCustomOptions(
                   this.props.shortcut,
                   result.value
                 );
               }
             }}
-            title={this._trans.__('Custom options')}
+            title={
+              editable
+                ? this._trans.__('Custom options')
+                : this._trans.__('Show options')
+            }
             appearance={'neutral'}
           >
-            <editIcon.react tag={null} />
+            {editable ? (
+              <editIcon.react tag={null} />
+            ) : (
+              <infoIcon.react tag={null} />
+            )}
           </Button>
-        ) : (
-          <></>
         )}
       </div>
     );
@@ -226,7 +233,7 @@ export class ShortcutItem extends React.Component<
     return this.state.displayReplaceInput[location];
   }
 
-  getOrDiplayIfNeeded(force: boolean): JSX.Element {
+  getOrDisplayIfNeeded(force: boolean): JSX.Element {
     const classes = ['jp-Shortcuts-Or'];
     if (force || this.state.displayNewInput) {
       classes.push('jp-Shortcuts-Or-Forced');
@@ -294,7 +301,7 @@ export class ShortcutItem extends React.Component<
           index === this._nonEmptyBindings.length - 1 &&
           Object.values(this.state.displayReplaceInput).some(Boolean)
         ) &&
-          this.getOrDiplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
+          this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
       </div>
     );
   }
