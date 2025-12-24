@@ -4892,6 +4892,7 @@ __metadata:
     "@jupyterlab/application": ^4.5.0-rc.1
     "@jupyterlab/apputils": ^4.6.0-rc.1
     "@jupyterlab/documentsearch": ^4.5.0-rc.1
+    "@jupyterlab/filebrowser": ^4.5.0-rc.1
     "@jupyterlab/launcher": ^4.5.0-rc.1
     "@jupyterlab/mainmenu": ^4.5.0-rc.1
     "@jupyterlab/running": ^4.5.0-rc.1
