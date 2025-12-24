@@ -188,7 +188,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         return blank;
       }
 
-      const { main, down, left, right, relativeSizes, top } =
+      const { main, down, left, right, relativeSizes, top, menuArea } =
         data as Private.ILayout;
 
       // If any data exists, then this is not a fresh session.
@@ -218,7 +218,8 @@ export class LayoutRestorer implements ILayoutRestorer {
         leftArea,
         rightArea,
         relativeSizes: relativeSizes || null,
-        topArea: (top as any) ?? null
+        topArea: (top as any) ?? null,
+        menuArea: (menuArea as any) ?? null
       };
     } catch (error) {
       return blank;
@@ -354,7 +355,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     dehydrated.right = this._dehydrateSideArea(layout.rightArea);
     dehydrated.relativeSizes = layout.relativeSizes;
     dehydrated.top = { ...layout.topArea };
-
+    dehydrated.menuArea = { ...layout.menuArea };
     return this._connector.save(KEY, dehydrated);
   }
 
@@ -633,6 +634,11 @@ namespace Private {
      * The restorable description of the top area in the user interface.
      */
     top?: ITopArea | null;
+
+    /**
+     * The restorable description of the menu area in the user interface.
+     */
+    menuArea?: IMenuArea | null;
   }
 
   /**
@@ -708,6 +714,16 @@ namespace Private {
      * Top area visibility in simple mode.
      */
     readonly simpleVisibility?: boolean;
+  }
+
+  /**
+   * The restorable description of the menu area in the user interface.
+   */
+  export interface IMenuArea extends PartialJSONObject {
+    /**
+     * Whether the menu bar is visible.
+     */
+    readonly visible?: boolean;
   }
 
   /**

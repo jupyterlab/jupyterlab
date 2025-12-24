@@ -115,6 +115,8 @@ namespace CommandIDs {
   export const toggleFullscreenMode: string =
     'application:toggle-fullscreen-mode';
 
+  export const toggleMainMenu: string = 'application:toggle-main-menu';
+
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
@@ -558,6 +560,21 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isVisible: () => true
       });
 
+      commands.addCommand(CommandIDs.toggleMainMenu, {
+        label: trans.__('Show Main Menu'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
+        execute: () => {
+          labShell.menuBarVisible = !labShell.menuBarVisible;
+        },
+        isToggled: () => labShell.menuBarVisible,
+        isVisible: () => true
+      });
+
       commands.addCommand(CommandIDs.toggleFullscreenMode, {
         label: trans.__('Fullscreen Mode'),
         describedBy: {
@@ -689,6 +706,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           // - by listening to this command execution.
         }
       });
+
+      // Alt+M key handler to toggle menu visibility
+      commands.addKeyBinding({
+        command: CommandIDs.toggleMainMenu,
+        keys: ['Alt M'],
+        selector: 'body',
+        preventDefault: true
+      });
     }
 
     if (palette) {
@@ -705,6 +730,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
         CommandIDs.togglePresentationMode,
+        CommandIDs.toggleMainMenu,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
         CommandIDs.resetLayout
