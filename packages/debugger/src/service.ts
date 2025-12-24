@@ -564,6 +564,14 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (this._model) {
       this._model.clear();
     }
+    this._stoppedSignal.emit();
+  }
+
+  /**
+   * Signal emitted when the debugger is stopped.
+   */
+  get stopped(): ISignal<IDebugger, void> {
+    return this._stoppedSignal;
   }
 
   /**
@@ -701,10 +709,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @returns Whether the state has been restored successfully or not
    */
   async restoreDebuggerState(state: IDebugger.State): Promise<boolean> {
-    await this.start();
-
     const breakpoints = await this._migrateBreakpoints(state);
-
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
     await this.restoreState(false);
@@ -1045,6 +1050,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
   private _pauseOnExceptionChanged = new Signal<IDebugger, void>(this);
+  private _stoppedSignal = new Signal<IDebugger, void>(this);
 }
 
 /**
