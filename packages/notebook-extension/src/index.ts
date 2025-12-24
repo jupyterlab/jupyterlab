@@ -2508,6 +2508,8 @@ function addCommands(
   tracker.activeCellChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
+    commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+    commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
   });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
@@ -4398,20 +4400,28 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.selectLastModifiedCell(current.content, true);
+        return NotebookActions.selectLastModifiedCell(current.content);
       }
     },
-    isEnabled
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return !!current && current.content.lastModifiedCellBackStack.length > 0;
+    }
   });
   commands.addCommand(CommandIDs.selectNextModifiedCell, {
     label: trans.__('Select Next Modified Cell'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.selectNextModifiedCell(current.content, true);
+        return NotebookActions.selectNextModifiedCell(current.content);
       }
     },
-    isEnabled
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return (
+        !!current && current.content.lastModifiedCellForwardStack.length > 0
+      );
+    }
   });
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Notebook Cell'),

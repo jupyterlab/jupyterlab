@@ -1918,18 +1918,12 @@ export namespace NotebookActions {
   }
 
   /**
-   * Select the last modified cell.
+   * Select the last modified cell and pop it from the back stack
    *
    * @param notebook - The target notebook widget.
-   * @param pop - If true, pop the stack (like undo).
    */
-  export function selectLastModifiedCell(
-    notebook: Notebook,
-    pop: boolean = false
-  ): void {
-    const cell = pop
-      ? notebook.popLastModifiedCell()
-      : notebook.lastModifiedCell;
+  export function selectLastModifiedCell(notebook: Notebook): void {
+    const cell = notebook.popLastModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
       notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
       notebook.scrollToCell(cell);
@@ -1937,18 +1931,12 @@ export namespace NotebookActions {
   }
 
   /**
-   * Select the next modified cell.
+   * Select the next modified cell and pop it from the forward stack
    *
    * @param notebook - The target notebook widget.
-   * @param pop - If true, pop the stack (like redo).
    */
-  export function selectNextModifiedCell(
-    notebook: Notebook,
-    pop: boolean = false
-  ): void {
-    const cell = pop
-      ? notebook.popNextModifiedCell()
-      : notebook.nextModifiedCell;
+  export function selectNextModifiedCell(notebook: Notebook): void {
+        const cell = notebook.popNextModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
       notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
       notebook.scrollToCell(cell);

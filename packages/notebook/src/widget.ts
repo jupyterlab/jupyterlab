@@ -1911,6 +1911,14 @@ export class Notebook extends StaticNotebook {
     return this._activeCell;
   }
 
+  get lastModifiedCellBackStack(): string[] {
+    return this._lastModifiedCellBackStack;
+  }
+
+  get lastModifiedCellForwardStack(): string[] {
+    return this._lastModifiedCellForwardStack;
+  }
+
   get lastClipboardInteraction(): 'copy' | 'cut' | 'paste' | null {
     return this._lastClipboardInteraction;
   }
@@ -3466,24 +3474,6 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Get the last modified cell (back stack).
-   */
-  get lastModifiedCell(): Cell | null {
-    while (this._lastModifiedCellBackStack.length) {
-      const id =
-        this._lastModifiedCellBackStack[
-          this._lastModifiedCellBackStack.length - 1
-        ];
-      const cell = this.widgets.find(c => c.model.id === id) || null;
-      if (cell && !cell.isDisposed) {
-        return cell;
-      }
-      this._lastModifiedCellBackStack.pop();
-    }
-    return null;
-  }
-
-  /**
    * Pop and return the top cell from the back stack, pushing to forward stack.
    */
   popLastModifiedCell(): Cell | null {
@@ -3495,24 +3485,6 @@ export class Notebook extends StaticNotebook {
         return cell;
       }
       // If cell is gone, continue to next
-    }
-    return null;
-  }
-
-  /**
-   * Get the next modified cell (forward stack).
-   */
-  get nextModifiedCell(): Cell | null {
-    while (this._lastModifiedCellForwardStack.length) {
-      const id =
-        this._lastModifiedCellForwardStack[
-          this._lastModifiedCellForwardStack.length - 1
-        ];
-      const cell = this.widgets.find(c => c.model.id === id) || null;
-      if (cell && !cell.isDisposed) {
-        return cell;
-      }
-      this._lastModifiedCellForwardStack.pop();
     }
     return null;
   }
