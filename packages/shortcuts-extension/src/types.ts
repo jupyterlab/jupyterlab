@@ -256,3 +256,24 @@ export interface IShortcutRegistry
    */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[];
 }
+
+/**
+ * Match type to search in shortcuts.
+ */
+export const enum MatchType {
+  Label,
+  Category,
+  Split,
+  Default
+}
+
+/**
+ *  Search result data
+ **/
+export interface ISearchResult {
+  matchType: MatchType;
+  categoryIndices: number[] | null;
+  labelIndices: number[] | null;
+  score: number;
+  item: IShortcutTarget;
+}
