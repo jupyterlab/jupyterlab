@@ -18,6 +18,7 @@ import {
   ImageViewerFactory
 } from '@jupyterlab/imageviewer';
 import { ITranslator } from '@jupyterlab/translation';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The command IDs used by the image widget plugin.
@@ -73,7 +74,7 @@ const plugin: JupyterFrontEndPlugin<IImageTracker> = {
   description: 'Adds image viewer and provide its tracker.',
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
-  requires: [ITranslator],
+  requires: [ITranslator, ISettingRegistry],
   optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
@@ -89,11 +90,16 @@ export default plugin;
 function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
+  settingRegistry: ISettingRegistry,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null
 ): IImageTracker {
   const trans = translator.load('jupyterlab');
   const namespace = 'image-widget';
+
+  const tracker = new WidgetTracker<IDocumentWidget<ImageViewer>>({
+    namespace
+  });
 
   function onWidgetCreated(
     sender: any,
@@ -114,46 +120,65 @@ function activate(
     }
   }
 
-  const factory = new ImageViewerFactory({
-    name: FACTORY,
-    label: trans.__('Image'),
-    modelName: 'base64',
-    fileTypes: [...FILE_TYPES, ...TEXT_FILE_TYPES],
-    defaultFor: FILE_TYPES,
-    readOnly: true
-  });
+  void settingRegistry.load(plugin.id).then(settings => {
+    let defaultZoom =
+      (settings.get('defaultZoom').composite as string) ?? 'fit-to-width';
 
-  const textFactory = new ImageViewerFactory({
-    name: TEXT_FACTORY,
-    label: trans.__('Image (Text)'),
-    modelName: 'text',
-    fileTypes: TEXT_FILE_TYPES,
-    defaultFor: TEXT_FILE_TYPES,
-    readOnly: true
-  });
+    // React to setting changes for default zoom
+    settings.changed.connect(() => {
+      const newZoom =
+        (settings.get('defaultZoom').composite as string) ?? 'fit-to-width';
 
-  [factory, textFactory].forEach(factory => {
-    app.docRegistry.addWidgetFactory(factory);
-    factory.widgetCreated.connect(onWidgetCreated);
-  });
+      if (newZoom === defaultZoom) {
+        return;
+      }
 
-  const tracker = new WidgetTracker<IDocumentWidget<ImageViewer>>({
-    namespace
-  });
+      defaultZoom = newZoom;
 
-  if (restorer) {
-    // Handle state restoration.
-    void restorer.restore(tracker, {
-      command: 'docmanager:open',
-      args: widget => ({
-        path: widget.context.path,
-        factory: TEXT_FILE_REGEX.test(widget.context.path)
-          ? TEXT_FACTORY
-          : FACTORY
-      }),
-      name: widget => widget.context.path
+      tracker.forEach(widget => {
+        widget.content.setDefaultZoom?.(defaultZoom);
+      });
     });
-  }
+
+    const factory = new ImageViewerFactory({
+      name: FACTORY,
+      label: trans.__('Image'),
+      modelName: 'base64',
+      fileTypes: [...FILE_TYPES, ...TEXT_FILE_TYPES],
+      defaultFor: FILE_TYPES,
+      readOnly: true,
+      defaultZoom
+    });
+
+    const textFactory = new ImageViewerFactory({
+      name: TEXT_FACTORY,
+      label: trans.__('Image (Text)'),
+      modelName: 'text',
+      fileTypes: TEXT_FILE_TYPES,
+      defaultFor: TEXT_FILE_TYPES,
+      readOnly: true,
+      defaultZoom
+    });
+
+    [factory, textFactory].forEach(factory => {
+      app.docRegistry.addWidgetFactory(factory);
+      factory.widgetCreated.connect(onWidgetCreated);
+    });
+
+    if (restorer) {
+      // Handle state restoration.
+      void restorer.restore(tracker, {
+        command: 'docmanager:open',
+        args: widget => ({
+          path: widget.context.path,
+          factory: TEXT_FILE_REGEX.test(widget.context.path)
+            ? TEXT_FACTORY
+            : FACTORY
+        }),
+        name: widget => widget.context.path
+      });
+    }
+  });
 
   addCommands(app, tracker, translator);
 
