@@ -152,6 +152,18 @@ from the context menu:
 </div>
 ```
 
+## Autosave
+
+JupyterLab automatically saves your files and notebooks every 1 minute (60 seconds) by default.
+
+You can configure this behavior in the **Settings Editor**:
+
+1. Go to **Settings** → **Settings Editor**.
+2. Select **Document Manager** in the left sidebar.
+3. Adjust the following settings:
+   - **Autosave Documents**: Toggle this checkbox to enable or disable the feature.
+   - **Autosave Interval**: Change the frequency by entering a value in **seconds**. (Set to 60 for 1 minute).
+
 ## Uploading and Downloading
 
 (file-upload)=
