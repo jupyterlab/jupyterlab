@@ -109,4 +109,7 @@ void restorer.restore(tracker, {
 });
 ```
 
-Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.
+Note that only the portion of the key before the first `:` (the tracker namespace)
+is used to associate the workspace entry with a plugin. Any additional segments
+after the first `:` (such as `package.json:JSON`) are not used during restoration
+and do not affect how the workspace is loaded.
