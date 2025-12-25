@@ -339,6 +339,31 @@ export async function renderMarkdown(
 
     // Replace math.
     html = replaceMath(html, parts['math']);
+
+    // Some syntax highlighters produce empty code blocks for single-character content
+    // This ensures code blocks always have visible content
+
+    // Match code blocks that might be empty
+    const codeBlockRegex = /<pre><code(\s+[^>]*)?>\s*<\/code><\/pre>/gi;
+
+    html = html.replace(codeBlockRegex, (match, attributes) => {
+      // Extract the actual code content from the original source
+      // Look for patterns like ```python\nx\n```
+      const codeMatch = source.match(/```[\w-]*\n([^\n]+)\n```/);
+
+      if (codeMatch && codeMatch[1]) {
+        const codeContent = codeMatch[1].trim();
+        const attrs = attributes || '';
+
+        // Safely add the content with proper escaping
+        return `<pre><code${attrs}>${escape(codeContent)}</code></pre>`;
+      }
+
+      // If we can't extract content, return a non-breaking space to ensure rendering
+      const attrs = attributes || '';
+      return `<pre><code${attrs}>&nbsp;</code></pre>`;
+    });
+   
   } else {
     // Fallback if the application does not have any markdown parser.
     html = `<pre>${source}</pre>`;
