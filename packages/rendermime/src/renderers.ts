@@ -363,7 +363,7 @@ export async function renderMarkdown(
       const attrs = attributes || '';
       return `<pre><code${attrs}>&nbsp;</code></pre>`;
     });
-   
+
   } else {
     // Fallback if the application does not have any markdown parser.
     html = `<pre>${source}</pre>`;
