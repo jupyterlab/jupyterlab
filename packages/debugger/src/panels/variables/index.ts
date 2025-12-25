@@ -39,6 +39,7 @@ export class Variables extends PanelWithToolbar {
       commands,
       translator
     });
+
     this._table = new VariablesBodyGrid({
       model,
       commands,
