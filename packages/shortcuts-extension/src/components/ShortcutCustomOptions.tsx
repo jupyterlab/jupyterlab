@@ -33,7 +33,7 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
     if (options.readOnly) {
       buttons.push(Dialog.cancelButton({ label: trans.__('OK') }));
     } else {
-      buttons.push(Dialog.cancelButton({ label: trans.__('OK') }));
+      buttons.push(Dialog.cancelButton({ label: trans.__('Cancel') }));
       buttons.push(Dialog.okButton({ label: trans.__('Apply') }));
     }
     super({
