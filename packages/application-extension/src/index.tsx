@@ -60,7 +60,10 @@ import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
-
+import { FileEditor } from '@jupyterlab/fileeditor';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import { ConsolePanel } from '@jupyterlab/console';
+import { NotebookPanel } from '@jupyterlab/notebook';
 /**
  * Default context menu item rank
  */
@@ -125,6 +128,10 @@ namespace CommandIDs {
 
   export const resetWidgetZoom = 'application:reset-widget-zoom';
 }
+
+type SingleEditorWidget = FileEditor | ConsolePanel | NotebookPanel;
+const DEFAULT_CODE_FONT_SIZE = 13;
+const DEFAULT_CONTENT_FONT_SIZE = 14;
 
 /**
  * A plugin to register the commands for the main application.
@@ -248,16 +255,74 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     const getCurrentWidget = (): Widget | null => {
       return shell.currentWidget ?? null;
     };
-    const zoomWidget = (widget: Widget, delta: number) => {
-      console.log('Zooming widget', widget, 'by', delta);
-      const node = widget.node as HTMLElement;
-      const current = Number(
-        (node.style as CSSStyleDeclaration & { zoom?: string }).zoom || 1
+
+    function zoomEditor(widget: SingleEditorWidget, delta: number) {
+      const node = widget.node;
+
+      let currentCodeFontSize =
+        parseFloat(
+          getComputedStyle(node).getPropertyValue('--jp-code-font-size')
+        ) || DEFAULT_CODE_FONT_SIZE;
+      let currentContentFontSize =
+        parseFloat(
+          getComputedStyle(node).getPropertyValue('--jp-content-font-size1')
+        ) || DEFAULT_CONTENT_FONT_SIZE;
+
+      const STEP = 1;
+      const MIN = 10;
+      const MAX = 24;
+      const nextCodeFontSize = Math.min(
+        MAX,
+        Math.max(MIN, currentCodeFontSize + delta * STEP)
       );
-      (node.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(
-        Math.min(3, Math.max(0.5, current + delta))
+      const nextContentFontSize = Math.min(
+        MAX,
+        Math.max(MIN, currentContentFontSize + delta * STEP)
       );
-    };
+
+      node.style.setProperty('--jp-code-font-size', `${nextCodeFontSize}px`);
+      if (widget instanceof NotebookPanel) {
+        node.style.setProperty(
+          '--jp-content-font-size1',
+          `${nextContentFontSize}px`
+        );
+      }
+    }
+    function resetWidgetZoom(widget: any) {
+      if (
+        (widget instanceof DocumentWidget &&
+          widget.content instanceof FileEditor) ||
+        widget instanceof ConsolePanel
+      ) {
+        widget.content.node.style.setProperty(
+          '--jp-code-font-size',
+          `${DEFAULT_CODE_FONT_SIZE}px`
+        );
+      } else if (widget instanceof NotebookPanel) {
+        widget.node.style.setProperty(
+          '--jp-code-font-size',
+          `${DEFAULT_CODE_FONT_SIZE}px`
+        );
+        widget.node.style.setProperty(
+          '--jp-content-font-size1',
+          `${DEFAULT_CONTENT_FONT_SIZE}px`
+        );
+      }
+    }
+
+    function zoomActiveWidget(delta: number) {
+      const widget = shell.currentWidget;
+      if (
+        (widget instanceof DocumentWidget &&
+          widget.content instanceof FileEditor) ||
+        widget instanceof ConsolePanel
+      ) {
+        zoomEditor(widget.content, delta);
+      } else if (widget instanceof NotebookPanel) {
+        zoomEditor(widget, delta);
+      }
+    }
+
     // Sets tab focus on the element
     function setTabFocus(focusElement: HTMLElement | null) {
       if (focusElement) {
@@ -336,7 +401,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const widget = getCurrentWidget();
         if (widget) {
-          zoomWidget(widget, 0.1);
+          zoomActiveWidget(1);
         }
       }
     });
@@ -346,7 +411,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const widget = getCurrentWidget();
         if (widget) {
-          zoomWidget(widget, -0.1);
+          zoomActiveWidget(-1);
         }
       }
     });
@@ -356,7 +421,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const widget = getCurrentWidget();
         if (widget) {
-          (widget.node.style as any).zoom = '';
+          resetWidgetZoom(widget);
         }
       }
     });
@@ -783,7 +848,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         event.preventDefault();
 
         const delta = event.deltaY < 0 ? 0.1 : -0.1;
-        zoomWidget(widget, delta);
+        zoomActiveWidget(delta);
       },
       { passive: false, capture: true }
     );
