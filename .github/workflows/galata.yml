@@ -103,7 +103,7 @@ jobs:
         with:
           name: jupyterlab-galata-report-${{ matrix.browser }}
           path: |
-            galata/playwright-report-*
+            galata/playwright-report*
 
       - name: Print JupyterLab logs
         if: always()
