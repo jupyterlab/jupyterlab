@@ -180,7 +180,7 @@ export namespace Commands {
   ): void {
     config =
       (settings.get('editorConfig').composite as Record<string, any>) ?? {};
-    scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
     commands.notifyCommandChanged(CommandIDs.lineNumbers);
@@ -212,6 +212,7 @@ export namespace Commands {
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
     editor.setOptions({ ...config, scrollPastEnd });
+    widget.toggleClass('jp-mod-scrollPastEnd', scrollPastEnd);
   }
 
   /**
@@ -263,20 +264,18 @@ export namespace Commands {
           });
       },
       label: args => {
-        const delta = Number(args['delta']);
-        if (Number.isNaN(delta)) {
-          console.error(
-            `${CommandIDs.changeFontSize}: delta arg must be a number`
-          );
-        }
+        const delta = Number(args.delta ?? 0);
+
         if (delta > 0) {
           return args.isMenu
             ? trans.__('Increase Text Editor Font Size')
             : trans.__('Increase Font Size');
-        } else {
+        } else if (delta < 0) {
           return args.isMenu
             ? trans.__('Decrease Text Editor Font Size')
             : trans.__('Decrease Font Size');
+        } else {
+          return trans.__('Change Font Size');
         }
       },
       describedBy: {

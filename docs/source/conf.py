@@ -64,7 +64,7 @@ templates_path = ["_templates"]
 # The file extensions of source files.
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {".md": "markdown"}
 
 # The master toctree document.
 master_doc = "index"
@@ -200,6 +200,7 @@ PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
 PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.md"
+TOKENS_BLACKLIST = ["@jupyterlab/services-extension:default-content-provider"]
 
 
 def _clean_command_data(command: dict) -> None:
@@ -345,6 +346,9 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     template = ""
 
     for _name, _description in items.items():
+        if _name in TOKENS_BLACKLIST:
+            continue
+
         # Normalize line continuation indentation to 2 spaces (prettier standard for markdown lists)
         _description = _description.replace("\n    ", "\n  ")
         template += f"- `{_name}`: {_description}\n"
@@ -365,7 +369,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 You can now test JupyterLab 4.5.0 Release Candidate · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
+    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",

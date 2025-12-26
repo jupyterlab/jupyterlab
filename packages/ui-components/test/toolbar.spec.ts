@@ -404,6 +404,43 @@ describe('@jupyterlab/ui-components', () => {
         expect(iconNode.classList.contains(iconClassValue)).toBe(true);
         cmd.dispose();
       });
+
+      describe('ARIA menu-button attributes', () => {
+        it('should pass aria-haspopup, aria-expanded and aria-controls to the command toolbar button', async () => {
+          const button = new CommandToolbarButton({
+            commands,
+            id: testLogCommandId,
+            'aria-haspopup': 'menu',
+            'aria-expanded': true,
+            'aria-controls': 'popup-id'
+          });
+
+          await render(button);
+
+          const buttonNode = button.node.firstChild as HTMLButtonElement;
+          expect(buttonNode.getAttribute('aria-haspopup')).toBe('menu');
+          expect(buttonNode.getAttribute('aria-expanded')).toBe('true');
+          expect(buttonNode.getAttribute('aria-controls')).toBe('popup-id');
+
+          button.dispose();
+        });
+
+        it('should not set ARIA menu-button attributes when not provided', async () => {
+          const button = new CommandToolbarButton({
+            commands,
+            id: testLogCommandId
+          });
+
+          await render(button);
+
+          const buttonNode = button.node.firstChild as HTMLButtonElement;
+          expect(buttonNode.hasAttribute('aria-haspopup')).toBe(false);
+          expect(buttonNode.hasAttribute('aria-expanded')).toBe(false);
+          expect(buttonNode.hasAttribute('aria-controls')).toBe(false);
+
+          button.dispose();
+        });
+      });
     });
   });
 
@@ -723,6 +760,45 @@ describe('@jupyterlab/ui-components', () => {
         expect(widget.enabled).toBe(false);
         expect(widget.pressed).toBe(false);
         expect(button.getAttribute('aria-disabled')).toEqual('true');
+        widget.dispose();
+      });
+    });
+
+    describe('ARIA menu-button attributes', () => {
+      it('should pass aria-haspopup, aria-expanded and aria-controls to the button', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'Menu',
+          'aria-haspopup': 'menu',
+          'aria-expanded': true,
+          'aria-controls': 'popup-id'
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        await widget.renderPromise;
+
+        const button = widget.node.firstChild as HTMLButtonElement;
+        expect(button.getAttribute('aria-haspopup')).toBe('menu');
+        expect(button.getAttribute('aria-expanded')).toBe('true');
+        expect(button.getAttribute('aria-controls')).toBe('popup-id');
+
+        widget.dispose();
+      });
+
+      it('should not set ARIA menu-button attributes when not provided', async () => {
+        const widget = new ToolbarButton({
+          icon: bugIcon,
+          tooltip: 'No ARIA menu props for me'
+        });
+        Widget.attach(widget, document.body);
+        await framePromise();
+        await widget.renderPromise;
+
+        const button = widget.node.firstChild as HTMLButtonElement;
+        expect(button.hasAttribute('aria-haspopup')).toBe(false);
+        expect(button.hasAttribute('aria-expanded')).toBe(false);
+        expect(button.hasAttribute('aria-controls')).toBe(false);
+
         widget.dispose();
       });
     });
