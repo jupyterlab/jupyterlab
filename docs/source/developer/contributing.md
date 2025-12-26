@@ -175,7 +175,7 @@ To add a new command to the JupyterLab command palette:
      }
    });
   ```
-  
+
 ### Issue Management
 
 Opening an issue lets community members participate in the design
