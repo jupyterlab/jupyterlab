@@ -387,7 +387,7 @@ export class ShortcutUI
 
     if (created) {
       this._newShortcutItem.reset();
-      this.toggleAddCommandRow();
+      void this.toggleAddCommandRow();
     }
   };
 
