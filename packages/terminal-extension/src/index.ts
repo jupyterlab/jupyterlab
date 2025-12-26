@@ -15,8 +15,10 @@ import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -59,6 +61,9 @@ namespace CommandIDs {
   export const setTheme = 'terminal:set-theme';
 
   export const shutdown = 'terminal:shut-down';
+
+  export const openInTerminalForBrowser =
+    'terminal:open-in-terminal-for-browser';
 }
 
 /**
@@ -83,9 +88,68 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
 };
 
 /**
- * Export the plugin as default.
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
  */
-export default plugin;
+const openInTerminalForBrowserPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/terminal-extension:open-in-terminal-for-browser',
+  description: 'Adds an "Open in Terminal" command for the file browser.',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    fileBrowserFactory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openInTerminalForBrowser, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const { tracker } = fileBrowserFactory;
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const items = Array.from(widget.selectedItems());
+        if (items.length === 0) {
+          return;
+        }
+
+        for (const item of items) {
+          // Only open a terminal for directories.
+          if (item.type !== 'directory') {
+            continue;
+          }
+          try {
+            // Open one terminal for each selected directory.
+            await commands.execute('terminal:create-new', {
+              cwd: item.path
+            });
+          } catch (error) {
+            void showErrorMessage(
+              trans.__('Failed to open new terminal'),
+              error as Error
+            );
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+export default [plugin, openInTerminalForBrowserPlugin];
 
 /**
  * Activate the terminal plugin.
