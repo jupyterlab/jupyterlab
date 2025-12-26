@@ -395,9 +395,6 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
 
   // Filtering on a specific command should keep only one command.
   await filterInput.locator('input').fill('restart kernel and run all cells');
-  for (let i = 0; i < (await commandOptions.count()); i++) {
-    console.log(await commandOptions.nth(i).textContent());
-  }
   expect(await commandOptions.count()).toBe(1);
 });
 
