@@ -155,6 +155,27 @@ Don't hesitate to mention the targeted version in a PR description.
 A maintainer will set the milestone accordingly.
 :::
 
+### Adding a new command to the Command Palette
+
+To add a new command to the JupyterLab command palette:
+
+1. Navigate to `packages/application-extension/src/index.tsx`.
+
+2. Define a new command ID alongside existing command IDs:
+   ```ts
+   export const MyCommand = 'application:my-command';
+  ```
+3. Register the command using `commands.addCommand`, providing a label and
+   an execute handler:
+   ```ts
+   commands.addCommand(CommandIDs.MyCommand, {
+     label: 'My command',
+     execute: () => {
+       // command logic
+     }
+   });
+  ```
+  
 ### Issue Management
 
 Opening an issue lets community members participate in the design
