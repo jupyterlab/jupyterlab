@@ -118,6 +118,8 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const activateTabIndex: string = 'application:activate-tab-index';
 }
 
 /**
@@ -370,6 +372,38 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         execute: () => {
           labShell.activatePreviousTabBar();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activateTabIndex, {
+        label: trans.__('Activate Tab by Index'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              index: {
+                type: 'number',
+                description: trans.__(
+                  'The index of the tab to activate (1-9, or 0 for last)'
+                )
+              }
+            },
+            required: ['index']
+          }
+        },
+        execute: args => {
+          const index = args['index'] as number;
+          const widgets = Array.from(labShell.widgets('main'));
+
+          if (widgets.length === 0) {
+            return;
+          }
+
+          if (index === 0) {
+            labShell.activateById(widgets[widgets.length - 1].id);
+          } else if (index > 0 && index <= widgets.length) {
+            labShell.activateById(widgets[index - 1].id);
+          }
         }
       });
 

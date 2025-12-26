@@ -128,6 +128,10 @@ marked with a colored top border (blue by default).
 
 (tabs)=
 
+### Switching Tabs by Index
+
+You can switch to a specific tab in the main area using the keyboard shortcuts `Accel Alt` and a number from `1` to `9` (where `1` is the first tab). To jump directly to the last tab, use `Accel Alt 0`.
+
 ## Tabs and Simple Interface Mode
 
 The Tabs panel in the left sidebar lists the open documents or
