@@ -49,6 +49,7 @@ See the sections below (and the top-level links above) for more information abou
 getting_started/overview
 user/index
 extension/extension_dev
+extension/documents
 developer/contributing
 API Reference <developer/api>
 ```
