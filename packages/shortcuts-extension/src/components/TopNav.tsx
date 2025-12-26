@@ -5,7 +5,7 @@
 
 import { Button } from '@jupyter/react-components';
 import type { ITranslator } from '@jupyterlab/translation';
-import { checkIcon, dotsIcon, FilterBox } from '@jupyterlab/ui-components';
+import { addIcon, FilterBox } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
@@ -55,80 +55,34 @@ function Symbols(props: ISymbolsProps): JSX.Element {
 
 function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
   const trans = props.translator.load('jupyterlab');
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-      setMenuOpen(false);
-    }
-  };
-
-  React.useEffect(() => {
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [menuOpen]);
-
   return (
-    <div className="jp-Shortcuts-AdvancedOptions" ref={menuRef}>
-      <Button
-        className="jp-Shortcuts-AdvancedOptionsButton jp-mod-styled jp-mod-reject"
-        onClick={() => setMenuOpen(!menuOpen)}
-        title={trans.__('Advanced options')}
-        appearance={'neutral'}
+    <div className="jp-Shortcuts-AdvancedOptions">
+      <a
+        className="jp-Shortcuts-AdvancedOptionsLink"
+        onClick={() => props.toggleSelectors()}
       >
-        <dotsIcon.react tag={null} />
+        {props.showSelectors
+          ? trans.__('Hide Selectors')
+          : trans.__('Show Selectors')}
+      </a>
+      <a
+        className="jp-Shortcuts-AdvancedOptionsLink"
+        onClick={() => props.resetShortcuts()}
+      >
+        {trans.__('Reset All')}
+      </a>
+      <Button
+        className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
+        onClick={props.toggleAddCommandRow}
+        title={trans.__('Show add shortcut row')}
+        disabled={props.showAddCommandRow}
+      >
+        <addIcon.react
+          tag="span"
+          elementSize="xlarge"
+          elementPosition="center"
+        />
       </Button>
-      {menuOpen && (
-        <ul className="lm-Menu lm-MenuBar-menu jp-Shortcuts-AdvancedOptionsMenu">
-          <li
-            className="lm-Menu-item"
-            onClick={async () => {
-              await props.resetShortcuts();
-              setMenuOpen(false);
-            }}
-          >
-            <div className="lm-Menu-itemIcon" />
-            <div className="lm-Menu-itemLabel">{trans.__('Reset All')}</div>
-          </li>
-          <li
-            className="lm-Menu-item"
-            onClick={async () => {
-              props.toggleSelectors();
-              setMenuOpen(false);
-            }}
-          >
-            {props.showSelectors ? (
-              <checkIcon.react className="lm-Menu-itemIcon" />
-            ) : (
-              <div className="lm-Menu-itemIcon" />
-            )}
-            <div className="lm-Menu-itemLabel">
-              {trans.__('Show Selectors')}
-            </div>
-          </li>
-          <li
-            className="lm-Menu-item"
-            onClick={() => {
-              props.toggleAddCommandRow();
-              setMenuOpen(false);
-            }}
-          >
-            {props.showAddCommandRow ? (
-              <checkIcon.react className="lm-Menu-itemIcon" />
-            ) : (
-              <div className="lm-Menu-itemIcon" />
-            )}
-            <div className="lm-Menu-itemLabel">
-              {trans.__('Show add command row')}
-            </div>
-          </li>
-        </ul>
-      )}
     </div>
   );
 }

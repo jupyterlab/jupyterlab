@@ -7,6 +7,7 @@ import { Button } from '@jupyter/react-components';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import {
   checkIcon,
+  closeIcon,
   editIcon,
   HTMLSelect,
   infoIcon
@@ -40,6 +41,7 @@ export interface IShortcutItemProps {
     searchQuery: string;
     updateCommand: (command: string, category: string) => void;
     saveShortcut: () => Promise<void>;
+    hideAddCommandRow: () => void;
   };
 }
 
@@ -235,15 +237,25 @@ export class ShortcutItem extends React.Component<
           </Button>
         )}
         {!!this.props.newShortcutUtils && (
-          <Button
-            className="jp-mod-styled jp-mod-accept jp-Shortcuts-CustomOptions"
-            onClick={this.props.newShortcutUtils?.saveShortcut}
-            title={this._trans.__('Save shortcut')}
-            appearance="neutral"
-            disabled={false}
-          >
-            <checkIcon.react tag={null} />
-          </Button>
+          <>
+            <Button
+              className="jp-mod-styled jp-mod-accept jp-Shortcuts-CustomOptions"
+              onClick={this.props.newShortcutUtils?.saveShortcut}
+              title={this._trans.__('Save shortcut')}
+              appearance="neutral"
+              disabled={false}
+            >
+              <checkIcon.react tag={null} />
+            </Button>
+            <Button
+              className="jp-mod-styled jp-mod-accept jp-Shortcuts-CustomOptions"
+              onClick={this.props.newShortcutUtils?.hideAddCommandRow}
+              title={this._trans.__('Hide add shortcut row')}
+              appearance="neutral"
+            >
+              <closeIcon.react tag={null} />
+            </Button>
+          </>
         )}
       </div>
     );

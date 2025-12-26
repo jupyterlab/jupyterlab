@@ -126,6 +126,10 @@
   white-space: pre-wrap;
 }
 
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
+  top: 4px;
+}
+
 .jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
   vertical-align: inherit;
   margin-left: 10px;
@@ -353,33 +357,43 @@
 }
 
 .jp-Shortcuts-AdvancedOptions {
-  position: relative;
-}
-
-.jp-Shortcuts-AdvancedOptionsButton {
-  padding: 4px 8px;
-}
-
-.jp-Shortcuts-AdvancedOptionsButton:hover {
-  background-color: var(--jp-layout-color2);
-  border-radius: 4px;
-}
-
-.jp-Shortcuts-AdvancedOptionsMenu {
-  margin-top: 4px;
-  right: 0;
-  border-radius: 5px;
-}
-
-.jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-item:hover {
-  background: var(--jp-layout-color2);
-}
-
-.jp-Shortcuts-AdvancedOptionsMenu .lm-Menu-itemIcon {
-  min-width: 21px;
+  padding-left: 12px;
+  display: flex;
   align-items: center;
+}
+
+.jp-Shortcuts-AdvancedOptionsLink {
+  color: var(--jp-content-link-color);
+  margin-right: 15px;
   display: inline-block;
-  vertical-align: middle;
+  cursor: pointer;
+}
+
+.jp-Shortcuts-AdvancedOptionsLink:hover {
+  color: var(--jp-brand-color0);
+  text-decoration: underline;
+}
+
+.jp-Shortcuts-AdvancedOptionsLink:active {
+  color: var(--jp-brand-color0);
+  text-decoration: underline;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept {
+  background: var(--jp-accept-color-normal);
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled.jp-mod-accept:hover {
+  background: var(--jp-accept-color-hover);
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.jp-Shortcuts-AdvancedOptionsButton.jp-mod-styled .jp-icon3[fill] {
+  fill: var(--jp-ui-inverse-font-color0);
 }
 
 .jp-Shortcuts-HeaderRowContainer {

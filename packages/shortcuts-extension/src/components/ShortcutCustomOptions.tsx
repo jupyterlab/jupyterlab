@@ -37,7 +37,9 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
       buttons.push(Dialog.okButton({ label: trans.__('Apply') }));
     }
     super({
-      title: trans.__('Custom Shortcut Options'),
+      title: options.readOnly
+        ? trans.__('Shortcut Options')
+        : trans.__('Custom Shortcut Options'),
       body,
       buttons
     });
