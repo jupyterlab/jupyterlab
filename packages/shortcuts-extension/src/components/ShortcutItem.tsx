@@ -239,7 +239,7 @@ export class ShortcutItem extends React.Component<
         {!!this.props.newShortcutUtils && (
           <>
             <Button
-              className="jp-mod-styled jp-mod-accept jp-Shortcuts-CustomOptions"
+              className="jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew"
               onClick={this.props.newShortcutUtils?.saveShortcut}
               title={this._trans.__('Save shortcut')}
               appearance="neutral"
@@ -248,7 +248,7 @@ export class ShortcutItem extends React.Component<
               <checkIcon.react tag={null} />
             </Button>
             <Button
-              className="jp-mod-styled jp-mod-accept jp-Shortcuts-CustomOptions"
+              className="jp-mod-styled jp-mod-accept jp-Shortcuts-HideNew"
               onClick={this.props.newShortcutUtils?.hideAddCommandRow}
               title={this._trans.__('Hide add shortcut row')}
               appearance="neutral"
