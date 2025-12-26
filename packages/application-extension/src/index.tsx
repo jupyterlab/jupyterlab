@@ -129,7 +129,7 @@ namespace CommandIDs {
   export const resetWidgetZoom = 'application:reset-widget-zoom';
 }
 
-type SingleEditorWidget = FileEditor | ConsolePanel | NotebookPanel;
+type ZoomableEditor = FileEditor | ConsolePanel | NotebookPanel;
 const DEFAULT_CODE_FONT_SIZE = 13;
 const DEFAULT_CONTENT_FONT_SIZE = 14;
 
@@ -256,7 +256,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       return shell.currentWidget ?? null;
     };
 
-    function zoomEditor(widget: SingleEditorWidget, delta: number) {
+    function zoomEditor(widget: ZoomableEditor, delta: number) {
       const node = widget.node;
 
       let currentCodeFontSize =

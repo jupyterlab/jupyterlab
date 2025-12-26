@@ -41,6 +41,7 @@
     "@jupyterlab/apputils": "^4.7.0-alpha.0",
     "@jupyterlab/console": "^4.6.0-alpha.0",
     "@jupyterlab/coreutils": "^6.6.0-alpha.0",
+    "@jupyterlab/docregistry": "^4.6.0-alpha.0",
     "@jupyterlab/fileeditor": "^4.6.0-alpha.0",
     "@jupyterlab/notebook": "^4.6.0-alpha.0",
     "@jupyterlab/property-inspector": "^4.6.0-alpha.0",
