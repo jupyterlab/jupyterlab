@@ -41,7 +41,7 @@ describe('JupyterPluginRegistry', () => {
     jest
       .spyOn(PluginRegistry.prototype, 'activatePlugin')
       .mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(), 500))
+        () => new Promise(resolve => setTimeout(() => resolve(), 520))
       );
 
     await registry.activatePlugin('slow-plugin');
