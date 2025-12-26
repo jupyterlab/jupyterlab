@@ -6,7 +6,7 @@
  */
 
 import type { FieldProps } from '@rjsf/utils';
-
+import { OutputArea } from '@jupyterlab/outputarea';
 import {
   ILabShell,
   ILayoutRestorer,
@@ -91,7 +91,8 @@ import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
 import {
   IMarkdownParser,
   IRenderMime,
-  IRenderMimeRegistry
+  IRenderMimeRegistry,
+  MimeModel
 } from '@jupyterlab/rendermime';
 import { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -369,7 +370,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   requires: [
     INotebookWidgetFactory,
     IEditorExtensionRegistry,
-    INotebookCellExecutor
+    INotebookCellExecutor,
+    IRenderMimeRegistry
   ],
   optional: [
     ICommandPalette,
@@ -1778,6 +1780,7 @@ function activateNotebookHandler(
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
   executor: INotebookCellExecutor,
+  rendermime: IRenderMimeRegistry,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1827,6 +1830,46 @@ function activateNotebookHandler(
   fetchSettings
     .then(settings => {
       updateConfig(settings);
+      let helpWidget: MainAreaWidget<Panel> | null = null;
+
+      OutputArea.pageRequested.connect((sender, args) => {
+        const helpInBottomPanel = settings.get('helpInBottomPanel')
+          .composite as boolean;
+        if (!helpInBottomPanel) {
+          return;
+        }
+
+        args.handled = true;
+
+        if (!helpWidget || helpWidget.isDisposed) {
+          const content = new Panel();
+          content.addClass('jp-HelpPanel');
+          helpWidget = new MainAreaWidget({ content });
+          helpWidget.id = 'jp-help-panel';
+          helpWidget.title.label = trans.__('Help');
+          helpWidget.title.closable = true;
+        }
+
+        const content = helpWidget.content;
+        content.widgets.forEach(w => w.dispose());
+
+        const { data, metadata } = args.payload;
+        const mimeType = rendermime.preferredMimeType(data, 'any');
+
+        if (mimeType) {
+          const renderer = rendermime.createRenderer(mimeType);
+          void renderer.renderModel(
+            new MimeModel({ data, metadata, trusted: true })
+          );
+          content.addWidget(renderer);
+        }
+
+        if (!helpWidget.isAttached) {
+          shell.add(helpWidget, 'down');
+        }
+        shell.activateById(helpWidget.id);
+      });
+
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
