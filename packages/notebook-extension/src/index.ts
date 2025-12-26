@@ -15,6 +15,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  CommandToolbarButton,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -106,6 +107,7 @@ import {
   copyIcon,
   cutIcon,
   duplicateIcon,
+  editIcon,
   fastForwardIcon,
   IDisposableMenuItem,
   IFormRenderer,
@@ -312,6 +314,8 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
+
+  export const jumpToLastModified = 'notebook:jump-to-last-modified';
 
   export const replaceSelection = 'notebook:replace-selection';
 
@@ -923,7 +927,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
   description: 'Adds table of content capability to the notebooks',
-  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
+  requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer, ILabShell],
   optional: [IMarkdownParser, ISettingRegistry],
   autoStart: true,
   activate: (
@@ -931,11 +935,31 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
     sanitizer: IRenderMime.ISanitizer,
+    labShell: ILabShell,
     mdParser: IMarkdownParser | null,
     settingRegistry: ISettingRegistry | null
   ): void => {
     const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
     tocRegistry.add(nbTocFactory);
+    app.restored.then(() => {
+      const tocWidget = Array.from(labShell.widgets('left')).find(
+        w => w.id === 'table-of-contents'
+      );
+
+      if (tocWidget && (tocWidget as any).toolbar) {
+        (tocWidget as any).toolbar.addItem(
+          'jump-to-last-modified',
+          new CommandToolbarButton({
+            commands: app.commands,
+            id: CommandIDs.jumpToLastModified,
+            icon: editIcon,
+            label: '',
+            caption: 'Jump to Last Modified Cell'
+          })
+        );
+      }
+    });
+
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
         .then(([_, setting]) => {
@@ -1800,6 +1824,50 @@ function activateNotebookHandler(
 
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
+
+  // Track the last modified cell
+  let lastModifiedCell: Cell | null = null;
+
+  tracker.currentChanged.connect((sender, notebookPanel) => {
+    if (!notebookPanel) {
+      return;
+    }
+    const notebook = notebookPanel.content;
+
+    const attachListener = (cell: Cell) => {
+      cell.model.contentChanged.connect(() => {
+        lastModifiedCell = cell;
+        commands.notifyCommandChanged(CommandIDs.jumpToLastModified);
+      });
+    };
+
+    notebook.widgets.forEach(attachListener);
+
+    notebook.model?.cells.changed.connect((sender, args) => {
+      args.newValues.forEach(model => {
+        const cellWidget = notebook.widgets.find(w => w.model.id === model.id);
+        if (cellWidget) {
+          attachListener(cellWidget);
+        }
+      });
+    });
+  });
+
+  commands.addCommand(CommandIDs.jumpToLastModified, {
+    label: trans.__('Jump to Last Modified Cell'),
+    icon: editIcon,
+    execute: () => {
+      if (lastModifiedCell && tracker.currentWidget) {
+        tracker.currentWidget.content.scrollToCell(lastModifiedCell);
+        const index =
+          tracker.currentWidget.content.widgets.indexOf(lastModifiedCell);
+        if (index !== -1) {
+          tracker.currentWidget.content.activeCellIndex = index;
+        }
+      }
+    },
+    isEnabled: () => lastModifiedCell !== null
+  });
 
   // Use the router to deal with hash navigation
   function onRouted(router: IRouter, location: IRouter.ILocation): void {
@@ -4618,7 +4686,8 @@ function populatePalette(
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
-    CommandIDs.virtualScrollbar
+    CommandIDs.virtualScrollbar,
+    CommandIDs.jumpToLastModified
   ].forEach(command => {
     palette.addItem({ command, category });
   });
