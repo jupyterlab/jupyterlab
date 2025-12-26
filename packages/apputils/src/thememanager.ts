@@ -25,6 +25,7 @@ const REQUEST_INTERVAL = 75;
 const REQUEST_THRESHOLD = 20;
 
 type Dict<T> = { [key: string]: T };
+type ThemedProp<T> = { light: T; dark: T };
 
 /**
  * A class that provides theme management.
@@ -139,8 +140,13 @@ export class ThemeManager implements IThemeManager {
    * @returns value - The current value of the Jupyterlab CSS variable
    */
   getCSS(key: string): string {
+    let val = this._overrides[key];
+    if (val && typeof val !== 'string') {
+      const isLight = this._current ? this.isLight(this._current) : true;
+      val = isLight ? val.light : val.dark;
+    }
     return (
-      this._overrides[key] ??
+      val ??
       getComputedStyle(document.documentElement).getPropertyValue(`--jp-${key}`)
     );
   }
@@ -170,9 +176,6 @@ export class ThemeManager implements IThemeManager {
 
       document.body.appendChild(link);
       links.push(link);
-
-      // add any css overrides to document
-      this.loadCSSOverrides();
     });
   }
 
@@ -182,11 +185,16 @@ export class ThemeManager implements IThemeManager {
    */
   loadCSSOverrides(): void {
     const newOverrides =
-      (this._settings.user['overrides'] as Dict<string>) ?? {};
+      (this._settings.user['overrides'] as Dict<string | ThemedProp<string>>) ??
+      {};
 
     // iterate over the union of current and new CSS override keys
     Object.keys({ ...this._overrides, ...newOverrides }).forEach(key => {
-      const val = newOverrides[key];
+      let val = newOverrides[key];
+      if (val && typeof val !== 'string') {
+        const isLight = this._current ? this.isLight(this._current) : true;
+        val = isLight ? val.light : val.dark;
+      }
 
       if (val && this.validateCSS(key, val)) {
         // validation succeeded, set the override
@@ -396,6 +404,9 @@ export class ThemeManager implements IThemeManager {
         case 'ui-font-size1':
           description = 'font-size';
           break;
+        case 'rendermime-error-background':
+          description = 'background';
+          break;
         default:
           description = overidesSchema[key].description;
           break;
@@ -519,6 +530,10 @@ export class ThemeManager implements IThemeManager {
     return Promise.all([old, themes[theme].load()])
       .then(() => {
         this._current = theme;
+
+        // Load the overrides settings
+        this.loadCSSOverrides();
+
         this._themeChanged.emit({
           name: 'theme',
           oldValue: current,
@@ -560,7 +575,7 @@ export class ThemeManager implements IThemeManager {
   private _current: string | null = null;
   private _host: Widget;
   private _links: HTMLLinkElement[] = [];
-  private _overrides: Dict<string> = {};
+  private _overrides: Dict<string | ThemedProp<string>> = {};
   private _overrideProps: Dict<string> = {};
   private _outstanding: Promise<void> | null = null;
   private _pending = 0;

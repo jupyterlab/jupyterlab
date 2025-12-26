@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+const rspack = require('@rspack/core');
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
@@ -12,19 +13,24 @@ module.exports = {
     filename: 'bundle.js'
   },
   bail: true,
-  mode: 'development',
+  devtool: 'cheap-source-map',
+  mode: 'production',
   module: {
     rules: [
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.raw\.css$/, type: 'asset/source' },
       { test: /\.html$/, type: 'asset/resource' },
-      { test: /\.js.map$/, type: 'asset/resource' },
+      { test: /\.md$/, type: 'asset/source' },
       {
         // In .css files, svg is loaded as a data URI.
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.css$/,
-        type: 'asset/inline',
+        type: 'asset',
         generator: {
-          dataUrl: content => miniSVGDataURI(content.toString())
+          dataUrl: {
+            content: content => miniSVGDataURI(content.content),
+            mimetype: 'image/svg+xml'
+          }
         }
       },
       {
@@ -33,7 +39,17 @@ module.exports = {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         issuer: /\.js$/,
         type: 'asset/source'
+      },
+      {
+        test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        type: 'asset'
       }
     ]
-  }
+  },
+  plugins: [
+    new rspack.DefinePlugin({
+      // Needed for various packages using cwd(), like the path polyfill
+      process: { cwd: () => '/', env: {} }
+    })
+  ]
 };

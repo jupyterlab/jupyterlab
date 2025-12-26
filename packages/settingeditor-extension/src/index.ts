@@ -51,6 +51,8 @@ import {
   ImportSettingsDialogBodyWidget,
   ImportSettingsWidget
 } from './importSettingsWidget';
+import { history, historyKeymap } from '@codemirror/commands';
+import { keymap } from '@codemirror/view';
 
 const HARDCODED_TO_SKIP = [
   '@jupyterlab/application-extension:context-menu',
@@ -359,7 +361,17 @@ function activateJSON(
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
-        editorFactory,
+        editorFactory: options => {
+          const cmEditor = editorFactory({
+            ...options,
+            extensions: [
+              ...(options.extensions ?? []),
+              history(), // Adds the CM6 undo/redo history extension
+              keymap.of(historyKeymap) // bind Ctrl+Z / Ctrl+Shift+Z
+            ]
+          });
+          return cmEditor;
+        },
         key,
         registry,
         rendermime,
