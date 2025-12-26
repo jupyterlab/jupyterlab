@@ -152,6 +152,32 @@ from the context menu:
 </div>
 ```
 
+## File creation behavior with multiple drives
+
+JupyterLab can be configured with multiple drives, which may be provided by the server
+or by extensions.
+
+When creating a new file or notebook, JupyterLab determines the target drive based on
+the current context:
+
+- **File Browser**:  
+  New files created via right-click or toolbar actions are created in the currently
+  active directory and drive.
+
+- **File → New** and **Launcher**:  
+  New items are created in the directory currently selected in the File Browser.  
+  If no directory is selected, the file is created in the default drive.
+
+- **Command Palette**:  
+  Commands that create new files rely on the current File Browser context to determine
+  the target directory and drive.
+
+Currently, JupyterLab does not provide an explicit drive selector when creating new files.
+The active directory and drive are inferred from the File Browser state.
+
+Extensions may register custom drives to support additional storage backends.
+
+
 ## Uploading and Downloading
 
 (file-upload)=
