@@ -415,7 +415,8 @@ export class ShortcutUI
             newShortcutUtils={{
               searchQuery: this.state.searchQuery,
               updateCommand: this._newShortcutItem.updateCommand,
-              saveShortcut: this.saveNewShortcut
+              saveShortcut: this.saveNewShortcut,
+              hideAddCommandRow: this.toggleAddCommandRow
             }}
           />
         )}
