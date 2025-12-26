@@ -277,7 +277,6 @@ function createApp(manager: ServiceManager.IManager): void {
   window.addEventListener('resize', () => {
     panel.update();
   });
-
   setupCommands(commands, palette, nbWidget, handler, sessionContextDialogs);
 
   console.debug('Example started!');

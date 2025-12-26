@@ -36,6 +36,7 @@ import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
@@ -130,13 +131,18 @@ export namespace ToolbarItems {
    */
   export function createCutButton(
     panel: NotebookPanel,
-    translator?: ITranslator
+    translator?: ITranslator,
+    settings?: ISettingRegistry.ISettings
   ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: cutIcon,
-      onClick: async (): Promise<void> => {
-        await NotebookActions.cutToSystemClipboard(panel.content);
+      onClick: async () => {
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          await NotebookActions.cutToSystemClipboard(panel.content);
+        } else {
+          NotebookActions.cut(panel.content);
+        }
       },
       tooltip: trans.__('Cut the selected cells')
     });
@@ -150,13 +156,18 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(
     panel: NotebookPanel,
-    translator?: ITranslator
+    translator?: ITranslator,
+    settings?: ISettingRegistry.ISettings
   ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: copyIcon,
-      onClick: async (): Promise<void> => {
-        await NotebookActions.copyToSystemClipboard(panel.content);
+      onClick: async () => {
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          await NotebookActions.copyToSystemClipboard(panel.content);
+        } else {
+          NotebookActions.copy(panel.content);
+        }
       },
       tooltip: trans.__('Copy the selected cells')
     });
@@ -170,13 +181,18 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(
     panel: NotebookPanel,
-    translator?: ITranslator
+    translator?: ITranslator,
+    settings?: ISettingRegistry.ISettings
   ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: pasteIcon,
-      onClick: async (): Promise<void> => {
-        await NotebookActions.pasteFromSystemClipboard(panel.content);
+      onClick: async () => {
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          await NotebookActions.pasteFromSystemClipboard(panel.content);
+        } else {
+          NotebookActions.paste(panel.content);
+        }
       },
       tooltip: trans.__('Paste cells from the clipboard')
     });
@@ -265,14 +281,15 @@ export namespace ToolbarItems {
   export function getDefaultItems(
     panel: NotebookPanel,
     sessionDialogs?: ISessionContextDialogs,
-    translator?: ITranslator
+    translator?: ITranslator,
+    settings?: ISettingRegistry.ISettings
   ): DocumentRegistry.IToolbarItem[] {
     return [
       { name: 'save', widget: createSaveButton(panel, translator) },
       { name: 'insert', widget: createInsertButton(panel, translator) },
-      { name: 'cut', widget: createCutButton(panel, translator) },
-      { name: 'copy', widget: createCopyButton(panel, translator) },
-      { name: 'paste', widget: createPasteButton(panel, translator) },
+      { name: 'cut', widget: createCutButton(panel, translator, settings) },
+      { name: 'copy', widget: createCopyButton(panel, translator, settings) },
+      { name: 'paste', widget: createPasteButton(panel, translator, settings) },
       {
         name: 'run',
         widget: createRunButton(panel, sessionDialogs, translator)

@@ -3429,6 +3429,7 @@ __metadata:
     "@jupyterlab/notebook": ^4.6.0-alpha.0
     "@jupyterlab/rendermime": ^4.6.0-alpha.0
     "@jupyterlab/services": ^7.6.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.6.0-alpha.0
     "@jupyterlab/theme-light-extension": ^4.6.0-alpha.0
     "@jupyterlab/translation": ^4.6.0-alpha.0
     "@jupyterlab/ui-components": ^4.6.0-alpha.0
