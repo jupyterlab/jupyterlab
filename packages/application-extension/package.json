@@ -37,6 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@jupyterlab/application": "^4.6.0-alpha.4",
     "@jupyterlab/apputils": "^4.7.0-alpha.4",
     "@jupyterlab/coreutils": "^6.6.0-alpha.4",
@@ -46,6 +47,21 @@
     "@jupyterlab/statusbar": "^4.6.0-alpha.4",
     "@jupyterlab/translation": "^4.6.0-alpha.4",
     "@jupyterlab/ui-components": "^4.6.0-alpha.4",
+=======
+    "@jupyterlab/application": "^4.6.0-alpha.0",
+    "@jupyterlab/apputils": "^4.7.0-alpha.0",
+    "@jupyterlab/console": "^4.6.0-alpha.0",
+    "@jupyterlab/coreutils": "^6.6.0-alpha.0",
+    "@jupyterlab/docregistry": "^4.6.0-alpha.0",
+    "@jupyterlab/fileeditor": "^4.6.0-alpha.0",
+    "@jupyterlab/notebook": "^4.6.0-alpha.0",
+    "@jupyterlab/property-inspector": "^4.6.0-alpha.0",
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
+    "@jupyterlab/statedb": "^4.6.0-alpha.0",
+    "@jupyterlab/statusbar": "^4.6.0-alpha.0",
+    "@jupyterlab/translation": "^4.6.0-alpha.0",
+    "@jupyterlab/ui-components": "^4.6.0-alpha.0",
+>>>>>>> 0d580cb5eb (dependencies)
     "@lumino/algorithm": "^2.0.4",
     "@lumino/commands": "^2.3.3",
     "@lumino/coreutils": "^2.2.2",
