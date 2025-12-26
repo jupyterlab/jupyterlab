@@ -210,6 +210,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
                   }}
                   tagName="div"
                   translator={translator ?? nullTranslator}
+                  buttonStyle="icons"
                 />
               </div>
             );

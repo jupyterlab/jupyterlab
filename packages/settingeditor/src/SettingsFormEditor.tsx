@@ -235,6 +235,7 @@ export class SettingsFormEditor extends React.Component<
           experimental_defaultFormStateBehavior={{
             emptyObjectFields: 'populateRequiredDefaults'
           }}
+          buttonStyle="icons"
         />
       </>
     );
