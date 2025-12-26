@@ -130,8 +130,11 @@
   top: 4px;
 }
 
-.jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
+.jp-Shortcuts-Cell jp-button {
   vertical-align: inherit;
+}
+
+.jp-Shortcuts-Cell jp-button.jp-Shortcuts-CustomOptions {
   margin-left: 10px;
 }
 
