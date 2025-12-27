@@ -1060,6 +1060,47 @@ describe('rendermime/factories', () => {
           '<pre>URL <a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a> File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
         );
       });
+
+      it('should prepend the error message only if the traceback is longer than 10 lines', async () => {
+        const f = errorRendererFactory;
+        const mimeType = 'application/vnd.jupyter.stderr';
+
+        // Short error (exactly 10 lines) - Should NOT prepend
+        const shortTrace =
+          Array(10).fill('line').join('\n') + '\nShortError: message';
+        const shortModel = createModel(mimeType, shortTrace);
+        const shortWidget = f.createRenderer({ mimeType, ...options });
+        await shortWidget.renderModel(shortModel);
+        // Should be exactly as original
+        expect(shortWidget.node.querySelector('pre')!.textContent).toBe(
+          shortTrace
+        );
+
+        // 2. Test case: Long error (11 lines) - Should prepend
+        const longTraceLines = [
+          'Traceback (most recent call last):',
+          '  File "test.py", line 1, in <module>',
+          '    func1()',
+          '  File "test.py", line 2, in func1',
+          '    func2()',
+          '  File "test.py", line 3, in func2',
+          '    func3()',
+          '  File "test.py", line 4, in func3',
+          '    func4()',
+          '  File "test.py", line 5, in func4',
+          '    func5()',
+          'LongError: Something went wrong'
+        ];
+        const longTrace = longTraceLines.join('\n');
+        const longModel = createModel(mimeType, longTrace);
+        const longWidget = f.createRenderer({ mimeType, ...options });
+        await longWidget.renderModel(longModel);
+
+        const expectedOutput = `LongError: Something went wrong\n${longTrace}`;
+        expect(longWidget.node.querySelector('pre')!.textContent).toBe(
+          expectedOutput
+        );
+      });
     });
   });
 });
