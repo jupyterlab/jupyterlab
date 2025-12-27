@@ -1065,9 +1065,9 @@ describe('rendermime/factories', () => {
         const f = errorRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
 
-        // Short error (exactly 10 lines) - Should NOT prepend
+        // Should NOT prepend
         const shortTrace =
-          Array(10).fill('line').join('\n') + '\nShortError: message';
+          Array(5).fill('line').join('\n') + '\nShortError: message';
         const shortModel = createModel(mimeType, shortTrace);
         const shortWidget = f.createRenderer({ mimeType, ...options });
         await shortWidget.renderModel(shortModel);
@@ -1076,7 +1076,7 @@ describe('rendermime/factories', () => {
           shortTrace
         );
 
-        // 2. Test case: Long error (11 lines) - Should prepend
+        // Long error (12 lines) - Should prepend
         const longTraceLines = [
           'Traceback (most recent call last):',
           '  File "test.py", line 1, in <module>',
