@@ -1036,12 +1036,33 @@ export async function renderError(
   options: renderError.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, linkHandler, resolver } = options;
+  const { host, linkHandler, resolver, source } = options;
 
-  renderTextual(options, {
-    checkWeb: true,
-    checkPaths: true
-  });
+  let processedSource = source;
+
+  if (source) {
+    // Split the source into lines and remove any trailing empty lines
+    const lines = source.trim().split('\n');
+
+    if (lines.length > 1) {
+      // The last line is the error message
+      const lastLine = lines[lines.length - 1];
+
+      // Prepend the error message at the very top, followed by a newline.
+      processedSource = `${lastLine}\n${source}`;
+    }
+  }
+
+  renderTextual(
+    {
+      ...options,
+      source: processedSource
+    },
+    {
+      checkWeb: true,
+      checkPaths: true
+    }
+  );
 
   // Patch the paths if a resolver is available.
   if (resolver) {
