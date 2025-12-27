@@ -1042,14 +1042,21 @@ export async function renderError(
 
   if (source) {
     // Split the source into lines and remove any trailing empty lines
-    const lines = source.trim().split('\n');
+    const lines = source.split('\n');
 
-    if (lines.length > 1) {
-      // The last line is the error message
-      const lastLine = lines[lines.length - 1];
+    if (lines.length > 10) {
+      // Find the last non-empty line
+      let lastLine = '';
+      for (let i = lines.length - 1; i >= 0; i--) {
+        if (lines[i].trim()) {
+          lastLine = lines[i];
+          break;
+        }
+      }
 
-      // Prepend the error message at the very top, followed by a newline.
-      processedSource = `${lastLine}\n${source}`;
+      if (lastLine) {
+        processedSource = `${lastLine}\n${source}`;
+      }
     }
   }
 
