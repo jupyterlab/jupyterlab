@@ -18,7 +18,7 @@ test.describe('Notebook Footer Responsive Alignment', () => {
     await page.setViewportSize({ width: 600, height: 800 });
 
     const footer = page.locator('.jp-Notebook-footer');
-    const panel = page.locator('.jp-WindowedPanel-inner');
+    const panel = page.locator('.jp-WindowedPanel-outer');
 
     // Hover to make the footer visible
     await footer.hover();
