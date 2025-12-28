@@ -95,7 +95,7 @@ test.describe('Cell Toolbar Delete', () => {
       .first()
       .click();
 
-    // 3. Verify dialog appears
+    // Verify dialog appears
     const dialog = page.locator('.jp-Dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText(
@@ -104,7 +104,7 @@ test.describe('Cell Toolbar Delete', () => {
 
     await dialog.locator('button.jp-mod-reject').click();
 
-    // 5. Verify no deletion occurred
+    // Verify no deletion occurred
     await expect(dialog).toBeHidden();
     expect(await page.notebook.getCellCount()).toBe(2);
     expect(await page.notebook.getCellTextInput(0)).toContain('cell-A');
