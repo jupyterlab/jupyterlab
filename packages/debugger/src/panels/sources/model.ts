@@ -28,27 +28,31 @@ export class SourcesModel implements IDebugger.Model.ISources {
     }
 
     options.currentFrameChanged.connect(async (_, frame) => {
-      if (frame) {
-        const displayPath = this.getDisplayName(frame);
-
-        const source = await options.getSource({
-          sourceReference: 0,
-          path: frame?.source?.path
-        });
-
-        const { content, mimeType } = source;
-        const editorMimeType =
-          mimeType ||
-          this._mimeTypeService.getMimeTypeByFilePath(frame.source?.path ?? '');
-
-        this._currentFrame = frame;
-
-        this.currentSource = {
-          content: content,
-          mimeType: editorMimeType,
-          path: displayPath
-        };
+      if (!frame) {
+        this._currentFrame = null;
+        this.currentSource = null;
+        return;
       }
+
+      const displayPath = this.getDisplayName(frame);
+
+      const source = await options.getSource({
+        sourceReference: 0,
+        path: frame?.source?.path
+      });
+
+      const { content, mimeType } = source;
+      const editorMimeType =
+        mimeType ||
+        this._mimeTypeService.getMimeTypeByFilePath(frame.source?.path ?? '');
+
+      this._currentFrame = frame;
+
+      this.currentSource = {
+        content: content,
+        mimeType: editorMimeType,
+        path: displayPath
+      };
     });
   }
 
