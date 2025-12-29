@@ -1936,7 +1936,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function selectNextModifiedCell(notebook: Notebook): void {
-        const cell = notebook.popNextModifiedCell();
+    const cell = notebook.popNextModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
       notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
       notebook.scrollToCell(cell);

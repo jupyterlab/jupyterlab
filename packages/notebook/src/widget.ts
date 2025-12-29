@@ -1692,7 +1692,6 @@ export class Notebook extends StaticNotebook {
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
-    this.modelChanged.connect(this._onNotebookModelChanged, this);
 
     this.addFooter();
   }
@@ -3440,36 +3439,28 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle changes to the notebook model.
-   */
-  private _onNotebookModelChanged(): void {
-    if (this.model) {
-      const cells = this.model.cells;
-      for (let i = 0; i < cells.length; i++) {
-        cells.get(i).contentChanged.connect(this._onCellContentChanged, this);
-      }
-    }
-  }
-
-  /**
    * Handle a cell content change.
    */
   private _onCellContentChanged(sender: ICellModel): void {
     const id = sender.id;
-    // Remove if already present to avoid duplicates
-    const idx = this._lastModifiedCellBackStack.lastIndexOf(id);
+    const backStack = this._lastModifiedCellBackStack;
+
+    // Do nothing if the last modified cell is the same as this one
+    if (backStack.length > 0 && backStack[backStack.length - 1] === id) {
+      return;
+    }
+
+    // Remove if already present elsewhere in the stack to move it to the top
+    const idx = backStack.lastIndexOf(id);
     if (idx !== -1) {
-      this._lastModifiedCellBackStack.splice(idx, 1);
+      backStack.splice(idx, 1);
     }
-    this._lastModifiedCellBackStack.push(id);
-    // Enforce stack size limit
-    if (this._lastModifiedCellBackStack.length > Notebook.MAX_MODIFIED_STACK) {
-      this._lastModifiedCellBackStack.splice(
-        0,
-        this._lastModifiedCellBackStack.length - Notebook.MAX_MODIFIED_STACK
-      );
+    backStack.push(id);
+    if (backStack.length > Notebook.MAX_MODIFIED_STACK) {
+      backStack.shift();
     }
-    // Clear forward stack after new modification
+
+    // Clear forward stack when a new cell is modified
     this._lastModifiedCellForwardStack = [];
   }
 
@@ -3477,30 +3468,44 @@ export class Notebook extends StaticNotebook {
    * Pop and return the top cell from the back stack, pushing to forward stack.
    */
   popLastModifiedCell(): Cell | null {
+    const activeId = this.activeCell?.model.id;
+
     while (this._lastModifiedCellBackStack.length) {
       const id = this._lastModifiedCellBackStack.pop()!;
-      this._lastModifiedCellForwardStack.push(id);
-      const cell = this.widgets.find(c => c.model.id === id) || null;
+
+      // Skip active cell
+      if (id === activeId) {
+        this._lastModifiedCellForwardStack.push(id);
+        continue;
+      }
+
+      const cell = this.widgets.find(c => c.model.id === id);
       if (cell && !cell.isDisposed) {
+        this._lastModifiedCellForwardStack.push(id);
         return cell;
       }
-      // If cell is gone, continue to next
     }
     return null;
   }
-
   /**
    * Pop and return the top cell from the forward stack, pushing to back stack.
    */
   popNextModifiedCell(): Cell | null {
+    const activeId = this.activeCell?.model.id;
+
     while (this._lastModifiedCellForwardStack.length) {
       const id = this._lastModifiedCellForwardStack.pop()!;
-      this._lastModifiedCellBackStack.push(id);
-      const cell = this.widgets.find(c => c.model.id === id) || null;
+
+      if (id === activeId) {
+        this._lastModifiedCellBackStack.push(id);
+        continue;
+      }
+
+      const cell = this.widgets.find(c => c.model.id === id);
       if (cell && !cell.isDisposed) {
+        this._lastModifiedCellBackStack.push(id);
         return cell;
       }
-      // If cell is gone, continue to next
     }
     return null;
   }
