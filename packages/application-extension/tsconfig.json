@@ -32,6 +32,18 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../console"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
     }
   ]
 }
