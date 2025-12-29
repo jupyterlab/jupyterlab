@@ -13,7 +13,19 @@
       "path": "../apputils"
     },
     {
+      "path": "../console"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../notebook"
     },
     {
       "path": "../property-inspector"
@@ -32,18 +44,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../console"
-    },
-    {
-      "path": "../docregistry"
-    },
-    {
-      "path": "../fileeditor"
-    },
-    {
-      "path": "../notebook"
     }
   ]
 }
