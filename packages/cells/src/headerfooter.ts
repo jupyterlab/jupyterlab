@@ -53,14 +53,6 @@ export interface ICellFooter extends Widget {
   readonly position: 'input' | 'output';
 }
 
-export interface ICellInputFooter extends ICellFooter {
-  position: 'input';
-}
-
-export interface ICellOutputFooter extends ICellFooter {
-  position: 'output';
-}
-
 /**
  * Default implementation of a cell footer.
  */

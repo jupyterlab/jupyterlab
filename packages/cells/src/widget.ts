@@ -627,9 +627,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       (inputWrapper.layout as PanelLayout).addWidget(this._inputPlaceholder!);
     }
 
-    // Footer
-    const footer = this.contentFactory.createCellFooter();
-    (this.layout as PanelLayout).addWidget(footer);
+    // Input Footer
+    const inputFooter = this.contentFactory.createCellFooter('input');
+    (this.layout as PanelLayout).addWidget(inputFooter);
+
+    // Output Footer
+    const outputFooter = this.contentFactory.createCellFooter('output');
+    (this.layout as PanelLayout).addWidget(outputFooter);
   }
 
   /**
@@ -917,9 +921,10 @@ export namespace Cell {
 
     /**
      * Create a new cell footer for the parent widget.
+     * The default position is below the output area of the cell.
      */
-    createCellFooter(): ICellFooter {
-      return new CellFooter();
+    createCellFooter(position: 'input' | 'output' = 'output'): ICellFooter {
+      return new CellFooter(position);
     }
 
     /**
