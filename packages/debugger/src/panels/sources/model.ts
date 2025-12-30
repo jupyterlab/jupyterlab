@@ -42,9 +42,10 @@ export class SourcesModel implements IDebugger.Model.ISources {
       });
 
       const { content, mimeType } = source;
+
       const editorMimeType =
         mimeType ||
-        this._mimeTypeService.getMimeTypeByFilePath(frame.source?.path ?? '');
+        this._mimeTypeService?.getMimeTypeByFilePath(frame.source?.path ?? '');
 
       this._currentFrame = frame;
 
