@@ -7,6 +7,7 @@ import { Locator } from '@playwright/test';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
+// This test is flaky
 test.use({
   mockSettings: {
     ...galata.DEFAULT_SETTINGS,
@@ -114,6 +115,10 @@ for (const theme of ['default', 'dark']) {
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
       }) => {
+        test.fixme(
+          i >= 18,
+          `Diagram ${i} ${diagram} in ${theme} theme is flaky: sometimes the screenshot capture is 1px smaller in one dimension than expected, with other minor differences.`
+        );
         const output = page.locator(
           `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`
         );

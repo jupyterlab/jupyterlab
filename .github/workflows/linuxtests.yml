@@ -15,7 +15,7 @@ jobs:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
         # This will be used by the base setup action
-        python-version: ["3.9", "3.13"]
+        python-version: ["3.10", "3.14"]
         include:
           - group: examples
             upload-output: true
@@ -23,30 +23,30 @@ jobs:
             upload-output: true
         exclude:
           - group: integrity
-            python-version: "3.9"
+            python-version: "3.10"
           - group: integrity2
-            python-version: "3.9"
+            python-version: "3.10"
           - group: integrity3
-            python-version: "3.9"
+            python-version: "3.10"
           - group: release_test
-            python-version: "3.9"
+            python-version: "3.10"
           - group: docs
-            python-version: "3.9"
+            python-version: "3.10"
           - group: usage
-            python-version: "3.9"
+            python-version: "3.10"
           - group: usage2
-            python-version: "3.9"
+            python-version: "3.10"
           - group: nonode
-            python-version: "3.9"
+            python-version: "3.10"
           - group: lint
-            python-version: "3.9"
+            python-version: "3.10"
           - group: examples
-            python-version: "3.9"
+            python-version: "3.10"
           - group: splice_source
-            python-version: "3.9"
+            python-version: "3.10"
       fail-fast: false
     timeout-minutes: 45
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
-          python_version: "3.9"
+          python_version: "3.10"
           dependency_type: minimum
       - name: Install dependencies
         run: |

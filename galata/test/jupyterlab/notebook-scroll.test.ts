@@ -440,6 +440,7 @@ test.describe('Jump to execution button', () => {
     await page.notebook.openByPath(`${tmpPath}/${longOutputsNb}`);
     await page.notebook.activate(longOutputsNb);
   });
+
   test('should show jump button after first execution and scroll to executing cells', async ({
     page
   }) => {
@@ -466,6 +467,7 @@ test.describe('Jump to execution button', () => {
     await expect(jumpButton).toBeVisible();
 
     // Click and scroll to the first cell (currently executing)
+    // TODO: this jumpButton.click fails with a timeout
     await jumpButton.click();
     const firstCell = await page.notebook.getCellLocator(0);
     await firstCell?.waitFor({ state: 'visible', timeout: 1000 });

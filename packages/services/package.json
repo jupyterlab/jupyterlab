@@ -39,7 +39,7 @@
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "test": "jest -i",
-    "test:cov": "jest -i --collect-coverage",
+    "test:cov": "jest -i --verbose --collect-coverage",
     "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.6.0-alpha.0",
-    "@rspack/cli": "^1.6.4",
+    "@rspack/cli": "^1.7.0-beta.1",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
     "jest": "^29.2.0",
