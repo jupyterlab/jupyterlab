@@ -398,6 +398,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.zoomInWidget, {
       label: trans.__('Zoom In Active Widget'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         const widget = getCurrentWidget();
         if (widget) {
@@ -408,6 +414,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.zoomOutWidget, {
       label: trans.__('Zoom Out Active Widget'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         const widget = getCurrentWidget();
         if (widget) {
@@ -418,6 +430,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.resetWidgetZoom, {
       label: trans.__('Reset Widget Zoom'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         const widget = getCurrentWidget();
         if (widget) {
@@ -821,7 +839,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
-        CommandIDs.resetLayout
+        CommandIDs.resetLayout,
+        CommandIDs.zoomInWidget,
+        CommandIDs.zoomOutWidget,
+        CommandIDs.resetWidgetZoom
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
