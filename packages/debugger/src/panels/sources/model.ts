@@ -139,7 +139,7 @@ export class SourcesModel implements IDebugger.Model.ISources {
     IDebugger.Source | null
   >(this);
   private _displayRegistry: IDebuggerDisplayRegistry;
-  private _mimeTypeService: IEditorMimeTypeService;
+  private _mimeTypeService: IEditorMimeTypeService | null = null;
   private _currentFrame: IDebugger.IStackFrame | null;
 }
 
