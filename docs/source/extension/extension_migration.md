@@ -18,9 +18,9 @@ However, if an extension uses the experimental {ref}`webpackConfig` option, it
 may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
 Webpack config to Rspack.
 
-### Deprecation
+### API Updates
 
-`currentFrameChanged` signal in `IDebugger.Model.ISources` interface will be deprecated starting from 4.6.0 and will be removed in 5.0.
+- The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
 
 ## JupyterLab 4.5.0 to 4.5.1
 
