@@ -1092,6 +1092,6 @@ export namespace DebuggerService {
     /**
      * The mimetype service.
      */
-    mimeTypeService: IEditorMimeTypeService | null;
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

@@ -193,8 +193,8 @@ export namespace DebuggerModel {
      */
     displayRegistry?: IDebuggerDisplayRegistry | null;
     /**
-     * The editor services.
+     * The mimetype services.
      */
-    mimeTypeService: IEditorMimeTypeService | null;
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

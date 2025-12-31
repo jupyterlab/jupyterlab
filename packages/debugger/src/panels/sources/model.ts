@@ -174,8 +174,8 @@ export namespace SourcesModel {
 
     displayRegistry?: IDebuggerDisplayRegistry;
     /**
-     * The mimeTypeService.
+     * The mimetype service.
      */
-    mimeTypeService: IEditorMimeTypeService | null;
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }
