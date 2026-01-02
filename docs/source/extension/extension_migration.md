@@ -407,6 +407,29 @@ For more details about the new file structure and packaging of the extension, ch
 You will need to modify the code of your extension if it is impacted by the API changes mentioned below.
 :::
 
+### Updating FileEditor text handling
+
+In JupyterLab 3.x, extension authors could update the contents of a
+`FileEditor` by mutating the editor model directly, for example:
+
+```ts
+widget.content.model.value.text = 'something';
+```
+
+In JupyterLab 4.x this pattern no longer works. Editor content is now
+managed through a shared model. To update the editor source, use one of
+the following APIs instead:
+
+```ts
+widget.content.model.sharedModel.setSource('foo');
+// or
+widget.content.model.sharedModel.updateSource(0, 0, 'foo');
+```
+To retrieve the current editor contents, use:
+```ts
+widget.content.model.sharedModel.getSource();
+```
+
 ### jlpm
 
 The utility `jlpm` uses Yarn 3 (previously Yarn 1). This will require updating your
