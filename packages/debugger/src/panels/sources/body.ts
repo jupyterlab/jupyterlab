@@ -13,6 +13,7 @@ import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 /**
  * The body for a Sources Panel.
  */
@@ -24,7 +25,6 @@ export class SourcesBody extends Widget {
    */
   constructor(options: SourcesBody.IOptions) {
     super();
-    console.log('You are in the beginning of the constructor');
     this._model = options.model;
     this._debuggerService = options.service;
 
@@ -98,13 +98,22 @@ export class SourcesBody extends Widget {
     });
 
     requestAnimationFrame(() => {
-      if (this._model.currentFrame) {
-        EditorHandler.showCurrentLine(
-          this._editor.editor,
-          this._model.currentFrame.line,
-          'start'
-        );
+      const frame = this._model.currentFrame;
+      const editor = this._editor.editor;
+
+      if (!frame || !editor) {
+        return;
       }
+
+      const doc = (editor as CodeMirrorEditor).doc;
+      const lineCount = doc.lines;
+
+      if (frame.line < 1 || frame.line > lineCount) {
+        // Line is not in the document
+        return;
+      }
+
+      EditorHandler.showCurrentLine(editor, frame.line, 'start');
     });
 
     this._editor.show();
