@@ -40,22 +40,25 @@ export class SettingsEditor extends SplitPanel {
       // Filters out a couple of plugins that take too long to load in the new settings editor.
       toSkip: options.toSkip
     });
+    this.toggleCompact = this.toggleCompact.bind(this);
     this._list = new PluginList({
       registry: options.registry,
       translator: this.translator,
       query: options.query,
-      model: this._listModel
+      model: this._listModel,
+      onToggle: this.toggleCompact
     });
     this._listModel.changed.connect(() => {
       this.update();
     });
     this.addWidget(this._list);
     this.setDirtyState = this.setDirtyState.bind(this);
+    this.addClass('jp-SettingsEditor');
 
     const settingsPanel = ReactWidget.create(
       <UseSignal signal={this._listModel.changed}>
         {() => (
-          <SettingsPanel
+        <SettingsPanel
             settings={[...Object.values(this._listModel.settings)]}
             editorRegistry={options.editorRegistry}
             handleSelectSignal={this._list.handleSelectSignal}
@@ -108,6 +111,50 @@ export class SettingsEditor extends SplitPanel {
     }
     this._saveStateChange.emit(dirty ? 'started' : 'completed');
   }
+
+  /**
+   * Toggle the side bar compact mode.
+   */
+  toggleCompact(): void {
+    const compactWidth = 36;
+    const node = this._list.node;
+    const wasCompact = node.classList.contains('jp-mod-compact');
+
+    if (!wasCompact) {
+      // Expanding -> Compacting
+      this._lastWidth = node.offsetWidth;
+      node.classList.add('jp-mod-compact');
+      this.addClass('jp-mod-compact');
+
+      // Enforce size for compact mode to prevent resizing
+      node.style.minWidth = `${compactWidth}px`;
+      node.style.maxWidth = `${compactWidth}px`;
+      node.style.width = `${compactWidth}px`;
+
+      const totalWidth = this.node.offsetWidth;
+      const fraction = compactWidth / totalWidth;
+      this.setRelativeSizes([fraction, 1 - fraction]);
+    } else {
+      // Compacting -> Expanding
+      node.classList.remove('jp-mod-compact');
+      this.removeClass('jp-mod-compact');
+
+      // Enforce min width in expanded mode
+      node.style.minWidth = '175px';
+      node.style.maxWidth = '';
+      node.style.width = '';
+
+      // Restore previous size or default
+      const totalWidth = this.node.offsetWidth;
+      const fraction = this._lastWidth
+        ? this._lastWidth / totalWidth
+        : 0.25;
+      this.setRelativeSizes([fraction, 1 - fraction]);
+    }
+    this.update();
+  }
+
+  private _lastWidth: number;
 
   /**
    * Updates the filter of the plugin list.

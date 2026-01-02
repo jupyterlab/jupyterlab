@@ -42,10 +42,14 @@
   background-color: var(--jp-border-color2);
 }
 
+.jp-SettingsEditor.jp-mod-compact > .lm-SplitPanel-handle {
+  pointer-events: none;
+}
+
 /** Plugin list **/
 
 .jp-PluginList {
-  min-width: 175px;
+  min-width: 36px;
   max-width: 275px;
 }
 
@@ -265,6 +269,48 @@
   background-color: var(--jp-warn-color-normal);
   border: 0;
   color: var(--jp-ui-inverse-font-color0);
+}
+
+.jp-PluginList-header-group {
+  display: flex;
+  flex-direction: row;
+}
+
+.jp-PluginList-toggle {
+  flex: 0 0 auto;
+  background-color: transparent;
+  border: 0;
+  margin-left: 4px;
+}
+
+/* Compact mode styles */
+.jp-PluginList.jp-mod-compact {
+  min-width: 36px !important;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-entry-label-text,
+.jp-PluginList.jp-mod-compact .jp-PluginList-header,
+.jp-PluginList.jp-mod-compact .jp-FilterBox {
+  display: none;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-header-group {
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-wrapper {
+  overflow-x: hidden;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-entry {
+  justify-content: center;
+  padding-left: 0;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-entry-icon,
+.jp-PluginList.jp-mod-compact .jp-PluginList-toggle {
+  margin: 0;
 }
 
 .jp-PluginEditor {
