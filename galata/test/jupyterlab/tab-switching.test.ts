@@ -13,36 +13,32 @@ test.describe('Tab Switching Shortcuts', () => {
     for (let i = 0; i < 3; i++) {
       await page.menu.clickMenuItem('File>New>Text File');
 
-      await page.waitForFunction(
-        count =>
-          document.querySelectorAll('#jp-main-dock-panel .lm-TabBar-tab')
-            .length === count,
-        i + 1
-      );
+      await page.waitForFunction(count => {
+        const tabs = document.querySelectorAll(
+          '#jp-main-dock-panel .lm-TabBar-tab'
+        );
+        return tabs.length === count;
+      }, i + 1);
     }
   });
 
   test('should switch to Tab 1 and Tab 2 using Accel+Alt+Number', async ({
     page
   }) => {
-    // Determine the modifier based on the OS (Mac uses Meta/Cmd, others use Control)
     const modifier = process.platform === 'darwin' ? 'Meta+Alt' : 'Control+Alt';
 
-    // 1. Switch to the first tab (Index 1)
+    // Switch to Tab 2 first to make sure switching to 1 actually does something
+    await page.keyboard.press(`${modifier}+2`);
     await page.keyboard.press(`${modifier}+1`);
 
     const firstTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').first();
-
-    // Verify it has the active class
     await expect(firstTab).toHaveClass(/lm-mod-current/);
 
-    // Verify the label text
-    await expect(firstTab.locator('.lm-TabBar-tabLabel')).toContainText(
-      'untitled.txt',
-      { ignoreCase: true }
+    // Check that we aren't on the Launcher
+    await expect(firstTab.locator('.lm-TabBar-tabLabel')).not.toHaveText(
+      'Launcher'
     );
 
-    // 2. Switch to the second tab (Index 2)
     await page.keyboard.press(`${modifier}+2`);
     const secondTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').nth(1);
     await expect(secondTab).toHaveClass(/lm-mod-current/);

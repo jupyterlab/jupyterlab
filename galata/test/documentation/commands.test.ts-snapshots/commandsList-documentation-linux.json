@@ -48,6 +48,35 @@
     }
   },
   {
+    "id": "application:activate-tab-index",
+    "label": "Activate Tab by Index",
+    "caption": "",
+    "shortcuts": [
+      "Accel Alt 1",
+      "Accel Alt 2",
+      "Accel Alt 3",
+      "Accel Alt 4",
+      "Accel Alt 5",
+      "Accel Alt 6",
+      "Accel Alt 7",
+      "Accel Alt 8",
+      "Accel Alt 9",
+      "Accel Alt 0"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "number",
+          "description": "The index of the tab to activate (1-9), or 0 for the last tab."
+        }
+      },
+      "required": [
+        "index"
+      ]
+    }
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
