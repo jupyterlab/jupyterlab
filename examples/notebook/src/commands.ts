@@ -77,7 +77,7 @@ export const setupCommands = (
   nbWidget: NotebookPanel,
   handler: CompletionHandler,
   sessionContextDialogs: ISessionContextDialogs,
-  settings: ISettingRegistry.ISettings
+  settings?: ISettingRegistry.ISettings
 ): void => {
   // Add commands.
   commands.addCommand(COMMAND_IDS.invoke, {
