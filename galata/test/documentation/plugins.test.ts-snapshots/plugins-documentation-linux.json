@@ -65,6 +65,7 @@
   "@jupyterlab/console-extension:tracker": "Provides the console widget tracker.",
   "@jupyterlab/csvviewer-extension:csv": "Adds viewer for CSV file types",
   "@jupyterlab/csvviewer-extension:tsv": "Adds viewer for TSV file types.",
+  "@jupyterlab/debugger-extension:completions": "Provides debugger-based completions.",
   "@jupyterlab/debugger-extension:config": "Provides the debugger configuration",
   "@jupyterlab/debugger-extension:consoles": "Add debugger capability to the consoles.",
   "@jupyterlab/debugger-extension:debug-console": "Debugger console to enable evaluation in debugger context.",
