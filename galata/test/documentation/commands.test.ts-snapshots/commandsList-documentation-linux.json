@@ -103,6 +103,7 @@
     "id": "application:reset-widget-zoom",
     "label": "Reset Widget Zoom",
     "caption": "",
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -290,6 +291,7 @@
     "id": "application:zoom-in-widget",
     "label": "Zoom In Active Widget",
     "caption": "",
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
@@ -299,6 +301,7 @@
     "id": "application:zoom-out-widget",
     "label": "Zoom Out Active Widget",
     "caption": "",
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
