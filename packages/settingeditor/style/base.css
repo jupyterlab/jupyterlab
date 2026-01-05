@@ -280,10 +280,9 @@
   flex: 0 0 auto;
   background-color: transparent;
   border: 0;
-  margin-left: 4px;
 }
 
-/* Compact mode styles */
+/** Compact mode styles **/
 .jp-PluginList.jp-mod-compact {
   min-width: 36px !important;
 }
@@ -296,11 +295,22 @@
 
 .jp-PluginList.jp-mod-compact .jp-PluginList-header-group {
   justify-content: center;
-  padding: 4px 0;
+  padding-left: 0;
 }
 
 .jp-PluginList.jp-mod-compact .jp-PluginList-wrapper {
   overflow-x: hidden;
+  scrollbar-width: thin;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-wrapper::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-wrapper::-webkit-scrollbar-thumb {
+  background: var(--jp-border-color2);
+  border-radius: 2px;
 }
 
 .jp-PluginList.jp-mod-compact .jp-PluginList-entry {
@@ -311,6 +321,10 @@
 .jp-PluginList.jp-mod-compact .jp-PluginList-entry-icon,
 .jp-PluginList.jp-mod-compact .jp-PluginList-toggle {
   margin: 0;
+}
+
+.jp-PluginList.jp-mod-compact .jp-PluginList-entry-label svg {
+  margin-left: 3px;
 }
 
 .jp-PluginEditor {
