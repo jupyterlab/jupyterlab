@@ -17,13 +17,13 @@ type ShowSourcesCase = {
 const showSourcesCases: ShowSourcesCase[] = [
   {
     name: 'showSourcesInMainArea = false',
-    screenshotSuffix: '-in-sidebar',
+    screenshotSuffix: '-sidebar',
     showSourcesInMainArea: false,
     expectSourcesPanel: true
   },
   {
     name: 'showSourcesInMainArea = true',
-    screenshotSuffix: '-in-main-area',
+    screenshotSuffix: '-main-area',
     showSourcesInMainArea: true,
     expectSourcesPanel: false
   }
@@ -176,6 +176,63 @@ for (const c of showSourcesCases) {
           showSourcesInMainArea: c.showSourcesInMainArea
         }
       }
+    });
+
+    test('Rich variables inspector', async ({ page, tmpPath }) => {
+      await page.contents.uploadFile(
+        path.resolve(__dirname, './notebooks/WidgetArch.png'),
+        `${tmpPath}/WidgetArch.png`
+      );
+
+      const notebookName = 'image_notebook.ipynb';
+      const globalVar = 'global_img';
+      const localVar = 'local_img';
+
+      await openNotebook(page, tmpPath, notebookName);
+
+      await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+      await page.debugger.switchOn();
+      await page.waitForCondition(() => page.debugger.isOpen());
+
+      await page.notebook.waitForCellGutter(0);
+      await page.notebook.clickCellGutter(0, 8);
+      await page.notebook.clickCellGutter(0, 11);
+
+      // don't add await, run will be blocked by the breakpoint
+      void page.notebook.run().then();
+      await page.debugger.waitForCallStack();
+
+      await page.debugger.waitForVariables();
+      const variablesPanel = await page.debugger.getVariablesPanelLocator();
+      expect
+        .soft(await variablesPanel.screenshot())
+        .toMatchSnapshot(
+          `image-debug-session-global-variables${c.screenshotSuffix}.png`
+        );
+
+      await page.debugger.renderVariable(globalVar);
+      let richVariableTab = await page.activity.getPanelLocator(
+        `${globalVar} - ${notebookName}`
+      );
+      expect
+        .soft(await richVariableTab?.screenshot())
+        .toMatchSnapshot(
+          `image-debug-session-global-rich-variables${c.screenshotSuffix}.png`
+        );
+
+      await page.activity.closePanel(`${globalVar} - ${notebookName}`);
+
+      await page.getByRole('button', { name: 'Continue (F9)' }).click();
+      await expect.soft(variablesPanel.getByRole('tree')).toHaveCount(1);
+      await page.debugger.waitForVariables();
+
+      await page.debugger.renderVariable(localVar);
+      richVariableTab = await page.activity.getPanelLocator(
+        `${localVar} - ${notebookName}`
+      );
+      expect(await richVariableTab?.screenshot()).toMatchSnapshot(
+        `image-debug-session-local-rich-variable${c.screenshotSuffix}.png`
+      );
     });
 
     test(`Start debug session (Script) ${c.name}`, async ({
