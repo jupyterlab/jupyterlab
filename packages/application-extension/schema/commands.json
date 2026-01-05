@@ -251,21 +251,6 @@
         "side": "right",
         "index": 9
       }
-    },
-    {
-      "command": "application:zoom-in-widget",
-      "keys": ["Accel Shift ="],
-      "selector": "body"
-    },
-    {
-      "command": "application:zoom-out-widget",
-      "keys": ["Accel Shift -"],
-      "selector": "body"
-    },
-    {
-      "command": "application:reset-widget-zoom",
-      "keys": ["Accel Shift 0"],
-      "selector": "body"
     }
   ],
   "jupyter.lab.menus": {
