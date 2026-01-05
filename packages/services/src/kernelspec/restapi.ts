@@ -113,7 +113,7 @@ export interface ISpecModel extends PartialJSONObject {
    * Specifiy the interrupt mode (v5.3).
    * [ref](https://jupyter-client.readthedocs.io/en/stable/messaging.html#kernel-interrupt)
    */
-  readonly interrupt_mode?: 'message'| 'signal';
+  readonly interrupt_mode?: 'message' | 'signal';
 
   /**
    * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.
