@@ -57,21 +57,6 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   /**
-   * Set hidden sources list
-   */
-  set hiddenSources(list: string[]) {
-    this._hiddenSources = new Set(list);
-    void this._refreshDebouncer.invoke();
-  }
-
-  /**
-   * Get hidden sources list
-   */
-  get hiddenSources(): string[] {
-    return Array.from(this._hiddenSources);
-  }
-
-  /**
    * Whether native kernel sources should be hidden.
    */
   get hideNativeSources(): boolean {
