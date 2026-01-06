@@ -48,7 +48,7 @@ import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
-import { IKernelManager, Kernel } from '@jupyterlab/services';
+import { IKernelManager, KernelManager } from '@jupyterlab/services';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -889,26 +889,12 @@ const kernelInfoTimeoutInjector: JupyterFrontEndPlugin<void> = {
   activate: async (
     _app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    kernelManager: Kernel.IManager
+    kernelManager: KernelManager
   ): Promise<void> => {
     const settings = await settingRegistry.load(kernelSettings.id);
     const patchKernelInfoTimeout = () => {
-      // Wrap the connectTo method to inject timeout
-      const originalConnectTo = kernelManager.connectTo.bind(kernelManager);
-      kernelManager.connectTo = (
-        options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
-      ): Kernel.IKernelConnection => {
-        const kernelInfoTimeout = settings.get('kernelInfoTimeout')
-          .composite as number;
-        console.log(
-          '[kernelInfoTimeoutInjector] connectTo called with timeout:',
-          kernelInfoTimeout
-        );
-        return originalConnectTo({
-          ...options,
-          kernelInfoTimeout: kernelInfoTimeout
-        });
-      };
+      kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
+        .composite as number;
     };
     patchKernelInfoTimeout();
     settings.changed.connect(patchKernelInfoTimeout);
