@@ -36,7 +36,6 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     );
 
     /* initialize native kernel sources once */
-    this.hiddenSources = filterData;
     this._hiddenSources = new Set(filterData);
   }
 
@@ -62,7 +61,6 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
    */
   set hiddenSources(list: string[]) {
     this._hiddenSources = new Set(list);
-    this._hiddenSourcesList = list;
     void this._refreshDebouncer.invoke();
   }
 
@@ -70,7 +68,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
    * Get hidden sources list
    */
   get hiddenSources(): string[] {
-    return this._hiddenSourcesList;
+    return Array.from(this._hiddenSources);
   }
 
   /**
@@ -176,7 +174,6 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   private _hiddenSources: Set<string> = new Set();
-  private _hiddenSourcesList: string[] = [];
   private _hideNativeSources = false;
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
