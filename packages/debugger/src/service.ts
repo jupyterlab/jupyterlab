@@ -21,6 +21,7 @@ import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
 import { IDebuggerDisplayRegistry } from './tokens';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -41,7 +42,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._session = null;
     this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model({
-      displayRegistry: options.displayRegistry
+      displayRegistry: options.displayRegistry,
+      getSource: this.getSource.bind(this),
+      mimeTypeService: options.mimeTypeService || null
     });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -1085,5 +1088,10 @@ export namespace DebuggerService {
      * The display registry.
      */
     displayRegistry?: IDebuggerDisplayRegistry | null;
+
+    /**
+     * The mimetype service.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }
