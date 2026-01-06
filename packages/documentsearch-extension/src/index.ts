@@ -509,6 +509,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     if (palette) {
       [
         CommandIDs.search,
+        CommandIDs.searchAndReplace,
         CommandIDs.findNext,
         CommandIDs.findPrevious,
         CommandIDs.end,
