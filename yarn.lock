@@ -22127,7 +22127,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vega-expression@npm:^5.2.0, vega-expression@npm:~5.2.0, vega-expression@npm:^5.2.1":
+"vega-expression@npm:^5.2.0, vega-expression@npm:^5.2.1, vega-expression@npm:~5.2.0":
   version: 5.2.1
   resolution: "vega-expression@npm:5.2.1"
   dependencies:
@@ -22430,7 +22430,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vega-util@npm:^1.17.0, vega-util@npm:^1.17.1, vega-util@npm:^1.17.3, vega-util@npm:~1.17.0, vega-util@npm:~1.17.2, vega-util@npm:^1.17.4":
+"vega-util@npm:^1.17.0, vega-util@npm:^1.17.1, vega-util@npm:^1.17.3, vega-util@npm:^1.17.4, vega-util@npm:~1.17.0, vega-util@npm:~1.17.2":
   version: 1.17.4
   resolution: "vega-util@npm:1.17.4"
   checksum: 07b4808fc5d43afc20566a15f4d02465c13d20ec8f36859f4be3ffad9ed3b12220c20efaa12aaf9bcc7b0a07003a513f038cbcebc6e3e90e2bfc3456be085bd0
