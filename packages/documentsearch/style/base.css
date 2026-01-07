@@ -237,6 +237,10 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   height: 100%;
 }
 
+.jp-DocumentSearch-replace-button-disabled {
+  color: var(--jp-ui-font-color2);
+}
+
 .jp-DocumentSearch-replace-button:focus {
   outline: none;
 }
