@@ -195,7 +195,6 @@ The following environment variables are respected
 2. `HTTP_PROXY`
 3. `ALL_PROXY`
 
-
 ### Extension manager implementations
 
 By default, there are two extension managers provided by JupyterLab:
