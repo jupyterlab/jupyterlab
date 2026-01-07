@@ -1258,8 +1258,6 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
-   *
-   * @deprecated will be removed in a future release. Use `copyToSystemClipboard` instead.
    */
   export function copy(notebook: Notebook): void {
     Private.copyOrCut(notebook, false);
@@ -1284,8 +1282,6 @@ export namespace NotebookActions {
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
-   *
-   * @deprecated will be removed in a future release. Use `cutToSystemClipboard` instead.
    */
   export function cut(notebook: Notebook): void {
     Private.copyOrCut(notebook, true);
@@ -1321,8 +1317,6 @@ export namespace NotebookActions {
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
-   *
-   * @deprecated will be removed in a future release. Use `pasteFromSystemClipboard` instead.
    */
   export function paste(
     notebook: Notebook,
@@ -2705,8 +2699,6 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
-   *
-   * @deprecated will be removed in a future release. Use `copyOrCutToSystemClipboard` instead.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {

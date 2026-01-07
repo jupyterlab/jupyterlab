@@ -3083,7 +3083,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.cutToSystemClipboard(current.content);
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.cutToSystemClipboard(current.content);
+        }
+        return NotebookActions.cut(current.content);
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
@@ -3128,7 +3131,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.copyToSystemClipboard(current.content);
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.copyToSystemClipboard(current.content);
+        }
+        return NotebookActions.copy(current.content);
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
@@ -3173,10 +3179,13 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.pasteFromSystemClipboard(
-          current.content,
-          'below'
-        );
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.pasteFromSystemClipboard(
+            current.content,
+            'below'
+          );
+        }
+        return NotebookActions.paste(current.content, 'below');
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
@@ -3221,10 +3230,13 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.pasteFromSystemClipboard(
-          current.content,
-          'above'
-        );
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.pasteFromSystemClipboard(
+            current.content,
+            'above'
+          );
+        }
+        return NotebookActions.paste(current.content, 'above');
       }
     },
     isEnabled,
@@ -3300,10 +3312,13 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.pasteFromSystemClipboard(
-          current.content,
-          'replace'
-        );
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.pasteFromSystemClipboard(
+            current.content,
+            'replace'
+          );
+        }
+        return NotebookActions.paste(current.content, 'replace');
       }
     },
     isEnabled,
