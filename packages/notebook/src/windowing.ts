@@ -13,7 +13,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
-const DEFAULT_RICH_OUTPUT_LINES = 5;
+//const DEFAULT_RICH_OUTPUT_LINES = 5;
 /**
  * Check whether the element is in a scrolling notebook.
  * Traverses open shadow DOM roots if needed.
@@ -157,7 +157,7 @@ export class NotebookViewModel extends WindowedListModel {
   ) {
     super(options);
     // Set default cell size
-    this._estimateWidgetSize = NotebookViewModel.DEFAULT_CELL_SIZE;
+    this._estimatedWidgetSize = NotebookViewModel.DEFAULT_CELL_SIZE;
   }
 
   /**
@@ -258,7 +258,7 @@ export class NotebookViewModel extends WindowedListModel {
   protected cellsEstimatedHeight = new Map<string, number>();
 
   private _emitEstimatedHeightChanged = new Debouncer(() => {
-    this.stateChanged.emit({
+    this._stateChanged.emit({
       name: 'estimatedWidgetSize',
       newValue: null,
       oldValue: null
