@@ -24,6 +24,8 @@
   background: none;
   color: var(--jp-ui-font-color0);
   height: inherit;
+  width: 22ch;
+  box-sizing: border-box;
 }
 
 .jp-FormGroup-content .jp-inputFieldWrapper > select > option {
@@ -96,7 +98,8 @@
 
 /* RJSF ARRAY style */
 
-.jp-arrayFieldWrapper legend {
+.jp-arrayFieldWrapper legend,
+.jp-objectFieldWrapper legend {
   font-size: var(--jp-content-font-size2);
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;
@@ -165,8 +168,7 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 
 .jp-FormGroup-contentNormal {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
 .jp-FormGroup-contentNormal .jp-FormGroup-contentItem {
@@ -175,13 +177,11 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 }
 
 .jp-FormGroup-contentNormal .jp-FormGroup-description {
-  flex-basis: 100%;
   padding: 4px 7px;
   white-space: pre-wrap;
 }
 
 .jp-FormGroup-contentNormal .jp-FormGroup-default {
-  flex-basis: 100%;
   padding: 4px 7px;
 }
 
@@ -189,6 +189,8 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
   font-size: var(--jp-content-font-size1);
   font-weight: normal;
   min-width: 120px;
+  margin-bottom: 2px;
+  margin-top: 2px;
 }
 
 .jp-FormGroup-contentNormal fieldset:not(:first-child) {
