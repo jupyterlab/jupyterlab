@@ -2643,13 +2643,11 @@ function addCommands(
 
       if (current) {
         const { context, content } = current;
-        const autoScroll = content.notebookConfig.autoScroll ?? true;
         return NotebookActions.runAll(
           content,
           context.sessionContext,
           sessionDialogs,
-          translator,
-          autoScroll
+          translator
         );
       }
     },
@@ -2699,14 +2697,12 @@ function addCommands(
 
       if (current) {
         const { context, content } = current;
-        const autoScroll = content.notebookConfig.autoScroll ?? true;
 
         return NotebookActions.runAllBelow(
           content,
           context.sessionContext,
           sessionDialogs,
-          translator,
-          autoScroll
+          translator
         );
       }
     },
@@ -2905,15 +2901,13 @@ function addCommands(
       }
       const { context, content } = current;
 
-      const autoScroll = content.notebookConfig.autoScroll ?? true;
       const restarted = await sessionDialogs.restart(current.sessionContext);
       if (restarted) {
         return NotebookActions.runAll(
           content,
           context.sessionContext,
           sessionDialogs,
-          translator,
-          autoScroll
+          translator
         );
       }
     },

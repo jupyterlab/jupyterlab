@@ -797,8 +797,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
-    translator?: ITranslator,
-    autoScroll: boolean = true
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -815,7 +814,7 @@ export namespace NotebookActions {
       translator
     );
 
-    if (autoScroll) {
+    if (notebook.notebookConfig.autoScroll ?? true) {
       notebook.activeCellIndex = lastIndex;
     }
     notebook.deselectAll();
@@ -907,8 +906,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
-    translator?: ITranslator,
-    autoScroll: boolean = true
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -925,7 +923,7 @@ export namespace NotebookActions {
       translator
     );
 
-    if (autoScroll) {
+    if (notebook.notebookConfig.autoScroll ?? true) {
       notebook.activeCellIndex = lastIndex;
     }
     notebook.deselectAll();
