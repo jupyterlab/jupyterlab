@@ -383,6 +383,7 @@ cellModel.metadata.has(key);
 cellModel.metadata.get(key);
 cellModel.metadata.set(key, value);
 ```
+
 In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
 model APIs instead:
 
