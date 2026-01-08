@@ -1912,6 +1912,32 @@ export namespace NotebookActions {
   }
 
   /**
+   * Select the last modified cell and pop it from the back stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function selectLastModifiedCell(notebook: Notebook): void {
+    const cell = notebook.popLastModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
+      notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
+   * Select the next modified cell and pop it from the forward stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export function selectNextModifiedCell(notebook: Notebook): void {
+    const cell = notebook.popNextModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
+      notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.
