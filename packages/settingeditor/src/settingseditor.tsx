@@ -18,7 +18,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { SplitPanel } from '@lumino/widgets';
+import { SplitPanel, Widget } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
@@ -118,13 +118,16 @@ export class SettingsEditor extends SplitPanel {
   toggleCompact(): void {
     const compactWidth = 36;
     const node = this._list.node;
-    const wasCompact = node.classList.contains('jp-mod-compact');
 
-    if (!wasCompact) {
+    if (!this._isCompact) {
       // Expanding -> Compacting
+      this._isCompact = true;
       this._lastWidth = node.offsetWidth;
       node.classList.add('jp-mod-compact');
       this.addClass('jp-mod-compact');
+
+      // Clear search query in compact mode
+      this._list.setFilter(updateFilterFunction('', false, false), '');
 
       // Enforce size for compact mode to prevent resizing
       node.style.minWidth = `${compactWidth}px`;
@@ -136,6 +139,7 @@ export class SettingsEditor extends SplitPanel {
       this.setRelativeSizes([fraction, 1 - fraction]);
     } else {
       // Compacting -> Expanding
+      this._isCompact = false;
       node.classList.remove('jp-mod-compact');
       this.removeClass('jp-mod-compact');
 
@@ -144,17 +148,15 @@ export class SettingsEditor extends SplitPanel {
       node.style.maxWidth = '';
       node.style.width = '';
 
-      // Restore previous size or default
-      const totalWidth = this.node.offsetWidth;
-      const fraction = this._lastWidth
-        ? this._lastWidth / totalWidth
-        : 0.25;
-      this.setRelativeSizes([fraction, 1 - fraction]);
+      // Restore layout
+      if (this._lastWidth) {
+        const totalWidth = this.node.offsetWidth;
+        const fraction = this._lastWidth / totalWidth;
+        this.setRelativeSizes([fraction, 1 - fraction]);
+      }
     }
     this.update();
   }
-
-  private _lastWidth: number;
 
   /**
    * Updates the filter of the plugin list.
@@ -166,6 +168,20 @@ export class SettingsEditor extends SplitPanel {
       query ? updateFilterFunction(query, false, false) : null,
       query
     );
+  }
+
+  /**
+   * Handle resize events
+   *
+   * @param msg Widget resize message
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    const width = msg.width === -1 ? this.node.offsetWidth : msg.width;
+    if (this._isCompact && width > 0) {
+      const fraction = 36 / width;
+      this.setRelativeSizes([fraction, 1 - fraction]);
+    }
+    super.onResize(msg);
   }
 
   /**
@@ -212,6 +228,8 @@ export class SettingsEditor extends SplitPanel {
   private _list: PluginList;
   private _listModel: PluginList.Model;
   private _saveStateChange = new Signal<this, SettingsEditor.SaveState>(this);
+  private _lastWidth: number;
+  private _isCompact = false;
 }
 
 export namespace SettingsEditor {
