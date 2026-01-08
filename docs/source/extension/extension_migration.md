@@ -721,7 +721,7 @@ bumped their major version (following semver convention). We want to point out p
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the [migration to react 18](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html).
 
-  ### CodeEditor text handling (sharedModel)
+### CodeEditor text handling (sharedModel)
 
 In JupyterLab 4.x, extension authors should no longer update editor text
 by mutating `model.value.text` directly.
