@@ -43,7 +43,14 @@
       "selector": ".jp-ImageViewer"
     }
   ],
-  "properties": {},
+  "properties": {
+    "defaultZoom": {
+      "type": "string",
+      "enum": ["fit-to-width", "fit-to-height", "100%"],
+      "default": "fit-to-width",
+      "description": "Default zoom level when opening an image"
+    }
+  },
   "additionalProperties": false,
   "type": "object"
 }

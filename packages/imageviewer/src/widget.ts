@@ -18,6 +18,10 @@ import { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
+interface IImageViewerFactoryOptions
+  extends DocumentRegistry.IWidgetFactoryOptions {
+  defaultZoom?: string;
+}
 /**
  * The class name added to a imageviewer.
  */
@@ -30,11 +34,15 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   /**
    * Construct a new image widget.
    */
-  constructor(context: DocumentRegistry.Context) {
+  constructor(
+    context: DocumentRegistry.Context,
+    options?: { defaultZoom?: string }
+  ) {
     super();
     this.context = context;
     this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
+    this._defaultZoom = options?.defaultZoom ?? 'fit-to-width';
 
     this._img = document.createElement('img');
     this.node.appendChild(this._img);
@@ -49,6 +57,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       const contents = context.contentsModel!;
       this._mimeType = contents.mimetype;
       this._render();
+
       context.model.contentChanged.connect(this.update, this);
       context.fileChanged.connect(this.update, this);
       this._ready.resolve(void 0);
@@ -196,7 +205,50 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       const a = new Blob([content], { type: this._mimeType });
       this._img.src = URL.createObjectURL(a);
     }
-    URL.revokeObjectURL(oldurl);
+    this._img.onload = () => {
+      requestAnimationFrame(() => {
+        this._applyDefaultZoom();
+        URL.revokeObjectURL(oldurl);
+      });
+    };
+  }
+  /**
+   * Apply the default zoom to the image.
+   */
+  private _applyDefaultZoom(): void {
+    if (!this._img.naturalWidth || !this._img.naturalHeight) {
+      return;
+    }
+
+    const rect = this.node.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      return;
+    }
+
+    switch (this._defaultZoom) {
+      case 'fit-to-width':
+        this.scale = rect.width / this._img.naturalWidth;
+        break;
+      case 'fit-to-height':
+        this.scale = rect.height / this._img.naturalHeight;
+        break;
+      default:
+        this.scale = 1;
+    }
+  }
+
+  /**
+   * Set the default zoom level.
+   */
+  setDefaultZoom(value: string): void {
+    if (this._defaultZoom === value) {
+      return;
+    }
+    this._defaultZoom = value;
+
+    if (this._img.complete) {
+      this._applyDefaultZoom();
+    }
   }
 
   /**
@@ -218,6 +270,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
   private _img: HTMLImageElement;
+  private _defaultZoom?: string;
 }
 
 /**
@@ -226,16 +279,23 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
 export class ImageViewerFactory extends ABCWidgetFactory<
   IDocumentWidget<ImageViewer>
 > {
+  constructor(options: IImageViewerFactoryOptions) {
+    super(options);
+    this._defaultZoom = options.defaultZoom;
+  }
   /**
    * Create a new widget given a context.
    */
   protected createNewWidget(
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>
   ): IDocumentWidget<ImageViewer> {
-    const content = new ImageViewer(context);
+    const content = new ImageViewer(context, {
+      defaultZoom: this._defaultZoom
+    });
     const widget = new DocumentWidget({ content, context });
     return widget;
   }
+  private _defaultZoom?: string;
 }
 
 /**
