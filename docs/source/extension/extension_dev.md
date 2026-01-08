@@ -15,7 +15,6 @@ See the sections below for more detailed information, or browse the rest of this
 > **Note for non-developers**
 > You do not need to fully understand TypeScript, npm, or the build system to make small, local customizations. In the sections below, only the explicitly mentioned files are intended to be edited; most other files are generated as part of the build process and can be safely ignored.
 
-
 ```{toctree}
 :maxdepth: 1
 
