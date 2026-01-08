@@ -93,7 +93,6 @@ In addition to the toolbars attached to individual widgets, JupyterLab provides
 a TopBar extension point that allows extensions to add items to the application
 top bar area.
 
-
 Lots of toolbars are customizable. Here is a mapping of the customizable toolbars
 and the associated setting.
 
