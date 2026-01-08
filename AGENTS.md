@@ -2,6 +2,13 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
+## Documentation and Resources
+
+- **Developer documentation**: `docs/source/developer/` (extension dev, patterns, contributing)
+- **Design patterns**: `docs/source/developer/patterns.md` (Lumino patterns, signals, disposables)
+- **Extension plugin examples**: `packages/*-extension/src/index.ts`
+- **TypeScript Style Guide**: https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide
+
 ## Build Commands
 
 ```bash
@@ -19,6 +26,7 @@ npm run clean:slate         # Complete clean and rebuild
 ## Testing
 
 ### TypeScript/JavaScript Tests (Jest)
+
 ```bash
 jlpm test                   # Run all package tests
 
@@ -33,11 +41,13 @@ jlpm test --watch
 ```
 
 ### Python Tests (Pytest)
+
 ```bash
 pytest jupyterlab/tests
 ```
 
 ### UI/Integration Tests (Galata/Playwright)
+
 ```bash
 jlpm run test:galata                           # Run UI tests
 PWDEBUG=1 jlpm playwright test <path-to-test>  # Debug UI tests
@@ -84,21 +94,61 @@ jupyter lab --dev-mode --watch  # Auto-rebuild on TypeScript changes (requires p
 - Build: Rspack, TypeScript, Lerna (independent versioning)
 - Package Manager: Yarn via `jlpm` wrapper (locked version in `jupyterlab/yarn.js`)
 
+## Code Quality Rules
+
+### Logging
+
+- **Don't**: Use `console.log()` for user-facing messages
+- **Do**: Use `console.warn()` for non-critical warnings during development
+- **Do**: Use `console.error()` for low-level error details not shown in UI
+
+### Type Safety
+
+- **Do**: Define explicit TypeScript interfaces
+- **Don't**: Use the `any` type; prefer `unknown` with type guards
+- **Do**: Prefer type guards over type casts
+
 ## Code Style and Patterns
 
-**Follow existing code style and patterns strictly:**
-- TypeScript Style Guide: https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide
-- Design patterns: `docs/source/developer/patterns.md`
-- Look at similar code in `packages/*-extension/` for plugin/extension patterns
+### Naming Conventions
 
-### JupyterLab-Specific Patterns
+**TypeScript** (in `packages/*/src/*.ts` files):
 
-- **Disposables**: Always implement `IDisposable`; call `super.dispose()` last; check `isDisposed` in async operations
-- **Signals**: Use `.connect(this._onFoo, this)` pattern for proper cleanup via `Signal.clearData(this)`
-- **Command IDs**: Format as `package-name:verb-noun`, group in unexported `CommandIDs` namespace
+- Classes/interfaces: `PascalCase` (e.g., `NotebookPanel`, `IDocumentManager`)
+- Functions/variables: `camelCase` (e.g., `activatePlugin`, `currentWidget`)
+- Constants: `UPPER_SNAKE_CASE` (e.g., `PLUGIN_ID`, `DEFAULT_TIMEOUT`)
+- Private members: prefix with underscore (e.g., `_isDisposed`, `_onModelChanged`)
+- Use 2-space indentation
+
+**Python** (in `jupyterlab/*.py` files):
+
+- Follow PEP 8 with 4-space indentation
+- Classes: `PascalCase` (e.g., `LabApp`, `ExtensionManager`)
+- Functions/variables: `snake_case` (e.g., `get_app_dir`, `build_check`)
+
+For Lumino patterns (disposables, signals, commands, etc.), see `docs/source/developer/patterns.md`.
+
+## Common Pitfalls
+
+### Package Management
+
+- **Do**: Use `jlpm` exclusively for all package operations
+- **Don't**: Mix `npm`, `yarn`, or `pnpm` commands with `jlpm`
+- **Don't**: Commit `package-lock.json` (this repo uses `yarn.lock`)
+
+### Import Paths
+
+- **Do**: Import from package entry points: `import { Widget } from '@lumino/widgets'`
+- **Don't**: Import from internal paths: `import { Widget } from '@lumino/widgets/lib/widget'`
+
+### React Components
+
+- **Do**: Use functional components with hooks for new code
+- **Do**: Follow existing patterns in `@jupyterlab/ui-components`
 
 ## Key File Locations
 
-- Test utilities and mocks: `testutils/src/mock.ts`
 - Jest debugging: Use `jlpm test:debug:watch` then attach VSCode or Chrome debugger
 - UI test results: Download `galata-report` artifact from GitHub Actions
+- Extension plugin patterns: Look at `packages/*-extension/src/index.ts`
+- Settings schemas: `packages/*/schema/*.json`
