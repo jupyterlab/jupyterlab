@@ -172,8 +172,7 @@ Currently, JupyterLab does not provide an explicit drive selector when creating 
 The active directory and drive are inferred from the File Browser state.
 
 Extensions may register custom drives to provide additional storage backends.
- See the extension developer documentation for details.
-
+See the extension developer documentation for details.
 
 ## Uploading and Downloading
 
