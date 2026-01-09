@@ -14,6 +14,7 @@ import { KernelSpecAPIClient } from '../kernelspec/restapi';
  * An implementation of a kernel manager.
  */
 export class KernelManager extends BaseManager implements Kernel.IManager {
+  private _kernelInfoTimeout: number;
   /**
    * Construct a new kernel manager.
    *
@@ -21,7 +22,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   constructor(options: KernelManager.IOptions = {}) {
     super(options);
-
+    this._kernelInfoTimeout = 3 * 1000;
     this._kernelAPIClient =
       options.kernelAPIClient ??
       new KernelAPIClient({ serverSettings: this.serverSettings });
@@ -87,6 +88,17 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
+   * Timeout awaiting Websocket responds Kernel's information.
+   */
+  get kernelInfoTimeout(): number {
+    return this._kernelInfoTimeout;
+  }
+
+  set kernelInfoTimeout(value: number) {
+    this._kernelInfoTimeout = value;
+  }
+
+  /**
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
@@ -131,7 +143,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       ...options,
       serverSettings: this.serverSettings,
       kernelAPIClient: this._kernelAPIClient,
-      kernelSpecAPIClient: this._kernelSpecAPIClient
+      kernelSpecAPIClient: this._kernelSpecAPIClient,
+      kernelInfoTimeout: this._kernelInfoTimeout
     });
     this._onStarted(kernelConnection);
     if (!this._models.has(id)) {

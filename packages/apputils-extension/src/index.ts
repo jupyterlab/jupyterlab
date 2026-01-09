@@ -48,6 +48,7 @@ import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
+import { IKernelManager, KernelManager } from '@jupyterlab/services';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -877,11 +878,34 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/*
+ * A plugin that injects kernel info timeout into the kernel manager
+ */
+const kernelInfoTimeoutInjector: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:kernel-info-timeout-injector',
+  description: 'Injects kernel info timeout into kernel manager.',
+  autoStart: true,
+  requires: [ISettingRegistry, IKernelManager],
+  activate: async (
+    _app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    kernelManager: KernelManager
+  ): Promise<void> => {
+    const settings = await settingRegistry.load(kernelSettings.id);
+    const patchKernelInfoTimeout = () => {
+      kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
+        .composite as number;
+    };
+    patchKernelInfoTimeout();
+    settings.changed.connect(patchKernelInfoTimeout);
+  }
+};
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelSettings,
+  kernelInfoTimeoutInjector,
   announcements,
   kernelStatus,
   licensesClient,
