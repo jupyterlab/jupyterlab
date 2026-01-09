@@ -51,6 +51,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
+  checkIcon,
   closeIcon,
   copyIcon,
   cutIcon,
@@ -1249,8 +1250,40 @@ const showPropertiesPlugin: JupyterFrontEndPlugin<void> = {
             vW.node.textContent = value;
             vW.addClass('jp-FileProperties-value');
 
+            const copyBtn = new Widget({
+              node: copyIcon.element({
+                className: 'jp-FileProperties-copyBtn',
+                tag: 'span',
+                title: trans.__('Copy %1', label),
+                height: '16px',
+                width: '16px'
+              })
+            });
+            copyBtn.node.onclick = () => {
+              void Clipboard.copyToSystem(value);
+              checkIcon.element({
+                container: copyBtn.node,
+                className: 'jp-FileProperties-copyBtn',
+                tag: 'span',
+                title: trans.__('Copied!'),
+                height: '16px',
+                width: '16px'
+              });
+              setTimeout(() => {
+                copyIcon.element({
+                  container: copyBtn.node,
+                  className: 'jp-FileProperties-copyBtn',
+                  tag: 'span',
+                  title: trans.__('Copy %1', label),
+                  height: '16px',
+                  width: '16px'
+                });
+              }, 1000);
+            };
+
             row.addWidget(lW);
             row.addWidget(vW);
+            row.addWidget(copyBtn);
             body.addWidget(row);
           };
 
