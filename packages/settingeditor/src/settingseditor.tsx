@@ -181,6 +181,9 @@ export class SettingsEditor extends SplitPanel {
       const fraction = 36 / width;
       this.setRelativeSizes([fraction, 1 - fraction]);
     }
+    if (width > 0 && width < 600 && !this._isCompact) {
+      this.toggleCompact();
+    }
     super.onResize(msg);
   }
 
