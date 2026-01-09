@@ -34,8 +34,10 @@ Workspaces can be saved on the server with
 To learn more about URLs in Jupyterlab, visit {ref}`urls`.
 
 In the user interface, the current workspace can be changed using the workspace
-selector widget located in the top bar. This widget allows switching between
-existing workspaces without changing the current server or URL manually.
+selector widget located in the top bar.
+
+To enable the workspace selector, use the main menu:
+View → Appearance → Show Workspace Indicator.
 
 (menu-bar)=
 
