@@ -921,7 +921,7 @@ class _AppHandler:
             if pkg in local or pkg in linked:
                 continue
             if old_deps[pkg] != dep:
-                msg = f"{pkg} changed from {old_deps[pkg]} to {new_deps[pkg]}"
+                msg = f"{pkg} changed from {old_deps[pkg]} to {dep}"
                 messages.append(msg)
 
         # Look for updated local extensions.
