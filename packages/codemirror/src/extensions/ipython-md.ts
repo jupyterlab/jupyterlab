@@ -139,18 +139,21 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           // Test if the node type is one of the math expression
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
-            return {
-              parser: latexParser,
-              // Remove delimiter from LaTeX parser otherwise it won't be highlighted
-              overlay: [
-                {
-                  from: node.from + delimiterLength,
-                  to: node.to - delimiterLength
-                }
-              ]
-            };
+            const contentFrom = node.from + delimiterLength;
+            const contentTo = node.to - delimiterLength;
+            if (contentTo - contentFrom > 0) {
+              return {
+                parser: latexParser,
+                // Remove delimiter from LaTeX parser otherwise it won't be highlighted
+                overlay: [
+                  {
+                    from: contentFrom,
+                    to: contentTo
+                  }
+                ]
+              };
+            }
           }
-
           return null;
         })
       : undefined
