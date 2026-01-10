@@ -1,0 +1,42 @@
+{
+  "title": "Widget Mover",
+  "description": "Widget mover settings.",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "type": "submenu",
+        "selector": "[id^='jp-'] .lm-TabBar-tab",
+        "rank": 500,
+        "submenu": {
+          "id": "jp-contextmenu-move-widget",
+          "label": "Move Widget To",
+          "items": [
+            {
+              "command": "application:move-widget",
+              "args": { "area": "main" },
+              "rank": 1
+            },
+            {
+              "command": "application:move-widget",
+              "args": { "area": "left" },
+              "rank": 2
+            },
+            {
+              "command": "application:move-widget",
+              "args": { "area": "right" },
+              "rank": 3
+            },
+            {
+              "command": "application:move-widget",
+              "args": { "area": "down" },
+              "rank": 4
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
