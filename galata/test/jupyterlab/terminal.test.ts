@@ -154,3 +154,109 @@ test('Terminal web link', async ({ page, tmpPath, browserName }) => {
   ]);
   expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
 });
+
+test.describe('Open in Terminal from File Browser', () => {
+  // Ensure a clean state before each test
+  test.beforeEach(async ({ page }) => {
+    await page.activity.closeAll();
+  });
+
+  test('should open one terminal for a single selected directory', async ({
+    page,
+    tmpPath
+  }) => {
+    // a test directory
+    const folderName = 'single-dir-test';
+    await page.contents.createDirectory(`${tmpPath}/${folderName}`);
+    await page.filebrowser.openDirectory(tmpPath);
+
+    // Right-click the directory and select "Open in Terminal"
+    const folderLocator = page.locator(
+      `.jp-DirListing-item[data-path="${tmpPath}/${folderName}"]`
+    );
+    await folderLocator.click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Check that one terminal opened in the correct path
+    const terminalTabLocator = page.activity.getTabLocator('Terminal 1');
+    await expect(terminalTabLocator).toBeVisible();
+
+    const terminalPanelLocator =
+      await page.activity.getPanelLocator('Terminal 1');
+    expect(terminalPanelLocator).not.toBeNull();
+    await terminalPanelLocator!.click();
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+
+    await expect(terminalPanelLocator!).toContainText(folderName, {
+      timeout: 2000
+    });
+  });
+
+  test('should open multiple terminals for multiple selected directories', async ({
+    page,
+    tmpPath
+  }) => {
+    // Create two test directories
+    const folderA = 'multi-dir-a';
+    const folderB = 'multi-dir-b';
+    await page.contents.createDirectory(`${tmpPath}/${folderA}`);
+    await page.contents.createDirectory(`${tmpPath}/${folderB}`);
+    await page.filebrowser.openDirectory(tmpPath);
+
+    // Control-click to select both directories, then right-click
+    const folderALocator = page.locator(
+      `.jp-DirListing-item[data-path="${tmpPath}/${folderA}"]`
+    );
+    const folderBLocator = page.locator(
+      `.jp-DirListing-item[data-path="${tmpPath}/${folderB}"]`
+    );
+
+    await folderALocator.click();
+    await folderBLocator.click({ modifiers: ['Control'] });
+    await folderBLocator.click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Check that two terminals opened, each in the correct path
+    const term1Panel = await page.activity.getPanelLocator('Terminal 1');
+    await expect(term1Panel).not.toBeNull();
+    await expect(term1Panel!).toBeVisible();
+    await term1Panel!.click();
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+    await expect(term1Panel!).toContainText(folderA, { timeout: 2000 });
+
+    const term2Panel = await page.activity.getPanelLocator('Terminal 2');
+    await expect(term2Panel).not.toBeNull();
+    await expect(term2Panel!).toBeVisible();
+    await term2Panel!.click();
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+    await expect(term2Panel!).toContainText(folderB, { timeout: 2000 });
+  });
+
+  test('should not show the context menu item for files', async ({
+    page,
+    tmpPath
+  }) => {
+    //  Create a test file by simulating the UI actions
+    const fileName = 'a-file.txt';
+    const fullPath = `${tmpPath}/${fileName}`;
+    await page.filebrowser.openDirectory(tmpPath);
+
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.contents.renameFile(`${tmpPath}/untitled.txt`, fullPath);
+
+    // Right-click the file
+    const fileLocator = page.locator(
+      `.jp-DirListing-item[data-path="${fullPath}"]`
+    );
+    await fileLocator.waitFor({ state: 'visible' });
+    await fileLocator.click({ button: 'right' });
+
+    // Assert: The "Open in Terminal" menu item should NOT be visible
+    await expect(
+      page.getByRole('menuitem', { name: 'Open in Terminal' })
+    ).not.toBeVisible();
+  });
+});
