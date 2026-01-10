@@ -9,6 +9,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -24,9 +25,10 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
-import { renderShortCut } from './renderer';
 import { ISignal, Signal } from '@lumino/signaling';
+
+import { renderShortCut } from './renderer';
+import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
@@ -34,7 +36,8 @@ function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator,
-  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>,
+  editorFactory?: CodeEditor.Factory
 ): IShortcutUI.IExternalBundle {
   return {
     translator,
@@ -43,7 +46,8 @@ function getExternalForJupyterLab(
         ISettingRegistry.ISettings<IShortcutsSettingsLayout>
       >,
     commandRegistry: app.commands,
-    actionRequested
+    actionRequested,
+    editorFactory
   };
 }
 
@@ -80,12 +84,13 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
   id: SHORTCUT_PLUGIN_ID,
   description: 'Adds the keyboard shortcuts editor.',
   requires: [ISettingRegistry],
-  optional: [ITranslator, IFormRendererRegistry],
+  optional: [ITranslator, IFormRendererRegistry, IEditorServices],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator | null,
-    editorRegistry: IFormRendererRegistry | null
+    editorRegistry: IFormRendererRegistry | null,
+    editorServices: IEditorServices | null
   ) => {
     const translator_ = translator ?? nullTranslator;
     const trans = translator_.load('jupyterlab');
@@ -205,6 +210,10 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      const editorFactory: CodeEditor.Factory | undefined = editorServices
+        ? options => editorServices.factoryService.newInlineEditor(options)
+        : undefined;
+
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
           return renderShortCut({
@@ -212,7 +221,8 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
               registry,
               app,
               translator_,
-              actionRequested
+              actionRequested,
+              editorFactory
             ),
             ...props
           });

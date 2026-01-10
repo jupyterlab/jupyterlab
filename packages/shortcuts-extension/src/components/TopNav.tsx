@@ -3,8 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Button } from '@jupyter/react-components';
 import { ITranslator } from '@jupyterlab/translation';
-import { FilterBox } from '@jupyterlab/ui-components';
+import { addIcon, FilterBox } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
@@ -15,6 +16,8 @@ export interface IAdvancedOptionsProps {
   showSelectors: boolean;
   resetShortcuts: IShortcutUI['resetShortcuts'];
   translator: ITranslator;
+  toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
+  showAddCommandRow: boolean;
 }
 
 export interface ISymbolsProps {}
@@ -68,6 +71,18 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
       >
         {trans.__('Reset All')}
       </a>
+      <Button
+        className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
+        onClick={props.toggleAddCommandRow}
+        title={trans.__('Show add shortcut row')}
+        disabled={props.showAddCommandRow}
+      >
+        <addIcon.react
+          tag="span"
+          elementSize="xlarge"
+          elementPosition="center"
+        />
+      </Button>
     </div>
   );
 }
@@ -80,6 +95,8 @@ export interface ITopNavProps {
   showSelectors: boolean;
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
+  toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
+  showAddCommandRow: boolean;
   width: number;
   translator: ITranslator;
 }
@@ -121,6 +138,8 @@ export class TopNav extends React.Component<ITopNavProps> {
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
+            toggleAddCommandRow={this.props.toggleAddCommandRow}
+            showAddCommandRow={this.props.showAddCommandRow}
             translator={this.props.translator}
           />
         </div>
