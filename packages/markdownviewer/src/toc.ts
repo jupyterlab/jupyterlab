@@ -174,7 +174,13 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
         if (!elementId) {
           return;
         }
-        const selector = `h${heading.level}[id="${CSS.escape(elementId)}"]`;
+        const attribute =
+          this.sanitizer.allowNamedProperties ?? false
+            ? 'id'
+            : 'data-jupyter-id';
+        const selector = `h${heading.level}[${attribute}="${CSS.escape(
+          elementId
+        )}"]`;
 
         headingToElement.set(
           heading,

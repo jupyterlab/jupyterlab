@@ -122,6 +122,30 @@
     }
   },
   {
+    "id": "application:split-tab",
+    "label": "Split Tab",
+    "caption": "Split the current tab",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ],
+          "description": "The direction to split the tab"
+        }
+      },
+      "required": [
+        "direction"
+      ]
+    }
+  },
+  {
     "id": "application:toggle-context-menu",
     "label": "Enable Context Menu",
     "caption": "",
@@ -2036,7 +2060,9 @@
     "id": "documentsearch:startWithReplace",
     "label": "Find and Replace…",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Ctrl H"
+    ],
     "args": {
       "type": "object",
       "properties": {

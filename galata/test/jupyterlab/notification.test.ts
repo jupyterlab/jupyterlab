@@ -220,6 +220,7 @@ test.describe('Notification center', () => {
     });
 
     const status = page.locator('.jp-Notification-Status');
+    // TODO: sometimes we receive "lm-Widget jp-Notification-Status jp-StatusBar-Item"
     expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
     await expect(status).toHaveText('1');
 

@@ -10,7 +10,7 @@ name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -28,16 +28,15 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "async_lru>=1.0.0",
     "httpx>=0.25.0,<1",
-    "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
@@ -117,7 +116,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.11.12",
+    "ruff==0.14.10",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
