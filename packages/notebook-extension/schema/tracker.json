@@ -861,6 +861,12 @@
       "type": "boolean",
       "default": false
     },
+    "autoScroll": {
+      "type": "boolean",
+      "title": "Auto-scroll to last cell after running all cells.",
+      "description": "Activate and scroll to the last cell after running all cells in the notebook.",
+      "default": true
+    },
     "useSystemClipboardForCells": {
       "title": "Use system clipboard for copy/cut/paste of cells",
       "description": "Whether to use the system clipboard for copy/cut/paste of cells. When enabled, cell contents are copied to the system clipboard, allowing copy/cut/paste between different notebook tabs or browser windows.",

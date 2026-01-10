@@ -791,7 +791,7 @@ export namespace NotebookActions {
    * The existing selection will be cleared.
    * An execution error will prevent the remaining code cells from executing.
    * All markdown cells will be rendered.
-   * The last cell in the notebook will be activated and scrolled into view.
+   * The last cell in the notebook will be activated and scrolled into view if autoScroll is true.
    */
   export function runAll(
     notebook: Notebook,
@@ -814,7 +814,9 @@ export namespace NotebookActions {
       translator
     );
 
-    notebook.activeCellIndex = lastIndex;
+    if (notebook.notebookConfig.autoScroll ?? true) {
+      notebook.activeCellIndex = lastIndex;
+    }
     notebook.deselectAll();
 
     void Private.handleRunState(notebook, state);
@@ -921,7 +923,9 @@ export namespace NotebookActions {
       translator
     );
 
-    notebook.activeCellIndex = lastIndex;
+    if (notebook.notebookConfig.autoScroll ?? true) {
+      notebook.activeCellIndex = lastIndex;
+    }
     notebook.deselectAll();
 
     void Private.handleRunState(notebook, state);
