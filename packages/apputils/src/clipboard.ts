@@ -12,8 +12,6 @@ export type ClipboardData = string | MimeData;
 export namespace Clipboard {
   /**
    * Get the application clipboard instance.
-   *
-   * @deprecated To use `SystemClipboard.getInstance` for copy/cut/paste cells.
    */
   export function getInstance(): MimeData {
     return Private.instance;
