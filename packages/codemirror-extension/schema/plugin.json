@@ -26,6 +26,12 @@
       "command": "codemirror:select-next-occurrence",
       "keys": ["Accel Shift D"],
       "selector": ".cm-content"
+    },
+    {
+      "command": "codemirror:toggle-bold",
+      "keys": ["Accel B"],
+      "selector": ".jp-MarkdownCell .cm-content",
+      "preventDefault": true
     }
   ],
   "jupyter.lab.menus": {

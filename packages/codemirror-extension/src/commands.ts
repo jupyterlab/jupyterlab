@@ -38,6 +38,7 @@ namespace CommandIDs {
   export const toggleComment = 'codemirror:toggle-comment';
   export const selectNextOccurrence = 'codemirror:select-next-occurrence';
   export const toggleTabFocusMode = 'codemirror:toggle-tab-focus-mode';
+  export const toggleBold = 'codemirror:toggle-bold';
   export const foldCurrent = 'codemirror:fold-current';
   export const unfoldCurrent = 'codemirror:unfold-current';
   export const foldSubregions = 'codemirror:fold-subregions';
@@ -88,6 +89,46 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     const isEnabled = () => {
       return !!findEditorView();
+    };
+
+    /**
+     * Toggle bold formatting by wrapping/unwrapping selected text with **.
+     */
+    const toggleBold = (view: EditorView): boolean => {
+      const { state } = view;
+      const { main } = state.selection;
+
+      if (main.empty) {
+        // No selection, do nothing
+        return false;
+      }
+
+      const selectedText = state.sliceDoc(main.from, main.to);
+
+      // Check if text is already wrapped with **
+      const isBold =
+        selectedText.startsWith('**') && selectedText.endsWith('**');
+
+      let newText: string;
+      let cursorPos: number;
+
+      if (isBold) {
+        // Unwrap: remove ** from start and end
+        newText = selectedText.slice(2, -2);
+        cursorPos = main.from + newText.length;
+      } else {
+        // Wrap: add ** to start and end
+        newText = `**${selectedText}**`;
+        cursorPos = main.from + newText.length;
+      }
+
+      // Replace the selection
+      view.dispatch({
+        changes: { from: main.from, to: main.to, insert: newText },
+        selection: { anchor: cursorPos }
+      });
+
+      return true;
     };
 
     const getActiveEditorInfo = () => {
@@ -227,6 +268,27 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           return;
         }
         selectNextOccurrence(view);
+      },
+      isEnabled
+    });
+
+    app.commands.addCommand(CommandIDs.toggleBold, {
+      label: trans.__('Toggle Bold'),
+      caption: trans.__(
+        'Toggle bold formatting by wrapping/unwrapping selected text with **'
+      ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        toggleBold(view);
       },
       isEnabled
     });
