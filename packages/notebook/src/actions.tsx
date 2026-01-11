@@ -1922,11 +1922,10 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function selectLastModifiedCell(notebook: Notebook): void {
+  export async function selectLastModifiedCell(notebook: Notebook): Promise<void> {
     const cell = notebook.popLastModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
-      notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
-      notebook.scrollToCell(cell);
+      await notebook.scrollToCell(cell);
     }
   }
 
@@ -1935,11 +1934,10 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function selectNextModifiedCell(notebook: Notebook): void {
+  export async function selectNextModifiedCell(notebook: Notebook): Promise<void> {
     const cell = notebook.popNextModifiedCell();
     if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
-      notebook.activeCellIndex = notebook.widgets.findIndex(c => c === cell);
-      notebook.scrollToCell(cell);
+      await notebook.scrollToCell(cell);
     }
   }
 

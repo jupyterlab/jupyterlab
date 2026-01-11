@@ -4397,10 +4397,10 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.selectLastModifiedCell, {
     label: trans.__('Select Last Modified Cell'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.selectLastModifiedCell(current.content);
+        await NotebookActions.selectLastModifiedCell(current.content);
       }
     },
     isEnabled: args => {
@@ -4410,10 +4410,10 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.selectNextModifiedCell, {
     label: trans.__('Select Next Modified Cell'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.selectNextModifiedCell(current.content);
+        await NotebookActions.selectNextModifiedCell(current.content);
       }
     },
     isEnabled: args => {
