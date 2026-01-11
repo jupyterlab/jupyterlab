@@ -17,6 +17,7 @@ export interface IShortcutListProps {
   resetKeybindings: IShortcutUI['resetKeybindings'];
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
+  setCustomOptions: IShortcutUI['setCustomOptions'];
   showSelectors: boolean;
   height: number;
   external: IShortcutUI.IExternalBundle;
@@ -43,6 +44,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
                 deleteKeybinding={this.props.deleteKeybinding}
                 resetKeybindings={this.props.resetKeybindings}
                 findConflictsFor={this.props.findConflictsFor}
+                setCustomOptions={this.props.setCustomOptions}
                 shortcut={shortcut}
                 showSelectors={this.props.showSelectors}
                 external={this.props.external}
