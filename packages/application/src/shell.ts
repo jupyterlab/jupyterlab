@@ -1776,6 +1776,38 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     return true;
   };
+  /**
+   * Move a widget to the main dock panel.
+   */
+  moveTab(widget: Widget, direction: 'left' | 'right' | 'top' | 'bottom') {
+    const ref = widget;
+
+    const modeMap: Record<string, DockLayout.InsertMode> = {
+      left: 'split-left',
+      right: 'split-right',
+      top: 'split-top',
+      bottom: 'split-bottom'
+    };
+
+    const mode = modeMap[direction];
+
+    this._dockPanel.addWidget(widget, {
+      mode,
+      ref
+    });
+  }
+
+  /**
+   *  Find the tab bar containing a given widget.
+   */
+  getMainAreaTabBar(widget: Widget): TabBar<Widget> | null {
+    for (const tabBar of this._dockPanel.tabBars()) {
+      if (tabBar.titles.includes(widget.title)) {
+        return tabBar;
+      }
+    }
+    return null;
+  }
 
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;

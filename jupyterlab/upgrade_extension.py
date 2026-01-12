@@ -266,7 +266,7 @@ def update_extension(  # noqa
     if override_pyproject:
         if (target / "setup.cfg").exists():
             try:
-                import tomli_w
+                import tomli_w  # noqa: PLC0415
             except ImportError:
                 msg = "To update pyproject.toml, you need to install tomli-w"
                 print(msg)

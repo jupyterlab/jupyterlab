@@ -23,10 +23,10 @@ def execvp(cmd, argv):
     """
     cmd = which(cmd)
     if os.name == "nt":
-        import signal
-        import sys
+        import signal  # noqa: PLC0415
+        import sys  # noqa: PLC0415
 
-        p = subprocess.Popen([cmd] + argv[1:])
+        p = subprocess.Popen([cmd, *argv[1:]])
         # Don't raise KeyboardInterrupt in the parent process.
         # Set this after spawning, to avoid subprocess inheriting handler.
         signal.signal(signal.SIGINT, signal.SIG_IGN)

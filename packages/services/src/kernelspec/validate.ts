@@ -30,6 +30,10 @@ export function validateSpecModel(data: any): ISpecModel {
     validateProperty(spec, 'env', 'object');
     env = spec.env;
   }
+  if (spec.hasOwnProperty('interrupt_mode')) {
+    validateProperty(spec, 'interrupt_mode', 'string');
+    env = spec.env;
+  }
   return {
     name: data.name,
     resources: data.resources,
