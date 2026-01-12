@@ -246,7 +246,7 @@ wish to run are passed in the `args` argument as a list of strings:
 In this example `docmanager:save` and `application:close` commands are mapped to `Accel T`.
 The commands are run in succession when you use the shortcut.
 
-#### Markdown editing shortcuts
+### Markdown editing shortcuts
 
 When editing markdown cells, you can use {kbd}`Ctrl+B` ({kbd}`Cmd+B` on macOS) to toggle bold formatting.
 Select text in a markdown cell and press {kbd}`Ctrl+B` to wrap it with `**` for bold formatting.

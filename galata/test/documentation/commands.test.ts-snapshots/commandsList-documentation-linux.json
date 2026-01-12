@@ -931,6 +931,18 @@
     }
   },
   {
+    "id": "codemirror:toggle-bold",
+    "label": "Toggle Bold",
+    "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
+    "shortcuts": [
+      "Ctrl B"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "codemirror:toggle-comment",
     "label": "Toggle Comment",
     "caption": "",
