@@ -284,6 +284,14 @@ const elementAriaLabels = {
 };
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/debugger-extension:main': {
+        showSourcesInMainArea: false
+      }
+    }
+  });
   test.skip(
     ({ browserName }) => browserName === 'firefox',
     'Some cases fail on Firefox'
