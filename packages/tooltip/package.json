@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip",
-  "version": "4.5.1",
+  "version": "4.5.2",
   "description": "JupyterLab - Tooltip Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,10 +36,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^4.5.1",
-    "@jupyterlab/rendermime": "^4.5.1",
-    "@jupyterlab/services": "^7.5.1",
-    "@jupyterlab/ui-components": "^4.5.1",
+    "@jupyterlab/codeeditor": "^4.5.2",
+    "@jupyterlab/rendermime": "^4.5.2",
+    "@jupyterlab/services": "^7.5.2",
+    "@jupyterlab/ui-components": "^4.5.2",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/messaging": "^2.0.4",
     "@lumino/widgets": "^2.7.2"
