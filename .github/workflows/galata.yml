@@ -75,7 +75,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test --project ${{ matrix.project }}
+          jlpm run test:base:update --project ${{ matrix.project }}
           mv playwright-report playwright-report-${{ matrix.project }} || true
           if [[ "${{ matrix.browser }}" == "chromium" ]]; then
             jlpm run test --project galata
@@ -94,8 +94,7 @@ jobs:
         with:
           name: jupyterlab-galata-test-assets-${{ matrix.browser }}
           path: |
-            galata/test-${{ matrix.project }}-results
-            galata/test-results
+            galata
 
       - name: Upload Galata Test report
         if: always()
