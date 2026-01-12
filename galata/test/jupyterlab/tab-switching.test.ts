@@ -20,6 +20,29 @@ test.describe('Tab Switching Shortcuts', () => {
         return tabs.length === count;
       }, i + 1);
     }
+
+    // Close Launcher tab if present (it's closable when other widgets are open)
+    const launcherTab = page
+      .locator('#jp-main-dock-panel .lm-TabBar-tab')
+      .filter({ hasText: 'Launcher' });
+    if ((await launcherTab.count()) > 0) {
+      const closeIcon = launcherTab.locator('.lm-TabBar-tabCloseIcon');
+      if ((await closeIcon.count()) > 0) {
+        await closeIcon.click();
+        await page.waitForFunction(() => {
+          const tabs = document.querySelectorAll(
+            '#jp-main-dock-panel .lm-TabBar-tab'
+          );
+          return (
+            Array.from(tabs).every(
+              tab =>
+                tab.querySelector('.lm-TabBar-tabLabel')?.textContent !==
+                'Launcher'
+            ) && tabs.length >= 3
+          );
+        });
+      }
+    }
   });
 
   test('should switch to Tab 1 and Tab 2 using Accel+Alt+Number', async ({
@@ -33,11 +56,6 @@ test.describe('Tab Switching Shortcuts', () => {
 
     const firstTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').first();
     await expect(firstTab).toHaveClass(/lm-mod-current/);
-
-    // Check that we aren't on the Launcher
-    await expect(firstTab.locator('.lm-TabBar-tabLabel')).not.toHaveText(
-      'Launcher'
-    );
 
     await page.keyboard.press(`${modifier}+2`);
     const secondTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').nth(1);
@@ -65,6 +83,12 @@ test.describe('Tab Switching Shortcuts', () => {
 
     // Start on second tab
     await page.keyboard.press(`${modifier}+2`);
+    await page.waitForFunction(() => {
+      const tabs = document.querySelectorAll(
+        '#jp-main-dock-panel .lm-TabBar-tab'
+      );
+      return tabs.length >= 2 && tabs[1].classList.contains('lm-mod-current');
+    });
 
     // Press index 9 (which doesn't exist in our 3-tab setup)
     await page.keyboard.press(`${modifier}+9`);
