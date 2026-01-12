@@ -84,5 +84,6 @@ print(f'Std Dev: {std_value}')`
       'notebook_cell_folding_first_line.png'
     );
   });
+});
 
 
