@@ -33,6 +33,12 @@ Workspaces can be saved on the server with
 {ref}`using workspace commands <workspaces-gui>` available in the menu and sidebar.
 To learn more about URLs in Jupyterlab, visit {ref}`urls`.
 
+In the user interface, the current workspace can be changed using the workspace
+selector widget located in the top bar.
+
+To enable the workspace selector, use the main menu:
+View → Appearance → Show Workspace Indicator.
+
 (menu-bar)=
 
 ## Menu Bar

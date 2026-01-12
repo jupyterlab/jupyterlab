@@ -1380,21 +1380,35 @@ namespace Private {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href') || '';
+    if (!href) {
+      return;
+    }
+    const hash = anchor.hash;
+    if (hash && hash === href) {
+      anchor.target = '_self';
+      anchor.addEventListener('click', (event: MouseEvent) => {
+        const id = hash.slice(1);
+        const escapedId = CSS.escape(id);
+        const doc = anchor.ownerDocument;
+        const el =
+          doc.querySelector(`[data-jupyter-id="${escapedId}"]`) ||
+          doc.querySelector(`#${escapedId}`);
+        if (el) {
+          event.preventDefault();
+          el.scrollIntoView();
+        }
+      });
+      return;
+    }
     const isLocal = resolver.isLocal
       ? resolver.isLocal(href)
       : URLExt.isLocal(href);
     // Bail if it is not a file-like url.
-    if (!href || !isLocal) {
+    if (!isLocal) {
       return;
     }
     // Remove the hash until we can handle it.
-    const hash = anchor.hash;
     if (hash) {
-      // Handle internal link in the file.
-      if (hash === href) {
-        anchor.target = '_self';
-        return;
-      }
       // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
