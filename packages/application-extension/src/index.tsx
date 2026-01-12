@@ -120,7 +120,7 @@ namespace CommandIDs {
   export const switchSidebar = 'sidebar:switch';
 
   export const activateTabIndex: string = 'application:activate-tab-index';
-  
+
   export const splitTab = 'application:split-tab';
 }
 
