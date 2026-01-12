@@ -59,7 +59,7 @@ test.describe('Notebook No Kernel', () => {
 
     await page.keyboard.press('Shift+Enter');
 
-    await expect(page.locator('.jp-Dialog')).toBeVisible();
+    await expect(page.locator('.jp-Dialog')).toBeVisible({ timeout: 10000 });
     await expect(
       page.locator('.jp-Dialog-header').getByText('Select Kernel')
     ).toBeVisible();

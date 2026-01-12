@@ -194,6 +194,7 @@
   "@jupyterlab/settingeditor-extension:plugin": "Adds the JSON settings editor and provides its tracker.",
   "@jupyterlab/shortcuts-extension:shortcuts": "Adds the keyboard shortcuts editor.",
   "@jupyterlab/statusbar-extension:plugin": "Provides the application status bar.",
+  "@jupyterlab/terminal-extension:open-in-terminal-for-browser": "Adds an \"Open in Terminal\" command for the file browser.",
   "@jupyterlab/terminal-extension:plugin": "Adds terminal and provides its tracker.",
   "@jupyterlab/theme-dark-extension:plugin": "Adds a dark theme.",
   "@jupyterlab/theme-dark-high-contrast-extension:plugin": "Adds a dark high contrast theme.",

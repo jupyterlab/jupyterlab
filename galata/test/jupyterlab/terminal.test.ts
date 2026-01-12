@@ -169,11 +169,13 @@ test.describe('Open in Terminal from File Browser', () => {
     const folderName = 'single-dir-test';
     await page.contents.createDirectory(`${tmpPath}/${folderName}`);
     await page.filebrowser.openDirectory(tmpPath);
+    await page.filebrowser.refresh();
 
     // Right-click the directory and select "Open in Terminal"
     const folderLocator = page.locator(
       `.jp-DirListing-item[data-path="${tmpPath}/${folderName}"]`
     );
+    await folderLocator.waitFor({ state: 'visible' });
     await folderLocator.click({ button: 'right' });
     await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
 
@@ -203,6 +205,7 @@ test.describe('Open in Terminal from File Browser', () => {
     await page.contents.createDirectory(`${tmpPath}/${folderA}`);
     await page.contents.createDirectory(`${tmpPath}/${folderB}`);
     await page.filebrowser.openDirectory(tmpPath);
+    await page.filebrowser.refresh();
 
     // Control-click to select both directories, then right-click
     const folderALocator = page.locator(
@@ -212,7 +215,9 @@ test.describe('Open in Terminal from File Browser', () => {
       `.jp-DirListing-item[data-path="${tmpPath}/${folderB}"]`
     );
 
+    await folderALocator.waitFor({ state: 'visible' });
     await folderALocator.click();
+    await folderBLocator.waitFor({ state: 'visible' });
     await folderBLocator.click({ modifiers: ['Control'] });
     await folderBLocator.click({ button: 'right' });
     await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
@@ -246,6 +251,7 @@ test.describe('Open in Terminal from File Browser', () => {
 
     await page.menu.clickMenuItem('File>New>Text File');
     await page.contents.renameFile(`${tmpPath}/untitled.txt`, fullPath);
+    await page.filebrowser.refresh();
 
     // Right-click the file
     const fileLocator = page.locator(
