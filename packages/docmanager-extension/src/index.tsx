@@ -858,7 +858,26 @@ function addCommands(
           },
           kernel: {
             type: 'object',
-            description: 'The kernel model to use'
+            description:
+              'The kernel model to use. See the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) for more information.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'Unique identifier of the kernel on the server'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              },
+              execution_state: {
+                type: 'string',
+                description: 'The kernel execution state'
+              },
+              last_activity: {
+                type: 'string',
+                description: 'The timestamp of the last activity on the kernel'
+              }
+            }
           },
           kernelPreference: {
             type: 'object',
@@ -905,7 +924,32 @@ function addCommands(
           },
           options: {
             type: 'object',
-            description: 'Additional options for opening'
+            description: 'Additional options for opening the widget',
+            properties: {
+              ref: {
+                type: 'string',
+                description:
+                  'The reference widget id for the insert location (default `null`)'
+              },
+              mode: {
+                type: 'string',
+                description:
+                  'The insertion mode relative to a reference widget ("split-top", "split-bottom", "split-left", "split-right", "tab-before", "tab-after")'
+              },
+              activate: {
+                type: 'boolean',
+                description: 'Whether to activate the widget (default `true`)'
+              },
+              rank: {
+                type: 'number',
+                description: 'The rank order of the widget among its siblings'
+              },
+              type: {
+                type: 'string',
+                description:
+                  'Type of widget to open, used to load user customization (typically a factory name or widget id)'
+              }
+            }
           },
           icon: {
             type: 'string',
