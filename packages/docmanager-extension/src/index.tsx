@@ -863,7 +863,45 @@ function addCommands(
           kernelPreference: {
             type: 'object',
             description:
-              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values'
+              'Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'The id of an existing kernel'
+              },
+              name: {
+                type: 'string',
+                description: 'The name of the kernel'
+              },
+              language: {
+                type: 'string',
+                description: 'The preferred kernel language'
+              },
+              shouldStart: {
+                type: 'boolean',
+                description:
+                  'A kernel should be started automatically (default `true`)'
+              },
+              canStart: {
+                type: 'boolean',
+                description: 'A kernel can be started (default `true`)'
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description:
+                  'Shut down the session when session context is disposed (default `false`)'
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description:
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description:
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+              }
+            }
           },
           options: {
             type: 'object',
