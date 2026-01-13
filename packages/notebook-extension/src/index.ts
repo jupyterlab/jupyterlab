@@ -3731,8 +3731,7 @@ function addCommands(
 
         if (cellCount > 0) {
           const lastIndex = cellCount - 1;
-          await notebook.scrollToItem(lastIndex).catch(() => {
-          });
+          await notebook.scrollToItem(lastIndex).catch(() => {});
           notebook.activeCellIndex = lastIndex;
           const lastCell = notebook.widgets[lastIndex];
           notebook.deselectAll();
@@ -3751,7 +3750,9 @@ function addCommands(
         properties: {
           activate: {
             type: 'boolean',
-            description: trans.__('Whether to activate the notebook after execution')
+            description: trans.__(
+              'Whether to activate the notebook after execution'
+            )
           }
         }
       }
