@@ -4,7 +4,7 @@
 import { createSimpleSessionContext } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
-import { dismissDialog } from '@jupyterlab/testing';
+import { dismissDialog, signalToPromise } from '@jupyterlab/testing';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -149,6 +149,40 @@ describe('console/panel', () => {
             CodeConsole
           );
         });
+      });
+    });
+
+    describe('#updateTitle', () => {
+      it('Should update the caption on session change', async () => {
+        const newName = 'new session name';
+        Widget.attach(panel, document.body);
+        await panel.sessionContext.ready;
+        const caption = panel.title.caption;
+        const promise = signalToPromise(panel.sessionContext.propertyChanged);
+        panel.sessionContext.session?.setName(newName);
+        await promise;
+        expect(panel.title.caption).not.toEqual(caption);
+        expect(panel.title.caption).toContain(newName);
+      });
+
+      it('Should not update the caption on session change', async () => {
+        const newName = 'new session name';
+        panel = new TestPanel({
+          manager,
+          contentFactory,
+          rendermime,
+          mimeTypeService,
+          sessionContext: createSimpleSessionContext(),
+          preventTitleUpdate: true
+        });
+        Widget.attach(panel, document.body);
+        await panel.sessionContext.ready;
+        const caption = panel.title.caption;
+        const promise = signalToPromise(panel.sessionContext.propertyChanged);
+        panel.sessionContext.session?.setName(newName);
+        await promise;
+        expect(panel.title.caption).toEqual(caption);
+        expect(panel.title.caption).not.toContain(newName);
       });
     });
   });
