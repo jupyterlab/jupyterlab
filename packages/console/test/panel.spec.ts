@@ -159,7 +159,7 @@ describe('console/panel', () => {
         await panel.sessionContext.ready;
         const caption = panel.title.caption;
         const promise = signalToPromise(panel.sessionContext.propertyChanged);
-        panel.sessionContext.session?.setName(newName);
+        await panel.sessionContext.session?.setName(newName);
         await promise;
         expect(panel.title.caption).not.toEqual(caption);
         expect(panel.title.caption).toContain(newName);
@@ -179,7 +179,7 @@ describe('console/panel', () => {
         await panel.sessionContext.ready;
         const caption = panel.title.caption;
         const promise = signalToPromise(panel.sessionContext.propertyChanged);
-        panel.sessionContext.session?.setName(newName);
+        await panel.sessionContext.session?.setName(newName);
         await promise;
         expect(panel.title.caption).toEqual(caption);
         expect(panel.title.caption).not.toContain(newName);
