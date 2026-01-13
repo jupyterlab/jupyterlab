@@ -1912,6 +1912,30 @@ export namespace NotebookActions {
   }
 
   /**
+   * Select the last modified cell and pop it from the back stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function selectLastModifiedCell(notebook: Notebook): Promise<void> {
+    const cell = notebook.popLastModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      await notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
+   * Select the next modified cell and pop it from the forward stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function selectNextModifiedCell(notebook: Notebook): Promise<void> {
+    const cell = notebook.popNextModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      await notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.

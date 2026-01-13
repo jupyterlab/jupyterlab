@@ -313,6 +313,10 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
+  export const selectLastModifiedCell = 'notebook:select-last-modified-cell';
+
+  export const selectNextModifiedCell = 'notebook:select-next-modified-cell';
+
   export const replaceSelection = 'notebook:replace-selection';
 
   export const autoClosingBrackets = 'notebook:toggle-autoclosing-brackets';
@@ -2504,6 +2508,8 @@ function addCommands(
   tracker.activeCellChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
+    commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
+    commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
   });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
@@ -4404,6 +4410,34 @@ function addCommands(
       }
     }
   });
+  commands.addCommand(CommandIDs.selectLastModifiedCell, {
+    label: trans.__('Select Last Modified Cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        await NotebookActions.selectLastModifiedCell(current.content);
+      }
+    },
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return !!current && current.content.lastModifiedCellBackStack.length > 0;
+    }
+  });
+  commands.addCommand(CommandIDs.selectNextModifiedCell, {
+    label: trans.__('Select Next Modified Cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        await NotebookActions.selectNextModifiedCell(current.content);
+      }
+    },
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return (
+        !!current && current.content.lastModifiedCellForwardStack.length > 0
+      );
+    }
+  });
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Notebook Cell'),
     execute: args => {
@@ -4698,7 +4732,9 @@ function populatePalette(
     CommandIDs.toggleRenderSideBySideCurrentNotebook,
     CommandIDs.setSideBySideRatio,
     CommandIDs.enableOutputScrolling,
-    CommandIDs.disableOutputScrolling
+    CommandIDs.disableOutputScrolling,
+    CommandIDs.selectLastModifiedCell,
+    CommandIDs.selectNextModifiedCell
   ].forEach(command => {
     palette.addItem({ command, category });
   });
