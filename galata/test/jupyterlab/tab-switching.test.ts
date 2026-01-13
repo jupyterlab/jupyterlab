@@ -10,15 +10,18 @@ test.describe('Tab Switching Shortcuts', () => {
   test.beforeEach(async ({ page }) => {
     await page.menu.clickMenuItem('File>Close All Tabs');
 
-    for (let i = 0; i < 3; i++) {
-      await page.menu.clickMenuItem('File>New>Text File');
+    const currentDir = await page.filebrowser.getCurrentDirectory();
+    const names = ['file-1.txt', 'file-2.txt', 'file-3.txt'];
+    for (const name of names) {
+      const filePath = currentDir ? `${currentDir}/${name}` : name;
+      if (!(await page.contents.fileExists(filePath))) {
+        await page.contents.uploadContent('content', 'text', filePath);
+      }
+    }
+    await page.filebrowser.refresh();
 
-      await page.waitForFunction(count => {
-        const tabs = document.querySelectorAll(
-          '#jp-main-dock-panel .lm-TabBar-tab'
-        );
-        return tabs.length === count;
-      }, i + 1);
+    for (const name of names) {
+      await page.filebrowser.open(name);
     }
 
     // Close Launcher tab if present (it's closable when other widgets are open)
