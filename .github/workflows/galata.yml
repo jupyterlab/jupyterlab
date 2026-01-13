@@ -75,7 +75,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test:base:update --project ${{ matrix.project }}
+          jlpm playwright test --project ${{ matrix.project }} --update-snapshots
           mv playwright-report playwright-report-${{ matrix.project }} || true
           if [[ "${{ matrix.browser }}" == "chromium" ]]; then
             jlpm run test --project galata
