@@ -100,12 +100,6 @@ export class DebuggerSidebar extends SidePanel {
     this.addWidget(this.kernelSources);
   }
 
-  updateSourceCode() {
-    console.log('Updating source code...');
-    const source = this._sourcesOptions.model.currentSource;
-    console.log('Source code:', source);
-  }
-
   get showSourcesPanel(): boolean {
     return this._showSourcesPanel;
   }
