@@ -16,7 +16,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { StackedLayout, Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
 import { JsonSettingEditor } from './jsonsettingeditor';
 
@@ -43,11 +43,7 @@ export class PluginEditor extends Widget {
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
-    // TODO: Remove this layout. We were using this before when we
-    // when we had a way to switch between the raw and table editor
-    // Now, the raw editor is the only child and probably could merged into
-    // this class directly in the future.
-    const layout = (this.layout = new StackedLayout());
+    const layout = (this.layout = new PanelLayout());
     const { onSaveError } = Private;
 
     this.raw = this._rawEditor = new RawEditor({
@@ -196,44 +192,14 @@ export namespace PluginEditor {
    * The instantiation options for a plugin editor.
    */
   export interface IOptions {
-    /**
-     * The toolbar commands and registry for the setting editor toolbar.
-     */
     commands: {
-      /**
-       * The command registry.
-       */
       registry: CommandRegistry;
-
-      /**
-       * The revert command ID.
-       */
       revert: string;
-
-      /**
-       * The save command ID.
-       */
       save: string;
     };
-
-    /**
-     * The editor factory used by the plugin editor.
-     */
     editorFactory: CodeEditor.Factory;
-
-    /**
-     * The setting registry used by the editor.
-     */
     registry: ISettingRegistry;
-
-    /**
-     * The optional MIME renderer to use for rendering debug messages.
-     */
     rendermime?: IRenderMimeRegistry;
-
-    /**
-     * The application language translator.
-     */
     translator?: ITranslator;
   }
 }
@@ -242,9 +208,6 @@ export namespace PluginEditor {
  * A namespace for private module data.
  */
 namespace Private {
-  /**
-   * Handle save errors.
-   */
   export function onSaveError(
     reason: Dialog.IError,
     translator?: ITranslator
