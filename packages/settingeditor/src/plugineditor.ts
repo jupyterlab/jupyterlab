@@ -43,6 +43,10 @@ export class PluginEditor extends Widget {
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
+    // NOTE: This editor previously used a StackedLayout when switching between
+    // raw and table editors. That functionality has been removed, and the editor
+    // now uses a single-child layout while keeping the structure simple.
+
     const layout = (this.layout = new PanelLayout());
     const { onSaveError } = Private;
 
@@ -192,14 +196,44 @@ export namespace PluginEditor {
    * The instantiation options for a plugin editor.
    */
   export interface IOptions {
+    /**
+     * The toolbar commands and registry for the setting editor toolbar.
+     */
     commands: {
+      /**
+       * The command registry.
+       */
       registry: CommandRegistry;
+
+      /**
+       * The revert command ID.
+       */
       revert: string;
+
+      /**
+       * The save command ID.
+       */
       save: string;
     };
+
+    /**
+     * The editor factory used by the plugin editor.
+     */
     editorFactory: CodeEditor.Factory;
+
+    /**
+     * The setting registry used by the editor.
+     */
     registry: ISettingRegistry;
+
+    /**
+     * The optional MIME renderer to use for rendering debug messages.
+     */
     rendermime?: IRenderMimeRegistry;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }
@@ -208,6 +242,9 @@ export namespace PluginEditor {
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * Handle save errors.
+   */
   export function onSaveError(
     reason: Dialog.IError,
     translator?: ITranslator
