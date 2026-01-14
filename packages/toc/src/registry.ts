@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ToolbarRegistry } from '@jupyterlab/apputils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 import { ITableOfContentsRegistry, TableOfContents } from './tokens';
@@ -27,6 +28,23 @@ export class TableOfContentsRegistry implements ITableOfContentsRegistry {
     for (const generator of this._generators.values()) {
       if (generator.isApplicable(widget)) {
         return generator.createNew(widget, configuration);
+      }
+    }
+  }
+
+  /**
+   * Get the toolbar items for a widget.
+   *
+   * @param widget - widget
+   * @returns List of toolbar items
+   */
+  getToolbarItems(widget: Widget): ToolbarRegistry.IToolbarItem[] | undefined {
+    for (const generator of this._generators.values()) {
+      if (generator.isApplicable(widget)) {
+        if (generator.getToolbarItems) {
+          return generator.getToolbarItems(widget);
+        }
+        break;
       }
     }
   }

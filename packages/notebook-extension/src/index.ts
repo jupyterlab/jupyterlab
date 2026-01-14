@@ -938,7 +938,12 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     mdParser: IMarkdownParser | null,
     settingRegistry: ISettingRegistry | null
   ): void => {
-    const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
+    const nbTocFactory = new NotebookToCFactory(
+      tracker,
+      mdParser,
+      sanitizer,
+      app.commands
+    );
     tocRegistry.add(nbTocFactory);
     if (settingRegistry) {
       Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])

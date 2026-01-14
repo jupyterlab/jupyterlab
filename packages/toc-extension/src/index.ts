@@ -28,12 +28,11 @@ import {
   expandAllIcon,
   MenuSvg,
   numberingIcon,
-  redoIcon,
   tocIcon,
   Toolbar,
-  ToolbarButton,
-  undoIcon
+  ToolbarButton
 } from '@jupyterlab/ui-components';
+import { IDisposable } from '@lumino/disposable';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -270,32 +269,6 @@ async function activateTOC(
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
   toc.toolbar.addItem(
-    'select-last-modified-back',
-    new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.selectLastModifiedCell,
-      args: {
-        toolbar: true
-      },
-      icon: undoIcon,
-      label: ''
-    })
-  );
-
-  toc.toolbar.addItem(
-    'select-last-modified-forward',
-    new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.selectNextModifiedCell,
-      args: {
-        toolbar: true
-      },
-      icon: redoIcon,
-      label: ''
-    })
-  );
-
-  toc.toolbar.addItem(
     'collapse-all',
     new CommandToolbarButton({
       commands: app.commands,
@@ -327,6 +300,9 @@ async function activateTOC(
 
   // Add the ToC to the left area:
   app.shell.add(toc, 'left', { rank: 400, type: 'Table of Contents' });
+
+  // Keep track of factory items to dispose them
+  let factoryToolbarItems: IDisposable[] = [];
 
   // Update the ToC when the active widget changes:
   if (labShell) {
@@ -372,6 +348,26 @@ async function activateTOC(
       toc.model.headingsChanged.connect(onCollapseChange);
       toc.model.collapseChanged.connect(onCollapseChange);
     }
+
+    // Clean up previous factory items
+    factoryToolbarItems.forEach(item => {
+      item.dispose();
+    });
+    factoryToolbarItems = [];
+
+    const toolbarItems = tocRegistry.getToolbarItems(widget);
+
+    if (toolbarItems) {
+      toolbarItems.forEach(item => {
+        toc.toolbar.insertBefore(
+          'collapse-all',
+          `toc-item-${item.name}`,
+          item.widget
+        );
+        factoryToolbarItems.push(item.widget);
+      });
+    }
+
     setToolbarButtonsState();
   }
 

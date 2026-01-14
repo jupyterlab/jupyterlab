@@ -13,6 +13,14 @@ import { KernelError, NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { INotebookTracker } from './tokens';
 import { Notebook } from './widget';
+import {
+  CommandToolbarButton,
+  redoIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
+
+import { ToolbarRegistry } from '@jupyterlab/apputils';
+import { CommandRegistry } from '@lumino/commands';
 
 /**
  * Cell running status
@@ -561,7 +569,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
   constructor(
     tracker: INotebookTracker,
     protected parser: IMarkdownParser | null,
-    protected sanitizer: IRenderMime.ISanitizer
+    protected sanitizer: IRenderMime.ISanitizer,
+    protected commands: CommandRegistry
   ) {
     super(tracker);
   }
@@ -786,6 +795,41 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     });
 
     return model;
+  }
+
+  /**
+   * Get the toolbar items for the widget
+   *
+   * @param widget - widget
+   * @returns List of toolbar items
+   */
+  getToolbarItems(widget: NotebookPanel): ToolbarRegistry.IToolbarItem[] {
+    return [
+      {
+        name: 'select-last-modified-back',
+        widget: new CommandToolbarButton({
+          commands: this.commands,
+          id: 'notebook:select-last-modified-cell',
+          args: {
+            toolbar: true
+          },
+          icon: undoIcon,
+          label: ''
+        })
+      },
+      {
+        name: 'select-last-modified-forward',
+        widget: new CommandToolbarButton({
+          commands: this.commands,
+          id: 'notebook:select-next-modified-cell',
+          args: {
+            toolbar: true
+          },
+          icon: redoIcon,
+          label: ''
+        })
+      }
+    ];
   }
 
   private _scrollToTop: boolean = true;

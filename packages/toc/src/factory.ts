@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
+import { IWidgetTracker, ToolbarRegistry } from '@jupyterlab/apputils';
 import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Widget } from '@lumino/widgets';
@@ -42,6 +42,16 @@ export abstract class TableOfContentsFactory<
     }
 
     return true;
+  }
+
+  /**
+   * Get the toolbar items for the widget
+   *
+   * @param widget - widget
+   * @returns List of toolbar items
+   */
+  getToolbarItems(widget: W): ToolbarRegistry.IToolbarItem[] {
+    return [];
   }
 
   /**

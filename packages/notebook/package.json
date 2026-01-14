@@ -60,6 +60,7 @@
     "@jupyterlab/translation": "^4.5.0",
     "@jupyterlab/ui-components": "^4.5.0",
     "@lumino/algorithm": "^2.0.4",
+    "@lumino/commands": "^2.3.3",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
     "@lumino/domutils": "^2.0.4",
