@@ -32,7 +32,7 @@ jobs:
           # Filter to staging dir and exclude allowed files
           DISALLOWED=$(echo "$CHANGED_FILES" \
             | grep '^jupyterlab/staging/' \
-            | grep -v -E '^jupyterlab/staging/(yarn\.js|\.yarnrc)$' || true)
+            | grep -v -E '^jupyterlab/staging/(yarn\.js|\.yarnrc\.yml)$' || true)
 
           if [[ -n "$DISALLOWED" ]]; then
             echo "Disallowed changes detected in jupyterlab/staging:" >&2
@@ -47,7 +47,7 @@ jobs:
             echo "$DISALLOWED" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Only \`yarn.js\` and \`.yarnrc\` files are allowed to be modified in this directory." >> $GITHUB_STEP_SUMMARY
+            echo "Only \`yarn.js\` and \`.yarnrc.yml\` files are allowed to be modified in this directory." >> $GITHUB_STEP_SUMMARY
 
             exit 1
           else

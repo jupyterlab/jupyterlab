@@ -204,6 +204,11 @@ export interface IDebugger {
   stop(): Promise<void>;
 
   /**
+   * Signal emitted when the debugger stops.
+   */
+  readonly stopped: ISignal<IDebugger, void>;
+
+  /**
    * Update all breakpoints of a cell at once.
    *
    * @param code - The code in the cell where the breakpoints are set.
@@ -289,6 +294,10 @@ export namespace IDebugger {
      * Map of breakpoints to send back to the kernel after it has restarted
      */
     breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+    /**
+     * Prefix for temporary files associated with this kernel session
+     */
+    tmpPrefix?: string;
   };
 
   /**
@@ -996,7 +1005,9 @@ export namespace IDebugger {
     export interface ISources {
       /**
        * Signal emitted when the current frame changes.
+       * @deprecated since 4.6.0, will be removed in 5.0.
        */
+
       readonly currentFrameChanged: ISignal<
         IDebugger.Model.ICallstack,
         IDebugger.IStackFrame | null
@@ -1005,7 +1016,12 @@ export namespace IDebugger {
       /**
        * Return the current source.
        */
-      currentSource: IDebugger.Source | null;
+      readonly currentSource: IDebugger.Source | null;
+
+      /**
+       * Return the current frame.
+       */
+      readonly currentFrame: IDebugger.IStackFrame | null;
 
       /**
        * Signal emitted when the current source changes.

@@ -378,7 +378,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
     this._notebookModel = null;
     (this.layout as NotebookWindowedLayout).header?.dispose();
+    //  Disconnect the content-visibility observer
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
+    }
     super.dispose();
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    //  Disconnect the content-visibility observer
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
+    }
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -544,20 +558,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
    */
   protected onCellRemoved(index: number, cell: Cell): void {
     // This is a no-op.
-  }
-
-  /**
-   * A message handler invoked on an `'update-request'` message.
-   *
-   * #### Notes
-   * The default implementation of this handler is a no-op.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this.notebookConfig.windowingMode === 'defer') {
-      void this._runOnIdleTime();
-    } else {
-      super.onUpdateRequest(msg);
-    }
   }
 
   /**
@@ -1027,11 +1027,20 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
         });
       });
+      this._setupContentVisibilityObserver();
     } else {
       // Remove intrinsic size styling when disabling content visibility
       this.cellsArray.forEach(cell => {
         cell.node.style.removeProperty('contain-intrinsic-size');
+        cell.node.style.removeProperty('content-visibility');
+        cell.node.style.removeProperty('contain');
       });
+
+      // Disconnect observer if it exists
+      if (this._contentVisibilityObserver) {
+        this._contentVisibilityObserver.disconnect();
+        this._contentVisibilityObserver = null;
+      }
     }
   }
 
@@ -1047,19 +1056,51 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this.cellsArray.forEach((cell, i) => {
           const estHeight = this._viewModel.estimateWidgetSize(i);
           cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+          (cell.node.style as any).contentVisibility = 'auto';
+          cell.node.style.contain = 'layout style paint';
         });
       });
 
-      // Watch for newly added cells and set intrinsic size for them too
-      this.model?.cells.changed.connect(() => {
-        requestAnimationFrame(() => {
-          this.cellsArray.forEach((cell, i) => {
-            const estHeight = this._viewModel.estimateWidgetSize(i);
-            cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-          });
+      // Use the real browser viewport for visibility detection
+      this._setupContentVisibilityObserver();
+    }
+  }
+
+  private _setupContentVisibilityObserver(): void {
+    if (!this._contentVisibilityObserver) {
+      // Create observer only once
+      this._contentVisibilityObserver = new IntersectionObserver(
+        entries => {
+          for (const entry of entries) {
+            const cell = entry.target as HTMLElement;
+            if (entry.isIntersecting) {
+              (cell.style as any).contentVisibility = 'visible';
+              cell.style.contain = 'style';
+            } else {
+              (cell.style as any).contentVisibility = 'auto';
+              cell.style.contain = 'layout style paint';
+            }
+          }
+        },
+        { root: null, threshold: 0.1 }
+      );
+    }
+
+    // Observe all existing cells
+    this.cellsArray.forEach(cell =>
+      this._contentVisibilityObserver!.observe(cell.node)
+    );
+
+    // Watch for newly added cells and set intrinsic size for them too
+    this.model?.cells.changed.connect(() => {
+      requestAnimationFrame(() => {
+        this.cellsArray.forEach((cell, i) => {
+          const estHeight = this._viewModel.estimateWidgetSize(i);
+          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+          this._contentVisibilityObserver!.observe(cell.node);
         });
       });
-    }
+    });
   }
 
   protected cellsArray: Array<Cell>;
@@ -1077,6 +1118,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _notebookModel: INotebookModel | null;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
+  private _contentVisibilityObserver: IntersectionObserver | null = null;
 }
 
 /**
@@ -2352,7 +2394,7 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('lm-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
-    super.onBeforeAttach(msg);
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -2545,6 +2587,11 @@ export class Notebook extends StaticNotebook {
     editor: CodeEditor.IEditor,
     location: CodeEditor.EdgeLocation
   ): void {
+    // Ensure edit mode but do not focus yet; we ensure the edit mode
+    // with focus trigger at the end, as a side-effect of `this.mode = 'edit'`,
+    // which could be simplified in the future.
+    this.setMode('edit', { focus: false });
+
     const prev = this.activeCellIndex;
     if (location === 'top') {
       this.activeCellIndex--;
@@ -2566,6 +2613,7 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
+    // This is potentially no longer needed with the `setMode` call at the top.
     this.mode = 'edit';
   }
 
@@ -3212,6 +3260,9 @@ export class Notebook extends StaticNotebook {
    */
   private _updateReadWrite(): void {
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    if (this.node.classList.contains(READ_WRITE_CLASS) === inReadWrite) {
+      return;
+    }
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
@@ -3277,14 +3328,13 @@ export class Notebook extends StaticNotebook {
    * Handle `focusout` events for the notebook.
    */
   private _evtFocusOut(event: FocusEvent): void {
-    // Update read-write class state.
-    this._updateReadWrite();
-
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test
     // assumes that we explicitly focus things rather than calling blur()
     if (!relatedTarget) {
+      // Update read-write class state.
+      this._updateReadWrite();
       return;
     }
 
@@ -3294,6 +3344,8 @@ export class Notebook extends StaticNotebook {
     if (index !== -1) {
       const widget = this.widgets[index];
       if (widget.editorWidget?.node.contains(relatedTarget)) {
+        // Do not update read-write state as there is no real loss of focus,
+        // instead we are just switching to a different cell
         return;
       }
     }
@@ -3302,6 +3354,8 @@ export class Notebook extends StaticNotebook {
     if (this.mode !== 'command') {
       this.setMode('command', { focus: false });
     }
+    // Update read-write class state.
+    this._updateReadWrite();
   }
 
   /**

@@ -7,28 +7,16 @@ import {
   classes,
   LabIcon,
   openKernelSourceIcon,
-  ReactWidget
+  ReactWidget,
+  UseSignal
 } from '@jupyterlab/ui-components';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { KernelSourcesFilter } from './filter';
-
 import { IDebugger } from '../../tokens';
-import { UseSignal } from '@jupyterlab/ui-components';
 import { IRenderMime } from '@jupyterlab/rendermime';
-
-/**
- * The class name added to the filterbox node.
- */
-const FILTERBOX_CLASS = 'jp-DebuggerKernelSource-filterBox';
-
-/**
- * The class name added to hide the filterbox node.
- */
-const FILTERBOX_HIDDEN_CLASS = 'jp-DebuggerKernelSource-filterBox-hidden';
 
 /**
  * The class for each source row.
@@ -54,19 +42,14 @@ export class KernelSourcesBody extends ReactWidget {
   }
 
   render() {
-    let filterClass = FILTERBOX_CLASS;
-    if (!this._showFilter) {
-      filterClass += ' ' + FILTERBOX_HIDDEN_CLASS;
-    }
     return (
       <React.Fragment>
-        <div className={filterClass} key={'filter'}>
-          <KernelSourcesFilter model={this._model} trans={this._trans} />
-        </div>
         <UseSignal signal={this._model.changed}>
           {(_, kernelSources) => {
             const keymap: { [key: string]: number } = {};
-            return (kernelSources ?? []).map(module => {
+            const filtered = kernelSources ?? [];
+
+            return filtered.map(module => {
               const name = module.name;
               const path = module.path;
               const key =
@@ -112,18 +95,9 @@ export class KernelSourcesBody extends ReactWidget {
     );
   }
 
-  /**
-   * Show or hide the filter box.
-   */
-  public toggleFilterbox(): void {
-    this._showFilter = !this._showFilter;
-    this.update();
-  }
-
   private _model: IDebugger.Model.IKernelSources;
   private _debuggerService: IDebugger;
   private _trans: IRenderMime.TranslationBundle;
-  private _showFilter = false;
 }
 
 /**
@@ -131,7 +105,7 @@ export class KernelSourcesBody extends ReactWidget {
  */
 export namespace KernelSourcesBody {
   /**
-   * Instantiation options for `Breakpoints`.
+   * Instantiation options for `KernelSourcesBody`.
    */
   export interface IOptions {
     /**

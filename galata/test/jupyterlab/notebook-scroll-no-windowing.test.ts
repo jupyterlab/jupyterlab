@@ -257,6 +257,7 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
     await page.notebook.runCell(1);
 
     // After running the second cell, the third cell should be revealed, in at least 10%
+    // TODO: this expectation sometimes fails with a viewport ratio 0.009747706353664398
     await expect(thirdCell!).toBeInViewport({ ratio: 0.1 });
 
     // The third cell should now occupy about half of the notebook viewport
