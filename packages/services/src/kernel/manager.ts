@@ -14,7 +14,6 @@ import { KernelSpecAPIClient } from '../kernelspec/restapi';
  * An implementation of a kernel manager.
  */
 export class KernelManager extends BaseManager implements Kernel.IManager {
-  private _kernelInfoTimeout: number;
   /**
    * Construct a new kernel manager.
    *
@@ -379,6 +378,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _connectionFailure = new Signal<this, Error>(this);
   private _kernelAPIClient: Kernel.IKernelAPIClient;
   private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
+  private _kernelInfoTimeout: number;
 }
 
 /**
