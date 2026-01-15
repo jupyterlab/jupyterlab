@@ -14,7 +14,8 @@ import {
 } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
+
 import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
@@ -155,8 +156,14 @@ export class PluginEditor extends Widget {
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
-    this.update();
-  }
+  super.onAfterAttach(msg);
+
+  // Ensure proper layout sizing in slow environments (e.g. Binder)
+  MessageLoop.sendMessage(this, Widget.ResizeMessage.UnknownSize);
+
+  this.update();
+}
+
 
   /**
    * Handle `'update-request'` messages.
