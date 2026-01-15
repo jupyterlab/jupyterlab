@@ -885,12 +885,21 @@ const kernelInfoTimeoutInjector: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:kernel-info-timeout-injector',
   description: 'Injects kernel info timeout into kernel manager.',
   autoStart: true,
-  requires: [ISettingRegistry, IKernelManager],
+  requires: [ISettingRegistry],
+  optional: [IKernelManager],
   activate: async (
     _app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    kernelManager: KernelManager
+    kernelManager: KernelManager | null
   ): Promise<void> => {
+    // Skip if kernel manager is not available (e.g., in test environments)
+    if (!kernelManager) {
+      console.debug(
+        '[kernelInfoTimeoutInjector] Kernel manager not available, skipping'
+      );
+      return;
+    }
+
     const settings = await settingRegistry.load(kernelSettings.id);
     const patchKernelInfoTimeout = () => {
       kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
