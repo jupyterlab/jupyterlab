@@ -13,7 +13,7 @@
     "@jupyterlab/services": "^7.5.2",
     "@jupyterlab/terminal": "^4.5.2",
     "@jupyterlab/theme-light-extension": "^4.5.2",
-    "@lumino/widgets": "^2.7.2"
+    "@lumino/widgets": "^2.7.3"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
