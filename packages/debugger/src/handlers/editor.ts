@@ -113,7 +113,8 @@ export class EditorHandler implements IDisposable {
             }
           }
         }
-      }
+      },
+      this
     );
 
     this._breakpointEffect = StateEffect.define<
