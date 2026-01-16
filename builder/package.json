@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "4.6.0-alpha.0",
+  "version": "4.6.0-alpha.1",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -45,7 +45,7 @@
     "@lumino/signaling": "^2.1.5",
     "@lumino/virtualdom": "^2.0.4",
     "@lumino/widgets": "^2.7.2",
-    "@rspack/core": "^1.6.4",
+    "@rspack/core": "^1.7.2",
     "ajv": "^8.12.0",
     "commander": "^9.4.1",
     "css-loader": "^6.7.1",
