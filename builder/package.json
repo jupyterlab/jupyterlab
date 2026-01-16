@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@lumino/algorithm": "^2.0.4",
-    "@lumino/application": "^2.4.5",
+    "@lumino/application": "^2.4.6",
     "@lumino/commands": "^2.3.3",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/disposable": "^2.1.5",
@@ -44,7 +44,7 @@
     "@lumino/properties": "^2.0.4",
     "@lumino/signaling": "^2.1.5",
     "@lumino/virtualdom": "^2.0.4",
-    "@lumino/widgets": "^2.7.2",
+    "@lumino/widgets": "^2.7.3",
     "@rspack/core": "^1.7.2",
     "ajv": "^8.12.0",
     "commander": "^9.4.1",
