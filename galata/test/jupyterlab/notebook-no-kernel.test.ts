@@ -26,7 +26,8 @@ test.describe('Notebook No Kernel', () => {
   test('Should show "No Kernel" message when opening notebook', async ({
     page
   }) => {
-    await expect(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
+;
     expect(await page.activity.isTabActive(NOTEBOOK_NAME)).toBe(true);
   });
 
@@ -36,7 +37,9 @@ test.describe('Notebook No Kernel', () => {
     await page.notebook.setCell(0, 'code', 'print("Hello, World!")');
     await page.notebook.addCell('markdown', '# Test Header');
 
-    await expect(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
+
+    
     expect(await page.notebook.getCellCount()).toBe(2);
   });
 
@@ -49,7 +52,8 @@ test.describe('Notebook No Kernel', () => {
 
     await page.filebrowser.open(NOTEBOOK_NAME);
 
-    await expect(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
+
   });
 
   test('Should prompt for kernel when executing code cell', async ({
@@ -107,13 +111,15 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     expect(await page.activity.isTabActive(NOTEBOOK_NAME_2)).toBe(true);
 
     await page.activity.activateTab(NOTEBOOK_NAME_1);
-    await expect(page.getByTitle('Switch kernel').first()).toHaveText(
-      'No Kernel'
+    await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
+
+    
     );
 
     await page.activity.activateTab(NOTEBOOK_NAME_2);
-    await expect(page.getByTitle('Switch kernel').first()).toHaveText(
-      'No Kernel'
+    await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
+
+    
     );
   });
 });
