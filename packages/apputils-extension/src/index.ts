@@ -873,48 +873,31 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
   description: 'Reserves the name for kernel settings.',
   autoStart: true,
   requires: [ISettingRegistry],
-  activate: (_app: JupyterFrontEnd, settingRegistry: ISettingRegistry) => {
-    void settingRegistry.load(kernelSettings.id);
-  }
-};
-
-/*
- * A plugin that injects kernel info timeout into the kernel manager
- */
-const kernelInfoTimeoutInjector: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:kernel-info-timeout-injector',
-  description: 'Injects kernel info timeout into kernel manager.',
-  autoStart: true,
-  requires: [ISettingRegistry],
   optional: [IKernelManager],
   activate: async (
     _app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
     kernelManager: KernelManager | null
-  ): Promise<void> => {
-    // Skip if kernel manager is not available (e.g., in test environments)
-    if (!kernelManager) {
-      console.debug(
-        '[kernelInfoTimeoutInjector] Kernel manager not available, skipping'
-      );
-      return;
+  ) => {
+    void settingRegistry.load(kernelSettings.id);
+    // override Kernel Info's timeout setting
+    if (kernelManager) {
+      const settings = await settingRegistry.load(kernelSettings.id);
+      const patchKernelInfoTimeout = () => {
+        kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
+          .composite as number;
+      };
+      patchKernelInfoTimeout();
+      settings.changed.connect(patchKernelInfoTimeout);
     }
-
-    const settings = await settingRegistry.load(kernelSettings.id);
-    const patchKernelInfoTimeout = () => {
-      kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
-        .composite as number;
-    };
-    patchKernelInfoTimeout();
-    settings.changed.connect(patchKernelInfoTimeout);
   }
 };
+
 /**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelSettings,
-  kernelInfoTimeoutInjector,
   announcements,
   kernelStatus,
   licensesClient,
