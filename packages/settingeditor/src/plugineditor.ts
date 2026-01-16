@@ -14,10 +14,9 @@ import {
 } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
-
+import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { StackedLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
 import { JsonSettingEditor } from './jsonsettingeditor';
 
@@ -44,11 +43,12 @@ export class PluginEditor extends Widget {
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
-    // NOTE: This editor previously used a StackedLayout when switching between
-    // raw and table editors. That functionality has been removed, and the editor
-    // now uses a single-child layout while keeping the structure simple.
-
-    const layout = (this.layout = new PanelLayout());
+    // Even though PluginEditor currently has only one child, we still need
+    // StackedLayout to correctly handle sizing and resize events.
+    // Editor widgets like RawEditor depend on this behavior to render properly.
+    // Using simpler layouts (e.g. PanelLayout) caused layout and sizing issues.
+    // This layout can be removed only if the editor is merged into this widget later.
+    const layout = (this.layout = new StackedLayout());
     const { onSaveError } = Private;
 
     this.raw = this._rawEditor = new RawEditor({
@@ -156,14 +156,8 @@ export class PluginEditor extends Widget {
    * Handle `after-attach` messages.
    */
   protected onAfterAttach(msg: Message): void {
-  super.onAfterAttach(msg);
-
-  // Ensure proper layout sizing in slow environments (e.g. Binder)
-  MessageLoop.sendMessage(this, Widget.ResizeMessage.UnknownSize);
-
-  this.update();
-}
-
+    this.update();
+  }
 
   /**
    * Handle `'update-request'` messages.
