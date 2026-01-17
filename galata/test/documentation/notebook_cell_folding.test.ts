@@ -82,7 +82,7 @@ print(f'Std Dev: {std_value}')`
     const notebookPanel = await page.notebook.getNotebookInPanelLocator();
     expect(await notebookPanel!.screenshot({
       clip: { x: 0, y: 0, width: 1280, height: 500 }
-    }).toMatchSnapshot(
+    })).toMatchSnapshot(
       'notebook_cell_folding_first_line.png'
     );
   });
