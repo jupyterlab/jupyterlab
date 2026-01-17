@@ -39,7 +39,7 @@ test.describe('Notebook No Kernel', () => {
 
     await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
 
-    
+
     expect(await page.notebook.getCellCount()).toBe(2);
   });
 
@@ -113,13 +113,13 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     await page.activity.activateTab(NOTEBOOK_NAME_1);
     await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
 
-    
+
     );
 
     await page.activity.activateTab(NOTEBOOK_NAME_2);
     await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
 
-    
+
     );
   });
 });
