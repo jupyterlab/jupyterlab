@@ -80,7 +80,9 @@ print(f'Std Dev: {std_value}')`
 
     // Take screenshot showing collapsed cells with first line visible
     const notebookPanel = await page.notebook.getNotebookInPanelLocator();
-    expect(await notebookPanel!.screenshot()).toMatchSnapshot(
+    expect(await notebookPanel!.screenshot({
+      clip: { x: 0, y: 0, width: 1280, height: 500 }
+    }).toMatchSnapshot(
       'notebook_cell_folding_first_line.png'
     );
   });
