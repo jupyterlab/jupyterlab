@@ -59,7 +59,7 @@
     "@lumino/polling": "^2.1.5",
     "@lumino/signaling": "^2.1.5",
     "@lumino/virtualdom": "^2.0.4",
-    "@lumino/widgets": "^2.7.2",
+    "@lumino/widgets": "^2.7.3",
     "jest-environment-jsdom": "^29.3.0",
     "react": "^18.2.0"
   },

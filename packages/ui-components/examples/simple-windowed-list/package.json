@@ -15,10 +15,10 @@
     "@jupyterlab/theme-light-extension": "^4.6.0-alpha.1",
     "@jupyterlab/ui-components": "^4.6.0-alpha.1",
     "@lumino/messaging": "^2.0.4",
-    "@lumino/widgets": "^2.7.2"
+    "@lumino/widgets": "^2.7.3"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.7.1",
+    "@rspack/cli": "^1.7.2",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
     "typescript": "~5.5.4"
