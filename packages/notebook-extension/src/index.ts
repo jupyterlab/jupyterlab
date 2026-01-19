@@ -315,7 +315,7 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
-  export const jumpToLastModified = 'notebook:jump-to-last-modified';
+  export const jumpToLastFocused = 'notebook:jump-to-last-focused';
 
   export const replaceSelection = 'notebook:replace-selection';
 
@@ -948,13 +948,13 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
 
       if (tocWidget && (tocWidget as any).toolbar) {
         (tocWidget as any).toolbar.addItem(
-          'jump-to-last-modified',
+          'jump-to-last-focused',
           new CommandToolbarButton({
             commands: app.commands,
-            id: CommandIDs.jumpToLastModified,
+            id: CommandIDs.jumpToLastFocused,
             icon: editIcon,
             label: '',
-            caption: 'Jump to Last Modified Cell'
+            caption: 'Jump to Last Focused Cell'
           })
         );
       }
@@ -1825,48 +1825,45 @@ function activateNotebookHandler(
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
-  // Track the last modified cell
-  let lastModifiedCell: Cell | null = null;
+  // Jump to Last Focused
+  const jumpHistory = new WeakMap<Notebook, number>();
 
-  tracker.currentChanged.connect((sender, notebookPanel) => {
-    if (!notebookPanel) {
-      return;
-    }
-    const notebook = notebookPanel.content;
+  tracker.widgetAdded.connect((sender, panel) => {
+    const notebook = panel.content;
+    let currentIndex = notebook.activeCellIndex;
 
-    const attachListener = (cell: Cell) => {
-      cell.model.contentChanged.connect(() => {
-        lastModifiedCell = cell;
-        commands.notifyCommandChanged(CommandIDs.jumpToLastModified);
-      });
-    };
-
-    notebook.widgets.forEach(attachListener);
-
-    notebook.model?.cells.changed.connect((sender, args) => {
-      args.newValues.forEach(model => {
-        const cellWidget = notebook.widgets.find(w => w.model.id === model.id);
-        if (cellWidget) {
-          attachListener(cellWidget);
-        }
-      });
+    notebook.activeCellChanged.connect(() => {
+      const newIndex = notebook.activeCellIndex;
+      if (newIndex !== currentIndex) {
+        jumpHistory.set(notebook, currentIndex);
+        currentIndex = newIndex;
+      }
     });
   });
 
-  commands.addCommand(CommandIDs.jumpToLastModified, {
-    label: trans.__('Jump to Last Modified Cell'),
+  commands.addCommand(CommandIDs.jumpToLastFocused, {
+    label: trans.__('Jump to Last Focused Cell'),
     icon: editIcon,
     execute: () => {
-      if (lastModifiedCell && tracker.currentWidget) {
-        tracker.currentWidget.content.scrollToCell(lastModifiedCell);
-        const index =
-          tracker.currentWidget.content.widgets.indexOf(lastModifiedCell);
-        if (index !== -1) {
-          tracker.currentWidget.content.activeCellIndex = index;
-        }
+      const currentWidget = tracker.currentWidget;
+      if (!currentWidget) {
+        return;
       }
-    },
-    isEnabled: () => lastModifiedCell !== null
+
+      const notebook = currentWidget.content;
+      const previousIndex = jumpHistory.get(notebook);
+
+      if (
+        previousIndex !== undefined &&
+        previousIndex >= 0 &&
+        notebook.model &&
+        previousIndex < notebook.model.cells.length
+      ) {
+        notebook.activeCellIndex = previousIndex;
+        const cell = notebook.widgets[previousIndex];
+        notebook.scrollToCell(cell);
+      }
+    }
   });
 
   // Use the router to deal with hash navigation
@@ -4687,7 +4684,7 @@ function populatePalette(
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
     CommandIDs.virtualScrollbar,
-    CommandIDs.jumpToLastModified
+    CommandIDs.jumpToLastFocused
   ].forEach(command => {
     palette.addItem({ command, category });
   });
