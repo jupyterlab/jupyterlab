@@ -1286,7 +1286,7 @@ function activateNotebookTools(
   if (inspectorProvider) {
     tracker.widgetAdded.connect((sender, panel) => {
       const inspector = inspectorProvider.register(panel);
-      inspector.render(notebookTools);
+      void inspector.render(notebookTools);
     });
   }
 
@@ -1861,7 +1861,7 @@ function activateNotebookHandler(
       ) {
         notebook.activeCellIndex = previousIndex;
         const cell = notebook.widgets[previousIndex];
-        notebook.scrollToCell(cell);
+        void notebook.scrollToCell(cell);
       }
     }
   });
