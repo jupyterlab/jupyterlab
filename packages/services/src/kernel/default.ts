@@ -31,7 +31,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 // Stub for requirejs.
 declare let requirejs: any;
 
-const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
+export const DEFAULT_KERNEL_INFO_TIMEOUT = 3000;
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 const STARTING_KERNEL_SESSION = '';
 

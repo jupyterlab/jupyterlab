@@ -7,7 +7,7 @@ import { CommsOverSubshells, KernelSpec, ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
 import { IKernelOptions, KernelAPIClient } from './restapi';
-import { KernelConnection } from './default';
+import { DEFAULT_KERNEL_INFO_TIMEOUT, KernelConnection } from './default';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
 
 /**
@@ -21,7 +21,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   constructor(options: KernelManager.IOptions = {}) {
     super(options);
-    this._kernelInfoTimeout = 3 * 1000;
+    this._kernelInfoTimeout = DEFAULT_KERNEL_INFO_TIMEOUT;
     this._kernelAPIClient =
       options.kernelAPIClient ??
       new KernelAPIClient({ serverSettings: this.serverSettings });

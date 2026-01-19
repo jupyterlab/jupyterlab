@@ -882,6 +882,12 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
     void settingRegistry.load(kernelSettings.id);
     // override Kernel Info's timeout setting
     if (kernelManager) {
+      // Refers to other implementation of IKernelManager that does not have kernelInfoTimeout
+      if (!('kernelInfoTimeout' in kernelManager)) {
+        console.log(
+          'Provided kernel manager does not support kernelInfoTimeout setting'
+        );
+      }
       const settings = await settingRegistry.load(kernelSettings.id);
       const patchKernelInfoTimeout = () => {
         kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
