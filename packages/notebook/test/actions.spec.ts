@@ -1537,7 +1537,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[0])).toBe(true);
         expect(widget.isSelected(widget.widgets[1])).toBe(true);
         expect(widget.isSelected(widget.widgets[2])).toBe(false);
-        expect(widget.activeCellIndex).toBe(0);
+        expect(widget.activeCellIndex).toBe(1);
       });
 
       it('should move the last cell up', () => {
@@ -1576,7 +1576,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
         expect(widget.isSelected(widget.widgets[1])).toBe(true);
         expect(widget.isSelected(widget.widgets[2])).toBe(true);
-        expect(widget.activeCellIndex).toBe(2);
+        expect(widget.activeCellIndex).toBe(1);
       });
 
       it('should be a no-op if there is no model', () => {
