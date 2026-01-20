@@ -561,6 +561,23 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   /**
+   * A message handler invoked on an `'update-request'` message.
+   *
+   * In defer-like mode, the default logic for inserting cells
+   * is skipped, enabling the notebook to render cells in small
+   * batches, without blocking the UI.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    if (
+      ['defer', 'contentVisibility'].includes(this.notebookConfig.windowingMode)
+    ) {
+      void this._runOnIdleTime();
+    } else {
+      super.onUpdateRequest(msg);
+    }
+  }
+
+  /**
    * Handle a new model on the widget.
    */
   private _onModelChanged(
