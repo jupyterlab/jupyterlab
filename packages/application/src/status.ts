@@ -5,6 +5,7 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { JupyterFrontEnd } from './frontend';
 import { ILabStatus } from './tokens';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The application status signals and flags class.
@@ -71,15 +72,28 @@ export class LabStatus implements ILabStatus {
    *
    * @returns A disposable used to clear the busy state for the caller.
    */
-  setBusy(): IDisposable {
+  setBusy(translator?: ITranslator): IDisposable {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     const oldBusy = this.isBusy;
+    const ariaLiveRegion = document.getElementById('commands-aria-live');
+    let timeout: any;
     this._busyCount++;
     if (this.isBusy !== oldBusy) {
       this._busySignal.emit(this.isBusy);
+      timeout = setTimeout(() => {
+        ariaLiveRegion!.append(
+          trans.__('A notebook cell is processing. Kernel status is busy.')
+        );
+      }, 10000);
     }
     return new DisposableDelegate(() => {
       const oldBusy = this.isBusy;
       this._busyCount--;
+      clearTimeout(timeout);
+      ariaLiveRegion!.append(
+        trans.__('Processing complete. Kernel status is idle.')
+      );
       if (this.isBusy !== oldBusy) {
         this._busySignal.emit(this.isBusy);
       }
