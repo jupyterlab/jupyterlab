@@ -265,7 +265,6 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       >
         <span
           className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={0}
         >
           {trans.__('Replace')}
         </span>
@@ -277,7 +276,6 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       >
         <span
           className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
         >
           {trans.__('Replace All')}
         </span>
