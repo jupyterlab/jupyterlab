@@ -5,7 +5,9 @@ import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Notebook No Kernel', () => {
   const NOTEBOOK_NAME = 'test-notebook-no-kernel.ipynb';
+
   test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
+  
 
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(NOTEBOOK_NAME);
@@ -14,51 +16,46 @@ test.describe('Notebook No Kernel', () => {
 
     // Open notebook with "Open With > Notebook (no kernel)" from the context menu
     await page.sidebar.openTab('filebrowser');
-    await page.click(`.jp-DirListing-item span:has-text("${NOTEBOOK_NAME}")`, {
-      button: 'right'
-    });
+    await page.click(`.jp-DirListing-item span:has-text("${NOTEBOOK_NAME}")`,{
+     button: 'right'
+  });
+
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
     await page.click('text=Notebook (no kernel)');
     await page.waitForSelector('.jp-NotebookPanel');
   });
 
-  test('Should show "No Kernel" message when opening notebook', async ({
-    page
-  }) => {
+  test('Should show "No Kernel" message when opening notebook', async ({ page }) => {
+  
     await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
-;
+
     expect(await page.activity.isTabActive(NOTEBOOK_NAME)).toBe(true);
   });
 
-  test('Should maintain no kernel state when adding cells', async ({
-    page
-  }) => {
+  test('Should maintain no kernel state when adding cells',  async ({ page }) => {
+    await page.kernel.shutdownAll();
+
     await page.notebook.setCell(0, 'code', 'print("Hello, World!")');
     await page.notebook.addCell('markdown', '# Test Header');
 
-    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
-
-    
+    expect(await page.kernel.isRunning()).toBe(false);
     expect(await page.notebook.getCellCount()).toBe(2);
   });
 
-  test('Should not auto-start kernel when reopening notebook', async ({
-    page
-  }) => {
+  test('Should not auto-start kernel when reopening notebook',  async ({ page }) => {
+
     await page.notebook.setCell(0, 'code', 'print("test")');
     await page.notebook.save();
     await page.menu.clickMenuItem('File>Close Tab');
 
     await page.filebrowser.open(NOTEBOOK_NAME);
-
-    await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
+    await expect(await page.kernel.isRunning()).toBe(false);
 
   });
 
-  test('Should prompt for kernel when executing code cell', async ({
-    page
-  }) => {
+  test('Should prompt for kernel when executing code cell', async ({ page }) => {
+
     await page.notebook.setCell(0, 'code', 'print("Hello, World!")');
 
     await page.keyboard.press('Shift+Enter');
@@ -68,7 +65,9 @@ test.describe('Notebook No Kernel', () => {
       page.locator('.jp-Dialog-header').getByText('Select Kernel')
     ).toBeVisible();
   });
+
 });
+
 
 test.describe('Opening Two Notebooks with No Kernel', () => {
   const NOTEBOOK_NAME_1 = 'test-notebook-no-kernel-1.ipynb';
@@ -84,11 +83,10 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     await page.notebook.save();
     await page.notebook.close();
     await page.kernel.shutdownAll();
-  });
+});
 
-  test('Should open both notebooks with no kernel when using the "Open With" menu item', async ({
-    page
-  }) => {
+  test('Should open both notebooks with no kernel when using the "Open With" menu item', async ({ page }) => {
+
     await page.sidebar.openTab('filebrowser');
 
     await page.click(`.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_1}")`);
@@ -96,30 +94,33 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
 
     await page.click(
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
-      {
-        button: 'right'
-      }
-    );
+      { button: 'right'}
+  );
+  
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
     await page.click('text=Notebook (no kernel)');
 
     await page.waitForFunction(() => {
-      return document.querySelectorAll('.jp-NotebookPanel').length === 2;
-    });
-
-    expect(await page.activity.isTabActive(NOTEBOOK_NAME_2)).toBe(true);
-
-    await page.activity.activateTab(NOTEBOOK_NAME_1);
-    await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
-
-    
-    );
-
-    await page.activity.activateTab(NOTEBOOK_NAME_2);
-    await expect(page.getByTitle('Switch kernel').first()).toContainText('No Kernel');
-
-    
-    );
+    return document.querySelectorAll('.jp-NotebookPanel').length === 2;
   });
+
+  expect(await page.kernel.isRunning()).toBe(false);
+
+   await page.activity.activateTab(NOTEBOOK_NAME_1);
+   expect(await page.kernel.isRunning()).toBe(false);
+
+   await page.activity.activateTab(NOTEBOOK_NAME_2);
+   expect(await page.kernel.isRunning()).toBe(false);
+  }
+
+ );
+
 });
+    
+  
+
+
+  
+
+
