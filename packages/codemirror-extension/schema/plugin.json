@@ -28,7 +28,7 @@
       "selector": ".cm-content"
     },
     {
-      "command": "codemirror:toggle-bold",
+      "command": "codemirror:markdown-toggle-bold",
       "keys": ["Accel B"],
       "selector": ".cm-content[data-language='markdown']",
       "preventDefault": true

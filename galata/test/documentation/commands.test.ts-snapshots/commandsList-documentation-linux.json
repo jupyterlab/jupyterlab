@@ -931,7 +931,7 @@
     }
   },
   {
-    "id": "codemirror:toggle-bold",
+    "id": "codemirror:markdown-toggle-bold",
     "label": "Toggle Bold",
     "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
     "shortcuts": [

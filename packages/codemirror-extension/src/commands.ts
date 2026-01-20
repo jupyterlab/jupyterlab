@@ -39,7 +39,7 @@ namespace CommandIDs {
   export const toggleComment = 'codemirror:toggle-comment';
   export const selectNextOccurrence = 'codemirror:select-next-occurrence';
   export const toggleTabFocusMode = 'codemirror:toggle-tab-focus-mode';
-  export const toggleBold = 'codemirror:toggle-bold';
+  export const toggleBold = 'codemirror:markdown-toggle-bold';
   export const foldCurrent = 'codemirror:fold-current';
   export const unfoldCurrent = 'codemirror:unfold-current';
   export const foldSubregions = 'codemirror:fold-subregions';
