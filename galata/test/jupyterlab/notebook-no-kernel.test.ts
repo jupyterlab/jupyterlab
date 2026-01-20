@@ -7,7 +7,7 @@ test.describe('Notebook No Kernel', () => {
   const NOTEBOOK_NAME = 'test-notebook-no-kernel.ipynb';
 
   test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
-  
+
 
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(NOTEBOOK_NAME);
@@ -27,7 +27,7 @@ test.describe('Notebook No Kernel', () => {
   });
 
   test('Should show "No Kernel" message when opening notebook', async ({ page }) => {
-  
+
     await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
 
     expect(await page.activity.isTabActive(NOTEBOOK_NAME)).toBe(true);
@@ -96,7 +96,7 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
       { button: 'right'}
   );
-  
+
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
     await page.click('text=Notebook (no kernel)');
@@ -117,10 +117,8 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
  );
 
 });
-    
-  
 
 
-  
+
 
 
