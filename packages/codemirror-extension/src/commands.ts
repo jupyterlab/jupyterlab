@@ -19,6 +19,7 @@ import {
   unfoldCode,
   unfoldEffect
 } from '@codemirror/language';
+import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
 import {
@@ -103,29 +104,53 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         return false;
       }
 
-      const selectedText = state.sliceDoc(main.from, main.to);
+      const { from, to, anchor, head } = main;
+      const isReversed = anchor > head;
+      const doc = state.doc;
+      const selectedText = doc.sliceString(from, to);
 
-      // Check if text is already wrapped with **
-      const isBold =
-        selectedText.startsWith('**') && selectedText.endsWith('**');
+      const outerStart = from >= 2 && doc.sliceString(from - 2, from) === '**';
+      const outerEnd = doc.sliceString(to, to + 2) === '**';
+      const innerStart = selectedText.startsWith('**');
+      const innerEnd = selectedText.endsWith('**');
 
-      let newText: string;
-      let cursorPos: number;
+      const setSelection = (contentStart: number, contentEnd: number) => {
+        const newAnchor = isReversed ? contentEnd : contentStart;
+        const newHead = isReversed ? contentStart : contentEnd;
+        return EditorSelection.single(newAnchor, newHead);
+      };
 
-      if (isBold) {
-        // Unwrap: remove ** from start and end
-        newText = selectedText.slice(2, -2);
-        cursorPos = main.from + newText.length;
-      } else {
-        // Wrap: add ** to start and end
-        newText = `**${selectedText}**`;
-        cursorPos = main.from + newText.length;
+      // Unwrap when markers are outside the selection
+      if (outerStart && outerEnd) {
+        const changeFrom = from - 2;
+        const changeTo = to + 2;
+        const contentLength = to - from;
+        view.dispatch({
+          changes: { from: changeFrom, to: changeTo, insert: selectedText },
+          selection: setSelection(changeFrom, changeFrom + contentLength)
+        });
+        return true;
       }
 
-      // Replace the selection
+      // Unwrap when markers are included in the selection
+      if (innerStart && innerEnd && selectedText.length >= 4) {
+        const unwrapped = selectedText.slice(2, -2);
+        const contentStart = from;
+        const contentEnd = from + unwrapped.length;
+        view.dispatch({
+          changes: { from, to, insert: unwrapped },
+          selection: setSelection(contentStart, contentEnd)
+        });
+        return true;
+      }
+
+      // Wrap the selection
+      const wrapped = `**${selectedText}**`;
+      const contentStart = from + 2;
+      const contentEnd = to + 2;
       view.dispatch({
-        changes: { from: main.from, to: main.to, insert: newText },
-        selection: { anchor: cursorPos }
+        changes: { from, to, insert: wrapped },
+        selection: setSelection(contentStart, contentEnd)
       });
 
       return true;

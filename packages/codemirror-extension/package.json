@@ -42,6 +42,7 @@
     "@codemirror/language": "^6.11.0",
     "@codemirror/legacy-modes": "^6.5.1",
     "@codemirror/search": "^6.5.10",
+    "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.1",
     "@jupyter/ydoc": "^3.1.0",
     "@jupyterlab/application": "^4.6.0-alpha.1",

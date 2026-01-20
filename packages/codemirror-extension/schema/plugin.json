@@ -30,7 +30,7 @@
     {
       "command": "codemirror:toggle-bold",
       "keys": ["Accel B"],
-      "selector": ".jp-MarkdownCell .cm-content",
+      "selector": ".cm-content[data-language='markdown']",
       "preventDefault": true
     }
   ],
