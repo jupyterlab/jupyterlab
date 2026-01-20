@@ -46,6 +46,7 @@ const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_FILTER_DISABLED_CLASS = 'jp-DocumentSearch-search-filter-disabled';
 const SEARCH_FILTER_CLASS = 'jp-DocumentSearch-search-filter';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
+const REPLACE_BUTTON_DISABLED_CLASS = 'jp-DocumentSearch-replace-button-disabled';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_CLASS = 'jp-DocumentSearch-replace-toggle';
@@ -221,6 +222,7 @@ interface IReplaceEntryProps {
   preserveCase: boolean;
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
+  replaceEnabled: boolean;
   translator?: ITranslator;
 }
 
@@ -262,9 +264,12 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
         tabIndex={0}
+        disabled={!props.replaceEnabled}
       >
         <span
-          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
+          className={props.replaceEnabled
+            ? `${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`
+            : `${REPLACE_BUTTON_DISABLED_CLASS} ${BUTTON_CONTENT_CLASS}`}
           tabIndex={0}
         >
           {trans.__('Replace')}
@@ -469,6 +474,10 @@ interface ISearchOverlayProps {
    * Replacement expression
    */
   replaceText: string;
+  /**
+   * Whether the replace button is enabled.
+   */
+  replaceEnabled: boolean;
   /**
    * The text in the search entry
    */
@@ -785,6 +794,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 onReplaceAll={() => this.props.onReplaceAll()}
                 replaceOptionsSupport={this.props.replaceOptionsSupport}
                 replaceText={this.props.replaceText}
+                replaceEnabled={this.props.replaceEnabled}
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
               />
@@ -921,6 +931,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         filtersVisible={this._showFilters}
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
+        replaceEnabled={this.model.replaceEnabled}
         initialSearchText={this.model.initialQuery}
         lastSearchText={this.model.searchExpression}
         searchInputRef={
