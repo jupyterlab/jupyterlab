@@ -6,6 +6,28 @@
 
 # Extension Migration Guide
 
+## JupyterLab 4.5 to 4.6 (not released yet)
+
+### Building extensions with Rspack
+
+In the upcoming 4.6, JupyterLab will use [Rspack](https://rspack.rs/) instead of
+[Webpack](https://webpack.js.org/) to build extensions. Since Rspack strives for
+compatibility with Webpack, no changes should be needed in most extensions and
+extensions built with either system should interoperate with each other.
+However, if an extension uses the experimental {ref}`webpackConfig` option, it
+may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
+Webpack config to Rspack.
+
+### API Updates
+
+- The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
+
+## JupyterLab 4.5.0 to 4.5.1
+
+### IDefaultContentProvider
+
+As part of the 4.5.0 release, a new token `IDefaultContentProvider` was wrongfully made public. The 4.5.1 release makes it deprecated and the token will be removed in 5.0.
+
 ## JupyterLab 4.4 to 4.5
 
 ### File Browser updates
@@ -715,7 +737,7 @@ helpers from various core packages. The exported helpers are the same as before 
 
 ### Testing with Galata
 
-The in-page helpers are now in an JupyterLab extension to live in the common Webpack shared scoped. That new extension
+The in-page helpers are now in a JupyterLab extension to live in the common Webpack shared scoped. That new extension
 is contained in the JupyterLab python package at `jupyterlab.galata`. It requires to update your Jupyter server
 configuration by adding the following line:
 

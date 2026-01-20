@@ -180,7 +180,7 @@ export namespace Commands {
   ): void {
     config =
       (settings.get('editorConfig').composite as Record<string, any>) ?? {};
-    scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
+    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
     commands.notifyCommandChanged(CommandIDs.lineNumbers);
@@ -212,6 +212,7 @@ export namespace Commands {
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
     editor.setOptions({ ...config, scrollPastEnd });
+    widget.toggleClass('jp-mod-scrollPastEnd', scrollPastEnd);
   }
 
   /**

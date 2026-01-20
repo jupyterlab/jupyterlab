@@ -638,7 +638,8 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      (tracker.currentWidget === shell.currentWidget ||
+        tracker.currentWidget.node.contains(document.activeElement))
     );
   }
 
@@ -797,7 +798,8 @@ async function activateConsole(
         }
         current.console.setConfig({ promptCellPosition: position });
       },
-      isEnabled: isEnabled,
+      isEnabled: () =>
+        !!tracker.currentWidget && tracker.currentWidget.isVisible,
       label: trans.__(`Prompt to ${position}`),
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {

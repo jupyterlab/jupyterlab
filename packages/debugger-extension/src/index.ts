@@ -345,7 +345,6 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       },
       execute: async () => {
         const state = service.getDebuggerState();
-        await service.stop();
 
         const widget = notebookTracker.currentWidget;
         if (!widget) {
@@ -353,11 +352,15 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext, {
+          onBeforeRestart: async (): Promise<void> => {
+            await service.stop();
+          }
+        });
         if (!restarted) {
           return;
         }
-
+        await service.start();
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
         await NotebookActions.runAll(
@@ -451,20 +454,27 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [IDebuggerDisplayRegistry, IDebuggerSources, ITranslator],
+  optional: [
+    IDebuggerDisplayRegistry,
+    IDebuggerSources,
+    ITranslator,
+    IEditorServices
+  ],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
     displayRegistry: IDebuggerDisplayRegistry | null,
     debuggerSources: IDebugger.ISources | null,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    editorServices: IEditorServices | null
   ) =>
     new Debugger.Service({
       config,
       displayRegistry,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
-      translator
+      translator,
+      mimeTypeService: editorServices?.mimeTypeService ?? null
     })
 };
 
@@ -1149,7 +1159,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
       label: args => (args.filter as string) || 'Breakpoints on exception',
-      caption: args => args.description as string,
+      caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),

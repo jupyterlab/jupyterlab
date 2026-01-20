@@ -5,6 +5,7 @@ import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { changeCodeFontSize, getFileListFontSize } from './utils';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -86,24 +87,6 @@ test.describe('change font-size', () => {
       el => getComputedStyle(el).fontSize
     );
     return parseInt(newFontSize);
-  };
-  const getFileListFontSize = async (page: IJupyterLabPageFixture) => {
-    const itemElement = page.locator(
-      '.jp-DirListing-content .jp-DirListing-itemText'
-    );
-    await itemElement.waitFor();
-    const newFontSize = await itemElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    return parseInt(newFontSize);
-  };
-  const changeCodeFontSize = async (
-    page: IJupyterLabPageFixture,
-    menuOption
-  ) => {
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-    await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
   };
 
   test('should Increase Code Font Size', async ({ page }) => {

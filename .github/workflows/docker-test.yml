@@ -12,7 +12,7 @@ jobs:
   docker:
     name: Docker Dev Container
     if: ${{ github.event_name == 'schedule' }} || contains( github.event.pull_request.title, '[docker]')
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
