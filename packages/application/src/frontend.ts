@@ -57,6 +57,12 @@ export abstract class JupyterFrontEnd<
       sortBySelector: false
     });
 
+    this.contextMenu.menu.aboutToClose.connect(() => {
+      // Make sure we do not keep a reference to DOM node that was hovered over
+      // when the context menu was last opened in event's `target` property.
+      this._contextMenuEvent = null;
+    });
+
     // The default restored promise if one does not exist in the options.
     const restored = new Promise<void>(resolve => {
       requestAnimationFrame(() => {
@@ -206,7 +212,7 @@ export abstract class JupyterFrontEnd<
     }
   }
 
-  private _contextMenuEvent: MouseEvent;
+  private _contextMenuEvent: MouseEvent | null = null;
   private _format: U;
   private _formatChanged = new Signal<this, U>(this);
 }
