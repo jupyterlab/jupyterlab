@@ -340,6 +340,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     skipLinkWrapper.addClass('jp-skiplink-wrapper');
     skipLinkWrapper.addWidget(skipLinkWidget);
 
+    // Scan Mode Off notification
+    const scanModeOffWidget = (this._ScanModeOffWidget =
+      new Private.ScanModeOffWidget(this));
+    this._ScanModeOffWidget.show();
+    //  Wrap the Scan Mode notification widget to customize its position and size
+    const scanModeOffWrapper = new Panel();
+    scanModeOffWrapper.addClass('jp-ScanModepanel-wrapper');
+    scanModeOffWrapper.addWidget(scanModeOffWidget);
+
     const headerPanel = (this._headerPanel = new BoxPanel());
     const menuHandler = (this._menuHandler = new Private.PanelHandler());
     menuHandler.panel.node.setAttribute('role', 'navigation');
@@ -434,6 +443,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxLayout.setStretch(bottomPanel, 0);
 
     rootLayout.addWidget(skipLinkWrapper);
+    rootLayout.addWidget(scanModeOffWrapper);
     rootLayout.addWidget(headerPanel);
     rootLayout.addWidget(topHandler.panel);
     rootLayout.addWidget(hboxPanel);
@@ -1836,6 +1846,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _topHandlerHiddenByUser = false;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidget: Private.SkipLinkWidget;
+  private _ScanModeOffWidget: Private.ScanModeOffWidget;
   private _titleHandler: Private.TitleHandler;
   private _bottomPanel: Panel;
   private _idTypeMap = new Map<string, string>();
@@ -2330,6 +2341,64 @@ namespace Private {
       skipLink.className = 'skip-link';
       skipLink.dataset['targetarea'] = area;
       this.node.appendChild(skipLink);
+    }
+  }
+
+  export class ScanModeOffWidget extends Widget {
+    /**
+     * Construct a new scan mode notification widget.
+     */
+    constructor(shell: ILabShell) {
+      super();
+      this.addClass('jp-ScanModepanel');
+      this.id = 'jp-ScanModepanel';
+      this._shell = shell;
+      this._createScanModeOffRegion('Scan Mode Off', 'main');
+    }
+
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'click':
+          if (event.target instanceof HTMLElement) {
+            this._shell.activateArea(
+              event.target?.dataset?.targetarea as ILabShell.Area
+            );
+          }
+          break;
+      }
+    }
+
+    /**
+     * Handle `after-attach` messages for the widget.
+     */
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('click', this);
+    }
+
+    /**
+     * A message handler invoked on a `'before-detach'`
+     * message
+     */
+    protected onBeforeDetach(msg: Message): void {
+      this.node.removeEventListener('click', this);
+      super.onBeforeDetach(msg);
+    }
+    private _shell: ILabShell;
+
+    private _createScanModeOffRegion(
+      scanModeOffText: string,
+      area: ILabShell.Area
+    ): void {
+      const scanModeOff = document.createElement('div');
+      scanModeOff.setAttribute('aria-live', 'assertive');
+      scanModeOff.setAttribute('role', 'region');
+      scanModeOff.setAttribute('id', 'jp-ScanMode-region');
+      scanModeOff.tabIndex = 0;
+      scanModeOff.innerText = scanModeOffText;
+      scanModeOff.className = 'ScanMode-panel';
+      scanModeOff.dataset['targetarea'] = area;
+      this.node.appendChild(scanModeOff);
     }
   }
 
