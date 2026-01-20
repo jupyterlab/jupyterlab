@@ -868,14 +868,6 @@ function addCommands(
               name: {
                 type: 'string',
                 description: 'The name of the kernel'
-              },
-              execution_state: {
-                type: 'string',
-                description: 'The kernel execution state'
-              },
-              last_activity: {
-                type: 'string',
-                description: 'The timestamp of the last activity on the kernel'
               }
             }
           },

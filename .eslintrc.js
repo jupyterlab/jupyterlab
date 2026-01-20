@@ -140,7 +140,6 @@ module.exports = {
           'jupyterlab_mime_extensions',
           'kernel_spec',
           'language_info',
-          'last_activity',
           'last_modified',
           'last_update_date',
           'latest_version',
