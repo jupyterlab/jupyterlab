@@ -25,25 +25,15 @@ test.describe('Tab Switching Shortcuts', () => {
     }
 
     // Close Launcher tab if present (it's closable when other widgets are open)
-    const launcherTab = page
-      .locator('#jp-main-dock-panel .lm-TabBar-tab')
-      .filter({ hasText: 'Launcher' });
+    const launcherTab = page.activity.getTabLocator('Launcher');
     if ((await launcherTab.count()) > 0) {
       const closeIcon = launcherTab.locator('.lm-TabBar-tabCloseIcon');
       if ((await closeIcon.count()) > 0) {
-        await closeIcon.click();
-        await page.waitForFunction(() => {
-          const tabs = document.querySelectorAll(
-            '#jp-main-dock-panel .lm-TabBar-tab'
-          );
-          return (
-            Array.from(tabs).every(
-              tab =>
-                tab.querySelector('.lm-TabBar-tabLabel')?.textContent !==
-                'Launcher'
-            ) && tabs.length >= 3
-          );
+        await page.activity.activateTab('Launcher');
+        await page.evaluate(async () => {
+          await window.jupyterapp.commands.execute('application:close');
         });
+        await launcherTab.waitFor({ state: 'hidden' });
       }
     }
   });
