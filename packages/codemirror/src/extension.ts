@@ -740,6 +740,8 @@ export namespace EditorExtensionRegistry {
             //   between command end edit mode) in notebooks, but has no equivalent
             //   in the File Editor; instead, a `codemirror:toggle-tab-focus-mode`
             //   command can be bound to invoke this behaviour.
+            // - Disable Mod-Alt-ArrowDown/Up that were addd in commands v6.9.0
+            //   until they get more testing in JupyterLab 4.6.0 pre-releases.
             return ![
               'Ctrl-m',
               'Mod-Enter',
@@ -747,7 +749,9 @@ export namespace EditorExtensionRegistry {
               'Mod-/',
               'Alt-A',
               'Escape',
-              'Enter'
+              'Enter',
+              'Mod-Alt-ArrowUp',
+              'Mod-Alt-ArrowDown'
             ].includes(binding.key as string);
           }),
           {
