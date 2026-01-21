@@ -49,7 +49,7 @@ namespace CommandIDs {
 }
 
 /**
- * Selector for CodeMirror editor with `cmView` attribute.
+ * Selector for CodeMirror editor with `cmTile` attribute.
  */
 const CODE_MIRROR_SELECTOR = '.cm-content';
 
@@ -82,10 +82,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       if (!node) {
         return;
       }
-      if (!('cmView' in node)) {
-        return;
-      }
-      return (node.cmView as any).view as EditorView;
+      return EditorView.findFromDOM(node);
     };
 
     const isEnabled = () => {
