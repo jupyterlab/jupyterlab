@@ -907,6 +907,18 @@
     }
   },
   {
+    "id": "codemirror:markdown-toggle-bold",
+    "label": "Toggle Bold",
+    "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
+    "shortcuts": [
+      "Ctrl B"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "codemirror:select-next-occurrence",
     "label": "Select Next Occurrence",
     "caption": "",
