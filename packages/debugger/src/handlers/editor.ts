@@ -79,7 +79,7 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
       const editor = this.editor;
@@ -87,13 +87,14 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
-      }
+      },
+      this
     );
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(
@@ -113,7 +114,8 @@ export class EditorHandler implements IDisposable {
             }
           }
         }
-      }
+      },
+      this
     );
 
     this._breakpointEffect = StateEffect.define<
