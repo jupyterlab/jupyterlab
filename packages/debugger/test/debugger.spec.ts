@@ -57,11 +57,7 @@ describe('Debugger', () => {
   const specsManager = new KernelSpecManager();
   const config = new Debugger.Config();
   const displayRegistry = new DebuggerDisplayRegistry();
-  const service = new DebuggerService({
-    displayRegistry,
-    specsManager,
-    config
-  });
+
   const registry = new CommandRegistry();
   const languages = new EditorLanguageRegistry();
   const callstackToolbarCommands = {
@@ -92,6 +88,12 @@ describe('Debugger', () => {
   });
   const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const service = new DebuggerService({
+    displayRegistry,
+    specsManager,
+    config,
+    mimeTypeService
+  });
   const lines = [3, 5];
   const code = [
     'i = 0',
