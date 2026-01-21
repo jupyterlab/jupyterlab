@@ -83,6 +83,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
+    // For backward-compatibility with older CodeMirror
+    const content = host.querySelector('.cm-content')!;
+    (content as any).cmView = {
+      view: this._editor,
+      dom: content
+    };
 
     const scroller = host.querySelector('.cm-scroller') as HTMLElement | null;
     if (scroller) {
