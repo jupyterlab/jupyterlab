@@ -907,6 +907,18 @@
     }
   },
   {
+    "id": "codemirror:markdown-toggle-bold",
+    "label": "Toggle Bold",
+    "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
+    "shortcuts": [
+      "Ctrl B"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "codemirror:select-next-occurrence",
     "label": "Select Next Occurrence",
     "caption": "",
@@ -924,18 +936,6 @@
     "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
     "shortcuts": [
       "Alt A"
-    ],
-    "args": {
-      "type": "object",
-      "properties": {}
-    }
-  },
-  {
-    "id": "codemirror:markdown-toggle-bold",
-    "label": "Toggle Bold",
-    "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
-    "shortcuts": [
-      "Ctrl B"
     ],
     "args": {
       "type": "object",
