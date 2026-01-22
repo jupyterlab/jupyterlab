@@ -61,6 +61,7 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
+    this._root = options.root || '';
     this._allowFileUploads = options.allowFileUploads ?? true;
     this._model = {
       path: this.rootPath,
@@ -147,6 +148,15 @@ export class FileBrowserModel implements IDisposable {
    */
   get rootPath(): string {
     return this._driveName ? this._driveName + ':' : '';
+  }
+
+  /**
+   * Get the navigation root path.
+   *
+   * When set, navigation is restricted to this path and its subdirectories.
+   */
+  get root(): string {
+    return this._root;
   }
 
   /**
@@ -246,6 +256,10 @@ export class FileBrowserModel implements IDisposable {
     } else {
       path = this._pendingPath || this._model.path;
     }
+    // Check if navigation is restricted and the path is outside the root
+    if (this._root && !this._isPathWithinRoot(path)) {
+      return;
+    }
     if (this._pending) {
       // Collapse requests to the same directory.
       if (path === this._pendingPath) {
@@ -289,14 +303,15 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (error.response && error.response.status === 404 && path !== '/') {
+        const fallbackPath = this._root || '/';
+        if (error.response && error.response.status === 404 && path !== fallbackPath) {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
           );
           console.error(error);
           this._connectionFailure.emit(error);
-          return this.cd('/');
+          return this.cd(fallbackPath);
         } else {
           this._connectionFailure.emit(error);
         }
@@ -649,6 +664,26 @@ export class FileBrowserModel implements IDisposable {
   }
 
   /**
+   * Check if a path is within the navigation root.
+   *
+   * @param path - The path to check.
+   * @returns Whether the path is within the root boundary.
+   */
+  private _isPathWithinRoot(path: string): boolean {
+    if (!this._root) {
+      return true;
+    }
+    // Normalize paths for comparison (remove trailing slashes)
+    const normalizedPath = PathExt.removeSlash(path);
+    const normalizedRoot = PathExt.removeSlash(this._root);
+    // Path is valid if it equals the root or is a subdirectory of root
+    return (
+      normalizedPath === normalizedRoot ||
+      normalizedPath.startsWith(normalizedRoot + '/')
+    );
+  }
+
+  /**
    * Populate the model's sessions collection.
    */
   private _populateSessions(models: Iterable<Session.IModel>): void {
@@ -675,6 +710,7 @@ export class FileBrowserModel implements IDisposable {
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
+  private _root: string;
   private _allowFileUploads: boolean;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
@@ -711,6 +747,14 @@ export namespace FileBrowserModel {
      * A document manager instance.
      */
     manager: IDocumentManager;
+
+    /**
+     * The root path for navigation restriction.
+     *
+     * When set, navigation will be restricted to this path and its
+     * subdirectories. Users will not be able to navigate above this path.
+     */
+    root?: string;
 
     /**
      * The time interval for browser refreshing, in ms.
