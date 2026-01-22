@@ -154,3 +154,81 @@ test('Terminal web link', async ({ page, tmpPath, browserName }) => {
   ]);
   expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
 });
+
+test.describe('Open in Terminal from File Browser', () => {
+  // Ensure a clean state before each test
+  test.beforeEach(async ({ page }) => {
+    await page.activity.closeAll();
+  });
+
+  test('should open one terminal for a single selected directory', async ({
+    page,
+    tmpPath
+  }) => {
+    // a test directory
+    const folderName = 'single-dir-test';
+    await page.contents.createDirectory(`${tmpPath}/${folderName}`);
+    await page.filebrowser.openDirectory(tmpPath);
+    await page.filebrowser.refresh();
+
+    // Right-click the directory and select "Open in Terminal"
+    const folderLocator = page.locator(
+      `.jp-DirListing-item:has-text("${folderName}")`
+    );
+    await folderLocator.waitFor({ state: 'visible' });
+    await folderLocator.click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Open in Terminal' }).click();
+
+    // Check that one terminal opened in the correct path
+    const terminalTabLocator = page.activity.getTabLocator('Terminal 1');
+    await expect(terminalTabLocator).toBeVisible();
+
+    const terminalPanelLocator =
+      await page.activity.getPanelLocator('Terminal 1');
+    expect(terminalPanelLocator).not.toBeNull();
+
+    // Wait for terminal body to be ready
+    await terminalPanelLocator!.locator('.jp-Terminal-body').waitFor();
+    await page.waitForTimeout(500);
+
+    await terminalPanelLocator!.click();
+
+    await page.waitForTimeout(300);
+
+    await page.keyboard.type('pwd');
+    await page.keyboard.press('Enter');
+
+    // Wait for command to execute and output to appear
+    await page.waitForTimeout(1000);
+
+    await expect(terminalPanelLocator!).toContainText(folderName, {
+      timeout: 5000
+    });
+  });
+
+  test('should not show the context menu item for files', async ({
+    page,
+    tmpPath
+  }) => {
+    //  Create a test file by simulating the UI actions
+    const fileName = 'a-file.txt';
+    const fullPath = `${tmpPath}/${fileName}`;
+    await page.filebrowser.openDirectory(tmpPath);
+
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.contents.renameFile(`${tmpPath}/untitled.txt`, fullPath);
+    await page.filebrowser.refresh();
+
+    // Right-click the file
+    const fileLocator = page.locator(
+      `.jp-DirListing-item:has-text("${fileName}")`
+    );
+    await fileLocator.waitFor({ state: 'visible' });
+    await fileLocator.click({ button: 'right' });
+
+    // Assert: The "Open in Terminal" menu item should NOT be visible
+    await expect(
+      page.getByRole('menuitem', { name: 'Open in Terminal' })
+    ).not.toBeVisible();
+  });
+});
