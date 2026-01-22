@@ -56,6 +56,14 @@ export namespace FileDialog {
     defaultPath?: string;
 
     /**
+     * The root path for navigation.
+     *
+     * When set, navigation will be restricted to this path and its
+     * subdirectories. Users will not be able to navigate above this path.
+     */
+    root?: string;
+
+    /**
      * Text to display above the file browser.
      */
     label?: string;
@@ -131,6 +139,7 @@ class OpenDialog extends Dialog<Contents.IModel[]> {
       options.filter,
       translator,
       options.defaultPath,
+      options.root,
       options.label,
       true,
       handleOpenFile
@@ -164,6 +173,7 @@ class OpenDialogBody
     filter?: (value: Contents.IModel) => Partial<IScore> | null,
     translator?: ITranslator,
     defaultPath?: string,
+    root?: string,
     label?: string,
     filterDirectories?: boolean,
     handleOpenFile?: (path: string) => void
@@ -180,6 +190,7 @@ class OpenDialogBody
       {},
       translator,
       defaultPath,
+      root,
       filterDirectories,
       handleOpenFile
     )
@@ -317,6 +328,7 @@ namespace Private {
     options: IFileBrowserFactory.IOptions = {},
     translator?: ITranslator,
     defaultPath?: string,
+    root?: string,
     filterDirectories?: boolean,
     handleOpenFile?: (path: string) => void
   ): Promise<FileBrowser> => {
@@ -327,6 +339,7 @@ namespace Private {
       translator,
       driveName: options.driveName,
       refreshInterval: options.refreshInterval,
+      root,
       filterDirectories
     });
 
