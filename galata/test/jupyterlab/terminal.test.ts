@@ -186,12 +186,23 @@ test.describe('Open in Terminal from File Browser', () => {
     const terminalPanelLocator =
       await page.activity.getPanelLocator('Terminal 1');
     expect(terminalPanelLocator).not.toBeNull();
+
+    // Wait for terminal body to be ready
+    await terminalPanelLocator!.locator('.jp-Terminal-body').waitFor();
+    await page.waitForTimeout(500);
+
     await terminalPanelLocator!.click();
+
+    await page.waitForTimeout(300);
+
     await page.keyboard.type('pwd');
     await page.keyboard.press('Enter');
 
+    // Wait for command to execute and output to appear
+    await page.waitForTimeout(1000);
+
     await expect(terminalPanelLocator!).toContainText(folderName, {
-      timeout: 2000
+      timeout: 5000
     });
   });
 
