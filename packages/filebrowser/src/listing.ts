@@ -1729,6 +1729,10 @@ export class DirListing extends Widget {
     if (model.path === model.rootPath) {
       return;
     }
+    // Check if we're at the navigation root boundary
+    if (model.root && model.path === model.root) {
+      return;
+    }
     try {
       await model.cd('..');
     } catch (reason) {
