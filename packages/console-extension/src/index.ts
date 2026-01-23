@@ -638,7 +638,8 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      (tracker.currentWidget === shell.currentWidget ||
+        tracker.currentWidget.node.contains(document.activeElement))
     );
   }
 
@@ -729,7 +730,53 @@ async function activateConsole(
           },
           kernelPreference: {
             type: 'object',
-            description: trans.__('The kernel preference for the console')
+            description: trans.__(
+              'The kernel preference for the console. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.'
+            ),
+            properties: {
+              id: {
+                type: 'string',
+                description: trans.__('The id of an existing kernel')
+              },
+              name: {
+                type: 'string',
+                description: trans.__('The name of the kernel')
+              },
+              language: {
+                type: 'string',
+                description: trans.__('The preferred kernel language')
+              },
+              shouldStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel should be started automatically (default `true`)'
+                )
+              },
+              canStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel can be started (default `true`)'
+                )
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description: trans.__(
+                  'Shut down the session when session context is disposed (default `false`)'
+                )
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description: trans.__(
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+                )
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description: trans.__(
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+                )
+              }
+            }
           },
           basePath: {
             type: 'string',
@@ -797,7 +844,8 @@ async function activateConsole(
         }
         current.console.setConfig({ promptCellPosition: position });
       },
-      isEnabled: isEnabled,
+      isEnabled: () =>
+        !!tracker.currentWidget && tracker.currentWidget.isVisible,
       label: trans.__(`Prompt to ${position}`),
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {

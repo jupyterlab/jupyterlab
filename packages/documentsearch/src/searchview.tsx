@@ -251,7 +251,6 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
           <button
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => props.onPreserveCaseToggled()}
-            tabIndex={0}
             title={trans.__('Preserve Case')}
           >
             <caseSensitiveIcon.react
@@ -284,13 +283,9 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       </button>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
-        tabIndex={0}
         onClick={() => props.onReplaceAll()}
       >
-        <span
-          className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
-        >
+        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
         </span>
       </button>
@@ -876,6 +871,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    */
   protected onCloseRequest(msg: Message): void {
     super.onCloseRequest(msg);
+    this.setReplaceInputVisibility(false);
     this._closed.emit();
     void this.model.endQuery();
   }

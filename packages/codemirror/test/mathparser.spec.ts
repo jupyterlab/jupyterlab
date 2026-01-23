@@ -9,8 +9,13 @@
 import { parseMathIPython } from '@jupyterlab/codemirror';
 import { Tree } from '@lezer/common';
 import { MarkdownParser, parser } from '@lezer/markdown';
+import { StreamLanguage } from '@codemirror/language';
+import { stexMath } from '@codemirror/legacy-modes/mode/stex';
 
 const ipythonParser = parser.configure([parseMathIPython()]);
+const mixedParser = parser.configure([
+  parseMathIPython(StreamLanguage.define(stexMath).parser)
+]);
 
 function compareTree(a: Tree, b: Tree) {
   let curA = a.cursor(),
@@ -294,3 +299,10 @@ test(
 {maBB:\\\\]}}}
 `
 );
+
+describe('markdown parser', () => {
+  it('should parse empty math block $$$$ without error', () => {
+    const inputText = '$$$$';
+    expect(() => mixedParser.parse(inputText)).not.toThrow();
+  });
+});

@@ -79,7 +79,7 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
       const editor = this.editor;
@@ -87,21 +87,36 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
-      }
+      },
+      this
     );
 
-    this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
-      const editor = this.editor;
-      if (editor) {
-        EditorHandler.clearHighlight(editor);
-      }
-    });
+    this._debuggerService.model.callstack.currentFrameChanged.connect(
+      (_, frame: IDebugger.IStackFrame) => {
+        const editor = this.editor;
+        if (editor) {
+          EditorHandler.clearHighlight(editor);
+          const framePath = frame?.source?.path ?? '';
+          const editorPath =
+            this._path ||
+            this._debuggerService.getCodeId(this._src.getSource());
+
+          // If the current frame belongs to this editor, highlight its line.
+          if (framePath && editorPath && framePath === editorPath) {
+            if (typeof frame?.line === 'number') {
+              EditorHandler.showCurrentLine(editor, frame.line);
+            }
+          }
+        }
+      },
+      this
+    );
 
     this._breakpointEffect = StateEffect.define<
       { pos: number; selected: boolean }[]
