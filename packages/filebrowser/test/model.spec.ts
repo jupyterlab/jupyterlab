@@ -218,6 +218,59 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#root', () => {
+      it('should return empty string when no root is set', () => {
+        expect(model.root).toBe('');
+      });
+
+      it('should return the root when set', () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        expect(restrictedModel.root).toBe(subDir);
+        restrictedModel.dispose();
+      });
+
+      it('should block navigation outside the root', async () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        await restrictedModel.cd(subDir);
+        expect(restrictedModel.path).toBe(subDir);
+
+        // Try to navigate to parent (outside root) - should be blocked
+        await restrictedModel.cd('..');
+        expect(restrictedModel.path).toBe(subDir);
+
+        // Try to navigate to root "/" - should be blocked
+        await restrictedModel.cd('/');
+        expect(restrictedModel.path).toBe(subDir);
+
+        restrictedModel.dispose();
+      });
+
+      it('should allow navigation within the root', async () => {
+        const restrictedModel = new FileBrowserModel({
+          manager,
+          root: subDir
+        });
+        await restrictedModel.cd(subDir);
+        expect(restrictedModel.path).toBe(subDir);
+
+        // Navigate to subdirectory within root - should work
+        await restrictedModel.cd(subSubDir);
+        expect(restrictedModel.path).toBe(subSubDir);
+
+        // Navigate back to root - should work
+        await restrictedModel.cd(subDir);
+        expect(restrictedModel.path).toBe(subDir);
+
+        restrictedModel.dispose();
+      });
+    });
+
     describe('#items()', () => {
       it('should get an iterator of items in the current path', () => {
         const items = model.items();
