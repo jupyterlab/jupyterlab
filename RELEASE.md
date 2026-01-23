@@ -66,12 +66,12 @@ Here is a quick summary of the action items, with each step linked to further co
 2. [Run the Prep Release workflow](#prep-release) to prepare a draft GitHub release
    1. Go to the [Prep Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/prep-release.yml) workflow
    2. Click the "Run Workflow" dropdown menu on the right.
-      - `New Version Specifier`: `next` if releasing a patch release, otherwise fill in with the new release version number
+      - `New Version Specifier`: `next` if releasing a patch release (these are the most common), otherwise `major`, `minor` or `release` as per the [bump version table](#bump-version)
       - `The branch to target`: leave blank if releasing the `main` branch, otherwise fill in with the repo branch you are releasing
    3. Click the green "Run Workflow" button at the bottom of the dialog box to trigger the workflow
    4. After the workflow runs, edit the draft release statement at https://github.com/jupyterlab/jupyterlab/releases if needed
 3. [Run the Release workflow](#publish-release) to create a release and publish it to NPM and PyPI
-   1. Go to the [Prep Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow
+   1. Go to the [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow
    2. Click the "Run Workflow" dropdown menu on the right. If releasing a different branch than main, fill in "The target branch"
    3. Click the green "Run Workflow" button at the bottom of the dialog box to trigger the workflow
 4. Post a message to [#jupyterlab > Release Coordination](https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab/topic/Release.20coordination) with a link to the GitHub release.
