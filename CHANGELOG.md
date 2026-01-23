@@ -603,6 +603,38 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.5.3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.2...a3c7cc66c59cc260de9abe56d0d9aaba824d2036))
+
+### Bugs fixed
+
+- Fix error in console when the debugger switch from a module to another [#18352](https://github.com/jupyterlab/jupyterlab/pull/18352) ([@brichet](https://github.com/brichet))
+- Fix focus of replace buttons in the document search box [#18362](https://github.com/jupyterlab/jupyterlab/pull/18362) ([@IsabelParedes](https://github.com/IsabelParedes))
+- Update CodeMirror to latest versions [#18344](https://github.com/jupyterlab/jupyterlab/pull/18344) ([@krassowski](https://github.com/krassowski))
+- Fix deferred cell loading in `defer` and `contentVisibility` windowing mode [#18359](https://github.com/jupyterlab/jupyterlab/pull/18359) ([@krassowski](https://github.com/krassowski))
+- Backport PR #18349: Fix "Open With > Editor" for `.py` files, update `@lumino` packages to `v2026.1.15` [#18351](https://github.com/jupyterlab/jupyterlab/pull/18351) ([@krassowski](https://github.com/krassowski), [@aaron-seq](https://github.com/aaron-seq))
+
+### Maintenance and upkeep improvements
+
+- Fix UI tests: config useSystemClipboardForCells=true for notebook toolbar test [#18335](https://github.com/jupyterlab/jupyterlab/pull/18335) ([@brichet](https://github.com/brichet))
+- Remove generated docs files from the repo [#18340](https://github.com/jupyterlab/jupyterlab/pull/18340) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Add installation instructions for JupyterLab with uv [#18363](https://github.com/jupyterlab/jupyterlab/pull/18363) ([@jimangel](https://github.com/jimangel))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2026-01-12&to=2026-01-23&type=c))
+
+@aaron-seq ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aaaron-seq+updated%3A2026-01-12..2026-01-23&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2026-01-12..2026-01-23&type=Issues)) | @IsabelParedes ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AIsabelParedes+updated%3A2026-01-12..2026-01-23&type=Issues)) | @jimangel ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajimangel+updated%3A2026-01-12..2026-01-23&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2026-01-12..2026-01-23&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2026-01-12..2026-01-23&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.5.2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.5.1...bb13be16887be7116f086da699bd09208042e2b6))
@@ -637,8 +669,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2025-12-15&to=2026-01-12&type=c))
 
 @brichet ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2025-12-15..2026-01-12&type=Issues)) | @Darshan808 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADarshan808+updated%3A2025-12-15..2026-01-12&type=Issues)) | @i-aki-y ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ai-aki-y+updated%3A2025-12-15..2026-01-12&type=Issues)) | @JamesWrigley ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJamesWrigley+updated%3A2025-12-15..2026-01-12&type=Issues)) | @jtpio ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2025-12-15..2026-01-12&type=Issues)) | @krassowski ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2025-12-15..2026-01-12&type=Issues)) | @Krish-876 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKrish-876+updated%3A2025-12-15..2026-01-12&type=Issues)) | @MUFFANUJ ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMUFFANUJ+updated%3A2025-12-15..2026-01-12&type=Issues)) | @pranshugupta01 ([activity](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apranshugupta01+updated%3A2025-12-15..2026-01-12&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.5.1
 
