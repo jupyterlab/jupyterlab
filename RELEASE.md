@@ -69,7 +69,7 @@ Here is a quick summary of the action items, with each step linked to further co
       - `New Version Specifier`: `next` if releasing a patch release (these are the most common), otherwise `major`, `minor` or `release` as per the [bump version table](#bump-version)
       - `The branch to target`: leave blank if releasing the `main` branch, otherwise fill in with the repo branch you are releasing
    3. Click the green "Run Workflow" button at the bottom of the dialog box to trigger the workflow
-   4. After the workflow runs, edit the draft release statement at https://github.com/jupyterlab/jupyterlab/releases if needed
+   4. After the workflow runs, examine the draft release statement at https://github.com/jupyterlab/jupyterlab/releases. If changes are needed, edit relevant PR titles, labels, etc., then re-run the Prep Release workflow to generate a new draft release.
 3. [Run the Release workflow](#publish-release) to create a release and publish it to NPM and PyPI
    1. Go to the [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow
    2. Click the "Run Workflow" dropdown menu on the right. If releasing a different branch than main, fill in "The target branch"
@@ -108,7 +108,7 @@ Click on "Run workflow", then once completed:
 
 1. Go to the GitHub Releases: https://github.com/jupyterlab/jupyterlab/releases
 2. Check the draft GitHub Release has been created
-3. Make edits to the changelog if needed. ⚠️ If you make edits to the content of the GitHub Release, then don't forget to click on "Save Draft" and not "Publish Release".
+3. Examine the text of the draft release. If changes are needed to the information, you can edit PR titles, labels, etc., then re-run the Prep Release workflow to generate a new draft release. ⚠️ In the rare event that you make direct edits to the content of the draft release itself, then don't forget to click on "Save Draft" and not "Publish Release".
 
 ### Publish Release
 
