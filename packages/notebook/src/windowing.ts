@@ -187,10 +187,10 @@ export class NotebookViewModel extends WindowedListModel {
     if (model instanceof CodeCellModel && !model.isDisposed) {
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
         const output = model.outputs.get(outputIdx);
-        
+
         // Check for multiple output types including stderr and stdout
         const outputTypes = ['text/plain', 'application/vnd.jupyter.stderr', 'application/vnd.jupyter.stdout'];
-        
+
         for (const outputType of outputTypes) {
           const data = output.data[outputType];
           if (typeof data === 'string') {
