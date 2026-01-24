@@ -5,6 +5,7 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  PromiseDelegate,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
@@ -93,7 +94,7 @@ export abstract class RenderedCommon
     // TODO compare model against old model for early bail?
 
     // Empty any existing content in the node from previous renders
-    if (!keepExisting) {
+    if (!keepExisting && !this.keepExisting) {
       while (this.node.firstChild) {
         this.node.removeChild(this.node.firstChild);
       }
@@ -120,6 +121,11 @@ export abstract class RenderedCommon
    * @returns A promise which resolves when rendering is complete.
    */
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+
+  /**
+   * Whether to Whether to keep the existing rendering by default.
+   */
+  readonly keepExisting?: boolean = false;
 
   /**
    * Set the URI fragment identifier.
@@ -425,6 +431,11 @@ export class RenderedSVG extends RenderedCommon {
  */
 export class RenderedText extends RenderedCommon {
   /**
+   * Keep existing node as `renderText` supports reuse of the existing nodes on streaming.
+   */
+  readonly keepExisting = true;
+
+  /**
    * Construct a new rendered text widget.
    *
    * @param options - The options for initializing the widget.
@@ -432,6 +443,30 @@ export class RenderedText extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedText');
+    this._wrapper = document.createElement('div');
+    this._wrapper.style.contain = 'style layout';
+    this._wrapper.style.width = '100%';
+    this.node.appendChild(this._wrapper);
+    this._ready.resolve(void 0);
+    /*
+    this._iframe = document.createElement('iframe');
+    this._iframe.width = '100%';
+    this._iframe.style.border = '0';
+    this.node.appendChild(this._iframe);
+    this._iframe.onload = () => {
+      const body = this._iframe.contentWindow!.document.createElement('body');
+      const style = this._iframe.contentWindow!.document.createElement('style');
+      style.innerHTML = 'pre { margin: 0; white-space: pre-wrap; word-break: break-all;word-wrap: break-word;}'
+      const resizeObserver = new ResizeObserver((entries) => {
+        //
+        this._iframe.style.height = entries[0].contentRect.height + 'px';
+      });
+      resizeObserver.observe(body);
+      body.style.margin = '0px';
+      this._iframe.contentWindow!.document.body = body;
+      this._iframe.contentWindow!.document.head.appendChild(style);
+      this._ready.resolve(void 0);
+    };*/
   }
 
   /**
@@ -441,25 +476,26 @@ export class RenderedText extends RenderedCommon {
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  async render(model: IRenderMime.IMimeModel): Promise<void> {
+    await this._ready.promise;
     return renderers.renderText({
-      host: this.node,
+      host: this._wrapper, //this._iframe.contentDocument?.body!,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
       translator: this.translator
     });
   }
+
+  protected _iframe: HTMLIFrameElement;
+  protected _wrapper: HTMLElement;
+  protected _ready = new PromiseDelegate<void>();
 }
 
-export class RenderedError extends RenderedCommon {
-  constructor(options: IRenderMime.IRendererOptions) {
-    super(options);
-    this.addClass('jp-RenderedText');
-  }
-
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+export class RenderedError extends RenderedText {
+  async render(model: IRenderMime.IMimeModel): Promise<void> {
+    await this._ready.promise;
     return renderers.renderError({
-      host: this.node,
+      host: this._wrapper, //this._iframe.contentDocument?.body!,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
       linkHandler: this.linkHandler,
