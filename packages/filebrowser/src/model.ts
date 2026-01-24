@@ -303,7 +303,11 @@ export class FileBrowserModel implements IDisposable {
         this._pendingPath = null;
         this._pending = null;
         const fallbackPath = this._root || '/';
-        if (error.response && error.response.status === 404 && path !== fallbackPath) {
+        if (
+          error.response &&
+          error.response.status === 404 &&
+          path !== fallbackPath
+        ) {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
@@ -648,10 +652,10 @@ export class FileBrowserModel implements IDisposable {
       prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue &&
-          newValue.path &&
-          prefix + PathExt.dirname(newValue.path) === path
-        ? newValue
-        : undefined;
+            newValue.path &&
+            prefix + PathExt.dirname(newValue.path) === path
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
