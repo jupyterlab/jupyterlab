@@ -319,7 +319,8 @@ export class Context<
     try {
       await this._manager.ready;
       await this._manager.contents.get(newPath, {
-        contentProviderId: this._contentProviderId
+        contentProviderId: this._contentProviderId,
+        content: false
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
