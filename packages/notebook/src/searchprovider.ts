@@ -234,10 +234,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
         disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
+          'Search in the cell outputs (replace will be disabled for output matches).'
         ),
         default: false,
-        supportReplace: false
+        supportReplace: true // Allow search in outputs when replace is shown
       },
       selection: {
         title:
@@ -925,6 +925,21 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
 
     this._filtersChanged.emit();
+  }
+
+  /**
+   * Check if the current match is in a cell output.
+   *
+   * @returns Whether the current match is in an output
+   */
+  get isCurrentMatchInOutput(): boolean {
+    if (this._currentProviderIndex === null || !this._searchProviders[this._currentProviderIndex]) {
+      return false;
+    }
+    
+    const currentProvider = this._searchProviders[this._currentProviderIndex];
+    // Check if the output filter is enabled and the current provider supports output matches
+    return this._filters?.output === true && currentProvider.currentMatchIndex !== null;
   }
 
   // used for testing only

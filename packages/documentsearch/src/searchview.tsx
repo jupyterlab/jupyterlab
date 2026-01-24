@@ -222,6 +222,7 @@ interface IReplaceEntryProps {
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
+  isCurrentMatchInOutput?: boolean; // New prop to disable replace for output matches
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -260,6 +261,8 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
+        disabled={props.isCurrentMatchInOutput}
+        title={props.isCurrentMatchInOutput ? trans.__('Cannot replace matches in cell outputs') : trans.__('Replace')}
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
@@ -268,6 +271,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceAll()}
+        title={trans.__('Replace All')}
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
@@ -550,6 +554,10 @@ interface ISearchOverlayProps {
    * Provides information about keybindings for display.
    */
   keyBindings?: ISearchKeyBindings;
+  /**
+   * Whether the current match is in a cell output.
+   */
+  isCurrentMatchInOutput?: boolean;
 }
 
 class SearchOverlay extends React.Component<ISearchOverlayProps> {
@@ -778,6 +786,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 replaceText={this.props.replaceText}
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
+                isCurrentMatchInOutput={this.props.isCurrentMatchInOutput}
               />
               <div className={SPACER_CLASS}></div>
             </>
@@ -964,6 +973,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
           void this.model.replaceAllMatches();
         }}
         keyBindings={this._keyBindings}
+        isCurrentMatchInOutput={(this.model.searchProvider as any)?.isCurrentMatchInOutput}
       ></SearchOverlay>
     );
   }
