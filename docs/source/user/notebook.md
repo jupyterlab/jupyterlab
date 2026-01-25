@@ -31,7 +31,7 @@ visualizations and other rich output:
 **Jupyter notebooks (.ipynb files) are fully supported in JupyterLab.** The
 [notebook document format](https://nbformat.readthedocs.io/en/latest/) used in
 JupyterLab is the same as in the classic Jupyter Notebook. Your existing notebooks
-should open correctly in JupyterLab. If they don’t, please open an issue on our
+should open correctly in JupyterLab. If they don't, please open an issue on our
 [GitHub issues](https://github.com/jupyterlab/jupyterlab/issues) page.
 
 (create-notebook)=
@@ -48,7 +48,7 @@ then selecting a kernel in the new Launcher tab:
 (rename-file)=
 
 A new file is created with a default name. Rename a file by
-right-clicking on its name in the file browser and selecting “Rename”
+right-clicking on its name in the file browser and selecting "Rename"
 from the context menu:
 
 ```{raw} html
@@ -116,8 +116,25 @@ Create multiple synchronized views of a single notebook:
 
 (collapse-code)=
 
-Collapse and expand code and output using the View menu or the blue
-collapser button on left of each cell:
+## Collapsing Cells
+
+When you collapse a cell, the first line of the code remains visible. This allows you
+to identify the cell's purpose without viewing the entire code block, which is
+particularly useful when working with large notebooks containing many cells.
+
+![Cell folding with first line visible](../_images/notebook_cell_folding_first_line.png)
+
+To collapse or expand a cell, you can:
+- Click the blue vertical bar on the left edge of the cell
+- Use the View menu to collapse or expand all cells
+- Click directly on a collapsed cell to expand it
+
+**Important behavioral notes:**
+- When a cell is collapsed, clicking anywhere on the cell (not just the blue bar) will expand it
+- In command mode, you can navigate to collapsed cells using arrow keys and execute them with `Shift+Enter`
+- Keyboard navigation in command mode works with both collapsed and expanded cells
+
+Code and output collapsing:
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -125,10 +142,30 @@ collapser button on left of each cell:
 </div>
 ```
 
+(cell-folding-behavior)=
+
+### Cell Folding Behavior
+
+When you collapse a cell, the first line of the code remains visible. This allows you
+to identify the cell's purpose without viewing the entire code block, which is
+particularly useful when working with large notebooks containing many cells.
+
+To collapse or expand a cell, you can:
+
+- Click the blue vertical bar on the left edge of the cell
+- Use the View menu to collapse or expand all cells
+- Click directly on a collapsed cell to expand it
+
+**Important behavioral notes:**
+
+- When a cell is collapsed, clicking anywhere on the cell (not just the blue bar) will expand it
+- In command mode, you can navigate to collapsed cells using arrow keys and execute them with `Shift+Enter`
+- Keyboard navigation in command mode works with both collapsed and expanded cells
+
 (enable-scrolling)=
 
 Enable scrolling for long outputs by right-clicking on a cell and
-selecting “Enable Scrolling for Outputs”:
+selecting "Enable Scrolling for Outputs":
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -138,7 +175,7 @@ selecting “Enable Scrolling for Outputs”:
 
 (cell-output-mirror)=
 
-Create a new synchronized view of a cell’s output:
+Create a new synchronized view of a cell's output:
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -178,7 +215,7 @@ You can connect a {ref}`code console <code-console>` to a notebook kernel to hav
 computations done in the kernel, in the order in which they were done.
 The attached code console also provides a place to interactively inspect
 kernel state without changing the notebook. Right-click on a notebook
-and select “New Console for Notebook”:
+and select "New Console for Notebook":
 
 ```{raw} html
 <div class="jp-youtube-video">
