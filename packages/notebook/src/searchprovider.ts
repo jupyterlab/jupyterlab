@@ -936,7 +936,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (this._currentProviderIndex === null || !this._searchProviders[this._currentProviderIndex]) {
       return false;
     }
-    
+
     const currentProvider = this._searchProviders[this._currentProviderIndex];
     // Check if the output filter is enabled and the current provider supports output matches
     return this._filters?.output === true && currentProvider.currentMatchIndex !== null;
