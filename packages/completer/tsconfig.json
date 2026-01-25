@@ -2,7 +2,16 @@
   "extends": "../../tsconfigbase",
   "compilerOptions": {
     "outDir": "lib",
-    "rootDir": "src"
+    "rootDir": "src",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2018",
+      "ES2020.BigInt",
+      "ES2020.Intl",
+      "ES2020.String",
+      "ES2020.Promise"
+    ]
   },
   "include": ["src/*", "src/default/*"],
   "references": [
