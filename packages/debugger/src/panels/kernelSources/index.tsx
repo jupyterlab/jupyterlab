@@ -5,13 +5,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { showErrorMessage } from '@jupyterlab/apputils';
-
-import {
-  PanelWithToolbar,
-  refreshIcon,
-  ToolbarButton
-} from '@jupyterlab/ui-components';
+import { PanelWithToolbar } from '@jupyterlab/ui-components';
 
 import { IDebugger } from '../../tokens';
 
@@ -47,23 +41,6 @@ export class KernelSources extends PanelWithToolbar {
     this.toolbar.addItem(
       'filter',
       ReactWidget.create(<KernelSourcesFilter model={model} trans={trans} />)
-    );
-
-    this.toolbar.addItem(
-      'refresh',
-      new ToolbarButton({
-        icon: refreshIcon,
-        onClick: () => {
-          this._model.kernelSources = [];
-          void service.displayModules().catch(reason => {
-            void showErrorMessage(
-              trans.__('Fail to get kernel sources'),
-              trans.__('Fail to get kernel sources:\n%2', reason)
-            );
-          });
-        },
-        tooltip: trans.__('Refresh kernel sources')
-      })
     );
 
     this.addClass('jp-DebuggerKernelSources-header');
