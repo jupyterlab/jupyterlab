@@ -88,7 +88,7 @@ if http_proxy_url:
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
-def _check_python_version_compatible(requires_python: Optional[str]) -> bool:
+def _check_python_version_compatible(requires_python: str | None) -> bool:
     """Check if the current Python version satisfies the requires_python specifier.
 
     Args:
