@@ -20,6 +20,8 @@ import { Debugger } from './debugger';
 import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
+import { IDebuggerDisplayRegistry } from './tokens';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * A concrete implementation of the IDebugger interface.
@@ -39,7 +41,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     // runs a kernel with debugging ability
     this._session = null;
     this._specsManager = options.specsManager ?? null;
-    this._model = new Debugger.Model();
+    this._model = new Debugger.Model({
+      displayRegistry: options.displayRegistry,
+      getSource: this.getSource.bind(this),
+      mimeTypeService: options.mimeTypeService || null
+    });
     this._debuggerSources = options.debuggerSources ?? null;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
   }
@@ -109,6 +115,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     this._session?.eventMessage.connect((_, event) => {
       if (event.event === 'stopped') {
+        this._model.stoppedThreads.clear();
         this._model.stoppedThreads.add(event.body.threadId);
         void this._getAllFrames();
       } else if (event.event === 'continued') {
@@ -255,11 +262,15 @@ export class DebuggerService implements IDebugger, IDisposable {
       expression,
       frameId
     });
+
     if (!reply.success) {
       return null;
     }
+
+    // TODO - Should this be here?
+    this._model.variables.scopes = [];
+
     // get the frames to retrieve the latest state of the variables
-    this._clearModel();
     await this._getAllFrames();
 
     return reply.body;
@@ -420,8 +431,9 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
     const { body } = reply;
-    const breakpoints = this._mapBreakpoints(body.breakpoints);
+    const kernelBreakpoints = this._mapBreakpoints(body.breakpoints);
     const stoppedThreads = new Set(body.stoppedThreads);
+    const oldDebuggerState = this.getDebuggerState();
 
     this._model.hasRichVariableRendering = body.richRendering === true;
     this._model.supportCopyToGlobals = body.copyToGlobals === true;
@@ -448,18 +460,33 @@ export class DebuggerService implements IDebugger, IDisposable {
         ? this.session?.connection?.name || '-'
         : '-';
     }
+    const breakpoints = await this._migrateBreakpoints(oldDebuggerState);
 
-    if (this._debuggerSources) {
-      const filtered = this._filterBreakpoints(breakpoints);
-      this._model.breakpoints.restoreBreakpoints(filtered);
-    } else {
-      this._model.breakpoints.restoreBreakpoints(breakpoints);
+    // Merge kernel breakpoints with existing breakpoints, avoiding duplicates
+    for (const [path, kernelBpList] of kernelBreakpoints) {
+      const existingBreakpoints = breakpoints.get(path) ?? [];
+
+      // Filter out kernel breakpoints that already exist at the same line
+      const newBreakpoints = kernelBpList.filter(
+        kernelBp =>
+          !existingBreakpoints.some(
+            existingBp => existingBp.line === kernelBp.line
+          )
+      );
+
+      // Merge existing and new breakpoints
+      breakpoints.set(path, [...existingBreakpoints, ...newBreakpoints]);
     }
+
+    // restore in kernel AND model
+    await this._restoreBreakpoints(breakpoints);
+
+    this._model.breakpoints.restoreBreakpoints(breakpoints);
 
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else if (this.isStarted) {
-      this._clearModel();
+      this._model.callstack.frames = [];
       this._clearSignals();
     }
 
@@ -540,6 +567,14 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (this._model) {
       this._model.clear();
     }
+    this._stoppedSignal.emit();
+  }
+
+  /**
+   * Signal emitted when the debugger is stopped.
+   */
+  get stopped(): ISignal<IDebugger, void> {
+    return this._stoppedSignal;
   }
 
   /**
@@ -566,15 +601,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     const localBreakpoints = breakpoints
       .filter(({ line }) => typeof line === 'number')
       .map(({ line }) => ({ line: line! }));
+
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
-    // Set the local copy of breakpoints to reflect only editors that exist.
-    if (this._debuggerSources) {
-      const filtered = this._filterBreakpoints(remoteBreakpoints);
-      this._model.breakpoints.restoreBreakpoints(filtered);
-    } else {
-      this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
-    }
+    this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
 
     // Removes duplicated breakpoints. It is better to do it here than
     // in the editor, because the kernel can change the line of a
@@ -592,7 +622,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-    await this.session.sendRequest('configurationDone', {});
   }
 
   /**
@@ -658,6 +687,9 @@ export class DebuggerService implements IDebugger, IDisposable {
   getDebuggerState(): IDebugger.State {
     const breakpoints = this._model.breakpoints.breakpoints;
     let cells: string[] = [];
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    const tmpFileParams = this._config.getTmpFileParams(kernel);
+    const tmpPrefix = tmpFileParams?.prefix ?? '';
     if (this._debuggerSources) {
       for (const id of breakpoints.keys()) {
         const editorList = this._debuggerSources.find({
@@ -670,7 +702,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         cells = cells.concat(tmpCells);
       }
     }
-    return { cells, breakpoints };
+    return { cells, breakpoints, tmpPrefix };
   }
 
   /**
@@ -680,27 +712,67 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @returns Whether the state has been restored successfully or not
    */
   async restoreDebuggerState(state: IDebugger.State): Promise<boolean> {
-    await this.start();
-
-    for (const cell of state.cells) {
-      await this._dumpCell(cell);
-    }
-
-    const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
-    const kernel = this.session?.connection?.kernel?.name ?? '';
-    const { prefix, suffix } = this._config.getTmpFileParams(kernel);
-    for (const item of state.breakpoints) {
-      const [id, list] = item;
-      const unsuffixedId = id.substr(0, id.length - suffix.length);
-      const codeHash = unsuffixedId.substr(unsuffixedId.lastIndexOf('/') + 1);
-      const newId = prefix.concat(codeHash).concat(suffix);
-      breakpoints.set(newId, list);
-    }
-
+    const breakpoints = await this._migrateBreakpoints(state);
     await this._restoreBreakpoints(breakpoints);
     const config = await this.session!.sendRequest('configurationDone', {});
     await this.restoreState(false);
     return config.success;
+  }
+
+  /**
+   * Migrate breakpoints from previous path to new path when restoring service state
+   * @param breakpoints
+   * @returns
+   */
+  private async _migrateBreakpoints(debuggerState: IDebugger.State) {
+    const oldSessionPrefix: string | undefined = debuggerState.tmpPrefix;
+    const kernel = this.session?.connection?.kernel?.name ?? '';
+    const { prefix } = this._config.getTmpFileParams(kernel);
+    const { breakpoints } = debuggerState;
+
+    // Bail early if nothing to do
+    if (oldSessionPrefix === prefix) {
+      return breakpoints;
+    }
+
+    const migratedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+
+    for (const item of breakpoints) {
+      const [id, list] = item;
+      if (
+        oldSessionPrefix &&
+        id.startsWith(oldSessionPrefix) &&
+        oldSessionPrefix !== prefix
+      ) {
+        /* replace tmpPrefix by the new prefix in newId*/
+        const newId = id.replace(oldSessionPrefix, prefix);
+        migratedBreakpoints.set(
+          newId,
+          list.map(bp => {
+            return {
+              ...bp,
+              source: {
+                ...bp.source,
+                path: bp.source?.path
+                  ? bp.source.path.replace(oldSessionPrefix, prefix)
+                  : undefined
+              }
+            };
+          })
+        );
+      } else {
+        /* keep the original id otherwise */
+        migratedBreakpoints.set(id, list);
+      }
+    }
+
+    // The session has changed (tmpPrefix has changed), the new kernel does not know
+    // about the cells, request to dump cells
+    for (const cell of debuggerState.cells) {
+      await this._dumpCell(cell);
+    }
+
+    return migratedBreakpoints;
   }
 
   /**
@@ -752,8 +824,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get the current thread from the model.
    */
   private _currentThread(): number {
-    // TODO: ask the model for the current thread ID
-    return 1;
+    return this._model.stoppedThreads.values().next().value ?? 1;
   }
 
   /**
@@ -768,37 +839,6 @@ export class DebuggerService implements IDebugger, IDisposable {
       throw new Error('No active debugger session');
     }
     return this.session.sendRequest('dumpCell', { code });
-  }
-
-  /**
-   * Filter breakpoints and only return those associated with a known editor.
-   *
-   * @param breakpoints - Map of breakpoints.
-   *
-   */
-  private _filterBreakpoints(
-    breakpoints: Map<string, IDebugger.IBreakpoint[]>
-  ): Map<string, IDebugger.IBreakpoint[]> {
-    if (!this._debuggerSources) {
-      return breakpoints;
-    }
-    let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
-    for (const collection of breakpoints) {
-      const [id, list] = collection;
-      list.forEach(() => {
-        this._debuggerSources!.find({
-          focus: false,
-          kernel: this.session?.connection?.kernel?.name ?? '',
-          path: this._session?.connection?.path ?? '',
-          source: id
-        }).forEach(() => {
-          if (list.length > 0) {
-            bpMapForRestore.set(id, list);
-          }
-        });
-      });
-    }
-    return bpMapForRestore;
   }
 
   /**
@@ -1013,6 +1053,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _specsManager: KernelSpec.IManager | null;
   private _trans: TranslationBundle;
   private _pauseOnExceptionChanged = new Signal<IDebugger, void>(this);
+  private _stoppedSignal = new Signal<IDebugger, void>(this);
 }
 
 /**
@@ -1042,5 +1083,15 @@ export namespace DebuggerService {
      * The application language translator.
      */
     translator?: ITranslator | null;
+
+    /**
+     * The display registry.
+     */
+    displayRegistry?: IDebuggerDisplayRegistry | null;
+
+    /**
+     * The mimetype service.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

@@ -118,6 +118,8 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const splitTab = 'application:split-tab';
 }
 
 /**
@@ -142,6 +144,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     // Add Command to override the JLab context menu.
     commands.addCommand(JupyterFrontEndContextMenu.contextMenu, {
       label: trans.__('Shift+Right Click for Browser Menu'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => false,
       execute: () => void 0
     });
@@ -242,6 +250,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         const widget = contextMenuWidget();
         return !!widget && widget.title.closable;
@@ -256,6 +270,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.closeOtherTabs, {
       label: () => trans.__('Close All Other Tabs'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () => {
         // Ensure there are at least two widgets.
         return some(shell.widgets('main'), (_, i) => i === 1);
@@ -276,6 +296,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.closeRightTabs, {
       label: () => trans.__('Close Tabs to Right'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isEnabled: () =>
         !!contextMenuWidget() &&
         widgetsRightOf(contextMenuWidget()!).length > 0,
@@ -299,6 +325,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     if (labShell) {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activateNextTab();
         }
@@ -306,6 +338,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activatePreviousTab, {
         label: trans.__('Activate Previous Tab'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activatePreviousTab();
         }
@@ -313,6 +351,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activateNextTabBar, {
         label: trans.__('Activate Next Tab Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activateNextTabBar();
         }
@@ -320,6 +364,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activatePreviousTabBar, {
         label: trans.__('Activate Previous Tab Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.activatePreviousTabBar();
         }
@@ -327,6 +377,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.closeAll, {
         label: trans.__('Close All Tabs'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.closeAll();
         }
@@ -334,6 +390,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleHeader, {
         label: trans.__('Show Header'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (labShell.mode === 'single-document') {
             labShell.toggleTopInSimpleModeVisibility();
@@ -345,6 +407,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleLeftArea, {
         label: trans.__('Show Left Sidebar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
@@ -361,6 +429,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleRightArea, {
         label: trans.__('Show Right Sidebar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (labShell.rightCollapsed) {
             labShell.expandRight();
@@ -390,6 +464,23 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 'Toggle Element %1 in Left Sidebar',
                 parseInt(args.index as string, 10) + 1
               ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              side: {
+                type: 'string',
+                enum: ['left', 'right'],
+                description: trans.__('The sidebar side')
+              },
+              index: {
+                type: ['string', 'number'],
+                description: trans.__('The index of the sidebar widget')
+              }
+            },
+            required: ['side', 'index']
+          }
+        },
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -424,6 +515,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.side === 'right'
             ? trans.__('Show Right Activity Bar')
             : trans.__('Show Left Activity Bar'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              side: {
+                type: 'string',
+                enum: ['left', 'right'],
+                description: trans.__('The sidebar side')
+              }
+            },
+            required: ['side']
+          }
+        },
         execute: args => {
           if (args.side === 'right') {
             labShell.toggleSideTabBarVisibility('right');
@@ -443,6 +547,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.togglePresentationMode, {
         label: () => trans.__('Presentation Mode'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           labShell.presentationMode = !labShell.presentationMode;
         },
@@ -452,6 +562,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleFullscreenMode, {
         label: trans.__('Fullscreen Mode'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           if (
             document.fullscreenElement === null ||
@@ -477,6 +593,19 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         caption: trans.__(
           'The layout `mode` can be "single-document" or "multiple-document".'
         ),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              mode: {
+                type: 'string',
+                enum: ['single-document', 'multiple-document'],
+                description: trans.__('The layout mode')
+              }
+            },
+            required: ['mode']
+          }
+        },
         isVisible: args => {
           const mode = args['mode'] as string;
           return mode === 'single-document' || mode === 'multiple-document';
@@ -493,6 +622,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleMode, {
         label: trans.__('Simple Interface'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         isToggled: () => labShell.mode === 'single-document',
         execute: () => {
           const args =
@@ -505,6 +640,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.resetLayout, {
         label: trans.__('Reset Default Layout'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           // Turn off presentation mode
           if (labShell.presentationMode) {
@@ -548,6 +689,92 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
           // Some actions are also trigger indirectly
           // - by listening to this command execution.
+        }
+      });
+
+      const contextMenuTabWidget = (): Widget | null => {
+        const test = (node: HTMLElement) =>
+          node.classList.contains('lm-TabBar-tab') && !!node.dataset.id;
+
+        const node = app.contextMenuHitTest(test);
+        if (!node) {
+          return null;
+        }
+
+        const id = node.dataset.id;
+        if (!id) {
+          return null;
+        }
+
+        return find(labShell.widgets('main'), w => w.id === id) ?? null;
+      };
+
+      commands.addCommand('application:split-tab', {
+        label: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+            | undefined;
+
+          if (!direction) {
+            return trans.__('Split Tab');
+          }
+
+          const directionLabels: Record<string, string> = {
+            left: trans.__('Left'),
+            right: trans.__('Right'),
+            top: trans.__('Up'),
+            bottom: trans.__('Down')
+          };
+
+          return directionLabels[direction];
+        },
+        caption: trans.__('Split the current tab'),
+
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              direction: {
+                type: 'string',
+                enum: ['left', 'right', 'top', 'bottom'],
+                description: trans.__('The direction to split the tab')
+              }
+            },
+            required: ['direction']
+          }
+        },
+        isEnabled: () => {
+          const widget = contextMenuTabWidget();
+          if (!widget) {
+            return false;
+          }
+
+          if (!(labShell instanceof LabShell)) {
+            return false;
+          }
+
+          const tabBar = labShell.getMainAreaTabBar(widget);
+          if (!tabBar) {
+            return false;
+          }
+
+          // Disable if only one tab in this area
+          return tabBar.titles.length > 1;
+        },
+        execute: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom';
+
+          const widget = contextMenuTabWidget();
+          if (widget && direction) {
+            labShell.moveTab(widget, direction);
+          }
         }
       });
     }
@@ -969,11 +1196,14 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   description: 'Provides the tree route resolver',
   autoStart: true,
   requires: [IRouter],
+  optional: [ITranslator],
   provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
-    router: IRouter
+    router: IRouter,
+    translator: ITranslator | null
   ): JupyterFrontEnd.ITreeResolver => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const { commands } = app;
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
@@ -984,6 +1214,19 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
     set.add(
       commands.addCommand(CommandIDs.tree, {
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              search: {
+                type: 'string',
+                description: trans.__(
+                  'The URL search string containing query parameters'
+                )
+              }
+            }
+          }
+        },
         execute: async (args: IRouter.ILocation) => {
           if (set.isDisposed) {
             return;
@@ -1206,6 +1449,12 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
 
     app.commands.addCommand(CommandIDs.showPropertyPanel, {
       label: trans.__('Property Inspector'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         labshell.activateById(widget.id);
       }
@@ -1533,6 +1782,12 @@ namespace Private {
     setDisabled(settings);
     commands.addCommand(CommandIDs.toggleContextMenu, {
       label: trans.__('Enable Context Menu'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       isToggleable: true,
       isToggled: () => !settings.get('disabled').composite,
       execute: () =>
@@ -1549,6 +1804,12 @@ namespace Private {
     // Add a command to switch a side panels's side
     app.commands.addCommand(CommandIDs.switchSidebar, {
       label: trans.__('Switch Sidebar Side'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // First, try to find the correct panel based on the application
         // context menu click. Bail if we don't find a sidebar for the widget.

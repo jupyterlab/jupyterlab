@@ -13,6 +13,7 @@ import { Contents, Kernel } from '@jupyterlab/services';
 import { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  audioIcon,
   fileIcon,
   folderIcon,
   imageIcon,
@@ -26,6 +27,7 @@ import {
   rKernelIcon,
   spreadsheetIcon,
   Toolbar,
+  videoIcon,
   yamlIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find } from '@lumino/algorithm';
@@ -967,7 +969,7 @@ export namespace DocumentRegistry {
     /**
      * Save the document to a different path chosen by the user.
      */
-    saveAs(): Promise<void>;
+    saveAs(): Promise<boolean>;
 
     /**
      * Save the document to a different path chosen by the user.
@@ -1536,6 +1538,142 @@ export namespace DocumentRegistry {
         extensions: ['.webp'],
         icon: imageIcon,
         fileFormat: 'base64'
+      },
+      {
+        name: 'aac',
+        displayName: trans.__('Audio'),
+        extensions: ['.aac'],
+        mimeTypes: ['audio/aac'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'midi',
+        displayName: trans.__('Audio'),
+        extensions: ['.midi', '.mid'],
+        mimeTypes: ['audio/midi', 'audio/x-midi'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'mp3',
+        displayName: trans.__('Audio'),
+        extensions: ['.mp3'],
+        mimeTypes: ['audio/mpeg'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'wav',
+        displayName: trans.__('Audio'),
+        extensions: ['.wav'],
+        mimeTypes: ['audio/wav', 'audio/x-wav'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'ogg',
+        displayName: trans.__('Audio'),
+        extensions: ['.ogg'],
+        mimeTypes: ['audio/ogg'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'm4a',
+        displayName: trans.__('Audio'),
+        extensions: ['.m4a'],
+        mimeTypes: ['audio/mp4'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'flac',
+        displayName: trans.__('Audio'),
+        extensions: ['.flac'],
+        mimeTypes: ['audio/flac'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'opus',
+        displayName: trans.__('Audio'),
+        extensions: ['.opus'],
+        mimeTypes: ['audio/opus'],
+        icon: audioIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'mp4',
+        displayName: trans.__('Video'),
+        extensions: ['.mp4'],
+        mimeTypes: ['video/mp4'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mpeg',
+        displayName: trans.__('Video'),
+        extensions: ['.mpeg'],
+        mimeTypes: ['video/mpeg'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'webm',
+        displayName: trans.__('Video'),
+        extensions: ['.webm'],
+        mimeTypes: ['video/webm'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'ogv',
+        displayName: trans.__('Video'),
+        extensions: ['.ogv', '.ogg'],
+        mimeTypes: ['video/ogg'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'avi',
+        displayName: trans.__('Video'),
+        extensions: ['.avi'],
+        mimeTypes: ['video/x-msvideo'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mov',
+        displayName: trans.__('Video'),
+        extensions: ['.mov'],
+        mimeTypes: ['video/quicktime'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'm4v',
+        displayName: trans.__('Video'),
+        extensions: ['.m4v'],
+        mimeTypes: ['video/mp4', 'video/x-m4v'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: '3gp',
+        displayName: trans.__('Video'),
+        extensions: ['.3gp'],
+        mimeTypes: ['video/3gpp'],
+        fileFormat: 'base64',
+        icon: videoIcon
+      },
+      {
+        name: 'mkv',
+        displayName: trans.__('Video'),
+        extensions: ['.mkv'],
+        mimeTypes: ['video/x-matroska'],
+        fileFormat: 'base64',
+        icon: videoIcon
       }
     ];
   }

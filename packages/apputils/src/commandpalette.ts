@@ -18,6 +18,8 @@ const SEARCH_ICON_GROUP_CLASS = 'jp-SearchIconGroup';
 export class ModalCommandPalette extends Panel {
   constructor(options: ModalCommandPalette.IOptions) {
     super();
+    this._options = options;
+
     this.addClass('jp-ModalCommandPalette');
     this.addClass('jp-ThemedContainer');
     this.id = 'modal-command-palette';
@@ -63,6 +65,7 @@ export class ModalCommandPalette extends Panel {
     this.hide();
     this._commandPalette.inputNode.value = '';
     this._commandPalette.refresh();
+    this._options.restore?.();
   }
 
   /**
@@ -167,10 +170,16 @@ export class ModalCommandPalette extends Panel {
   }
 
   private _commandPalette: CommandPalette;
+  private _options: ModalCommandPalette.IOptions;
 }
 
 export namespace ModalCommandPalette {
   export interface IOptions {
     commandPalette: CommandPalette;
+    /**
+     * A callback executed when the modal palette is closed.
+     * Used to restore focus to the previously active widget.
+     */
+    restore?: () => void;
   }
 }

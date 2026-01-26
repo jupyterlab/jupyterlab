@@ -16,21 +16,22 @@ import {
   Dialog,
   ICommandPalette,
   InputDialog,
+  ISanitizer,
   ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
   SessionContextDialogs,
-  showDialog,
-  WidgetTracker
+  showDialog
 } from '@jupyterlab/apputils';
-import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Debugger,
+  DebuggerDisplayRegistry,
   IDebugger,
   IDebuggerConfig,
+  IDebuggerDisplayRegistry,
   IDebuggerHandler,
   IDebuggerSidebar,
   IDebuggerSources,
@@ -38,7 +39,6 @@ import {
 } from '@jupyterlab/debugger';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import {
   INotebookTracker,
   NotebookActions,
@@ -46,13 +46,23 @@ import {
 } from '@jupyterlab/notebook';
 import {
   standardRendererFactories as initialFactories,
+  IRenderMime,
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  NullTranslator,
+  nullTranslator
+} from '@jupyterlab/translation';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import { DebugConsoleCellExecutor } from './debug-console-executor';
+import { DebuggerCompletionProvider } from './debugger-completion-provider';
+import { isCodeCellModel } from '@jupyterlab/cells';
 
 function notifyCommands(commands: CommandRegistry): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -81,17 +91,39 @@ const consoles: JupyterFrontEndPlugin<void> = {
   description: 'Add debugger capability to the consoles.',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
-  optional: [ILabShell],
-  activate: (
+  optional: [
+    ILabShell,
+    ISettingRegistry,
+    ITranslator,
+    IDebuggerDisplayRegistry
+  ],
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    translator: ITranslator | NullTranslator,
+    displayRegistry: IDebuggerDisplayRegistry | null
   ) => {
+    if (settingRegistry) {
+      const settings = await settingRegistry?.load(main.id);
+
+      const updateOverlaySetting = (): void => {
+        const showOverlay = settings.composite['showPausedOverlay'] ?? true;
+        document.body.dataset.showPausedOverlay = showOverlay
+          ? 'true'
+          : 'false';
+      };
+
+      updateOverlaySetting();
+      settings.changed.connect(updateOverlaySetting);
+    }
     const handler = new Debugger.Handler({
       type: 'console',
       shell: app.shell,
-      service: debug
+      service: debug,
+      translator: translator
     });
 
     const updateHandlerAndCommands = async (
@@ -117,6 +149,44 @@ const consoles: JupyterFrontEndPlugin<void> = {
         }
       });
     }
+
+    if (displayRegistry) {
+      displayRegistry.register({
+        canHandle(source: IDebugger.Source): boolean {
+          return source.path?.includes('ipykernel_') ?? false;
+        },
+        getDisplayName(source: IDebugger.Source): string {
+          let displayName = source.path ?? '';
+
+          consoleTracker.forEach(panel => {
+            for (const cell of panel.console.cells) {
+              const model = cell.model;
+              if (!isCodeCellModel(model)) {
+                continue;
+              }
+              const code = model.sharedModel.getSource();
+              const codeId = debug.getCodeId(code);
+
+              if (codeId && codeId === source.path) {
+                const exec = model.executionCount ?? null;
+                const state = model.executionState ?? null;
+
+                if (state === 'running') {
+                  displayName = 'In [*]';
+                } else if (exec === null) {
+                  displayName = 'In [ ]';
+                } else {
+                  displayName = `In [${exec}]`;
+                }
+                return;
+              }
+            }
+          });
+
+          return displayName;
+        }
+      });
+    }
   }
 };
 
@@ -129,17 +199,33 @@ const files: JupyterFrontEndPlugin<void> = {
   description: 'Adds debugger capabilities to files.',
   autoStart: true,
   requires: [IDebugger, IEditorTracker],
-  optional: [ILabShell],
-  activate: (
+  optional: [ILabShell, ISettingRegistry, ITranslator],
+  activate: async (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    settingRegistry: ISettingRegistry | null,
+    translator: ITranslator | NullTranslator
   ) => {
+    if (settingRegistry) {
+      const settings = await settingRegistry?.load(main.id);
+
+      const updateOverlaySetting = (): void => {
+        const showOverlay = settings.composite['showPausedOverlay'] ?? true;
+        document.body.dataset.showPausedOverlay = showOverlay
+          ? 'true'
+          : 'false';
+      };
+
+      updateOverlaySetting();
+      settings.changed.connect(updateOverlaySetting);
+    }
     const handler = new Debugger.Handler({
       type: 'file',
       shell: app.shell,
-      service: debug
+      service: debug,
+      translator: translator
     });
 
     const activeSessions: {
@@ -203,24 +289,47 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     'Adds debugger capability to notebooks and provides the debugger notebook handler.',
   autoStart: true,
   requires: [IDebugger, INotebookTracker],
-  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
+  optional: [
+    ILabShell,
+    ICommandPalette,
+    ISessionContextDialogs,
+    ISettingRegistry,
+    ITranslator,
+    IDebuggerDisplayRegistry
+  ],
   provides: IDebuggerHandler,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
     labShell: ILabShell | null,
     palette: ICommandPalette | null,
     sessionDialogs_: ISessionContextDialogs | null,
-    translator_: ITranslator | null
-  ): Debugger.Handler => {
+    settingRegistry: ISettingRegistry | null,
+    translator_: ITranslator | null,
+    displayRegistry: IDebuggerDisplayRegistry | null
+  ): Promise<Debugger.Handler> => {
     const translator = translator_ ?? nullTranslator;
+    if (settingRegistry) {
+      const settings = await settingRegistry?.load(main.id);
+
+      const updateOverlaySetting = (): void => {
+        const showOverlay = settings.composite['showPausedOverlay'] ?? true;
+        document.body.dataset.showPausedOverlay = showOverlay
+          ? 'true'
+          : 'false';
+      };
+
+      updateOverlaySetting();
+      settings.changed.connect(updateOverlaySetting);
+    }
     const sessionDialogs =
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
-      service
+      service,
+      translator: translator
     });
 
     const trans = translator.load('jupyterlab');
@@ -228,9 +337,14 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       label: trans.__('Restart Kernel and Debug…'),
       caption: trans.__('Restart Kernel and Debug…'),
       isEnabled: () => service.isStarted,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         const state = service.getDebuggerState();
-        await service.stop();
 
         const widget = notebookTracker.currentWidget;
         if (!widget) {
@@ -238,11 +352,15 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext, {
+          onBeforeRestart: async (): Promise<void> => {
+            await service.stop();
+          }
+        });
         if (!restarted) {
           return;
         }
-
+        await service.start();
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
         await NotebookActions.runAll(
@@ -261,6 +379,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         const { sessionContext } = widget;
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
+        await handler.updateWidget(widget, sessionContext.session);
       }
       updateState(app.commands, service);
     };
@@ -287,6 +406,41 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       });
     }
 
+    if (displayRegistry) {
+      displayRegistry.register({
+        canHandle(source: IDebugger.Source): boolean {
+          return source.path?.includes('ipykernel_') ?? false;
+        },
+        getDisplayName(source: IDebugger.Source): string {
+          let displayName = source.path ?? '';
+
+          notebookTracker.forEach(panel => {
+            for (const cell of panel.content.widgets) {
+              const model = cell.model;
+              if (!isCodeCellModel(model)) {
+                continue;
+              }
+              const code = model.sharedModel.getSource();
+              const codeId = service.getCodeId(code);
+
+              if (codeId === source.path) {
+                const exec = model.executionCount;
+                if (model.executionState === 'running') {
+                  displayName = 'Cell [*]';
+                } else {
+                  displayName = exec == null ? 'Cell [ ]' : `Cell [${exec}]`;
+                }
+                // Stop iteration once we found the matching cell
+                return;
+              }
+            }
+          });
+
+          return displayName;
+        }
+      });
+    }
+
     return handler;
   }
 };
@@ -300,19 +454,40 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
-  optional: [IDebuggerSources, ITranslator],
+  optional: [
+    IDebuggerDisplayRegistry,
+    IDebuggerSources,
+    ITranslator,
+    IEditorServices
+  ],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
+    displayRegistry: IDebuggerDisplayRegistry | null,
     debuggerSources: IDebugger.ISources | null,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    editorServices: IEditorServices | null
   ) =>
     new Debugger.Service({
       config,
+      displayRegistry,
       debuggerSources,
       specsManager: app.serviceManager.kernelspecs,
-      translator
+      translator,
+      mimeTypeService: editorServices?.mimeTypeService ?? null
     })
+};
+
+/**
+ * A plugin providing the debugger display registry.
+ */
+const displayRegistry: JupyterFrontEndPlugin<IDebuggerDisplayRegistry> = {
+  id: '@jupyterlab/debugger-extension:display-registry',
+  description:
+    'Provides the debugger display registry for cell/file display names.',
+  provides: IDebuggerDisplayRegistry,
+  autoStart: true,
+  activate: () => new DebuggerDisplayRegistry()
 };
 
 /**
@@ -354,7 +529,8 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
     });
   }
 };
-/*
+
+/**
  * A plugin to open detailed views for variables.
  */
 const variables: JupyterFrontEndPlugin<void> = {
@@ -393,6 +569,21 @@ const variables: JupyterFrontEndPlugin<void> = {
             service.model.variables.selectedVariable?.variablesReference ??
             0
         ) > 0,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            variableReference: {
+              type: 'number',
+              description: trans.__('The variable reference to inspect')
+            },
+            name: {
+              type: 'string',
+              description: trans.__('The name of the variable to inspect')
+            }
+          }
+        }
+      },
       execute: async args => {
         let { variableReference, name } = args as {
           variableReference?: number;
@@ -457,6 +648,21 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         service.model.hasRichVariableRendering &&
         (rendermime !== null || handler.activeWidget instanceof NotebookPanel),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            frameId: {
+              type: 'number',
+              description: trans.__('The frame ID')
+            },
+            name: {
+              type: 'string',
+              description: trans.__('The name of the variable to render')
+            }
+          }
+        }
+      },
       execute: args => {
         let { name, frameId } = args as {
           frameId?: number;
@@ -538,6 +744,12 @@ const variables: JupyterFrontEndPlugin<void> = {
         );
       },
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async () => {
         const value = service.model.variables.selectedVariable!.value;
         if (value) {
@@ -553,6 +765,12 @@ const variables: JupyterFrontEndPlugin<void> = {
       isVisible: () =>
         handler.activeWidget instanceof NotebookPanel &&
         service.model.supportCopyToGlobals,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: async args => {
         const name = service.model.variables.selectedVariable!.name;
         await service.copyToGlobals(name);
@@ -761,6 +979,17 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
           path
         });
         return openSource(source);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__('Path to the source file to open')
+            }
+          }
+        }
       }
     });
 
@@ -776,13 +1005,19 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
   description: 'Initialize the debugger user interface.',
-  requires: [IDebugger, IDebuggerSidebar, IEditorServices, ITranslator],
+  requires: [
+    IDebugger,
+    IDebuggerSidebar,
+    IEditorServices,
+    ITranslator,
+    ConsolePanel.IContentFactory,
+    IConsoleTracker
+  ],
   optional: [
     ICommandPalette,
     IDebuggerSourceViewer,
     ILabShell,
     ILayoutRestorer,
-    ILoggerRegistry,
     ISettingRegistry
   ],
   autoStart: true,
@@ -792,11 +1027,12 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar: IDebugger.ISidebar,
     editorServices: IEditorServices,
     translator: ITranslator,
+    consolePanelContentFactory: ConsolePanel.IContentFactory,
+    consoleTracker: IConsoleTracker,
     palette: ICommandPalette | null,
     sourceViewer: IDebugger.ISourceViewer | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    loggerRegistry: ILoggerRegistry | null,
     settingRegistry: ISettingRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
@@ -823,60 +1059,6 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
-    // get the mime type of the kernel language for the current debug session
-    const getMimeType = async (): Promise<string> => {
-      const kernel = service.session?.connection?.kernel;
-      if (!kernel) {
-        return '';
-      }
-      const info = (await kernel.info).language_info;
-      const name = info.name;
-      const mimeType =
-        editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
-      return mimeType;
-    };
-
-    const rendermime = new RenderMimeRegistry({ initialFactories });
-
-    commands.addCommand(CommandIDs.evaluate, {
-      label: trans.__('Evaluate Code'),
-      caption: trans.__('Evaluate Code'),
-      icon: Debugger.Icons.evaluateIcon,
-      isEnabled: () => service.hasStoppedThreads(),
-      execute: async () => {
-        const mimeType = await getMimeType();
-        const result = await Debugger.Dialogs.getCode({
-          title: trans.__('Evaluate Code'),
-          okLabel: trans.__('Evaluate'),
-          cancelLabel: trans.__('Cancel'),
-          mimeType,
-          contentFactory: new CodeCell.ContentFactory({
-            editorFactory: options =>
-              editorServices.factoryService.newInlineEditor(options)
-          }),
-          rendermime
-        });
-        const code = result.value;
-        if (!result.button.accept || !code) {
-          return;
-        }
-        const reply = await service.evaluate(code);
-        if (reply) {
-          const data = reply.result;
-          const path = service?.session?.connection?.path;
-          const logger = path ? loggerRegistry?.getLogger?.(path) : undefined;
-
-          if (logger) {
-            // print to log console of the notebook currently being debugged
-            logger.log({ type: 'text', data, level: logger.level });
-          } else {
-            // fallback to printing to devtools console
-            console.debug(data);
-          }
-        }
-      }
-    });
-
     commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
@@ -901,6 +1083,12 @@ const main: JupyterFrontEndPlugin<void> = {
           await service.pause();
         }
         commands.notifyCommandChanged(CommandIDs.debugContinue);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -912,6 +1100,12 @@ const main: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         await service.restart();
         updateState(app.commands, service);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -922,6 +1116,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.next();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -932,6 +1132,12 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepIn();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -942,12 +1148,18 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.stepOut();
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
       label: args => (args.filter as string) || 'Breakpoints on exception',
-      caption: args => args.description as string,
+      caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),
@@ -971,6 +1183,21 @@ const main: JupyterFrontEndPlugin<void> = {
           let filters = result.button.accept ? result.value : null;
           if (filters !== null) {
             await service.pauseOnExceptions(filters);
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'string',
+              description: trans.__('Exception filter to pause on')
+            },
+            description: {
+              type: 'string',
+              description: trans.__('Description of the exception filter')
+            }
           }
         }
       }
@@ -1021,6 +1248,12 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Debugger Panel'),
       execute: () => {
         shell.activateById(sidebar.id);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -1071,10 +1304,279 @@ const main: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * A plugin that provides debugger-based completions.
+ */
+const debuggerCompletions: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:completions',
+  description: 'Provides debugger-based completions.',
+  autoStart: true,
+  requires: [IDebugger, ICompletionProviderManager],
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    debuggerService: IDebugger,
+    completionManager: ICompletionProviderManager,
+    translator: ITranslator | null
+  ): void => {
+    // Create and register the debugger completion provider
+    const provider = new DebuggerCompletionProvider({
+      debuggerService: debuggerService,
+      translator: translator || nullTranslator
+    });
+
+    // Register the provider with the completion manager
+    completionManager.registerProvider(provider);
+  }
+};
+
+/**
+ * A plugin that provides the debug console functionality.
+ */
+const debugConsole: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:debug-console',
+  description: 'Debugger console to enable evaluation in debugger context.',
+  autoStart: true,
+  requires: [
+    IDebugger,
+    ConsolePanel.IContentFactory,
+    IEditorServices,
+    ICompletionProviderManager,
+    ISanitizer,
+    ITranslator
+  ],
+  optional: [ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    service: IDebugger,
+    consolePanelContentFactory: ConsolePanel.IContentFactory,
+    editorServices: IEditorServices,
+    manager: ICompletionProviderManager,
+    sanitizer: IRenderMime.ISanitizer,
+    translator: ITranslator,
+    labShell: ILabShell | null
+  ) => {
+    const CommandIDs = Debugger.CommandIDs;
+    const trans = translator.load('jupyterlab');
+
+    // Create our own tracker for debug consoles
+    const debugConsoleTracker = new WidgetTracker<ConsolePanel>({
+      namespace: 'debugger-debug-console'
+    });
+
+    // Global debug console widget variable for toggling
+    let debugConsoleWidget: ConsolePanel | null = null;
+
+    // Create the console
+    const createDebugConsole = async () => {
+      const rendermime = new RenderMimeRegistry({ initialFactories });
+      const debugExecutor = new DebugConsoleCellExecutor({
+        debuggerService: service,
+        trans
+      });
+
+      debugConsoleWidget = new ConsolePanel({
+        manager: app.serviceManager,
+        name: trans.__('Debug Console'),
+        contentFactory: consolePanelContentFactory,
+        rendermime,
+        executor: debugExecutor,
+        mimeTypeService: editorServices.mimeTypeService,
+        kernelPreference: { shouldStart: false, canStart: false }
+      });
+
+      debugConsoleWidget.title.label = trans.__('Debug Console');
+      debugConsoleWidget.title.icon = Debugger.Icons.evaluateIcon;
+
+      // Add a specific class to distinguish debug console from regular consoles
+      debugConsoleWidget.addClass('jp-DebugConsole');
+      debugConsoleWidget.console.addClass('jp-DebugConsole-widget');
+
+      // Close console when debugger is terminated
+      service.eventMessage.connect((_, event): void => {
+        if (labShell && event.event === 'terminated') {
+          debugConsoleWidget?.dispose();
+        }
+      });
+
+      const notifyCommands = () => {
+        app.commands.notifyCommandChanged(CommandIDs.evaluate);
+        app.commands.notifyCommandChanged(CommandIDs.executeConsole);
+        app.commands.notifyCommandChanged(CommandIDs.invokeConsole);
+        app.commands.notifyCommandChanged(CommandIDs.selectConsole);
+      };
+
+      debugConsoleWidget.disposed.connect(() => {
+        debugConsoleWidget = null;
+      });
+
+      app.shell.add(debugConsoleWidget, 'main', {
+        mode: 'split-bottom',
+        activate: true,
+        type: 'Debugger Console'
+      });
+
+      void debugConsoleTracker.add(debugConsoleWidget);
+      app.shell.activateById(debugConsoleWidget.id);
+
+      await updateCompleter(undefined, debugConsoleWidget);
+      debugConsoleWidget?.update();
+
+      notifyCommands();
+    };
+
+    // Set up completer
+    const updateCompleter = async (
+      _: WidgetTracker<ConsolePanel> | undefined,
+      consolePanel: ConsolePanel
+    ) => {
+      const completerContext = {
+        editor: consolePanel.console.promptCell?.editor ?? null,
+        session: consolePanel.console.sessionContext.session,
+        widget: consolePanel
+      };
+      await manager.updateCompleter(completerContext);
+      consolePanel.console.promptCellCreated.connect((codeConsole, cell) => {
+        const newContext = {
+          editor: cell.editor,
+          session: codeConsole.sessionContext.session,
+          widget: consolePanel,
+          sanitizer: sanitizer
+        };
+        manager.updateCompleter(newContext).catch(console.error);
+      });
+      consolePanel.console.sessionContext.sessionChanged.connect(() => {
+        const newContext = {
+          editor: consolePanel.console.promptCell?.editor ?? null,
+          session: consolePanel.console.sessionContext.session,
+          widget: consolePanel,
+          sanitizer: sanitizer
+        };
+        manager.updateCompleter(newContext).catch(console.error);
+      });
+    };
+
+    debugConsoleTracker.widgetAdded.connect(updateCompleter);
+
+    manager.activeProvidersChanged.connect(() => {
+      debugConsoleTracker.forEach(consoleWidget => {
+        updateCompleter(undefined, consoleWidget).catch(e => console.error(e));
+      });
+    });
+
+    // Add commands
+    app.commands.addCommand(CommandIDs.invokeConsole, {
+      label: trans.__('Display the tab completion widget.'),
+      execute: () => {
+        const id =
+          debugConsoleTracker.currentWidget &&
+          debugConsoleTracker.currentWidget.id;
+
+        if (id) {
+          return manager.invoke(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.selectConsole, {
+      label: trans.__('Select the completion suggestion.'),
+      execute: () => {
+        const id =
+          debugConsoleTracker.currentWidget &&
+          debugConsoleTracker.currentWidget.id;
+
+        if (id) {
+          return manager.select(id);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    // Add the debugger console execute command
+    app.commands.addCommand(CommandIDs.executeConsole, {
+      label: trans.__('Execute the current line in debug console.'),
+      execute: async () => {
+        const currentWidget = debugConsoleTracker.currentWidget;
+        if (currentWidget && currentWidget.console) {
+          await currentWidget.console.execute(true);
+          // Ensure focus stays on the console prompt after execution
+          const promptCell = currentWidget.console.promptCell;
+          if (promptCell && promptCell.editor) {
+            promptCell.editor.focus();
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.evaluate, {
+      label: trans.__('Evaluate Code'),
+      caption: trans.__('Evaluate Code'),
+      icon: Debugger.Icons.evaluateIcon,
+      isEnabled: () => !!service.session?.isStarted,
+      execute: async () => {
+        if (debugConsoleWidget) {
+          debugConsoleWidget.dispose();
+        } else {
+          void createDebugConsole();
+        }
+      },
+      isToggled: () => {
+        return debugConsoleWidget !== null;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    // Add the keybindings
+    app.commands.addKeyBinding({
+      command: CommandIDs.selectConsole,
+      keys: ['Enter'],
+      selector:
+        '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-mod-completer-active'
+    });
+
+    app.commands.addKeyBinding({
+      command: CommandIDs.invokeConsole,
+      keys: ['Tab'],
+      selector:
+        '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-CodeConsole-promptCell .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)'
+    });
+
+    app.commands.addKeyBinding({
+      command: CommandIDs.executeConsole,
+      keys: ['Shift Enter'],
+      selector:
+        '.jp-ConsolePanel.jp-DebugConsole .jp-DebugConsole-widget .jp-CodeConsole-promptCell'
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   service,
+  displayRegistry,
   consoles,
   files,
   notebooks,
@@ -1083,7 +1585,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   main,
   sources,
   sourceViewer,
-  configuration
+  configuration,
+  debuggerCompletions,
+  debugConsole
 ];
 
 export default plugins;

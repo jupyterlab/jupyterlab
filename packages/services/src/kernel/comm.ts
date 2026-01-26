@@ -273,7 +273,10 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
   }
 
   private _cleanSubshells() {
-    CommHandler._commTargetSubShellsId = {};
+    const kernelId = this._kernel.id;
+    if (CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
+      delete CommHandler._commTargetSubShellsId[kernelId];
+    }
   }
 
   private async _maybeStartSubshell() {
@@ -291,18 +294,24 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
     }
 
     // One shell per comm-target
-    if (CommHandler._commTargetSubShellsId[this._target]) {
-      this._subshellId = await CommHandler._commTargetSubShellsId[this._target];
+    const kernelId = this._kernel.id;
+    if (!CommHandler._commTargetSubShellsId.hasOwnProperty(kernelId)) {
+      CommHandler._commTargetSubShellsId[kernelId] = {};
+    }
+    const kernelCommTargetSubShells =
+      CommHandler._commTargetSubShellsId[kernelId];
+    if (kernelCommTargetSubShells[this._target]) {
+      this._subshellId = await kernelCommTargetSubShells[this._target];
       this._subshellStarted.resolve();
     } else {
       // Create subshell
-      CommHandler._commTargetSubShellsId[this._target] = this._kernel
+      kernelCommTargetSubShells[this._target] = this._kernel
         .requestCreateSubshell({})
         .done.then(replyMsg => {
           this._subshellId = replyMsg.content.subshell_id;
           return this._subshellId;
         });
-      await CommHandler._commTargetSubShellsId[this._target];
+      await kernelCommTargetSubShells[this._target];
       this._subshellStarted.resolve();
     }
   }
@@ -325,7 +334,8 @@ export class CommHandler extends DisposableDelegate implements Kernel.IComm {
 
   private _subshellStarted = new PromiseDelegate<void>();
   private static _commTargetSubShellsId: {
-    [targetName: string]: Promise<string> | null;
+    // One subshell per kernel per comm target.
+    [kernelId: string]: { [targetName: string]: Promise<string> | null };
   } = {};
 
   private _commsOverSubshells: CommsOverSubshells;

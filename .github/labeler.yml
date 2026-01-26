@@ -64,6 +64,12 @@ pkg:attachments:
     - packages/attachments/**/*
     - packages/attachments/*
 
+pkg:audio:
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/audio-extension/**/*
+    - packages/audio-extension/*
+
 pkg:cell-toolbar:
 - changed-files:
   - any-glob-to-any-file:
@@ -445,6 +451,12 @@ pkg:vega:
   - any-glob-to-any-file:
     - packages/vega5-extension/**/*
     - packages/vega5-extension/*
+
+pkg:video:
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/video-extension/**/*
+    - packages/video-extension/*
 
 pkg:workspaces:
 - changed-files:

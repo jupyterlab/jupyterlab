@@ -461,7 +461,7 @@ def _get_labextension_metadata(module):  # noqa
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", mod_path])  # noqa S603
         sys.path.insert(0, mod_path)
 
-    from setuptools import find_namespace_packages, find_packages
+    from setuptools import find_namespace_packages, find_packages  # noqa: PLC0415
 
     package_candidates = [
         package.replace("-", "_"),  # Module with the same name as package

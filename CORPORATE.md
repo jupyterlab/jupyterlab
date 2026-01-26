@@ -66,8 +66,8 @@ accelerates the work of everyone.
 
 **Use public communications channels whenever possible.** JupyterLab is
 developed openly on GitHub. We have weekly video meetings on Wednesday at 9:00
-am PT on Zoom (https://calpoly.zoom.us/my/jupyter). Finally, we have a public
-chat room on Zulip (https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab).
+am PT on Zoom (https://zoom.us/j/95228013874?pwd=Ep7HIk8t9JP6VToxt1Wj4P7K5PshC0.1).
+Finally, we have a public chat room on Zulip (https://jupyter.zulipchat.com/#narrow/channel/469762-jupyterlab).
 As much as possible, all work and communications should take place on these public
 channels. We welcome you to join these channels and introduce yourself.
 We are willing to have private conversations once in a while, but we

@@ -112,6 +112,7 @@ export class SettingsFormEditor extends React.Component<
     const { settings } = props;
     settings.changed.connect(this._syncFormDataWithSettings);
     this._formData = settings.composite as ReadonlyJSONObject;
+
     this.state = {
       isModified: settings.isModified,
       uiSchema: {},
@@ -234,6 +235,7 @@ export class SettingsFormEditor extends React.Component<
           experimental_defaultFormStateBehavior={{
             emptyObjectFields: 'populateRequiredDefaults'
           }}
+          buttonStyle="icons"
         />
       </>
     );

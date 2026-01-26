@@ -86,12 +86,57 @@ test.describe('Notebook Markdown', () => {
   test('Render a MermaidJS flowchart', async ({ page, tmpPath }) => {
     const imageName = 'render-mermaid-flowchart.png';
     const cell = await page.notebook.getCellLocator(3);
+    await cell!.scrollIntoViewIfNeeded();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Render a MermaidJS error', async ({ page, tmpPath }) => {
     const imageName = 'render-mermaid-error.png';
     const cell = await page.notebook.getCellLocator(4);
+    await cell!.scrollIntoViewIfNeeded();
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Toggle bold formatting with Ctrl+B', async ({ page }) => {
+    await page.notebook.addCell('markdown', 'Bold text');
+    const cellIndex = (await page.notebook.getCellCount()) - 1;
+
+    await page.notebook.enterCellEditingMode(cellIndex);
+    await page.waitForTimeout(100);
+
+    await page.keyboard.press('Home');
+    await page.waitForTimeout(50);
+
+    // Select "Bold" (4 characters)
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowRight');
+    }
+    await page.waitForTimeout(50);
+
+    // Press Ctrl+B (Accel B) to toggle bold
+    await page.keyboard.press('Control+B');
+    await page.waitForTimeout(100);
+
+    // Verify the text is wrapped with **
+    const cellText = await page.notebook.getCellTextInput(cellIndex);
+    expect(cellText).toContain('**Bold**');
+    expect(cellText).toBe('**Bold** text');
+
+    await page.keyboard.press('Home');
+    await page.waitForTimeout(50);
+
+    for (let i = 0; i < 8; i++) {
+      await page.keyboard.press('Shift+ArrowRight');
+    }
+    await page.waitForTimeout(50);
+
+    // Press Ctrl+B again to unwrap
+    await page.keyboard.press('Control+B');
+    await page.waitForTimeout(100);
+
+    // Verify the text is unwrapped
+    const cellTextAfterUnwrap = await page.notebook.getCellTextInput(cellIndex);
+    expect(cellTextAfterUnwrap).not.toContain('**Bold**');
+    expect(cellTextAfterUnwrap).toBe('Bold text');
   });
 });

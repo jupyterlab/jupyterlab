@@ -1,22 +1,37 @@
 name: UI Tests
 
 on:
-  issue_comment:
-    types: [created]
+  # We currently turned off Galata snapshot updates via issue comments
+  # We comment this trigger so the workflow runs are not swamped by comments triggering skipped runs
+  # TODO: re-enable once snapshot updates via comments are enabled again
+  # issue_comment:
+  #   types: [created]
   push:
     branches:
       - main
   pull_request:
+  schedule:
+    # Run every 6 hours to establish a baseline for flaky tests
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 env:
   PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
 
 jobs:
   test:
-    name: Visual Regression Tests
+    name: Visual Regression Tests (${{ matrix.browser }})
     if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
-    timeout-minutes: 80
+    timeout-minutes: 260
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: 'jupyterlab'
+            browser: 'chromium'
+          - project: 'jupyterlab-firefox'
+            browser: 'firefox'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +44,7 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
-          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+          key: ${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
@@ -39,7 +54,7 @@ jobs:
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
         run: |
-          pip install --upgrade --pre ipykernel>=7
+          pip install --upgrade --pre "ipykernel<=7.0.0a1"
 
       - name: Launch JupyterLab
         run: |
@@ -50,8 +65,8 @@ jobs:
         run: |
           cd galata
           jlpm playwright install-deps
-          # Install only Chromium browser
-          jlpm playwright install chromium
+          # Install only the relevant browser for this matrix job
+          jlpm playwright install ${{ matrix.browser }}
           jlpm run build
 
       - name: Wait for JupyterLab
@@ -60,27 +75,35 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test --project galata jupyterlab
-          mv galata/test-results galata/test-jupyterlab-results || true
-          # Run once benchmark tests to ensure they have no regression
-          BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+          jlpm run test --project ${{ matrix.project }}
+          mv playwright-report playwright-report-${{ matrix.project }} || true
+          if [[ "${{ matrix.browser }}" == "chromium" ]]; then
+            jlpm run test --project galata
+            mv playwright-report playwright-report-galata || true
+            mv galata/test-results galata/test-jupyterlab-results || true
+
+            # Run benchmark tests once to ensure they have no regression
+            BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+            # Move benchmark report
+            mv playwright-report playwright-report-benchmark || true
+          fi
 
       - name: Upload Galata Test assets
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-test-assets
+          name: jupyterlab-galata-test-assets-${{ matrix.browser }}
           path: |
-            galata/test-jupyterlab-results
+            galata/test-${{ matrix.project }}-results
             galata/test-results
 
       - name: Upload Galata Test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-report
+          name: jupyterlab-galata-report-${{ matrix.browser }}
           path: |
-            galata/playwright-report
+            galata/playwright-report*
 
       - name: Print JupyterLab logs
         if: always()
@@ -137,7 +160,7 @@ jobs:
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
-          pip install .[docs-screenshots]
+          pip install .[docs-screenshots] 'ipykernel<7.0'
           bash ./scripts/ci_install.sh
 
           # Build dev-mode

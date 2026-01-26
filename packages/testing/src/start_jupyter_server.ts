@@ -50,6 +50,9 @@ export class JupyterServer {
     if (Private.child !== null) {
       throw Error('Previous server was not disposed');
     }
+
+    console.debug('Starting Jupyter Server');
+
     const startDelegate = new PromiseDelegate<string>();
 
     const env = {
@@ -67,18 +70,21 @@ export class JupyterServer {
 
     // Handle server output.
     const handleOutput = (output: string) => {
-      console.debug(output);
+      // Use process.stdout.write to make logs much more concise
+      process.stdout.write(output);
 
       if (started) {
         return;
       }
       const baseUrl = Private.handleStartup(output);
       if (baseUrl) {
-        console.debug('Jupyter Server started');
+        console.debug('Jupyter Server started and output received');
         started = true;
         void Private.connect(baseUrl, startDelegate);
       }
     };
+
+    console.debug(`Jupyter Server spawned with pid ${child.pid}`);
 
     child.stdout.on('data', data => {
       handleOutput(String(data));
@@ -101,8 +107,14 @@ export class JupyterServer {
     }
     const stopDelegate = new PromiseDelegate<void>();
     const child = Private.child;
+
+    let killTimer: NodeJS.Timeout;
+
     child.on('exit', code => {
       Private.child = null;
+      // Clear the force-kill timer since the process exited
+      clearTimeout(killTimer);
+      console.debug(`Jupyter Server exited with code ${code}`);
       if (code !== null && code !== 0) {
         stopDelegate.reject('child process exited with code ' + String(code));
       } else {
@@ -110,9 +122,13 @@ export class JupyterServer {
       }
     });
 
+    console.debug(`Killing Jupyter Server (pid ${child.pid})`);
     child.kill();
-    window.setTimeout(() => {
+    killTimer = setTimeout(() => {
       if (Private.child) {
+        console.debug(
+          `Forcibly killing Jupyter Server with kill -9 (pid ${child.pid})`
+        );
         Private.child.kill(9);
       }
     }, 3000);
@@ -327,13 +343,19 @@ namespace Private {
    */
   export function handleStartup(output: string): string | null {
     let baseUrl: string | null = null;
+    console.debug('Parsing Jupyter server output for URL:', output);
     output.split('\n').forEach(line => {
       const baseUrlMatch = line.match(/(http:\/\/localhost:\d+\/[^?]*)/);
       if (baseUrlMatch) {
+        console.debug('Found URL match:', baseUrlMatch[1]);
         baseUrl = baseUrlMatch[1].replace('/lab', '');
+        console.debug('Setting baseUrl to:', baseUrl);
         PageConfig.setOption('baseUrl', baseUrl);
       }
     });
+    if (!baseUrl) {
+      console.debug('No URL found in server output');
+    }
     return baseUrl;
   }
 

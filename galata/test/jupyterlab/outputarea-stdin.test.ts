@@ -106,6 +106,14 @@ test.describe('Stdin for ipdb', () => {
       );
     });
   }
+});
+
+test.describe('Stdin for ipdb (flaky)', () => {
+  test.describe.configure({ retries: 4 });
+
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew();
+  });
 
   test('Subsequent execution in short succession', async ({ page }) => {
     await page.notebook.setCell(0, 'code', loopedInput);
@@ -137,7 +145,7 @@ test.describe('Stdin for ipdb', () => {
     const cellInput = await page.notebook.getCellInputLocator(0);
     const editor = cellInput!.locator('.cm-content');
     const contentAfter = await editor.evaluate((e: any) =>
-      e.cmView.view.state.doc.toString()
+      e.cmTile.view.state.doc.toString()
     );
     expect(contentAfter).toBe(loopedInput);
   });

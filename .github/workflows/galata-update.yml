@@ -11,15 +11,7 @@ permissions:
 jobs:
   update-galata-snapshots:
     name: Update Galata References
-    if: >
-      (
-        github.event.issue.author_association == 'OWNER' ||
-        github.event.issue.author_association == 'COLLABORATOR' ||
-        github.event.issue.author_association == 'MEMBER' ||
-        github.event.comment.author_association == 'OWNER' ||
-        github.event.comment.author_association == 'COLLABORATOR' ||
-        github.event.comment.author_association == 'MEMBER'
-      ) && github.event.issue.pull_request && (
+    if: github.event.issue.pull_request && (
         contains(github.event.comment.body, 'please update galata snapshots') ||
         contains(github.event.comment.body, 'please update snapshots')
       )
@@ -27,54 +19,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: React to the triggering comment
-        run: |
-          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=+1'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure git to use https
-        run: git config --global hub.protocol https
-
-      - name: Get PR Info
-        id: pr
-        env:
-          PR_NUMBER: ${{ github.event.issue.number }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          COMMENT_AT: ${{ github.event.comment.created_at }}
-        run: |
-          pr="$(gh api /repos/${GH_REPO}/pulls/${PR_NUMBER})"
-          head_sha="$(echo "$pr" | jq -r .head.sha)"
-          pushed_at="$(echo "$pr" | jq -r .pushed_at)"
-
-          if [[ $(date -d "$pushed_at" +%s) -gt $(date -d "$COMMENT_AT" +%s) ]]; then
-              echo "Updating is not allowed because the PR was pushed to (at $pushed_at) after the triggering comment was issued (at $COMMENT_AT)"
-              exit 1
-          fi
-
-          echo "head_sha=$head_sha" >> $GITHUB_OUTPUT
-
-      - name: Checkout the branch from the PR that triggered the job
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr checkout ${{ github.event.issue.number }}
-
-      - name: Validate the fetched branch HEAD revision
-        env:
-          EXPECTED_SHA: ${{ steps.pr.outputs.head_sha }}
-        run: |
-          actual_sha="$(git rev-parse HEAD)"
-
-          if [[ "$actual_sha" != "$EXPECTED_SHA" ]]; then
-              echo "The HEAD of the checked out branch ($actual_sha) differs from the HEAD commit available at the time when trigger comment was submitted ($EXPECTED_SHA)"
-              exit 1
-          fi
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -201,7 +148,7 @@ jobs:
           # Freeze the packages to ensure consistent look and feel
           # IPython is frozen because its version is displayed in
           # the console header
-          pip install .[docs-screenshots]
+          pip install .[docs-screenshots] 'ipykernel<7.0'
           bash ./scripts/ci_install.sh
 
           # Build dev-mode

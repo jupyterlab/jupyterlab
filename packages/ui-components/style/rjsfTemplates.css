@@ -115,6 +115,7 @@
   border: 1px solid var(--jp-border-color2);
   border-radius: 4px;
   margin: 4px;
+  position: relative;
 }
 
 .jp-ArrayOperations {
@@ -122,12 +123,26 @@
   margin-left: 8px;
 }
 
-.jp-ArrayOperationsButton {
+.field-array-of-object .jp-ArrayOperations {
+  position: absolute;
+  right: 2px;
+  top: 10px;
+}
+
+/* Display the array operations toolbar on hover only for array of objects */
+.jp-arrayFieldWrapper
+  .field-array-of-object
+  .array-item:not(:hover):not(:focus-within)
+  .jp-ArrayOperations {
+  display: none;
+}
+
+.jp-ArrayOperations .jp-ArrayOperationsButton {
   margin: 2px;
 }
 
-.jp-ArrayOperationsButton .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+button.jp-ArrayOperationsButton.jp-mod-styled .jp-icon3[fill] {
+  fill: var(--jp-ui-inverse-font-color0);
 }
 
 button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
@@ -162,6 +177,7 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 .jp-FormGroup-contentNormal .jp-FormGroup-description {
   flex-basis: 100%;
   padding: 4px 7px;
+  white-space: pre-wrap;
 }
 
 .jp-FormGroup-contentNormal .jp-FormGroup-default {
@@ -179,7 +195,9 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
   margin-left: 7px;
 }
 
-.jp-FormGroup-contentNormal .field-array-of-string .array-item {
+.jp-FormGroup-contentNormal
+  .field-array:not(.field-array-of-object)
+  .array-item {
   /* Display `jp-ArrayOperations` buttons side-by-side with content except
     for small screens where flex-wrap will place them one below the other.
   */

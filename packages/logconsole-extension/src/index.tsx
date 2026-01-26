@@ -12,8 +12,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  createToolbarFactory,
   ICommandPalette,
+  IToolbarWidgetRegistry,
   MainAreaWidget,
+  setToolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IChangedArgs } from '@jupyterlab/coreutils';
@@ -35,7 +38,6 @@ import {
 import {
   addIcon,
   clearIcon,
-  CommandToolbarButton,
   HTMLSelect,
   listIcon,
   ReactWidget
@@ -45,6 +47,7 @@ import { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
 import { LogConsoleStatus } from './status';
 
+const LOG_CONSOLE_FACTORY = 'LogConsole';
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
 
 /**
@@ -70,8 +73,9 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
     ILabShell,
     ICommandPalette,
     ILayoutRestorer,
+    IStatusBar,
     ISettingRegistry,
-    IStatusBar
+    IToolbarWidgetRegistry
   ],
   autoStart: true
 };
@@ -86,12 +90,31 @@ function activateLogConsole(
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
+  statusBar: IStatusBar | null,
   settingRegistry: ISettingRegistry | null,
-  statusBar: IStatusBar | null
+  toolbarRegistry: IToolbarWidgetRegistry | null
 ): ILoggerRegistry {
   const trans = translator.load('jupyterlab');
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> | null = null;
   let logConsolePanel: LogConsolePanel | null = null;
+
+  let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
+  if (settingRegistry && toolbarRegistry) {
+    toolbarFactory = createToolbarFactory(
+      toolbarRegistry,
+      settingRegistry,
+      LOG_CONSOLE_FACTORY,
+      LOG_CONSOLE_PLUGIN_ID,
+      translator
+    );
+
+    toolbarRegistry.addFactory(
+      LOG_CONSOLE_FACTORY,
+      'set-level',
+      (panel: MainAreaWidget<LogConsolePanel>) =>
+        new LogLevelSwitcher(panel.content, translator)
+    );
+  }
 
   const loggerRegistry = new LoggerRegistry({
     defaultRendermime: rendermime,
@@ -154,15 +177,9 @@ function activateLogConsole(
     logConsoleWidget.title.icon = listIcon;
     logConsoleWidget.title.label = trans.__('Log Console');
 
-    const addCheckpointButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.addCheckpoint
-    });
-
-    const clearButton = new CommandToolbarButton({
-      commands: app.commands,
-      id: CommandIDs.clear
-    });
+    if (toolbarFactory) {
+      setToolbar(logConsoleWidget, toolbarFactory);
+    }
 
     const notifyCommands = () => {
       app.commands.notifyCommandChanged(CommandIDs.addCheckpoint);
@@ -170,17 +187,6 @@ function activateLogConsole(
       app.commands.notifyCommandChanged(CommandIDs.open);
       app.commands.notifyCommandChanged(CommandIDs.setLevel);
     };
-
-    logConsoleWidget.toolbar.addItem(
-      'lab-log-console-add-checkpoint',
-      addCheckpointButton
-    );
-    logConsoleWidget.toolbar.addItem('lab-log-console-clear', clearButton);
-
-    logConsoleWidget.toolbar.addItem(
-      'level',
-      new LogLevelSwitcher(logConsoleWidget.content, translator)
-    );
 
     logConsolePanel.sourceChanged.connect(() => {
       notifyCommands();
@@ -220,6 +226,25 @@ function activateLogConsole(
     },
     isToggled: () => {
       return logConsoleWidget !== null;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          source: {
+            type: 'string',
+            description: trans.__('The source for the log console')
+          },
+          insertMode: {
+            type: 'string',
+            description: trans.__('The insert mode for the dock layout')
+          },
+          ref: {
+            type: 'string',
+            description: trans.__('The reference widget')
+          }
+        }
+      }
     }
   });
 
@@ -229,7 +254,13 @@ function activateLogConsole(
     },
     icon: addIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    label: trans.__('Add Checkpoint')
+    label: trans.__('Add Checkpoint'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.clear, {
@@ -238,7 +269,13 @@ function activateLogConsole(
     },
     icon: clearIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    label: trans.__('Clear Log')
+    label: trans.__('Clear Log'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   function toTitleCase(value: string) {
@@ -256,7 +293,20 @@ function activateLogConsole(
     label: args =>
       args['level']
         ? trans.__('Set Log Level to %1', toTitleCase(args.level as string))
-        : trans.__('Set log level to `level`.')
+        : trans.__('Set log level to `level`.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          level: {
+            type: 'string',
+            enum: ['Critical', 'Error', 'Warning', 'Info', 'Debug'],
+            description: trans.__('The log level to set')
+          }
+        },
+        required: ['level']
+      }
+    }
   });
 
   if (palette) {
@@ -298,6 +348,8 @@ function activateLogConsole(
       loggerRegistry.maxLength = settings.get('maxLogEntries')
         .composite as number;
       status.model.flashEnabled = settings.get('flash').composite as boolean;
+      loggerRegistry.defaultLogLevel = settings.get('defaultLogLevel')
+        .composite as LogLevel;
     };
 
     Promise.all([settingRegistry.load(LOG_CONSOLE_PLUGIN_ID), app.restored])

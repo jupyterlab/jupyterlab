@@ -16,7 +16,7 @@ dependencies:
   - hatchling >=1.5.0
   # run
   - async-lru >=1.0.0
-  - httpx >=0.25.0
+  - httpx >=0.25.0,<1
   - ipykernel
   - jinja2 >=3.0.3
   - jupyter_core
@@ -51,7 +51,7 @@ dependencies:
   - matplotlib-base
   - notebook >=7.0.4
   - numpy
-  - vega_datasets
+  - altair
   - xeus-python
   # extra conda stuff
   - jsonschema-with-format-nongpl

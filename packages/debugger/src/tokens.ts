@@ -19,6 +19,8 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 
 import { DebuggerHandler } from './handler';
 
+import { IDebuggerSourceDisplayProvider } from './displayregistry';
+
 /**
  * An interface describing an application's visual debugger.
  */
@@ -122,7 +124,6 @@ export interface IDebugger {
    * Request to set a variable in the global scope.
    *
    * @param name The name of the variable.
-   * @param value The value of the variable.
    */
   copyToGlobals(name: string): Promise<void>;
 
@@ -201,6 +202,11 @@ export interface IDebugger {
    * Precondition: isStarted
    */
   stop(): Promise<void>;
+
+  /**
+   * Signal emitted when the debugger stops.
+   */
+  readonly stopped: ISignal<IDebugger, void>;
 
   /**
    * Update all breakpoints of a cell at once.
@@ -288,6 +294,10 @@ export namespace IDebugger {
      * Map of breakpoints to send back to the kernel after it has restarted
      */
     breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+    /**
+     * Prefix for temporary files associated with this kernel session
+     */
+    tmpPrefix?: string;
   };
 
   /**
@@ -856,6 +866,16 @@ export namespace IDebugger {
       readonly restored: ISignal<this, void>;
 
       /**
+       * Signal emitted when the breakpoints are restored.
+       */
+      readonly selectedChanged: Signal<this, IDebugger.IBreakpoint>;
+
+      /**
+       * Selected breakpoint
+       */
+      selectedBreakpoint: IDebugger.IBreakpoint | null;
+
+      /**
        * Get the breakpoints for a given id (path).
        *
        * @param id The code id (path).
@@ -876,6 +896,14 @@ export namespace IDebugger {
        * @param breakpoints The list of breakpoints.
        */
       setBreakpoints(id: string, breakpoints: IBreakpoint[]): void;
+
+      /**
+       * Function to get a display name for a breakpoint.
+       *
+       * @param breakpoint The breakpoint object.
+       * @returns The display name.
+       */
+      getDisplayName(breakpoint: IBreakpoint): string;
     }
 
     /**
@@ -901,6 +929,14 @@ export namespace IDebugger {
        * Signal emitted when the frames have changed.
        */
       readonly framesChanged: ISignal<this, IDebugger.IStackFrame[]>;
+
+      /**
+       * Function to get a display name for a frame.
+       *
+       * @param frame The frame object.
+       * @returns The display name.
+       */
+      getDisplayName?(frame: IDebugger.IStackFrame): string;
     }
 
     /**
@@ -969,7 +1005,9 @@ export namespace IDebugger {
     export interface ISources {
       /**
        * Signal emitted when the current frame changes.
+       * @deprecated since 4.6.0, will be removed in 5.0.
        */
+
       readonly currentFrameChanged: ISignal<
         IDebugger.Model.ICallstack,
         IDebugger.IStackFrame | null
@@ -978,7 +1016,12 @@ export namespace IDebugger {
       /**
        * Return the current source.
        */
-      currentSource: IDebugger.Source | null;
+      readonly currentSource: IDebugger.Source | null;
+
+      /**
+       * Return the current frame.
+       */
+      readonly currentFrame: IDebugger.IStackFrame | null;
 
       /**
        * Signal emitted when the current source changes.
@@ -1000,6 +1043,14 @@ export namespace IDebugger {
        * Open a source in the main area.
        */
       open(): void;
+
+      /**
+       * Function to get a display name for a frame.
+       *
+       * @param frame The frame object.
+       * @returns The display name.
+       */
+      getDisplayName(frame: IDebugger.IStackFrame): string;
     }
 
     /**
@@ -1078,6 +1129,21 @@ export namespace IDebugger {
 }
 
 /**
+ * Interface token for the Debugger Display Registry service.
+ */
+export interface IDebuggerDisplayRegistry {
+  /**
+   * Register a display provider.
+   */
+  register(provider: IDebuggerSourceDisplayProvider): void;
+
+  /**
+   * Get a display name for a given source.
+   */
+  getDisplayName(source: IDebugger.Source): string;
+}
+
+/**
  * The visual debugger token.
  */
 export const IDebugger = new Token<IDebugger>(
@@ -1123,4 +1189,12 @@ export const IDebuggerHandler = new Token<IDebugger.IHandler>(
 export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
   '@jupyterlab/debugger:IDebuggerSourceViewer',
   'A debugger source viewer.'
+);
+
+/**
+ * Debugger display registry token.
+ */
+export const IDebuggerDisplayRegistry = new Token<IDebuggerDisplayRegistry>(
+  '@jupyterlab/debugger:IDebuggerDisplayRegistry',
+  'A service for registering display labels for cells/files in the debugger.'
 );

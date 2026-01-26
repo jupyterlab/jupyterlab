@@ -140,7 +140,7 @@ export namespace DebuggerSidebar {
     callstackCommands: CallstackPanel.ICommands;
 
     /**
-     * The callstack toolbar commands.
+     * The breakpoints toolbar commands.
      */
     breakpointsCommands: BreakpointsPanel.ICommands;
 

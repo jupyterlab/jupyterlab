@@ -10,7 +10,10 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IUrlResolverFactory,
+  RenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
   Contents,
@@ -62,7 +65,7 @@ export class Context<
       { contentProviderId: options.contentProviderId }
     );
     const sharedModel = sharedFactory?.createNew({
-      path: localPath,
+      path: this._path,
       format: this._factory.fileFormat,
       contentType: this._factory.contentType,
       collaborative: this._factory.collaborative
@@ -83,7 +86,7 @@ export class Context<
       kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path: localPath,
+      path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -92,7 +95,15 @@ export class Context<
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
+    const urlResolverFactory = options.urlResolverFactory
+      ? options.urlResolverFactory
+      : {
+          createResolver: (
+            resolverOptions: RenderMimeRegistry.IUrlResolverOptions
+          ) => new RenderMimeRegistry.UrlResolver(resolverOptions)
+        };
+
+    this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
       contents: manager.contents
     });
@@ -234,7 +245,9 @@ export class Context<
   /**
    * The url resolver for the context.
    */
-  readonly urlResolver: IRenderMime.IResolver;
+  get urlResolver(): IRenderMime.IResolver {
+    return this._urlResolver;
+  }
 
   /**
    * Initialize the context.
@@ -276,37 +289,51 @@ export class Context<
   /**
    * Save the document to a different path chosen by the user.
    *
-   * It will be rejected if the user abort providing a new path.
+   * @returns A promise that resolves to `true` if the save operation was initiated.
+   * Returns `false` if the user cancelled the operation.
+   *
+   * Note:
+   * - If the save operation proceeds but fails due to an error in the content manager,
+   *   the returned value will still be `true`.
+   * - Consumers interested in the actual result of the save should listen to the
+   *   {@link saveState} signal to be notified when the save succeeds or fails.
    */
-  async saveAs(): Promise<void> {
+  async saveAs(): Promise<boolean> {
     await this.ready;
     const localPath = this._manager.contents.localPath(this.path);
     const newLocalPath = await Private.getSavePath(localPath);
 
     if (this.isDisposed || !newLocalPath) {
-      return;
+      return false;
     }
 
     const drive = this._manager.contents.driveName(this.path);
     const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
 
     if (newPath === this._path) {
-      return this.save();
+      await this.save();
+      return true;
     }
 
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
       await this._manager.contents.get(newPath, {
-        contentProviderId: this._contentProviderId
+        contentProviderId: this._contentProviderId,
+        content: false
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
       if (!err.response || err.response.status !== 404) {
+        // Dialog rejection (user cancelled)
+        if (!err.response) {
+          return false;
+        }
         throw err;
       }
-      await this._finishSaveAs(newPath);
     }
+    await this._finishSaveAs(newPath);
+    return true;
   }
 
   /**
@@ -473,7 +500,9 @@ export class Context<
     // The session uses local paths.
     // We need to convert it to a global path.
     const driveName = this._manager.contents.driveName(this.path);
-    let newPath = this.sessionContext.session!.path;
+    let newPath = this._manager.contents.localPath(
+      this.sessionContext.session!.path
+    );
     if (driveName) {
       newPath = `${driveName}:${newPath}`;
     }
@@ -521,14 +550,14 @@ export class Context<
     this._path = newPath;
     const localPath = this._manager.contents.localPath(newPath);
     const name = PathExt.basename(localPath);
-    if (this.sessionContext.session?.path !== localPath) {
-      void this.sessionContext.session?.setPath(localPath);
+    if (this.sessionContext.session?.path !== newPath) {
+      void this.sessionContext.session?.setPath(newPath);
     }
     if (this.sessionContext.session?.name !== name) {
       void this.sessionContext.session?.setName(name);
     }
-    if ((this.urlResolver as RenderMimeRegistry.UrlResolver).path !== newPath) {
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    if (this._urlResolver.path !== newPath) {
+      this._urlResolver.path = newPath;
     }
     if (
       this._contentsModel &&
@@ -604,13 +633,6 @@ export class Context<
 
     try {
       await this._manager.ready;
-      if (this._model.collaborative) {
-        // Files cannot be saved in collaborative mode. The "save" command
-        // is disabled in the UI, but if the user tries to save anyway, act
-        // as though it succeeded.
-        this._saveState.emit('completed');
-        return Promise.resolve();
-      }
 
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
@@ -762,9 +784,11 @@ export class Context<
           );
           return this._raiseConflict(model, options);
         }
-
         return this._manager.contents
-          .save(path, options)
+          .save(path, {
+            ...options,
+            contentProviderId: this._contentProviderId
+          })
           .then(async contentsModel => {
             const model = await this._manager.contents.get(path, {
               content: false,
@@ -913,6 +937,8 @@ or load the version on disk (revert)?`,
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
+      } else {
+        return Promise.reject(new Error('Cancelled'));
       }
     });
   }
@@ -999,6 +1025,7 @@ or load the version on disk (revert)?`,
     this
   );
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
+  private _urlResolver: RenderMimeRegistry.IUrlResolver;
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
@@ -1054,7 +1081,7 @@ export namespace Context {
     translator?: ITranslator;
 
     /**
-     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client.
      */
     lastModifiedCheckMargin?: number;
 
@@ -1063,6 +1090,11 @@ export namespace Context {
      * @experimental
      */
     contentProviderId?: string;
+
+    /**
+     * A factory for the URL resolver.
+     */
+    urlResolverFactory?: IUrlResolverFactory;
   }
 }
 

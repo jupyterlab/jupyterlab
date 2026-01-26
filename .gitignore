@@ -12,8 +12,8 @@ dev_mode/stats.json
 
 docs/_build
 docs/source/user/commands_list.md
-docs/source/extension/plugins_list.rst
-docs/source/extension/tokens_list.rst
+docs/source/extension/plugins_list.md
+docs/source/extension/tokens_list.md
 docs/source/api
 **/docs/source/_build
 
@@ -158,3 +158,6 @@ untitled*.txt
 
 # pixi environments
 .pixi
+
+# temporary files, useful for testing
+tmp

@@ -63,6 +63,59 @@ test.describe('Notebook scroll on navigation (no windowing)', () => {
   }
 });
 
+test.describe('Notebook scroll on navigation (no windowing), named properties allowed', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'none'
+      },
+      '@jupyterlab/apputils-extension:sanitizer': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/apputils-extension:sanitizer'],
+        allowNamedProperties: true
+      }
+    }
+  });
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  const cellLinks = {
+    'penultimate cell using heading, legacy format': 18,
+    'penultimate cell using heading, explicit fragment': 18,
+    'last cell using heading, legacy format': 19,
+    'last cell using heading, explicit fragment': 19,
+    'last cell using cell identifier': 19
+  };
+  for (const [link, cellIdx] of Object.entries(cellLinks)) {
+    test(`Scroll to ${link}`, async ({ page }) => {
+      const firstCellLocator = page.locator(
+        '.jp-Cell[data-windowed-list-index="0"]'
+      );
+      const lastCellLocator = page.locator(
+        `.jp-Cell[data-windowed-list-index="${cellIdx}"]`
+      );
+      await firstCellLocator.scrollIntoViewIfNeeded();
+
+      await page.click(`a:has-text("${link}")`);
+
+      await expect(firstCellLocator).not.toBeInViewport();
+      await expect(lastCellLocator).toBeInViewport();
+    });
+  }
+});
+
 test.describe('Notebook scroll on dragging cells (no windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
@@ -118,7 +171,10 @@ test.describe('Notebook scroll on dragging cells (no windowing)', () => {
     await expect(lastCellLocator).toBeInViewport();
   });
 
-  test('Scroll up on dragging cell to the top edge', async ({ page }) => {
+  test('Scroll up on dragging cell to the top edge', async ({
+    page,
+    browserName
+  }) => {
     const firstCellLocator = page.locator(
       '.jp-Cell[data-windowed-list-index="0"]'
     );
@@ -142,7 +198,8 @@ test.describe('Notebook scroll on dragging cells (no windowing)', () => {
 
     // Ensure the notebook is scrolled correctly and first cell is not visible
     const before = await scroller.evaluate(node => node.scrollTop);
-    expect(before).toBeGreaterThan(notebookContentHeight * 0.75);
+    const factor = browserName === 'firefox' ? 0.6 : 0.75;
+    expect(before).toBeGreaterThan(notebookContentHeight * factor);
     await expect(firstCellLocator).not.toBeInViewport();
 
     // Emulate drag and drop
@@ -200,6 +257,7 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
     await page.notebook.runCell(1);
 
     // After running the second cell, the third cell should be revealed, in at least 10%
+    // TODO: this expectation sometimes fails with a viewport ratio 0.009747706353664398
     await expect(thirdCell!).toBeInViewport({ ratio: 0.1 });
 
     // The third cell should now occupy about half of the notebook viewport

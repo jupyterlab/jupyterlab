@@ -9,7 +9,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: forbid-new-submodules
       - id: end-of-file-fixer
@@ -27,13 +27,13 @@ repos:
         exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.0
+    rev: 0.36.0
     hooks:
       - id: check-github-workflows
 
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.14.10
     hooks:
       - id: ruff
         args: ["--fix"]

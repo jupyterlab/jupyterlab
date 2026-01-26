@@ -5,6 +5,7 @@ import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { expect, Locator } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { changeCodeFontSize, getFileListFontSize } from './utils';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -74,36 +75,18 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const computedStyle = await cellElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await cellElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    return parseInt(computedStyle.fontSize);
+    return parseInt(newFontSize);
   };
   const getMarkdownFontSize = async (page: IJupyterLabPageFixture) => {
     const markdownElement = page.locator('.jp-RenderedHTMLCommon');
     await markdownElement.waitFor();
-    const computedStyle = await markdownElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await markdownElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    return parseInt(computedStyle.fontSize);
-  };
-  const getFileListFontSize = async (page: IJupyterLabPageFixture) => {
-    const itemElement = page.locator(
-      '.jp-DirListing-content .jp-DirListing-itemText'
-    );
-    await itemElement.waitFor();
-    const computedStyle = await itemElement.evaluate(el =>
-      getComputedStyle(el)
-    );
-    return parseInt(computedStyle.fontSize);
-  };
-  const changeCodeFontSize = async (
-    page: IJupyterLabPageFixture,
-    menuOption
-  ) => {
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-    await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
+    return parseInt(newFontSize);
   };
 
   test('should Increase Code Font Size', async ({ page }) => {
@@ -117,10 +100,10 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const computedStyle = await cellElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await cellElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    expect(computedStyle.fontSize).toEqual(`${fontSize + 1}px`);
+    expect(newFontSize).toEqual(`${fontSize + 1}px`);
   });
 
   test('should Decrease Code Font Size', async ({ page }) => {
@@ -134,10 +117,10 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const computedStyle = await cellElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await cellElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
+    expect(newFontSize).toEqual(`${fontSize - 1}px`);
   });
 
   test('should Increase Content Font Size', async ({ page }) => {
@@ -152,10 +135,10 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await fileElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    expect(computedStyle.fontSize).toEqual(`${fontSize + 1}px`);
+    expect(newFontSize).toEqual(`${fontSize + 1}px`);
   });
 
   test('should Decrease Content Font Size', async ({ page }) => {
@@ -170,10 +153,10 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await fileElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
+    expect(newFontSize).toEqual(`${fontSize - 1}px`);
   });
 
   test('should Increase UI Font Size', async ({ page }) => {
@@ -187,10 +170,10 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await fileElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    expect(computedStyle.fontSize).toEqual(`${fontSize + 1}px`);
+    expect(newFontSize).toEqual(`${fontSize + 1}px`);
   });
 
   test('should Decrease UI Font Size', async ({ page }) => {
@@ -204,10 +187,10 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    const newFontSize = await fileElement.evaluate(
+      el => getComputedStyle(el).fontSize
     );
-    expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
+    expect(newFontSize).toEqual(`${fontSize - 1}px`);
   });
 });
 
@@ -489,4 +472,46 @@ test('Read-only cells should remain read-only after changing settings', async ({
   // Assert the first cell is still read-only
   const cell = page.locator('.jp-Notebook-cell').nth(0);
   await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
+});
+test('Setting for "Show Filter Bar by Default" should work on reload', async ({
+  page
+}) => {
+  const filterBox = page.locator(
+    '.jp-FileBrowser-filterBox input[placeholder="Filter files by name"]'
+  );
+
+  await expect(filterBox).toBeHidden();
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Show Filter Bar by Default'
+    })
+  );
+
+  const settingContainer = page.locator(
+    '.form-group:has-text("Show Filter Bar by Default")'
+  );
+
+  const settingLabel = settingContainer.locator('label');
+  const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
+  await settingLabel.click();
+  await page.locator('button.jp-RestoreButton').waitFor();
+  await expect(modifiedIndicator).toBeVisible();
+
+  await page.reload({ waitForIsReady: false });
+  await expect(filterBox).toBeVisible();
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Show Filter Bar by Default'
+    })
+  );
+
+  // turn the setting OFF
+  await settingLabel.click();
+  await page.locator('button.jp-RestoreButton').waitFor({ state: 'hidden' });
+  await expect(modifiedIndicator).toBeHidden();
+  await page.reload({ waitForIsReady: false });
+
+  // The filter bar should now be hidden oonce the setting is disabled
+  await expect(filterBox).toBeHidden();
 });

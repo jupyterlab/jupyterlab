@@ -12,6 +12,7 @@ import re
 import sys
 import tempfile
 import xmlrpc.client
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
@@ -19,7 +20,7 @@ from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
@@ -140,9 +141,9 @@ class PyPIExtensionManager(ExtensionManager):
 
     def __init__(
         self,
-        app_options: Optional[dict] = None,
-        ext_options: Optional[dict] = None,
-        parent: Optional[config.Configurable] = None,
+        app_options: dict | None = None,
+        ext_options: dict | None = None,
+        parent: config.Configurable | None = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
         self._httpx_client = httpx.AsyncClient(**_httpx_client_args)
@@ -169,7 +170,7 @@ class PyPIExtensionManager(ExtensionManager):
         """Extension manager metadata."""
         return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
-    async def get_latest_version(self, pkg: str) -> Optional[str]:
+    async def get_latest_version(self, pkg: str) -> str | None:
         """Return the latest available version for a given extension.
 
         Args:
@@ -253,7 +254,7 @@ class PyPIExtensionManager(ExtensionManager):
 
     async def list_packages(
         self, query: str, page: int, per_page: int
-    ) -> tuple[dict[str, ExtensionPackage], Optional[int]]:
+    ) -> tuple[dict[str, ExtensionPackage], int | None]:
         """List the available extensions.
 
         Note:
@@ -487,7 +488,7 @@ class PyPIExtensionManager(ExtensionManager):
 
                 return ActionResult(status="ok", needs_restart=follow_ups)
             else:
-                self.log.error(f"Failed to installed {filename}: code {result.returncode}\n{error}")
+                self.log.error(f"Failed to install {name}: code {result.returncode}\n{error}")
                 return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:

@@ -18,7 +18,9 @@ import {
   EventManager,
   IConfigSectionManager,
   IConnectionStatus,
+  IContentProvider,
   IContentsManager,
+  IDefaultContentProvider,
   IDefaultDrive,
   IEventManager,
   IKernelManager,
@@ -37,6 +39,7 @@ import {
   KernelSpecManager,
   NbConvert,
   NbConvertManager,
+  RestContentProvider,
   ServerConnection,
   ServiceManager,
   ServiceManagerPlugin,
@@ -109,6 +112,45 @@ const contentsManagerPlugin: ServiceManagerPlugin<Contents.IManager> = {
 };
 
 /**
+ * The default IContentProvider plugin.
+ */
+const defaultContentProvider: ServiceManagerPlugin<IContentProvider> = {
+  id: '@jupyterlab/services-extension:default-content-provider',
+  description: 'The default content provider for the contents manager.',
+  autoStart: true,
+  provides: IDefaultContentProvider,
+  optional: [IServerSettings],
+  activate: (
+    _: null,
+    serverSettings: ServerConnection.ISettings | null
+  ): IContentProvider => {
+    const apiEndpoint = 'api/contents';
+    serverSettings = serverSettings ?? ServerConnection.makeSettings();
+    return new RestContentProvider({ serverSettings, apiEndpoint });
+  }
+};
+
+/**
+ * Content provider plugin warning
+ *
+ * A plugin that errors out if users are overwritting the deprecated defaultContentProvider
+ */
+const contentProviderWarning: ServiceManagerPlugin<void> = {
+  id: '@jupyterlab/services-extension:content-provider-warning',
+  description:
+    'Warn if user is overwriting the deprecated contentprovider plugin.',
+  autoStart: true,
+  requires: [IDefaultContentProvider],
+  activate: (_: null, contentProvider: IContentProvider) => {
+    if (!(contentProvider instanceof RestContentProvider)) {
+      console.error(
+        'Defining a IDefaultContentProvider plugin is deprecated since JupyterLab 4.5.1 and does not be have any effect.'
+      );
+    }
+  }
+};
+
+/**
  * The default drive plugin.
  */
 const defaultDrivePlugin: ServiceManagerPlugin<Contents.IDrive> = {
@@ -133,12 +175,18 @@ const eventManagerPlugin: ServiceManagerPlugin<Event.IManager> = {
   description: 'The event manager plugin.',
   autoStart: true,
   provides: IEventManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Event.IManager => {
-    return new EventManager({ serverSettings });
+    return new EventManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -150,12 +198,18 @@ const kernelManagerPlugin: ServiceManagerPlugin<Kernel.IManager> = {
   description: 'The kernel manager plugin.',
   autoStart: true,
   provides: IKernelManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Kernel.IManager => {
-    return new KernelManager({ serverSettings });
+    return new KernelManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -167,12 +221,18 @@ const kernelSpecManagerPlugin: ServiceManagerPlugin<KernelSpec.IManager> = {
   description: 'The kernel spec manager plugin.',
   autoStart: true,
   provides: IKernelSpecManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): KernelSpec.IManager => {
-    return new KernelSpecManager({ serverSettings });
+    return new KernelSpecManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -202,13 +262,20 @@ const sessionManagerPlugin: ServiceManagerPlugin<Session.IManager> = {
   autoStart: true,
   provides: ISessionManager,
   requires: [IKernelManager],
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
     kernelManager: Kernel.IManager,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Session.IManager => {
-    return new SessionManager({ kernelManager, serverSettings });
+    return new SessionManager({
+      kernelManager,
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -237,12 +304,18 @@ const terminalManagerPlugin: ServiceManagerPlugin<Terminal.IManager> = {
   description: 'The terminal manager plugin.',
   autoStart: true,
   provides: ITerminalManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): Terminal.IManager => {
-    return new TerminalManager({ serverSettings });
+    return new TerminalManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -254,12 +327,18 @@ const userManagerPlugin: ServiceManagerPlugin<User.IManager> = {
   description: 'The user manager plugin.',
   autoStart: true,
   provides: IUserManager,
-  optional: [IServerSettings],
+  optional: [IServerSettings, IConnectionStatus],
   activate: (
     _: null,
-    serverSettings: ServerConnection.ISettings | undefined
+    serverSettings: ServerConnection.ISettings | undefined,
+    connectionStatus: IConnectionStatus | undefined
   ): User.IManager => {
-    return new UserManager({ serverSettings });
+    return new UserManager({
+      serverSettings,
+      standby: () => {
+        return !connectionStatus?.isConnected || 'when-hidden';
+      }
+    });
   }
 };
 
@@ -357,6 +436,8 @@ export default [
   configSectionManager,
   connectionStatusPlugin,
   contentsManagerPlugin,
+  defaultContentProvider,
+  contentProviderWarning,
   defaultDrivePlugin,
   eventManagerPlugin,
   kernelManagerPlugin,

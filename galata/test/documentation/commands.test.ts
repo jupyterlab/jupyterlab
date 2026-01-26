@@ -4,7 +4,9 @@
 import { expect, test } from '@jupyterlab/galata';
 import * as fs from 'fs-extra';
 
-test('All commands must have a default label', async ({ page }, testInfo) => {
+test('All commands must have a default label and describedBy', async ({
+  page
+}, testInfo) => {
   const commands = await page.evaluate(async () => {
     const registry = window.jupyterapp.commands;
     const shortcuts = registry.keyBindings;
@@ -16,33 +18,46 @@ test('All commands must have a default label', async ({ page }, testInfo) => {
       label: string;
       caption: string;
       shortcuts?: string[];
-    }[] = commandIds
+      args?: any;
+    }[] = [];
+
+    for (const id of commandIds
       .filter(id => !id.startsWith('_') && !id.startsWith('@jupyter-widgets'))
-      .sort()
-      .map(id => {
+      .sort()) {
+      try {
+        let args: any = undefined;
         try {
-          return {
-            id,
-            label: registry.label(id),
-            caption: registry.caption(id),
-            shortcuts: [
-              ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ??
-                [])
-            ]
-          };
-        } catch (reason) {
-          console.error(reason);
-          return {
-            id,
-            label: '',
-            caption: '',
-            shortcuts: [
-              ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ??
-                [])
-            ]
-          };
+          // Try to get the describedBy information (command arguments schema)
+          const description = await registry.describedBy(id);
+          if (description && description.args) {
+            args = description.args;
+          }
+        } catch (error) {
+          // If describedBy fails or returns nothing, args remains undefined
+          console.debug(`No args description for ${id}:`, error);
         }
-      });
+
+        commands.push({
+          id,
+          label: registry.label(id),
+          caption: registry.caption(id),
+          shortcuts: [
+            ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ?? [])
+          ],
+          args
+        });
+      } catch (reason) {
+        console.error(reason);
+        commands.push({
+          id,
+          label: '',
+          caption: '',
+          shortcuts: [
+            ...(shortcuts.find(shortcut => shortcut.command === id)?.keys ?? [])
+          ]
+        });
+      }
+    }
 
     return Promise.resolve(commands);
   });
@@ -50,13 +65,40 @@ test('All commands must have a default label', async ({ page }, testInfo) => {
   if (!(await fs.pathExists(testInfo.snapshotDir))) {
     await fs.mkdir(testInfo.snapshotDir);
   }
-  await fs.writeJSON(testInfo.snapshotPath('commandsList.json'), commands, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
+
+  const commandsSnapshotPath = testInfo.snapshotPath('commandsList.json');
+
+  const existingCommands: typeof commands =
+    await fs.readJSON(commandsSnapshotPath);
+
+  // Update snapshots only when explicitly requested with --update-snapshots
+  if (testInfo.config.updateSnapshots === 'all') {
+    await fs.writeJSON(commandsSnapshotPath, commands, {
+      encoding: 'utf-8',
+      spaces: 2
+    });
+  }
+
+  expect(
+    commands,
+    'Commands list has changed. Run with --update-snapshots to update.'
+  ).toEqual(existingCommands);
 
   // All commands must at least define a label
   const missingLabel = commands.filter(command => !command.label);
 
   expect(missingLabel).toEqual([]);
+
+  // Check for commands missing describedBy information
+  const missingDescribedBy = commands.filter(command => !command.args);
+
+  // Log commands without describedBy for debugging
+  if (missingDescribedBy.length > 0) {
+    console.log(
+      'Commands missing describedBy information:',
+      missingDescribedBy.map(cmd => cmd.id)
+    );
+  }
+
+  expect(missingDescribedBy).toEqual([]);
 });

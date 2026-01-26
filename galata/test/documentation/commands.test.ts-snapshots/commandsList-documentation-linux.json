@@ -5,7 +5,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ]"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:activate-next-tab-bar",
@@ -13,7 +17,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ."
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:activate-previous-tab",
@@ -21,7 +29,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ["
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:activate-previous-tab-bar",
@@ -29,7 +41,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ,"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close",
@@ -37,43 +53,107 @@
     "caption": "",
     "shortcuts": [
       "Alt W"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close-all",
     "label": "Close All Tabs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close-other-tabs",
     "label": "Close All Other Tabs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:close-right-tabs",
     "label": "Close Tabs to Right",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:reset-layout",
     "label": "Reset Default Layout",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:set-mode",
     "label": "Set the layout `mode`.",
     "caption": "The layout `mode` can be \"single-document\" or \"multiple-document\".",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "single-document",
+            "multiple-document"
+          ],
+          "description": "The layout mode"
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    }
+  },
+  {
+    "id": "application:split-tab",
+    "label": "Split Tab",
+    "caption": "Split the current tab",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "top",
+            "bottom"
+          ],
+          "description": "The direction to split the tab"
+        }
+      },
+      "required": [
+        "direction"
+      ]
+    }
   },
   {
     "id": "application:toggle-context-menu",
     "label": "Enable Context Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-fullscreen-mode",
@@ -81,13 +161,21 @@
     "caption": "",
     "shortcuts": [
       "F11"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-header",
     "label": "Show Header",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-left-area",
@@ -95,7 +183,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl B"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-mode",
@@ -103,13 +195,21 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift D"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-presentation-mode",
     "label": "Presentation Mode",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-right-area",
@@ -117,13 +217,33 @@
     "caption": "",
     "shortcuts": [
       "Ctrl J"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "application:toggle-side-tabbar",
     "label": "Show Left Activity Bar",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "side": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "description": "The sidebar side"
+        }
+      },
+      "required": [
+        "side"
+      ]
+    }
   },
   {
     "id": "application:toggle-sidebar-widget",
@@ -131,7 +251,31 @@
     "caption": "",
     "shortcuts": [
       "Alt 1"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "side": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "description": "The sidebar side"
+        },
+        "index": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "description": "The index of the sidebar widget"
+        }
+      },
+      "required": [
+        "side",
+        "index"
+      ]
+    }
   },
   {
     "id": "apputils:activate-command-palette",
@@ -139,55 +283,166 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift C"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:adaptive-theme",
     "label": "Synchronize with System Settings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      }
+    }
   },
   {
     "id": "apputils:change-dark-theme",
     "label": "Switch to the provided dark `theme`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The preferred dark theme name"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "apputils:change-font",
     "label": "waiting for fonts",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the font is available and enabled"
+        },
+        "font": {
+          "type": "string",
+          "description": "The font name"
+        },
+        "key": {
+          "type": "string",
+          "description": "The CSS property key to modify"
+        }
+      },
+      "required": [
+        "enabled",
+        "font",
+        "key"
+      ]
+    }
   },
   {
     "id": "apputils:change-light-theme",
     "label": "Switch to the provided light `theme`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The preferred light theme name"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "apputils:change-theme",
     "label": "Switch to the provided `theme`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The theme name to switch to"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "apputils:decr-font-size",
     "label": "Decrease Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The font size key to decrease (e.g., \"code-font-size\", \"content-font-size1\", \"ui-font-size1\")"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
   },
   {
     "id": "apputils:dismiss-notification",
     "label": "Dismiss a notification",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The notification ID to dismiss"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
   },
   {
     "id": "apputils:display-notifications",
     "label": "Show Notifications",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:display-shortcuts",
@@ -195,25 +450,187 @@
     "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:incr-font-size",
     "label": "Increase Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The font size key to increase (e.g., \"code-font-size\", \"content-font-size1\", \"ui-font-size1\")"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  {
+    "id": "apputils:license-report",
+    "label": "Download All Licenses as Markdown",
+    "caption": "Download All Licenses as Markdown",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "The report format to use for download"
+        },
+        "noLabel": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "Whether to hide the label (truthy values hide label)"
+        }
+      },
+      "required": [
+        "format"
+      ]
+    }
+  },
+  {
+    "id": "apputils:licenses",
+    "label": "Licenses",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "apputils:licenses-refresh",
+    "label": "Refresh Licenses",
+    "caption": "Refresh Licenses",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "noLabel": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "Whether to hide the label (truthy values hide label)"
+        }
+      }
+    }
   },
   {
     "id": "apputils:load-statedb",
     "label": "Load state for the current workspace.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "description": "The URL hash"
+        },
+        "path": {
+          "type": "string",
+          "description": "The URL path"
+        },
+        "search": {
+          "type": "string",
+          "description": "The URL search string containing query parameters"
+        }
+      }
+    }
   },
   {
     "id": "apputils:notify",
     "label": "Emit a notification",
     "caption": "Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The notification message text"
+        },
+        "type": {
+          "type": "string",
+          "description": "The notification type (e.g., \"default\", \"info\", \"warning\", \"error\")"
+        },
+        "options": {
+          "type": "object",
+          "description": "Additional notification options",
+          "properties": {
+            "autoClose": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ],
+              "description": "Auto-close timeout in milliseconds, or false to disable"
+            },
+            "actions": {
+              "type": "array",
+              "description": "Array of action buttons for the notification",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "The action button label"
+                  },
+                  "commandId": {
+                    "type": "string",
+                    "description": "The command ID to execute when clicked"
+                  },
+                  "args": {
+                    "description": "Arguments to pass to the command"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "The action button caption/tooltip"
+                  },
+                  "className": {
+                    "type": "string",
+                    "description": "CSS class name for the action button"
+                  }
+                },
+                "required": [
+                  "label",
+                  "commandId"
+                ]
+              }
+            },
+            "data": {
+              "description": "Additional data associated with the notification"
+            }
+          }
+        }
+      },
+      "required": [
+        "message"
+      ]
+    }
   },
   {
     "id": "apputils:print",
@@ -221,55 +638,231 @@
     "caption": "",
     "shortcuts": [
       "Ctrl P"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:reset",
     "label": "Reset Application State",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "reload": {
+          "type": "boolean",
+          "description": "Whether to reload the page after resetting"
+        }
+      }
+    }
   },
   {
     "id": "apputils:reset-on-load",
     "label": "Reset state when loading for the workspace.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "description": "The URL hash"
+        },
+        "path": {
+          "type": "string",
+          "description": "The URL path"
+        },
+        "search": {
+          "type": "string",
+          "description": "The URL search string containing query parameters"
+        }
+      }
+    }
   },
   {
     "id": "apputils:run-all-enabled",
     "label": "Run All Enabled Commands Passed as Args",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of command IDs to run"
+        },
+        "args": {
+          "description": "Arguments to pass to the commands"
+        },
+        "errorIfNotEnabled": {
+          "type": "boolean",
+          "description": "Whether to log an error if a command is not enabled"
+        }
+      }
+    }
   },
   {
     "id": "apputils:run-first-enabled",
     "label": "Run First Enabled Command",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of command IDs to attempt to run"
+        },
+        "args": {
+          "description": "Arguments to pass to the commands"
+        }
+      },
+      "required": [
+        "commands"
+      ]
+    }
   },
   {
     "id": "apputils:theme-scrollbars",
     "label": "Theme Scrollbars",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:toggle-header",
     "label": "Show Header Above Content",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "apputils:update-notification",
     "label": "Update a notification",
     "caption": "Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The notification ID to update"
+        },
+        "message": {
+          "type": "string",
+          "description": "The notification message text"
+        },
+        "type": {
+          "type": "string",
+          "description": "The notification type (e.g., \"default\", \"info\", \"warning\", \"error\")"
+        },
+        "options": {
+          "type": "object",
+          "description": "Additional notification options",
+          "properties": {
+            "autoClose": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ],
+              "description": "Auto-close timeout in milliseconds, or false to disable"
+            },
+            "actions": {
+              "type": "array",
+              "description": "Array of action buttons for the notification",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "The action button label"
+                  },
+                  "commandId": {
+                    "type": "string",
+                    "description": "The command ID to execute when clicked"
+                  },
+                  "args": {
+                    "description": "Arguments to pass to the command"
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "The action button caption/tooltip"
+                  },
+                  "className": {
+                    "type": "string",
+                    "description": "CSS class name for the action button"
+                  }
+                },
+                "required": [
+                  "label",
+                  "commandId"
+                ]
+              }
+            },
+            "data": {
+              "description": "Additional data associated with the notification"
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "message"
+      ]
+    }
   },
   {
     "id": "code-viewer:open",
     "label": "Open Code Viewer",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The content to display in the code viewer"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label for the code viewer"
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "The MIME type of the content"
+        },
+        "extension": {
+          "type": "string",
+          "description": "The file extension to derive MIME type from"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID to assign to the widget"
+        }
+      },
+      "required": [
+        "content"
+      ]
+    }
   },
   {
     "id": "codemirror:delete-line",
@@ -277,7 +870,53 @@
     "caption": "",
     "shortcuts": [
       "Ctrl D"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:fold-all",
+    "label": "Fold All Regions",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:fold-current",
+    "label": "Fold Current Region",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:fold-subregions",
+    "label": "Fold All Subregions",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:markdown-toggle-bold",
+    "label": "Toggle Bold",
+    "caption": "Toggle bold formatting by wrapping/unwrapping selected text with **",
+    "shortcuts": [
+      "Ctrl B"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:select-next-occurrence",
@@ -285,7 +924,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift D"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:toggle-block-comment",
@@ -293,7 +936,11 @@
     "caption": "Toggles block comments in languages which support it (e.g. C, JavaScript)",
     "shortcuts": [
       "Alt A"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:toggle-comment",
@@ -301,13 +948,51 @@
     "caption": "",
     "shortcuts": [
       "Ctrl /"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "codemirror:toggle-tab-focus-mode",
     "label": "Toggle Tab Focus Mode",
     "caption": "Toggles behavior of Tab key between inserting indentation and moving to next focusable element",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:unfold-all",
+    "label": "Unfold All Regions",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:unfold-current",
+    "label": "Unfold Current Region",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "codemirror:unfold-subregions",
+    "label": "Unfold All Subregions",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "completer:invoke-console",
@@ -315,7 +1000,11 @@
     "caption": "",
     "shortcuts": [
       "Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "completer:invoke-file",
@@ -323,7 +1012,11 @@
     "caption": "",
     "shortcuts": [
       "Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "completer:invoke-notebook",
@@ -331,7 +1024,16 @@
     "caption": "",
     "shortcuts": [
       "Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "completer:select-console",
@@ -339,7 +1041,11 @@
     "caption": "",
     "shortcuts": [
       "Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "completer:select-file",
@@ -347,7 +1053,11 @@
     "caption": "",
     "shortcuts": [
       "Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "completer:select-notebook",
@@ -355,55 +1065,222 @@
     "caption": "",
     "shortcuts": [
       "Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:change-kernel",
     "label": "Change Kernel…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:clear",
     "label": "Clear Console Cells",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether executed from toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:close-and-shutdown",
     "label": "Close and Shut Down…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:create",
     "label": "Console",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is executed from the palette"
+        },
+        "isLauncher": {
+          "type": "boolean",
+          "description": "Whether the command is executed from the launcher"
+        },
+        "kernelPreference": {
+          "type": "object",
+          "description": "The kernel preference for the console. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The id of an existing kernel"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the kernel"
+            },
+            "language": {
+              "type": "string",
+              "description": "The preferred kernel language"
+            },
+            "shouldStart": {
+              "type": "boolean",
+              "description": "A kernel should be started automatically (default `true`)"
+            },
+            "canStart": {
+              "type": "boolean",
+              "description": "A kernel can be started (default `true`)"
+            },
+            "shutdownOnDispose": {
+              "type": "boolean",
+              "description": "Shut down the session when session context is disposed (default `false`)"
+            },
+            "autoStartDefault": {
+              "type": "boolean",
+              "description": "Automatically start the default kernel if no other matching kernel is found (default `false`)"
+            },
+            "skipKernelRestartDialog": {
+              "type": "boolean",
+              "description": "Skip showing the kernel restart dialog if checked (default `false`)"
+            }
+          }
+        },
+        "basePath": {
+          "type": "string",
+          "description": "The base path for the console"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "The current working directory"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        },
+        "ref": {
+          "type": "string",
+          "description": "The reference widget id for the insert location"
+        },
+        "insertMode": {
+          "type": "string",
+          "description": "The tab insert mode"
+        }
+      }
+    }
   },
   {
     "id": "console:get-kernel",
     "label": "Get Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:inject",
     "label": "Inject some code in a console.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path of the console session"
+        },
+        "code": {
+          "type": "string",
+          "description": "The code to inject"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "The metadata for the code"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      },
+      "required": [
+        "path",
+        "code"
+      ]
+    }
   },
   {
     "id": "console:interaction-mode",
     "label": "Set the console interaction mode.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "interactionMode": {
+          "type": "string",
+          "enum": [
+            "notebook",
+            "terminal"
+          ],
+          "description": "The interaction mode for the console"
+        }
+      }
+    }
   },
   {
     "id": "console:interrupt-kernel",
     "label": "Interrupt Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:linebreak",
@@ -411,55 +1288,167 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:open",
     "label": "Open a console for the provided `path`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path of the session to open"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the console widget"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
   },
   {
     "id": "console:prompt-to-bottom",
     "label": "Prompt to bottom",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is executed from palette"
+        }
+      }
+    }
   },
   {
     "id": "console:prompt-to-left",
     "label": "Prompt to left",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is executed from palette"
+        }
+      }
+    }
   },
   {
     "id": "console:prompt-to-right",
     "label": "Prompt to right",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is executed from palette"
+        }
+      }
+    }
   },
   {
     "id": "console:prompt-to-top",
     "label": "Prompt to top",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is executed from palette"
+        }
+      }
+    }
   },
   {
     "id": "console:redo",
     "label": "Redo",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text to replace the selection with"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:restart-kernel",
     "label": "Restart Kernel…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether executed from toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:run-forced",
@@ -467,7 +1456,20 @@
     "caption": "",
     "shortcuts": [
       "Shift Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether executed from toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:run-unforced",
@@ -475,37 +1477,90 @@
     "caption": "",
     "shortcuts": [
       "Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether executed from toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:shutdown",
     "label": "Shut Down",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:toggle-autoclosing-brackets",
     "label": "Auto Close Brackets for Code Console Prompt",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "force": {
+          "type": "boolean",
+          "description": "Whether to force the toggle state"
+        }
+      }
+    }
   },
   {
     "id": "console:toggle-show-all-kernel-activity",
     "label": "Show All Kernel Activity",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "console:undo",
     "label": "Undo",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        }
+      }
+    }
   },
   {
     "id": "csv:go-to-line",
     "label": "Go to Line",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:continue",
@@ -513,31 +1568,72 @@
     "caption": "Pause",
     "shortcuts": [
       "F9"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:copy-to-clipboard",
     "label": "Copy to Clipboard",
     "caption": "Copy text representation of the value to clipboard",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:copy-to-globals",
     "label": "Copy Variable to Globals",
     "caption": "Copy variable to globals scope",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:evaluate",
     "label": "Evaluate Code",
     "caption": "Evaluate Code",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:inspect-variable",
     "label": "Inspect Variable",
     "caption": "Inspect Variable",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "variableReference": {
+          "type": "number",
+          "description": "The variable reference to inspect"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the variable to inspect"
+        }
+      }
+    }
+  },
+  {
+    "id": "debugger:invoke-console-completer",
+    "label": "Display the tab completion widget.",
+    "caption": "",
+    "shortcuts": [
+      "Tab"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:next",
@@ -545,30 +1641,98 @@
     "caption": "Next",
     "shortcuts": [
       "F10"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:open-source",
     "label": "Open Source",
     "caption": "Open Source",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the source file to open"
+        }
+      }
+    }
   },
   {
     "id": "debugger:pause-on-exceptions",
     "label": "Breakpoints on exception",
-    "shortcuts": []
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "type": "string",
+          "description": "Exception filter to pause on"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the exception filter"
+        }
+      }
+    }
   },
   {
     "id": "debugger:render-mime-variable",
     "label": "Render Variable",
     "caption": "Render variable according to its mime type",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "frameId": {
+          "type": "number",
+          "description": "The frame ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the variable to render"
+        }
+      }
+    }
   },
   {
     "id": "debugger:restart-debug",
     "label": "Restart Kernel and Debug…",
     "caption": "Restart Kernel and Debug…",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:run-in-console",
+    "label": "Execute the current line in debug console.",
+    "caption": "",
+    "shortcuts": [
+      "Shift Enter"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:select-console-completion",
+    "label": "Select the completion suggestion.",
+    "caption": "",
+    "shortcuts": [
+      "Enter"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:show-panel",
@@ -576,7 +1740,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift E"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:stepIn",
@@ -584,7 +1752,11 @@
     "caption": "Step In",
     "shortcuts": [
       "F11"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:stepOut",
@@ -592,7 +1764,11 @@
     "caption": "Step Out",
     "shortcuts": [
       "Shift F11"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "debugger:terminate",
@@ -600,79 +1776,281 @@
     "caption": "Terminate",
     "shortcuts": [
       "Shift F9"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:clear-recents",
     "label": "Clear Recent Documents",
     "caption": "Clear the list of recently opened items.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:clone",
     "label": "New View for ",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "type": "object",
+          "description": "Options for opening the cloned document"
+        }
+      }
+    }
   },
   {
     "id": "docmanager:delete",
     "label": "Delete ",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:delete-file",
     "label": "Delete ",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path of the file to delete"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
   },
   {
     "id": "docmanager:download",
     "label": "Download",
     "caption": "Download the file to your computer",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:duplicate",
     "label": "Duplicate ",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:new-untitled",
     "label": "New undefined",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "The error title to display"
+        },
+        "path": {
+          "type": "string",
+          "description": "The path where to create the file"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of content to create",
+          "enum": [
+            "file",
+            "directory",
+            "notebook"
+          ]
+        },
+        "ext": {
+          "type": "string",
+          "description": "The file extension (for file type)"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label for the command"
+        }
+      }
+    }
   },
   {
     "id": "docmanager:open",
     "label": "Open the provided `path`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path of the file to open"
+        },
+        "factory": {
+          "type": "string",
+          "description": "The widget factory name"
+        },
+        "kernel": {
+          "type": "object",
+          "description": "The kernel model to use. See the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) for more information.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier of the kernel on the server"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the kernel"
+            }
+          }
+        },
+        "kernelPreference": {
+          "type": "object",
+          "description": "Override kernel preferences, see [`IKernelPreference`](https://jupyterlab.readthedocs.io/en/latest/api/interfaces/apputils.ISessionContext.IKernelPreference.html) for possible values. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The id of an existing kernel"
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the kernel"
+            },
+            "language": {
+              "type": "string",
+              "description": "The preferred kernel language"
+            },
+            "shouldStart": {
+              "type": "boolean",
+              "description": "A kernel should be started automatically (default `true`)"
+            },
+            "canStart": {
+              "type": "boolean",
+              "description": "A kernel can be started (default `true`)"
+            },
+            "shutdownOnDispose": {
+              "type": "boolean",
+              "description": "Shut down the session when session context is disposed (default `false`)"
+            },
+            "autoStartDefault": {
+              "type": "boolean",
+              "description": "Automatically start the default kernel if no other matching kernel is found (default `false`)"
+            },
+            "skipKernelRestartDialog": {
+              "type": "boolean",
+              "description": "Skip showing the kernel restart dialog if checked (default `false`)"
+            }
+          }
+        },
+        "options": {
+          "type": "object",
+          "description": "Additional options for opening the widget",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "description": "The reference widget id for the insert location (default `null`)"
+            },
+            "mode": {
+              "type": "string",
+              "description": "The insertion mode relative to a reference widget (\"split-top\", \"split-bottom\", \"split-left\", \"split-right\", \"tab-before\", \"tab-after\")"
+            },
+            "activate": {
+              "type": "boolean",
+              "description": "Whether to activate the widget (default `true`)"
+            },
+            "rank": {
+              "type": "number",
+              "description": "The rank order of the widget among its siblings"
+            },
+            "type": {
+              "type": "string",
+              "description": "Type of widget to open, used to load user customization (typically a factory name or widget id)"
+            }
+          }
+        },
+        "icon": {
+          "type": "string",
+          "description": "The icon class for the command"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label for the command"
+        },
+        "mnemonic": {
+          "type": "number",
+          "description": "The mnemonic index for the command"
+        }
+      }
+    }
   },
   {
     "id": "docmanager:open-browser-tab",
     "label": "Open in New Browser Tab",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path of the file to open in browser tab"
+        },
+        "icon": {
+          "type": "string",
+          "description": "The icon class for the command"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
   },
   {
     "id": "docmanager:reload",
     "label": "Reload  from Disk",
     "caption": "Reload contents from disk",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:rename",
     "label": "Rename…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:restore-checkpoint",
     "label": "Revert  to Checkpoint…",
     "caption": "Revert contents to previous checkpoint",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:save",
@@ -680,13 +2058,30 @@
     "caption": "Document is read-only. \"Save\" is disabled; use \"Save as…\" instead",
     "shortcuts": [
       "Ctrl S"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether executed from toolbar"
+        },
+        "_luminoEvent": {
+          "type": "object",
+          "description": "The lumino event object"
+        }
+      }
+    }
   },
   {
     "id": "docmanager:save-all",
     "label": "Save All",
     "caption": "Save all open documents",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:save-as",
@@ -694,19 +2089,31 @@
     "caption": "Save with new path",
     "shortcuts": [
       "Ctrl Shift S"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:show-in-file-browser",
     "label": "Show in File Browser",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "docmanager:toggle-autosave",
     "label": "Autosave Documents",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "documentsearch:end",
@@ -714,7 +2121,11 @@
     "caption": "",
     "shortcuts": [
       "Escape"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "documentsearch:highlightNext",
@@ -722,7 +2133,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl G"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "documentsearch:highlightPrevious",
@@ -730,7 +2145,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift G"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "documentsearch:start",
@@ -738,13 +2157,37 @@
     "caption": "",
     "shortcuts": [
       "Ctrl F"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "searchText": {
+          "type": "string",
+          "description": "The text to search for"
+        }
+      }
+    }
   },
   {
     "id": "documentsearch:startWithReplace",
     "label": "Find and Replace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl H"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "searchText": {
+          "type": "string",
+          "description": "The text to search for"
+        },
+        "replaceText": {
+          "type": "string",
+          "description": "The text to replace with"
+        }
+      }
+    }
   },
   {
     "id": "documentsearch:toggleSearchInSelection",
@@ -752,31 +2195,51 @@
     "caption": "",
     "shortcuts": [
       "Alt L"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "editmenu:clear-all",
     "label": "Clear All",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "editmenu:clear-current",
     "label": "Clear",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "editmenu:go-to-line",
     "label": "Go to Line…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "editmenu:open",
     "label": "Open Edit Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "editmenu:redo",
@@ -784,7 +2247,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift Z"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "editmenu:undo",
@@ -792,7 +2259,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Z"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "extensionmanager:show-panel",
@@ -800,19 +2271,36 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift X"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "extensionmanager:toggle",
     "label": "Enable Extension Manager",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:activate",
     "label": "Open the file browser for the provided `path`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to open in the file browser"
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:copy",
@@ -820,37 +2308,76 @@
     "caption": "",
     "shortcuts": [
       "Ctrl C"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:copy-download-link",
     "label": "Copy Download Link",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:copy-path",
     "label": "Copy Path",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:create-new-directory",
     "label": "New Folder",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:create-new-file",
     "label": "New File",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "default": "New File",
+          "description": "The command label."
+        },
+        "iconName": {
+          "type": "string",
+          "description": "The command icon."
+        },
+        "ext": {
+          "type": "string",
+          "default": "txt",
+          "description": "The file extension."
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:create-new-markdown-file",
     "label": "New Markdown File",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:cut",
@@ -858,21 +2385,33 @@
     "caption": "",
     "shortcuts": [
       "Ctrl X"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:delete",
-    "label": "Delete",
+    "label": "Move to Trash",
     "caption": "",
     "shortcuts": [
       "Delete"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:download",
     "label": "Download",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:duplicate",
@@ -880,13 +2419,30 @@
     "caption": "",
     "shortcuts": [
       "Ctrl D"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:go-to-path",
     "label": "Update the file browser to display the provided `path`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to navigate to"
+        },
+        "dontShowBrowser": {
+          "type": "boolean",
+          "description": "Whether to avoid showing the browser"
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:go-up",
@@ -894,37 +2450,89 @@
     "caption": "",
     "shortcuts": [
       "Backspace"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:hide-main",
     "label": "Hide the file browser.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:open",
     "label": "Open",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "factory": {
+          "type": "string",
+          "description": "The name of the widget factory to use"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label to display for the command"
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:open-browser-tab",
     "label": "Open in New Browser Tab",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "Mode for opening files (e.g., single-document)"
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:open-path",
     "label": "Open from Path…",
     "caption": "Open from path",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the file or directory to open"
+        },
+        "dontShowBrowser": {
+          "type": "boolean",
+          "description": "Whether to avoid showing the file browser"
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:open-url",
     "label": "Open from URL…",
     "caption": "Open from URL",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "URL of the file to open"
+        }
+      }
+    }
   },
   {
     "id": "filebrowser:paste",
@@ -932,13 +2540,21 @@
     "caption": "",
     "shortcuts": [
       "Ctrl V"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:refresh",
     "label": "Refresh File List",
     "caption": "Refresh the file browser.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:rename",
@@ -946,55 +2562,103 @@
     "caption": "",
     "shortcuts": [
       "F2"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:search",
     "label": "Search on File Names",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "filebrowser:select-all",
+    "label": "Select All",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl A"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:share-main",
     "label": "Copy Shareable Link",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:shutdown",
     "label": "Shut Down Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-file-checkboxes",
     "label": "Show File Checkboxes",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-file-filter",
     "label": "Toggle File Filter",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-file-size",
     "label": "Show File Size Column",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-hidden-files",
     "label": "Show Hidden Files",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-last-modified",
     "label": "Show Last Modified Column",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-main",
@@ -1002,199 +2666,428 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift F"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-navigate-to-current-directory",
     "label": "Show Active File in File Browser",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-show-full-path",
     "label": "Show Full Path",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-single-click-navigation",
     "label": "Enable Single Click Navigation",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filebrowser:toggle-sort-notebooks-first",
     "label": "Sort Notebooks Above Files",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:change-font-size",
-    "label": "Decrease Font Size",
+    "label": "Change Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "delta": {
+          "type": "number",
+          "description": "The font size change delta (positive to increase, negative to decrease)"
+        },
+        "isMenu": {
+          "type": "boolean",
+          "description": "Whether the command is called from a menu context"
+        }
+      },
+      "required": [
+        "delta"
+      ]
+    }
   },
   {
     "id": "fileeditor:change-language",
     "label": "Change editor language.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The language name to change to"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the language"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:change-tabs",
     "label": "Indent with Tab",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "string",
+          "description": "The number of spaces for indentation (or Tab for tab indentation)"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:change-theme",
     "label": "jupyter",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "The theme name to change to"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the theme"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:copy",
     "label": "Copy",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:create-console",
     "label": "Create Console for Editor",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:create-new",
     "label": "Text File",
     "caption": "Create a new text file",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "cwd": {
+          "type": "string",
+          "description": "The current working directory path"
+        },
+        "fileExt": {
+          "type": "string",
+          "description": "The file extension for the new file"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the command palette"
+        },
+        "paletteLabel": {
+          "type": "string",
+          "description": "The label to show in the command palette"
+        },
+        "launcherLabel": {
+          "type": "string",
+          "description": "The label to show in the launcher"
+        },
+        "caption": {
+          "type": "string",
+          "description": "The caption for the command"
+        },
+        "iconName": {
+          "type": "string",
+          "description": "The name of the icon to use"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:create-new-markdown-file",
     "label": "Markdown File",
     "caption": "Create a new markdown file",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "cwd": {
+          "type": "string",
+          "description": "The current working directory path"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is being called from the command palette"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:cut",
     "label": "Cut",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:find",
     "label": "Find…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:go-to-line",
     "label": "Go to Line…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "type": "number",
+          "description": "The line number to go to (1-indexed)"
+        },
+        "column": {
+          "type": "number",
+          "description": "The column number to go to (1-indexed)"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:markdown-preview",
     "label": "Show Markdown Preview",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:paste",
     "label": "Paste",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:redo",
     "label": "Redo",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:replace-selection",
     "label": "Replace Selection in Editor",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text to replace the current selection with"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:restart-console",
     "label": "Restart Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:run-all",
     "label": "Run All Code",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:run-code",
     "label": "Run Selected Code",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:select-all",
     "label": "Select All",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:toggle-autoclosing-brackets",
     "label": "Auto Close Brackets in Text Editor",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "force": {
+          "type": "boolean",
+          "description": "Force enable/disable auto closing brackets"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:toggle-autoclosing-brackets-universal",
     "label": "Auto Close Brackets",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:toggle-current-line-numbers",
     "label": "Show Line Numbers",
     "caption": "Show the line numbers for the current file.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:toggle-current-line-wrap",
     "label": "Wrap Words",
     "caption": "Wrap words for the current file.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:toggle-current-match-brackets",
     "label": "Match Brackets",
     "caption": "Change match brackets for the current file.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:toggle-line-numbers",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:toggle-line-wrap",
     "label": "Word Wrap",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "boolean",
+          "description": "Whether to enable word wrap"
+        }
+      }
+    }
   },
   {
     "id": "fileeditor:toggle-match-brackets",
     "label": "Match Brackets",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "fileeditor:undo",
     "label": "Undo",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filemenu:close-and-cleanup",
@@ -1202,85 +3095,157 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift Q"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filemenu:create-console",
     "label": "New Console for Activity",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filemenu:logout",
     "label": "Log Out",
     "caption": "Log out of JupyterLab",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filemenu:open",
     "label": "Open File Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "filemenu:shutdown",
     "label": "Shut Down",
     "caption": "Shut down JupyterLab",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "help:about",
     "label": "About JupyterLab",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "help:jupyter-forum",
     "label": "Jupyter Forum",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "help:license-report",
-    "label": "Download All Licenses as Markdown",
-    "caption": "Download All Licenses as Markdown",
-    "shortcuts": []
+    "label": "Download All Licenses",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "help:licenses",
     "label": "Licenses",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "help:licenses-refresh",
     "label": "Refresh Licenses",
-    "caption": "Refresh Licenses",
-    "shortcuts": []
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "help:open",
     "label": "Open the provided `url` in a tab.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The URL to open"
+        },
+        "text": {
+          "type": "string",
+          "description": "The text label for the tab"
+        },
+        "newBrowserTab": {
+          "type": "boolean",
+          "description": "Whether to open in a new browser tab"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
   },
   {
     "id": "helpmenu:get-kernel",
     "label": "Get Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "helpmenu:open",
     "label": "Open Help Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "htmlviewer:trust-html",
     "label": "Trust HTML File",
     "caption": "Whether the HTML file is trusted.\n    Trusting the file allows scripts to run in it,\n    which may result in security risks.\n    Only enable for files you trust.",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:flip-horizontal",
@@ -1288,7 +3253,11 @@
     "caption": "",
     "shortcuts": [
       "H"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:flip-vertical",
@@ -1296,7 +3265,11 @@
     "caption": "",
     "shortcuts": [
       "V"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:invert-colors",
@@ -1304,7 +3277,11 @@
     "caption": "",
     "shortcuts": [
       "I"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:reset-image",
@@ -1312,7 +3289,11 @@
     "caption": "",
     "shortcuts": [
       "0"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:rotate-clockwise",
@@ -1320,7 +3301,11 @@
     "caption": "",
     "shortcuts": [
       "]"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:rotate-counterclockwise",
@@ -1328,7 +3313,11 @@
     "caption": "",
     "shortcuts": [
       "["
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:zoom-in",
@@ -1336,7 +3325,11 @@
     "caption": "",
     "shortcuts": [
       "="
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "imageviewer:zoom-out",
@@ -1344,7 +3337,11 @@
     "caption": "",
     "shortcuts": [
       "-"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "inline-completer:accept",
@@ -1352,7 +3349,11 @@
     "caption": "",
     "shortcuts": [
       "Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "inline-completer:invoke",
@@ -1360,7 +3361,11 @@
     "caption": "",
     "shortcuts": [
       "Alt \\"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "inline-completer:next",
@@ -1368,7 +3373,11 @@
     "caption": "",
     "shortcuts": [
       "Alt ]"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "inline-completer:previous",
@@ -1376,7 +3385,11 @@
     "caption": "",
     "shortcuts": [
       "Alt ["
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "inspector:close",
@@ -1384,7 +3397,16 @@
     "caption": "Live updating code documentation from the active kernel",
     "shortcuts": [
       "Ctrl I"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isLauncher": {
+          "type": "boolean",
+          "description": "Whether command is called from launcher"
+        }
+      }
+    }
   },
   {
     "id": "inspector:open",
@@ -1392,31 +3414,69 @@
     "caption": "Live updating code documentation from the active kernel",
     "shortcuts": [
       "Ctrl I"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text to display in the inspector"
+        },
+        "refresh": {
+          "type": "boolean",
+          "description": "Whether to refresh the inspector"
+        },
+        "isLauncher": {
+          "type": "boolean",
+          "description": "Whether command is called from launcher"
+        }
+      }
+    }
   },
   {
     "id": "inspector:toggle",
     "label": "Show Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text to display in the inspector"
+        }
+      }
+    }
   },
   {
     "id": "jupyterlab-translation:en",
     "label": "English",
     "caption": "Change interface language to English",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "jupyterlab-translation:zh_CN",
     "label": "Chinese (Simplified, China) - 中文 (简体, 中国)",
     "caption": "Change interface language to Chinese (Simplified, China) - 中文 (简体, 中国)",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:change",
     "label": "Change Kernel…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:interrupt",
@@ -1425,19 +3485,31 @@
     "shortcuts": [
       "I",
       "I"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:open",
     "label": "Open Kernel Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:reconnect-to-kernel",
     "label": "Reconnect to Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:restart",
@@ -1446,25 +3518,41 @@
     "shortcuts": [
       "0",
       "0"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:restart-and-clear",
     "label": "Restart Kernel and Clear…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:shutdown",
     "label": "Shut Down Kernel",
     "caption": "Shut down kernel",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "kernelmenu:shutdownAll",
     "label": "Shut Down All Kernels…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "launcher:create",
@@ -1472,67 +3560,173 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift L"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "cwd": {
+          "type": "string",
+          "description": "The current working directory"
+        },
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is executed from a toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the widget"
+        },
+        "ref": {
+          "type": "string",
+          "description": "The reference widget id"
+        }
+      }
+    }
   },
   {
     "id": "logconsole:add-checkpoint",
     "label": "Add Checkpoint",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "logconsole:clear",
     "label": "Clear Log",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "logconsole:open",
     "label": "Show Log Console",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "The source for the log console"
+        },
+        "insertMode": {
+          "type": "string",
+          "description": "The insert mode for the dock layout"
+        },
+        "ref": {
+          "type": "string",
+          "description": "The reference widget"
+        }
+      }
+    }
   },
   {
     "id": "logconsole:set-level",
     "label": "Set log level to `level`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "Critical",
+            "Error",
+            "Warning",
+            "Info",
+            "Debug"
+          ],
+          "description": "The log level to set"
+        }
+      },
+      "required": [
+        "level"
+      ]
+    }
   },
   {
     "id": "mainmenu:open-first",
     "label": "Open First Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "markdownviewer:edit",
     "label": "Show Markdown Editor",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "markdownviewer:open",
     "label": "Markdown Preview",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to the markdown file to preview"
+        },
+        "options": {
+          "type": "object",
+          "description": "Options for opening the preview"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
   },
   {
     "id": "mathjax:clipboard",
     "label": "MathJax Copy Latex",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "mathjax:scale",
     "label": "Mathjax Scale Reset",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "scale": {
+          "type": "number",
+          "description": "The scale factor for MathJax rendering"
+        }
+      }
+    }
   },
   {
     "id": "mermaid:copy-source",
     "label": "Mermaid Copy Diagram Source",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:access-next-history-entry",
@@ -1540,7 +3734,11 @@
     "caption": "",
     "shortcuts": [
       "Alt ArrowDown"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:access-previous-history-entry",
@@ -1548,7 +3746,11 @@
     "caption": "",
     "shortcuts": [
       "Alt ArrowUp"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-code",
@@ -1556,7 +3758,11 @@
     "caption": "",
     "shortcuts": [
       "Y"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-heading-1",
@@ -1564,7 +3770,11 @@
     "caption": "",
     "shortcuts": [
       "1"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-heading-2",
@@ -1572,7 +3782,11 @@
     "caption": "",
     "shortcuts": [
       "2"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-heading-3",
@@ -1580,7 +3794,11 @@
     "caption": "",
     "shortcuts": [
       "3"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-heading-4",
@@ -1588,7 +3806,11 @@
     "caption": "",
     "shortcuts": [
       "4"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-heading-5",
@@ -1596,7 +3818,11 @@
     "caption": "",
     "shortcuts": [
       "5"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-heading-6",
@@ -1604,7 +3830,11 @@
     "caption": "",
     "shortcuts": [
       "6"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-markdown",
@@ -1612,7 +3842,11 @@
     "caption": "",
     "shortcuts": [
       "M"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-cell-to-raw",
@@ -1620,31 +3854,51 @@
     "caption": "",
     "shortcuts": [
       "R"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:change-kernel",
     "label": "Change Kernel…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:clear-all-cell-outputs",
     "label": "Clear Outputs of All Cells",
     "caption": "Clear all outputs of all cells",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:clear-cell-output",
     "label": "Clear Cell Output",
     "caption": "Clear outputs for the selected cells",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:close-and-shutdown",
     "label": "Close and Shut Down Notebook…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:collapse-all-headings",
@@ -1652,7 +3906,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ArrowLeft"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:copy-cell",
@@ -1660,37 +3918,114 @@
     "caption": "Copy this cell",
     "shortcuts": [
       "C"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:copy-to-clipboard",
     "label": "Copy Output to Clipboard",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:create-console",
     "label": "New Console for Notebook",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the console after creation"
+        }
+      }
+    }
   },
   {
     "id": "notebook:create-new",
     "label": "Notebook",
     "caption": "Create a new notebook",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "cwd": {
+          "type": "string",
+          "description": "Current working directory for the new notebook"
+        },
+        "kernelId": {
+          "type": "string",
+          "description": "Kernel ID to use for the new notebook"
+        },
+        "kernelName": {
+          "type": "string",
+          "description": "Kernel name to use for the new notebook"
+        },
+        "isLauncher": {
+          "type": "boolean",
+          "description": "Whether the command is executed from launcher"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is executed from palette"
+        },
+        "isContextMenu": {
+          "type": "boolean",
+          "description": "Whether the command is executed from context menu"
+        }
+      }
+    }
   },
   {
     "id": "notebook:create-output-view",
     "label": "Create New View for Cell Output",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path to the notebook containing the cell"
+        },
+        "index": {
+          "type": "number",
+          "description": "The index of the cell to create an output view for"
+        }
+      }
+    }
   },
   {
     "id": "notebook:create-subshell-console",
     "label": "New Subshell Console for Notebook",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the console after creation"
+        }
+      }
+    }
   },
   {
     "id": "notebook:cut-cell",
@@ -1698,7 +4033,20 @@
     "caption": "Cut this cell",
     "shortcuts": [
       "X"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:delete-cell",
@@ -1707,31 +4055,69 @@
     "shortcuts": [
       "D",
       "D"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:deselect-all",
     "label": "Deselect All Cells",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:disable-output-scrolling",
     "label": "Disable Scrolling for Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:duplicate-below",
     "label": "Duplicate Cell Below",
     "caption": "Create a duplicate of this cell below",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:enable-output-scrolling",
     "label": "Enable Scrolling for Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:enter-command-mode",
@@ -1739,7 +4125,11 @@
     "caption": "",
     "shortcuts": [
       "Escape"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:enter-edit-mode",
@@ -1747,7 +4137,11 @@
     "caption": "",
     "shortcuts": [
       "Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:expand-all-headings",
@@ -1755,13 +4149,37 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift ArrowRight"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:export-to-format",
     "label": "Save and Export Notebook to the given `format`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "The export format (e.g., pdf, html, latex)"
+        },
+        "label": {
+          "type": "string",
+          "description": "The label to display for this format"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is called from the command palette"
+        }
+      },
+      "required": [
+        "format"
+      ]
+    }
   },
   {
     "id": "notebook:extend-marked-cells-above",
@@ -1769,7 +4187,11 @@
     "caption": "",
     "shortcuts": [
       "Shift ArrowUp"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:extend-marked-cells-below",
@@ -1777,7 +4199,11 @@
     "caption": "",
     "shortcuts": [
       "Shift ArrowDown"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:extend-marked-cells-bottom",
@@ -1785,7 +4211,11 @@
     "caption": "",
     "shortcuts": [
       "Shift End"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:extend-marked-cells-top",
@@ -1793,37 +4223,66 @@
     "caption": "",
     "shortcuts": [
       "Shift Home"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:get-kernel",
     "label": "Get Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:hide-all-cell-code",
     "label": "Collapse All Code",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:hide-all-cell-outputs",
     "label": "Collapse All Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:hide-cell-code",
     "label": "Collapse Selected Code",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:hide-cell-outputs",
     "label": "Collapse Selected Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:insert-cell-above",
@@ -1831,7 +4290,16 @@
     "caption": "Insert a cell above",
     "shortcuts": [
       "A"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
   },
   {
     "id": "notebook:insert-cell-below",
@@ -1839,7 +4307,16 @@
     "caption": "Insert a cell below",
     "shortcuts": [
       "B"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
   },
   {
     "id": "notebook:insert-heading-above",
@@ -1847,7 +4324,11 @@
     "caption": "",
     "shortcuts": [
       "Shift A"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:insert-heading-below",
@@ -1855,13 +4336,26 @@
     "caption": "",
     "shortcuts": [
       "Shift B"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:interrupt-kernel",
     "label": "Interrupt Kernel",
     "caption": "Interrupt the kernel",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
   },
   {
     "id": "notebook:merge-cell-above",
@@ -1869,7 +4363,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Backspace"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:merge-cell-below",
@@ -1877,7 +4375,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift M"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:merge-cells",
@@ -1885,7 +4387,11 @@
     "caption": "",
     "shortcuts": [
       "Shift M"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:move-cell-down",
@@ -1893,7 +4399,20 @@
     "caption": "Move this cell down",
     "shortcuts": [
       "Ctrl Shift ArrowDown"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:move-cell-up",
@@ -1901,7 +4420,20 @@
     "caption": "Move this cell up",
     "shortcuts": [
       "Ctrl Shift ArrowUp"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:move-cursor-down",
@@ -1909,7 +4441,11 @@
     "caption": "",
     "shortcuts": [
       "ArrowDown"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:move-cursor-heading-above-or-collapse",
@@ -1917,7 +4453,11 @@
     "caption": "",
     "shortcuts": [
       "ArrowLeft"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:move-cursor-heading-below-or-expand",
@@ -1925,7 +4465,11 @@
     "caption": "",
     "shortcuts": [
       "ArrowRight"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:move-cursor-up",
@@ -1933,19 +4477,41 @@
     "caption": "",
     "shortcuts": [
       "ArrowUp"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:paste-and-replace-cell",
     "label": "Paste Cell and Replace",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:paste-cell-above",
     "label": "Paste Cell Above",
     "caption": "Paste this cell from the clipboard",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:paste-cell-below",
@@ -1953,19 +4519,40 @@
     "caption": "Paste this cell from the clipboard",
     "shortcuts": [
       "V"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:reconnect-to-kernel",
     "label": "Reconnect to Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:redo",
     "label": "Redo",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:redo-cell-action",
@@ -1973,61 +4560,125 @@
     "caption": "",
     "shortcuts": [
       "Shift Z"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:render-all-markdown",
     "label": "Render All Markdown Cells",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:replace-selection",
     "label": "Replace Selection in Notebook Cell",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text to replace the selection with"
+        }
+      }
+    }
   },
   {
     "id": "notebook:restart-and-run-to-selected",
     "label": "Restart Kernel and Run up to Selected Cell…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:restart-clear-output",
     "label": "Restart Kernel and Clear Outputs of All Cells…",
     "caption": "Restart the kernel and clear all outputs of all cells",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:restart-kernel",
     "label": "Restart Kernel…",
     "caption": "Restart the kernel",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
   },
   {
     "id": "notebook:restart-run-all",
     "label": "Restart Kernel and Run All Cells…",
     "caption": "Restart the kernel and run all cells",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:run-all-above",
     "label": "Run All Above Selected Cell",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:run-all-below",
     "label": "Run Selected Cell and All Below",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:run-all-cells",
     "label": "Run All Cells",
     "caption": "Run all cells",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:run-cell",
@@ -2035,7 +4686,16 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:run-cell-and-insert-below",
@@ -2043,7 +4703,16 @@
     "caption": "",
     "shortcuts": [
       "Alt Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:run-cell-and-select-next",
@@ -2051,13 +4720,30 @@
     "caption": "Run this cell and advance",
     "shortcuts": [
       "Shift Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        },
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:run-in-console",
     "label": "Run Selected Text or Current Line in Console",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:select-all",
@@ -2065,49 +4751,81 @@
     "caption": "",
     "shortcuts": [
       "Ctrl A"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:select-last-run-cell",
     "label": "Select current running or last run cell",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:set-side-by-side-ratio",
     "label": "Set side-by-side ratio",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:show-all-cell-code",
     "label": "Expand All Code",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:show-all-cell-outputs",
     "label": "Expand All Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:show-cell-code",
     "label": "Expand Selected Code",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:show-cell-outputs",
     "label": "Expand Selected Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:shutdown-kernel",
     "label": "Shut Down Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:split-cell-at-cursor",
@@ -2115,31 +4833,61 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift -"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:toggle-all-cell-line-numbers",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:toggle-autoclosing-brackets",
     "label": "Auto Close Brackets for All Notebook Cell Types",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "force": {
+          "type": "boolean",
+          "description": "Force toggling the auto closing brackets setting"
+        }
+      }
+    }
   },
   {
     "id": "notebook:toggle-cell-outputs",
     "label": "Toggle Visibility of Selected Outputs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:toggle-heading-collapse",
     "label": "Toggle Collapse Notebook Heading",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:toggle-render-side-by-side-current",
@@ -2147,25 +4895,46 @@
     "caption": "",
     "shortcuts": [
       "Shift R"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "notebook:toggle-virtual-scrollbar",
     "label": "Show Minimap",
-    "caption": "Show Minimap (virtual scrollbar, enabled with windowing mode: full)",
-    "shortcuts": []
+    "caption": "Show Minimap",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:trust",
     "label": "Trust Notebook",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:undo",
     "label": "Undo",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "notebook:undo-cell-action",
@@ -2173,19 +4942,45 @@
     "caption": "",
     "shortcuts": [
       "Z"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "pluginmanager:open",
     "label": "Advanced Plugin Manager",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The search query for plugins"
+        },
+        "isDisclaimed": {
+          "type": "boolean",
+          "description": "Whether the disclaimer has been accepted"
+        }
+      }
+    }
   },
   {
     "id": "pluginmanager:refresh",
     "label": "Refresh Plugin List",
     "caption": "Refresh plugins list",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "noLabel": {
+          "type": "boolean",
+          "description": "Whether to hide the label"
+        }
+      }
+    }
   },
   {
     "id": "property-inspector:show-panel",
@@ -2193,13 +4988,26 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift U"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "recentmenu:open-recent",
     "label": "Open a Recent Document (given by `recent` argument)",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "recent": {
+          "type": "object",
+          "description": "Recent document to open"
+        }
+      }
+    }
   },
   {
     "id": "recentmenu:reopen-last",
@@ -2207,25 +5015,61 @@
     "caption": "Reopen recently closed file or notebook.",
     "shortcuts": [
       "Ctrl Shift T"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "rendermime:handle-local-link",
     "label": "Handle Local Link",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The file path to open"
+        },
+        "id": {
+          "type": "string",
+          "description": "Fragment identifier to navigate to"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "kernel",
+            "server"
+          ],
+          "description": "Scope of the file location"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
   },
   {
     "id": "runmenu:open",
     "label": "Open Run Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "runmenu:restart-and-run-all",
     "label": "Restart Kernel and Run All",
     "caption": "Restart Kernel and Run All",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "runmenu:run",
@@ -2233,43 +5077,104 @@
     "caption": "Run Selected",
     "shortcuts": [
       "Shift Enter"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "runmenu:run-all",
     "label": "Run All",
     "caption": "Run All",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "running:kernel-new-console",
     "label": "New Console for Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Kernel ID to create console for"
+        }
+      }
+    }
   },
   {
     "id": "running:kernel-new-notebook",
     "label": "New Notebook for Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Kernel ID to create notebook for"
+        }
+      }
+    }
   },
   {
     "id": "running:kernel-open-session",
     "label": "Unknown Session",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the session to open"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of session (console or notebook)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the session"
+        }
+      }
+    }
   },
   {
     "id": "running:kernel-shut-down",
     "label": "Shut Down Kernel",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Kernel ID to shut down"
+        }
+      }
+    }
   },
   {
     "id": "running:kernel-shut-down-unused",
     "label": "Shut Down Unused",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether executed from toolbar"
+        }
+      }
+    }
   },
   {
     "id": "running:show-modal",
@@ -2277,7 +5182,11 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Alt A"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "running:show-panel",
@@ -2285,19 +5194,31 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift B"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "settingeditor:export",
     "label": "Export Settings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "settingeditor:import",
     "label": "Import Settings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "settingeditor:open",
@@ -2305,19 +5226,48 @@
     "caption": "",
     "shortcuts": [
       "Ctrl ,"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query to filter settings"
+        },
+        "settingEditorType": {
+          "type": "string",
+          "enum": [
+            "ui",
+            "json"
+          ],
+          "description": "Type of settings editor to open"
+        },
+        "label": {
+          "type": "string",
+          "description": "Custom label for the command"
+        }
+      }
+    }
   },
   {
     "id": "settingeditor:open-json",
     "label": "Advanced Settings Editor",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "settingeditor:revert",
     "label": "Revert User Settings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "settingeditor:save",
@@ -2325,61 +5275,109 @@
     "caption": "",
     "shortcuts": [
       "Ctrl S"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "settingsmenu:open",
     "label": "Open Settings Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "shortcuts:add-keybinding",
     "label": "Add Keybinding",
     "caption": "Add new keybinding for existing shortcut target",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "shortcuts:delete-keybinding",
     "label": "Delete Keybinding",
     "caption": "Delete chosen keybinding",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "shortcuts:edit-keybinding",
     "label": "Edit Keybinding",
     "caption": "Edit existing keybinding",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "shortcuts:reset-all",
     "label": "Reset All",
     "caption": "Reset all shortcuts",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "shortcuts:toggle-selectors",
     "label": "Toggle Selectors",
     "caption": "Toggle command selectors",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "sidebar:switch",
     "label": "Switch Sidebar Side",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "statusbar:toggle",
     "label": "Show Status Bar",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "tabsmenu:activate-by-id",
     "label": "Activate a widget by its `id`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The widget id to activate"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
   },
   {
     "id": "tabsmenu:activate-previously-used-tab",
@@ -2387,91 +5385,204 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift '"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "tabsmenu:open",
     "label": "Open Tabs Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "terminal:copy",
     "label": "Copy",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "terminal:create-new",
     "label": "Terminal",
     "caption": "Start a new terminal session",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Terminal session name"
+        },
+        "cwd": {
+          "type": "string",
+          "description": "Current working directory for the terminal"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is called from the command palette"
+        }
+      }
+    }
   },
   {
     "id": "terminal:decrease-font",
     "label": "Decrease Terminal Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "terminal:increase-font",
     "label": "Increase Terminal Font Size",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "terminal:open",
     "label": "Open a terminal by its `name`.",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Terminal session name to open"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
   },
   {
     "id": "terminal:paste",
     "label": "Paste",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "terminal:refresh",
     "label": "Refresh Terminal",
     "caption": "Refresh the current terminal session",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is called from the command palette"
+        }
+      }
+    }
   },
   {
     "id": "terminal:set-theme",
     "label": "Set terminal theme to the provided `theme`.",
     "caption": "Set the terminal theme",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": [
+            "inherit",
+            "light",
+            "dark"
+          ],
+          "description": "Terminal theme to set"
+        },
+        "isPalette": {
+          "type": "boolean",
+          "description": "Whether the command is called from the command palette"
+        }
+      },
+      "required": [
+        "theme"
+      ]
+    }
   },
   {
     "id": "terminal:shut-down",
     "label": "Shutdown Terminal",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "toc:display-h1-numbering",
     "label": "Show first-level heading number",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "toc:display-numbering",
     "label": "Show heading number in the document",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is called from toolbar"
+        }
+      }
+    }
   },
   {
     "id": "toc:display-outputs-numbering",
     "label": "Show output headings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "toc:run-cells",
     "label": "Select and Run Cell(s) for this Heading",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether to activate the notebook after execution"
+        }
+      }
+    }
   },
   {
     "id": "toc:show-panel",
@@ -2479,13 +5590,26 @@
     "caption": "",
     "shortcuts": [
       "Ctrl Shift K"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "toc:toggle-collapse",
     "label": "Collapse All Headings",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is called from toolbar"
+        }
+      }
+    }
   },
   {
     "id": "tooltip:dismiss",
@@ -2493,7 +5617,11 @@
     "caption": "",
     "shortcuts": [
       "Escape"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "tooltip:launch-console",
@@ -2501,7 +5629,11 @@
     "caption": "",
     "shortcuts": [
       "Shift Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "tooltip:launch-file",
@@ -2509,7 +5641,11 @@
     "caption": "",
     "shortcuts": [
       "Shift Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "tooltip:launch-notebook",
@@ -2517,13 +5653,21 @@
     "caption": "",
     "shortcuts": [
       "Shift Tab"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "tsv:go-to-line",
     "label": "Go to Line",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "viewmenu:line-numbering",
@@ -2531,90 +5675,195 @@
     "caption": "",
     "shortcuts": [
       "Shift L"
-    ]
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "viewmenu:match-brackets",
     "label": "Match Brackets",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "viewmenu:open",
     "label": "Open View Menu",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "viewmenu:show-minimap",
+    "label": "Show Minimap",
+    "caption": "Show Minimap",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "viewmenu:word-wrap",
     "label": "Wrap Words",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "workspace-indicator:toggle",
     "label": "Show Workspace Indicator",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "workspace-ui:clone",
     "label": "Clone Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier to clone"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:create-new",
     "label": "Create New Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier for the new workspace"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:delete",
     "label": "Delete Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier to delete"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:export",
     "label": "Export Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier to export"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:import",
     "label": "Import Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "workspace-ui:open",
     "label": "Open Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier to open"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:rename",
     "label": "Rename Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier to rename"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:reset",
     "label": "Reset Workspace…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "description": "Workspace identifier to reset"
+        }
+      }
+    }
   },
   {
     "id": "workspace-ui:save",
     "label": "Save Current Workspace",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "id": "workspace-ui:save-as",
     "label": "Save Current Workspace As…",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
   }
 ]

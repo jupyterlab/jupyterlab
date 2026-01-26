@@ -78,15 +78,25 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
   }
 
   // Handle default behavior of nodes.
-  Private.handleDefaults(host, resolver);
+  Private.handleDefaults(host);
+
+  if (shouldTypeset && latexTypesetter) {
+    const maybePromise = latexTypesetter.typeset(host);
+    if (maybePromise instanceof Promise) {
+      // Harden anchors to contain secure target/rel attributes.
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      hardenAnchorLinks(host, resolver);
+    }
+  } else {
+    hardenAnchorLinks(host, resolver);
+  }
 
   // Patch the urls if a resolver is available.
   if (resolver) {
     await Private.handleUrls(host, resolver, linkHandler);
-  }
-
-  if (shouldTypeset && latexTypesetter) {
-    latexTypesetter.typeset(host);
   }
 }
 
@@ -246,14 +256,22 @@ export async function renderLatex(
   options: renderLatex.IRenderOptions
 ): Promise<void> {
   // Unpack the options.
-  const { host, source, shouldTypeset, latexTypesetter } = options;
+  const { host, source, shouldTypeset, latexTypesetter, resolver } = options;
 
   // Set the source on the node.
   host.textContent = source;
 
   // Typeset the node if needed.
   if (shouldTypeset && latexTypesetter) {
-    latexTypesetter.typeset(host);
+    const maybePromise = latexTypesetter.typeset(host);
+    if (maybePromise instanceof Promise) {
+      // Harden anchors to contain secure target/rel attributes.
+      maybePromise
+        .then(() => hardenAnchorLinks(host, resolver))
+        .catch(console.warn);
+    } else {
+      hardenAnchorLinks(host, resolver);
+    }
   }
 }
 
@@ -284,6 +302,11 @@ export namespace renderLatex {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * An optional url resolver.
+     */
+    resolver?: IRenderMime.IResolver | null;
   }
 }
 
@@ -329,7 +352,7 @@ export async function renderMarkdown(
   });
 
   // Apply ids to the header nodes.
-  Private.headerAnchors(host);
+  Private.headerAnchors(host, options.sanitizer.allowNamedProperties ?? false);
 }
 
 /**
@@ -1127,6 +1150,38 @@ export namespace renderError {
 }
 
 /**
+ * Harden anchor links.
+ */
+export function hardenAnchorLinks(
+  node: HTMLElement,
+  resolver?: IRenderMime.IResolver | null
+): void {
+  // Handle anchor elements.
+  const anchors = node.getElementsByTagName('a');
+  for (let i = 0; i < anchors.length; i++) {
+    const el = anchors[i];
+    // skip when processing a elements inside svg
+    // which are of type SVGAnimatedString
+    if (!(el instanceof HTMLAnchorElement)) {
+      continue;
+    }
+    const path = el.href;
+    const isLocal =
+      resolver && resolver.isLocal
+        ? resolver.isLocal(path)
+        : URLExt.isLocal(path);
+    // set target attribute if not already present
+    if (!el.target) {
+      el.target = isLocal ? '_self' : '_blank';
+    }
+    // set rel as 'noopener' for non-local anchors
+    if (!isLocal) {
+      el.rel = 'noopener';
+    }
+  }
+}
+
+/**
  * The namespace for module implementation details.
  */
 namespace Private {
@@ -1178,34 +1233,7 @@ namespace Private {
   /**
    * Handle the default behavior of nodes.
    */
-  export function handleDefaults(
-    node: HTMLElement,
-    resolver?: IRenderMime.IResolver | null
-  ): void {
-    // Handle anchor elements.
-    const anchors = node.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      const el = anchors[i];
-      // skip when processing a elements inside svg
-      // which are of type SVGAnimatedString
-      if (!(el instanceof HTMLAnchorElement)) {
-        continue;
-      }
-      const path = el.href;
-      const isLocal =
-        resolver && resolver.isLocal
-          ? resolver.isLocal(path)
-          : URLExt.isLocal(path);
-      // set target attribute if not already present
-      if (!el.target) {
-        el.target = isLocal ? '_self' : '_blank';
-      }
-      // set rel as 'noopener' for non-local anchors
-      if (!isLocal) {
-        el.rel = 'noopener';
-      }
-    }
-
+  export function handleDefaults(node: HTMLElement): void {
     // Handle image elements.
     const imgs = node.getElementsByTagName('img');
     for (let i = 0; i < imgs.length; i++) {
@@ -1281,17 +1309,25 @@ namespace Private {
   /**
    * Apply ids to headers.
    */
-  export function headerAnchors(node: HTMLElement): void {
+  export function headerAnchors(
+    node: HTMLElement,
+    allowNamedProperties: boolean
+  ): void {
     const headerNames = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     for (const headerType of headerNames) {
       const headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
-        header.id = renderMarkdown.createHeaderId(header);
+        const headerId = renderMarkdown.createHeaderId(header);
+        if (allowNamedProperties) {
+          header.id = headerId;
+        } else {
+          header.setAttribute('data-jupyter-id', headerId);
+        }
         const anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
-        anchor.href = '#' + header.id;
+        anchor.href = '#' + headerId;
         anchor.classList.add('jp-InternalAnchorLink');
         header.appendChild(anchor);
       }
@@ -1314,7 +1350,10 @@ namespace Private {
       return;
     }
     try {
-      const urlPath = await resolver.resolveUrl(source);
+      const urlPath = await resolver.resolveUrl(source, {
+        attribute: name,
+        tag: node.localName as IRenderMime.IResolveUrlContext['tag']
+      });
       let url = await resolver.getDownloadUrl(urlPath);
       if (URLExt.parse(url).protocol !== 'data:') {
         // Bust caching for local src attrs.
@@ -1341,27 +1380,41 @@ namespace Private {
     // Get the link path without the location prepended.
     // (e.g. "./foo.md#Header 1" vs "http://localhost:8888/foo.md#Header 1")
     let href = anchor.getAttribute('href') || '';
+    if (!href) {
+      return;
+    }
+    const hash = anchor.hash;
+    if (hash && hash === href) {
+      anchor.target = '_self';
+      anchor.addEventListener('click', (event: MouseEvent) => {
+        const id = hash.slice(1);
+        const escapedId = CSS.escape(id);
+        const doc = anchor.ownerDocument;
+        const el =
+          doc.querySelector(`[data-jupyter-id="${escapedId}"]`) ||
+          doc.querySelector(`#${escapedId}`);
+        if (el) {
+          event.preventDefault();
+          el.scrollIntoView();
+        }
+      });
+      return;
+    }
     const isLocal = resolver.isLocal
       ? resolver.isLocal(href)
       : URLExt.isLocal(href);
     // Bail if it is not a file-like url.
-    if (!href || !isLocal) {
+    if (!isLocal) {
       return;
     }
     // Remove the hash until we can handle it.
-    const hash = anchor.hash;
     if (hash) {
-      // Handle internal link in the file.
-      if (hash === href) {
-        anchor.target = '_self';
-        return;
-      }
       // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
     // Get the appropriate file path.
     return resolver
-      .resolveUrl(href)
+      .resolveUrl(href, { attribute: 'href', tag: 'a' })
       .then(urlPath => {
         // decode encoded url from url to api path
         const path = decodeURIComponent(urlPath);

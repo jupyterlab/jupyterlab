@@ -15,7 +15,9 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 import {
   Compartment,
+  Line,
   Prec,
+  Range,
   RangeSet,
   StateEffect,
   StateEffectType,
@@ -31,6 +33,10 @@ import {
 } from '@codemirror/view';
 
 import { IDebugger } from '../tokens';
+import {
+  breakpointIcon,
+  selectedBreakpointIcon
+} from '@jupyterlab/ui-components';
 
 /**
  * The class name added to the current line.
@@ -65,14 +71,15 @@ export class EditorHandler implements IDisposable {
     this._editorMonitor.activityStopped.connect(() => {
       this._sendEditorBreakpoints();
     }, this);
-
+    this._selectedBreakpoint =
+      this._debuggerService.model.breakpoints.selectedBreakpoint;
     this._debuggerService.model.breakpoints.changed.connect(async () => {
       const editor = this.editor;
       if (!editor || editor.isDisposed) {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
       const editor = this.editor;
@@ -80,17 +87,45 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
-    this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
-      const editor = this.editor;
-      if (editor) {
-        EditorHandler.clearHighlight(editor);
-      }
-    });
+    this._debuggerService.model.breakpoints.selectedChanged.connect(
+      (_, breakpoint) => {
+        this._selectedBreakpoint = breakpoint;
+        this._addBreakpointsToEditor();
+      },
+      this
+    );
 
-    this._breakpointEffect = StateEffect.define<{ pos: number[] }>({
-      map: (value, mapping) => ({ pos: value.pos.map(v => mapping.mapPos(v)) })
+    this._debuggerService.model.callstack.currentFrameChanged.connect(
+      (_, frame: IDebugger.IStackFrame) => {
+        const editor = this.editor;
+        if (editor) {
+          EditorHandler.clearHighlight(editor);
+          const framePath = frame?.source?.path ?? '';
+          const editorPath =
+            this._path ||
+            this._debuggerService.getCodeId(this._src.getSource());
+
+          // If the current frame belongs to this editor, highlight its line.
+          if (framePath && editorPath && framePath === editorPath) {
+            if (typeof frame?.line === 'number') {
+              EditorHandler.showCurrentLine(editor, frame.line);
+            }
+          }
+        }
+      },
+      this
+    );
+
+    this._breakpointEffect = StateEffect.define<
+      { pos: number; selected: boolean }[]
+    >({
+      map: (value, mapping) =>
+        value.map(v => ({
+          pos: mapping.mapPos(v.pos),
+          selected: v.selected
+        }))
     });
 
     this._breakpointState = StateField.define<RangeSet<GutterMarker>>({
@@ -98,21 +133,27 @@ export class EditorHandler implements IDisposable {
         return RangeSet.empty;
       },
       update: (breakpoints, transaction) => {
-        breakpoints = breakpoints.map(transaction.changes);
+        let hasEffect = false;
+        let decorations: Range<GutterMarker> | readonly Range<GutterMarker>[] =
+          [];
+
         for (let ef of transaction.effects) {
           if (ef.is(this._breakpointEffect)) {
-            let e = ef as StateEffect<{ pos: number[] }>;
-            if (e.value.pos.length) {
-              breakpoints = breakpoints.update({
-                add: e.value.pos.map(v => Private.breakpointMarker.range(v)),
-                sort: true
-              });
-            } else {
-              breakpoints = RangeSet.empty;
-            }
+            hasEffect = true;
+            decorations = ef.value.map(({ pos, selected }) => {
+              const marker = selected
+                ? Private.selectedBreakpointMarker
+                : Private.breakpointMarker;
+              return marker.range(pos);
+            });
           }
         }
-        return breakpoints;
+
+        if (hasEffect) {
+          return RangeSet.of(decorations, true);
+        }
+
+        return breakpoints.map(transaction.changes);
       }
     });
 
@@ -258,32 +299,94 @@ export class EditorHandler implements IDisposable {
    * @param editor The editor from where the click originated.
    * @param position The position corresponding to the click event.
    */
+  private _getEffectiveClickedLine(
+    editor: EditorView,
+    position: number
+  ): [Line | undefined, boolean] {
+    let clickedLine = editor.state.doc.lineAt(position);
+    let clickedLineNumber = clickedLine.number;
+    let targetLine: Line | undefined = undefined;
+    let isLineEmpty: boolean =
+      false; /* is true is the clicked line of code is empty */
+    if (clickedLine.text.trim() === '') {
+      isLineEmpty = true;
+      while (clickedLineNumber > 1) {
+        clickedLineNumber--;
+        const prevLine = editor.state.doc.line(clickedLineNumber);
+        if (prevLine.text.trim() !== '') {
+          targetLine = prevLine;
+          break;
+        }
+      }
+    } else {
+      if (isLineEmpty === false) {
+        targetLine = clickedLine;
+      }
+    }
+    return [targetLine, isLineEmpty];
+  }
+  /**
+   * Handle a click on the gutter.
+   *
+   * @param editor The editor from where the click originated.
+   * @param position The position corresponding to the click event.
+   */
   private _onGutterClick(editor: EditorView, position: number): void {
     if (this._id !== this._debuggerService.session?.connection?.id) {
       return;
     }
 
-    const lineNumber = editor.state.doc.lineAt(position).number;
+    const [clickedLine, isLineEmpty] = this._getEffectiveClickedLine(
+      editor,
+      position
+    );
+    let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
     let stateBreakpoints = editor.state.field(this._breakpointState);
     let hasBreakpoint = false;
-    stateBreakpoints.between(position, position, () => {
-      hasBreakpoint = true;
-    });
-    let breakpoints: IDebugger.IBreakpoint[] = this._getBreakpoints();
-    if (hasBreakpoint) {
-      breakpoints = breakpoints.filter(ele => ele.line !== lineNumber);
-    } else {
-      breakpoints.push(
-        Private.createBreakpoint(
+
+    if (clickedLine) {
+      stateBreakpoints.between(clickedLine?.from, clickedLine?.from, () => {
+        hasBreakpoint = true;
+      });
+
+      if (!hasBreakpoint) {
+        /* if there is no breakpoint at effective clickedLine : add one */
+        this._debuggerService.model.breakpoints.selectedBreakpoint = null;
+        const newBreakpoint = Private.createBreakpoint(
           this._path ?? this._debuggerService.session.connection.name,
-          lineNumber
-        )
-      );
+          clickedLine.number
+        );
+
+        breakpoints.push(newBreakpoint);
+      } else {
+        /* if there is already a breakpoint */
+        if (!isLineEmpty) {
+          /* remove the in place breakpoint if the clicked line of code is not empty*/
+          breakpoints = breakpoints.filter(
+            ele => ele.line !== clickedLine.number
+          );
+
+          if (this._selectedBreakpoint) {
+            /* if the breakpoint is a selected one: remove it*/
+            breakpoints = breakpoints.filter(
+              ele => ele.line !== this._selectedBreakpoint?.line
+            );
+          }
+        } else {
+          /* if the clicked line of code is empty, find the breakpoint at the effective clicked line
+          and make it the selected breakpoint*/
+          const breakPointAtClickedLine = breakpoints.find(
+            b => b.line === clickedLine.number
+          );
+          if (breakPointAtClickedLine) {
+            this._debuggerService.model.breakpoints.selectedBreakpoint =
+              breakPointAtClickedLine;
+          }
+        }
+      }
     }
 
-    breakpoints.sort((a, b) => {
-      return a.line! - b.line!;
-    });
+    breakpoints.sort((a, b) => a.line! - b.line!);
 
     void this._debuggerService.updateBreakpoints(
       this._src.getSource(),
@@ -296,7 +399,10 @@ export class EditorHandler implements IDisposable {
    * Add the breakpoints to the editor.
    */
   private _addBreakpointsToEditor(): void {
-    if (this._id !== this._debuggerService.session?.connection?.id) {
+    if (
+      !this.editor ||
+      this._id !== this._debuggerService.session?.connection?.id
+    ) {
       return;
     }
 
@@ -304,12 +410,18 @@ export class EditorHandler implements IDisposable {
     const breakpoints = this._getBreakpoints();
 
     this._clearGutter(editor);
-    const breakpointPos = breakpoints.map(b => {
-      return editor.state.doc.line(b.line!).from;
+
+    const selectedLine = this._selectedBreakpoint?.line;
+    const selectedPath = this._selectedBreakpoint?.source?.path;
+    const breakpointData = breakpoints.map(b => {
+      const pos = editor.state.doc.line(b.line!).from;
+      const selected =
+        b.line! === selectedLine && b.source?.path === selectedPath;
+      return { pos, selected };
     });
 
     editor.editor.dispatch({
-      effects: this._breakpointEffect.of({ pos: breakpointPos })
+      effects: this._breakpointEffect.of(breakpointData)
     });
   }
 
@@ -317,6 +429,10 @@ export class EditorHandler implements IDisposable {
    * Retrieve the breakpoints from the editor.
    */
   private _getBreakpointsFromEditor(): number[] {
+    if (!this.editor) {
+      return [];
+    }
+
     const editor = this.editor as CodeMirrorEditor;
     const breakpoints = editor.editor.state.field(this._breakpointState);
     let lines: number[] = [];
@@ -334,7 +450,7 @@ export class EditorHandler implements IDisposable {
 
     const view = (editor as CodeMirrorEditor).editor;
     view.dispatch({
-      effects: this._breakpointEffect.of({ pos: [] })
+      effects: this._breakpointEffect.of([])
     });
   }
 
@@ -352,7 +468,9 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _debuggerService: IDebugger;
   private _editor: () => CodeEditor.IEditor | null;
-  private _breakpointEffect: StateEffectType<{ pos: number[] }>;
+  private _breakpointEffect: StateEffectType<
+    { pos: number; selected: boolean }[]
+  >;
   private _breakpointState: StateField<RangeSet<GutterMarker>>;
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
@@ -360,6 +478,7 @@ export class EditorHandler implements IDisposable {
   private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
   private _path: string;
   private _src: ISharedText;
+  private _selectedBreakpoint: IDebugger.IBreakpoint | null;
 }
 
 /**
@@ -405,16 +524,35 @@ export namespace EditorHandler {
    *
    * @param editor The editor to highlight.
    * @param line The line number.
+   * @param scrollLogicalPosition the position of the the widget after scroll, or false
+   * if no scroll is expected.
    */
   export function showCurrentLine(
     editor: CodeEditor.IEditor,
-    line: number
+    line: number,
+    scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
+
+    const effects: StateEffect<any>[] = [
+      _highlightEffect.of({ pos: [linePos] })
+    ];
+
+    if (scrollLogicalPosition) {
+      // getOffsetAt increases the line number before scrolling to it, because
+      // Jupyter uses 0-indexes line number while CM6 uses 1-indexes line number.
+      // In this case, the line number is 1-indexes as it comes from the debugProtocol
+      // stackFrame https://microsoft.github.io/debug-adapter-protocol/specification#Types_StackFrame,
+      // therefore we need to decrease it first.
+      const offset = cmEditor.getOffsetAt({ line: line - 1, column: 0 });
+      effects.push(
+        EditorView.scrollIntoView(offset, { y: scrollLogicalPosition })
+      );
+    }
     cmEditor.editor.dispatch({
-      effects: _highlightEffect.of({ pos: [linePos] })
+      effects: effects
     });
   }
 
@@ -442,8 +580,32 @@ namespace Private {
    * Create a marker DOM element for a breakpoint.
    */
   export const breakpointMarker = new (class extends GutterMarker {
-    toDOM() {
-      const marker = document.createTextNode('●');
+    toDOM(view: EditorView) {
+      const marker = document.createElement('span');
+      marker.className = 'cm-breakpoint-gutter';
+      marker.ariaLabel = view.state.phrase('Breakpoint');
+
+      const iconNode = breakpointIcon.element({
+        tag: 'span',
+        className: 'cm-breakpoint-icon'
+      });
+
+      marker.appendChild(iconNode);
+      return marker;
+    }
+  })();
+
+  export const selectedBreakpointMarker = new (class extends GutterMarker {
+    toDOM(view: EditorView) {
+      const marker = document.createElement('span');
+      marker.className = 'cm-breakpoint-gutter';
+      marker.ariaLabel = view.state.phrase('Selected breakpoint');
+      const iconNode = selectedBreakpointIcon.element({
+        tag: 'span',
+        className: 'cm-selected-breakpoint-icon'
+      });
+
+      marker.appendChild(iconNode);
       return marker;
     }
   })();

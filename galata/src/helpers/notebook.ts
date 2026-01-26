@@ -255,6 +255,16 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<boolean> {
+    if (await this.isAnyActive()) {
+      const focusedMarkdownEditor = this.page.locator(
+        '.jp-MarkdownCell .jp-InputArea-editor.jp-mod-focused, .jp-MarkdownCell .cm-content.jp-mod-focused'
+      );
+      if ((await focusedMarkdownEditor.count()) > 0) {
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(50);
+      }
+    }
+
     const toolbarItem = await this.getToolbarItemLocator(itemId, notebookName);
 
     if (toolbarItem) {
@@ -692,7 +702,11 @@ export class NotebookHelper {
     }
     await this.page.keyboard.press('Control+A');
     await this.page.keyboard.press('Control+C');
-    await this.page.context().grantPermissions(['clipboard-read']);
+    try {
+      await this.page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not it it either
+    }
     const handle = await this.page.evaluateHandle(() =>
       navigator.clipboard.readText()
     );
@@ -1129,7 +1143,7 @@ export class NotebookHelper {
       let break_ = true;
       try {
         await Utils.waitForCondition(
-          async () => ((await gutter.textContent())?.length ?? 0) > 0,
+          async () => (await gutter.locator('.cm-breakpoint-icon').count()) > 0,
           1000
         );
       } catch (reason) {

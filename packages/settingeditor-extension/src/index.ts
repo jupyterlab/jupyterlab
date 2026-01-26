@@ -51,6 +51,13 @@ import {
   ImportSettingsDialogBodyWidget,
   ImportSettingsWidget
 } from './importSettingsWidget';
+import { history, historyKeymap } from '@codemirror/commands';
+import { keymap } from '@codemirror/view';
+
+const HARDCODED_TO_SKIP = [
+  '@jupyterlab/application-extension:context-menu',
+  '@jupyterlab/mainmenu-extension:plugin'
+];
 
 /**
  * The command IDs used by the setting editor.
@@ -142,6 +149,16 @@ function activate(
 
     const { SettingsEditor } = await import('@jupyterlab/settingeditor');
 
+    // Load the settings to get the configurable toSkip list
+    const settings = await registry.load(plugin.id);
+    const toSkipSetting = settings.get('toSkip').composite;
+    const configurableToSkip = Array.isArray(toSkipSetting)
+      ? (toSkipSetting as string[])
+      : [];
+
+    // Combine hardcoded and configurable skip lists, avoiding duplicates
+    const toSkip = [...new Set([...HARDCODED_TO_SKIP, ...configurableToSkip])];
+
     const editor = new MainAreaWidget<SettingsEditor>({
       content: new SettingsEditor({
         editorRegistry,
@@ -149,10 +166,7 @@ function activate(
         registry,
         state,
         commands,
-        toSkip: [
-          '@jupyterlab/application-extension:context-menu',
-          '@jupyterlab/mainmenu-extension:plugin'
-        ],
+        toSkip,
         translator,
         status,
         query: args.query as string
@@ -238,6 +252,26 @@ function activate(
         return args.label as string;
       }
       return trans.__('Settings Editor');
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: trans.__('Search query to filter settings')
+          },
+          settingEditorType: {
+            type: 'string',
+            enum: ['ui', 'json'],
+            description: trans.__('Type of settings editor to open')
+          },
+          label: {
+            type: 'string',
+            description: trans.__('Custom label for the command')
+          }
+        }
+      }
     }
   });
 
@@ -327,7 +361,17 @@ function activateJSON(
           revert: CommandIDs.revert,
           save: CommandIDs.save
         },
-        editorFactory,
+        editorFactory: options => {
+          const cmEditor = editorFactory({
+            ...options,
+            extensions: [
+              ...(options.extensions ?? []),
+              history(), // Adds the CM6 undo/redo history extension
+              keymap.of(historyKeymap) // bind Ctrl+Z / Ctrl+Shift+Z
+            ]
+          });
+          return cmEditor;
+        },
         key,
         registry,
         rendermime,
@@ -371,7 +415,13 @@ function activateJSON(
       void tracker.add(container);
       shell.add(container, 'main', { type: 'Advanced Settings' });
     },
-    label: trans.__('Advanced Settings Editor')
+    label: trans.__('Advanced Settings Editor'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
   if (palette) {
     palette.addItem({
@@ -386,14 +436,26 @@ function activateJSON(
     },
     icon: undoIcon,
     label: trans.__('Revert User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
     label: trans.__('Save User Settings'),
-    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
+    isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.exportSettings, {
@@ -403,7 +465,13 @@ function activateJSON(
       downloadSettings(jsonContent, 'overrides.json');
     },
     label: trans.__('Export Settings'),
-    icon: downloadIcon
+    icon: downloadIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.importSettings, {
@@ -509,7 +577,13 @@ function activateJSON(
       fileInput.click();
     },
     label: trans.__('Import Settings'),
-    icon: fileUploadIcon
+    icon: fileUploadIcon,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   /**

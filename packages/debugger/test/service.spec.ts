@@ -1,11 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelSpec, KernelSpecManager, Session } from '@jupyterlab/services';
+import {
+  KernelManager,
+  KernelSpec,
+  KernelSpecManager,
+  Session,
+  SessionManager
+} from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
-import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
+import {
+  acceptDialog,
+  JupyterServer,
+  signalToPromise,
+  testEmission
+} from '@jupyterlab/testing';
 
 import { JSONExt, UUID } from '@lumino/coreutils';
 
@@ -14,6 +25,16 @@ import { Debugger } from '../src/debugger';
 import { IDebugger } from '../src/tokens';
 
 import { handleRequest, KERNELSPECS } from './utils';
+import { DebuggerDisplayRegistry } from '../src';
+import { SessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+import { IYText } from '@jupyter/ydoc';
 
 /**
  * A Test class to mock a KernelSpecManager
@@ -48,13 +69,22 @@ describe('Debugging support', () => {
   let specsManager: TestKernelSpecManager;
   let service: Debugger.Service;
   let config: IDebugger.IConfig;
+  let displayRegistry: DebuggerDisplayRegistry;
 
   beforeAll(async () => {
     specsManager = new TestKernelSpecManager({ standby: 'never' });
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
     config = new Debugger.Config();
-    service = new Debugger.Service({ specsManager, config });
+    displayRegistry = new DebuggerDisplayRegistry();
+    const editorServices = getEditorServices();
+    const mimeTypeService = editorServices.mimeTypeService;
+    service = new Debugger.Service({
+      displayRegistry,
+      specsManager,
+      config,
+      mimeTypeService
+    });
   });
 
   afterAll(async () => {
@@ -86,6 +116,7 @@ describe('DebuggerService', () => {
   let config: IDebugger.IConfig;
   let session: IDebugger.ISession;
   let service: IDebugger;
+  let displayRegistry: DebuggerDisplayRegistry;
 
   beforeEach(async () => {
     connection = await createSession({
@@ -96,7 +127,15 @@ describe('DebuggerService', () => {
     await connection.changeKernel({ name: 'python3' });
     config = new Debugger.Config();
     session = new Debugger.Session({ connection, config });
-    service = new Debugger.Service({ specsManager, config });
+    displayRegistry = new DebuggerDisplayRegistry();
+    const editorServices = getEditorServices();
+    const mimeTypeService = editorServices.mimeTypeService;
+    service = new Debugger.Service({
+      displayRegistry,
+      specsManager,
+      config,
+      mimeTypeService
+    });
   });
 
   afterEach(async () => {
@@ -126,6 +165,31 @@ describe('DebuggerService', () => {
       await service.start();
       await service.stop();
       expect(service.isStarted).toEqual(false);
+    });
+  });
+
+  describe('#pause()', () => {
+    it('should send a pause request including a threadId', async () => {
+      service.session = session;
+      await service.start();
+      const sendRequest = jest.spyOn(service.session, 'sendRequest');
+      await service.pause();
+      expect(sendRequest).toHaveBeenCalledWith(
+        'pause',
+        expect.objectContaining({ threadId: 1 })
+      );
+    });
+
+    it('should use one of the stopped threads for pause if set', async () => {
+      service.session = session;
+      await service.start();
+      service.model.stoppedThreads = new Set([42]);
+      const sendRequest = jest.spyOn(service.session, 'sendRequest');
+      await service.pause();
+      expect(sendRequest).toHaveBeenCalledWith(
+        'pause',
+        expect.objectContaining({ threadId: 42 })
+      );
     });
   });
 
@@ -214,6 +278,49 @@ describe('DebuggerService', () => {
         const bpList = model.breakpoints.getBreakpoints(sourceId);
         expect(bpList).toEqual(breakpoints);
       });
+
+      it('should preserve breakpoints after kernel restart', async () => {
+        const kernelManager = new KernelManager();
+        const sessionManager = new SessionManager({ kernelManager });
+        const specsManager = new KernelSpecManager();
+        await Promise.all([
+          sessionManager.ready,
+          kernelManager.ready,
+          specsManager.ready
+        ]);
+
+        const path = UUID.uuid4();
+        const sessionContext = new SessionContext({
+          kernelManager,
+          path,
+          sessionManager,
+          specsManager,
+          kernelPreference: { name: specsManager.specs?.default }
+        });
+
+        const sessionContextDialogs = new SessionContextDialogs();
+
+        // Get initial breakpoints
+        const initialBps = service.model.breakpoints.getBreakpoints(sourceId);
+        expect(initialBps.length).toBeGreaterThan(0);
+
+        const emission = testEmission(sessionContext.statusChanged, {
+          find: (_, args) => args === 'restarting'
+        });
+
+        await sessionContext.initialize();
+        const restart = sessionContextDialogs.restart(sessionContext);
+
+        await acceptDialog();
+        expect(await restart).toBe(true);
+        await emission;
+
+        // Verify breakpoints are still present
+        const restoredBps = service.model.breakpoints.getBreakpoints(sourceId);
+        expect(restoredBps.length).toEqual(initialBps.length);
+        expect(restoredBps[0].line).toEqual(initialBps[0].line);
+        expect(restoredBps[1].line).toEqual(initialBps[1].line);
+      });
     });
 
     describe('#hasStoppedThreads', () => {
@@ -239,3 +346,30 @@ describe('DebuggerService', () => {
     });
   });
 });
+
+function getEditorServices() {
+  const languages = new EditorLanguageRegistry();
+
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(lang => ['Python'].includes(lang.name))
+    .forEach(lang => {
+      languages.addLanguage(lang);
+    });
+  const extensions = new EditorExtensionRegistry();
+  EditorExtensionRegistry.getDefaultExtensions()
+    .filter(ext => ['lineNumbers'].includes(ext.name))
+    .forEach(ext => extensions.addExtension(ext));
+  extensions.addExtension({
+    name: 'binding',
+    factory: ({ model }) => {
+      const m = model.sharedModel as IYText;
+      return EditorExtensionRegistry.createImmutableExtension(
+        ybinding({ ytext: m.ysource, undoManager: m.undoManager ?? undefined })
+      );
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const editorServices = { factoryService, mimeTypeService };
+  return editorServices;
+}

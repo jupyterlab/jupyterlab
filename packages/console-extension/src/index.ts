@@ -618,7 +618,18 @@ async function activateConsole(
       await settingRegistry.set(pluginId, 'promptCellConfig', promptCellConfig);
     },
     label: trans.__('Auto Close Brackets for Code Console Prompt'),
-    isToggled: () => promptCellConfig.autoClosingBrackets as boolean
+    isToggled: () => promptCellConfig.autoClosingBrackets as boolean,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          force: {
+            type: 'boolean',
+            description: trans.__('Whether to force the toggle state')
+          }
+        }
+      }
+    }
   });
 
   /**
@@ -627,7 +638,8 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      (tracker.currentWidget === shell.currentWidget ||
+        tracker.currentWidget.node.contains(document.activeElement))
     );
   }
 
@@ -643,6 +655,22 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.open, {
     label: trans.__('Open a console for the provided `path`.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('The path of the session to open')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the console widget')
+          }
+        },
+        required: ['path']
+      }
+    },
     execute: (args: IOpenOptions) => {
       const path = args['path'];
       const widget = tracker.find(value => {
@@ -684,6 +712,97 @@ async function activateConsole(
       return trans.__('Console');
     },
     icon: args => (args['isPalette'] ? undefined : consoleIcon),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          isPalette: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from the palette'
+            )
+          },
+          isLauncher: {
+            type: 'boolean',
+            description: trans.__(
+              'Whether the command is executed from the launcher'
+            )
+          },
+          kernelPreference: {
+            type: 'object',
+            description: trans.__(
+              'The kernel preference for the console. Preferences are considered in the order `id`, `name`, `language`. If no matching kernels can be found and `autoStartDefault` is `true`, then the default kernel for the server is preferred.'
+            ),
+            properties: {
+              id: {
+                type: 'string',
+                description: trans.__('The id of an existing kernel')
+              },
+              name: {
+                type: 'string',
+                description: trans.__('The name of the kernel')
+              },
+              language: {
+                type: 'string',
+                description: trans.__('The preferred kernel language')
+              },
+              shouldStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel should be started automatically (default `true`)'
+                )
+              },
+              canStart: {
+                type: 'boolean',
+                description: trans.__(
+                  'A kernel can be started (default `true`)'
+                )
+              },
+              shutdownOnDispose: {
+                type: 'boolean',
+                description: trans.__(
+                  'Shut down the session when session context is disposed (default `false`)'
+                )
+              },
+              autoStartDefault: {
+                type: 'boolean',
+                description: trans.__(
+                  'Automatically start the default kernel if no other matching kernel is found (default `false`)'
+                )
+              },
+              skipKernelRestartDialog: {
+                type: 'boolean',
+                description: trans.__(
+                  'Skip showing the kernel restart dialog if checked (default `false`)'
+                )
+              }
+            }
+          },
+          basePath: {
+            type: 'string',
+            description: trans.__('The base path for the console')
+          },
+          cwd: {
+            type: 'string',
+            description: trans.__('The current working directory')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          },
+          ref: {
+            type: 'string',
+            description: trans.__(
+              'The reference widget id for the insert location'
+            )
+          },
+          insertMode: {
+            type: 'string',
+            description: trans.__('The tab insert mode')
+          }
+        }
+      }
+    },
     execute: args => {
       const basePath =
         ((args['basePath'] as string) ||
@@ -725,9 +844,27 @@ async function activateConsole(
         }
         current.console.setConfig({ promptCellPosition: position });
       },
-      isEnabled: isEnabled,
+      isEnabled: () =>
+        !!tracker.currentWidget && tracker.currentWidget.isVisible,
       label: trans.__(`Prompt to ${position}`),
-      icon: args => (args['isPalette'] ? undefined : iconMap[position])
+      icon: args => (args['isPalette'] ? undefined : iconMap[position]),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            activate: {
+              type: 'boolean',
+              description: trans.__('Whether to activate the widget')
+            },
+            isPalette: {
+              type: 'boolean',
+              description: trans.__(
+                'Whether the command is executed from palette'
+              )
+            }
+          }
+        }
+      }
     });
 
     if (palette) {
@@ -770,7 +907,18 @@ async function activateConsole(
       return editor.model.sharedModel.canUndo();
     },
     icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Undo')
+    label: trans.__('Undo'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   /**
@@ -804,12 +952,38 @@ async function activateConsole(
       return editor.model.sharedModel.canRedo();
     },
     icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Redo')
+    label: trans.__('Redo'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
     icon: args => (args.toolbar ? clearIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -823,6 +997,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.runUnforced, {
     label: trans.__('Run Cell (unforced)'),
     icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -836,6 +1025,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.runForced, {
     label: trans.__('Run Cell (forced)'),
     icon: args => (args.toolbar ? runIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -848,6 +1052,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.linebreak, {
     label: trans.__('Insert Line Break'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -860,6 +1075,21 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.replaceSelection, {
     label: trans.__('Replace Selection in Console'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          text: {
+            type: 'string',
+            description: trans.__('The text to replace the selection with')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -873,6 +1103,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -889,6 +1130,21 @@ async function activateConsole(
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
     icon: args => (args.toolbar ? refreshIcon : undefined),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -901,6 +1157,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -945,11 +1212,46 @@ async function activateConsole(
         }
       });
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   commands.addCommand(CommandIDs.inject, {
     label: trans.__('Inject some code in a console.'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('The path of the console session')
+          },
+          code: {
+            type: 'string',
+            description: trans.__('The code to inject')
+          },
+          metadata: {
+            type: 'object',
+            description: trans.__('The metadata for the code')
+          },
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        },
+        required: ['path', 'code']
+      }
+    },
     execute: args => {
       const path = args['path'];
       tracker.find(widget => {
@@ -971,6 +1273,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.changeKernel, {
     label: trans.__('Change Kernel…'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent(args);
       if (!current) {
@@ -983,6 +1296,17 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.getKernel, {
     label: trans.__('Get Kernel'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    },
     execute: args => {
       const current = getCurrent({ activate: false, ...args });
       if (!current) {
@@ -1106,7 +1430,19 @@ async function activateConsole(
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       }
     },
-    isToggled: args => args['interactionMode'] === interactionMode
+    isToggled: args => args['interactionMode'] === interactionMode,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          interactionMode: {
+            type: 'string',
+            enum: ['notebook', 'terminal'],
+            description: trans.__('The interaction mode for the console')
+          }
+        }
+      }
+    }
   });
 
   return tracker;
@@ -1137,6 +1473,12 @@ function activateConsoleCompleterService(
       if (id) {
         return manager.invoke(id);
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -1147,6 +1489,12 @@ function activateConsoleCompleterService(
 
       if (id) {
         return manager.select(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
       }
     }
   });

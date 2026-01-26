@@ -10,7 +10,7 @@ name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -28,22 +28,21 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "async_lru>=1.0.0",
-    "httpx>=0.25.0",
-    "importlib-metadata>=4.8.3;python_version<\"3.10\"",
-    "ipykernel>=6.5.0",
+    "httpx>=0.25.0,<1",
+    "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
     "jupyter_server>=2.4.0,<3",
     "jupyter-lsp>=2.0.0",
-    "jupyterlab_server>=2.27.1,<3",
+    "jupyterlab_server>=2.28.0,<3",
     "notebook_shim>=0.2",
     "packaging",
     "setuptools>=41.1.0",
@@ -86,7 +85,7 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.5.0",
+    "altair==6.0.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
@@ -95,7 +94,6 @@ docs-screenshots = [
     "nbconvert>=7.0.0",
     "pandas==2.2.3",
     "scipy==1.15.1",
-    "vega_datasets==0.9.0",
 ]
 test = [
     "coverage",
@@ -118,7 +116,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.11.8",
+    "ruff==0.14.10",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -248,7 +246,7 @@ after-publish-assets = "npm run after:publish:assets"
 
 [tool.ruff]
 exclude = ["*.ipynb"]
-target-version = "py39"
+target-version = "py310"
 line-length = 100
 lint.select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
@@ -256,8 +254,6 @@ lint.select = [
   "W", "YTT",
 ]
 lint.ignore = [
-# Q000 Single quotes found but double quotes preferred
-"Q000",
 # FBT001 Boolean positional arg in function definition
 "FBT001", "FBT002", "FBT003",
 # E501 Line too long (158 > 100 characters)
@@ -280,11 +276,9 @@ lint.ignore = [
 # T201 `print` found
 "galata/*" = ["T201"]
 # F821 Undefined name `c`
-# S104 Possible binding to all interfaces
-# S105 Possible hardcoded password: `""`
-"galata/jupyter_server_test_config.py" = ["F821", "S104", "S105"]
-# T201 `print` found
-"jupyterlab/browser_check.py" = ["RUF012", "T201"]
+"galata/jupyter_server_test_config.py" = ["F821"]
+# RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
+"jupyterlab/browser_check.py" = ["RUF012"]
 # C901 method is too complex
 "jupyterlab/commands.py" = ["C901"]
 # B028 No explicit `stacklevel` keyword argument found
@@ -307,10 +301,9 @@ lint.ignore = [
 "scripts/milestone_check.py" = ["T201", "UP031"]
 # N806 Variable `tM` in function should be lowercase
 # N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
-# PLC1901 test can be simplified as an empty string is falsey
 # PLR1714 Consider merging multiple comparisons
 # PLR5501 Use `elif` instead of `else` then `if`, to reduce indentation
-"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901", "PLR1714", "PLR5501"]
+"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLR1714", "PLR5501"]
 # T201 `print` found
 "jupyterlab/upgrade_extension.py" = ["T201"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`

@@ -9,60 +9,43 @@ on:
     types: [published]
 
 jobs:
+  setup:
+    name: Setup test matrix
+    runs-on: ubuntu-latest
+    outputs:
+      group: ${{ steps.set-matrix.outputs.group }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set matrix
+        id: set-matrix
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+
+          packages = []
+          for p in Path('packages').iterdir():
+              pkg_json = p / 'package.json'
+              if pkg_json.exists():
+                  data = json.loads(pkg_json.read_text())
+                  if data.get('scripts', {}).get('test:cov'):
+                      packages.append(f'js-{p.name}')
+          assert len(packages) > 0, "No packages found for testing"
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'group={json.dumps(sorted(packages))}\n')
+
   linuxjs:
     name: JS
+    needs: setup
     strategy:
       matrix:
-        python-version: ["3.13"]
-        group:
-          [
-            js-application,
-            js-apputils,
-            js-cell-toolbar,
-            js-cells,
-            js-codeeditor,
-            js-codemirror,
-            js-completer,
-            js-console,
-            js-coreutils,
-            js-csvviewer,
-            js-debugger,
-            js-docmanager,
-            js-docregistry,
-            js-documentsearch,
-            js-filebrowser,
-            js-fileeditor,
-            js-hub-extension,
-            js-imageviewer,
-            js-inspector,
-            js-logconsole,
-            js-lsp,
-            js-mainmenu,
-            js-mermaid,
-            js-metadataform,
-            js-metapackage,
-            js-nbformat,
-            js-notebook,
-            js-observables,
-            js-outputarea,
-            js-pluginmanager,
-            js-rendermime,
-            js-services,
-            js-settingeditor,
-            js-settingregistry,
-            js-shortcuts-extension,
-            js-statedb,
-            js-statusbar,
-            js-testing,
-            js-terminal,
-            js-toc,
-            js-translation,
-            js-ui-components,
-            js-vega5-extension,
-            js-workspaces,
-          ]
+        python-version: ["3.14"]
+        group: ${{ fromJson(needs.setup.outputs.group) }}
       fail-fast: false
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
       - name: Checkout

@@ -13,6 +13,7 @@ import {
   SidePanel,
   Toolbar
 } from '@jupyterlab/ui-components';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
@@ -125,9 +126,13 @@ export class FileBrowser extends SidePanel {
       model,
       renderer,
       translator,
-      state: options.state
+      state: options.state,
+      handleOpenFile: options.handleOpenFile
     });
     this.listing.addClass(LISTING_CLASS);
+    this.listing.selectionChanged.connect(() => {
+      this._selectionChanged.emit();
+    });
 
     this.mainPanel.addWidget(this.crumbs);
     this.mainPanel.addWidget(this.filterToolbar);
@@ -172,6 +177,28 @@ export class FileBrowser extends SidePanel {
     } else {
       console.warn('Listing does not support toggling column visibility');
     }
+  }
+
+  /**
+   * Number of directory items to show on the left side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsLeftItems(): number {
+    return this.crumbs.minimumLeftItems;
+  }
+
+  set minimumBreadcrumbsLeftItems(value: number) {
+    this.crumbs.minimumLeftItems = value;
+  }
+
+  /**
+   * Number of directory items to show on the right side of the ellipsis in breadcrumbs.
+   */
+  get minimumBreadcrumbsRightItems(): number {
+    return this.crumbs.minimumRightItems;
+  }
+
+  set minimumBreadcrumbsRightItems(value: number) {
+    this.crumbs.minimumRightItems = value;
   }
 
   /**
@@ -293,12 +320,36 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to allow upload of files.
+   */
+  get allowFileUploads(): boolean {
+    return this._allowFileUploads;
+  }
+
+  set allowFileUploads(value: boolean) {
+    this.model.allowFileUploads = value;
+    if (this.listing.setAllowDragDropUpload) {
+      this.listing.setAllowDragDropUpload(value);
+      this._allowFileUploads = value;
+    } else {
+      console.warn('Listing does not support setting upload');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
    */
   selectedItems(): IterableIterator<Contents.IModel> {
     return this.listing.selectedItems();
+  }
+
+  /**
+   * A signal emitted when the selection changes in the file browser.
+   */
+  get selectionChanged(): ISignal<this, void> {
+    return this._selectionChanged;
   }
 
   /**
@@ -423,6 +474,13 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Select all listing items.
+   */
+  selectAll(): Promise<void> {
+    return this.listing.selectAll();
+  }
+
+  /**
    * Download the currently selected item(s).
    */
   download(): Promise<void> {
@@ -539,6 +597,8 @@ export class FileBrowser extends SidePanel {
   private _showHiddenFiles: boolean = false;
   private _showLastModifiedColumn: boolean = true;
   private _sortNotebooksFirst: boolean = false;
+  private _allowFileUploads: boolean = true;
+  private _selectionChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -586,6 +646,12 @@ export namespace FileBrowser {
      * the columns sizes
      */
     state?: IStateDB;
+
+    /**
+     * Callback overriding action performed when user asks to open a file.
+     * The default is to open the file in the main area if it is not open already, or to reveal it otherwise.
+     */
+    handleOpenFile?: (path: string) => void;
   }
 
   /**

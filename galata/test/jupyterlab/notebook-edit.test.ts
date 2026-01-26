@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
 
@@ -37,6 +42,54 @@ test.describe('Notebook Edit', () => {
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Re-render Markdown after edit', async ({ page }) => {
+    // Add an image and render
+    await page.notebook.addCell('markdown', '![alt text](./image.png)');
+    await page.notebook.runCell(1, true);
+
+    // There should be no link rendered in the cell, just an image
+    const cell = await page.notebook.getCellLocator(1);
+    const image = cell!.locator('img');
+    const link = cell!.locator('a');
+    await expect(link).toHaveCount(0);
+    await expect(image).toHaveCount(1);
+
+    // Edit and re-render the cell
+    await page.notebook.setCell(1, 'markdown', '[link](https://jupyter.org)');
+    await page.notebook.runCell(1, true);
+
+    // There should be a link but not an image
+    await expect(link).toHaveCount(1);
+    await expect(image).toHaveCount(0);
+
+    // Double-check we see the right link
+    await expect(link).toContainText('link');
+  });
+
+  test('Cut from code and paste into a Markdown cell', async ({ page }) => {
+    const text = 'text to be pasted';
+    await page.notebook.addCell('code', text);
+    await page.notebook.addCell('markdown', '');
+
+    const codeCell = await page.notebook.getCellLocator(1);
+    const markdownCell = await page.notebook.getCellLocator(2);
+
+    await expect(codeCell!).toContainText(text);
+    await expect(markdownCell!).not.toContainText(text);
+
+    // Cut from the code cell
+    await page.notebook.enterCellEditingMode(1);
+    await page.keyboard.press('Control+KeyA');
+    await page.keyboard.press('Control+KeyX');
+
+    // Paste into the markdown cell
+    await page.notebook.enterCellEditingMode(2);
+    await page.keyboard.press('Control+KeyV');
+
+    await expect(codeCell!).not.toContainText(text);
+    await expect(markdownCell!).toContainText(text);
   });
 
   test('Execute again', async ({ page }) => {
@@ -127,6 +180,7 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Move Cell Up');
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    await page.waitForTimeout(200);
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -167,3 +221,81 @@ test.describe('Notebook Edit', () => {
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
+
+test.describe('Notebook Edit (defer mode)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+  });
+
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'defer'
+      }
+    }
+  });
+
+  test('Data-windowing-index consistency on merge', async ({ page }) => {
+    // Create 10 code cells with values 1 to 10
+    await page.notebook.setCell(0, 'code', '1');
+    for (let i = 2; i <= 10; i++) {
+      await page.notebook.addCell('code', `${i}`);
+    }
+
+    // Get windowing indices before merge
+    const indicesBeforeMerge = await getWindowingIndices(page);
+    expect(indicesBeforeMerge.length).toBe(10);
+
+    expect(verifyIncreasingByOne(indicesBeforeMerge)).toBeTruthy();
+
+    // We will select cells 6, 5, 4 in that order (multi-select)
+    const cell6 = await page.notebook.getCellLocator(6);
+
+    // Start by selecting cell 6
+    await cell6!.click();
+
+    // Enter command mode
+    await page.keyboard.press('Escape');
+
+    // Select cell 5 and 4
+    await page.keyboard.press('Shift+ArrowUp');
+    await page.keyboard.press('Shift+ArrowUp');
+
+    // Press M to merge
+    await page.keyboard.press('Shift+KeyM');
+
+    const indicesAfterMerge = await getWindowingIndices(page);
+    expect(indicesAfterMerge.length).toBe(8);
+
+    // Verify windowing indices increase by 1 after merge
+    expect(verifyIncreasingByOne(indicesAfterMerge)).toBeTruthy();
+  });
+});
+
+const getWindowingIndices = async (page: IJupyterLabPageFixture) => {
+  const notebook = await page.notebook.getNotebookInPanelLocator();
+  const cellElements = await notebook!
+    .locator('[data-windowed-list-index]')
+    .all();
+  const indices: number[] = [];
+  if (cellElements) {
+    for (const element of cellElements) {
+      const idx = await element.getAttribute('data-windowed-list-index');
+      if (idx !== null) {
+        indices.push(parseInt(idx, 10));
+      }
+    }
+  }
+  return indices;
+};
+
+const verifyIncreasingByOne = (indices: number[]) => {
+  for (let i = 1; i < indices.length; i++) {
+    if (indices[i] !== indices[i - 1] + 1) {
+      return false;
+    }
+  }
+  return true;
+};

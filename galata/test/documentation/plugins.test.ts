@@ -11,7 +11,10 @@ const IGNORED_PLUGINS = [
   /^@jupyterlab\/geojson-extension:factory$/,
   /^@jupyterlab\/galata-extension:helpers$/,
   /^@jupyter-widgets\//,
-  /^jupyterlab_pygments/
+  /^jupyterlab_pygments/,
+  // Deprecated plugins
+  /^@jupyterlab\/services-extension:default-content-provider$/,
+  /^@jupyterlab\/services-extension:content-provider-warning$/
 ];
 
 test('All plugins and tokens must have a description', async ({
@@ -35,11 +38,19 @@ test('All plugins and tokens must have a description', async ({
       const plugin = (
         (window.jupyterapp as any).pluginRegistry._plugins as Map<
           string,
-          { provides: Token<any> | null }
+          {
+            optional?: Token<any>[];
+            provides?: Token<any>;
+            requires: Token<any>[];
+          }
         >
       ).get(id);
-      if (plugin?.provides) {
-        const token = plugin.provides;
+      const referencedTokens = [
+        ...(plugin?.provides ? [plugin?.provides] : []),
+        ...(plugin?.optional ?? []),
+        ...(plugin?.requires ?? [])
+      ];
+      for (const token of referencedTokens) {
         tokens[token.name] = token.description;
       }
     });
@@ -58,15 +69,35 @@ test('All plugins and tokens must have a description', async ({
     await fs.mkdir(testInfo.snapshotDir);
   }
 
-  await fs.writeJSON(testInfo.snapshotPath('plugins.json'), plugins, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
+  const pluginsSnapshotPath = testInfo.snapshotPath('plugins.json');
+  const tokensSnapshotPath = testInfo.snapshotPath('tokens.json');
 
-  await fs.writeJSON(testInfo.snapshotPath('tokens.json'), tokens, {
-    encoding: 'utf-8',
-    spaces: 2
-  });
+  const existingPlugins: Record<string, string> =
+    await fs.readJSON(pluginsSnapshotPath);
+  const existingTokens: Record<string, string | undefined> =
+    await fs.readJSON(tokensSnapshotPath);
+
+  // Update snapshots only when explicitly requested with --update-snapshots
+  if (testInfo.config.updateSnapshots === 'all') {
+    await fs.writeJSON(pluginsSnapshotPath, plugins, {
+      encoding: 'utf-8',
+      spaces: 2
+    });
+
+    await fs.writeJSON(tokensSnapshotPath, tokens, {
+      encoding: 'utf-8',
+      spaces: 2
+    });
+  }
+
+  expect(
+    plugins,
+    'Plugins list has changed. Run with --update-snapshots to update.'
+  ).toEqual(existingPlugins);
+  expect(
+    tokens,
+    'Tokens list has changed. Run with --update-snapshots to update.'
+  ).toEqual(existingTokens);
 
   // All plugins must define a description
   const missingPluginDescriptions = Object.entries(plugins).filter(

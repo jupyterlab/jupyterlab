@@ -8,7 +8,8 @@
  */
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  JupyterLab
 } from '@jupyterlab/application';
 import {
   IWorkspaceCommands,
@@ -18,7 +19,11 @@ import {
 import { commandsPlugin } from './commands';
 import { workspacesSidebar } from './sidebar';
 import { WorkspaceSelectorWidget } from './top_indicator';
-import { IToolbarWidgetRegistry, IWindowResolver } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  IToolbarWidgetRegistry,
+  IWindowResolver
+} from '@jupyterlab/apputils';
 import { ITranslator } from '@jupyterlab/translation';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
@@ -30,9 +35,16 @@ const workspacesModel: JupyterFrontEndPlugin<IWorkspacesModel> = {
   description: 'Provides a model for available workspaces.',
   provides: IWorkspacesModel,
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
+  optional: [JupyterLab.IInfo],
+  activate: (app: JupyterFrontEnd, info: JupyterLab.IInfo | null) => {
     return new WorkspacesModel({
-      manager: app.serviceManager.workspaces
+      manager: app.serviceManager.workspaces,
+      refreshStandby: () => {
+        if (info) {
+          return !info.isConnected || 'when-hidden';
+        }
+        return 'when-hidden';
+      }
     });
   }
 };
@@ -50,8 +62,15 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/**
+ * The plugin id for the workspace indicator.
+ */
 const WORKSPACE_INDICATOR_PLUGIN_ID =
   '@jupyterlab/workspaces-extension:indicator';
+
+/**
+ * The command id for the workspace indicator toggle command.
+ */
 const WORKSPACE_INDICATOR_COMMAND_ID = 'workspace-indicator:toggle';
 
 /**
@@ -68,6 +87,7 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
     ISettingRegistry,
     IToolbarWidgetRegistry
   ],
+  optional: [ICommandPalette],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
@@ -76,7 +96,8 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
     resolver: IWindowResolver,
     translator: ITranslator,
     registry: ISettingRegistry,
-    toolbarRegistry: IToolbarWidgetRegistry
+    toolbarRegistry: IToolbarWidgetRegistry,
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const openWorkspace = async (workspace: string) => {
@@ -115,8 +136,19 @@ const workspacesIndicator: JupyterFrontEndPlugin<void> = {
             updatedToolbar
           );
         }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
+
+    if (palette) {
+      const category = trans.__('Workspaces');
+      palette.addItem({ command: WORKSPACE_INDICATOR_COMMAND_ID, category });
+    }
   }
 };
 
