@@ -54,7 +54,7 @@
     "@jupyterlab/services": "^7.6.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.6.0-alpha.2",
     "@lumino/coreutils": "^2.2.2",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.58.0",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
     "json5": "^2.2.3",
