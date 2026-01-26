@@ -190,6 +190,12 @@ and select “New Console for Notebook”:
 
 You can iterate through the kernel history in a document cell using `Alt Up-Arrow` and `Alt Down-Arrow`. To use this feature, enable kernel history access in the notebook settings.
 
+(paste-code-cells-without-output)=
+
+## Paste code cells without output
+
+When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+
 (cell-toolbar)=
 
 ## Cell Toolbar
