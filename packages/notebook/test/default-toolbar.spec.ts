@@ -20,6 +20,7 @@ import {
   ToolbarItems
 } from '@jupyterlab/notebook';
 import * as utils from './utils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
@@ -97,166 +98,284 @@ describe('@jupyterlab/notebook', () => {
         });
       });
 
-      describe('#createCutButton()', () => {
-        it('should cut when clicked', async () => {
-          const button = ToolbarItems.createCutButton(panel);
-          const count = panel.content.widgets.length;
-          Widget.attach(button, document.body);
-          await framePromise();
-          await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'click');
-          await sleep();
-          expect(panel.content.widgets.length).toBe(count - 1);
-          expect(navigator.clipboard.writeText).toHaveBeenCalled();
-          const copied = JSON.parse(
-            (navigator.clipboard.writeText as jest.Mock).mock.calls[0][0]
-          );
-          expect(copied.length).toBe(1);
-          expect(copied[0].cell_type).toBe('code');
-          expect(copied[0].source).toBe(
-            [
-              'import sys\n',
-              "sys.stdout.write('hello world\\n')\n",
-              'sys.stdout.flush()\n',
-              'for i in range(3):\n',
-              "    sys.stdout.write('%s\\n' % i)\n",
-              '    sys.stdout.flush()\n',
-              "sys.stderr.write('output to stderr\\n')\n",
-              'sys.stderr.flush()\n',
-              "sys.stdout.write('some more stdout text\\n')\n",
-              'sys.stdout.flush()'
-            ].join('')
-          );
-          expect(copied[0].metadata).toEqual({ tags: [] });
-          expect(copied[0].outputs).toStrictEqual([
-            {
-              output_type: 'stream',
-              name: 'stdout',
-              text: ['hello world\n', '0\n', '1\n', '2\n'].join(',')
-            },
-            {
-              output_type: 'stream',
-              name: 'stderr',
-              text: 'output to stderr\n'
-            },
-            {
-              output_type: 'stream',
-              name: 'stdout',
-              text: 'some more stdout text\n'
-            }
-          ]);
-          button.dispose();
-        });
-
-        it("should add an inline svg node with the 'cut' icon", async () => {
-          const button = ToolbarItems.createCutButton(panel);
-          Widget.attach(button, document.body);
-          await framePromise();
-          expect(button.node.querySelector("[data-icon$='cut']")).toBeDefined();
-          button.dispose();
-        });
-      });
-
-      describe('#createCopyButton()', () => {
-        it('should copy when clicked in secure context', async () => {
-          // secure context: use the native clipboard API
-          (navigator.clipboard.writeText as jest.Mock).mockResolvedValue(null);
-          const button = ToolbarItems.createCopyButton(panel);
-          const count = panel.content.widgets.length;
-          Widget.attach(button, document.body);
-          await framePromise();
-          await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'click');
-          expect(panel.content.widgets.length).toBe(count);
-          expect(navigator.clipboard.writeText).toHaveBeenCalled();
-          const copied = JSON.parse(
-            (navigator.clipboard.writeText as jest.Mock).mock.calls[0][0]
-          );
-          expect(copied.length).toBe(1);
-          expect(copied[0].cell_type).toBe('code');
-          expect(copied[0].source).toBe(
-            [
-              'import sys\n',
-              "sys.stdout.write('hello world\\n')\n",
-              'sys.stdout.flush()\n',
-              'for i in range(3):\n',
-              "    sys.stdout.write('%s\\n' % i)\n",
-              '    sys.stdout.flush()\n',
-              "sys.stderr.write('output to stderr\\n')\n",
-              'sys.stderr.flush()\n',
-              "sys.stdout.write('some more stdout text\\n')\n",
-              'sys.stdout.flush()'
-            ].join('')
-          );
-          expect(copied[0].metadata).toEqual({ tags: [] });
-          expect(copied[0].outputs).toStrictEqual([
-            {
-              output_type: 'stream',
-              name: 'stdout',
-              text: ['hello world\n', '0\n', '1\n', '2\n'].join(',')
-            },
-            {
-              output_type: 'stream',
-              name: 'stderr',
-              text: 'output to stderr\n'
-            },
-            {
-              output_type: 'stream',
-              name: 'stdout',
-              text: 'some more stdout text\n'
-            }
-          ]);
-          button.dispose();
-        });
-
-        it('should copy when clicked in insecure context', async () => {
-          // insecure context: fallback to internal clipboard API
-          (navigator.clipboard.writeText as jest.Mock).mockRejectedValue({
-            name: 'NotAllowedError'
+      describe('withSystemClipboard', () => {
+        const mockSettings = {
+          get: (key: string) => ({
+            composite: key === 'useSystemClipboardForCells' ? true : undefined
+          })
+        } as any;
+        describe('#createCutButton()', () => {
+          it('should cut when clicked', async () => {
+            const button = ToolbarItems.createCutButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            await sleep();
+            expect(panel.content.widgets.length).toBe(count - 1);
+            expect(navigator.clipboard.writeText).toHaveBeenCalled();
+            const copied = JSON.parse(
+              (navigator.clipboard.writeText as jest.Mock).mock.calls[0][0]
+            );
+            expect(copied.length).toBe(1);
+            expect(copied[0].cell_type).toBe('code');
+            expect(copied[0].source).toBe(
+              [
+                'import sys\n',
+                "sys.stdout.write('hello world\\n')\n",
+                'sys.stdout.flush()\n',
+                'for i in range(3):\n',
+                "    sys.stdout.write('%s\\n' % i)\n",
+                '    sys.stdout.flush()\n',
+                "sys.stderr.write('output to stderr\\n')\n",
+                'sys.stderr.flush()\n',
+                "sys.stdout.write('some more stdout text\\n')\n",
+                'sys.stdout.flush()'
+              ].join('')
+            );
+            expect(copied[0].metadata).toEqual({ tags: [] });
+            expect(copied[0].outputs).toStrictEqual([
+              {
+                output_type: 'stream',
+                name: 'stdout',
+                text: ['hello world\n', '0\n', '1\n', '2\n'].join(',')
+              },
+              {
+                output_type: 'stream',
+                name: 'stderr',
+                text: 'output to stderr\n'
+              },
+              {
+                output_type: 'stream',
+                name: 'stdout',
+                text: 'some more stdout text\n'
+              }
+            ]);
+            button.dispose();
           });
-          const button = ToolbarItems.createCopyButton(panel);
-          const count = panel.content.widgets.length;
-          Widget.attach(button, document.body);
-          await framePromise();
-          await button.renderPromise;
-          simulate(button.node.firstChild as HTMLElement, 'click');
-          expect(panel.content.widgets.length).toBe(count);
-          expect(navigator.clipboard.writeText).toHaveBeenCalled();
-          await sleep();
-          expect(
-            (utils.systemClipboard as any).fallback.hasData(JUPYTER_CELL_MIME)
-          ).toBe(true);
-          button.dispose();
+
+          it("should add an inline svg node with the 'cut' icon", async () => {
+            const button = ToolbarItems.createCutButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            Widget.attach(button, document.body);
+            await framePromise();
+            expect(
+              button.node.querySelector("[data-icon$='cut']")
+            ).toBeDefined();
+            button.dispose();
+          });
         });
 
-        it("should add an inline svg node with the 'copy' icon", async () => {
-          const button = ToolbarItems.createCopyButton(panel);
-          Widget.attach(button, document.body);
-          await framePromise();
-          expect(
-            button.node.querySelector("[data-icon$='copy']")
-          ).toBeDefined();
-          button.dispose();
+        describe('#createCopyButton()', () => {
+          it('should copy when clicked in secure context', async () => {
+            // secure context: use the native clipboard API
+            (navigator.clipboard.writeText as jest.Mock).mockResolvedValue(
+              null
+            );
+            const button = ToolbarItems.createCopyButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            expect(panel.content.widgets.length).toBe(count);
+            expect(navigator.clipboard.writeText).toHaveBeenCalled();
+            const copied = JSON.parse(
+              (navigator.clipboard.writeText as jest.Mock).mock.calls[0][0]
+            );
+            expect(copied.length).toBe(1);
+            expect(copied[0].cell_type).toBe('code');
+            expect(copied[0].source).toBe(
+              [
+                'import sys\n',
+                "sys.stdout.write('hello world\\n')\n",
+                'sys.stdout.flush()\n',
+                'for i in range(3):\n',
+                "    sys.stdout.write('%s\\n' % i)\n",
+                '    sys.stdout.flush()\n',
+                "sys.stderr.write('output to stderr\\n')\n",
+                'sys.stderr.flush()\n',
+                "sys.stdout.write('some more stdout text\\n')\n",
+                'sys.stdout.flush()'
+              ].join('')
+            );
+            expect(copied[0].metadata).toEqual({ tags: [] });
+            expect(copied[0].outputs).toStrictEqual([
+              {
+                output_type: 'stream',
+                name: 'stdout',
+                text: ['hello world\n', '0\n', '1\n', '2\n'].join(',')
+              },
+              {
+                output_type: 'stream',
+                name: 'stderr',
+                text: 'output to stderr\n'
+              },
+              {
+                output_type: 'stream',
+                name: 'stdout',
+                text: 'some more stdout text\n'
+              }
+            ]);
+            button.dispose();
+          });
+
+          it('should copy when clicked in insecure context', async () => {
+            // insecure context: fallback to internal clipboard API
+            (navigator.clipboard.writeText as jest.Mock).mockRejectedValue({
+              name: 'NotAllowedError'
+            });
+            const button = ToolbarItems.createCopyButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            expect(panel.content.widgets.length).toBe(count);
+            expect(navigator.clipboard.writeText).toHaveBeenCalled();
+            await sleep();
+            expect(
+              (utils.systemClipboard as any).fallback.hasData(JUPYTER_CELL_MIME)
+            ).toBe(true);
+            button.dispose();
+          });
+
+          it("should add an inline svg node with the 'copy' icon", async () => {
+            const button = ToolbarItems.createCopyButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            Widget.attach(button, document.body);
+            await framePromise();
+            expect(
+              button.node.querySelector("[data-icon$='copy']")
+            ).toBeDefined();
+            button.dispose();
+          });
+        });
+
+        describe('#createPasteButton()', () => {
+          it('should paste when clicked', async () => {
+            (navigator.clipboard.writeText as jest.Mock).mockResolvedValue(
+              null
+            );
+            const button = ToolbarItems.createPasteButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            await NotebookActions.copyToSystemClipboard(panel.content);
+            // Ensure the readText returns the copied content
+            const copied = (navigator.clipboard.writeText as jest.Mock).mock
+              .calls[0][0];
+            (navigator.clipboard.readText as jest.Mock).mockResolvedValue(
+              copied
+            );
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            await sleep();
+            expect(panel.content.widgets.length).toBe(count + 1);
+            button.dispose();
+          });
+
+          it("should add an inline svg node with the 'paste' icon", async () => {
+            const button = ToolbarItems.createPasteButton(
+              panel,
+              undefined,
+              mockSettings as ISettingRegistry.ISettings
+            );
+            Widget.attach(button, document.body);
+            await framePromise();
+            expect(
+              button.node.querySelector("[data-icon$='paste']")
+            ).toBeDefined();
+            button.dispose();
+          });
         });
       });
 
-      describe('#createPasteButton()', () => {
-        it('should paste when clicked', async () => {
-          (navigator.clipboard.writeText as jest.Mock).mockResolvedValue(null);
-          const button = ToolbarItems.createPasteButton(panel);
-          const count = panel.content.widgets.length;
-          Widget.attach(button, document.body);
-          await framePromise();
-          await button.renderPromise;
-          await NotebookActions.copyToSystemClipboard(panel.content);
-          // Ensure the readText returns the copied content
-          const copied = (navigator.clipboard.writeText as jest.Mock).mock
-            .calls[0][0];
-          (navigator.clipboard.readText as jest.Mock).mockResolvedValue(copied);
-          simulate(button.node.firstChild as HTMLElement, 'click');
-          await sleep();
-          expect(panel.content.widgets.length).toBe(count + 1);
-          button.dispose();
+      describe('withoutSystemClipboard', () => {
+        describe('#createCutButton()', () => {
+          it('should cut when clicked', async () => {
+            const button = ToolbarItems.createCutButton(panel);
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            expect(panel.content.widgets.length).toBe(count - 1);
+            expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
+            button.dispose();
+          });
+
+          it("should add an inline svg node with the 'cut' icon", async () => {
+            const button = ToolbarItems.createCutButton(panel);
+            Widget.attach(button, document.body);
+            await framePromise();
+            expect(
+              button.node.querySelector("[data-icon$='cut']")
+            ).toBeDefined();
+            button.dispose();
+          });
+        });
+
+        describe('#createCopyButton()', () => {
+          it('should copy when clicked', async () => {
+            const button = ToolbarItems.createCopyButton(panel);
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            expect(panel.content.widgets.length).toBe(count);
+            expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
+            button.dispose();
+          });
+
+          it("should add an inline svg node with the 'copy' icon", async () => {
+            const button = ToolbarItems.createCopyButton(panel);
+            Widget.attach(button, document.body);
+            await framePromise();
+            expect(
+              button.node.querySelector("[data-icon$='copy']")
+            ).toBeDefined();
+            button.dispose();
+          });
+        });
+
+        describe('#createPasteButton()', () => {
+          it('should paste when clicked', async () => {
+            const button = ToolbarItems.createPasteButton(panel);
+            const count = panel.content.widgets.length;
+            Widget.attach(button, document.body);
+            await framePromise();
+            await button.renderPromise;
+            NotebookActions.copy(panel.content);
+            simulate(button.node.firstChild as HTMLElement, 'click');
+            await sleep();
+            expect(panel.content.widgets.length).toBe(count + 1);
+            button.dispose();
+          });
         });
 
         it("should add an inline svg node with the 'paste' icon", async () => {
