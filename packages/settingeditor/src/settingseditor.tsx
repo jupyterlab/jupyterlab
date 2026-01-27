@@ -18,7 +18,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
-import { SplitPanel } from '@lumino/widgets';
+import { SplitPanel, Widget } from '@lumino/widgets';
 import React from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
@@ -40,22 +40,25 @@ export class SettingsEditor extends SplitPanel {
       // Filters out a couple of plugins that take too long to load in the new settings editor.
       toSkip: options.toSkip
     });
+    this.toggleCompact = this.toggleCompact.bind(this);
     this._list = new PluginList({
       registry: options.registry,
       translator: this.translator,
       query: options.query,
-      model: this._listModel
+      model: this._listModel,
+      onToggle: this.toggleCompact
     });
     this._listModel.changed.connect(() => {
       this.update();
     });
     this.addWidget(this._list);
     this.setDirtyState = this.setDirtyState.bind(this);
+    this.addClass('jp-SettingsEditor');
 
     const settingsPanel = ReactWidget.create(
       <UseSignal signal={this._listModel.changed}>
         {() => (
-          <SettingsPanel
+        <SettingsPanel
             settings={[...Object.values(this._listModel.settings)]}
             editorRegistry={options.editorRegistry}
             handleSelectSignal={this._list.handleSelectSignal}
@@ -110,6 +113,52 @@ export class SettingsEditor extends SplitPanel {
   }
 
   /**
+   * Toggle the side bar compact mode.
+   */
+  toggleCompact(): void {
+    const compactWidth = 36;
+    const node = this._list.node;
+
+    if (!this._isCompact) {
+      // Expanding -> Compacting
+      this._isCompact = true;
+      this._lastWidth = node.offsetWidth;
+      node.classList.add('jp-mod-compact');
+      this.addClass('jp-mod-compact');
+
+      // Clear search query in compact mode
+      this._list.setFilter(updateFilterFunction('', false, false), '');
+
+      // Enforce size for compact mode to prevent resizing
+      node.style.minWidth = `${compactWidth}px`;
+      node.style.maxWidth = `${compactWidth}px`;
+      node.style.width = `${compactWidth}px`;
+
+      const totalWidth = this.node.offsetWidth;
+      const fraction = compactWidth / totalWidth;
+      this.setRelativeSizes([fraction, 1 - fraction]);
+    } else {
+      // Compacting -> Expanding
+      this._isCompact = false;
+      node.classList.remove('jp-mod-compact');
+      this.removeClass('jp-mod-compact');
+
+      // Enforce min width in expanded mode
+      node.style.minWidth = '175px';
+      node.style.maxWidth = '';
+      node.style.width = '';
+
+      // Restore layout
+      if (this._lastWidth) {
+        const totalWidth = this.node.offsetWidth;
+        const fraction = this._lastWidth / totalWidth;
+        this.setRelativeSizes([fraction, 1 - fraction]);
+      }
+    }
+    this.update();
+  }
+
+  /**
    * Updates the filter of the plugin list.
    *
    * @param query The query to filter the plugin list
@@ -119,6 +168,23 @@ export class SettingsEditor extends SplitPanel {
       query ? updateFilterFunction(query, false, false) : null,
       query
     );
+  }
+
+  /**
+   * Handle resize events
+   *
+   * @param msg Widget resize message
+   */
+  protected onResize(msg: Widget.ResizeMessage): void {
+    const width = msg.width === -1 ? this.node.offsetWidth : msg.width;
+    if (this._isCompact && width > 0) {
+      const fraction = 36 / width;
+      this.setRelativeSizes([fraction, 1 - fraction]);
+    }
+    if (width > 0 && width < 600 && !this._isCompact) {
+      this.toggleCompact();
+    }
+    super.onResize(msg);
   }
 
   /**
@@ -165,6 +231,8 @@ export class SettingsEditor extends SplitPanel {
   private _list: PluginList;
   private _listModel: PluginList.Model;
   private _saveStateChange = new Signal<this, SettingsEditor.SaveState>(this);
+  private _lastWidth: number;
+  private _isCompact = false;
 }
 
 export namespace SettingsEditor {

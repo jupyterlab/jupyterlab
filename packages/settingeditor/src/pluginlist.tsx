@@ -14,7 +14,9 @@ import {
   IScore,
   LabIcon,
   settingsIcon,
-  updateFilterFunction
+  updateFilterFunction,
+  Button,
+  listIcon
 } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
 import { PartialJSONObject, PromiseDelegate } from '@lumino/coreutils';
@@ -73,6 +75,7 @@ export class PluginList extends ReactWidget {
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
     this._query = options.query ?? '';
+    this._onToggle = options.onToggle;
 
     this._errors = {};
   }
@@ -429,14 +432,26 @@ export class PluginList extends ReactWidget {
 
     return (
       <div className="jp-PluginList-wrapper">
-        <FilterBox
-          updateFilter={this.setFilter}
-          useFuzzyFilter={false}
-          placeholder={trans.__('Search settings…')}
-          forceRefresh={false}
-          caseSensitive={false}
-          initialQuery={this._query}
-        />
+        <div className="jp-PluginList-header-group">
+          <FilterBox
+            updateFilter={this.setFilter}
+            useFuzzyFilter={false}
+            placeholder={trans.__('Search settings…')}
+            forceRefresh={false}
+            caseSensitive={false}
+            initialQuery={this._query}
+          />
+          {this._onToggle && (
+            <Button
+              className="jp-PluginList-toggle"
+              onClick={this._onToggle}
+              title={trans.__('Toggle compact mode')}
+              minimal
+            >
+              <listIcon.react tag="span" className="jp-Icon" />
+            </Button>
+          )}
+        </div>
         {modifiedItems.length > 0 && (
           <div>
             <h1 className="jp-PluginList-header">{trans.__('Modified')}</h1>
@@ -472,6 +487,7 @@ export class PluginList extends ReactWidget {
   private _confirm?: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';
+  private _onToggle?: () => void;
 }
 
 /**
@@ -517,6 +533,11 @@ export namespace PluginList {
      * An optional initial query so the plugin list can filter on start.
      */
     query?: string;
+
+    /**
+     * Callback to toggle the compact mode.
+     */
+    onToggle?: () => void;
   }
 
   /**
