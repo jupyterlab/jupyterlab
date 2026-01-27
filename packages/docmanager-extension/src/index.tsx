@@ -510,7 +510,7 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     }
   });
 
-  
+
   if (palette) {
     palette.addItem({
       command: 'docmanager:open-no-kernel',
@@ -547,9 +547,9 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
           return context.download();
         }
       }
-  
 
-   
+
+
 
     app.shell.currentChanged?.connect(() => {
       app.commands.notifyCommandChanged(CommandIDs.download);
