@@ -2550,7 +2550,7 @@ __metadata:
     "@rspack/core": ^1.7.3
     "@types/fs-extra": ^9.0.1
     "@types/glob": ^7.1.1
-    "@types/node": ^20.11.27
+    "@types/node": ^20.14.8
     "@types/supports-color": ^5.3.0
     "@types/watchpack": ^2.4.4
     ajv: ^8.12.0
@@ -2583,7 +2583,7 @@ __metadata:
     "@types/glob": ^7.1.1
     "@types/inquirer": ^9.0.3
     "@types/micromatch": ^4.0.1
-    "@types/node": ^20.11.27
+    "@types/node": ^20.14.8
     "@types/prettier": ~2.6.0
     "@yarnpkg/core": ^4.0.3
     "@yarnpkg/parsers": ^3.0.0
@@ -4038,7 +4038,7 @@ __metadata:
     lodash.mergewith: ^4.6.1
     rimraf: ~5.0.5
     typescript: ~5.6.3
-    vscode-jsonrpc: ^6.0.0
+    vscode-jsonrpc: ^8.2.0
     vscode-languageserver-protocol: ^3.17.0
     vscode-ws-jsonrpc: ~1.0.2
   languageName: unknown
@@ -5029,7 +5029,7 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
-    "@types/node": ^20.11.27
+    "@types/node": ^20.14.8
     deepmerge: ^4.2.2
     fs-extra: ^10.1.0
     identity-obj-proxy: ^3.0.0
@@ -7786,12 +7786,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:^20.11.27":
+"@types/node@npm:*, @types/node@npm:>=10.0.0":
   version: 20.11.27
   resolution: "@types/node@npm:20.11.27"
   dependencies:
     undici-types: ~5.26.4
   checksum: 24a134a3c18e7261b6d6385c2b7714b6cf93663f30d5df8ca95c649f9cef917a422d77bfd4a18b2c7d190d3a39f445b345ecd9ef6f994e61c7e92f400ecbe80f
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.14.8":
+  version: 20.19.30
+  resolution: "@types/node@npm:20.19.30"
+  dependencies:
+    undici-types: ~6.21.0
+  checksum: 32e80a104b8fcdcacc52a98f0a197a33fd264325501f9af1653cbe9c07fdb6d11130cb0111c65fd353112e6a5af1e5f106714411b1b252d06f0f58760153a1e3
   languageName: node
   linkType: hard
 
@@ -21773,6 +21782,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
+  languageName: node
+  linkType: hard
+
 "unicode-canonical-property-names-ecmascript@npm:^2.0.0":
   version: 2.0.0
   resolution: "unicode-canonical-property-names-ecmascript@npm:2.0.0"
@@ -22639,10 +22655,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vscode-jsonrpc@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "vscode-jsonrpc@npm:6.0.0"
-  checksum: 3a67a56f287e8c449f2d9752eedf91e704dc7b9a326f47fb56ac07667631deb45ca52192e9bccb2ab108764e48409d70fa64b930d46fc3822f75270b111c5f53
+"vscode-jsonrpc@npm:^8.2.0":
+  version: 8.2.1
+  resolution: "vscode-jsonrpc@npm:8.2.1"
+  checksum: 2af2c333d73f6587896a7077978b8d4b430e55c674d5dbb90597a84a6647057c1655a3bff398a9b08f1f8ba57dbd2deabf05164315829c297b0debba3b8bc19e
   languageName: node
   linkType: hard
 

@@ -7,4 +7,4 @@
 // We define it here so we can import the Rspack packages.
 // We can remove this file when we upgrade to Typescript 5.6 or later.
 
-type SetIterator<T> = Iterator<T>;
+// type SetIterator<T> = Iterator<T>;
