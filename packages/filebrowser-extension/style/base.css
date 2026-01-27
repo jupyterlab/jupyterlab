@@ -11,3 +11,57 @@
   padding: 0;
   flex: 0 0 auto;
 }
+
+.jp-FileProperties-body {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  min-width: 300px;
+}
+
+.jp-FileProperties-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-FileProperties-label {
+  font-weight: 600;
+  color: var(--jp-content-font-color2);
+  flex: 0 0 120px;
+}
+
+.jp-FileProperties-value {
+  color: var(--jp-content-font-color1);
+  word-break: break-all;
+  text-align: right;
+  flex: 1;
+}
+
+.jp-FileProperties-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--jp-border-color1);
+}
+
+.jp-FileProperties-headerIcon {
+  margin-right: 8px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.jp-FileProperties-copyBtn {
+  margin-left: 8px;
+  cursor: pointer;
+  color: var(--jp-content-font-color2);
+  display: flex;
+  align-items: center;
+}
+
+.jp-FileProperties-copyBtn:hover {
+  background-color: var(--jp-layout-color2);
+  border-radius: 4px;
+}

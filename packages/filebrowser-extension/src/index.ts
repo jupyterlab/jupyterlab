@@ -18,11 +18,13 @@ import {
 import {
   Clipboard,
   createToolbarFactory,
+  Dialog,
   ICommandPalette,
   InputDialog,
   IToolbarWidgetRegistry,
   Notification,
   setToolbar,
+  showDialog,
   showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -49,6 +51,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addIcon,
+  checkIcon,
   closeIcon,
   copyIcon,
   cutIcon,
@@ -70,7 +73,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ContextMenu } from '@lumino/widgets';
+import { ContextMenu, Panel, Widget } from '@lumino/widgets';
 
 /**
  * Toolbar factory for the top toolbar in the widget
@@ -157,6 +160,8 @@ namespace CommandIDs {
   export const toggleSingleClick = 'filebrowser:toggle-single-click-navigation';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
+
+  export const showProperties = 'filebrowser:show-properties';
 }
 
 /**
@@ -1178,6 +1183,145 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const showPropertiesPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:show-properties',
+  description: 'Adds a "Properties" context menu entry for files',
+  requires: [IDefaultFileBrowser, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    defaultBrowser: FileBrowser,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const { commands, docRegistry } = app;
+
+    commands.addCommand(CommandIDs.showProperties, {
+      label: trans.__('Properties'),
+      icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
+      isVisible: () => Array.from(defaultBrowser.selectedItems()).length === 1,
+      execute: async () => {
+        const item = defaultBrowser.selectedItems().next();
+        if (item.done) {
+          return;
+        }
+        const { path } = item.value;
+
+        try {
+          const details =
+            await defaultBrowser.model.manager.services.contents.get(path, {
+              content: false
+            });
+
+          const ft = docRegistry.getFileTypeForModel(details);
+          const typeName = ft.displayName || ft.name;
+          const icon = ft.icon;
+
+          const body = new Panel();
+          body.addClass('jp-FileProperties-body');
+
+          const header = new Panel();
+          header.addClass('jp-FileProperties-header');
+          if (icon) {
+            const iconWidget = new Widget({
+              node: icon.element({
+                className: 'jp-FileProperties-headerIcon',
+                height: '32px',
+                width: '32px'
+              })
+            });
+            header.addWidget(iconWidget);
+          }
+          const nameTitle = new Widget();
+          nameTitle.node.textContent = details.name;
+          nameTitle.addClass('jp-FileProperties-headerName');
+          header.addWidget(nameTitle);
+          body.addWidget(header);
+
+          const addRow = (label: string, value: string) => {
+            const row = new Panel();
+            row.addClass('jp-FileProperties-row');
+
+            const lW = new Widget();
+            lW.node.textContent = label;
+            lW.addClass('jp-FileProperties-label');
+
+            const vW = new Widget();
+            vW.node.textContent = value;
+            vW.addClass('jp-FileProperties-value');
+
+            const copyBtn = new Widget({
+              node: copyIcon.element({
+                className: 'jp-FileProperties-copyBtn',
+                tag: 'span',
+                title: trans.__('Copy %1', label),
+                height: '16px',
+                width: '16px'
+              })
+            });
+            copyBtn.node.onclick = () => {
+              void Clipboard.copyToSystem(value);
+              checkIcon.element({
+                container: copyBtn.node,
+                className: 'jp-FileProperties-copyBtn',
+                tag: 'span',
+                title: trans.__('Copied!'),
+                height: '16px',
+                width: '16px'
+              });
+              setTimeout(() => {
+                copyIcon.element({
+                  container: copyBtn.node,
+                  className: 'jp-FileProperties-copyBtn',
+                  tag: 'span',
+                  title: trans.__('Copy %1', label),
+                  height: '16px',
+                  width: '16px'
+                });
+              }, 1000);
+            };
+
+            row.addWidget(lW);
+            row.addWidget(vW);
+            row.addWidget(copyBtn);
+            body.addWidget(row);
+          };
+
+          addRow(trans.__('Location'), details.path);
+          addRow(trans.__('Type'), typeName);
+          addRow(
+            trans.__('Size'),
+            typeof details.size === 'number'
+              ? formatFileSize(details.size, 1, 1024)
+              : trans.__('N/A')
+          );
+          addRow(
+            trans.__('Last Modified'),
+            new Date(details.last_modified).toLocaleString()
+          );
+
+          await showDialog({
+            title: trans.__('File Properties'),
+            body,
+            buttons: [Dialog.okButton({ label: trans.__('Close') })]
+          });
+        } catch (error) {
+          void showErrorMessage(
+            trans.__('Cannot fetch file properties'),
+            error
+          );
+        }
+      }
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.showProperties,
+      selector: '.jp-DirListing-item[data-isdir="false"]',
+      rank: 99
+    });
+  }
+};
+
 /**
  * Add the main file browser commands to the application's command registry.
  */
@@ -1890,7 +2034,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   openBrowserTabPlugin,
   openUrlPlugin,
   notifyUploadPlugin,
-  createNewLanguageFilePlugin
+  createNewLanguageFilePlugin,
+  showPropertiesPlugin
 ];
 export default plugins;
 
