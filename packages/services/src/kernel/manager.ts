@@ -7,7 +7,7 @@ import { CommsOverSubshells, KernelSpec, ServerConnection } from '..';
 import * as Kernel from './kernel';
 import { BaseManager } from '../basemanager';
 import { IKernelOptions, KernelAPIClient } from './restapi';
-import { KernelConnection } from './default';
+import { DEFAULT_KERNEL_INFO_TIMEOUT, KernelConnection } from './default';
 import { KernelSpecAPIClient } from '../kernelspec/restapi';
 
 /**
@@ -21,7 +21,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    */
   constructor(options: KernelManager.IOptions = {}) {
     super(options);
-
+    this._kernelInfoTimeout = DEFAULT_KERNEL_INFO_TIMEOUT;
     this._kernelAPIClient =
       options.kernelAPIClient ??
       new KernelAPIClient({ serverSettings: this.serverSettings });
@@ -87,6 +87,17 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   }
 
   /**
+   * Timeout awaiting Websocket responds Kernel's information.
+   */
+  get kernelInfoTimeout(): number {
+    return this._kernelInfoTimeout;
+  }
+
+  set kernelInfoTimeout(value: number) {
+    this._kernelInfoTimeout = value;
+  }
+
+  /**
    * Dispose of the resources used by the manager.
    */
   dispose(): void {
@@ -131,7 +142,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       ...options,
       serverSettings: this.serverSettings,
       kernelAPIClient: this._kernelAPIClient,
-      kernelSpecAPIClient: this._kernelSpecAPIClient
+      kernelSpecAPIClient: this._kernelSpecAPIClient,
+      kernelInfoTimeout: this._kernelInfoTimeout
     });
     this._onStarted(kernelConnection);
     if (!this._models.has(id)) {
@@ -366,6 +378,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   private _connectionFailure = new Signal<this, Error>(this);
   private _kernelAPIClient: Kernel.IKernelAPIClient;
   private _kernelSpecAPIClient: KernelSpec.IKernelSpecAPIClient;
+  private _kernelInfoTimeout: number;
 }
 
 /**
