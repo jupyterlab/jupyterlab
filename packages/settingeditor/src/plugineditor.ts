@@ -43,10 +43,11 @@ export class PluginEditor extends Widget {
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
-    // TODO: Remove this layout. We were using this before when we
-    // when we had a way to switch between the raw and table editor
-    // Now, the raw editor is the only child and probably could merged into
-    // this class directly in the future.
+    // Even though PluginEditor currently has only one child, we still need
+    // StackedLayout to correctly handle sizing and resize events.
+    // Editor widgets like RawEditor depend on this behavior to render properly.
+    // Using simpler layouts (e.g. PanelLayout) caused layout and sizing issues.
+    // This layout can be removed only if the editor is merged into this widget later.
     const layout = (this.layout = new StackedLayout());
     const { onSaveError } = Private;
 
