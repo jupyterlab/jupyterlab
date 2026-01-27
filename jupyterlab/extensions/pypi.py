@@ -27,8 +27,8 @@ from zipfile import ZipFile
 import httpx
 import tornado
 from async_lru import alru_cache
-from packaging.specifiers import SpecifierSet
-from packaging.version import Version
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import InvalidVersion, Version
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab._version import __version__
@@ -106,7 +106,7 @@ def _check_python_version_compatible(requires_python: str | None) -> bool:
         )
         specifier = SpecifierSet(requires_python)
         return current_version in specifier
-    except Exception:
+    except (InvalidSpecifier, InvalidVersion):
         # If parsing fails, assume compatible to avoid false negatives
         return True
 

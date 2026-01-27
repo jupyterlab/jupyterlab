@@ -2,6 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import json
+import sys
 from unittest.mock import Mock, patch
 
 import pytest
@@ -9,8 +10,33 @@ from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
 from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage, PluginManager
+from jupyterlab.extensions.pypi import _check_python_version_compatible
 
 from . import fake_client_factory
+
+
+@pytest.mark.parametrize(
+    "requires_python, expected",
+    (
+        (None, True),  # No requirement
+        ("", True),  # Empty requirement
+        (">=3.6", True),  # Should pass on any modern Python
+        (">=3.6,<4", True),  # Common range
+        (">=99.0", False),  # Future version
+        ("<3.0", False),  # Very old Python
+        ("invalid-specifier", True),  # Invalid specifier should default to compatible
+    ),
+)
+def test_check_python_version_compatible(requires_python, expected):
+    """Test the Python version compatibility check function."""
+    result = _check_python_version_compatible(requires_python)
+    assert result == expected
+
+
+def test_check_python_version_compatible_current_version():
+    """Test that current Python version is compatible with its own specifier."""
+    current = f">={sys.version_info.major}.{sys.version_info.minor}"
+    assert _check_python_version_compatible(current) is True
 
 
 @pytest.mark.parametrize(
