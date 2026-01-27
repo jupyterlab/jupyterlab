@@ -484,6 +484,8 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IDocumentManager],
   optional: [ITranslator, ICommandPalette],
+}
+
  activate: (
   app: JupyterFrontEnd,
   docManager: IDocumentManager,
@@ -518,21 +520,31 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     });
   }
 
-};
+}
+  activate: (
+    app: JupyterFrontEnd,
+    docManager: IDocumentManager,
+    translator: ITranslator | null,
+    palette: ICommandPalette | null
+  ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    const { commands, shell } = app;
     const isEnabled = () => {
       const { currentWidget } = shell;
       return !!(currentWidget && docManager.contextForWidget(currentWidget));
-    }
+    };
     commands.addCommand(CommandIDs.download, {
       label: trans.__('Download'),
-      caption: trans.__('Download the file to your computer')},
+      caption: trans.__('Download the file to your computer'),
       isEnabled,
       describedBy: {
         args: {
           type: 'object',
           properties: {}
         }
-      });
+    },
+  
+  
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {
@@ -547,16 +559,17 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
           return context.download();
         }
       }
-
-
-
+      });
 
     app.shell.currentChanged?.connect(() => {
       app.commands.notifyCommandChanged(CommandIDs.download);
-
     });
 
-
+    const category = trans.__('File Operations');
+    if (palette) {
+      palette.addItem({ command: CommandIDs.download, category });
+    }
+ }
 
 /**
  * A plugin providing open-browser-tab commands.

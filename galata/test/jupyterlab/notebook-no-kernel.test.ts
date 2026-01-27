@@ -8,6 +8,7 @@ test.describe('Notebook No Kernel', () => {
 
   test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
 
+
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(NOTEBOOK_NAME);
     await page.notebook.save();
@@ -52,7 +53,7 @@ test.describe('Notebook No Kernel', () => {
     await page.menu.clickMenuItem('File>Close Tab');
 
     await page.filebrowser.open(NOTEBOOK_NAME);
-    expect(await page.kernel.isRunning()).toBe(false);
+    await expect(await page.kernel.isRunning()).toBe(false);
   });
 
   test('Should prompt for kernel when executing code cell', async ({
@@ -95,8 +96,10 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
 
     await page.click(
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
+
       { button: 'right' }
     );
+
 
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
