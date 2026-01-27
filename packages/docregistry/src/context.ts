@@ -5,7 +5,6 @@ import {
   Dialog,
   ISessionContext,
   SessionContext,
-  SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -51,9 +50,6 @@ export class Context<
     this._contentProviderId = options.contentProviderId;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
-    this._dialogs =
-      options.sessionDialogs ??
-      new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
@@ -598,11 +594,7 @@ export class Context<
     // Note: we don't wait on the session to initialize
     // so that the user can be shown the content before
     // any kernel has started.
-    void this.sessionContext.initialize().then(shouldSelect => {
-      if (shouldSelect) {
-        void this._dialogs.selectKernel(this.sessionContext);
-      }
-    });
+    void this.sessionContext.initialize();
   }
 
   /**
@@ -1026,7 +1018,7 @@ or load the version on disk (revert)?`,
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _urlResolver: RenderMimeRegistry.IUrlResolver;
   private _disposed = new Signal<this, void>(this);
-  private _dialogs: ISessionContext.IDialogs;
+
   private _lastModifiedCheckMargin = 500;
   private _conflictModalIsOpen = false;
 }
