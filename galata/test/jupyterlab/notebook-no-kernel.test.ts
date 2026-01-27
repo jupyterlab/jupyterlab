@@ -7,6 +7,10 @@ test.describe('Notebook No Kernel', () => {
   const NOTEBOOK_NAME = 'test-notebook-no-kernel.ipynb';
 
   test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
+<<<<<<< HEAD
+=======
+
+>>>>>>> 52940c77280c140d2c12d28675089a58d36fb960
 
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(NOTEBOOK_NAME);
@@ -25,9 +29,8 @@ test.describe('Notebook No Kernel', () => {
     await page.waitForSelector('.jp-NotebookPanel');
   });
 
-  test('Should show "No Kernel" message when opening notebook', async ({
-    page
-  }) => {
+  test('Should show "No Kernel" message when opening notebook', async ({ page }) => {
+
     await expect(page.getByTitle('Switch kernel')).toContainText('No Kernel');
 
     expect(await page.activity.isTabActive(NOTEBOOK_NAME)).toBe(true);
@@ -96,8 +99,13 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
 
     await page.click(
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
+<<<<<<< HEAD
       { button: 'right' }
     );
+=======
+      { button: 'right'}
+  );
+>>>>>>> 52940c77280c140d2c12d28675089a58d36fb960
 
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');
@@ -116,3 +124,11 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     expect(await page.kernel.isRunning()).toBe(false);
   });
 });
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> 52940c77280c140d2c12d28675089a58d36fb960
