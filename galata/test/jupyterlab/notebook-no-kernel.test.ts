@@ -115,4 +115,3 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     expect(await page.kernel.isRunning()).toBe(false);
   });
 });
-
