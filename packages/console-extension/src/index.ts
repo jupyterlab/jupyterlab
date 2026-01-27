@@ -5,19 +5,18 @@
  * @module console-extension
  */
 
-import {
-  ILabStatus,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
   ISanitizer,
-  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   Sanitizer,
@@ -28,14 +27,11 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import {
-  CodeEditor,
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
+import type { CodeConsole } from '@jupyterlab/console';
 import {
-  CodeConsole,
   ConsolePanel,
   IConsoleCellExecutor,
   IConsoleTracker
@@ -43,7 +39,8 @@ import {
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -62,15 +59,15 @@ import {
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import {
-  JSONExt,
+import type {
   JSONObject,
   ReadonlyJSONValue,
-  ReadonlyPartialJSONObject,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt, UUID } from '@lumino/coreutils';
 import { DisposableSet } from '@lumino/disposable';
-import { DockLayout, Menu, Widget } from '@lumino/widgets';
+import type { DockLayout, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
 

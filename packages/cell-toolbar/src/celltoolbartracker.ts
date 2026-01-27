@@ -2,25 +2,28 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
-import {
+import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import { createDefaultFactory } from '@jupyterlab/apputils';
+import type {
   Cell,
   CellModel,
   CodeCell,
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { Notebook, NotebookPanel } from '@jupyterlab/notebook';
+import type { IObservableList } from '@jupyterlab/observables';
+import { ObservableList } from '@jupyterlab/observables';
 import { ReactWidget, Toolbar } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { PanelLayout, Widget } from '@lumino/widgets';
-import { IMapChange } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { PanelLayout, Widget } from '@lumino/widgets';
+import type { IMapChange } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /*
  * Text mime types
