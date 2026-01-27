@@ -255,6 +255,16 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<boolean> {
+    if (await this.isAnyActive()) {
+      const focusedMarkdownEditor = this.page.locator(
+        '.jp-MarkdownCell .jp-InputArea-editor.jp-mod-focused, .jp-MarkdownCell .cm-content.jp-mod-focused'
+      );
+      if ((await focusedMarkdownEditor.count()) > 0) {
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(50);
+      }
+    }
+
     const toolbarItem = await this.getToolbarItemLocator(itemId, notebookName);
 
     if (toolbarItem) {

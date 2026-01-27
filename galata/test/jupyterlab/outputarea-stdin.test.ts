@@ -145,7 +145,7 @@ test.describe('Stdin for ipdb (flaky)', () => {
     const cellInput = await page.notebook.getCellInputLocator(0);
     const editor = cellInput!.locator('.cm-content');
     const contentAfter = await editor.evaluate((e: any) =>
-      e.cmView.view.state.doc.toString()
+      e.cmTile.view.state.doc.toString()
     );
     expect(contentAfter).toBe(loopedInput);
   });
