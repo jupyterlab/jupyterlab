@@ -543,8 +543,8 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
     },
-  
-  
+
+
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {
