@@ -264,6 +264,7 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           showHiddenFiles: false,
           showFileCheckboxes: false,
           sortNotebooksFirst: false,
+          sortFileNamesNaturally: true,
           showFullPath: false,
           allowFileUploads: true
         };

@@ -256,3 +256,23 @@ Hidden files and folders can be displayed in JupyterLab by combining two paramet
 ## Single-Click Navigation
 
 Single-click navigation for files and folders can be enabled via the settings editor under the `File Browser` option: `Navigate files and directories with single click`
+
+## File name sort order
+
+(file-sort-order)=
+
+You can choose how file names are ordered when sorting by name in the file browser:
+
+- **Sort file names naturally** (default, when enabled): Names are ordered in natural order, e.g. `file1.txt`, `file2.txt`, `file10.txt`.
+
+- When disabled: Names are ordered lexicographically, e.g. `file1.txt`, `file10.txt`, `file2.txt`.
+
+Change this in **Settings → Settings Editor → File Browser** via the “Sort file names naturally” checkbox, or in **Settings → Advanced Settings Editor → File Browser**:
+
+```json
+{
+  "@jupyterlab/filebrowser-extension:browser": {
+    "sortFileNamesNaturally": true
+  }
+}
+```
