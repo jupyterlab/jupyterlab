@@ -21,7 +21,7 @@
     "@rspack/cli": "^1.7.3",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.6.3"
   },
   "styleModule": "style/index.js"
 }
