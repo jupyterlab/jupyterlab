@@ -13,7 +13,8 @@
       "ES2018",
       "ES2020.BigInt",
       "ES2020.Intl",
-      "ES2020.String"
+      "ES2020.String",
+      "ES2020.Promise"
     ],
     "module": "esnext",
     "moduleResolution": "node",
