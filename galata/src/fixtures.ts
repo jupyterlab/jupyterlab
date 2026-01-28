@@ -3,8 +3,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Kernel, Session, TerminalAPI, User } from '@jupyterlab/services';
-import {
-  test as base,
+import type {
   Page,
   PlaywrightTestArgs,
   PlaywrightTestOptions,
@@ -12,10 +11,11 @@ import {
   PlaywrightWorkerOptions,
   TestType
 } from '@playwright/test';
+import { test as base } from '@playwright/test';
 import * as path from 'path';
 import { ContentsHelper } from './contents';
 import { galata } from './galata';
-import { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
+import type { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
 
 /**
  * Galata test arguments

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Contents } from './index';
+import type { Contents } from './index';
 import { validateProperty } from '../validate';
 
 /**

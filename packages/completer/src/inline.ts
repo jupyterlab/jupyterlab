@@ -2,18 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { TransactionSpec } from '@codemirror/state';
-import { SourceChange } from '@jupyter/ydoc';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { SourceChange } from '@jupyter/ydoc';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import { HoverBox, kernelIcon, Toolbar } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { GhostTextManager } from './ghost';
-import { CompletionHandler } from './handler';
-import {
+import type { CompletionHandler } from './handler';
+import type {
   IInlineCompleterFactory,
   IInlineCompleterSettings,
   IInlineCompletionList

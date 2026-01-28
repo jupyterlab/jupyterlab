@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
+import type { IWidgetTracker } from '@jupyterlab/apputils';
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { Token } from '@lumino/coreutils';
 
-import { ImageViewer } from './widget';
+import type { ImageViewer } from './widget';
 
 /**
  * A class that tracks image widgets.

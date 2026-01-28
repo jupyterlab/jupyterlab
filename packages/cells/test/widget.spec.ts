@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { createStandaloneCell, YCodeCell, YMarkdownCell } from '@jupyter/ydoc';
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { YCodeCell, YMarkdownCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   Cell,
@@ -22,13 +23,14 @@ import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
-import { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
+import type { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
 import {
   framePromise,
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
