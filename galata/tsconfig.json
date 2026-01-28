@@ -2,12 +2,11 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "../tsconfigbase",
   "compilerOptions": {
-    "skipLibCheck": true,
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
     "types": ["node"],
-    "lib": ["DOM", "DOM.iterable", "es2019.array", "esnext"]
+    "lib": ["DOM", "DOM.iterable", "es2019.array"]
   },
   "include": ["src/**/*"],
   "references": [
