@@ -31,8 +31,8 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:tsgo": "tsgo -b",
     "build:all": "npm run build",
+    "build:tsgo": "tsgo -b",
     "build:tsgo:all": "npm run build:tsgo",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -b --watch"

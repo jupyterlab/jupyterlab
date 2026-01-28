@@ -38,10 +38,9 @@ const MAXIMUM_TIME_REMAINING = 100;
 let passiveIfSupported: boolean | { passive: boolean } = false;
 
 try {
-  // @ts-expect-error unknown signature
   window.addEventListener(
     'test',
-    null,
+    () => {},
     Object.defineProperty({}, 'passive', {
       get: function () {
         passiveIfSupported = { passive: true };

@@ -23,10 +23,10 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:tsgo": "tsgo -b",
     "build:all": "npm run build",
-    "build:tsgo:all": "npm run build:tsgo",
     "build:test": "tsc --build tsconfig.test.json",
+    "build:tsgo": "tsgo -b",
+    "build:tsgo:all": "npm run build:tsgo",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "test": "jest -i",
     "test:cov": "jest -i --collect-coverage",

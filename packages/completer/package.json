@@ -36,8 +36,8 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:tsgo": "tsgo -b",
     "build:test": "tsc --build tsconfig.test.json",
+    "build:tsgo": "tsgo -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
