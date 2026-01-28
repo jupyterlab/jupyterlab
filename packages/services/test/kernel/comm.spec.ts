@@ -3,13 +3,9 @@
 
 import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
-import {
-  CommsOverSubshells,
-  Kernel,
-  KernelManager,
-  KernelMessage
-} from '../../src';
-import { CommHandler } from '../../src/kernel/comm';
+import type { Kernel } from '../../src';
+import { CommsOverSubshells, KernelManager, KernelMessage } from '../../src';
+import type { CommHandler } from '../../src/kernel/comm';
 
 const BLIP = `
 from ipykernel.comm import Comm

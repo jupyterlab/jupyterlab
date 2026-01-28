@@ -3,8 +3,8 @@
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IEditorLanguageRegistry } from './token';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IEditorLanguageRegistry } from './token';
 
 /**
  * The mime type service for CodeMirror.

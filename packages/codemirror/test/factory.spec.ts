@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory,
   EditorExtensionRegistry,
-  EditorLanguageRegistry,
-  IEditorExtensionRegistry
+  EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import { YFile } from '@jupyter/ydoc';
 
