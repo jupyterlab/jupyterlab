@@ -25,7 +25,7 @@
     "@rspack/cli": "^1.7.3",
     "@rspack/core": "^1.7.3",
     "rimraf": "~5.0.5",
-    "typescript": "~5.6.3"
+    "typescript": "~5.9.3"
   },
   "styleModule": "style/index.js"
 }
