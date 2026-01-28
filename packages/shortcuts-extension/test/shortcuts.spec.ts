@@ -90,7 +90,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       const shortcuts = settings.get('shortcuts')
         .composite as ISettingRegistry.IShortcut[];
 
-      expect(shortcuts).toHaveLength(Platform.IS_MAC ? 2 : 1);
+      expect(shortcuts).toHaveLength(Platform.IS_MAC ? 12 : 11);
     });
 
     it('should respect default shortcuts (e.g. from `overrides.json`)', async () => {
@@ -403,7 +403,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       const shortcuts = settings.get('shortcuts')
         .composite as ISettingRegistry.IShortcut[];
 
-      expect(shortcuts).toHaveLength(1);
+      expect(shortcuts).toHaveLength(11);
     });
   });
 });
