@@ -276,3 +276,28 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 **R:**
 
 - [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
+
+## How links are handled in notebooks
+
+JupyterLab supports several types of links inside Markdown cells in notebooks.
+
+### External links
+
+Links to external websites (for example, <https://google.com>) open in a new
+browser tab when clicked.
+
+### Links to files and notebooks
+
+Links pointing to files or notebooks in the same directory (for example,
+`test.ipynb`) open in JupyterLab if the referenced file exists.
+
+If the referenced file does not exist, clicking the link has no effect. Using a
+modified click (such as opening the link in a new tab) may result in a
+*404 Not Found* error.
+
+### Anchor links
+
+Links to headings within the same notebook (for example, `#my-section`) scroll to
+the referenced section if the heading exists.
+
+If the referenced heading does not exist, clicking the link has no effect.
