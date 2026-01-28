@@ -973,7 +973,11 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
           void this.model.replaceAllMatches();
         }}
         keyBindings={this._keyBindings}
-        isCurrentMatchInOutput={(this.model.searchProvider as any)?.isCurrentMatchInOutput}
+        isCurrentMatchInOutput={
+          'isCurrentMatchInOutput' in this.model.searchProvider
+            ? (this.model.searchProvider as { isCurrentMatchInOutput: boolean }).isCurrentMatchInOutput
+            : false
+        }
       ></SearchOverlay>
     );
   }
