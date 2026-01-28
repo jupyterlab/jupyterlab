@@ -4,8 +4,7 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "Node16",
-    "moduleResolution": "node16",
-    "skipLibCheck": true
+    "moduleResolution": "node16"
   },
   "include": ["src/*"],
   "references": []
