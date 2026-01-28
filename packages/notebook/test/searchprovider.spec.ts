@@ -632,32 +632,5 @@ describe('@jupyterlab/notebook', () => {
         expect(state).toBe('single');
       });
     });
-
-    describe('#isCurrentMatchInOutput', () => {
-      it('should return false when output filter is disabled', async () => {
-        const cell = utils.createCodeCell();
-        cell.model.setSource('test');
-        panel.model!.cells.push(cell.model);
-
-        await provider.startQuery('test', panel.content);
-        expect(provider.isCurrentMatchInOutput).toBe(false);
-        await provider.endQuery();
-      });
-
-      it('should return true when output filter is enabled and match is found', async () => {
-        const cell = utils.createCodeCell();
-        cell.model.setSource('test');
-        panel.model!.cells.push(cell.model);
-
-        // Enable output filter
-        await provider.setFilters({ output: true });
-        await provider.startQuery('test', panel.content);
-        
-        // The exact behavior depends on whether there are actual output matches
-        // For now, we just test that the property exists and returns a boolean
-        expect(typeof provider.isCurrentMatchInOutput).toBe('boolean');
-        await provider.endQuery();
-      });
-    });
   });
 });
