@@ -7,12 +7,10 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore, LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
   closeIcon,
   collapseAllIcon,
@@ -20,25 +18,25 @@ import {
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
-  IScore,
-  LabIcon,
   PanelWithToolbar,
   ReactWidget,
   refreshIcon,
   SidePanel,
   tableRowsIcon,
-  Toolbar,
   ToolbarButton,
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode, useCallback, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { isValidElement, useCallback, useRef } from 'react';
 
 /**
  * The class name added to a running widget.

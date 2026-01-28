@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   DefaultSchemaValidator,
-  ISettingRegistry,
   SettingRegistry,
   Settings
 } from '@jupyterlab/settingregistry';
 import { StateDB } from '@jupyterlab/statedb';
 import { signalToPromise } from '@jupyterlab/testing';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import * as json5 from 'json5';
 
 class TestConnector extends StateDB {

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services-extension",
-  "version": "4.5.0",
+  "version": "4.6.0-alpha.2",
   "description": "JupyterLab - Services Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,20 +29,15 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/services": "^7.5.0",
+    "@jupyterlab/services": "^7.6.0-alpha.2",
     "@lumino/coreutils": "^2.2.2"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.5.0",
+    "@jupyterlab/testing": "^4.6.0-alpha.2",
     "@types/jest": "^29.2.0",
     "rimraf": "~5.0.5",
     "typescript": "~5.5.4"

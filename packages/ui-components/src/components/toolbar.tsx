@@ -8,13 +8,16 @@ import {
   jpToolbar,
   provideJupyterDesignSystem
 } from '@jupyter/web-components';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Layout, PanelLayout, Widget } from '@lumino/widgets';
+import type { Layout } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
 import { ellipsesIcon, LabIcon } from '../icon';
@@ -790,7 +793,7 @@ export namespace ToolbarButtonComponent {
     iconClass?: string;
     iconLabel?: string;
     tooltip?: string;
-    onClick?: () => void;
+    onClick?: (event?: React.SyntheticEvent) => void;
     enabled?: boolean;
     pressed?: boolean;
     pressedIcon?: LabIcon.IMaybeResolvable;
@@ -825,7 +828,7 @@ export function ToolbarButtonComponent(
       ? undefined
       : (event: React.MouseEvent) => {
           if (event.button === 0) {
-            props.onClick?.();
+            props.onClick?.(event);
             // In safari, the focus do not move to the button on click (see
             // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
             (event.target as HTMLElement).focus();
@@ -842,7 +845,7 @@ export function ToolbarButtonComponent(
           // Fire action only when left button is pressed.
           if (event.button === 0) {
             event.preventDefault();
-            props.onClick?.();
+            props.onClick?.(event);
           }
         }
       : undefined;
@@ -850,7 +853,7 @@ export function ToolbarButtonComponent(
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      props.onClick?.();
+      props.onClick?.(event);
     }
   };
 
@@ -983,8 +986,14 @@ export class ToolbarButton extends ReactWidget {
   /**
    * Returns the click handler for the button
    */
-  get onClick(): () => void {
-    return this._onClick!;
+  get onClick(): (event?: React.SyntheticEvent) => void {
+    return (event?: React.SyntheticEvent) => {
+      // Toggle the `pressed` state of the button when clicked
+      this.pressed = !this.pressed;
+
+      // Call the original click handler, if defined
+      this._onClick(event);
+    };
   }
 
   render(): JSX.Element {
@@ -1001,7 +1010,7 @@ export class ToolbarButton extends ReactWidget {
 
   private _pressed: boolean;
   private _enabled: boolean;
-  private _onClick: () => void;
+  private _onClick: (event?: React.SyntheticEvent) => void;
 }
 
 /**
@@ -1227,7 +1236,8 @@ class ToolbarPopupOpener extends ToolbarButton {
     const trans = (props.translator || nullTranslator).load('jupyterlab');
     super({
       icon: ellipsesIcon,
-      onClick: () => {
+      onClick: event => {
+        event?.preventDefault();
         this.handleClick();
       },
       tooltip: trans.__('More commands')

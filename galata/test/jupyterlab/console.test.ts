@@ -1,12 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor';
 const CODE_MIRROR_CURSOR = '.cm-cursor';
@@ -152,6 +148,8 @@ print(data.head())`;
 
     const heightAtTop = await codeConsoleInput.boundingBox();
     expect(heightAtTop).not.toBeNull();
+
+    // TODO: Sometimes fails when it expects 157.3125 but receives 52
     expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
   });
 

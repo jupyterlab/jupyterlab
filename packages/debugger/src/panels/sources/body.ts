@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   CodeEditorWrapper,
-  IEditorMimeTypeService,
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
@@ -15,7 +14,7 @@ import { Debugger } from '../..';
 
 import { EditorHandler } from '../../handlers/editor';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 /**
  * The body for a Sources Panel.
@@ -30,7 +29,6 @@ export class SourcesBody extends Widget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-    this._mimeTypeService = options.editorServices.mimeTypeService;
 
     const factory = new Debugger.ReadOnlyEditorFactory({
       editorServices: options.editorServices
@@ -43,14 +41,9 @@ export class SourcesBody extends Widget {
     });
     this._editor.hide();
 
-    this._model.currentFrameChanged.connect(async (_, frame) => {
-      if (!frame) {
-        this._clearEditor();
-        return;
-      }
+    void this._showSource();
 
-      void this._showSource(frame);
-    });
+    this._model.currentSourceChanged.connect(this._showSource.bind(this));
 
     const layout = new PanelLayout();
     layout.addWidget(this._editor);
@@ -75,24 +68,16 @@ export class SourcesBody extends Widget {
    * Clear the content of the source read-only editor.
    */
   private _clearEditor(): void {
-    this._model.currentSource = null;
     this._editor.hide();
   }
 
   /**
-   * Show the content of the source for the given frame.
-   *
-   * @param frame The current frame.
+   * Show the content of the current source.
    */
-  private async _showSource(frame: IDebugger.IStackFrame): Promise<void> {
-    const displayPath = this._model.getDisplayName(frame);
+  private async _showSource(): Promise<void> {
+    const source = this._model.currentSource;
 
-    const source = await this._debuggerService.getSource({
-      sourceReference: 0,
-      path: frame.source?.path
-    });
-
-    if (!source?.content) {
+    if (!source || !source?.content) {
       this._clearEditor();
       return;
     }
@@ -100,31 +85,27 @@ export class SourcesBody extends Widget {
     if (this._editorHandler) {
       this._editorHandler.dispose();
     }
-
     const { content, mimeType } = source;
-    const editorMimeType =
-      mimeType ||
-      this._mimeTypeService.getMimeTypeByFilePath(frame.source?.path ?? '');
 
     this._editor.model.sharedModel.setSource(content);
-    this._editor.model.mimeType = editorMimeType;
+    this._editor.model.mimeType = mimeType ?? 'text/plain';
 
     this._editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
       editorReady: () => Promise.resolve(this._editor.editor),
       getEditor: () => this._editor.editor,
-      path: frame.source?.path ?? '',
+      path: this._model.currentFrame?.source?.path ?? '',
       src: this._editor.model.sharedModel
     });
 
-    this._model.currentSource = {
-      content,
-      mimeType: editorMimeType,
-      path: displayPath
-    };
-
     requestAnimationFrame(() => {
-      EditorHandler.showCurrentLine(this._editor.editor, frame.line, 'start');
+      if (this._model.currentFrame) {
+        EditorHandler.showCurrentLine(
+          this._editor.editor,
+          this._model.currentFrame.line,
+          'start'
+        );
+      }
     });
 
     this._editor.show();
@@ -134,7 +115,6 @@ export class SourcesBody extends Widget {
   private _editor: CodeEditorWrapper;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
-  private _mimeTypeService: IEditorMimeTypeService;
 }
 
 /**

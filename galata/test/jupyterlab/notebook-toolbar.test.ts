@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
 
@@ -69,6 +70,15 @@ async function addWidgetsInNotebookToolbar(
 }
 
 test.describe('Notebook Toolbar', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        useSystemClipboardForCells: true
+      }
+    }
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
     await populateNotebook(page);

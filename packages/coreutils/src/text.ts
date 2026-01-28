@@ -23,7 +23,7 @@ export namespace Text {
    * @returns The unicode character offset
    */
   export function jsIndexToCharIndex(jsIdx: number, text: string): number {
-    if (HAS_SURROGATES) {
+    if (!HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return jsIdx;
     }
@@ -52,7 +52,7 @@ export namespace Text {
    * @returns The js-native index
    */
   export function charIndexToJsIndex(charIdx: number, text: string): number {
-    if (HAS_SURROGATES) {
+    if (!HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return charIdx;
     }

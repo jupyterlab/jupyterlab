@@ -3,13 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
-import {
-  WindowedLayout,
-  WindowedList,
-  WindowedListModel
-} from '@jupyterlab/ui-components';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Cell } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import type { WindowedList } from '@jupyterlab/ui-components';
+import { WindowedLayout, WindowedListModel } from '@jupyterlab/ui-components';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Debouncer, Throttler } from '@lumino/polling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';

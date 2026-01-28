@@ -34,7 +34,6 @@ pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
 node -p process.versions
 jlpm config
 
-
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
     pip install build
