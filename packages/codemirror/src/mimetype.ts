@@ -29,9 +29,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
       }
     );
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
       : IEditorMimeTypeService.defaultMimeType;
   }
 
@@ -52,9 +52,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     }
     const mode = this.languages.findByFileName(path);
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
       : IEditorMimeTypeService.defaultMimeType;
   }
 }
