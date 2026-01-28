@@ -3,7 +3,7 @@
 
 import { Token } from '@lumino/coreutils';
 import type MermaidType from 'mermaid';
-import type { MermaidConfig } from 'mermaid/dist/config.type';
+import type { MermaidConfig } from 'mermaid';
 
 // documented upstream constants
 export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';

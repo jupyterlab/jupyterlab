@@ -5,6 +5,7 @@
   "style": "style/index.css",
   "scripts": {
     "build": "tsc && rspack",
+    "build:tsgo": "tsgo && rspack",
     "clean": "rimraf build tsconfig.tsbuildinfo",
     "watch": "rspack --watch"
   },
@@ -19,9 +20,10 @@
   },
   "devDependencies": {
     "@rspack/cli": "^1.7.3",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "styleModule": "style/index.js"
 }

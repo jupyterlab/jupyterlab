@@ -2310,9 +2310,10 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2422,9 +2423,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2454,12 +2456,13 @@ __metadata:
     "@lumino/polling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     react-dom: ^18.2.0
     react-toastify: ^9.0.8
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2489,11 +2492,12 @@ __metadata:
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
     "@types/sanitize-html": ^2.11.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
     sanitize-html: ~2.12.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2507,8 +2511,9 @@ __metadata:
     "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.2
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2525,9 +2530,10 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2550,9 +2556,10 @@ __metadata:
     "@rspack/core": ^1.7.3
     "@types/fs-extra": ^9.0.1
     "@types/glob": ^7.1.1
-    "@types/node": ^20.11.27
+    "@types/node": ^20.14.8
     "@types/supports-color": ^5.3.0
     "@types/watchpack": ^2.4.4
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     ajv: ^8.12.0
     commander: ^9.4.1
     css-loader: ^6.7.1
@@ -2567,7 +2574,7 @@ __metadata:
     source-map-loader: ~1.0.2
     style-loader: ~3.3.1
     supports-color: ^7.2.0
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     webpack-merge: ^5.8.0
     worker-loader: ^3.0.2
   bin:
@@ -2583,9 +2590,10 @@ __metadata:
     "@types/glob": ^7.1.1
     "@types/inquirer": ^9.0.3
     "@types/micromatch": ^4.0.1
-    "@types/node": ^20.11.27
+    "@types/node": ^20.14.8
     "@types/prettier": ~2.6.0
-    "@yarnpkg/core": ^4.0.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
+    "@yarnpkg/core": ~4.3.1
     "@yarnpkg/parsers": ^3.0.0
     commander: ^9.4.1
     crypto: ~1.0.1
@@ -2602,7 +2610,7 @@ __metadata:
     rimraf: ~5.0.5
     semver: ^7.5.2
     sort-package-json: ~1.53.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     verdaccio: ^5.33.0
   bin:
     get-dependency: ./lib/get-dependency.js
@@ -2623,8 +2631,9 @@ __metadata:
     "@jupyterlab/cell-toolbar": ^4.6.0-alpha.2
     "@jupyterlab/settingregistry": ^4.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2647,9 +2656,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2687,10 +2697,11 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2704,9 +2715,10 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/algorithm": ^2.0.4
     "@rjsf/utils": ^5.13.4
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2731,10 +2743,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2764,9 +2777,10 @@ __metadata:
     "@rjsf/utils": ^5.13.4
     "@rjsf/validator-ajv8": ^5.13.4
     "@types/react": ^18.0.26
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2810,9 +2824,10 @@ __metadata:
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     yjs: ^13.5.40
   languageName: unknown
   linkType: soft
@@ -2830,9 +2845,10 @@ __metadata:
     "@lumino/commands": ^2.3.3
     "@lumino/coreutils": ^2.2.2
     "@rjsf/utils": ^5.13.4
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2863,9 +2879,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2890,8 +2907,9 @@ __metadata:
     "@lumino/disposable": ^2.1.5
     "@lumino/properties": ^2.0.4
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2919,9 +2937,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2937,6 +2956,7 @@ __metadata:
     "@types/jest": ^29.2.0
     "@types/minimist": ^1.2.0
     "@types/url-parse": ^1.4.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     jest-environment-jsdom: ^29.3.0
     jest-junit: ^15.0.0
@@ -2944,7 +2964,7 @@ __metadata:
     path-browserify: ^1.0.0
     rimraf: ~5.0.5
     ts-jest: ^29.1.0
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     url-parse: ~1.5.4
   languageName: unknown
   linkType: soft
@@ -2964,8 +2984,9 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@lumino/datagrid": ^2.5.4
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -2985,11 +3006,12 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     csv-spectrum: ^1.0.0
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3017,8 +3039,9 @@ __metadata:
     "@lumino/commands": ^2.3.3
     "@types/jest": ^29.2.0
     "@types/react-dom": ^18.0.9
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3057,12 +3080,13 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     "@vscode/debugprotocol": ^1.51.0
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3088,9 +3112,10 @@ __metadata:
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3117,10 +3142,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3147,10 +3173,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3165,8 +3192,9 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@lumino/commands": ^2.3.3
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3186,10 +3214,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3263,11 +3292,12 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     style-loader: ~3.3.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3289,10 +3319,11 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     css-loader: ^6.7.1
     rimraf: ~5.0.5
     style-loader: ~3.3.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3403,11 +3434,12 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     style-loader: ~3.3.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3438,11 +3470,12 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     style-loader: ~3.3.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3455,8 +3488,9 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3470,8 +3504,9 @@ __metadata:
     "@jupyterlab/services": ^7.6.0-alpha.2
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3487,9 +3522,10 @@ __metadata:
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.3
     "@rspack/cli": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3506,11 +3542,12 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@rspack/cli": ^1.7.3
     "@rspack/core": ^1.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     css-loader: ^6.7.1
     mini-svg-data-uri: ^1.4.4
     rimraf: ~5.0.5
     style-loader: ~3.3.1
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3524,8 +3561,9 @@ __metadata:
     "@jupyterlab/settingregistry": ^4.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3544,12 +3582,13 @@ __metadata:
     "@types/react": ^18.0.26
     "@types/react-paginate": ^6.2.1
     "@types/semver": ^7.5.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     react-paginate: ^6.3.2
     rimraf: ~5.0.5
     semver: ^7.5.2
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3573,8 +3612,9 @@ __metadata:
     "@lumino/commands": ^2.3.3
     "@lumino/disposable": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3603,11 +3643,12 @@ __metadata:
     "@lumino/virtualdom": ^2.0.4
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     jest-environment-jsdom: ^29.3.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3645,8 +3686,9 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3673,11 +3715,12 @@ __metadata:
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     regexp-match-indices: ^1.0.2
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3697,8 +3740,9 @@ __metadata:
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3718,12 +3762,13 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@playwright/test": ^1.58.0
     "@stdlib/stats": ~0.0.13
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     fs-extra: ^10.1.0
     json5: ^2.2.3
     path: ~0.12.7
     rimraf: ~5.0.5
     systeminformation: ^5.8.6
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     vega: ^5.20.0
     vega-lite: ^5.6.1
     vega-statistics: ^1.7.9
@@ -3742,9 +3787,10 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3760,8 +3806,9 @@ __metadata:
     "@jupyterlab/settingregistry": ^4.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3777,9 +3824,10 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3793,9 +3841,10 @@ __metadata:
     "@jupyterlab/services": ^7.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3808,8 +3857,9 @@ __metadata:
     "@jupyterlab/docregistry": ^4.6.0-alpha.2
     "@jupyterlab/imageviewer": ^4.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3825,9 +3875,10 @@ __metadata:
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3844,8 +3895,9 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3867,9 +3919,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3879,8 +3932,9 @@ __metadata:
   dependencies:
     "@jupyterlab/rendermime": ^4.6.0-alpha.2
     "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3900,13 +3954,14 @@ __metadata:
     "@types/react": ^18.0.26
     "@types/react-dom": ^18.0.9
     "@types/react-highlight-words": ^0.16.4
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     react-dom: ^18.2.0
     react-highlight-words: ^0.20.0
     react-json-tree: ^0.18.0
     rimraf: ~5.0.5
     style-mod: ^4.0.0
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3923,8 +3978,9 @@ __metadata:
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3942,9 +3998,10 @@ __metadata:
     "@lumino/properties": ^2.0.4
     "@lumino/widgets": ^2.7.3
     "@types/react": ^18.0.26
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3965,9 +4022,10 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -3988,9 +4046,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4009,9 +4068,10 @@ __metadata:
     "@lumino/polling": ^2.1.5
     "@lumino/signaling": ^2.1.5
     "@rjsf/utils": ^5.13.4
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4033,12 +4093,13 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/lodash.mergewith": ^4.6.1
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     json-schema-to-typescript: ^8.0.0
     lodash.mergewith: ^4.6.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
-    vscode-jsonrpc: ^6.0.0
+    typescript: ~5.9.3
+    vscode-jsonrpc: ^8.2.0
     vscode-languageserver-protocol: ^3.17.0
     vscode-ws-jsonrpc: ~1.0.2
   languageName: unknown
@@ -4063,8 +4124,9 @@ __metadata:
     "@lumino/disposable": ^2.1.5
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4081,9 +4143,10 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4099,8 +4162,9 @@ __metadata:
     "@jupyterlab/settingregistry": ^4.6.0-alpha.2
     "@jupyterlab/toc": ^6.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4118,8 +4182,9 @@ __metadata:
     "@lumino/messaging": ^2.0.4
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4135,11 +4200,12 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@types/d3": ^7.4.0
     "@types/dompurify": ^2.4.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     marked: ^16.2.1
     marked-gfm-heading-id: ^4.1.2
     marked-mangle: ^1.1.11
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4153,10 +4219,11 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     mathjax-full: ^3.2.2
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4169,8 +4236,9 @@ __metadata:
     "@jupyterlab/mermaid": ^4.6.0-alpha.2
     "@jupyterlab/rendermime-interfaces": ^3.14.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4185,10 +4253,11 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@mermaid-js/layout-elk": ^0.2.0
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     mermaid: ^11.12.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4203,8 +4272,9 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/coreutils": ^2.2.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4226,11 +4296,12 @@ __metadata:
     "@rjsf/validator-ajv8": ^5.13.4
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     json-schema: ^0.4.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4340,11 +4411,12 @@ __metadata:
     "@jupyterlab/workspaces": ^4.6.0-alpha.2
     "@jupyterlab/workspaces-extension": ^4.6.0-alpha.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     fs-extra: ^10.1.0
     jest: ^29.2.0
     json-to-html: ~0.1.2
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4418,9 +4490,10 @@ __metadata:
     "@jupyterlab/testing": ^4.6.0-alpha.2
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4476,9 +4549,10 @@ __metadata:
     "@lumino/polling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@rjsf/utils": ^5.13.4
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4518,10 +4592,11 @@ __metadata:
     "@lumino/virtualdom": ^2.0.4
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4536,9 +4611,10 @@ __metadata:
     "@lumino/messaging": ^2.0.4
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4562,9 +4638,10 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4576,8 +4653,9 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/disposable": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4591,8 +4669,9 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/coreutils": ^2.2.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4611,10 +4690,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4629,10 +4709,11 @@ __metadata:
     "@lumino/disposable": ^2.1.5
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4645,8 +4726,9 @@ __metadata:
     "@jupyterlab/docmanager": ^4.6.0-alpha.2
     "@jupyterlab/rendermime": ^4.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4656,8 +4738,9 @@ __metadata:
   dependencies:
     "@lumino/coreutils": ^1.11.0 || ^2.2.2
     "@lumino/widgets": ^1.37.2 || ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4679,11 +4762,12 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/lodash.escape": ^4.0.6
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     fs-extra: ^10.1.0
     jest: ^29.2.0
     lodash.escape: ^4.0.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4730,9 +4814,10 @@ __metadata:
     "@lumino/polling": ^2.1.5
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4751,9 +4836,10 @@ __metadata:
     "@lumino/messaging": ^2.0.4
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4765,8 +4851,9 @@ __metadata:
     "@jupyterlab/testing": ^4.6.0-alpha.2
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4788,9 +4875,10 @@ __metadata:
     "@rspack/cli": ^1.7.3
     "@types/jest": ^29.2.0
     "@types/ws": ^8.5.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     ws: ^8.11.0
   languageName: unknown
   linkType: soft
@@ -4812,9 +4900,10 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/disposable": ^2.1.5
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4846,13 +4935,14 @@ __metadata:
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
     "@types/react-test-renderer": ^18.0.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     json-schema: ^0.4.0
     react: ^18.2.0
     react-test-renderer: ^18.2.0
     rimraf: ~5.0.5
     ts-jest: ^29.1.0
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4869,11 +4959,12 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@rjsf/utils": ^5.13.4
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     ajv: ^8.12.0
     jest: ^29.2.0
     json5: ^2.2.3
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   peerDependencies:
     react: ">=16"
   languageName: unknown
@@ -4896,10 +4987,11 @@ __metadata:
     "@lumino/keyboard": ^2.0.4
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4914,9 +5006,10 @@ __metadata:
     "@lumino/properties": ^2.0.4
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4931,8 +5024,9 @@ __metadata:
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@types/react": ^18.0.26
     "@types/react-dom": ^18.0.9
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4949,10 +5043,11 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4962,8 +5057,9 @@ __metadata:
   dependencies:
     "@jupyterlab/testing": ^4.6.0-alpha.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -4984,10 +5080,11 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@lumino/widgets": ^2.7.3
     "@types/webpack-env": ^1.18.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     "@xterm/addon-search": ~0.15.0
     color: ^5.0.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5005,6 +5102,7 @@ __metadata:
     "@lumino/signaling": ^2.1.5
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     "@xterm/addon-canvas": ~0.7.0
     "@xterm/addon-fit": ~0.10.0
     "@xterm/addon-search": ~0.15.0
@@ -5015,7 +5113,7 @@ __metadata:
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5029,7 +5127,8 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
-    "@types/node": ^20.11.27
+    "@types/node": ^20.14.8
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     deepmerge: ^4.2.2
     fs-extra: ^10.1.0
     identity-obj-proxy: ^3.0.0
@@ -5039,7 +5138,7 @@ __metadata:
     rimraf: ~5.0.5
     simulate-event: ~1.4.0
     ts-jest: ^29.1.0
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   peerDependencies:
     typescript: ">=4.3"
   languageName: unknown
@@ -5054,8 +5153,9 @@ __metadata:
     "@jupyterlab/notebook": ^4.6.0-alpha.2
     "@jupyterlab/rendermime": ^4.6.0-alpha.2
     "@jupyterlab/testing": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5066,8 +5166,9 @@ __metadata:
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5078,8 +5179,9 @@ __metadata:
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5090,8 +5192,9 @@ __metadata:
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/apputils": ^4.7.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5104,8 +5207,9 @@ __metadata:
     "@jupyterlab/toc": ^6.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5130,10 +5234,11 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5154,8 +5259,9 @@ __metadata:
     "@lumino/algorithm": ^2.0.4
     "@lumino/coreutils": ^2.2.2
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5170,8 +5276,9 @@ __metadata:
     "@lumino/coreutils": ^2.2.2
     "@lumino/messaging": ^2.0.4
     "@lumino/widgets": ^2.7.3
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5184,8 +5291,9 @@ __metadata:
     "@jupyterlab/mainmenu": ^4.6.0-alpha.2
     "@jupyterlab/settingregistry": ^4.6.0-alpha.2
     "@jupyterlab/translation": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5200,9 +5308,10 @@ __metadata:
     "@jupyterlab/testing": ^4.6.0-alpha.2
     "@lumino/coreutils": ^2.2.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5212,8 +5321,9 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.6.0-alpha.2
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5242,12 +5352,13 @@ __metadata:
     "@rjsf/utils": ^5.13.4
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     react: ^18.2.0
     react-dom: ^18.2.0
     rimraf: ~5.0.5
     svgo: ^3.3.2
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     typestyle: ^2.0.4
   peerDependencies:
     react: ^18.2.0
@@ -5264,10 +5375,11 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
     vega: ^5.20.0
     vega-embed: ^6.2.1
     vega-lite: ^5.6.1-next.1
@@ -5287,9 +5399,10 @@ __metadata:
     "@lumino/widgets": ^2.7.3
     "@types/jest": ^29.2.0
     "@types/webpack-env": ^1.18.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5309,9 +5422,10 @@ __metadata:
     "@jupyterlab/ui-components": ^4.6.0-alpha.2
     "@jupyterlab/workspaces": ^4.6.0-alpha.2
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     react: ^18.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -5326,9 +5440,10 @@ __metadata:
     "@lumino/polling": ^2.1.5
     "@lumino/signaling": ^2.1.5
     "@types/jest": ^29.2.0
+    "@typescript/native-preview": 7.0.0-dev.20260128.1
     jest: ^29.2.0
     rimraf: ~5.0.5
-    typescript: ~5.5.4
+    typescript: ~5.9.3
   languageName: unknown
   linkType: soft
 
@@ -7786,12 +7901,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:^20.11.27":
-  version: 20.11.27
-  resolution: "@types/node@npm:20.11.27"
+"@types/node@npm:*, @types/node@npm:>=10.0.0, @types/node@npm:^20.14.8":
+  version: 20.19.30
+  resolution: "@types/node@npm:20.19.30"
   dependencies:
-    undici-types: ~5.26.4
-  checksum: 24a134a3c18e7261b6d6385c2b7714b6cf93663f30d5df8ca95c649f9cef917a422d77bfd4a18b2c7d190d3a39f445b345ecd9ef6f994e61c7e92f400ecbe80f
+    undici-types: ~6.21.0
+  checksum: 32e80a104b8fcdcacc52a98f0a197a33fd264325501f9af1653cbe9c07fdb6d11130cb0111c65fd353112e6a5af1e5f106714411b1b252d06f0f58760153a1e3
   languageName: node
   linkType: hard
 
@@ -8256,6 +8371,87 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript/native-preview-darwin-arm64@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-darwin-arm64@npm:7.0.0-dev.20260128.1"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview-darwin-x64@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-darwin-x64@npm:7.0.0-dev.20260128.1"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview-linux-arm64@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-linux-arm64@npm:7.0.0-dev.20260128.1"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview-linux-arm@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-linux-arm@npm:7.0.0-dev.20260128.1"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview-linux-x64@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-linux-x64@npm:7.0.0-dev.20260128.1"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview-win32-arm64@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-win32-arm64@npm:7.0.0-dev.20260128.1"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview-win32-x64@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview-win32-x64@npm:7.0.0-dev.20260128.1"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@typescript/native-preview@npm:7.0.0-dev.20260128.1":
+  version: 7.0.0-dev.20260128.1
+  resolution: "@typescript/native-preview@npm:7.0.0-dev.20260128.1"
+  dependencies:
+    "@typescript/native-preview-darwin-arm64": 7.0.0-dev.20260128.1
+    "@typescript/native-preview-darwin-x64": 7.0.0-dev.20260128.1
+    "@typescript/native-preview-linux-arm": 7.0.0-dev.20260128.1
+    "@typescript/native-preview-linux-arm64": 7.0.0-dev.20260128.1
+    "@typescript/native-preview-linux-x64": 7.0.0-dev.20260128.1
+    "@typescript/native-preview-win32-arm64": 7.0.0-dev.20260128.1
+    "@typescript/native-preview-win32-x64": 7.0.0-dev.20260128.1
+  dependenciesMeta:
+    "@typescript/native-preview-darwin-arm64":
+      optional: true
+    "@typescript/native-preview-darwin-x64":
+      optional: true
+    "@typescript/native-preview-linux-arm":
+      optional: true
+    "@typescript/native-preview-linux-arm64":
+      optional: true
+    "@typescript/native-preview-linux-x64":
+      optional: true
+    "@typescript/native-preview-win32-arm64":
+      optional: true
+    "@typescript/native-preview-win32-x64":
+      optional: true
+  bin:
+    tsgo: bin/tsgo.js
+  checksum: 2d71003b4dbf7fd86464ad723f1494b2958bb4be9d34b872c9500b584a9c0886a6105114d9fc14efa0bfc04771fc44a98d7b8212871e7de578e0aac8443d8ee6
+  languageName: node
+  linkType: hard
+
 "@ungap/structured-clone@npm:^1.2.0":
   version: 1.2.0
   resolution: "@ungap/structured-clone@npm:1.2.0"
@@ -8555,22 +8751,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/core@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "@yarnpkg/core@npm:4.0.3"
+"@yarnpkg/core@npm:~4.3.1":
+  version: 4.3.1
+  resolution: "@yarnpkg/core@npm:4.3.1"
   dependencies:
     "@arcanis/slice-ansi": ^1.1.1
     "@types/semver": ^7.1.0
     "@types/treeify": ^1.0.0
-    "@yarnpkg/fslib": ^3.0.2
-    "@yarnpkg/libzip": ^3.0.1
-    "@yarnpkg/parsers": ^3.0.0
-    "@yarnpkg/shell": ^4.0.0
+    "@yarnpkg/fslib": ^3.1.2
+    "@yarnpkg/libzip": ^3.1.1
+    "@yarnpkg/parsers": ^3.0.3
+    "@yarnpkg/shell": ^4.1.2
     camelcase: ^5.3.1
     chalk: ^3.0.0
-    ci-info: ^3.2.0
+    ci-info: ^4.0.0
     clipanion: ^4.0.0-rc.2
-    cross-spawn: 7.0.3
+    cross-spawn: ^7.0.3
     diff: ^5.1.0
     dotenv: ^16.3.1
     fast-glob: ^3.2.2
@@ -8585,29 +8781,29 @@ __metadata:
     treeify: ^1.1.0
     tslib: ^2.4.0
     tunnel: ^0.0.6
-  checksum: 811956ab94e9f4b3601f304312baf816322df124cf85754ef3985110c90935b1b761c8266a06c2c5633f6edc39c8a4ceffeff50f08f036d7adf19612ce3761a3
+  checksum: 0baaa420e7f2eceb0c175c3aebb888f05129b5bab4728a70b4d7c58f4f9f9cfc91bace644c7324208e5370eb38ab42a3b990b82e1d68f1db3a12bc6c534867d7
   languageName: node
   linkType: hard
 
-"@yarnpkg/fslib@npm:^3.0.0, @yarnpkg/fslib@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@yarnpkg/fslib@npm:3.0.2"
+"@yarnpkg/fslib@npm:^3.1.2, @yarnpkg/fslib@npm:^3.1.3":
+  version: 3.1.4
+  resolution: "@yarnpkg/fslib@npm:3.1.4"
   dependencies:
     tslib: ^2.4.0
-  checksum: b0795df777e43eb1c2bd8aa1d6c45f88b8a1d3922ee8bf264cdca916cc6f9455551a9499761a9c1f585aa576350d84adcc315e497fc031cdbbbc1a5c71942e1b
+  checksum: 641b54cdbcfe1e734b3c177af6be0b6cd8e2a9fcfc5d8bb21d6264aa2ef55ea943175ec1ee0620656f075af2f29258220d90a328593d3fc9d434c99349f72809
   languageName: node
   linkType: hard
 
-"@yarnpkg/libzip@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@yarnpkg/libzip@npm:3.0.1"
+"@yarnpkg/libzip@npm:^3.1.1":
+  version: 3.2.2
+  resolution: "@yarnpkg/libzip@npm:3.2.2"
   dependencies:
     "@types/emscripten": ^1.39.6
-    "@yarnpkg/fslib": ^3.0.2
+    "@yarnpkg/fslib": ^3.1.3
     tslib: ^2.4.0
   peerDependencies:
-    "@yarnpkg/fslib": ^3.0.2
-  checksum: 932b1fc35bb60ca57d033aab7a940f7b1d7bf52a68bfff6c755fe26827c0f1b373fda33e373afabbae98de3ed31ae4f0e9ee2ef24588cd074b75fb814117827d
+    "@yarnpkg/fslib": ^3.1.3
+  checksum: 68736d731ef18f54720ed0b26e24dd0a69adcf26ef5d1f1a2e7ac89c096e2fc50373ff7467158b3a3b3cc7579bbb8ab7e72ee79f2c9044bda0dac52fbf40819b
   languageName: node
   linkType: hard
 
@@ -8628,31 +8824,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/parsers@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@yarnpkg/parsers@npm:3.0.0"
+"@yarnpkg/parsers@npm:^3.0.0, @yarnpkg/parsers@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "@yarnpkg/parsers@npm:3.0.3"
   dependencies:
     js-yaml: ^3.10.0
     tslib: ^2.4.0
-  checksum: fefe5ecafb5bfa2b678ac9ba9259810fdda40142afd9d0b7e0e5cc1cce1fd824dffc52217c5e429807481d8fd18ead074bd317e64fd626335d3c9f1a320bade2
+  checksum: d6f78ec15b36732a88aeb090d012756d03a855a301a29f0f4f725ac05186f2d2e26400ea5636016481bdca7d4a013f70d61141bc1add2048cf1c2e5132b9ecf8
   languageName: node
   linkType: hard
 
-"@yarnpkg/shell@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@yarnpkg/shell@npm:4.0.0"
+"@yarnpkg/shell@npm:^4.1.2":
+  version: 4.1.3
+  resolution: "@yarnpkg/shell@npm:4.1.3"
   dependencies:
-    "@yarnpkg/fslib": ^3.0.0
-    "@yarnpkg/parsers": ^3.0.0
-    chalk: ^3.0.0
+    "@yarnpkg/fslib": ^3.1.2
+    "@yarnpkg/parsers": ^3.0.3
+    chalk: ^4.1.2
     clipanion: ^4.0.0-rc.2
-    cross-spawn: 7.0.3
+    cross-spawn: ^7.0.3
     fast-glob: ^3.2.2
     micromatch: ^4.0.2
     tslib: ^2.4.0
   bin:
     shell: ./lib/cli.js
-  checksum: 8497e278b1d3d0ffe324a3b9c878ca7165bbbe4d182f5ecb02f1bfaaf4dd18c8aaa54c33ee17bb37eb09173816dc4617b70c3fe0925f5fb99749687e2650b7a2
+  checksum: bb5a122b157d6a1652331542b26d07f63b1f796f264708b0126b3c5a87877150927e8e838bcf631f80469799c4b331b02c62b7ecb19325276590e28e2fe45557
   languageName: node
   linkType: hard
 
@@ -9856,7 +10052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.1":
+"chalk@npm:^4.0.0, chalk@npm:^4.0.2, chalk@npm:^4.1.0, chalk@npm:^4.1.1, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
   dependencies:
@@ -9942,6 +10138,13 @@ __metadata:
   version: 3.8.0
   resolution: "ci-info@npm:3.8.0"
   checksum: d0a4d3160497cae54294974a7246202244fff031b0a6ea20dd57b10ec510aa17399c41a1b0982142c105f3255aff2173e5c0dd7302ee1b2f28ba3debda375098
+  languageName: node
+  linkType: hard
+
+"ci-info@npm:^4.0.0":
+  version: 4.3.1
+  resolution: "ci-info@npm:4.3.1"
+  checksum: 66c159d92648e8a07acab0a3a0681bff6ccc39aa44916263208c4d97bbbeedbbc886d7611fd30c21df1aa624ce3c6fcdfde982e74689e3e014e064e1d0805f94
   languageName: node
   linkType: hard
 
@@ -10637,7 +10840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:7.0.3, cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
+"cross-spawn@npm:^7.0.0, cross-spawn@npm:^7.0.2, cross-spawn@npm:^7.0.3":
   version: 7.0.3
   resolution: "cross-spawn@npm:7.0.3"
   dependencies:
@@ -21681,23 +21884,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=3 < 6, typescript@npm:~5.5.4":
-  version: 5.5.4
-  resolution: "typescript@npm:5.5.4"
+"typescript@npm:>=3 < 6, typescript@npm:~5.9.3":
+  version: 5.9.3
+  resolution: "typescript@npm:5.9.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: b309040f3a1cd91c68a5a58af6b9fdd4e849b8c42d837b2c2e73f9a4f96a98c4f1ed398a9aab576ee0a4748f5690cf594e6b99dbe61de7839da748c41e6d6ca8
+  checksum: 0d0ffb84f2cd072c3e164c79a2e5a1a1f4f168e84cb2882ff8967b92afe1def6c2a91f6838fb58b168428f9458c57a2ba06a6737711fdd87a256bbe83e9a217f
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>, typescript@patch:typescript@~5.5.4#~builtin<compat/typescript>":
-  version: 5.5.4
-  resolution: "typescript@patch:typescript@npm%3A5.5.4#~builtin<compat/typescript>::version=5.5.4&hash=85af82"
+"typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>, typescript@patch:typescript@~5.9.3#~builtin<compat/typescript>":
+  version: 5.9.3
+  resolution: "typescript@patch:typescript@npm%3A5.9.3#~builtin<compat/typescript>::version=5.9.3&hash=85af82"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: fc52962f31a5bcb716d4213bef516885e4f01f30cea797a831205fc9ef12b405a40561c40eae3127ab85ba1548e7df49df2bcdee6b84a94bfbe3a0d7eff16b14
+  checksum: 8bb8d86819ac86a498eada254cad7fb69c5f74778506c700c2a712daeaff21d3a6f51fd0d534fe16903cb010d1b74f89437a3d02d4d0ff5ca2ba9a4660de8497
   languageName: node
   linkType: hard
 
@@ -21746,10 +21949,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~5.26.4":
-  version: 5.26.5
-  resolution: "undici-types@npm:5.26.5"
-  checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
   languageName: node
   linkType: hard
 
@@ -22612,17 +22815,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vscode-jsonrpc@npm:8.2.0, vscode-jsonrpc@npm:^8.0.2":
+"vscode-jsonrpc@npm:8.2.0, vscode-jsonrpc@npm:^8.0.2, vscode-jsonrpc@npm:^8.2.0":
   version: 8.2.0
   resolution: "vscode-jsonrpc@npm:8.2.0"
   checksum: f302a01e59272adc1ae6494581fa31c15499f9278df76366e3b97b2236c7c53ebfc71efbace9041cfd2caa7f91675b9e56f2407871a1b3c7f760a2e2ee61484a
-  languageName: node
-  linkType: hard
-
-"vscode-jsonrpc@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "vscode-jsonrpc@npm:6.0.0"
-  checksum: 3a67a56f287e8c449f2d9752eedf91e704dc7b9a326f47fb56ac07667631deb45ca52192e9bccb2ab108764e48409d70fa64b930d46fc3822f75270b111c5f53
   languageName: node
   linkType: hard
 

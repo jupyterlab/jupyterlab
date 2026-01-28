@@ -37,11 +37,13 @@
   ],
   "scripts": {
     "build": "tsc && cd template && npm run build",
+    "build:tsgo": "tsgo && cd template && npm run build:tsgo",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@yarnpkg/core": "^4.0.3",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
+    "@yarnpkg/core": "~4.3.1",
     "@yarnpkg/parsers": "^3.0.0",
     "commander": "^9.4.1",
     "crypto": "~1.0.1",
@@ -57,7 +59,7 @@
     "process": "^0.11.10",
     "semver": "^7.5.2",
     "sort-package-json": "~1.53.1",
-    "typescript": "~5.5.4",
+    "typescript": "~5.9.3",
     "verdaccio": "^5.33.0"
   },
   "devDependencies": {
@@ -65,7 +67,7 @@
     "@types/glob": "^7.1.1",
     "@types/inquirer": "^9.0.3",
     "@types/micromatch": "^4.0.1",
-    "@types/node": "^20.11.27",
+    "@types/node": "^20.14.8",
     "@types/prettier": "~2.6.0",
     "rimraf": "~5.0.5"
   },
