@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.6.0-alpha.2",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

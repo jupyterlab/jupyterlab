@@ -23,7 +23,9 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:tsgo": "tsgo -b",
     "build:all": "npm run build",
+    "build:tsgo:all": "npm run build:tsgo",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "test": "jest -i",
@@ -50,6 +52,7 @@
   "devDependencies": {
     "@types/jest": "^29.2.0",
     "@types/node": "^20.14.8",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

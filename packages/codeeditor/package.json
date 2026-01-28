@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:tsgo": "tsgo -b",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "test": "jest",
@@ -61,6 +62,7 @@
   "devDependencies": {
     "@jupyterlab/testing": "^4.6.0-alpha.2",
     "@types/jest": "^29.2.0",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "jest": "^29.2.0",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"

@@ -29,6 +29,7 @@
   "scripts": {
     "build": "rspack --mode=production",
     "build:all": "npm run build",
+    "build:tsgo:all": "npm run build:tsgo",
     "clean": "rimraf style/",
     "watch": "rspack --watch"
   },

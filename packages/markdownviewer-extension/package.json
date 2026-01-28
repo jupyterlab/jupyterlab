@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:tsgo": "tsgo -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -b --watch"
   },
@@ -47,6 +48,7 @@
     "@jupyterlab/translation": "^4.6.0-alpha.2"
   },
   "devDependencies": {
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

@@ -37,10 +37,12 @@
   ],
   "scripts": {
     "build": "tsc && cd template && npm run build",
+    "build:tsgo": "tsgo && cd template && npm run build:tsgo",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "@yarnpkg/core": "~4.3.1",
     "@yarnpkg/parsers": "^3.0.0",
     "commander": "^9.4.1",

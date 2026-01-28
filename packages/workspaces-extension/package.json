@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:tsgo": "tsgo -b",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "watch": "tsc -b --watch"
   },
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

@@ -28,6 +28,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:tsgo": "tsgo -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -b --watch"
   },
@@ -51,6 +52,7 @@
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "@types/react-highlight-words": "^0.16.4",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

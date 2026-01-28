@@ -39,6 +39,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:tsgo": "tsgo -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tsconfig.test.tsbuildinfo && rimraf tests/build",
     "watch": "tsc -b --watch"
   },
@@ -65,6 +66,7 @@
     "@jupyterlab/testing": "^4.6.0-alpha.2",
     "@types/jest": "^29.2.0",
     "@types/react-dom": "^18.0.9",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },

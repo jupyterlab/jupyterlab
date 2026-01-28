@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p src && rspack",
+    "build:tsgo": "tsgo -p src && rspack",
     "clean": "rimraf build"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@rspack/cli": "^1.7.3",
     "@rspack/core": "^1.7.3",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "css-loader": "^6.7.1",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",

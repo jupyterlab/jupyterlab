@@ -29,6 +29,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build:tsgo": "tsgo",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -w --listEmittedFiles"
   },
@@ -68,6 +69,7 @@
     "@types/node": "^20.14.8",
     "@types/supports-color": "^5.3.0",
     "@types/watchpack": "^2.4.4",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "rimraf": "~5.0.5",
     "typescript": "~5.9.3"
   },
