@@ -228,6 +228,7 @@ export class CSVViewer extends Widget {
     super();
 
     this._context = options.context;
+    this._delimiter = options.delimiter ?? ',';
     this.layout = new PanelLayout();
 
     this.addClass(CSV_CLASS);
@@ -429,6 +430,14 @@ export namespace CSVViewer {
      * The document context for the CSV being rendered by the widget.
      */
     context: DocumentRegistry.Context;
+
+    /**
+     * The initial delimiter for the CSV file.
+     *
+     * #### Notes
+     * If not provided, defaults to ','.
+     */
+    delimiter?: string;
   }
 }
 
@@ -438,13 +447,9 @@ export namespace CSVViewer {
 export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
   constructor(options: CSVDocumentWidget.IOptions) {
     let { content, context, delimiter, reveal, ...other } = options;
-    content = content || Private.createContent(context);
+    content = content || Private.createContent(context, delimiter);
     reveal = Promise.all([reveal, content.revealed]);
     super({ content, context, reveal, ...other });
-
-    if (delimiter) {
-      content.delimiter = delimiter;
-    }
   }
 
   /**
@@ -564,8 +569,9 @@ namespace Private {
   }
 
   export function createContent(
-    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>,
+    delimiter?: string
   ): CSVViewer {
-    return new CSVViewer({ context });
+    return new CSVViewer({ context, delimiter });
   }
 }
