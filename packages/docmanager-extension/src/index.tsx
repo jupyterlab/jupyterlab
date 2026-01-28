@@ -485,6 +485,43 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IDocumentManager],
   optional: [ITranslator, ICommandPalette],
+}
+
+ activate: (
+  app: JupyterFrontEnd,
+  docManager: IDocumentManager,
+  translator: ITranslator | null,
+  palette: ICommandPalette | null
+) => {
+
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
+  const { commands, shell } = app;
+
+  commands.addCommand('docmanager:open-no-kernel', {
+    label: 'Open Without Starting Kernel',
+    caption: 'Open the notebook without starting a kernel',
+    execute: async (args: any) => {
+      const { path } = args as { path: string };
+
+      return commands.execute('docmanager:open', {
+        path,
+        kernelPreference: {
+          shouldStart: false,
+          canStart: false
+        }
+      });
+    }
+  });
+
+
+  if (palette) {
+    palette.addItem({
+      command: 'docmanager:open-no-kernel',
+      category: trans.__('File Operations')
+    });
+  }
+
+}
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
@@ -506,7 +543,9 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
           type: 'object',
           properties: {}
         }
-      },
+    },
+
+
       execute: () => {
         // Checks that shell.currentWidget is valid:
         if (isEnabled()) {
@@ -521,7 +560,7 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
           return context.download();
         }
       }
-    });
+      });
 
     app.shell.currentChanged?.connect(() => {
       app.commands.notifyCommandChanged(CommandIDs.download);
@@ -531,8 +570,7 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category });
     }
-  }
-};
+ }
 
 /**
  * A plugin providing open-browser-tab commands.
