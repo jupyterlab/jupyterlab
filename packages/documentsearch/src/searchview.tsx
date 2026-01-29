@@ -223,6 +223,7 @@ interface IReplaceEntryProps {
   replaceText: string;
   translator?: ITranslator;
   isCurrentMatchInOutput?: boolean;
+  isCurrentMatchNonReplaceable?: boolean;
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -561,6 +562,10 @@ interface ISearchOverlayProps {
    */
   isCurrentMatchInOutput?: boolean;
   /**
+   * Whether the current match cannot be replaced (either in output or read-only cell).
+   */
+  isCurrentMatchNonReplaceable?: boolean;
+  /**
    * Provides information about keybindings for display.
    */
   keyBindings?: ISearchKeyBindings;
@@ -793,6 +798,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
                 isCurrentMatchInOutput={this.props.isCurrentMatchInOutput}
+                isCurrentMatchNonReplaceable={this.props.isCurrentMatchNonReplaceable}
               />
               <div className={SPACER_CLASS}></div>
             </>
@@ -937,6 +943,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         useRegex={this.model.useRegex}
         wholeWords={this.model.wholeWords}
         isCurrentMatchInOutput={this.model.isCurrentMatchInOutput}
+        isCurrentMatchNonReplaceable={this.model.isCurrentMatchNonReplaceable}
         onCaseSensitiveToggled={() => {
           this.model.caseSensitive = !this.model.caseSensitive;
         }}

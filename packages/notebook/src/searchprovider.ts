@@ -165,7 +165,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
-   * Whether the current match is in a cell output.
+   * Whether the current match cannot be replaced (either in output or read-only cell).
    */
   get isCurrentMatchInOutput(): boolean {
     // Check if output filter is enabled and we have a current match
@@ -187,6 +187,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
 
     return false;
+  }
+
+  /**
+   * Whether the current match cannot be replaced.
+   * Returns true if match is in output OR if the notebook is read-only.
+   */
+  get isCurrentMatchNonReplaceable(): boolean {
+    return this.isCurrentMatchInOutput || this.isReadOnly;
   }
 
   getSelectionState(): SelectionState {

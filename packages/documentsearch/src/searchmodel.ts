@@ -208,6 +208,15 @@ export class SearchDocumentModel
   }
 
   /**
+   * Whether the current match cannot be replaced (either in output or read-only cell).
+   */
+  get isCurrentMatchNonReplaceable(): boolean {
+    return 'isCurrentMatchNonReplaceable' in this.searchProvider
+      ? (this.searchProvider as { isCurrentMatchNonReplaceable: boolean }).isCurrentMatchNonReplaceable
+      : this.isCurrentMatchInOutput;
+  }
+
+  /**
    * Whether to use regular expression or not.
    */
   get useRegex(): boolean {

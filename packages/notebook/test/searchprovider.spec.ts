@@ -605,10 +605,10 @@ describe('@jupyterlab/notebook', () => {
         codeCell.outputs.add({
           name: 'stdout',
           output_type: 'stream',
-          text: ['test']
+          text: ['outputtest']
         });
 
-        await provider.startQuery(/test/, { output: true });
+        await provider.startQuery(/outputtest/, { output: true });
         // The match should be in the output area
         expect(provider.isCurrentMatchInOutput).toBe(true);
         await provider.endQuery();
@@ -757,15 +757,84 @@ describe('@jupyterlab/notebook', () => {
         codeCell.outputs.add({
           name: 'stdout',
           output_type: 'stream',
-          text: ['other output']
+          text: ['outputtest']
         });
 
         // Search with output filter - current implementation returns true when output filter is enabled
-        await provider.startQuery(/test/, { output: true });
+        await provider.startQuery(/outputtest/, { output: true });
         expect(provider.matchesCount).toBe(1);
         expect(provider.currentMatchIndex).toBe(0);
         expect(provider.isCurrentMatchInOutput).toBe(true);
         await provider.endQuery();
+      });
+
+      describe('isCurrentMatchNonReplaceable', () => {
+        it('should return true when match is in output', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+          
+          const codeCell = testPanel.model!.cells.get(0) as CodeCellModel;
+          codeCell.outputs.add({
+            name: 'stdout',
+            output_type: 'stream',
+            text: ['test output']
+          });
+
+          await testProvider.startQuery(/test/, { output: true });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(true);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
+
+        it('should return true when notebook is read-only', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+          
+          // Make notebook read-only
+          testPanel.model!.readOnly = true;
+
+          await testProvider.startQuery(/content/, { output: false });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(true);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
+
+        it('should return false when match is in editable content and notebook is not read-only', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+          
+          // Ensure notebook is not read-only
+          testPanel.model!.readOnly = false;
+
+          await testProvider.startQuery(/content/, { output: false });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(false);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
+
+        it('should return true when both output match and read-only', async () => {
+          const testContext = await NBTestUtils.createMockContext(false);
+          const testPanel = utils.createNotebookPanel(testContext);
+          const testProvider = new TestProvider(testPanel);
+          
+          // Make notebook read-only
+          testPanel.model!.readOnly = true;
+          
+          const codeCell = testPanel.model!.cells.get(0) as CodeCellModel;
+          codeCell.outputs.add({
+            name: 'stdout',
+            output_type: 'stream',
+            text: ['test output']
+          });
+
+          await testProvider.startQuery(/test/, { output: true });
+          expect(testProvider.isCurrentMatchNonReplaceable).toBe(true);
+          await testProvider.endQuery();
+          testContext.dispose();
+        });
       });
     });
   });
