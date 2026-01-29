@@ -4,30 +4,26 @@
  */
 
 import { Button } from '@jupyter/react-components';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
-import Form, { FormProps, IChangeEvent } from '@rjsf/core';
+import type { FormProps, IChangeEvent } from '@rjsf/core';
+import Form from '@rjsf/core';
 
-import {
-  ADDITIONAL_PROPERTY_FLAG,
+import type {
   ArrayFieldTemplateProps,
-  canExpand,
   FieldTemplateProps,
-  getTemplate,
   ObjectFieldTemplateProps,
   Registry,
   UiSchema
 } from '@rjsf/utils';
+import { ADDITIONAL_PROPERTY_FLAG, canExpand, getTemplate } from '@rjsf/utils';
 
 import React from 'react';
-import {
-  addIcon,
-  deleteIcon,
-  LabIcon,
-  moveDownIcon,
-  moveUpIcon
-} from '../icon';
+import type { LabIcon } from '../icon';
+import { addIcon, deleteIcon, moveDownIcon, moveUpIcon } from '../icon';
 
 /**
  * Default `ui:options` for the UiSchema.

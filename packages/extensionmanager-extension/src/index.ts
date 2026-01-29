@@ -5,19 +5,16 @@
  * @module extensionmanager-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 import { ExtensionsPanel, ListModel } from '@jupyterlab/extensionmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { extensionIcon } from '@jupyterlab/ui-components';
 
 const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';

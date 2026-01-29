@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { searchIcon } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
-import { CommandPalette, Panel, Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { CommandPalette } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 
 /**
  * Class name identifying the input group with search icon.

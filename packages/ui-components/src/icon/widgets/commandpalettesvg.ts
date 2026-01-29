@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { h, VirtualElement } from '@lumino/virtualdom';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
 import { CommandPalette } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';

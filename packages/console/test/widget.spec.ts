@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
+import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   CodeCell,
@@ -9,10 +9,12 @@ import {
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
+import type { YCodeCell } from '@jupyter/ydoc';
+import { createStandaloneCell } from '@jupyter/ydoc';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeConsole } from '@jupyterlab/console';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import {
   createConsoleFactory,
