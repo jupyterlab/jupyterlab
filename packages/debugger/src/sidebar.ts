@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager } from '@jupyterlab/apputils';
+import type { IThemeManager } from '@jupyterlab/apputils';
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { bugIcon, SidePanel } from '@jupyterlab/ui-components';
 
@@ -21,7 +22,7 @@ import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
 
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
 
 /**
  * A debugger sidebar.

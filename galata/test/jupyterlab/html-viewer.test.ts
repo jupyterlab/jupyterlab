@@ -4,7 +4,7 @@
  */
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { Frame, Page } from '@playwright/test';
+import type { Frame, Page } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'test.html';

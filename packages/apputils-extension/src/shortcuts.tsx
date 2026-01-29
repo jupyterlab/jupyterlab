@@ -7,7 +7,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { Selector } from '@lumino/domutils';
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The class name for each row of ContextShortcutTable

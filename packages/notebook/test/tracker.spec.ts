@@ -2,14 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell } from '@jupyterlab/cells';
-import { Context } from '@jupyterlab/docregistry';
+import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer } from '@jupyterlab/testing';
-import {
-  INotebookModel,
-  NotebookPanel,
-  NotebookTracker
-} from '@jupyterlab/notebook';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookTracker } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const namespace = 'notebook-tracker-test';
