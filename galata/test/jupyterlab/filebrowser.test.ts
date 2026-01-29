@@ -116,6 +116,8 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   ).toBeTruthy();
 });
 
+});
+
 test('File rename input respects UI font size', async ({ page }) => {
   await page.menu.clickMenuItem('File>New>Text File');
   await page
