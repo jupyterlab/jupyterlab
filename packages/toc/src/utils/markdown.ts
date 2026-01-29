@@ -83,27 +83,16 @@ export async function parseHeadings(
     console.warn("Couldn't parse headings; Markdown parser is null");
     return [];
   }
-  const renderedHtml = await parser.render(markdownText);
-
   const headings = new Array<IMarkdownHeading>();
-  const domParser = new DOMParser();
-  const htmlDocument = domParser.parseFromString(renderedHtml, 'text/html');
+  const parsedHeadings = await parser.getHeadings(markdownText);
 
-  // Query all heading elements (h1-h6)
-  const headingElements = htmlDocument.querySelectorAll(
-    'h1, h2, h3, h4, h5, h6'
-  );
-
-  headingElements.forEach((headingElement, lineIdx) => {
-    const level = parseInt(headingElement.tagName.substring(1), 10);
-    const headingText = headingElement.textContent?.trim() || '';
-
+  parsedHeadings.forEach(heading => {
     headings.push({
-      text: headingText,
-      line: lineIdx, // Line index within the parsed HTML, not the original Markdown source line
-      level: level,
-      raw: headingElement.outerHTML, // Parsed HTML string, not raw Markdown
-      skip: skipHeading.test(headingElement.outerHTML)
+      text: heading.text,
+      line: heading.line,
+      level: heading.level,
+      raw: heading.raw,
+      skip: skipHeading.test(heading.raw)
     });
   });
 

@@ -16,6 +16,7 @@ import type {
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type {
@@ -61,6 +62,9 @@ export function createMarkdownParser(
   return {
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
+    },
+    getHeadings: (content: string): Promise<IRenderMime.IMarkdownHeading[]> => {
+      return Private.getHeadings(content);
     }
   };
 }
@@ -253,5 +257,51 @@ namespace Private {
         }
         await highlight(token as Tokens.Code);
     }
+  }
+
+  /**
+   * Extract heading metadata from markdown source.
+   */
+  export async function getHeadings(
+    content: string,
+    options?: IRenderOptions
+  ): Promise<IRenderMime.IMarkdownHeading[]> {
+    if (!_marked) {
+      _marked = await initializeMarked(options);
+    }
+    const headings: IRenderMime.IMarkdownHeading[] =
+      new Array<IRenderMime.IMarkdownHeading>();
+    const tokens = _marked.lexer(content);
+
+    // Extract heading tokens and compute line numbers
+    let currentLine = 0;
+    for (const token of tokens) {
+      // Markdown headings
+      if (token.type === 'heading') {
+        const headingToken = token as Tokens.Heading;
+        headings.push({
+          text: headingToken.text,
+          level: headingToken.depth,
+          line: currentLine,
+          raw: headingToken.raw.replace(/\n/g, '')
+        });
+      } else if (token.type === 'html') {
+        // Handle HTML heading tags (h1 - h6)
+        const htmlToken = token as Tokens.HTML;
+        const rawText = htmlToken.raw;
+        const headingMatch = rawText.match(/<h([1-6])[^>]*>(.*?)<\/h\1>/i);
+        if (headingMatch) {
+          headings.push({
+            text: headingMatch[2].trim(),
+            level: parseInt(headingMatch[1], 10),
+            line: currentLine,
+            raw: rawText.replace(/\n/g, '')
+          });
+        }
+      }
+      currentLine += token.raw.split('\n').length - 1;
+    }
+
+    return headings;
   }
 }
