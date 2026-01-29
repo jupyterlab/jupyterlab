@@ -164,7 +164,7 @@ You can configure this behavior in the **Settings Editor**:
    - **Autosave Documents**: Toggle this checkbox to enable or disable the feature.
    - **Autosave Interval**: Change the frequency by entering a value in **seconds**. (Set to 60 for 1 minute).
 
-```{image} ./images/lsp/autosave-settings.png
+```{image} ./images/autosave-settings.png
 :align: center
 :alt: The Snapshot of the autosave settings.
 :class: jp-screenshot
