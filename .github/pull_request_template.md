@@ -9,8 +9,8 @@ https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md
 
 <!-- Check the appropriate boxes below and disclose the AI models, if applicable -->
 
-- [ ] No code in this PR was generated with AI
-- [ ] Some or all of the code in this PR was generated using AI.
+- [ ] No code in this PR was generated from AI
+- [ ] Some or all of the code in this PR was generated from AI.
   - [ ] The author has carefully reviewed this code (keep this PR draft until code has been reviewed)
   - AI models used:
 
