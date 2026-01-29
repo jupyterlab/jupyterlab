@@ -564,10 +564,6 @@ interface ISearchOverlayProps {
    * Provides information about keybindings for display.
    */
   keyBindings?: ISearchKeyBindings;
-  /**
-   * Whether the current match is in a cell output.
-   */
-  isCurrentMatchInOutput?: boolean;
 }
 
 class SearchOverlay extends React.Component<ISearchOverlayProps> {
@@ -984,7 +980,6 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
           void this.model.replaceAllMatches();
         }}
         keyBindings={this._keyBindings}
-        isCurrentMatchInOutput={this.model.isCurrentMatchInOutput}
       ></SearchOverlay>
     );
   }

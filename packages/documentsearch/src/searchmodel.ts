@@ -236,15 +236,6 @@ export class SearchDocumentModel
   }
 
   /**
-   * Whether the current match is in a cell output.
-   */
-  get isCurrentMatchInOutput(): boolean {
-    return 'isCurrentMatchInOutput' in this.searchProvider
-      ? (this.searchProvider as { isCurrentMatchInOutput: boolean }).isCurrentMatchInOutput
-      : false;
-  }
-
-  /**
    * Dispose the model.
    */
   dispose(): void {
