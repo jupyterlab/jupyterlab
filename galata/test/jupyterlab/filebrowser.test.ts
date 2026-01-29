@@ -41,3 +41,76 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
   await fileItem.waitFor({ state: 'visible' });
   expect(await page.filebrowser.isFileListedInBrowser(fileName)).toBeTruthy();
 });
+
+test('Bulk rename files', async ({ page, tmpPath }) => {
+  const file1 = 'test1.txt';
+  const file2 = 'test2.py';
+  const file3 = 'test3.md';
+  const newBaseName = 'renamed';
+
+  // Create test files
+  await page.contents.uploadContent('test1', 'text', `${tmpPath}/${file1}`);
+  await page.contents.uploadContent('test2', 'text', `${tmpPath}/${file2}`);
+  await page.contents.uploadContent('test3', 'text', `${tmpPath}/${file3}`);
+
+  await page.filebrowser.openDirectory(tmpPath);
+
+  const item1 = page.locator(`.jp-DirListing-item:has-text("${file1}")`);
+  const item2 = page.locator(`.jp-DirListing-item:has-text("${file2}")`);
+  const item3 = page.locator(`.jp-DirListing-item:has-text("${file3}")`);
+
+  // Wait for items to be visible
+  await item1.waitFor();
+  await item2.waitFor();
+  await item3.waitFor();
+
+  // Multi-select using Shift+Click
+  await item1.click();
+  await item2.click({ modifiers: ['Control'] });
+  await item3.click({ modifiers: ['Control'] });
+
+
+  // Right click to open context menu
+  await item1.click({ button: 'right' });
+
+  // Trigger Rename
+  await page.menu.clickMenuItem('File>Rename');
+
+
+  // Wait for the bulk rename dialog
+  const dialog = page.locator('.jp-Dialog');
+  await dialog.waitFor();
+  expect(await dialog.locator('.jp-Dialog-header').textContent()).toBe(
+    'Bulk Rename'
+  );
+
+  // Fill in the new base name
+  await dialog.locator('input').fill(newBaseName);
+
+  // Accept the dialog
+  await dialog.locator('.jp-Dialog-button.jp-mod-accept').click();
+
+  // Wait for the dialog to disappear
+  await dialog.waitFor({ state: 'hidden' });
+
+  // Verify renamed files
+  await page
+    .locator(`.jp-DirListing-item:has-text("${newBaseName}.txt")`)
+    .waitFor();
+  await page
+    .locator(`.jp-DirListing-item:has-text("${newBaseName}.py")`)
+    .waitFor();
+  await page
+    .locator(`.jp-DirListing-item:has-text("${newBaseName}.md")`)
+    .waitFor();
+
+  expect(
+    await page.filebrowser.isFileListedInBrowser(`${newBaseName}.txt`)
+  ).toBeTruthy();
+  expect(
+    await page.filebrowser.isFileListedInBrowser(`${newBaseName}.py`)
+  ).toBeTruthy();
+  expect(
+    await page.filebrowser.isFileListedInBrowser(`${newBaseName}.md`)
+  ).toBeTruthy();
+});
