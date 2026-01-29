@@ -1,38 +1,45 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type {
+  ISessionContext,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Clipboard,
   Dialog,
-  ISessionContext,
-  ISessionContextDialogs,
   showDialog,
   SystemClipboard
 } from '@jupyterlab/apputils';
-import {
+import type {
   Cell,
   CodeCell,
-  CodeCellModel,
   ICellModel,
-  ICodeCellModel,
+  ICodeCellModel
+} from '@jupyterlab/cells';
+import {
+  CodeCellModel,
   isMarkdownCellModel,
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { KernelMessage } from '@jupyterlab/services';
-import { ISharedAttachmentsCell } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { JSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { runCell as defaultRunCell } from './cellexecutor';
-import { Notebook, StaticNotebook } from './widget';
-import { NotebookWindowedLayout } from './windowing';
-import { INotebookCellExecutor } from './tokens';
+import type { Notebook, StaticNotebook } from './widget';
+import type { NotebookWindowedLayout } from './windowing';
+import type { INotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -1254,8 +1261,6 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
-   *
-   * @deprecated will be removed in a future release. Use `copyToSystemClipboard` instead.
    */
   export function copy(notebook: Notebook): void {
     Private.copyOrCut(notebook, false);
@@ -1280,8 +1285,6 @@ export namespace NotebookActions {
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
-   *
-   * @deprecated will be removed in a future release. Use `cutToSystemClipboard` instead.
    */
   export function cut(notebook: Notebook): void {
     Private.copyOrCut(notebook, true);
@@ -1317,8 +1320,6 @@ export namespace NotebookActions {
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
-   *
-   * @deprecated will be removed in a future release. Use `pasteFromSystemClipboard` instead.
    */
   export function paste(
     notebook: Notebook,
@@ -2701,8 +2702,6 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
-   *
-   * @deprecated will be removed in a future release. Use `copyOrCutToSystemClipboard` instead.
    */
   export function copyOrCut(notebook: Notebook, cut: boolean): void {
     if (!notebook.model || !notebook.activeCell) {

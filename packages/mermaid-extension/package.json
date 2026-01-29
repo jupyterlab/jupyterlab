@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mermaid-extension",
-  "version": "4.6.0-alpha.0",
+  "version": "4.6.0-alpha.2",
   "description": "JupyterLab - Mermaid Viewer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,15 +36,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/mermaid": "^4.6.0-alpha.0",
-    "@jupyterlab/rendermime-interfaces": "^3.14.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0"
+    "@jupyterlab/application": "^4.6.0-alpha.2",
+    "@jupyterlab/apputils": "^4.7.0-alpha.2",
+    "@jupyterlab/mermaid": "^4.6.0-alpha.2",
+    "@jupyterlab/rendermime-interfaces": "^3.14.0-alpha.2",
+    "@jupyterlab/translation": "^4.6.0-alpha.2"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "publishConfig": {
     "access": "public"

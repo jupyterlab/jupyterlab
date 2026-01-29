@@ -7,7 +7,8 @@ import * as React from 'react';
 
 import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
 

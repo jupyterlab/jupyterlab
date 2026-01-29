@@ -1,5 +1,6 @@
 import { JupyterPluginRegistry } from '@jupyterlab/coreutils';
-import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
+import type { IPlugin } from '@lumino/coreutils';
+import { PluginRegistry, Token } from '@lumino/coreutils';
 
 describe('JupyterPluginRegistry', () => {
   let registry: JupyterPluginRegistry;
@@ -7,7 +8,7 @@ describe('JupyterPluginRegistry', () => {
 
   beforeEach(() => {
     registry = new JupyterPluginRegistry({
-      expectedActivationTime: 400 // 0.5 second
+      expectedActivationTime: 400 // 0.4 second
     });
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
   });
@@ -37,11 +38,11 @@ describe('JupyterPluginRegistry', () => {
     ];
     registry.registerPlugins(mockPlugins);
 
-    // Mock super.activatePlugin to return after 1 second
+    // Mock super.activatePlugin to return after 0.55 second
     jest
       .spyOn(PluginRegistry.prototype, 'activatePlugin')
       .mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(), 500))
+        () => new Promise(resolve => setTimeout(() => resolve(), 550))
       );
 
     await registry.activatePlugin('slow-plugin');
@@ -53,7 +54,7 @@ describe('JupyterPluginRegistry', () => {
       expect.stringContaining('with 2 dependants')
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/5\d\d\.\d\dms/) // 500ms or slightly more
+      expect.stringMatching(/5\d\d\.\d\dms/) // 550ms or slightly more
     );
   });
 });

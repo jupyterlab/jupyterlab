@@ -1,25 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { KernelMessage, Session } from '@jupyterlab/services';
+import type { KernelMessage, Session } from '@jupyterlab/services';
 
-import { ISharedText } from '@jupyter/ydoc';
+import type { ISharedText } from '@jupyter/ydoc';
 
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal, Signal } from '@lumino/signaling';
 
-import { Panel } from '@lumino/widgets';
+import type { Panel } from '@lumino/widgets';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
-import { DebuggerHandler } from './handler';
+import type { DebuggerHandler } from './handler';
 
-import { IDebuggerSourceDisplayProvider } from './displayregistry';
+import type { IDebuggerSourceDisplayProvider } from './displayregistry';
 
 /**
  * An interface describing an application's visual debugger.
@@ -1005,7 +1006,9 @@ export namespace IDebugger {
     export interface ISources {
       /**
        * Signal emitted when the current frame changes.
+       * @deprecated since 4.6.0, will be removed in 5.0.
        */
+
       readonly currentFrameChanged: ISignal<
         IDebugger.Model.ICallstack,
         IDebugger.IStackFrame | null
@@ -1014,7 +1017,12 @@ export namespace IDebugger {
       /**
        * Return the current source.
        */
-      currentSource: IDebugger.Source | null;
+      readonly currentSource: IDebugger.Source | null;
+
+      /**
+       * Return the current frame.
+       */
+      readonly currentFrame: IDebugger.IStackFrame | null;
 
       /**
        * Signal emitted when the current source changes.
