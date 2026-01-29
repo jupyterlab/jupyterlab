@@ -114,6 +114,8 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   expect(
     await page.filebrowser.isFileListedInBrowser(`${newBaseName}.md`)
   ).toBeTruthy();
+});
+
 test('File rename input respects UI font size', async ({ page }) => {
   await page.menu.clickMenuItem('File>New>Text File');
   await page
