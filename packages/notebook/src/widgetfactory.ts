@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ITranslator } from '@jupyterlab/translation';
-import { INotebookModel } from './model';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory } from '@jupyterlab/docregistry';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
