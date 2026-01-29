@@ -8,19 +8,13 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
-import {
-  IDocumentManager,
-  isValidFileName,
-  renameFile
-} from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { isValidFileName, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Contents } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Contents } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretUpIcon,
@@ -28,19 +22,19 @@ import {
   LabIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt, filter, StringExt } from '@lumino/algorithm';
-import {
-  MimeData,
-  PromiseDelegate,
-  ReadonlyJSONObject
-} from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { Drag } from '@lumino/dragdrop';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { Widget } from '@lumino/widgets';
-import { FilterFileBrowserModel } from './model';
+import type { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to DirListing widget.

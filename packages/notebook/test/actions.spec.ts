@@ -1,17 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import {
-  Cell,
-  CodeCell,
-  ICodeCellModel,
-  MarkdownCell,
-  RawCell
-} from '@jupyterlab/cells';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
+import type { ICodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import {
   KernelError,
   Notebook,
@@ -19,9 +14,9 @@ import {
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
-import { Stdin } from '@jupyterlab/outputarea';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISharedCodeCell } from '@jupyter/ydoc';
+import type { Stdin } from '@jupyterlab/outputarea';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ISharedCodeCell } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
@@ -30,7 +25,8 @@ import {
   sleep,
   waitForDialog
 } from '@jupyterlab/testing';
-import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import type { JSONArray, JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import * as utils from './utils';
 import uncoalescedOp from './uncoalesced_op.json';
 

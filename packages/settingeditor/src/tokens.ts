@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
+import type { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { JsonSettingEditor as JSONSettingEditor } from './jsonsettingeditor';
-import { SettingsEditor } from './settingseditor';
+import type { JsonSettingEditor as JSONSettingEditor } from './jsonsettingeditor';
+import type { SettingsEditor } from './settingseditor';
 
 /**
  * The setting editor tracker token.

@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager } from '@jupyterlab/apputils';
+import type { IThemeManager } from '@jupyterlab/apputils';
 
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 
 import { Panel } from '@lumino/widgets';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 import type * as GridPanelModule from './gridpanel';
 

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { ForeignHandler } from '@jupyterlab/console';

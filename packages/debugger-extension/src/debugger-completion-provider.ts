@@ -7,12 +7,9 @@ import type {
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
-import { IDebugger } from '@jupyterlab/debugger';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IDebugger } from '@jupyterlab/debugger';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /**
  * Interface for the parsed result from debugger completion evaluation.
