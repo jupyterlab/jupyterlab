@@ -6,20 +6,20 @@
 import React from 'react';
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
 import { FormComponent } from '@jupyterlab/ui-components';
-import {
-  JSONExt,
+import type {
   PartialJSONObject,
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import { IChangeEvent } from '@rjsf/core';
+import type { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
-import { Field, UiSchema } from '@rjsf/utils';
-import { JSONSchema7 } from 'json-schema';
+import type { Field, UiSchema } from '@rjsf/utils';
+import type { JSONSchema7 } from 'json-schema';
 import { Button } from '@jupyterlab/ui-components';
 
 /**

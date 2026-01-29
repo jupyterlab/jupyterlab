@@ -6,11 +6,12 @@ import {
   HighlightStyle,
   syntaxHighlighting
 } from '@codemirror/language';
-import { Extension } from '@codemirror/state';
+import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { tags as t } from '@lezer/highlight';
-import { IEditorTheme, IEditorThemeRegistry } from './token';
+import type { IEditorTheme, IEditorThemeRegistry } from './token';
 
 export const jupyterEditorTheme = EditorView.theme({
   /**

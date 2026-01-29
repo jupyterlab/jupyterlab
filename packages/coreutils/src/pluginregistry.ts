@@ -1,4 +1,5 @@
-import { IPlugin, PluginRegistry, Token } from '@lumino/coreutils';
+import type { IPlugin, Token } from '@lumino/coreutils';
+import { PluginRegistry } from '@lumino/coreutils';
 
 const PLUGIN_ACTIVATION_TIMEOUT = 5000;
 

@@ -19,9 +19,10 @@ import {
   unfoldCode,
   unfoldEffect
 } from '@codemirror/language';
+import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { selectNextOccurrence } from '@codemirror/search';
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -38,6 +39,7 @@ namespace CommandIDs {
   export const toggleComment = 'codemirror:toggle-comment';
   export const selectNextOccurrence = 'codemirror:select-next-occurrence';
   export const toggleTabFocusMode = 'codemirror:toggle-tab-focus-mode';
+  export const toggleBold = 'codemirror:markdown-toggle-bold';
   export const foldCurrent = 'codemirror:fold-current';
   export const unfoldCurrent = 'codemirror:unfold-current';
   export const foldSubregions = 'codemirror:fold-subregions';
@@ -85,6 +87,70 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
 
     const isEnabled = () => {
       return !!findEditorView();
+    };
+
+    /**
+     * Toggle bold formatting by wrapping/unwrapping selected text with **.
+     */
+    const toggleBold = (view: EditorView): boolean => {
+      const { state } = view;
+      const { main } = state.selection;
+
+      if (main.empty) {
+        // No selection, do nothing
+        return false;
+      }
+
+      const { from, to, anchor, head } = main;
+      const isReversed = anchor > head;
+      const doc = state.doc;
+      const selectedText = doc.sliceString(from, to);
+
+      const outerStart = from >= 2 && doc.sliceString(from - 2, from) === '**';
+      const outerEnd = doc.sliceString(to, to + 2) === '**';
+      const innerStart = selectedText.startsWith('**');
+      const innerEnd = selectedText.endsWith('**');
+
+      const setSelection = (contentStart: number, contentEnd: number) => {
+        const newAnchor = isReversed ? contentEnd : contentStart;
+        const newHead = isReversed ? contentStart : contentEnd;
+        return EditorSelection.single(newAnchor, newHead);
+      };
+
+      // Unwrap when markers are outside the selection
+      if (outerStart && outerEnd) {
+        const changeFrom = from - 2;
+        const changeTo = to + 2;
+        const contentLength = to - from;
+        view.dispatch({
+          changes: { from: changeFrom, to: changeTo, insert: selectedText },
+          selection: setSelection(changeFrom, changeFrom + contentLength)
+        });
+        return true;
+      }
+
+      // Unwrap when markers are included in the selection
+      if (innerStart && innerEnd && selectedText.length >= 4) {
+        const unwrapped = selectedText.slice(2, -2);
+        const contentStart = from;
+        const contentEnd = from + unwrapped.length;
+        view.dispatch({
+          changes: { from, to, insert: unwrapped },
+          selection: setSelection(contentStart, contentEnd)
+        });
+        return true;
+      }
+
+      // Wrap the selection
+      const wrapped = `**${selectedText}**`;
+      const contentStart = from + 2;
+      const contentEnd = to + 2;
+      view.dispatch({
+        changes: { from, to, insert: wrapped },
+        selection: setSelection(contentStart, contentEnd)
+      });
+
+      return true;
     };
 
     const getActiveEditorInfo = () => {
@@ -224,6 +290,27 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           return;
         }
         selectNextOccurrence(view);
+      },
+      isEnabled
+    });
+
+    app.commands.addCommand(CommandIDs.toggleBold, {
+      label: trans.__('Toggle Bold'),
+      caption: trans.__(
+        'Toggle bold formatting by wrapping/unwrapping selected text with **'
+      ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const view = findEditorView();
+        if (!view) {
+          return;
+        }
+        toggleBold(view);
       },
       isEnabled
     });
