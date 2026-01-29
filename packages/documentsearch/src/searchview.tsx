@@ -269,8 +269,8 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
 <<<<<<< HEAD
         title={props.isCurrentMatchInOutput ? trans.__('Cannot replace matches in cell outputs') : trans.__('Replace')}
 =======
-        title={props.isCurrentMatchInOutput ? 
-          trans.__('Cannot replace matches in cell outputs') : 
+        title={props.isCurrentMatchInOutput ?
+          trans.__('Cannot replace matches in cell outputs') :
           trans.__('Replace')
         }
 >>>>>>> fix/completer-error-handling

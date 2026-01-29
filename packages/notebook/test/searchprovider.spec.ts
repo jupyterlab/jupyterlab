@@ -628,7 +628,7 @@ describe('@jupyterlab/notebook', () => {
         console.log('Current provider index:', (provider as any)._currentProviderIndex);
         console.log('Current provider:', (provider as any)._searchProviders[(provider as any)._currentProviderIndex]);
         console.log('Provider currentProviderIndex:', (provider as any)._searchProviders[(provider as any)._currentProviderIndex]?.currentProviderIndex);
-        
+
         // The match should be in the code area, not output
         expect(provider.isCurrentMatchInOutput).toBe(false);
         await provider.endQuery();
@@ -706,7 +706,7 @@ describe('@jupyterlab/notebook', () => {
           cell_type: 'code',
           source: 'test content'
         });
-        
+
         const codeCell = panel.model!.cells.get(0) as CodeCellModel;
         codeCell.outputs.add({
           name: 'stdout',
@@ -729,7 +729,7 @@ describe('@jupyterlab/notebook', () => {
           cell_type: 'code',
           source: 'xyz' // No match in code
         });
-        
+
         const codeCell = panel.model!.cells.get(0) as CodeCellModel;
         codeCell.outputs.add({
           name: 'stdout',
@@ -752,7 +752,7 @@ describe('@jupyterlab/notebook', () => {
           cell_type: 'code',
           source: 'test content'
         });
-        
+
         const codeCell = panel.model!.cells.get(0) as CodeCellModel;
         codeCell.outputs.add({
           name: 'stdout',
