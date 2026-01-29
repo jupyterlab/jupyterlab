@@ -222,11 +222,7 @@ interface IReplaceEntryProps {
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
-<<<<<<< HEAD
-  isCurrentMatchInOutput?: boolean; // New prop to disable replace for output matches
-=======
   isCurrentMatchInOutput?: boolean;
->>>>>>> fix/completer-error-handling
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -265,15 +261,14 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
-        disabled={props.isCurrentMatchInOutput}
-<<<<<<< HEAD
-        title={props.isCurrentMatchInOutput ? trans.__('Cannot replace matches in cell outputs') : trans.__('Replace')}
-=======
-        title={props.isCurrentMatchInOutput ?
-          trans.__('Cannot replace matches in cell outputs') :
+        disabled={props.isCurrentMatchNonReplaceable}
+        title={props.isCurrentMatchNonReplaceable ? 
+          (props.isCurrentMatchInOutput ? 
+            trans.__('Cannot replace matches in cell outputs') : 
+            trans.__('Cannot replace matches in read-only document')
+          ) : 
           trans.__('Replace')
         }
->>>>>>> fix/completer-error-handling
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
