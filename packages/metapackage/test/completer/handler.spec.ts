@@ -1,22 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { Signal } from '@lumino/signaling';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { Signal } from '@lumino/signaling';
+import type {
+  ICompletionContext,
+  ICompletionProvider
+} from '@jupyterlab/completer';
 import {
   Completer,
   CompleterModel,
   CompletionHandler,
   CompletionTriggerKind,
-  ICompletionContext,
-  ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
-import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
 class TestCompleterModel extends CompleterModel {

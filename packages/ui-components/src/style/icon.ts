@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { style as typestyleClass } from 'typestyle/lib';
-import { NestedCSSProperties } from 'typestyle/lib/types';
+import type { NestedCSSProperties } from 'typestyle/lib/types';
 
 export namespace LabIconStyle {
   /**

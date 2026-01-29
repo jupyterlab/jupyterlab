@@ -18,7 +18,7 @@ import '../index.css';
 import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 
 import { Widget } from '@lumino/widgets';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { ObservableList } from '@jupyterlab/observables';
 
 function getRandomInt(max: number): number {

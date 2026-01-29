@@ -1,18 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  INotebookModel,
-  NotebookPanel,
-  NotebookSearchProvider
-} from '@jupyterlab/notebook';
-import { Context } from '@jupyterlab/docregistry';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookSearchProvider } from '@jupyterlab/notebook';
+import type { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
-import { IReplaceOptions } from '@jupyterlab/documentsearch';
-import { CodeCellModel } from '@jupyterlab/cells';
+import type { IReplaceOptions } from '@jupyterlab/documentsearch';
+import type { CodeCellModel } from '@jupyterlab/cells';
 
 /**
  * To avoid relying on ydoc passing the selections via server

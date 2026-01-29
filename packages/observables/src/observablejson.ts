@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  JSONExt,
+import type {
   JSONObject,
   PartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
-import { IObservableMap, ObservableMap } from './observablemap';
+import type { IObservableMap } from './observablemap';
+import { ObservableMap } from './observablemap';
 
 /**
  * An observable JSON value.
