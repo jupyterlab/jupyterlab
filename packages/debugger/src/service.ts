@@ -165,7 +165,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Whether there exists a thread in stopped state.
    */
   hasStoppedThreads(): boolean {
-    return this._model?.stoppedThreads.size > 0 ?? false;
+    return this._model.stoppedThreads.size > 0;
   }
 
   /**

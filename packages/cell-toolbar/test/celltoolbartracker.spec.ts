@@ -126,7 +126,7 @@ function testToolbarFactory() {
 describe('@jupyterlab/cell-toolbar', () => {
   describe('CellBarExtension', () => {
     let commands: CommandRegistry;
-    let panel: NotebookPanel;
+    let panel: NotebookPanel | undefined;
     let extension: CellBarExtension;
 
     beforeAll(() => {
