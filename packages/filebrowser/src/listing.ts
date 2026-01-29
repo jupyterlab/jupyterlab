@@ -4,6 +4,7 @@
 import {
   Dialog,
   DOMUtils,
+  InputDialog,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -962,8 +963,8 @@ export class DirListing extends Widget {
       this._modifiedWidth < 100
         ? 'narrow'
         : this._modifiedWidth > 120
-        ? 'long'
-        : 'short';
+          ? 'long'
+          : 'short';
   }
 
   /**
@@ -2387,13 +2388,20 @@ export class DirListing extends Widget {
   private async _doRename(): Promise<string> {
     this._inRename = true;
 
-    const selectedPaths = Object.keys(this.selection);
+    const selectedItems = Array.from(this.selectedItems());
 
     // Bail out if nothing has been selected.
-    if (selectedPaths.length === 0) {
+    if (selectedItems.length === 0) {
       this._inRename = false;
       return Promise.resolve('');
     }
+
+    // Bulk rename if multiple items are selected
+    if (selectedItems.length > 1) {
+      return this._doBulkRename(selectedItems);
+    }
+
+    const selectedPaths = Object.keys(this.selection);
 
     // Figure out which selected path to use for the rename.
     const items = this._sortedItems;
@@ -2490,6 +2498,84 @@ export class DirListing extends Widget {
 
     this._inRename = false;
     return finalFilename;
+  }
+
+  /**
+   * Rename multiple items at once.
+   */
+  private async _doBulkRename(items: Contents.IModel[]): Promise<string> {
+    const trans = this._trans;
+
+    // Use the focused item's name as the default value if possible
+    let defaultName = '';
+    const focusItem = items.find(
+      item => item.path === this._sortedItems[this._focusIndex]?.path
+    );
+    if (focusItem) {
+      defaultName = PathExt.basename(
+        focusItem.name,
+        PathExt.extname(focusItem.name)
+      );
+    } else if (items.length > 0) {
+      defaultName = PathExt.basename(
+        items[0].name,
+        PathExt.extname(items[0].name)
+      );
+    }
+
+    const result = await InputDialog.getText({
+      title: trans.__('Bulk Rename'),
+      label: trans.__('New name'),
+      okLabel: trans.__('Rename'),
+      text: defaultName
+    });
+
+    if (!result.button.accept || !result.value) {
+      this._inRename = false;
+      return '';
+    }
+
+    const newBaseName = result.value;
+    if (!isValidFileName(newBaseName)) {
+      void showErrorMessage(
+        trans.__('Rename Error'),
+        Error(
+          trans._p(
+            'showErrorMessage',
+            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+            newBaseName
+          )
+        )
+      );
+      this._inRename = false;
+      return '';
+    }
+
+    const manager = this._manager;
+    const promises = items.map(item => {
+      const ext = PathExt.extname(item.name);
+      const newName = newBaseName + ext;
+      const oldPath = item.path;
+      const newPath = PathExt.join(PathExt.dirname(oldPath), newName);
+      if (oldPath === newPath) {
+        return Promise.resolve(item);
+      }
+      return renameFile(manager, oldPath, newPath);
+    });
+
+    try {
+      await Promise.all(promises);
+    } catch (error) {
+      if (error !== 'File not renamed') {
+        void showErrorMessage(
+          trans._p('showErrorMessage', 'Bulk Rename Error'),
+          error as any
+        );
+      }
+    }
+
+    this._inRename = false;
+    return newBaseName;
   }
 
   /**

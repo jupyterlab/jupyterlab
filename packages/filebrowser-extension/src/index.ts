@@ -816,10 +816,10 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
       // in the current filebrowser selection
       const factories = tracker.currentWidget
         ? Private.OpenWith.intersection<DocumentRegistry.WidgetFactory>(
-            map(tracker.currentWidget.selectedItems(), i => {
-              return Private.OpenWith.getFactories(docRegistry, i);
-            })
-          )
+          map(tracker.currentWidget.selectedItems(), i => {
+            return Private.OpenWith.getFactories(docRegistry, i);
+          })
+        )
         : new Set<DocumentRegistry.WidgetFactory>();
 
       // make new menu items from the widget factories
@@ -1616,13 +1616,11 @@ function addCommands(
         return widget.rename();
       }
     },
-    isVisible: () =>
-      // So long as this command only handles one file at time, don't show it
-      // if multiple files are selected.
-      !!tracker.currentWidget &&
-      Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
-    label: trans.__('Rename'),
+    label: () => {
+      const n = Array.from(tracker.currentWidget?.selectedItems() ?? []).length;
+      return n > 1 ? trans.__('Rename %1 Items', n) : trans.__('Rename');
+    },
     mnemonic: 0,
     describedBy: {
       args: {
