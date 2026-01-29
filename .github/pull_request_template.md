@@ -5,6 +5,15 @@ See the contributing guidelines for more information:
 https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md
 -->
 
+## AI usage
+
+<!-- Check the appropriate boxes below and disclose the AI models, if applicable -->
+
+- [ ] No code in this PR was generated with AI
+- [ ] Some or all of the code in this PR was generated using AI.
+  - [ ] The author has carefully reviewed this code (keep this PR draft until code has been reviewed)
+  - AI models used:
+
 ## References
 
 <!-- Note issue numbers this pull request addresses (should be at least one, see contributing guidelines above). -->
