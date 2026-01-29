@@ -584,6 +584,71 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#isCurrentMatchInOutput', () => {
+      it('should return false when output filter is disabled', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('print("test")');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test']
+        });
+
+        await provider.startQuery(/test/, { output: false });
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+
+      it('should return true when current match is in output', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('print("code")');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test']
+        });
+
+        await provider.startQuery(/test/, { output: true });
+        // The match should be in the output area
+        expect(provider.isCurrentMatchInOutput).toBe(true);
+        await provider.endQuery();
+      });
+
+      it('should return false when current match is in code', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('test');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['output']
+        });
+
+        await provider.startQuery(/test/, { output: true });
+        // Debug: Let's see what the current state is
+        console.log('Current provider index:', (provider as any)._currentProviderIndex);
+        console.log('Current provider:', (provider as any)._searchProviders[(provider as any)._currentProviderIndex]);
+        console.log('Provider currentProviderIndex:', (provider as any)._searchProviders[(provider as any)._currentProviderIndex]?.currentProviderIndex);
+        
+        // The match should be in the code area, not output
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+
+      it('should return false when there is no current match', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('code');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['output']
+        });
+
+        await provider.startQuery(/notfound/, { output: true });
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+    });
+
     describe('#getSelectionState()', () => {
       it('should reflect cell selection state in command mode', async () => {
         panel.content.mode = 'command';
