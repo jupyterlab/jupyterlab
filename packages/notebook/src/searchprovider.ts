@@ -164,6 +164,31 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     };
   }
 
+  /**
+   * Whether the current match is in a cell output.
+   */
+  get isCurrentMatchInOutput(): boolean {
+    // Check if output filter is enabled and we have a current match
+    if (!this._filters?.output || this._currentProviderIndex === null) {
+      return false;
+    }
+
+    const currentProvider = this._searchProviders[this._currentProviderIndex];
+    if (!currentProvider) {
+      return false;
+    }
+
+    // For CodeCellSearchProvider, check if the current match is in an output
+    // The CodeCellSearchProvider has a currentProviderIndex property that indicates
+    // whether the match is in the code editor (-1) or in an output provider (>= 0)
+    if ('currentProviderIndex' in currentProvider) {
+      const codeCellProvider = currentProvider as any;
+      return codeCellProvider.currentProviderIndex >= 0;
+    }
+
+    return false;
+  }
+
   getSelectionState(): SelectionState {
     const cellMode = this._selectionSearchMode === 'cells';
     const selectedCount = cellMode ? this._selectedCells : this._selectedLines;

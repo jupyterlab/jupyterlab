@@ -222,7 +222,11 @@ interface IReplaceEntryProps {
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
+<<<<<<< HEAD
   isCurrentMatchInOutput?: boolean; // New prop to disable replace for output matches
+=======
+  isCurrentMatchInOutput?: boolean;
+>>>>>>> fix/completer-error-handling
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -262,7 +266,14 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
         disabled={props.isCurrentMatchInOutput}
+<<<<<<< HEAD
         title={props.isCurrentMatchInOutput ? trans.__('Cannot replace matches in cell outputs') : trans.__('Replace')}
+=======
+        title={props.isCurrentMatchInOutput ? 
+          trans.__('Cannot replace matches in cell outputs') : 
+          trans.__('Replace')
+        }
+>>>>>>> fix/completer-error-handling
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
@@ -550,6 +561,10 @@ interface ISearchOverlayProps {
    * Callback on search expression change.
    */
   onSearchChanged: (q: string) => void;
+  /**
+   * Whether the current match is in a cell output.
+   */
+  isCurrentMatchInOutput?: boolean;
   /**
    * Provides information about keybindings for display.
    */
@@ -930,6 +945,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         translator={this.translator}
         useRegex={this.model.useRegex}
         wholeWords={this.model.wholeWords}
+        isCurrentMatchInOutput={this.model.isCurrentMatchInOutput}
         onCaseSensitiveToggled={() => {
           this.model.caseSensitive = !this.model.caseSensitive;
         }}
