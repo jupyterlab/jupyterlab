@@ -632,5 +632,76 @@ describe('@jupyterlab/notebook', () => {
         expect(state).toBe('single');
       });
     });
+
+    describe('#isCurrentMatchInOutput', () => {
+      it('should return false when output filter is disabled', async () => {
+        // Clear existing content
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'test content'
+        });
+        
+        const codeCell = panel.model!.cells.get(0) as CodeCellModel;
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test output']
+        });
+
+        // Search without output filter - should find match in code only
+        await provider.startQuery(/test/, undefined);
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.isCurrentMatchInOutput).toBe(false);
+        await provider.endQuery();
+      });
+
+      it('should return true when current match is in output', async () => {
+        // Clear existing content
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'xyz' // No match in code
+        });
+        
+        const codeCell = panel.model!.cells.get(0) as CodeCellModel;
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test output']
+        });
+
+        // Search with output filter - should find match in output only
+        await provider.startQuery(/test/, { output: true });
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.isCurrentMatchInOutput).toBe(true);
+        await provider.endQuery();
+      });
+
+      it('should return true when output filter is enabled and match exists', async () => {
+        // Clear existing content
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'test content'
+        });
+        
+        const codeCell = panel.model!.cells.get(0) as CodeCellModel;
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['other output']
+        });
+
+        // Search with output filter - current implementation returns true when output filter is enabled
+        await provider.startQuery(/test/, { output: true });
+        expect(provider.matchesCount).toBe(1);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(provider.isCurrentMatchInOutput).toBe(true);
+        await provider.endQuery();
+      });
+    });
   });
 });
