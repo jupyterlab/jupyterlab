@@ -63,8 +63,10 @@ export function createMarkdownParser(
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
     },
-    getHeadings: (content: string): Promise<IRenderMime.IMarkdownHeading[]> => {
-      return Private.getHeadings(content);
+    getHeadingTokens: (
+      content: string
+    ): Promise<IRenderMime.IMarkdownHeadingToken[]> => {
+      return Private.getHeadingTokens(content, options);
     }
   };
 }
@@ -262,42 +264,28 @@ namespace Private {
   /**
    * Extract heading metadata from markdown source.
    */
-  export async function getHeadings(
+  export async function getHeadingTokens(
     content: string,
     options?: IRenderOptions
-  ): Promise<IRenderMime.IMarkdownHeading[]> {
+  ): Promise<IRenderMime.IMarkdownHeadingToken[]> {
     if (!_marked) {
       _marked = await initializeMarked(options);
     }
-    const headings: IRenderMime.IMarkdownHeading[] =
-      new Array<IRenderMime.IMarkdownHeading>();
+    const headings = new Array<IRenderMime.IMarkdownHeadingToken>();
     const tokens = _marked.lexer(content);
 
     // Extract heading tokens and compute line numbers
     let currentLine = 0;
     for (const token of tokens) {
-      // Markdown headings
-      if (token.type === 'heading') {
-        const headingToken = token as Tokens.Heading;
+      if (
+        token.type === 'heading' ||
+        token.type === 'html' ||
+        token.type === 'paragraph'
+      ) {
         headings.push({
-          text: headingToken.text,
-          level: headingToken.depth,
-          line: currentLine,
-          raw: headingToken.raw.replace(/\n/g, '')
+          raw: token.raw,
+          line: currentLine
         });
-      } else if (token.type === 'html') {
-        // Handle HTML heading tags (h1 - h6)
-        const htmlToken = token as Tokens.HTML;
-        const rawText = htmlToken.raw;
-        const headingMatch = rawText.match(/<h([1-6])[^>]*>(.*?)<\/h\1>/i);
-        if (headingMatch) {
-          headings.push({
-            text: headingMatch[2].trim(),
-            level: parseInt(headingMatch[1], 10),
-            line: currentLine,
-            raw: rawText.replace(/\n/g, '')
-          });
-        }
       }
       currentLine += token.raw.split('\n').length - 1;
     }

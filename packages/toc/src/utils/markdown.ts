@@ -83,20 +83,34 @@ export async function parseHeadings(
     console.warn("Couldn't parse headings; Markdown parser is null");
     return [];
   }
-  const headings = new Array<IMarkdownHeading>();
-  const parsedHeadings = await parser.getHeadings(markdownText);
 
-  parsedHeadings.forEach(heading => {
-    headings.push({
-      text: heading.text,
-      line: heading.line,
-      level: heading.level,
-      raw: heading.raw,
-      skip: skipHeading.test(heading.raw)
-    });
-  });
+  // Get the heading tokens from the parser, including the source line metadata
+  const headingTokens = await parser.getHeadingTokens(markdownText);
 
-  return headings;
+  // Convert each heading token into HTML and extract the heading elements,
+  // as this provides a clean and reliable way to retrieve the headings.
+  const parseHeadings = await Promise.all(
+    headingTokens.map(async token => {
+      const renderedHtml = await parser.render(token.raw);
+      const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
+      const htmlHeadings = Array.from(
+        dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
+
+      return htmlHeadings.map(e => ({
+        text: e.textContent?.trim() || '',
+        line: token.line,
+        level: parseInt(e.tagName[1], 10),
+        raw: token.raw.replace(/\n+$/, ''),
+        skip: skipHeading.test(token.raw)
+      }));
+    })
+  );
+
+  return parseHeadings.reduce(
+    (acc, curr) => acc.concat(curr),
+    [] as IMarkdownHeading[]
+  );
 }
 
 /**

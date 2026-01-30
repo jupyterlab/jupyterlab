@@ -577,23 +577,13 @@ export namespace IRenderMime {
      * @param source - The markdown string to parse.
      * @returns - A promise of heading metadata.
      */
-    getHeadings(source: string): Promise<IMarkdownHeading[]>;
+    getHeadingTokens(source: string): Promise<IMarkdownHeadingToken[]>;
   }
 
   /**
    * Markdown heading metadata.
    */
-  export interface IMarkdownHeading {
-    /**
-     * Heading text content
-     */
-    text: string;
-
-    /**
-     * Heading level (1-6)
-     */
-    level: number;
-
+  export interface IMarkdownHeadingToken {
     /**
      * Line number in source markdown (0-based)
      */

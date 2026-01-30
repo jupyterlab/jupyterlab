@@ -292,7 +292,11 @@ describe('rendermime/factories', () => {
 
       beforeAll(() => {
         markdownParser = {
-          render: (content: string): Promise<string> => Promise.resolve(content)
+          render: (content: string): Promise<string> =>
+            Promise.resolve(content),
+          getHeadingTokens: (
+            content: string
+          ): Promise<IRenderMime.IMarkdownHeading[]> => Promise.resolve([])
         };
       });
 
