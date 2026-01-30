@@ -1822,6 +1822,7 @@ describe('@jupyterlab/notebook', () => {
         const pastedCell = widget.widgets[2] as CodeCell;
         expect(pastedCell).toBeInstanceOf(CodeCell);
         expect(pastedCell.model.outputs.length).toBe(0);
+        expect(pastedCell.model.executionCount).toBeNull();
         expect(pastedCell.model.sharedModel.getSource()).toBe(
           cell.model.sharedModel.getSource()
         );

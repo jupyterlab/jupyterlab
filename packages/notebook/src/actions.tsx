@@ -2686,14 +2686,14 @@ namespace Private {
    * Return a deep copy of cells with code cell outputs and execution_count cleared.
    *
    * @param cells - The cells to process.
-   * @returns New cell objects;
+   * @returns New cell objects.
    */
   export function stripCodeCellOutputs(
     cells: nbformat.IBaseCell[]
   ): nbformat.IBaseCell[] {
     return cells.map(cell => {
       const copy = JSONExt.deepCopy(cell) as nbformat.IBaseCell;
-      if (cell.cell_type === 'code') {
+      if (nbformat.isCode(cell)) {
         (copy as nbformat.ICodeCell).outputs = [];
         (copy as nbformat.ICodeCell).execution_count = null;
       }
