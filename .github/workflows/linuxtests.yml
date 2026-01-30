@@ -66,12 +66,6 @@ jobs:
           restore-keys: |
             playwright-browsers-${{ runner.os }}-
 
-      - name: Install dependencies
-        env:
-          GROUP: ${{ matrix.group }}
-        run: |
-          bash ./scripts/ci_install.sh
-
       - name: Restore ${{ matrix.group }} cache
         if: ${{ matrix.cache-path && matrix.cache-hashfiles }}
         uses: actions/cache@v5
@@ -79,6 +73,13 @@ jobs:
           path: ${{ matrix.cache-path }}
           key: |-
             ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(fromJson(matrix.cache-hashfiles)) }}
+
+
+      - name: Install dependencies
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          bash ./scripts/ci_install.sh
 
       - name: Run test ${{ matrix.group }}
         env:
