@@ -1,17 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServerConnection } from '@jupyterlab/services';
+import type { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
-import {
-  DEFAULT_LANGUAGE_CODE,
+import type {
   DomainData,
   ITranslator,
   ITranslatorConnector,
   Language,
-  TranslationBundle,
-  TranslatorConnector
+  TranslationBundle
 } from './tokens';
+import { DEFAULT_LANGUAGE_CODE, TranslatorConnector } from './tokens';
 import { normalizeDomain } from './utils';
 
 /**

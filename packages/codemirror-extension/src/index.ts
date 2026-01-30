@@ -5,15 +5,16 @@
  * @module codemirror-extension
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { CodeEditor, IPositionModel, LineCol } from '@jupyterlab/codeeditor';
+import { ILabShell } from '@jupyterlab/application';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IPositionModel, LineCol } from '@jupyterlab/codeeditor';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import { commandsPlugin } from './commands';
 import {
   bindingPlugin,

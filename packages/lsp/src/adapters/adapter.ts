@@ -4,19 +4,20 @@
 import mergeWith from 'lodash.mergewith';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { JSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { ClientCapabilities, LanguageIdentifier } from '../lsp';
-import { IVirtualPosition } from '../positioning';
-import {
+import type { ClientCapabilities, LanguageIdentifier } from '../lsp';
+import type { IVirtualPosition } from '../positioning';
+import type {
   Document,
   IDocumentConnectionData,
   ILSPCodeExtractorsManager,
@@ -24,7 +25,7 @@ import {
   ILSPFeatureManager,
   ISocketConnectionOptions
 } from '../tokens';
-import { VirtualDocument } from '../virtual/document';
+import type { VirtualDocument } from '../virtual/document';
 import { EditorAdapter } from './editorAdapter';
 
 type IButton = Dialog.IButton;

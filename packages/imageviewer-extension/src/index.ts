@@ -5,18 +5,18 @@
  * @module imageviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
-  IImageTracker,
-  ImageViewer,
-  ImageViewerFactory
-} from '@jupyterlab/imageviewer';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { ImageViewer } from '@jupyterlab/imageviewer';
+import { IImageTracker, ImageViewerFactory } from '@jupyterlab/imageviewer';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
