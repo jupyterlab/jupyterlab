@@ -251,14 +251,12 @@ describe('filebrowser/listing', () => {
         });
         await signalToPromise(dirListing.updated);
 
-        // Select all files to ensure we catch different extensions
         dirListing.selectAll();
-
         expect([...dirListing.selectedItems()].length).toBeGreaterThan(1);
 
-        await dirListing.rename();
+        const renamePromise = dirListing.rename();
+        await renamePromise;
         await dirListing.model.refresh();
-        await signalToPromise(dirListing.updated);
 
         const itemNames = [...dirListing.sortedItems()].map(item => item.name);
 
