@@ -270,7 +270,11 @@ export class NotebookTools extends Widget implements INotebookTools {
   ): void {
     const message = new ObservableJSON.ChangeMessage(
       'activecell-metadata-changed',
-      { newValue: undefined, oldValue: undefined, ...args }
+      {
+        newValue: undefined,
+        oldValue: undefined,
+        ...args
+      }
     );
     for (const widget of this._toolChildren()) {
       MessageLoop.sendMessage(widget, message);

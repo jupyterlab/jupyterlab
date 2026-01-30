@@ -451,14 +451,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.index === undefined
             ? trans.__('Toggle Sidebar Element')
             : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+              ? trans.__(
+                  'Toggle Element %1 in Right Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                )
+              : trans.__(
+                  'Toggle Element %1 in Left Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                ),
         describedBy: {
           args: {
             type: 'object',

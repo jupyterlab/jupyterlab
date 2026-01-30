@@ -227,7 +227,9 @@ describe('@jupyterlab/completer', () => {
         editor.setCursorPosition({ line: 0, column: 2 });
         (
           editor.model.sharedModel.changed as Signal<ISharedText, SourceChange>
-        ).emit({ sourceChange: {} as any });
+        ).emit({
+          sourceChange: {} as any
+        });
         expect(model.methods).toEqual(
           expect.arrayContaining(['handleTextChange'])
         );

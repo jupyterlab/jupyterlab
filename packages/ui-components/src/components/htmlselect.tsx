@@ -33,7 +33,8 @@ export interface IOptionProps {
 }
 
 export interface IHTMLSelectProps
-  extends IElementRefProps<HTMLSelectElement>,
+  extends
+    IElementRefProps<HTMLSelectElement>,
     React.SelectHTMLAttributes<HTMLSelectElement> {
   defaultStyle?: boolean;
 

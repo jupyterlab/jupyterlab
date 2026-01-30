@@ -1053,11 +1053,12 @@ export namespace DocumentRegistry {
   /**
    * The options used to initialize a widget factory.
    */
-  export interface IWidgetFactoryOptions<T extends Widget = Widget>
-    extends Omit<
-      IRenderMime.IDocumentWidgetFactoryOptions,
-      'primaryFileType' | 'toolbarFactory'
-    > {
+  export interface IWidgetFactoryOptions<
+    T extends Widget = Widget
+  > extends Omit<
+    IRenderMime.IDocumentWidgetFactoryOptions,
+    'primaryFileType' | 'toolbarFactory'
+  > {
     /**
      * Whether to automatically start the preferred kernel
      */
@@ -1145,8 +1146,7 @@ export namespace DocumentRegistry {
    * The interface for a widget factory.
    */
   export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
-    extends IDisposable,
-      IWidgetFactoryOptions {
+    extends IDisposable, IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */

@@ -307,7 +307,9 @@ describe('@jupyter/notebook', () => {
           widget = createWidget();
           widget.model!.sharedModel.insertCell(
             widget.model!.sharedModel.cells.length,
-            { cell_type: 'code' }
+            {
+              cell_type: 'code'
+            }
           );
           await framePromise();
           expect(widget.widgets.length).toBe(2);

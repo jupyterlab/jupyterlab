@@ -200,7 +200,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   ): IEditorLanguage | null {
     const modename = typeof language === 'string' ? language : language.name;
     const mimetype = typeof language !== 'string' ? language.mime : modename;
-    const ext = typeof language !== 'string' ? language.extensions ?? [] : [];
+    const ext = typeof language !== 'string' ? (language.extensions ?? []) : [];
 
     return (
       (modename ? this.findByName(modename) : null) ??

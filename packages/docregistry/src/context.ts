@@ -38,8 +38,7 @@ import type { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T>
-{
+> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
@@ -60,7 +59,9 @@ export class Context<
 
     const sharedFactory = this._manager.contents.getSharedModelFactory(
       this._path,
-      { contentProviderId: options.contentProviderId }
+      {
+        contentProviderId: options.contentProviderId
+      }
     );
     const sharedModel = sharedFactory?.createNew({
       path: this._path,
