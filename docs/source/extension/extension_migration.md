@@ -730,11 +730,18 @@ In JupyterLab 3.x, the following pattern was commonly used:
 
 ```ts
 widget.content.model.value.text = 'some text';
-widget.content.model.sharedModel.updateSource(0, 0, 'some text');
 ```
 
 In JupyterLab 4.x, extensions should update editor contents exclusively through
 the shared model APIs to ensure correct synchronization and collaboration.
+
+```ts
+widget.content.model.sharedModel.updateSource(
+  0,
+  widget.content.model.sharedModel.getSource().length,
+  'some text'
+);
+```
 
 ### Testing with Jest
 
