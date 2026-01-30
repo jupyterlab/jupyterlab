@@ -296,7 +296,7 @@ describe('rendermime/factories', () => {
             Promise.resolve(content),
           getHeadingTokens: (
             content: string
-          ): Promise<IRenderMime.IMarkdownHeading[]> => Promise.resolve([])
+          ): Promise<IRenderMime.IMarkdownHeadingToken[]> => Promise.resolve([])
         };
       });
 
