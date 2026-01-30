@@ -152,7 +152,6 @@ test.describe('Cell Toolbar Delete', () => {
       .first()
       .click();
 
-    // Verify dialog does NOT appear
     // Wait for deletion to happen
     await expect(
       page.locator('.jp-Cell .jp-InputArea-editor').first()
