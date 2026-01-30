@@ -21,6 +21,9 @@ jobs:
             upload-output: true
           - group: release_test
             upload-output: true
+          - group: lint
+            cache-path: build/.cache/lint
+            cache-hashfiles: '["yarn.lock", ".prettierrc", ".prettierignore"]'
         exclude:
           - group: integrity
             python-version: "3.10"
@@ -69,12 +72,13 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
 
-      - name: Restore ${{ matrix.group }} caches
-        if: ${{ contains(fromJSON('["lint"]'), matrix.group) }}
+      - name: Restore ${{ matrix.group }} cache
+        if: ${{ matrix.cache-path && matrix.cache-hashfiles }}
         uses: actions/cache@v5
         with:
-          path: build/.cache/${{ matrix.group }}
-          key: ${{ matrix.group }}-${{runner}}
+          path: ${{ matrix.cache-path }}
+          key: |-
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(fromJson(matrix.cache-hashfiles)) }}
 
       - name: Run test ${{ matrix.group }}
         env:
