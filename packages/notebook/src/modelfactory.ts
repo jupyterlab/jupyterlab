@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISharedNotebook } from '@jupyter/ydoc';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Contents } from '@jupyterlab/services';
-import { INotebookModel, NotebookModel } from './model';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { Contents } from '@jupyterlab/services';
+import type { INotebookModel } from './model';
+import { NotebookModel } from './model';
 
 /**
  * A model factory for notebooks.

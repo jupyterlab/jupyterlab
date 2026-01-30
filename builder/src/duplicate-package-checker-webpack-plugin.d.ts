@@ -18,7 +18,7 @@ declare module 'duplicate-package-checker-webpack-plugin';
 
 // Then we expand the definition with the things we use.
 declare module 'duplicate-package-checker-webpack-plugin' {
-  import * as rspack from '@rspack/core';
+  import type * as rspack from '@rspack/core';
 
   export = DuplicatePackageCheckerWebpackPlugin;
 

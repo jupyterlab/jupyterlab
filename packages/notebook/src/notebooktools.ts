@@ -1,19 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, ICellModel } from '@jupyterlab/cells';
-import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
+import type { Cell, ICellModel } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { JSONEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { IMapChange } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IMapChange } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { Collapser } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
+import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import { ConflatableMessage, MessageLoop } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { INotebookModel } from './model';
-import { NotebookPanel } from './panel';
-import { INotebookTools, INotebookTracker } from './tokens';
+import type { INotebookModel } from './model';
+import type { NotebookPanel } from './panel';
+import type { INotebookTools, INotebookTracker } from './tokens';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
