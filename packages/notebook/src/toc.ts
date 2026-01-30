@@ -1,18 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { CodeCell, ICellModel } from '@jupyterlab/cells';
+import { Cell, MarkdownCell } from '@jupyterlab/cells';
+import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { TableOfContents } from '@jupyterlab/toc';
 import {
-  TableOfContents,
   TableOfContentsFactory,
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { KernelError, NotebookActions } from './actions';
-import { NotebookPanel } from './panel';
-import { INotebookTracker } from './tokens';
-import { Notebook } from './widget';
+import type { KernelError } from './actions';
+import { NotebookActions } from './actions';
+import type { NotebookPanel } from './panel';
+import type { INotebookTracker } from './tokens';
+import type { Notebook } from './widget';
 
 /**
  * Cell running status

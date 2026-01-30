@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { EditorExtensionRegistry } from './extension';
 import { CodeMirrorEditor } from './editor';
 import { EditorLanguageRegistry } from './language';
-import {
+import type {
   IEditorExtensionFactory,
   IEditorExtensionRegistry,
   IEditorFactoryOptions,

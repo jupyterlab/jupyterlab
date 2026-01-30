@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { Notebook, NotebookActions, NotebookModel } from '@jupyterlab/notebook';
+import type { Notebook } from '@jupyterlab/notebook';
+import { NotebookActions, NotebookModel } from '@jupyterlab/notebook';
 import { JupyterServer } from '@jupyterlab/testing';
 import * as utils from './utils';
 

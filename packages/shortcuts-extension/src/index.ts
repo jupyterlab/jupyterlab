@@ -5,28 +5,29 @@
  * @module shortcuts-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  IFormRenderer,
-  IFormRendererRegistry
-} from '@jupyterlab/ui-components';
+import type { IFormRenderer } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type {
   PartialJSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
+import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
+import { CommandIDs } from './types';
 import { renderShortCut } from './renderer';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 

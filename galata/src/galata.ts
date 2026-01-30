@@ -17,11 +17,8 @@ import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
 import { PerformanceHelper } from './helpers';
-import {
-  IJupyterLabPage,
-  IJupyterLabPageFixture,
-  JupyterLabPage
-} from './jupyterlabpage';
+import type { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
+import { JupyterLabPage } from './jupyterlabpage';
 
 /**
  * Galata namespace

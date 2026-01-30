@@ -4,13 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
   ReactWidget,
@@ -19,8 +19,9 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**

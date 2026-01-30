@@ -2,13 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { language } from '@codemirror/language';
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  WidgetType
-} from '@codemirror/view';
-import { StateEffect, StateField, Text, Transaction } from '@codemirror/state';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import type { Text, Transaction } from '@codemirror/state';
+import { StateEffect, StateField } from '@codemirror/state';
 import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 const TRANSIENT_LINE_SPACER_CLASS = 'jp-GhostText-lineSpacer';

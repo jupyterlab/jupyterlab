@@ -1,21 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type * as SQLModule from '@codemirror/lang-sql';
+import type { StreamParser } from '@codemirror/language';
 import {
   LanguageDescription,
   LanguageSupport,
   LRLanguage,
-  StreamLanguage,
-  StreamParser
+  StreamLanguage
 } from '@codemirror/language';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { buildParser } from '@lezer/generator';
 import { highlightTree } from '@lezer/highlight';
 
 import { jupyterHighlightStyle } from './theme';
-import { IEditorLanguage, IEditorLanguageRegistry } from './token';
+import type { IEditorLanguage, IEditorLanguageRegistry } from './token';
 import { pythonBuiltin } from './pythonBuiltin';
 
 /**
@@ -286,7 +288,7 @@ export namespace EditorLanguageRegistry {
    * @returns Language object
    */
   async function sql(
-    dialectName: keyof typeof import('@codemirror/lang-sql')
+    dialectName: keyof typeof SQLModule
   ): Promise<LanguageSupport> {
     const m = await import('@codemirror/lang-sql');
     return m.sql({ dialect: (m as any)[dialectName] });
