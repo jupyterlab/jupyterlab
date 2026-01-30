@@ -83,6 +83,7 @@ docs = [
     "pytest-check-links",
     "jsx-lexer",
     "myst-parser",
+    "sphinxcontrib-mermaid",
 ]
 docs-screenshots = [
     "altair==6.0.0",

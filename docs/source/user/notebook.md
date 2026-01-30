@@ -277,15 +277,17 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 
 - [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
 
-### Mermaid-style diagrams
+### Mermaid diagrams
 
-JupyterLab can display diagram-like content in Markdown cells, but the documentation build does not include a Mermaid renderer.
+JupyterLab includes built-in support for rendering Mermaid diagrams in Markdown cells.
 
-The following shows an example of Mermaid-style syntax as plain text:
+Mermaid diagrams can be added using fenced code blocks with the `mermaid` language identifier:
 
-```text
+```mermaid
 graph TD
   A --> B
 ```
 
-To render Mermaid diagrams visually, users must rely on environments or extensions that provide Mermaid support at runtime. The diagram source remains editable as plain text in the Markdown cell.
+Mermaid support is bundled with JupyterLab and does not require installing an additional extension.
+
+Mermaid diagrams are rendered automatically in Markdown cells in notebooks opened in JupyterLab. The diagram source remains visible when editing the Markdown cell.
