@@ -248,7 +248,10 @@ describe('filebrowser/listing', () => {
           value: 'bulk_renamed'
         } as any);
 
-        await dirListing.model.manager.newUntitled({ type: 'file', ext: '.py' });
+        await dirListing.model.manager.newUntitled({
+          type: 'file',
+          ext: '.py'
+        });
         await signalToPromise(dirListing.updated);
 
         // Select all files to ensure we catch different extensions
@@ -268,7 +271,6 @@ describe('filebrowser/listing', () => {
         spy.mockRestore();
       });
 
-
       it('should not rename if dialog is cancelled', async () => {
         const spy = jest.spyOn(InputDialog, 'getText').mockResolvedValue({
           button: { accept: false },
@@ -278,7 +280,9 @@ describe('filebrowser/listing', () => {
         dirListing.selectNext();
         dirListing.selectNext(true);
 
-        const beforeNames = [...dirListing.sortedItems()].map(item => item.name);
+        const beforeNames = [...dirListing.sortedItems()].map(
+          item => item.name
+        );
         await dirListing.rename();
         const afterNames = [...dirListing.sortedItems()].map(item => item.name);
 
@@ -903,13 +907,13 @@ describe('filebrowser/listing', () => {
           name: string;
           type: 'file' | 'directory' | 'notebook';
         }[] = [
-            { name: '1.txt', type: 'file' },
-            { name: '2', type: 'directory' },
-            { name: '3.ipynb', type: 'notebook' },
-            { name: '4.txt', type: 'file' },
-            { name: '5', type: 'directory' },
-            { name: '6.ipynb', type: 'notebook' }
-          ];
+          { name: '1.txt', type: 'file' },
+          { name: '2', type: 'directory' },
+          { name: '3.ipynb', type: 'notebook' },
+          { name: '4.txt', type: 'file' },
+          { name: '5', type: 'directory' },
+          { name: '6.ipynb', type: 'notebook' }
+        ];
 
         // Create files that can be sorted alphabetically
         for (const file of files) {

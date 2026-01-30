@@ -816,10 +816,10 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
       // in the current filebrowser selection
       const factories = tracker.currentWidget
         ? Private.OpenWith.intersection<DocumentRegistry.WidgetFactory>(
-          map(tracker.currentWidget.selectedItems(), i => {
-            return Private.OpenWith.getFactories(docRegistry, i);
-          })
-        )
+            map(tracker.currentWidget.selectedItems(), i => {
+              return Private.OpenWith.getFactories(docRegistry, i);
+            })
+          )
         : new Set<DocumentRegistry.WidgetFactory>();
 
       // make new menu items from the widget factories

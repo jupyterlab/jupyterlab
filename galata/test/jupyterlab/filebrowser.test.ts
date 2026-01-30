@@ -69,13 +69,11 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   await item2.click({ modifiers: ['Control'] });
   await item3.click({ modifiers: ['Control'] });
 
-
   // Right click to open context menu
   await item1.click({ button: 'right' });
 
   // Trigger Rename
   await page.menu.clickMenuItem('File>Rename');
-
 
   // Wait for the bulk rename dialog
   const dialog = page.locator('.jp-Dialog');
