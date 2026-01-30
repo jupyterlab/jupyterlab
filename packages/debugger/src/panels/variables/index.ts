@@ -1,17 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IThemeManager } from '@jupyterlab/apputils';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   PanelWithToolbar,
   tableRowsIcon,
   ToolbarButton,
   treeViewIcon
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { Panel, Widget } from '@lumino/widgets';
-import { IDebugger } from '../../tokens';
+import type { CommandRegistry } from '@lumino/commands';
+import type { Panel, Widget } from '@lumino/widgets';
+import type { IDebugger } from '../../tokens';
 import { VariablesBodyGrid } from './grid';
 import { ScopeSwitcher } from './scope';
 import { VariablesBodyTree } from './tree';

@@ -860,6 +860,12 @@
       "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
       "type": "boolean",
       "default": false
+    },
+    "useSystemClipboardForCells": {
+      "title": "Use system clipboard for copy/cut/paste of cells",
+      "description": "Whether to use the system clipboard for copy/cut/paste of cells. When enabled, cell contents are copied to the system clipboard, allowing copy/cut/paste between different notebook tabs or browser windows.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

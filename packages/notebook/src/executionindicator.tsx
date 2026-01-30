@@ -1,29 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { translateKernelStatuses } from '@jupyterlab/apputils';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
 import { ProgressCircle } from '@jupyterlab/statusbar';
 
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   Button,
   circleIcon,
-  LabIcon,
   offlineBoltIcon,
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
 
-import { Notebook } from './widget';
+import type { Notebook } from './widget';
 import { KernelMessage } from '@jupyterlab/services';
-import { Kernel } from '@jupyterlab/services';
-import { NotebookPanel } from './panel';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Widget } from '@lumino/widgets';
-import { JSONObject } from '@lumino/coreutils';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { Kernel } from '@jupyterlab/services';
+import type { NotebookPanel } from './panel';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { Widget } from '@lumino/widgets';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { NotebookActions } from './actions';
 
 /**

@@ -3,30 +3,27 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
+import { Button } from '@jupyter/react-components';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
-import Form, { FormProps, IChangeEvent } from '@rjsf/core';
+import type { FormProps, IChangeEvent } from '@rjsf/core';
+import Form from '@rjsf/core';
 
-import {
-  ADDITIONAL_PROPERTY_FLAG,
+import type {
   ArrayFieldTemplateProps,
-  canExpand,
   FieldTemplateProps,
-  getTemplate,
   ObjectFieldTemplateProps,
   Registry,
   UiSchema
 } from '@rjsf/utils';
+import { ADDITIONAL_PROPERTY_FLAG, canExpand, getTemplate } from '@rjsf/utils';
 
 import React from 'react';
-import {
-  addIcon,
-  caretDownIcon,
-  caretUpIcon,
-  closeIcon,
-  LabIcon
-} from '../icon';
+import type { LabIcon } from '../icon';
+import { addIcon, deleteIcon, moveDownIcon, moveUpIcon } from '../icon';
 
 /**
  * Default `ui:options` for the UiSchema.
@@ -129,35 +126,43 @@ export const MoveButton = (
     }
   };
 
+  const moveTo =
+    props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
+
   if (props.buttonStyle === 'icons') {
     const iconProps: LabIcon.IReactProps = {
       tag: 'span',
-      elementSize: 'xlarge',
       elementPosition: 'center'
     };
     buttonContent =
       props.direction === 'up' ? (
-        <caretUpIcon.react {...iconProps}></caretUpIcon.react>
+        <moveUpIcon.react {...iconProps} />
       ) : (
-        <caretDownIcon.react {...iconProps}></caretDownIcon.react>
+        <moveDownIcon.react {...iconProps} />
       );
+
+    return (
+      <Button
+        className="jp-ArrayOperationsButton"
+        onClick={props.item.onReorderClick(props.item.index, moveTo)}
+        disabled={disabled()}
+        appearance="stealth"
+        title={trans.__('Move item %1', props.direction)}
+      >
+        {buttonContent}
+      </Button>
+    );
   } else {
-    buttonContent =
-      props.direction === 'up' ? trans.__('Move up') : trans.__('Move down');
+    return (
+      <button
+        className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+        onClick={props.item.onReorderClick(props.item.index, moveTo)}
+        disabled={disabled()}
+      >
+        {props.direction === 'up' ? trans.__('Move up') : trans.__('Move down')}
+      </button>
+    );
   }
-
-  const moveTo =
-    props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
-
-  return (
-    <button
-      className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
-      onClick={props.item.onReorderClick(props.item.index, moveTo)}
-      disabled={disabled()}
-    >
-      {buttonContent}
-    </button>
-  );
 };
 
 /**
@@ -172,25 +177,27 @@ export const DropButton = (
   let buttonContent: JSX.Element | string;
 
   if (props.buttonStyle === 'icons') {
-    buttonContent = (
-      <closeIcon.react
-        tag="span"
-        elementSize="xlarge"
-        elementPosition="center"
-      />
+    buttonContent = <deleteIcon.react tag="span" elementPosition="center" />;
+    return (
+      <Button
+        className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
+        onClick={props.item.onDropIndexClick(props.item.index)}
+        appearance="stealth"
+        title={trans.__('Remove item')}
+      >
+        {buttonContent}
+      </Button>
     );
   } else {
-    buttonContent = trans.__('Remove');
+    return (
+      <button
+        className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
+        onClick={props.item.onDropIndexClick(props.item.index)}
+      >
+        {trans.__('Remove')}
+      </button>
+    );
   }
-
-  return (
-    <button
-      className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
-      onClick={props.item.onDropIndexClick(props.item.index)}
-    >
-      {buttonContent}
-    </button>
-  );
 };
 
 /**
@@ -214,8 +221,9 @@ export const AddButton = (
 
   return (
     <button
-      className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
+      className="jp-mod-styled jp-mod-accept jp-ArrayOperationsButton"
       onClick={props.onAddClick}
+      title={trans.__('Add item')}
     >
       {buttonContent}
     </button>

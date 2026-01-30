@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { JupyterFrontEnd } from './frontend';
+import type { ServerConnection, ServiceManager } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { JupyterFrontEnd } from './frontend';
 
 /**
  * A token for which a plugin can provide to respond to connection failures
