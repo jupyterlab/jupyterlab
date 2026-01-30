@@ -37,7 +37,7 @@
   "additionalProperties": false,
   "properties": {
     "shortcuts": {
-      "description": "The list of keyboard shortcuts. Use 'Accel Alt [1-9]' to switch to specific tabs by index, and 'Accel Alt 0' to switch to the last tab.",
+      "description": "The list of keyboard shortcuts. Use 'Accel Alt [1-9]' to switch to specific tabs by index, where 'Accel Alt 9' switches to the last tab.",
       "items": { "$ref": "#/definitions/shortcut" },
       "type": "array",
       "default": [
@@ -92,12 +92,6 @@
         {
           "command": "application:activate-tab-index",
           "keys": ["Accel Alt 9"],
-          "selector": "body",
-          "args": { "index": 9 }
-        },
-        {
-          "command": "application:activate-tab-index",
-          "keys": ["Accel Alt 0"],
           "selector": "body",
           "args": { "index": 0 }
         }

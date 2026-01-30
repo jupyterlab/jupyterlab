@@ -381,7 +381,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               index: {
                 type: 'number',
                 description: trans.__(
-                  'The index of the tab to activate (1-9, or 0 for last)'
+                  'The index of the tab to activate (1-8, or 9 for last)'
                 )
               }
             },

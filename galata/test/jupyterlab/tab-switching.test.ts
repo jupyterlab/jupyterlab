@@ -54,16 +54,13 @@ test.describe('Tab Switching Shortcuts', () => {
     const secondTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').nth(1);
     await expect(secondTab).toHaveClass(/lm-mod-current/);
   });
-
-  test('should switch to the Last Tab using Accel+Alt+0', async ({ page }) => {
+  test('should switch to the Last Tab using Accel+Alt+9', async ({ page }) => {
     const modifier = process.platform === 'darwin' ? 'Meta+Alt' : 'Control+Alt';
 
     // Move to first tab first
     await page.keyboard.press(`${modifier}+1`);
-
-    // Trigger the "Last Tab" shortcut (0)
-    await page.keyboard.press(`${modifier}+0`);
-
+    // Trigger the "Last Tab" shortcut (9)
+    await page.keyboard.press(`${modifier}+9`);
     // Verify the last tab in the list is now the current one
     const lastTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').last();
     await expect(lastTab).toHaveClass(/lm-mod-current/);
@@ -82,10 +79,8 @@ test.describe('Tab Switching Shortcuts', () => {
       );
       return tabs.length >= 2 && tabs[1].classList.contains('lm-mod-current');
     });
-
-    // Press index 9 (which doesn't exist in our 3-tab setup)
-    await page.keyboard.press(`${modifier}+9`);
-
+    // Press index 8 (which doesn't exist in our 3-tab setup)
+    await page.keyboard.press(`${modifier}+8`);
     // Verify we are STILL on the second tab
     const secondTab = page.locator('#jp-main-dock-panel .lm-TabBar-tab').nth(1);
     await expect(secondTab).toHaveClass(/lm-mod-current/);
