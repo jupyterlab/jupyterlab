@@ -20,7 +20,7 @@ env:
 
 jobs:
   test:
-    name: Visual Regression Tests (${{ matrix.browser }})
+    name: Visual Regression Tests (${{ matrix.browser }}, ${{ matrix.build-mode }})
     if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
     timeout-minutes: 260
     runs-on: ubuntu-22.04
@@ -30,8 +30,13 @@ jobs:
         include:
           - project: 'jupyterlab'
             browser: 'chromium'
+            build-mode: 'dev'
+          - project: 'jupyterlab'
+            browser: 'chromium'
+            build-mode: 'prod'
           - project: 'jupyterlab-firefox'
             browser: 'firefox'
+            build-mode: 'dev'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,8 +54,12 @@ jobs:
       - name: Install dependencies
         run: |
           bash ./scripts/ci_install.sh
-          # Build dev-mode
-          jlpm run build
+          # Build based on mode
+          if [[ "${{ matrix.build-mode }}" == "prod" ]]; then
+            jlpm run build:dev:prod
+          else
+            jlpm run build
+          fi
 
       - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
         run: |
@@ -77,7 +86,8 @@ jobs:
           cd galata
           jlpm run test --project ${{ matrix.project }}
           mv playwright-report playwright-report-${{ matrix.project }} || true
-          if [[ "${{ matrix.browser }}" == "chromium" ]]; then
+          # Only run additional tests for chromium dev mode to avoid duplication
+          if [[ "${{ matrix.browser }}" == "chromium" && "${{ matrix.build-mode }}" == "dev" ]]; then
             jlpm run test --project galata
             mv playwright-report playwright-report-galata || true
             mv galata/test-results galata/test-jupyterlab-results || true
@@ -92,7 +102,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-test-assets-${{ matrix.browser }}
+          name: jupyterlab-galata-test-assets-${{ matrix.browser }}-${{ matrix.build-mode }}
           path: |
             galata/test-${{ matrix.project }}-results
             galata/test-results
@@ -101,7 +111,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-galata-report-${{ matrix.browser }}
+          name: jupyterlab-galata-report-${{ matrix.browser }}-${{ matrix.build-mode }}
           path: |
             galata/playwright-report*
 
