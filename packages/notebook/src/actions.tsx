@@ -25,7 +25,7 @@ import {
 } from '@jupyterlab/cells';
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
-import type * as nbformat from '@jupyterlab/nbformat';
+import * as nbformat from '@jupyterlab/nbformat';
 import type { KernelMessage } from '@jupyterlab/services';
 import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -2700,7 +2700,7 @@ namespace Private {
   ): nbformat.IBaseCell[] {
     return cells.map(cell => {
       const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
-      if (nbformat.isCode(copy)) {
+      if (copy && nbformat.isCode(copy)) {
         copy.outputs = [];
         copy.execution_count = null;
       }
