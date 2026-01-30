@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { HoverBox } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**

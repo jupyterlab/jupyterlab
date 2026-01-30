@@ -2,14 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ToolbarButton } from '@jupyterlab/apputils';
-import { Context } from '@jupyterlab/docregistry';
+import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer } from '@jupyterlab/testing';
-import {
-  INotebookModel,
-  NotebookPanel,
-  NotebookWidgetFactory
-} from '@jupyterlab/notebook';
+import type { INotebookModel } from '@jupyterlab/notebook';
+import { NotebookPanel, NotebookWidgetFactory } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const rendermime = utils.defaultRenderMime();

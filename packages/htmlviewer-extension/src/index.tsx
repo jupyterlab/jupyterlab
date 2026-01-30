@@ -7,25 +7,25 @@
  * @module htmlviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   ICommandPalette,
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { HTMLViewer } from '@jupyterlab/htmlviewer';
 import {
-  HTMLViewer,
   HTMLViewerFactory,
   IHTMLViewerTracker,
   ToolbarItems
 } from '@jupyterlab/htmlviewer';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { html5Icon } from '@jupyterlab/ui-components';

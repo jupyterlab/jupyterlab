@@ -3,15 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
-import {
-  CONFLICT_CONTAINER_CLASS,
-  IConflicts,
-  ShortcutInput
-} from './ShortcutInput';
-import {
+import type { IConflicts } from './ShortcutInput';
+import { CONFLICT_CONTAINER_CLASS, ShortcutInput } from './ShortcutInput';
+import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutTarget,
