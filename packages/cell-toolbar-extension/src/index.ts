@@ -44,17 +44,18 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: async () => {
+      execute: async args => {
         let shouldConfirmDelete = true;
+        let setting: ISettingRegistry.ISettings | undefined;
 
         if (settingRegistry) {
-          const setting = await settingRegistry.load(PLUGIN_ID);
+          setting = await settingRegistry.load(PLUGIN_ID);
           shouldConfirmDelete = setting.get('askCellDeleteConfirmation')
             .composite as boolean;
         }
 
         if (!shouldConfirmDelete) {
-          return app.commands.execute('notebook:delete-cell');
+          return app.commands.execute('notebook:delete-cell', args);
         }
 
         const result = await showDialog({
@@ -64,18 +65,19 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
             Dialog.cancelButton(),
             Dialog.warnButton({ label: trans.__('Delete') })
           ],
-          checkbox: {
-            label: trans.__('Do not ask me again'),
-            caption: trans.__('Ignore this warning for future deletions.')
-          }
+          checkbox: settingRegistry
+            ? {
+                label: trans.__('Do not ask me again'),
+                caption: trans.__('Ignore this warning for future deletions.')
+              }
+            : null
         });
 
         if (result.button.accept) {
-          if (result.isChecked && settingRegistry) {
-            const setting = await settingRegistry.load(PLUGIN_ID);
+          if (result.isChecked && setting) {
             await setting.set('askCellDeleteConfirmation', false);
           }
-          return app.commands.execute('notebook:delete-cell');
+          return app.commands.execute('notebook:delete-cell', args);
         }
       }
     });
