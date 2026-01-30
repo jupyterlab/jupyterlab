@@ -23,7 +23,7 @@ jobs:
             upload-output: true
           - group: lint
             cache-path: build/.cache/lint
-            cache-hashfiles: '["yarn.lock", ".prettierrc", ".prettierignore"]'
+            cache-hashfiles: 'yarn.lock, .prettier*'
         exclude:
           - group: integrity
             python-version: "3.10"
@@ -72,7 +72,7 @@ jobs:
         with:
           path: ${{ matrix.cache-path }}
           key: |-
-            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(fromJson(matrix.cache-hashfiles)) }}
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(matrix.cache-hashfiles) }}
 
 
       - name: Install dependencies
