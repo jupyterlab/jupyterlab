@@ -84,7 +84,7 @@
     "prepare:python-release": "node buildutils/lib/prepare-python-release.js",
     "prepublish:check": "node buildutils/lib/prepublish-check.js",
     "prettier": "npm run prettier:base -- --write \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
-    "prettier:base": "prettier --experimental-cli --parallel-workers=8 --cache --cache-location=build/.cache/prettier",
+    "prettier:base": "prettier --experimental-cli --parallel-workers=8 --cache --cache-location=build/.cache/lint/prettier",
     "prettier:check": "npm run prettier:base -- --check \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "prettier:files": "npm run prettier:base -- --write",
     "publish:js": "node buildutils/lib/publish.js",

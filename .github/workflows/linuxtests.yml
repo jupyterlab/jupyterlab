@@ -69,6 +69,13 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
 
+      - name: Restore ${{ matrix.group }} caches
+        if: ${{ contains(fromJSON('["lint"]'), matrix.group) }}
+        uses: actions/cache@v5
+        with:
+          path: build/.cache/${{ matrix.group }}
+          key: ${{ matrix.group }}-${{runner}}
+
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
