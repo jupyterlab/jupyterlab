@@ -480,22 +480,43 @@ front: matter
       expect(headings[0].skip).toEqual(true);
     });
 
-    it('should clean the title', async () => {
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+      [
+        '## Title [with](https://jupyter.org "title") link',
+        [
+          {
+            level: 2,
+            text: 'Title with link',
+            line: 0,
+            raw: '## Title [with](https://jupyter.org "title") link',
+            skip: false
+          }
+        ]
+      ],
+      [
+        '<h1>Title <a href="https://jupyter.org" title="title">with</a> link</h1>',
+        [
+          {
+            level: 1,
+            text: 'Title with link',
+            line: 0,
+            raw: '<h1>Title <a href="https://jupyter.org" title="title">with</a> link</h1>',
+            skip: false
+          }
+        ]
+      ]
+    ])('should clean the title', async (src, headers) => {
       const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
       const parser: IMarkdownParser = createMarkdownParser(languages);
-      const src = '## Title [with](https://jupyter.org "title") link';
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
         src,
         parser
       );
-      expect(headings).toHaveLength(1);
-      expect(headings[0]).toEqual({
-        level: 2,
-        text: 'Title with link',
-        line: 0,
-        raw: '## Title [with](https://jupyter.org "title") link',
-        skip: false
-      });
+
+      expect(headings).toHaveLength(headers.length);
+      for (let i = 0; i < headers.length; i++) {
+        expect(headings[i]).toEqual(headers[i]);
+      }
     });
 
     it.each<[number]>([[1], [2], [3], [4], [5], [6]])(
