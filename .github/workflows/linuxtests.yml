@@ -23,11 +23,9 @@ jobs:
             upload-output: true
           - group: lint
             cache-path: |
-              .eslintcache
-              .prettiercache
-              .stylintcache
-            cache-hashfiles: |
-              .eslintignore, .eslintrc.js, .eslintrc.typecheck.js, .prettierignore, .prettierrc, .stylelintcache, .stylelintignore, .stylelintrc.yaml, tsconfig*.*
+              ./.eslintcache
+              ./.prettiercache
+              ./.stylelintcache
         exclude:
           - group: integrity
             python-version: "3.10"
@@ -71,12 +69,12 @@ jobs:
             playwright-browsers-${{ runner.os }}-
 
       - name: Restore ${{ matrix.group }} cache
-        if: ${{ matrix.cache-path && matrix.cache-hashfiles }}
+        if: ${{ matrix.cache-path }}
         uses: actions/cache@v5
         with:
           path: ${{ matrix.cache-path }}
           key: |-
-            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(matrix.cache-hashfiles)  }}
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Install dependencies
         env:
