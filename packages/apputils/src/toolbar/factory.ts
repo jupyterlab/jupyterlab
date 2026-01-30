@@ -169,7 +169,7 @@ async function setToolbarItems(
       }
     });
   } catch (error) {
-    if (error.name === 'TransformError') {
+    if (error instanceof Error && error.name === 'TransformError') {
       // Assume the existing transformer is the toolbar builder transformer
       // from another factory set up.
       listenPlugin = false;

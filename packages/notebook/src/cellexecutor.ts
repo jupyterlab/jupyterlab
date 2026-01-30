@@ -112,13 +112,16 @@ export async function runCell({
             }
           })();
         } catch (reason) {
-          if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+          if (
+            cell.isDisposed ||
+            (reason instanceof Error && reason.message.startsWith('Canceled'))
+          ) {
             ran = false;
           } else {
             onCellExecuted({
               cell,
               success: false,
-              error: reason
+              error: reason instanceof KernelError ? reason : null
             });
             throw reason;
           }

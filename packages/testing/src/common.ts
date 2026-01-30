@@ -109,7 +109,11 @@ export async function expectFailure(
     await promise;
     called = true;
   } catch (err) {
-    if (message && err.message.indexOf(message) === -1) {
+    if (
+      message &&
+      err instanceof Error &&
+      err.message.indexOf(message) === -1
+    ) {
       throw Error(`Error "${message}" not in: "${err.message}"`);
     }
   }

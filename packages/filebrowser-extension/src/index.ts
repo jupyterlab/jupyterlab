@@ -41,6 +41,7 @@ import {
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -1000,13 +1001,19 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         // fetch the file from the URL
         try {
           const req = await fetch(url);
+          if (!req.ok) {
+            return showErrorMessage(
+              trans.__('Cannot fetch'),
+              trans.__('Could not open URL: %1', url)
+            );
+          }
           blob = await req.blob();
           type = req.headers.get('Content-Type') ?? '';
         } catch (reason) {
-          if (reason.response && reason.response.status !== 200) {
-            reason.message = trans.__('Could not open URL: %1', url);
-          }
-          return showErrorMessage(trans.__('Cannot fetch'), reason);
+          return showErrorMessage(
+            trans.__('Cannot fetch'),
+            reason instanceof Error ? reason : String(reason)
+          );
         }
 
         // upload the content of the file to the server
@@ -1020,7 +1027,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         } catch (error) {
           return showErrorMessage(
             trans._p('showErrorMessage', 'Upload Error'),
-            error
+            error instanceof Error ? error : String(error)
           );
         }
       },
@@ -1405,10 +1412,16 @@ function addCommands(
         }
         return commands.execute('docmanager:open', { path });
       } catch (reason) {
-        if (reason.response && reason.response.status === 404) {
+        if (
+          reason instanceof ServerConnection.ResponseError &&
+          reason.response.status === 404
+        ) {
           reason.message = trans.__('Could not find path: %1', path);
         }
-        return showErrorMessage(trans.__('Cannot open'), reason);
+        return showErrorMessage(
+          trans.__('Cannot open'),
+          reason instanceof Error ? reason : String(reason)
+        );
       }
     },
     describedBy: {

@@ -1424,7 +1424,11 @@ async function activateConsole(
           args['interactionMode'] as string
         );
       } catch (reason) {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        console.error(
+          `Failed to set ${pluginId}:${key} - ${
+            reason instanceof Error ? reason.message : String(reason)
+          }`
+        );
       }
     },
     isToggled: args => args['interactionMode'] === interactionMode,

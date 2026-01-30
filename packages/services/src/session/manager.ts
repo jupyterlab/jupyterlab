@@ -256,8 +256,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
       // 503 (<2.0) or 424 (>2.0) in that case.
       if (
         err instanceof ServerConnection.NetworkError ||
-        err.response?.status === 503 ||
-        err.response?.status === 424
+        (err instanceof ServerConnection.ResponseError &&
+          (err.response.status === 503 || err.response.status === 424))
       ) {
         this._connectionFailure.emit(err);
       }

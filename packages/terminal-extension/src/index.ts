@@ -468,7 +468,9 @@ function addCommands(
           current.content.activate();
         }
       } catch (err) {
-        Private.showErrorMessage(err);
+        if (err instanceof Error) {
+          Private.showErrorMessage(err);
+        }
       }
     },
     icon: args =>
@@ -595,7 +597,9 @@ function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
-          Private.showErrorMessage(err);
+          if (err instanceof Error) {
+            Private.showErrorMessage(err);
+          }
         }
       }
     },
@@ -615,7 +619,9 @@ function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
-          Private.showErrorMessage(err);
+          if (err instanceof Error) {
+            Private.showErrorMessage(err);
+          }
         }
       }
     },
@@ -659,7 +665,9 @@ function addCommands(
         commands.notifyCommandChanged(CommandIDs.setTheme);
       } catch (err) {
         console.log(err);
-        Private.showErrorMessage(err);
+        if (err instanceof Error) {
+          Private.showErrorMessage(err);
+        }
       }
     },
     describedBy: {
