@@ -184,7 +184,7 @@ export namespace Contents {
     /**
      * Whether to include the file content.
      *
-     * The default is `true`.
+     * The default is `false`.
      */
     content?: boolean;
 
