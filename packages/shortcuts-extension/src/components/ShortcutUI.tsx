@@ -4,7 +4,8 @@
  */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
 import { NewShortcutItem } from './NewShortcutItem';
 import { ShortcutItem } from './ShortcutItem';
