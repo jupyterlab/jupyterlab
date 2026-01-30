@@ -2692,10 +2692,10 @@ namespace Private {
     cells: nbformat.IBaseCell[]
   ): nbformat.IBaseCell[] {
     return cells.map(cell => {
-      const copy = JSONExt.deepCopy(cell) as nbformat.IBaseCell;
-      if (nbformat.isCode(cell)) {
-        (copy as nbformat.ICodeCell).outputs = [];
-        (copy as nbformat.ICodeCell).execution_count = null;
+      const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
+      if (nbformat.isCode(copy)) {
+        copy.outputs = [];
+        copy.execution_count = null;
       }
       return copy;
     });
