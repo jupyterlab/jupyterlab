@@ -74,7 +74,7 @@ jobs:
         with:
           path: ${{ matrix.cache-path }}
           key: |-
-            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version  }}
 
       - name: Install dependencies
         env:
