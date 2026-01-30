@@ -254,8 +254,7 @@ describe('filebrowser/listing', () => {
         dirListing.selectAll();
         expect([...dirListing.selectedItems()].length).toBeGreaterThan(1);
 
-        const renamePromise = dirListing.rename();
-        await renamePromise;
+        await dirListing.rename();
         await dirListing.model.refresh();
 
         const itemNames = [...dirListing.sortedItems()].map(item => item.name);
@@ -278,7 +277,10 @@ describe('filebrowser/listing', () => {
         const beforeNames = [...dirListing.sortedItems()].map(
           item => item.name
         );
+
         await dirListing.rename();
+        await dirListing.model.refresh();
+
         const afterNames = [...dirListing.sortedItems()].map(item => item.name);
 
         expect(afterNames).toEqual(beforeNames);

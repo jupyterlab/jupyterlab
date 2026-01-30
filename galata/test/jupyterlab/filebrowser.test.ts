@@ -74,11 +74,15 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   await item1.click({ button: 'right' });
 
   // Trigger Rename
-  await page.menu.clickMenuItem('File>Rename');
+  const bulkRename = page.locator(
+    '.jp-Menu-item[data-command="filebrowser:bulk-rename"]'
+  );
+  await expect(bulkRename).toBeVisible();
+  await bulkRename.click();
 
   // Wait for the bulk rename dialog
-  const dialog = page.locator('.jp-Dialog');
-  await dialog.waitFor();
+  const dialog = page.getByRole('dialog', { name: 'Bulk Rename' });
+  await expect(dialog).toBeVisible({ timeout: 10000 });
   expect(await dialog.locator('.jp-Dialog-header').textContent()).toBe(
     'Bulk Rename'
   );
