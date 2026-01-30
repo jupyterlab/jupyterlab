@@ -23,9 +23,9 @@ jobs:
             upload-output: true
           - group: lint
             cache-path: |
-              .stylintcache
               .eslintcache
               .prettiercache
+              .stylintcache
             cache-hashfiles: |
               .eslintignore, .eslintrc.js, .eslintrc.typecheck.js, .prettierignore, .prettierrc, .stylelintcache, .stylelintignore, .stylelintrc.yaml, tsconfig*.*
         exclude:
@@ -76,7 +76,7 @@ jobs:
         with:
           path: ${{ matrix.cache-path }}
           key: |-
-            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(matrix.cache-hashfiles) }}
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles(matrix.cache-hashfiles)  }}
 
       - name: Install dependencies
         env:
