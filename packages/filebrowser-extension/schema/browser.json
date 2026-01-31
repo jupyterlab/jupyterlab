@@ -77,9 +77,14 @@
         "rank": 9
       },
       {
+        "command": "filebrowser:bulk-rename",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "rank": 10
+      },
+      {
         "type": "separator",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 10
+        "rank": 11
       },
       {
         "command": "filebrowser:shutdown",

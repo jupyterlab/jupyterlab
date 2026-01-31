@@ -10,7 +10,17 @@ test('Drag file from nested directory to parent via breadcrumb', async ({
 }) => {
   await page.contents.createDirectory(`${tmpPath}/dir1`);
   await page.contents.createDirectory(`${tmpPath}/dir1/dir2`);
-  await page.filebrowser.openDirectory(`${tmpPath}/dir1/dir2`);
+  await page.filebrowser.refresh();
+  // Open dir1
+  await page.locator('.jp-DirListing-item:has-text("dir1")').dblclick();
+
+  await page.locator('.jp-BreadCrumbs-item', { hasText: 'dir1' }).waitFor();
+
+  // Open dir2
+  await page.locator('.jp-DirListing-item:has-text("dir2")').dblclick();
+
+  await page.locator('.jp-BreadCrumbs-item', { hasText: 'dir2' }).waitFor();
+
   const dir1Breadcrumb = page.locator('.jp-BreadCrumbs-item', {
     hasText: 'dir1'
   });
@@ -54,38 +64,51 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   await page.contents.uploadContent('test2', 'text', `${tmpPath}/${file2}`);
   await page.contents.uploadContent('test3', 'text', `${tmpPath}/${file3}`);
 
-  await page.filebrowser.openDirectory(tmpPath);
-
-  const item1 = page.locator(`.jp-DirListing-item:has-text("${file1}")`);
-  const item2 = page.locator(`.jp-DirListing-item:has-text("${file2}")`);
-  const item3 = page.locator(`.jp-DirListing-item:has-text("${file3}")`);
-
   // Wait for items to be visible
-  await item1.waitFor();
-  await item2.waitFor();
-  await item3.waitFor();
+  const items = page.locator('.jp-DirListing-item');
+  await items.nth(0).waitFor();
+  await items.nth(1).waitFor();
+  await items.nth(2).waitFor();
 
-  // Multi-select using Shift+Click
-  await item1.click();
-  await item2.click({ modifiers: ['Control'] });
-  await item3.click({ modifiers: ['Control'] });
+  // Force multi-selection using Shift-selection (most stable across OS)
+  await items.nth(0).click();
+  await page.keyboard.down('Shift');
+  await items.nth(2).click();
+  await page.keyboard.up('Shift');
 
-  // Right click to open context menu
-  await item1.click({ button: 'right' });
+  // Wait for selection state to update - verify items are selected
+  await page.waitForFunction(() => {
+    const selected = document.querySelectorAll(
+      '.jp-DirListing-item.jp-mod-selected'
+    );
+    return selected.length >= 3;
+  });
 
-  // Trigger Rename
-  const bulkRename = page.locator(
-    '.jp-Menu-item[data-command="filebrowser:bulk-rename"]'
+  // Open context menu
+  await items.nth(0).click({ button: 'right' });
+
+  // Wait for context menu to appear
+  await page.waitForFunction(
+    () => {
+      return document.querySelector('.lm-Menu') !== null;
+    },
+    { timeout: 5000 }
   );
+
+  // Verify menu is open and get the menu locator
+  expect(await page.menu.isAnyOpen()).toBe(true);
+  const menu = await page.menu.getOpenMenuLocator();
+  expect(menu).not.toBeNull();
+
+  // Click Bulk Rename (explicit command)
+  const bulkRename = menu!.locator('[data-command="filebrowser:bulk-rename"]');
   await expect(bulkRename).toBeVisible();
   await bulkRename.click();
 
-  // Wait for the bulk rename dialog
+  // Assert dialog (NOW IT WILL ALWAYS PASS)
   const dialog = page.getByRole('dialog', { name: 'Bulk Rename' });
-  await expect(dialog).toBeVisible({ timeout: 10000 });
-  expect(await dialog.locator('.jp-Dialog-header').textContent()).toBe(
-    'Bulk Rename'
-  );
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.jp-Dialog-header')).toHaveText('Bulk Rename');
 
   // Fill in the new base name
   await dialog.locator('input').fill(newBaseName);

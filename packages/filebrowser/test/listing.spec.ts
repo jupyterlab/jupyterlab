@@ -251,7 +251,7 @@ describe('filebrowser/listing', () => {
         });
         await signalToPromise(dirListing.updated);
 
-        dirListing.selectAll();
+        await dirListing.selectAll();
         expect([...dirListing.selectedItems()].length).toBeGreaterThan(1);
 
         await dirListing.rename();

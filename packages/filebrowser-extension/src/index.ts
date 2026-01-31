@@ -123,6 +123,8 @@ namespace CommandIDs {
 
   export const rename = 'filebrowser:rename';
 
+  export const bulkRename = 'filebrowser:bulk-rename';
+
   // For main browser only.
   export const copyShareableLink = 'filebrowser:share-main';
 
@@ -1621,6 +1623,28 @@ function addCommands(
       const n = Array.from(tracker.currentWidget?.selectedItems() ?? []).length;
       return n > 1 ? trans.__('Rename %1 Items', n) : trans.__('Rename');
     },
+    mnemonic: 0,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.bulkRename, {
+    label: trans.__('Bulk Rename'),
+    execute: () => {
+      const widget = tracker.currentWidget;
+      if (widget) {
+        return widget.rename();
+      }
+    },
+    isEnabled: () => {
+      const widget = tracker.currentWidget;
+      return !!widget && Array.from(widget.selectedItems()).length > 1;
+    },
+    icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     mnemonic: 0,
     describedBy: {
       args: {

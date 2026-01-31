@@ -88,6 +88,7 @@ export class Dialog<T> extends Widget {
   constructor(options: Partial<Dialog.IOptions<T>> = {}) {
     const dialogNode = document.createElement('dialog');
     dialogNode.ariaModal = 'true';
+    dialogNode.setAttribute('role', 'dialog');
     super({ node: dialogNode });
     this.addClass('jp-Dialog');
     this.addClass('jp-ThemedContainer');
@@ -120,9 +121,14 @@ export class Dialog<T> extends Widget {
     const layout = (this.layout = new PanelLayout());
     const content = new Panel();
     content.addClass('jp-Dialog-content');
+    // Store the title string for later use in accessibility
+    this._titleString = typeof normalized.title === 'string' ? normalized.title : '';
     if (typeof options.body === 'string') {
       content.addClass('jp-Dialog-content-small');
       dialogNode.ariaLabel = [normalized.title, options.body].join(' ');
+    } else if (this._titleString) {
+      // Set aria-label for dialogs with widget bodies so they can be found by accessible name
+      dialogNode.ariaLabel = this._titleString;
     }
     layout.addWidget(content);
 
@@ -277,6 +283,39 @@ export class Dialog<T> extends Widget {
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
 
+    const setAriaLabel = () => {
+      // Set aria-label from stored title string or header text if not already set
+      // This ensures Playwright can find the dialog by accessible name
+      if (node instanceof HTMLDialogElement && !node.ariaLabel) {
+        // First try the stored title string
+        if (this._titleString) {
+          node.ariaLabel = this._titleString;
+        } else {
+          // Fallback: try to get the title from the header element
+          // The header might be a React component, so we need to wait for it to render
+          const header = this.node.querySelector('.jp-Dialog-header');
+          if (header) {
+            // Get text content, but exclude the close button if present
+            const closeButton = header.querySelector('.jp-Dialog-close-button');
+            let headerText = header.textContent?.trim() || '';
+            if (closeButton && headerText) {
+              // Remove the close button text from the header text
+              const closeText = closeButton.textContent?.trim() || '';
+              if (closeText && headerText.includes(closeText)) {
+                headerText = headerText.replace(closeText, '').trim();
+              }
+            }
+            if (headerText) {
+              node.ariaLabel = headerText;
+            }
+          }
+        }
+      } else if (node instanceof HTMLDialogElement && this._titleString && node.ariaLabel !== this._titleString) {
+        // Ensure aria-label matches the title string
+        node.ariaLabel = this._titleString;
+      }
+    };
+
     const setFocus = () => {
       if (this._focusNodeSelector) {
         const body = this.node.querySelector('.jp-Dialog-body');
@@ -287,6 +326,8 @@ export class Dialog<T> extends Widget {
         }
       }
       this._primary?.focus();
+      // Set aria-label after React components have rendered
+      setAriaLabel();
       this._ready.resolve();
     };
 
@@ -302,6 +343,10 @@ export class Dialog<T> extends Widget {
           console.error("Error while loading Dialog's body");
         });
     } else {
+      // For non-React bodies, set aria-label after a short delay to ensure header is rendered
+      setTimeout(() => {
+        setAriaLabel();
+      }, 0);
       setFocus();
     }
   }
@@ -532,6 +577,7 @@ export class Dialog<T> extends Widget {
   private _lastMouseDownInDialog: boolean;
   private _focusNodeSelector: string | undefined = '';
   private _bodyWidget: Widget;
+  private _titleString: string = '';
 }
 
 /**
