@@ -720,7 +720,6 @@ bumped their major version (following semver convention). We want to point out p
 - React 18.2.0 update
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the [migration to react 18](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html).
-
 ### CodeEditor text handling (sharedModel)
 
 In JupyterLab 4.x, extension authors should no longer update editor text
@@ -730,6 +729,12 @@ In JupyterLab 3.x, the following pattern was commonly used:
 
 ```ts
 widget.content.model.value.text = 'some text';
+```
+In JupyterLab 4.x, extensions should update editor contents through the shared
+model API. For full text replacement, use setSource:
+
+```ts
+widget.content.model.sharedModel.setSource('some text');
 ```
 
 In JupyterLab 4.x, extensions should update editor contents exclusively through
