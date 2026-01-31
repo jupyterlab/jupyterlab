@@ -736,11 +736,7 @@ In JupyterLab 4.x, extensions should update editor contents exclusively through
 the shared model APIs to ensure correct synchronization and collaboration.
 
 ```ts
-widget.content.model.sharedModel.updateSource(
-  0,
-  widget.content.model.sharedModel.getSource().length,
-  'some text'
-);
+widget.content.model.sharedModel.setSource('some text');
 ```
 
 ### Testing with Jest
