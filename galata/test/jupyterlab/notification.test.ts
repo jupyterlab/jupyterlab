@@ -188,9 +188,7 @@ test.describe('Toast', () => {
       page.evaluate(id => {
         return window.jupyterapp.commands.execute(
           'apputils:dismiss-notification',
-          {
-            id
-          }
+          { id }
         );
       }, id)
     ]);

@@ -938,9 +938,7 @@ describe('@jupyterlab/notebook', () => {
         widget.select(widget.widgets[2]);
         const cell = widget.model!.sharedModel.insertCell(
           widget.widgets.length,
-          {
-            cell_type: 'code'
-          }
+          { cell_type: 'code' }
         ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
@@ -1060,9 +1058,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.model!.sharedModel.insertCell(
           widget.widgets.length,
-          {
-            cell_type: 'code'
-          }
+          { cell_type: 'code' }
         ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndAdvance(
@@ -1162,9 +1158,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.model!.sharedModel.insertCell(
           widget.widgets.length,
-          {
-            cell_type: 'code'
-          }
+          { cell_type: 'code' }
         ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndInsert(
@@ -1292,9 +1286,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.model!.sharedModel.insertCell(
           widget.widgets.length,
-          {
-            cell_type: 'code'
-          }
+          { cell_type: 'code' }
         ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAll(widget, ipySessionContext);

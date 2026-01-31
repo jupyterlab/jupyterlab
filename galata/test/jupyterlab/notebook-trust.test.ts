@@ -61,9 +61,7 @@ test.describe('Notebook Trust', () => {
       async ([newContent]) => {
         await window.jupyterapp.commands.execute(
           'fileeditor:replace-selection',
-          {
-            text: newContent
-          }
+          { text: newContent }
         );
         // Save file after changes
         await window.jupyterapp.commands.execute('docmanager:save');

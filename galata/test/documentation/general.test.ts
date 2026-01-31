@@ -684,9 +684,7 @@ test.describe('General', () => {
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))",
-      {
-        delay: 0
-      }
+      { delay: 0 }
     );
     await page.keyboard.press('Shift+Enter');
 

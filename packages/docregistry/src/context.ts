@@ -59,9 +59,7 @@ export class Context<
 
     const sharedFactory = this._manager.contents.getSharedModelFactory(
       this._path,
-      {
-        contentProviderId: options.contentProviderId
-      }
+      { contentProviderId: options.contentProviderId }
     );
     const sharedModel = sharedFactory?.createNew({
       path: this._path,

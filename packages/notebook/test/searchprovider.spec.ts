@@ -382,9 +382,7 @@ describe('@jupyterlab/notebook', () => {
         let replaced = await provider.replaceCurrentMatch(
           '$1st_bar (was $&)',
           false,
-          {
-            regularExpression: true
-          }
+          { regularExpression: true }
         );
         expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
@@ -397,9 +395,7 @@ describe('@jupyterlab/notebook', () => {
         let replaced = await provider.replaceCurrentMatch(
           '$1st_bar (was $&)',
           false,
-          {
-            regularExpression: false
-          }
+          { regularExpression: false }
         );
         expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();

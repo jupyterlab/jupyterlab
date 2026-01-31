@@ -873,9 +873,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
                 : deadline.timeRemaining()
             );
           },
-          {
-            timeout: 3000
-          }
+          { timeout: 3000 }
         );
       }
     }
