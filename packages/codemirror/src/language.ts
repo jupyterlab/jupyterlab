@@ -298,10 +298,12 @@ export namespace EditorLanguageRegistry {
    * Get the default editor languages
    *
    * @param translator Application translator
+   * @param findLanguage Optional function to find a language by name for markdown code block highlighting
    * @returns Default CodeMirror 6 languages
    */
   export function getDefaultLanguages(
-    translator?: ITranslator | null
+    translator?: ITranslator | null,
+    findLanguage?: (info: string) => IEditorLanguage | null
   ): ReadonlyArray<IEditorLanguage> {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
     return [
@@ -418,7 +420,11 @@ export namespace EditorLanguageRegistry {
         extensions: ['md', 'markdown', 'mkd'],
         async load() {
           const m = await import('@codemirror/lang-markdown');
-          return m.markdown({ codeLanguages: this._modeList as any });
+          return m.markdown(
+            findLanguage
+              ? { codeLanguages: (info: string) => findLanguage(info) as any }
+              : undefined
+          );
         }
       },
       {
