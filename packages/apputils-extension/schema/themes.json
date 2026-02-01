@@ -101,6 +101,21 @@
         "ui-font-size1": {
           "type": ["string", "null"],
           "description": "font-size"
+        },
+        "rendermime-error-background": {
+          "title": "Error Background Color",
+          "description": "Background color for error output",
+          "type": "object",
+          "properties": {
+            "light": {
+              "type": ["string", "null"],
+              "description": "Background color to use in light theme"
+            },
+            "dark": {
+              "type": ["string", "null"],
+              "description": "Background color to use in dark theme"
+            }
+          }
         }
       }
     }
@@ -148,7 +163,11 @@
         "content-font-size1": null,
 
         "ui-font-family": null,
-        "ui-font-size1": null
+        "ui-font-size1": null,
+        "rendermime-error-background": {
+          "light": null,
+          "dark": null
+        }
       }
     }
   }

@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TerminalManager, Terminal as TerminalNS } from '@jupyterlab/services';
+import type { Terminal as TerminalNS } from '@jupyterlab/services';
+import { TerminalManager } from '@jupyterlab/services';
 import { framePromise, JupyterServer, testEmission } from '@jupyterlab/testing';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { Terminal } from '../src';
 

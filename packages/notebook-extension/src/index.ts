@@ -7,13 +7,12 @@
 
 import type { FieldProps } from '@rjsf/utils';
 
-import {
-  ILabShell,
-  ILayoutRestorer,
-  IRouter,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
   Dialog,
@@ -21,7 +20,6 @@ import {
   IKernelStatusModel,
   InputDialog,
   ISanitizer,
-  ISessionContext,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
   MainAreaWidget,
@@ -32,13 +30,12 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
-import {
-  CodeEditor,
-  IEditorServices,
-  IPositionModel
-} from '@jupyterlab/codeeditor';
-import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
+import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
+import { MarkdownCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -47,23 +44,27 @@ import {
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import {
   IDefaultFileBrowser,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
+import type { WidgetLSPAdapterTracker } from '@jupyterlab/lsp';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
-  IWidgetLSPAdapterTracker,
-  WidgetLSPAdapterTracker
+  IWidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IMetadataFormProvider } from '@jupyterlab/metadataform';
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { Notebook } from '@jupyterlab/notebook';
 import {
   CommandEditStatus,
   ExecutionIndicator,
@@ -71,7 +72,6 @@ import {
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
-  Notebook,
   NotebookActions,
   NotebookAdapter,
   NotebookModelFactory,
@@ -86,19 +86,21 @@ import {
   StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import {
-  IMarkdownParser,
-  IRenderMime,
-  IRenderMimeRegistry
-} from '@jupyterlab/rendermime';
-import { NbConvert } from '@jupyterlab/services';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type {
+  IDisposableMenuItem,
+  IFormRenderer,
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   addAboveIcon,
   addBelowIcon,
@@ -107,30 +109,29 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
-  IDisposableMenuItem,
-  IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon,
-  RankedMenu,
   refreshIcon,
   runIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type { CommandRegistry } from '@lumino/commands';
+import type {
   JSONObject,
   ReadonlyJSONValue,
-  ReadonlyPartialJSONObject,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ContextMenu, Menu, Panel, Widget } from '@lumino/widgets';
+import { JSONExt, UUID } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
+import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
@@ -3085,7 +3086,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.cutToSystemClipboard(current.content);
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.cutToSystemClipboard(current.content);
+        }
+        return NotebookActions.cut(current.content);
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
@@ -3130,7 +3134,10 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.copyToSystemClipboard(current.content);
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.copyToSystemClipboard(current.content);
+        }
+        return NotebookActions.copy(current.content);
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
@@ -3175,10 +3182,13 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.pasteFromSystemClipboard(
-          current.content,
-          'below'
-        );
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.pasteFromSystemClipboard(
+            current.content,
+            'below'
+          );
+        }
+        return NotebookActions.paste(current.content, 'below');
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
@@ -3223,10 +3233,13 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.pasteFromSystemClipboard(
-          current.content,
-          'above'
-        );
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.pasteFromSystemClipboard(
+            current.content,
+            'above'
+          );
+        }
+        return NotebookActions.paste(current.content, 'above');
       }
     },
     isEnabled,
@@ -3302,10 +3315,13 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return await NotebookActions.pasteFromSystemClipboard(
-          current.content,
-          'replace'
-        );
+        if (settings?.get('useSystemClipboardForCells').composite as boolean) {
+          return await NotebookActions.pasteFromSystemClipboard(
+            current.content,
+            'replace'
+          );
+        }
+        return NotebookActions.paste(current.content, 'replace');
       }
     },
     isEnabled,

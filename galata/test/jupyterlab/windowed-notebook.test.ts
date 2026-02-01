@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'windowed_notebook.ipynb';

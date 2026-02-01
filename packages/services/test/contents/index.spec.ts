@@ -7,13 +7,8 @@ import {
   JupyterServer,
   signalToPromise
 } from '@jupyterlab/testing';
-import {
-  Contents,
-  ContentsManager,
-  Drive,
-  IContentProvider,
-  ServerConnection
-} from '../../src';
+import type { Contents, IContentProvider } from '../../src';
+import { ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
 const DEFAULT_DIR: Contents.IModel = {
@@ -1340,8 +1335,6 @@ describe('drive', () => {
           format: null
         };
       }
-
-      drive: Contents.IDrive;
     }
 
     class ChangeEmittingContentProvider extends DummyContentProvider {

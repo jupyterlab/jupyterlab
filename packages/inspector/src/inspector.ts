@@ -2,13 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Printing } from '@jupyterlab/apputils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IInspector } from './tokens';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PanelLayout } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
+import type { IInspector } from './tokens';
 
 /**
  * The class name added to inspector panels.

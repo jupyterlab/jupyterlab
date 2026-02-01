@@ -1,38 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 
+import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
   Compartment,
-  Line,
   Prec,
-  Range,
   RangeSet,
   StateEffect,
-  StateEffectType,
   StateField
 } from '@codemirror/state';
 
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  gutter,
-  GutterMarker
-} from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, gutter, GutterMarker } from '@codemirror/view';
 
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
 import {
   breakpointIcon,
   selectedBreakpointIcon
@@ -79,7 +72,7 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
       const editor = this.editor;
@@ -87,21 +80,36 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
-      }
+      },
+      this
     );
 
-    this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
-      const editor = this.editor;
-      if (editor) {
-        EditorHandler.clearHighlight(editor);
-      }
-    });
+    this._debuggerService.model.callstack.currentFrameChanged.connect(
+      (_, frame: IDebugger.IStackFrame) => {
+        const editor = this.editor;
+        if (editor) {
+          EditorHandler.clearHighlight(editor);
+          const framePath = frame?.source?.path ?? '';
+          const editorPath =
+            this._path ||
+            this._debuggerService.getCodeId(this._src.getSource());
+
+          // If the current frame belongs to this editor, highlight its line.
+          if (framePath && editorPath && framePath === editorPath) {
+            if (typeof frame?.line === 'number') {
+              EditorHandler.showCurrentLine(editor, frame.line);
+            }
+          }
+        }
+      },
+      this
+    );
 
     this._breakpointEffect = StateEffect.define<
       { pos: number; selected: boolean }[]
@@ -384,7 +392,10 @@ export class EditorHandler implements IDisposable {
    * Add the breakpoints to the editor.
    */
   private _addBreakpointsToEditor(): void {
-    if (this._id !== this._debuggerService.session?.connection?.id) {
+    if (
+      !this.editor ||
+      this._id !== this._debuggerService.session?.connection?.id
+    ) {
       return;
     }
 
@@ -411,6 +422,10 @@ export class EditorHandler implements IDisposable {
    * Retrieve the breakpoints from the editor.
    */
   private _getBreakpointsFromEditor(): number[] {
+    if (!this.editor) {
+      return [];
+    }
+
     const editor = this.editor as CodeMirrorEditor;
     const breakpoints = editor.editor.state.field(this._breakpointState);
     let lines: number[] = [];

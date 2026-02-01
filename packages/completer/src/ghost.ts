@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  WidgetType
-} from '@codemirror/view';
-import { StateEffect, StateField, Text, Transaction } from '@codemirror/state';
+import { language } from '@codemirror/language';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, WidgetType } from '@codemirror/view';
+import type { Text, Transaction } from '@codemirror/state';
+import { StateEffect, StateField } from '@codemirror/state';
+import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 const TRANSIENT_LINE_SPACER_CLASS = 'jp-GhostText-lineSpacer';
 const TRANSIENT_LETTER_SPACER_CLASS = 'jp-GhostText-letterSpacer';
@@ -16,6 +15,14 @@ const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
 const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
 const HIDDEN_LINES_CLASS = 'jp-GhostText-hiddenLines';
+
+/**
+ * A single, shared language registry to efficiently highlight ghost text.
+ */
+const GHOST_TEXT_LANGUAGE_REGISTRY = new EditorLanguageRegistry();
+EditorLanguageRegistry.getDefaultLanguages().forEach(lang => {
+  GHOST_TEXT_LANGUAGE_REGISTRY.addLanguage(lang);
+});
 
 /**
  * Ghost text content and placement.
@@ -77,6 +84,11 @@ export class GhostTextManager {
    * Typing animation.
    */
   static streamingAnimation: 'none' | 'uncover' = 'uncover';
+
+  /**
+   * Whether to apply syntax highlighting to ghost text.
+   */
+  static ghostSyntaxHighlighting: boolean = false;
 
   /**
    * Delay for removal of line spacer.
@@ -145,8 +157,8 @@ class GhostTextWidget extends WidgetType {
     return (this.content.match(/\n/g) || '').length;
   }
 
-  updateDOM(dom: HTMLElement, _view: EditorView): boolean {
-    this._updateDOM(dom);
+  updateDOM(dom: HTMLElement, view: EditorView): boolean {
+    void this._updateDOM(dom, view);
     return true;
   }
 
@@ -154,7 +166,7 @@ class GhostTextWidget extends WidgetType {
     return this.options.content;
   }
 
-  toDOM() {
+  toDOM(view: EditorView) {
     let wrap = document.createElement('span');
     if (this.options.onPointerOver) {
       wrap.addEventListener('pointerover', this.options.onPointerOver);
@@ -165,7 +177,7 @@ class GhostTextWidget extends WidgetType {
     wrap.classList.add(GHOST_TEXT_CLASS);
     wrap.dataset.animation = GhostTextManager.streamingAnimation;
     wrap.dataset.providedBy = this.options.providerId;
-    this._updateDOM(wrap);
+    this._updateDOM(wrap, view).catch(console.error);
     return wrap;
   }
 
@@ -200,7 +212,7 @@ class GhostTextWidget extends WidgetType {
     dom.appendChild(errorIndicator);
   }
 
-  private _updateDOM(dom: HTMLElement) {
+  private async _updateDOM(dom: HTMLElement, view: EditorView) {
     if (this.options.error) {
       this._mountErrorAnimation(dom);
 
@@ -242,12 +254,41 @@ class GhostTextWidget extends WidgetType {
     );
     const linesToAdd = Math.max(0, minLines - content.split('\n').length + 1);
     const placeHolderLines = new Array(linesToAdd).fill('').join('\n');
+    dom.innerHTML = '';
 
     if (this.isSpacer) {
       dom.innerText = content + placeHolderLines;
       return;
     }
-    dom.innerText = content;
+
+    if (GhostTextManager.ghostSyntaxHighlighting) {
+      // Get the current CodeMirror Language object from the editor state.
+      const currentLanguageObject = view.state.facet(language);
+
+      if (currentLanguageObject) {
+        // Use the language name to look up the full IEditorLanguage object.
+        const editorLanguage = await GHOST_TEXT_LANGUAGE_REGISTRY.getLanguage(
+          currentLanguageObject.name
+        );
+
+        if (editorLanguage) {
+          // Pass the IEditorLanguage object to the highlight method.
+          await GHOST_TEXT_LANGUAGE_REGISTRY.highlight(
+            content,
+            editorLanguage,
+            dom
+          );
+        } else {
+          // Fallback if the language isn't in our registry.
+          dom.appendChild(document.createTextNode(content));
+        }
+      } else {
+        // Fallback if no language is active in the editor.
+        dom.appendChild(document.createTextNode(content));
+      }
+    } else {
+      dom.innerText = content;
+    }
 
     let streamedTokenHost = dom;
 
@@ -321,8 +362,8 @@ class TransientSpacerWidget extends GhostTextWidget {
 }
 
 class TransientLineSpacerWidget extends TransientSpacerWidget {
-  toDOM() {
-    const wrap = super.toDOM();
+  toDOM(view: EditorView) {
+    const wrap = super.toDOM(view);
     wrap.classList.add(TRANSIENT_LINE_SPACER_CLASS);
     wrap.style.animationDelay = GhostTextManager.spacerRemovalDelay + 'ms';
     wrap.style.animationDuration =
@@ -336,8 +377,8 @@ class TransientLetterSpacerWidget extends TransientSpacerWidget {
     return this.options.content[0];
   }
 
-  toDOM() {
-    const wrap = super.toDOM();
+  toDOM(view: EditorView) {
+    const wrap = super.toDOM(view);
     wrap.classList.add(TRANSIENT_LETTER_SPACER_CLASS);
     return wrap;
   }

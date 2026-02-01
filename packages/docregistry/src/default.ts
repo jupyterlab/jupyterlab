@@ -3,15 +3,18 @@
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { Contents } from '@jupyterlab/services';
-import { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PartialJSONValue } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Title, Widget } from '@lumino/widgets';
-import { DocumentRegistry, IDocumentWidget } from './index';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Contents } from '@jupyterlab/services';
+import type { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title, Widget } from '@lumino/widgets';
+import type { DocumentRegistry, IDocumentWidget } from './index';
 import { createReadonlyLabel } from './components';
 
 /**
@@ -623,9 +626,11 @@ export class DocumentWidget<
     sender: DocumentRegistry.IContext<U>,
     path: string
   ): void {
-    this.title.label = PathExt.basename(sender.localPath);
-    // The document is not untitled any more.
-    this.isUntitled = false;
+    const newName = PathExt.basename(sender.localPath);
+    if (newName !== this.title.label) {
+      this.isUntitled = false;
+    }
+    this.title.label = newName;
   }
 
   /**

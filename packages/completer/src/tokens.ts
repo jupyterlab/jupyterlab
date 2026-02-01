@@ -1,18 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMime } from '@jupyterlab/rendermime';
-import { Session } from '@jupyterlab/services';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { SourceChange } from '@jupyter/ydoc';
-import { JSONValue, Token } from '@lumino/coreutils';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import type { Session } from '@jupyterlab/services';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import type { SourceChange } from '@jupyter/ydoc';
+import type { JSONValue } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
-import { CompletionHandler } from './handler';
-import { Completer } from './widget';
-import { InlineCompleter } from './inline';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import type { CompletionHandler } from './handler';
+import type { Completer } from './widget';
+import type { InlineCompleter } from './inline';
 
 /**
  * The type of completion request.
@@ -489,6 +490,10 @@ export interface IInlineCompleterSettings {
    * Reserve space for the longest of the completions candidates.
    */
   reserveSpaceForLongest: boolean;
+  /**
+   * If true, applies syntax highlighting to the ghost text suggestion instead of showing it as plain, faded text.
+   */
+  ghostSyntaxHighlighting: boolean;
   /**
    * Provider settings.
    */

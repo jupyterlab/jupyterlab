@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbconvert-css",
-  "version": "4.5.0-rc.1",
+  "version": "4.6.0-alpha.2",
   "description": "CSS bundle for the JupyterLab nbconvert template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -22,30 +22,31 @@
   },
   "files": [
     "style/*.js",
-    "style/*.css"
+    "style/*.js.map",
+    "style/*.css",
+    "style/*.css.map"
   ],
   "scripts": {
-    "build": "webpack --mode=production",
+    "build": "rspack --mode=production",
     "build:all": "npm run build",
     "clean": "rimraf style/",
-    "watch": "webpack --watch"
+    "watch": "rspack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.0-rc.1",
-    "@jupyterlab/apputils": "^4.6.0-rc.1",
-    "@jupyterlab/cells": "^4.5.0-rc.1",
-    "@jupyterlab/codemirror": "^4.5.0-rc.1",
-    "@jupyterlab/notebook": "^4.5.0-rc.1",
-    "@jupyterlab/outputarea": "^4.5.0-rc.1",
-    "@jupyterlab/rendermime": "^4.5.0-rc.1"
+    "@jupyterlab/application": "^4.6.0-alpha.2",
+    "@jupyterlab/apputils": "^4.7.0-alpha.2",
+    "@jupyterlab/cells": "^4.6.0-alpha.2",
+    "@jupyterlab/codemirror": "^4.6.0-alpha.2",
+    "@jupyterlab/notebook": "^4.6.0-alpha.2",
+    "@jupyterlab/outputarea": "^4.6.0-alpha.2",
+    "@jupyterlab/rendermime": "^4.6.0-alpha.2"
   },
   "devDependencies": {
+    "@rspack/cli": "^1.7.3",
+    "@rspack/core": "^1.7.3",
     "css-loader": "^6.7.1",
-    "mini-css-extract-plugin": "^2.7.0",
     "null-loader": "^4.0.0",
-    "rimraf": "~5.0.5",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "rimraf": "~5.0.5"
   },
   "publishConfig": {
     "access": "public"

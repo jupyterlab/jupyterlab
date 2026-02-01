@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';
@@ -91,4 +91,32 @@ export function isValidJSON(value: string): boolean {
  */
 export function isBlank(value: string): boolean {
   return value.trim().length === 0;
+}
+
+/**
+ * Get the font size of items in the file browser listing.
+ */
+export async function getFileListFontSize(
+  page: IJupyterLabPageFixture
+): Promise<number> {
+  const itemElement = page.locator(
+    '.jp-DirListing-content .jp-DirListing-itemText'
+  );
+  await itemElement.waitFor();
+  const fontSize = await itemElement.evaluate(
+    el => getComputedStyle(el).fontSize
+  );
+  return parseInt(fontSize);
+}
+
+/**
+ * Change font size using Settings > Theme menu.
+ */
+export async function changeCodeFontSize(
+  page: IJupyterLabPageFixture,
+  menuOption: string
+): Promise<void> {
+  await page.click('text=Settings');
+  await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
+  await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
 }
