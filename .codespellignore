@@ -41,6 +41,7 @@ CodeEditor
 DocumentWidget
 MainAreaWidget
 IIterator
+afterAll
 
 # Common false positives
 keypair

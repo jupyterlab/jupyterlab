@@ -1234,7 +1234,7 @@ the intended use cases, and the way these are exposed in the user interface are 
 
 To register a custom drive, use the contents manager's `addDrive` method.
 The drive needs to follow the {ts:interface}`services.Contents.IDrive` interface. For drives that use
-a jupyter-server compliant REST API you may wish to extend or re-use
+a jupyter-server compliant REST API you may wish to extend or reuse
 the built-in {ts:class}`services.Drive` class, as demonstrated below:
 
 ```typescript
