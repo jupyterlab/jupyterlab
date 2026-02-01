@@ -420,11 +420,23 @@ export namespace EditorLanguageRegistry {
         extensions: ['md', 'markdown', 'mkd'],
         async load() {
           const m = await import('@codemirror/lang-markdown');
-          return m.markdown(
-            findLanguage
-              ? { codeLanguages: (info: string) => findLanguage(info) as any }
-              : undefined
-          );
+          if (!findLanguage) {
+            return m.markdown();
+          }
+          return m.markdown({
+            codeLanguages: (info: string) => {
+              const language = findLanguage(info);
+              if (!language) {
+                return null;
+              }
+              if (language instanceof LanguageDescription) {
+                // Sometimes the IEditorLanguage returned is a
+                // LanguageDescription instance, so early return in this case.
+                return language;
+              }
+              return LanguageDescription.of(language);
+            }
+          });
         }
       },
       {
