@@ -22,5 +22,5 @@ jobs:
         uses: codespell-project/actions-codespell@v2
         with:
           check_filenames: false
-          skip: '*.min.js,*.map,*.lock,*.json,node_modules,*.ipynb,*.svg,*.png,*.jpg,*.jpeg,*.gif,*.ico,*.woff,*.woff2,*.ttf,*.eot,*.sum,*.pyc,.git,yarn.lock,package-lock.json,*.bundle.js'
+          skip: '*.min.js,*.map,*.lock,*.json,node_modules,*.ipynb,*.svg,*.png,*.jpg,*.jpeg,*.gif,*.ico,*.woff,*.woff2,*.ttf,*.eot,*.sum,*.pyc,.git,yarn.lock,package-lock.json,*.bundle.js,yarn.js'
           ignore_words_file: .codespellignore
