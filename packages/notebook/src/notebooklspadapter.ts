@@ -259,7 +259,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     let cellsRemoved: ICellModel[] = [];
     const type = this._type;
     if (change.type === 'set') {
-      // handling of conversions is important, because the editors get re-used and their handlers inherited,
+      // handling of conversions is important, because the editors get reused and their handlers inherited,
       // so we need to clear our handlers from editors of e.g. markdown cells which previously were code cells.
       let convertedToMarkdownOrRaw = [];
       let convertedToCode = [];
