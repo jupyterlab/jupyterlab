@@ -143,9 +143,9 @@ props.trans.__('This translatable string will be found');
 Examples that will **not** work:
 
 ```typescript
-translator.__('This translatable string WON\'T be found');
-__('This translatable string WON\'T be found');
-this.__('This translatable string WONT\' be found');
+translator.__("This translatable string WON'T be found");
+__("This translatable string WON'T be found");
+this.__("This translatable string WONT' be found");
 ```
 
 To fix this issue, alter your variable to use an accepted name:
