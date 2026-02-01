@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterServer } from '@jupyterlab/testing';
-import { Kernel, KernelAPI, KernelManager, KernelMessage } from '../../src';
+import type { Kernel } from '../../src';
+import { KernelAPI, KernelManager, KernelMessage } from '../../src';
 import { KernelTester } from '../utils';
 
 describe('Kernel.IShellFuture', () => {

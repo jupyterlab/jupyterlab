@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import { ShortcutItem } from './ShortcutItem';
-import { IShortcutRegistry, IShortcutTarget, IShortcutUI } from '../types';
+import type { IShortcutRegistry, IShortcutTarget, IShortcutUI } from '../types';
 
 const TOPNAV_HEIGHT: number = 115;
 
