@@ -17,7 +17,7 @@ describe('JupyterPluginRegistry', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  it('should log plugin activation time with dependent count', async () => {
+  it('should log plugin activation time with dependant count', async () => {
     const slowPluginToken = new Token<any>('slow-plugin-token');
     const mockPlugins: IPlugin<any, any>[] = [
       {
@@ -51,7 +51,7 @@ describe('JupyterPluginRegistry', () => {
       expect.stringContaining('slow-plugin')
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('with 2 dependent')
+      expect.stringContaining('with 2 dependant')
     );
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       expect.stringMatching(/5\d\d\.\d\dms/) // 550ms or slightly more
