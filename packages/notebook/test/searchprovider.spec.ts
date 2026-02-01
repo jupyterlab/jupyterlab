@@ -625,9 +625,22 @@ describe('@jupyterlab/notebook', () => {
 
         await provider.startQuery(/test/, { output: true });
         // Debug: Let's see what the current state is
-        console.log('Current provider index:', (provider as any)._currentProviderIndex);
-        console.log('Current provider:', (provider as any)._searchProviders[(provider as any)._currentProviderIndex]);
-        console.log('Provider currentProviderIndex:', (provider as any)._searchProviders[(provider as any)._currentProviderIndex]?.currentProviderIndex);
+        console.log(
+          'Current provider index:',
+          (provider as any)._currentProviderIndex
+        );
+        console.log(
+          'Current provider:',
+          (provider as any)._searchProviders[
+            (provider as any)._currentProviderIndex
+          ]
+        );
+        console.log(
+          'Provider currentProviderIndex:',
+          (provider as any)._searchProviders[
+            (provider as any)._currentProviderIndex
+          ]?.currentProviderIndex
+        );
 
         // The match should be in the code area, not output
         expect(provider.isCurrentMatchInOutput).toBe(false);
@@ -773,7 +786,7 @@ describe('@jupyterlab/notebook', () => {
           const testContext = await NBTestUtils.createMockContext(false);
           const testPanel = utils.createNotebookPanel(testContext);
           const testProvider = new TestProvider(testPanel);
-          
+
           const codeCell = testPanel.model!.cells.get(0) as CodeCellModel;
           codeCell.outputs.add({
             name: 'stdout',
@@ -791,7 +804,7 @@ describe('@jupyterlab/notebook', () => {
           const testContext = await NBTestUtils.createMockContext(false);
           const testPanel = utils.createNotebookPanel(testContext);
           const testProvider = new TestProvider(testPanel);
-          
+
           // Make notebook read-only
           testPanel.model!.readOnly = true;
 
@@ -805,7 +818,7 @@ describe('@jupyterlab/notebook', () => {
           const testContext = await NBTestUtils.createMockContext(false);
           const testPanel = utils.createNotebookPanel(testContext);
           const testProvider = new TestProvider(testPanel);
-          
+
           // Ensure notebook is not read-only
           testPanel.model!.readOnly = false;
 
@@ -819,10 +832,10 @@ describe('@jupyterlab/notebook', () => {
           const testContext = await NBTestUtils.createMockContext(false);
           const testPanel = utils.createNotebookPanel(testContext);
           const testProvider = new TestProvider(testPanel);
-          
+
           // Make notebook read-only
           testPanel.model!.readOnly = true;
-          
+
           const codeCell = testPanel.model!.cells.get(0) as CodeCellModel;
           codeCell.outputs.add({
             name: 'stdout',

@@ -45,14 +45,18 @@ export class ProviderReconciliator implements IProviderReconciliator {
     const isApplicablePromises = this._providers.map(p =>
       p.isApplicable(this._context)
     );
-    const applicableProvidersResults = await Promise.allSettled(isApplicablePromises);
+    const applicableProvidersResults =
+      await Promise.allSettled(isApplicablePromises);
     return this._providers.filter((_, idx) => {
       const result = applicableProvidersResults[idx];
       if (result.status === 'fulfilled') {
         return result.value;
       } else {
         // Log the error but don't fail the entire completion process
-        console.warn(`Completion provider isApplicable() failed:`, result.reason);
+        console.warn(
+          `Completion provider isApplicable() failed:`,
+          result.reason
+        );
         return false;
       }
     });

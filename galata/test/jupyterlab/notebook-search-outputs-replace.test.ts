@@ -22,7 +22,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     await page.contents.deleteDirectory(tmpPath);
   });
 
-  test('Should enable replace button for code matches when output filter is enabled', async ({ page }) => {
+  test('Should enable replace button for code matches when output filter is enabled', async ({
+    page
+  }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -50,7 +52,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     await expect(replaceButton).toHaveAttribute('title', 'Replace');
   });
 
-  test('Should disable replace button for output matches when output filter is enabled', async ({ page }) => {
+  test('Should disable replace button for output matches when output filter is enabled', async ({
+    page
+  }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -83,7 +87,10 @@ test.describe('Notebook Search Outputs Replace Button', () => {
         foundOutputMatch = true;
 
         // Verify tooltip explains why replace is disabled
-        await expect(replaceButton).toHaveAttribute('title', 'Cannot replace matches in cell outputs');
+        await expect(replaceButton).toHaveAttribute(
+          'title',
+          'Cannot replace matches in cell outputs'
+        );
       }
 
       attempts++;
@@ -92,7 +99,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     expect(foundOutputMatch).toBe(true);
   });
 
-  test('Should allow replace functionality for code matches even with output filter enabled', async ({ page }) => {
+  test('Should allow replace functionality for code matches even with output filter enabled', async ({
+    page
+  }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -126,7 +135,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     await expect(codeCell.first()).toContainText('results');
   });
 
-  test('Should maintain normal replace behavior when output filter is disabled', async ({ page }) => {
+  test('Should maintain normal replace behavior when output filter is disabled', async ({
+    page
+  }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -140,7 +151,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     await page.click('button[title="Show Replace"]');
 
     // Ensure output filter is disabled (default state)
-    const outputFilterButton = page.locator('button[title="Search Cell Outputs"]');
+    const outputFilterButton = page.locator(
+      'button[title="Search Cell Outputs"]'
+    );
     const isPressed = await outputFilterButton.getAttribute('aria-pressed');
     if (isPressed === 'true') {
       await outputFilterButton.click();
@@ -159,7 +172,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     await expect(replaceButton).toBeEnabled();
   });
 
-  test('Should show correct match count with output filter enabled', async ({ page }) => {
+  test('Should show correct match count with output filter enabled', async ({
+    page
+  }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -167,14 +182,18 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     await page.fill('[placeholder="Find"]', 'with');
 
     // Wait for initial search results (without output filter)
-    const matchCountWithoutFilter = await page.locator('text=/\\d+\\/\\d+/').textContent();
+    const matchCountWithoutFilter = await page
+      .locator('text=/\\d+\\/\\d+/')
+      .textContent();
 
     // Enable output filter
     await page.click('button[title="Search Cell Outputs"]');
 
     // Wait for updated search results (with output filter)
     await page.waitForTimeout(500); // Allow time for search to update
-    const matchCountWithFilter = await page.locator('text=/\\d+\\/\\d+/').textContent();
+    const matchCountWithFilter = await page
+      .locator('text=/\\d+\\/\\d+/')
+      .textContent();
 
     // With output filter enabled, we should find more matches (code + outputs)
     // Extract numbers from strings like "1/21" and "1/35"
@@ -190,7 +209,9 @@ test.describe('Notebook Search Outputs Replace Button', () => {
     expect(totalWithFilter).toBeGreaterThan(totalWithoutFilter);
   });
 
-  test('Should navigate between code and output matches correctly', async ({ page }) => {
+  test('Should navigate between code and output matches correctly', async ({
+    page
+  }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 

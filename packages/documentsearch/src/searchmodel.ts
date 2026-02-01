@@ -203,7 +203,8 @@ export class SearchDocumentModel
    */
   get isCurrentMatchInOutput(): boolean {
     return 'isCurrentMatchInOutput' in this.searchProvider
-      ? (this.searchProvider as { isCurrentMatchInOutput: boolean }).isCurrentMatchInOutput
+      ? (this.searchProvider as { isCurrentMatchInOutput: boolean })
+          .isCurrentMatchInOutput
       : false;
   }
 
@@ -212,7 +213,8 @@ export class SearchDocumentModel
    */
   get isCurrentMatchNonReplaceable(): boolean {
     return 'isCurrentMatchNonReplaceable' in this.searchProvider
-      ? (this.searchProvider as { isCurrentMatchNonReplaceable: boolean }).isCurrentMatchNonReplaceable
+      ? (this.searchProvider as { isCurrentMatchNonReplaceable: boolean })
+          .isCurrentMatchNonReplaceable
       : this.isCurrentMatchInOutput;
   }
 

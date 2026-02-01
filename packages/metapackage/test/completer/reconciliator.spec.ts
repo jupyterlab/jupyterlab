@@ -335,7 +335,8 @@ describe('completer/reconciliator', () => {
           providers: [workingProvider, failingProvider]
         });
 
-        const applicableProviders = await reconciliator['applicableProviders']();
+        const applicableProviders =
+          await reconciliator['applicableProviders']();
 
         // Should only return the working provider
         expect(applicableProviders).toEqual([workingProvider]);

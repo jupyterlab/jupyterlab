@@ -263,12 +263,12 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
         disabled={props.isCurrentMatchNonReplaceable}
-        title={props.isCurrentMatchNonReplaceable ? 
-          (props.isCurrentMatchInOutput ? 
-            trans.__('Cannot replace matches in cell outputs') : 
-            trans.__('Cannot replace matches in read-only document')
-          ) : 
-          trans.__('Replace')
+        title={
+          props.isCurrentMatchNonReplaceable
+            ? props.isCurrentMatchInOutput
+              ? trans.__('Cannot replace matches in cell outputs')
+              : trans.__('Cannot replace matches in read-only document')
+            : trans.__('Replace')
         }
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
@@ -798,7 +798,9 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
                 isCurrentMatchInOutput={this.props.isCurrentMatchInOutput}
-                isCurrentMatchNonReplaceable={this.props.isCurrentMatchNonReplaceable}
+                isCurrentMatchNonReplaceable={
+                  this.props.isCurrentMatchNonReplaceable
+                }
               />
               <div className={SPACER_CLASS}></div>
             </>
