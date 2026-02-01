@@ -571,7 +571,10 @@ function activateJSON(
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);
         } catch (error) {
-          await showErrorMessage('Failed to import settings', error);
+          await showErrorMessage(
+            'Failed to import settings',
+            error instanceof Error ? error : String(error)
+          );
         }
       });
 

@@ -182,7 +182,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       try {
         this.registerPlugin(item);
       } catch (error) {
-        this.registerPluginErrors.push(error);
+        this.registerPluginErrors.push(
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     });
   }

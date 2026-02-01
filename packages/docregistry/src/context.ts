@@ -13,11 +13,8 @@ import { PathExt } from '@jupyterlab/coreutils';
 import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type {
-  Contents,
-  ServerConnection,
-  ServiceManager
-} from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -322,12 +319,16 @@ export class Context<
       });
       await this._maybeOverWrite(newPath);
     } catch (err) {
-      if (!err.response || err.response.status !== 404) {
-        // Dialog rejection (user cancelled)
-        if (!err.response) {
-          return false;
-        }
+      if (
+        err instanceof ServerConnection.ResponseError &&
+        err.response.status === 404
+      ) {
+        // File doesn't exist, proceed with save
+      } else if (err instanceof ServerConnection.ResponseError) {
         throw err;
+      } else {
+        // User cancelled dialog
+        return false;
       }
     }
     await this._finishSaveAs(newPath);
@@ -649,18 +650,25 @@ export class Context<
     } catch (err) {
       // If the save has been canceled by the user, throw the error
       // so that whoever called save() can decide what to do.
-      const { name } = err;
-      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
-        throw err;
+      if (err instanceof Error) {
+        const { name } = err;
+        if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
+          throw err;
+        }
       }
 
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const file = PathExt.basename(localPath);
-      void this._handleError(
-        err,
-        this._trans.__('File Save Error for %1', file)
-      );
+      if (
+        err instanceof Error ||
+        err instanceof ServerConnection.ResponseError
+      ) {
+        void this._handleError(
+          err,
+          this._trans.__('File Save Error for %1', file)
+        );
+      }
 
       // Emit failure.
       this._saveState.emit('failed');
@@ -959,8 +967,9 @@ or load the version on disk (revert)?`,
       // throw the error so that whoever called save()
       // can decide what to do.
       if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
+        err instanceof Error &&
+        (err.message === 'Cancel' ||
+          err.message === 'Modal is already displayed')
       ) {
         throw err;
       }
@@ -968,10 +977,15 @@ or load the version on disk (revert)?`,
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
-      void this._handleError(
-        err,
-        this._trans.__('File Save Error for %1', name)
-      );
+      if (
+        err instanceof Error ||
+        err instanceof ServerConnection.ResponseError
+      ) {
+        void this._handleError(
+          err,
+          this._trans.__('File Save Error for %1', name)
+        );
+      }
 
       // Emit failure.
       this._saveState.emit('failed');

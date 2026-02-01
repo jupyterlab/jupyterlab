@@ -2450,7 +2450,7 @@ export class DirListing extends Widget {
         if (error !== 'File not renamed') {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Rename Error'),
-            error
+            error instanceof Error ? error : String(error)
           );
         }
         finalFilename = original;

@@ -13,6 +13,7 @@ import {
 import {
   KernelManager,
   KernelSpecManager,
+  ServerConnection,
   SessionAPI,
   SessionManager
 } from '@jupyterlab/services';
@@ -364,7 +365,9 @@ describe('@jupyterlab/apputils', () => {
           return [{ path }];
         };
         (mockManager as any).connectTo = () => {
-          throw new Error('mock error');
+          throw new ServerConnection.ResponseError(
+            new Response(null, { status: 500, statusText: 'mock error' })
+          );
         };
 
         let caught = false;

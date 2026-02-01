@@ -7,9 +7,9 @@ import type {
   Kernel,
   KernelMessage,
   KernelSpec,
-  ServerConnection,
   Session
 } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -842,7 +842,9 @@ export class SessionContext implements ISessionContext {
         const session = manager.connectTo({ model });
         this._handleNewSession(session);
       } catch (err) {
-        void this._handleSessionError(err);
+        if (err instanceof ServerConnection.ResponseError) {
+          void this._handleSessionError(err);
+        }
         return Promise.reject(err);
       }
     }
@@ -942,7 +944,9 @@ export class SessionContext implements ISessionContext {
         await this._session.changeKernel(model);
         return this._session.kernel;
       } catch (err) {
-        void this._handleSessionError(err);
+        if (err instanceof ServerConnection.ResponseError) {
+          void this._handleSessionError(err);
+        }
         throw err;
       }
     }
@@ -982,7 +986,9 @@ export class SessionContext implements ISessionContext {
       }
       return this._handleNewSession(session);
     } catch (err) {
-      void this._handleSessionError(err);
+      if (err instanceof ServerConnection.ResponseError) {
+        void this._handleSessionError(err);
+      }
       throw err;
     }
   }

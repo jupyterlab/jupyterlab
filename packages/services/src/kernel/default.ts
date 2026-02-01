@@ -1490,8 +1490,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
         // 503 (<2.0) or 424 (>2.0) in that case.
         if (
           err instanceof ServerConnection.NetworkError ||
-          err.response?.status === 503 ||
-          err.response?.status === 424
+          (err instanceof ServerConnection.ResponseError &&
+            (err.response.status === 503 || err.response.status === 424))
         ) {
           const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
           setTimeout(getKernelModel, timeout, evt);
@@ -1778,7 +1778,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       );
       validate.validateMessage(msg);
     } catch (error) {
-      error.message = `Kernel message validation error: ${error.message}`;
+      if (error instanceof Error) {
+        error.message = `Kernel message validation error: ${error.message}`;
+      }
       // We throw the error so that it bubbles up to the top, and displays the right stack.
       throw error;
     }

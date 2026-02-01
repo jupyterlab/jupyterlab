@@ -25,6 +25,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "strictNullChecks": true,
+    "useUnknownInCatchVariables": true,
     "target": "ES2018",
     "types": []
   }

@@ -360,7 +360,7 @@ export class SearchDocumentModel
       // Emit state change as the index needs to be updated
       this.stateChanged.emit();
     } catch (reason) {
-      this._parsingError = reason.toString();
+      this._parsingError = String(reason);
       this.stateChanged.emit();
       console.error(
         `Failed to parse expression ${this.searchExpression}`,
