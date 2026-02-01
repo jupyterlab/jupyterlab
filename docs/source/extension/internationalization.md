@@ -160,7 +160,7 @@ trans.__('This translatable string will be found');
 Example that will **not** work:
 
 ```typescript
-const errorMessage = 'This translatable string WONT be found';
+const errorMessage = 'This translatable string WON\'T be found';
 trans.__(errorMessage);
 ```
 
