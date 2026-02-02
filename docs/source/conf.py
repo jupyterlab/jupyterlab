@@ -52,9 +52,11 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
+mermaid_version = "latest"
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
 
