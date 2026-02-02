@@ -895,8 +895,6 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
     ): Promise<void> => {
-      let openedByDebugger = true;
-
       if (!showSourcesInMainArea) {
         /* display sources in the sources panel*/
         return;
@@ -908,7 +906,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       try {
         const source = await service.getSource({ path: frame.source.path });
         if (source) {
-          openSource(source, frame, openedByDebugger);
+          openSource(source, frame);
         }
       } catch (error) {
         console.error('Failed to fetch source:', error);
@@ -919,8 +917,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     const openSource = (
       /* method to open sources in the main area*/
       source: IDebugger.Source,
-      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame,
-      openedByDebugger = false
+      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
     ): void => {
       if (!source) {
         return;
@@ -941,7 +938,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
               if (edit) {
                 edit.revealPosition({
                   line: (breakpointOrFrame.line as number) - 1,
-                  column: breakpointOrFrame.column || 0
+                  column: breakpointOrFrame.column ?? 0
                 });
                 Debugger.EditorHandler.showCurrentLine(
                   edit,
@@ -954,11 +951,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         }
       }
       /* Check on the previous widget editor */
-      if (
-        previousEditorWidget &&
-        !previousEditorWidget.isDisposed &&
-        openedByDebugger === true
-      ) {
+      if (previousEditorWidget && !previousEditorWidget.isDisposed) {
         previousEditorWidget.dispose();
         previousEditorWidget = null;
       }
@@ -991,8 +984,7 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       for (const widget of app.shell.widgets('main')) {
         if (
           widget.title.label === PathExt.basename(path) &&
-          widget.title.caption === path &&
-          openedByDebugger === true
+          widget.title.caption === path
         ) {
           previousEditorWidget = widget;
           break;
@@ -1003,8 +995,8 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       if (frame) {
         requestAnimationFrame(() => {
           editor.revealPosition({
-            line: (frame.line as number) - 1,
-            column: frame.column || 0
+            line: frame.line - 1,
+            column: frame.column
           });
           Debugger.EditorHandler.showCurrentLine(editor, frame.line, 'start');
         });

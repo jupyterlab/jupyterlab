@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as path from 'path';
 type ShowSourcesCase = {
@@ -223,7 +219,7 @@ for (const c of showSourcesCases) {
 
       await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
-      /*await page.getByRole('button', { name: 'Continue (F9)' }).click();
+      await page.getByRole('button', { name: 'Continue (F9)' }).click();
 
       await page.debugger.waitForCallStack();
       await page.debugger.waitForVariables();
@@ -238,7 +234,7 @@ for (const c of showSourcesCases) {
       );
       expect(await richVariableTab?.screenshot()).toMatchSnapshot(
         `image-debug-session-local-rich-variable${c.screenshotSuffix}.png`
-      );*/
+      );
     });
 
     test(`Start debug session (Script) ${c.name}`, async ({

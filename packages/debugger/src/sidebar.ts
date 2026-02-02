@@ -114,14 +114,14 @@ export class DebuggerSidebar extends SidePanel {
     if (value) {
       // ShowSourcesPanel is true => ensure widget exists
 
-      if (!this.sources || this.sources.isDisposed) {
-        this.sources = new SourcesPanel(this._sourcesOptions);
-        this.insertWidget(3, this.sources);
+      if (!this._sources || this._sources.isDisposed) {
+        this._sources = new SourcesPanel(this._sourcesOptions);
+        this.insertWidget(3, this._sources);
       }
     } else {
       // ShowSourcesPanel is false => remove widget if present
-      if (this.sources && !this.sources.isDisposed) {
-        this.sources.dispose();
+      if (this._sources && !this._sources.isDisposed) {
+        this._sources.dispose();
       }
     }
   }
@@ -144,9 +144,13 @@ export class DebuggerSidebar extends SidePanel {
   /**
    * The sources widget.
    */
-  sources: SourcesPanel;
+  get sources(): SourcesPanel | undefined {
+    return this._sources;
+  }
 
   readonly kernelSources: KernelSourcesPanel;
+
+  private _sources?: SourcesPanel;
 
   private _showSourcesPanel: boolean;
 
