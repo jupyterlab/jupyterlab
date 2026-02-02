@@ -318,6 +318,40 @@ describe('completer/reconciliator', () => {
         spy1.mockRestore();
         spy2.mockRestore();
       });
+
+      it('should handle provider isApplicable() errors gracefully', async () => {
+        const workingProvider = new FooCompletionProvider();
+        const failingProvider = new FooCompletionProvider();
+
+        // Mock the failing provider's isApplicable to throw an error
+        const errorSpy = jest.spyOn(failingProvider, 'isApplicable');
+        errorSpy.mockRejectedValue(new Error('Provider failed'));
+
+        // Mock console.warn to verify error logging
+        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [workingProvider, failingProvider]
+        });
+
+        const applicableProviders =
+          await reconciliator['applicableProviders']();
+
+        // Should only return the working provider
+        expect(applicableProviders).toEqual([workingProvider]);
+        expect(applicableProviders).toHaveLength(1);
+
+        // Should have logged the error
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Completion provider isApplicable() failed:',
+          expect.any(Error)
+        );
+
+        // Cleanup
+        errorSpy.mockRestore();
+        consoleSpy.mockRestore();
+      });
     });
   });
 });
