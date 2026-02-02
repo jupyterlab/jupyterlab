@@ -53,7 +53,8 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
 
     // Register default languages
     for (const language of EditorLanguageRegistry.getDefaultLanguages(
-      translator
+      translator,
+      (info: string) => languages.findBest(info)
     )) {
       languages.addLanguage(language);
     }
