@@ -30,9 +30,7 @@ export class DebuggerSources implements IDebugger.ISources {
     this._editorTracker = options.editorTracker ?? null;
     this._readOnlyEditorTracker = new WidgetTracker<
       MainAreaWidget<CodeEditorWrapper>
-    >({
-      namespace: '@jupyterlab/debugger'
-    });
+    >({ namespace: '@jupyterlab/debugger' });
   }
 
   /**
