@@ -371,32 +371,6 @@ of your extension to work with each major version of JupyterLab. For examples of
 major versions for Lab 3 and Lab 4, see [jupyterlab-vim](https://github.com/jupyterlab-contrib/jupyterlab-vim)
 and [jupyter-ai](https://github.com/jupyterlab/jupyter-ai).
 
-### Notebook and cell metadata API changes
-
-In JupyterLab 4.x, access patterns for notebook and cell metadata have changed.
-Direct mutation of metadata objects is no longer supported.
-
-In JupyterLab 3.x, extensions commonly accessed metadata like:
-
-```ts
-cellModel.metadata.has(key);
-cellModel.metadata.get(key);
-cellModel.metadata.set(key, value);
-```
-
-In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
-model APIs instead:
-
-```ts
-cellModel.getMetadata(key);
-cellModel.setMetadata(key, value);
-cellModel.deleteMetadata(key);
-
-cellModel.metadataChanged.connect((sender, args) => {
-  // react to metadata updates
-});
-```
-
 ### Upgrading extension using the upgrade script
 
 JupyterLab 4.x provides a script to upgrade an existing extension to use the new extension system and packaging.
@@ -763,6 +737,32 @@ the shared model APIs to ensure correct synchronization and collaboration, e.g.:
 
 ```ts
 widget.content.model.sharedModel.setSource('some text');
+```
+
+#### Notebook and cell metadata API changes
+
+In JupyterLab 4.x, access patterns for notebook and cell metadata have changed.
+Direct mutation of metadata objects is no longer supported.
+
+In JupyterLab 3.x, extensions commonly accessed metadata like:
+
+```ts
+cellModel.metadata.has(key);
+cellModel.metadata.get(key);
+cellModel.metadata.set(key, value);
+```
+
+In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
+model APIs instead:
+
+```ts
+cellModel.getMetadata(key);
+cellModel.setMetadata(key, value);
+cellModel.deleteMetadata(key);
+
+cellModel.metadataChanged.connect((sender, args) => {
+  // react to metadata updates
+});
 ```
 
 ### Testing with Jest
