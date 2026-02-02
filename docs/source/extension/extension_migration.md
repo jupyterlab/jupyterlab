@@ -723,6 +723,32 @@ the shared model APIs to ensure correct synchronization and collaboration, e.g.:
 widget.content.model.sharedModel.setSource('some text');
 ```
 
+#### Notebook and cell metadata API changes
+
+In JupyterLab 4.x, access patterns for notebook and cell metadata have changed.
+Direct mutation of metadata objects is no longer supported.
+
+In JupyterLab 3.x, extensions commonly accessed metadata like:
+
+```ts
+cellModel.metadata.has(key);
+cellModel.metadata.get(key);
+cellModel.metadata.set(key, value);
+```
+
+In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
+model APIs instead:
+
+```ts
+cellModel.getMetadata(key);
+cellModel.setMetadata(key, value);
+cellModel.deleteMetadata(key);
+
+cellModel.metadataChanged.connect((sender, args) => {
+  // react to metadata updates
+});
+```
+
 ### Testing with Jest
 
 Jest has been updated to 29.2.0 (and _ts-jest_ to 29.0.0). And therefore the jest configuration provided by
