@@ -188,7 +188,10 @@ export namespace DebuggerModel {
     /**
      * Get source
      */
-    getSource(): Promise<IDebugger.Source>;
+    getSource(args: {
+      sourceReference: number;
+      path: string | undefined;
+    }): Promise<IDebugger.Source>;
     /**
      * The display registry.
      */

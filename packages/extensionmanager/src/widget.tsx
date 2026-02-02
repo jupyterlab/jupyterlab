@@ -495,7 +495,7 @@ class InstalledList extends ReactWidget {
               /* no-op */
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed
@@ -600,7 +600,7 @@ class SearchResult extends ReactWidget {
               this.onPage(value);
             }}
             performAction={
-              this.model.isDisclaimed ? this.onAction.bind(this) : null
+              this.model.isDisclaimed ? this.onAction.bind(this) : undefined
             }
             supportInstallation={
               this.model.canInstall && this.model.isDisclaimed

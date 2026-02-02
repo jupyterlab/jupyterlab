@@ -348,7 +348,7 @@ export namespace GhostTextManager {
   export interface IOptions {
     /**
      * Callback for editor `blur` event.
-     * Returning true will prevent the default action of removing current ghost.
+     * Returning false will prevent the default action of removing current ghost.
      */
     onBlur(event: FocusEvent): boolean;
   }
