@@ -30,10 +30,15 @@ git config --global user.email foo@bar.com
 pip install -q --upgrade pip --user
 pip --version
 
-if [[ -n "${OPTIONAL_DEPENDENCIES}" ]]; then
-    SPEC=".[${OPTIONAL_DEPENDENCIES}]"
-else
+if [[ -z "${OPTIONAL_DEPENDENCIES+x}" ]]; then
+    # undefined - use default dev,test
+    SPEC=".[dev,test]"
+elif [[ -z "${OPTIONAL_DEPENDENCIES}" ]]; then
+    # defined but empty
     SPEC="."
+else
+    # defined and non-empty
+    SPEC=".[${OPTIONAL_DEPENDENCIES}]"
 fi
 
 # Show a verbose install if the install fails, for debugging
