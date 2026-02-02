@@ -78,6 +78,9 @@ export class BreadCrumbs extends Widget {
     }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
+    this._resizeObserver = new ResizeObserver(() => {
+      this._onResize();
+    });
   }
 
   /**
@@ -156,6 +159,7 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragenter', this);
     node.addEventListener('lm-dragleave', this);
     node.addEventListener('lm-dragover', this);
+    this._resizeObserver.observe(node);
     node.addEventListener('lm-drop', this);
   }
 
@@ -170,6 +174,7 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
+    this._resizeObserver.disconnect();
   }
 
   /**
@@ -179,12 +184,17 @@ export class BreadCrumbs extends Widget {
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
+
+    // Calculate adaptive items based on available width
+    const adaptiveItems = this._calculateAdaptiveItems(localPath);
+
     const state = {
       path: localPath,
       hasPreferred: this._hasPreferred,
       fullPath: this._fullPath,
-      minimumLeftItems: this._minimumLeftItems,
-      minimumRightItems: this._minimumRightItems
+      minimumLeftItems: adaptiveItems.left,
+      minimumRightItems: adaptiveItems.right,
+      containerWidth: this._lastContainerWidth
     };
     if (this._previousState && JSONExt.deepEqual(state, this._previousState)) {
       return;
@@ -397,6 +407,99 @@ export class BreadCrumbs extends Widget {
   private _previousState: Private.ICrumbsState | null = null;
   private _minimumLeftItems: number;
   private _minimumRightItems: number;
+  private _resizeObserver: ResizeObserver;
+  private _lastContainerWidth: number = 0;
+  private _resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * Handle resize events with debouncing.
+   */
+  private _onResize(): void {
+    if (this._resizeTimeout) {
+      clearTimeout(this._resizeTimeout);
+    }
+    this._resizeTimeout = setTimeout(() => {
+      const newWidth = this.node.clientWidth;
+      if (newWidth !== this._lastContainerWidth) {
+        this._lastContainerWidth = newWidth;
+        // Force recalculation by clearing previous state
+        this._previousState = null;
+        this.update();
+      }
+    }, 100);
+  }
+
+  /**
+   * Calculate adaptive left/right items based on available width.
+   */
+  private _calculateAdaptiveItems(path: string): {
+    left: number;
+    right: number;
+  } {
+    const parts = path.split('/').filter(part => part !== '');
+    const totalParts = parts.length;
+
+    // If fullPath is enabled or there are no parts, use minimum settings
+    if (this._fullPath || totalParts === 0) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    // If total parts fit within minimums, no adaptation needed
+    const minTotal = this._minimumLeftItems + this._minimumRightItems;
+    if (totalParts <= minTotal) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    const containerWidth = this.node.clientWidth;
+    if (containerWidth === 0) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    const HOME_ICON_WIDTH = 22;
+    const SEPARATOR_WIDTH = 4;
+    const ELLIPSIS_WIDTH = 28;
+    const ITEM_PADDING_MARGIN = 8;
+    const AVG_TEXT_WIDTH = 80;
+    const ITEM_WIDTH = ITEM_PADDING_MARGIN + AVG_TEXT_WIDTH;
+
+    const fixedOverhead = HOME_ICON_WIDTH + SEPARATOR_WIDTH;
+    const ellipsisOverhead = ELLIPSIS_WIDTH + SEPARATOR_WIDTH;
+
+    // Available width for breadcrumb items
+    const availableForItems = containerWidth - fixedOverhead;
+
+    const widthPerItem = ITEM_WIDTH + SEPARATOR_WIDTH;
+    const maxItemsWithoutEllipsis = Math.floor(
+      availableForItems / widthPerItem
+    );
+
+    // If all parts can fit, show all (no ellipsis needed)
+    if (maxItemsWithoutEllipsis >= totalParts) {
+      return { left: totalParts, right: 0 };
+    }
+
+    // Calculate items that can fit with ellipsis
+    const availableWithEllipsis = availableForItems - ellipsisOverhead;
+    const maxItemsWithEllipsis = Math.max(
+      0,
+      Math.floor(availableWithEllipsis / widthPerItem)
+    );
+
+    // If we can't fit more than minimums, use minimums
+    if (maxItemsWithEllipsis <= minTotal) {
+      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    }
+
+    // Distribute items: prefer right side (most relevant for navigation)
+    const extraItems = maxItemsWithEllipsis - minTotal;
+    const maxExtraRight = totalParts - minTotal;
+    const extraRight = Math.min(extraItems, maxExtraRight);
+
+    return {
+      left: this._minimumLeftItems,
+      right: this._minimumRightItems + extraRight
+    };
+  }
 }
 
 /**
@@ -457,6 +560,7 @@ namespace Private {
     fullPath: boolean;
     minimumLeftItems: number;
     minimumRightItems: number;
+    containerWidth: number;
   }
 
   /**
