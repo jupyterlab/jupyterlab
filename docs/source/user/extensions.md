@@ -180,7 +180,24 @@ prevent it from being activated, but without rebuilding the application.
 
 ### Configuring the Extension Manager
 
-By default there are two extension managers provided by JupyterLab:
+#### Network proxy configuration
+
+This can be useful in enterprise or restricted network environments where
+outbound connections must go through a proxy.
+
+JupyterLab respects standard proxy environment variables when accessing
+remote resources.
+
+The following environment variables are respected
+(in order of precedence):
+
+1. `HTTPS_PROXY`
+2. `HTTP_PROXY`
+3. `ALL_PROXY`
+
+### Extension manager implementations
+
+By default, there are two extension managers provided by JupyterLab:
 
 - `pypi`: [default] Allow to un-/install extensions from PyPI.org
 - `readonly`: Display installed extensions (with the ability to dis-/en-able them)

@@ -4,13 +4,8 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
-import {
-  Kernel,
-  KernelManager,
-  KernelMessage,
-  KernelSpec,
-  KernelSpecAPI
-} from '../../src';
+import type { Kernel, KernelManager, KernelSpec } from '../../src';
+import { KernelMessage, KernelSpecAPI } from '../../src';
 import { FakeKernelManager, handleRequest, KernelTester } from '../utils';
 
 describe('Kernel.IKernel', () => {

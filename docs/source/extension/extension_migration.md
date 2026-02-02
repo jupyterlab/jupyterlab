@@ -18,6 +18,10 @@ However, if an extension uses the experimental {ref}`webpackConfig` option, it
 may need to [migrate](https://rspack.rs/guide/migration/webpack) its custom
 Webpack config to Rspack.
 
+### API Updates
+
+- The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
+
 ## JupyterLab 4.5.0 to 4.5.1
 
 ### IDefaultContentProvider
@@ -716,6 +720,50 @@ bumped their major version (following semver convention). We want to point out p
 - React 18.2.0 update
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the [migration to react 18](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html).
+
+#### Code editor text handling
+
+In JupyterLab 4.x, extension authors should no longer update editor text
+by mutating `model.value.text` directly.
+
+In JupyterLab 3.x, the following pattern was commonly used:
+
+```ts
+widget.content.model.value.text = 'some text';
+```
+
+In JupyterLab 4.x, extensions should update editor contents exclusively through
+the shared model APIs to ensure correct synchronization and collaboration, e.g.:
+
+```ts
+widget.content.model.sharedModel.setSource('some text');
+```
+
+#### Notebook and cell metadata API changes
+
+In JupyterLab 4.x, access patterns for notebook and cell metadata have changed.
+Direct mutation of metadata objects is no longer supported.
+
+In JupyterLab 3.x, extensions commonly accessed metadata like:
+
+```ts
+cellModel.metadata.has(key);
+cellModel.metadata.get(key);
+cellModel.metadata.set(key, value);
+```
+
+In JupyterLab 4.x, metadata should be accessed and modified using the dedicated
+model APIs instead:
+
+```ts
+cellModel.getMetadata(key);
+cellModel.setMetadata(key, value);
+cellModel.deleteMetadata(key);
+
+cellModel.metadataChanged.connect((sender, args) => {
+  // react to metadata updates
+});
+```
 
 ### Testing with Jest
 

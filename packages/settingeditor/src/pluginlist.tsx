@@ -6,20 +6,23 @@
 import React from 'react';
 
 import { ReactWidget } from '@jupyterlab/apputils';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore } from '@jupyterlab/ui-components';
 import {
   classes,
   FilterBox,
-  IScore,
   LabIcon,
   settingsIcon,
   updateFilterFunction
 } from '@jupyterlab/ui-components';
 import { StringExt } from '@lumino/algorithm';
-import { PartialJSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { PartialJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import type { SettingsEditor } from './settingseditor';
 

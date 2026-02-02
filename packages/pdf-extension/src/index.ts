@@ -5,7 +5,7 @@
  * @module pdf-extension
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
@@ -183,7 +183,7 @@ namespace Private {
     sliceSize: number = 512
   ): Blob {
     const byteCharacters = atob(b64Data);
-    const byteArrays: Uint8Array[] = [];
+    const byteArrays: Uint8Array<ArrayBuffer>[] = [];
 
     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
       const slice = byteCharacters.slice(offset, offset + sliceSize);
