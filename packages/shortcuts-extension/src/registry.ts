@@ -2,9 +2,9 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CommandRegistry } from '@lumino/commands';
-import {
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { CommandRegistry } from '@lumino/commands';
+import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutsSettingsLayout,

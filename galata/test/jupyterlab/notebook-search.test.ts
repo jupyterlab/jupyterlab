@@ -161,6 +161,59 @@ test.describe('Notebook Search', () => {
     await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
   });
 
+  test('Populate search box with text selected in rendered markdown', async ({
+    page
+  }) => {
+    // Render the markdown cell to be able to select text from it.
+    await page.notebook.runCell(1, true);
+    const cell = await page.notebook.getCellLocator(1);
+
+    await cell!.locator('.jp-MarkdownOutput').evaluate(element => {
+      const textToSelect = 'notebook';
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.textContent && node.textContent.includes(textToSelect)) {
+          const startIndex = node.textContent.indexOf(textToSelect);
+          const endIndex = startIndex + textToSelect.length;
+
+          const range = document.createRange();
+          range.setStart(node, startIndex);
+          range.setEnd(node, endIndex);
+
+          const selection = window.getSelection();
+          if (selection) {
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+          break;
+        }
+      }
+    });
+
+    // Open the search box.
+    await page.keyboard.press('Control+f');
+
+    const searchInput = page.getByPlaceholder('Find');
+    // Check if the search box is populated with the selected text.
+    await expect(searchInput).toHaveValue('notebook');
+    await expect(searchInput).toBeFocused();
+
+    // Check that the search box content is selected.
+    expect(await searchInput.evaluate(getSelectionRange)).toStrictEqual({
+      start: 0,
+      end: 'notebook'.length
+    });
+
+    // Expect that the search found a match.
+    await page.locator('text=2/2').waitFor();
+  });
+
   test('Restore previous search query if there is no selection', async ({
     page
   }) => {

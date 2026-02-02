@@ -4,23 +4,22 @@
 
 import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
+import type { Extension, StateCommand, Text } from '@codemirror/state';
 import {
   Compartment,
   EditorSelection,
   EditorState,
-  Extension,
-  Prec,
-  StateCommand,
-  Text
+  Prec
 } from '@codemirror/state';
-import { Command, EditorView, ViewUpdate } from '@codemirror/view';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { SyntaxNodeRef } from '@lezer/common';
+import type { Command, ViewUpdate } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ExtensionsHandler } from './extension';
 import { EditorLanguageRegistry } from './language';
-import {
+import type {
   IEditorExtensionRegistry,
   IEditorLanguageRegistry,
   IExtensionsHandler

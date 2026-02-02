@@ -1,14 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The document registry token.
