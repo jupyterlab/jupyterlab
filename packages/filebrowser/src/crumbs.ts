@@ -398,19 +398,6 @@ export class BreadCrumbs extends Widget {
     return elements;
   }
 
-  protected translator: ITranslator;
-  private _trans: TranslationBundle;
-  private _model: FileBrowserModel;
-  private _hasPreferred: boolean;
-  private _crumbs: ReadonlyArray<HTMLElement>;
-  private _fullPath: boolean;
-  private _previousState: Private.ICrumbsState | null = null;
-  private _minimumLeftItems: number;
-  private _minimumRightItems: number;
-  private _resizeObserver: ResizeObserver;
-  private _lastContainerWidth: number = 0;
-  private _resizeTimeout: ReturnType<typeof setTimeout> | null = null;
-
   /**
    * Handle resize events with debouncing.
    */
@@ -500,6 +487,19 @@ export class BreadCrumbs extends Widget {
       right: this._minimumRightItems + extraRight
     };
   }
+
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
+  private _model: FileBrowserModel;
+  private _hasPreferred: boolean;
+  private _crumbs: ReadonlyArray<HTMLElement>;
+  private _fullPath: boolean;
+  private _previousState: Private.ICrumbsState | null = null;
+  private _minimumLeftItems: number;
+  private _minimumRightItems: number;
+  private _resizeObserver: ResizeObserver;
+  private _lastContainerWidth: number = 0;
+  private _resizeTimeout: ReturnType<typeof setTimeout> | null = null;
 }
 
 /**
