@@ -1940,6 +1940,10 @@ export class DirListing extends Widget {
     Promise.all(promises)
       .then(() => this._allUploaded.emit())
       .catch(err => {
+        if (err.name == 'AbortError') {
+          console.log('Upload cancelled by user: ', err);
+          return;
+        }
         console.error('Error while uploading files: ', err);
       });
   }
