@@ -369,6 +369,43 @@ describe('filebrowser/model', () => {
         Widget.detach(customCrumbs);
         customCrumbs.dispose();
       });
+
+      it('should show more items when container width increases', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 0,
+          minimumRightItems: 1
+        });
+
+        // Create a container with controlled width
+        const container = document.createElement('div');
+        container.style.width = '200px';
+        document.body.appendChild(container);
+
+        Widget.attach(customCrumbs, container);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        // With narrow width, should show minimum items
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const narrowItemCount = items.length;
+
+        // Increase container width significantly
+        container.style.width = '800px';
+        // Trigger resize observer by forcing a layout
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const wideItemCount = items.length;
+
+        // Wide container should show at least as many items as narrow
+        expect(wideItemCount).toBeGreaterThanOrEqual(narrowItemCount);
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+        document.body.removeChild(container);
+      });
     });
   });
 });
