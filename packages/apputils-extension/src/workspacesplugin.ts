@@ -1,19 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import { URLExt } from '@jupyterlab/coreutils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { Workspace, WorkspaceManager } from '@jupyterlab/services';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { Workspace, WorkspaceManager } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IWorkspaceCommands } from '@jupyterlab/workspaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';

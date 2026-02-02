@@ -3,15 +3,15 @@
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
 import * as path from 'path';
-import { ContentsHelper } from '../contents';
+import type { ContentsHelper } from '../contents';
 import type { INotebookRunCallback } from '../extension';
-import { galata } from '../galata';
+import type { galata } from '../galata';
 import * as Utils from '../utils';
-import { ActivityHelper } from './activity';
-import { FileBrowserHelper } from './filebrowser';
-import { MenuHelper } from './menu';
+import type { ActivityHelper } from './activity';
+import type { FileBrowserHelper } from './filebrowser';
+import type { MenuHelper } from './menu';
 
 /**
  * Maximal number of retries to get a cell
@@ -255,6 +255,16 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<boolean> {
+    if (await this.isAnyActive()) {
+      const focusedMarkdownEditor = this.page.locator(
+        '.jp-MarkdownCell .jp-InputArea-editor.jp-mod-focused, .jp-MarkdownCell .cm-content.jp-mod-focused'
+      );
+      if ((await focusedMarkdownEditor.count()) > 0) {
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(50);
+      }
+    }
+
     const toolbarItem = await this.getToolbarItemLocator(itemId, notebookName);
 
     if (toolbarItem) {

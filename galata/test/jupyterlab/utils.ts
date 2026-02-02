@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';

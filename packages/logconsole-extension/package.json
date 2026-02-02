@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole-extension",
-  "version": "4.6.0-alpha.0",
+  "version": "4.6.0-alpha.2",
   "description": "JupyterLab - Log Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,24 +34,24 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.6.0-alpha.0",
-    "@jupyterlab/apputils": "^4.7.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.6.0-alpha.0",
-    "@jupyterlab/docregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/logconsole": "^4.6.0-alpha.0",
-    "@jupyterlab/rendermime": "^4.6.0-alpha.0",
-    "@jupyterlab/settingregistry": "^4.6.0-alpha.0",
-    "@jupyterlab/statusbar": "^4.6.0-alpha.0",
-    "@jupyterlab/translation": "^4.6.0-alpha.0",
-    "@jupyterlab/ui-components": "^4.6.0-alpha.0",
+    "@jupyterlab/application": "^4.6.0-alpha.2",
+    "@jupyterlab/apputils": "^4.7.0-alpha.2",
+    "@jupyterlab/coreutils": "^6.6.0-alpha.2",
+    "@jupyterlab/docregistry": "^4.6.0-alpha.2",
+    "@jupyterlab/logconsole": "^4.6.0-alpha.2",
+    "@jupyterlab/rendermime": "^4.6.0-alpha.2",
+    "@jupyterlab/settingregistry": "^4.6.0-alpha.2",
+    "@jupyterlab/statusbar": "^4.6.0-alpha.2",
+    "@jupyterlab/translation": "^4.6.0-alpha.2",
+    "@jupyterlab/ui-components": "^4.6.0-alpha.2",
     "@lumino/coreutils": "^2.2.2",
     "@lumino/signaling": "^2.1.5",
-    "@lumino/widgets": "^2.7.2",
+    "@lumino/widgets": "^2.7.3",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "publishConfig": {
     "access": "public"
