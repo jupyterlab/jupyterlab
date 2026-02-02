@@ -48,7 +48,8 @@ import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
-import { IKernelManager, Kernel, KernelManager } from '@jupyterlab/services';
+import type { Kernel } from '@jupyterlab/services';
+import { IKernelManager } from '@jupyterlab/services';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -881,7 +882,11 @@ export const kernelSettings: JupyterFrontEndPlugin<void> = {
   ) => {
     void settingRegistry.load(kernelSettings.id);
     // override Kernel Info's timeout setting
-    if (kernelManager && kernelManager instanceof KernelManager) {
+    if (kernelManager === null || !('kernelInfoTimeout' in kernelManager)) {
+      console.warn(
+        `The kernel manager does not support the kernelInfoTimeout property.`
+      );
+    } else {
       const settings = await settingRegistry.load(kernelSettings.id);
       const patchKernelInfoTimeout = () => {
         kernelManager.kernelInfoTimeout = settings.get('kernelInfoTimeout')
