@@ -22,9 +22,9 @@ import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
 
 import { Variables as VariablesPanel } from './panels/variables';
 
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * A debugger sidebar.
