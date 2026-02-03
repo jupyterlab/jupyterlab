@@ -5,7 +5,7 @@ import { act } from 'react-dom/test-utils';
 
 import type { Button } from '@jupyter/web-components';
 
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory,
@@ -36,10 +36,10 @@ import { DebuggerService } from '../src/service';
 
 import type { DebuggerModel } from '../src/model';
 
-import { SourcesBody } from '../src/panels/sources/body';
+import type { SourcesBody } from '../src/panels/sources/body';
 
-import { IYText } from '@jupyter/ydoc';
-import { IDebugger } from '../src/tokens';
+import type { IYText } from '@jupyter/ydoc';
+import type { IDebugger } from '../src/tokens';
 import { DebuggerDisplayRegistry } from '../src';
 
 const server = new JupyterServer();

@@ -16,9 +16,9 @@ import { Debugger } from './debugger';
 import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
-import { IDebugger } from './tokens';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IAnyMessageArgs } from '@jupyterlab/services/src/kernel/kernel';
+import type { IDebugger } from './tokens';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { IAnyMessageArgs } from '@jupyterlab/services/src/kernel/kernel';
 import { Signal } from '@lumino/signaling';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
