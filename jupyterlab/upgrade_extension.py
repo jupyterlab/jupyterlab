@@ -32,8 +32,7 @@ RECOMMENDED_TO_OVERRIDE = [
     ".github/workflows/publish-release.yml",
     ".github/workflows/update-integration-tests.yml",
     "binder/postBuild",
-    ".eslintignore",
-    ".eslintrc.js",
+    "eslint.config.js",
     ".gitignore",
     ".prettierignore",
     ".prettierrc",
@@ -184,8 +183,7 @@ def update_extension(  # noqa
     # Set linters
     ## Map package.json key to previous config file
     linters = {
-        "eslintConfig": ".eslintrc.js",
-        "eslintIgnore": ".eslintignore",
+        "eslintConfig": "eslint.config.js",
         "prettier": ".prettierrc",
         "stylelint": ".stylelintrc",
     }
