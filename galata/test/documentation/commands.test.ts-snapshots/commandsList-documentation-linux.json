@@ -831,6 +831,16 @@
     }
   },
   {
+    "id": "cell-toolbar:delete",
+    "label": "Delete Cell",
+    "caption": "Delete the cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "code-viewer:open",
     "label": "Open Code Viewer",
     "caption": "",

@@ -24,6 +24,7 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strictBuiltinIteratorReturn": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
     "target": "ES2018",
