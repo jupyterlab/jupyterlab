@@ -3,13 +3,15 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
+import type { JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
+import type * as Terminal from './terminal';
 import { TerminalAPIClient } from './restapi';
 
 /**

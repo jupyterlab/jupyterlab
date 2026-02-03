@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILoggerRegistry, LogLevel } from '@jupyterlab/logconsole';
-import * as nbformat from '@jupyterlab/nbformat';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import type { LogLevel } from '@jupyterlab/logconsole';
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import { INotebookTracker } from '@jupyterlab/notebook';
 import { KernelMessage } from '@jupyterlab/services';
 
 /**

@@ -1,37 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Dialog,
-  ISessionContext,
   SessionContext,
   SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import {
-  IUrlResolverFactory,
-  RenderMimeRegistry
-} from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {
+import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
+import { RenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
   Contents,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-import { DocumentRegistry } from './registry';
+import type { DocumentRegistry } from './registry';
 
 /**
  * An implementation of a document context.

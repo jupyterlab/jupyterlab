@@ -5,8 +5,10 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection, ServiceManager } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 import * as semver from 'semver';

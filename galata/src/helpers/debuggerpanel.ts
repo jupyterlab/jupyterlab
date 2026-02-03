@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Locator, Page } from '@playwright/test';
-import { SidebarHelper } from './sidebar';
-import { NotebookHelper } from './notebook';
+import type { ElementHandle, Locator, Page } from '@playwright/test';
+import type { SidebarHelper } from './sidebar';
+import type { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
 
 /**
