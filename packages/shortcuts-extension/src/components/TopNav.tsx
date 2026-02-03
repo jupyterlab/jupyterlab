@@ -74,7 +74,8 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
       <Button
         className="jp-mod-styled jp-mod-accept jp-Shortcuts-AdvancedOptionsButton"
         onClick={props.toggleAddCommandRow}
-        title={trans.__('Show add shortcut row')}
+        title={trans.__('Display the tool to add a shortcut')}
+        aria-label={trans.__('Display the tool to add a shortcut')}
         disabled={props.showAddCommandRow}
       >
         <addIcon.react

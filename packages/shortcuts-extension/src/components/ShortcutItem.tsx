@@ -144,7 +144,7 @@ export class ShortcutItem extends React.Component<
           <HTMLSelect
             value={this.props.shortcut.command}
             options={[
-              { value: '', label: 'Select a command' },
+              { value: '', label: this._trans.__('Select a command') },
               ...filteredShortcuts.map(shortcut => ({
                 value: shortcut.command,
                 label: `${shortcut.category}: ${shortcut.label}`
@@ -193,6 +193,10 @@ export class ShortcutItem extends React.Component<
     );
     const editable =
       this.props.shortcut.userDefined || !!this.props.newShortcutUtils;
+    const showOptionsButtonTitle = editable
+      ? this._trans.__('Custom options')
+      : this._trans.__('Show options');
+
     return (
       <div className="jp-Shortcuts-Cell">
         <div className="jp-Shortcuts-SourceCell">
@@ -222,11 +226,8 @@ export class ShortcutItem extends React.Component<
                 );
               }
             }}
-            title={
-              editable
-                ? this._trans.__('Custom options')
-                : this._trans.__('Show options')
-            }
+            title={showOptionsButtonTitle}
+            aria-label={showOptionsButtonTitle}
             appearance={'neutral'}
           >
             {editable ? (
@@ -242,8 +243,15 @@ export class ShortcutItem extends React.Component<
               className="jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew"
               onClick={this.props.newShortcutUtils?.saveShortcut}
               title={this._trans.__('Save shortcut')}
+              aria-label={this._trans.__('Save shortcut')}
               appearance="neutral"
-              disabled={false}
+              disabled={
+                !this.props.shortcut.command ||
+                !this.props.shortcut.keybindings.length ||
+                this.props.shortcut.keybindings.every(
+                  binding => !binding.keys || binding.keys.length === 0
+                )
+              }
             >
               <checkIcon.react tag={null} />
             </Button>
@@ -251,6 +259,7 @@ export class ShortcutItem extends React.Component<
               className="jp-mod-styled jp-mod-accept jp-Shortcuts-HideNew"
               onClick={this.props.newShortcutUtils?.hideAddCommandRow}
               title={this._trans.__('Hide add shortcut row')}
+              aria-label={this._trans.__('Hide add shortcut row')}
               appearance="neutral"
             >
               <closeIcon.react tag={null} />

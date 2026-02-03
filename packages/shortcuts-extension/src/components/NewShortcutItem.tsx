@@ -102,7 +102,7 @@ export class NewShortcutItem implements IShortcutItemProps {
       binding => binding.keys === keybinding.keys
     );
     if (index > -1) {
-      delete this._shortcut.keybindings[index];
+      this._shortcut.keybindings.splice(index, 1);
       this._changed.emit();
     }
   };

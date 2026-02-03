@@ -54,7 +54,7 @@ export interface IKeybinding {
  */
 export interface ICustomOptions {
   /**
-   * The DOM selector that catch the shortcut.
+   * The DOM selector that catches the shortcut.
    */
   selector: string;
   /**

@@ -48,9 +48,27 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
   /**
    * Overwrite the keyboard event to prevent the dialog from submitting when
    * pressing Enter in the JSON editor.
+   *
+   * For all other keys (and Enter outside the JSON editor), delegate to the
+   * base dialog handler to preserve standard keyboard behavior.
    */
   protected _evtKeydown(event: KeyboardEvent): void {
-    // no-op
+    if (event.key === 'Enter') {
+      // If focus is inside the JSON editor, prevent the dialog from treating
+      // Enter as a submit/activate-default-button key.
+      const jsonEditorNode = this.node.querySelector('.jp-JSONEditor');
+      const activeElement = document.activeElement;
+      if (
+        jsonEditorNode instanceof HTMLElement &&
+        activeElement instanceof HTMLElement &&
+        jsonEditorNode.contains(activeElement)
+      ) {
+        event.stopPropagation();
+        return;
+      }
+    }
+    // Fallback to the default dialog behavior.
+    super._evtKeydown(event);
   }
 }
 
@@ -62,7 +80,7 @@ class CustomOptionsDialogBody
   implements Dialog.IBodyWidget<ICustomOptions>
 {
   private _selectorInput: HTMLInputElement;
-  private _editorWidget: JSONEditorWidget;
+  private _editorWidget?: JSONEditorWidget;
 
   constructor(
     shortcut: IShortcutTarget,
@@ -121,7 +139,7 @@ class CustomOptionsDialogBody
    * Get the value from the dialog body.
    */
   getValue(): ICustomOptions {
-    const argsText = this._editorWidget.getJSON();
+    const argsText = this._editorWidget?.getJSON() ?? '{}';
     let args: JSONObject;
 
     try {
@@ -145,7 +163,7 @@ class CustomOptionsDialogBody
    * Dispose resources.
    */
   dispose(): void {
-    this._editorWidget.dispose();
+    this._editorWidget?.dispose();
     super.dispose();
   }
 }
