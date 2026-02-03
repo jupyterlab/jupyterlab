@@ -1632,28 +1632,6 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.bulkRename, {
-    label: trans.__('Bulk Rename'),
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (widget) {
-        return widget.rename();
-      }
-    },
-    isEnabled: () => {
-      const widget = tracker.currentWidget;
-      return !!widget && Array.from(widget.selectedItems()).length > 1;
-    },
-    icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
-    mnemonic: 0,
-    describedBy: {
-      args: {
-        type: 'object',
-        properties: {}
-      }
-    }
-  });
-
   commands.addCommand(CommandIDs.copyPath, {
     execute: () => {
       const widget = tracker.currentWidget;

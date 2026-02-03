@@ -101,14 +101,14 @@ test('Bulk rename files', async ({ page, tmpPath }) => {
   const menu = await page.menu.getOpenMenuLocator();
   expect(menu).not.toBeNull();
 
-  // Click Bulk Rename (explicit command)
-  const bulkRename = menu!.locator('[data-command="filebrowser:bulk-rename"]');
-  await expect(bulkRename).toBeVisible();
-  await bulkRename.click();
+  // Click Rename (handles multi-selection)
+  const rename = menu!.locator('[data-command="filebrowser:rename"]');
+  await expect(rename).toBeVisible();
+  await rename.click();
 
   // Assert dialog
   const dialog = page.locator('.jp-Dialog');
-  await expect(dialog).toBeVisible();
+  await expect(dialog).toBeVisible({ timeout: 10000 });
   await expect(dialog.locator('.jp-Dialog-header')).toHaveText('Bulk Rename');
 
   // Fill in the new base name
