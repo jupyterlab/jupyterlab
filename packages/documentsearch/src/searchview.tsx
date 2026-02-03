@@ -44,6 +44,8 @@ const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_FILTER_DISABLED_CLASS = 'jp-DocumentSearch-search-filter-disabled';
 const SEARCH_FILTER_CLASS = 'jp-DocumentSearch-search-filter';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
+const REPLACE_BUTTON_DISABLED_CLASS =
+  'jp-DocumentSearch-replace-button-disabled';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_CLASS = 'jp-DocumentSearch-replace-toggle';
@@ -220,6 +222,7 @@ interface IReplaceEntryProps {
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
+  replaceEnabled?: boolean;
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -257,9 +260,22 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       </div>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
+        disabled={!props.replaceEnabled}
         onClick={() => props.onReplaceCurrent()}
+        title={
+          !props.replaceEnabled
+            ? 'Cannot replace: match is in output or read-only cell'
+            : 'Replace'
+        }
+        tabIndex={0}
       >
-        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
+        <span
+          className={
+            props.replaceEnabled
+              ? `${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`
+              : `${REPLACE_BUTTON_CLASS} ${REPLACE_BUTTON_DISABLED_CLASS} ${BUTTON_CONTENT_CLASS}`
+          }
+        >
           {trans.__('Replace')}
         </span>
       </button>
@@ -487,6 +503,10 @@ interface ISearchOverlayProps {
    */
   wholeWords: boolean;
   /**
+   * Whether the replace button is disabled.
+   * */
+  replaceEnabled?: boolean;
+  /**
    * Callback on case sensitive toggled.
    */
   onCaseSensitiveToggled: () => void;
@@ -602,20 +622,6 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   }
 
   private _onReplaceToggled() {
-    // Deactivate invalid replace filters
-    if (!this.props.replaceEntryVisible) {
-      for (const key in this.props.filtersDefinition) {
-        const filter = this.props.filtersDefinition[key];
-        if (!filter.supportReplace) {
-          this.props.onFilterChanged(key, false).catch(reason => {
-            console.error(
-              `Fail to update filter value for ${filter.title}:\n${reason}`
-            );
-          });
-        }
-      }
-    }
-
     this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
 
@@ -653,20 +659,15 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
-
-          const isEnabled = !showReplace || filter.supportReplace;
-          // Show an alternate description, if one exists, when a filter is disabled in replace mode.
-          const description = isEnabled
-            ? filter.description
-            : filter.disabledDescription ?? filter.description;
           return (
             <FilterSelection
               key={name}
               title={filter.title}
               description={
-                description + (name == 'selection' ? selectionKeyHint : '')
+                filter.description +
+                (name == 'selection' ? selectionKeyHint : '')
               }
-              isEnabled={isEnabled}
+              isEnabled={true}
               onToggle={async () => {
                 await this.props.onFilterChanged(
                   name,
@@ -776,6 +777,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 replaceText={this.props.replaceText}
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
+                replaceEnabled={this.props.replaceEnabled}
               />
               <div className={SPACER_CLASS}></div>
             </>
@@ -912,6 +914,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         replaceText={this.model.replaceText}
         initialSearchText={this.model.initialQuery}
         lastSearchText={this.model.searchExpression}
+        replaceEnabled={this.model.replaceEnabled}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>
         }
