@@ -21,7 +21,7 @@ Webpack config to Rspack.
 ### API Updates
 
 - The `currentFrameChanged` signal in the `IDebugger.Model.ISources` interface has been deprecated and will be removed in 5.0.
-- The @jupyterlab/coreutils LruCache now throws an error if the maxSize is less than 1.
+- The `@jupyterlab/coreutils` `LruCache` now throws an error if the `maxSize` is less than 1.
 
 ## JupyterLab 4.5.0 to 4.5.1
 
