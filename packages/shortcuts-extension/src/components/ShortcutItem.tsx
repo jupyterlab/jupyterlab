@@ -258,8 +258,8 @@ export class ShortcutItem extends React.Component<
             <Button
               className="jp-mod-styled jp-mod-accept jp-Shortcuts-HideNew"
               onClick={this.props.newShortcutUtils?.hideAddCommandRow}
-              title={this._trans.__('Hide add shortcut row')}
-              aria-label={this._trans.__('Hide add shortcut row')}
+              title={this._trans.__('Hide row')}
+              aria-label={this._trans.__('Hide row')}
               appearance="neutral"
             >
               <closeIcon.react tag={null} />

@@ -359,11 +359,11 @@ test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
   await expect(addShortcutRow).not.toBeAttached();
 
   // Show the add shortcut row.
-  await shortcutsForm.getByTitle('Show add shortcut row').click();
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
   await expect(addShortcutRow).toBeAttached();
 
   // Hide the add shortcut row
-  await addShortcutRow.getByTitle('Hide add shortcut row').click();
+  await addShortcutRow.getByTitle('Hide row').click();
   await expect(addShortcutRow).not.toBeAttached();
 });
 
@@ -385,7 +385,7 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   );
 
   // Show the add shortcut row and count initial commands.
-  await shortcutsForm.getByTitle('Show add shortcut row').click();
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
   const initialCount = await commandOptions.count();
 
   // Filtering on notebook should reduce the count.
@@ -428,7 +428,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
 
   // Show the add shortcut row.
-  await shortcutsForm.getByTitle('Show add shortcut row').click();
+  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
 
   // Select the command.
   await addShortcutRow
