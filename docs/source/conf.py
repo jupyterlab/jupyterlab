@@ -59,6 +59,7 @@ extensions = [
 mermaid_version = "latest"
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
+myst_fence_as_directive = ["mermaid"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
