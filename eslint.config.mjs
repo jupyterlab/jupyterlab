@@ -1,20 +1,13 @@
-const { defineConfig, globalIgnores } = require('eslint/config');
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
+import jestPlugin from 'eslint-plugin-jest';
+import reactPlugin from 'eslint-plugin-react';
+import prettierPlugin from 'eslint-plugin-prettier';
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettierConfig from 'eslint-config-prettier';
 
-const globals = require('globals');
-const tsParser = require('@typescript-eslint/parser');
-const typescriptEslint = require('@typescript-eslint/eslint-plugin');
-const jest = require('eslint-plugin-jest');
-const js = require('@eslint/js');
-
-const { FlatCompat } = require('@eslint/eslintrc');
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
-});
-
-module.exports = defineConfig([
+export default defineConfig([
   globalIgnores([
     '**/node_modules',
     '**/build',
@@ -57,17 +50,17 @@ module.exports = defineConfig([
     'packages/lsp/schema.js',
     '**/.pixi'
   ]),
+  js.configs.recommended,
+  tseslint.configs.recommended,
   {
     files: ['**/*.js', '**/*.jsx'],
 
     languageOptions: {
       globals: {
-        ...Object.fromEntries(
-          Object.entries(globals.browser).filter(([key]) => key.trim() === key)
-        ),
+        ...globals.browser,
         ...globals.commonjs,
         ...globals.node,
-        ...jest.environments.globals.globals,
+        ...globals.jest,
         BigInt: 'readonly',
         HTMLCollectionOf: 'readonly',
         JSX: 'readonly',
@@ -188,14 +181,19 @@ module.exports = defineConfig([
   {
     files: ['**/*.ts', '**/*.tsx'],
 
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      prettier: prettierPlugin,
+      jest: jestPlugin,
+      react: reactPlugin
+    },
+
     languageOptions: {
       globals: {
-        ...Object.fromEntries(
-          Object.entries(globals.browser).filter(([key]) => key.trim() === key)
-        ),
+        ...globals.browser,
         ...globals.commonjs,
         ...globals.node,
-        ...jest.environments.globals.globals,
+        ...globals.jest,
         BigInt: 'readonly',
         HTMLCollectionOf: 'readonly',
         JSX: 'readonly',
@@ -205,24 +203,12 @@ module.exports = defineConfig([
         ScrollLogicalPosition: 'readonly'
       },
 
-      parser: tsParser,
+      parser: tseslint.parser,
       ecmaVersion: 2018,
 
       parserOptions: {
         project: ['./tsconfig.eslint.json']
       }
-    },
-
-    extends: compat.extends(
-      'eslint:recommended',
-      'plugin:@typescript-eslint/eslint-recommended',
-      'plugin:@typescript-eslint/recommended',
-      'prettier',
-      'plugin:react/recommended'
-    ),
-
-    plugins: {
-      '@typescript-eslint': typescriptEslint
     },
 
     rules: {
@@ -368,6 +354,9 @@ module.exports = defineConfig([
       'no-case-declarations': 'warn',
       'no-useless-escape': 'off',
       'prefer-const': 'off',
+      curly: ['error', 'all'],
+      eqeqeq: 'error',
+      'prefer-arrow-callback': 'error',
       'react/prop-types': 'warn',
 
       'sort-imports': [
@@ -402,12 +391,11 @@ module.exports = defineConfig([
     files: ['packages/**/*.spec.ts', 'testutils/**/*.spec.ts'],
 
     plugins: {
-      jest
+      jest: jestPlugin
     },
 
-    extends: compat.extends('plugin:jest/recommended'),
-
     rules: {
+      ...jestPlugin.configs.recommended.rules,
       'jest/no-conditional-expect': 'warn',
       'jest/valid-title': 'warn',
       'jest/no-standalone-expect': [
@@ -431,5 +419,6 @@ module.exports = defineConfig([
     rules: {
       'no-restricted-syntax': 'off'
     }
-  }
+  },
+  prettierConfig
 ]);
