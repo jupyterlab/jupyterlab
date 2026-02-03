@@ -986,6 +986,79 @@ describe('filebrowser/listing', () => {
           ]);
         });
       });
+
+      describe('with sortFileNamesNaturally', () => {
+        beforeEach(async () => {
+          const options = createOptionsForConstructor();
+          const naturalTestFiles = ['file10.txt', 'file2.txt', 'file1.txt'];
+          for (const name of naturalTestFiles) {
+            const model = await options.model.manager.newUntitled({
+              type: 'file'
+            });
+            await options.model.manager.rename(model.path, name);
+          }
+          dirListing = new TestDirListing(options);
+          Widget.attach(dirListing, document.body);
+          await signalToPromise(dirListing.updated);
+        });
+
+        it('should sort naturally when enabled by default', async () => {
+          dirListing.sort({
+            direction: 'ascending',
+            key: 'name'
+          });
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file2.txt',
+            'file10.txt'
+          ]);
+        });
+
+        it('should sort lexicographically when disabled', async () => {
+          dirListing.setSortFileNamesNaturally(false);
+          await signalToPromise(dirListing.updated);
+          dirListing.sort({
+            direction: 'ascending',
+            key: 'name'
+          });
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file10.txt',
+            'file2.txt'
+          ]);
+        });
+
+        it('should re-sort when toggling sortFileNamesNaturally', async () => {
+          dirListing.sort({
+            direction: 'ascending',
+            key: 'name'
+          });
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file2.txt',
+            'file10.txt'
+          ]);
+
+          dirListing.setSortFileNamesNaturally(false);
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file10.txt',
+            'file2.txt'
+          ]);
+
+          dirListing.setSortFileNamesNaturally(true);
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file2.txt',
+            'file10.txt'
+          ]);
+        });
+      });
     });
   });
 });
