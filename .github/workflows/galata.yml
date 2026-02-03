@@ -162,7 +162,8 @@ jobs:
         if: ${{ !cancelled() && steps.check-assets.outputs.count > 0 }}
         uses: actions/upload-artifact/merge@v4
         with:
-          name: visual-regression-test-assets
+          # The name matches the pattern so that it is picked again on re-runs
+          name: galata-test-assets-merged
           pattern: galata-test-assets-*
           delete-merged: true
 
@@ -170,7 +171,8 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact/merge@v4
         with:
-          name: visual-regression-blobs
+          # The name matches the pattern so that it is picked again on re-runs
+          name: galata-blobs-merged
           pattern: galata-blobs-*
           delete-merged: true
           retention-days: 1
