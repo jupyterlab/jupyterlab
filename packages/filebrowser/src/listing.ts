@@ -7,7 +7,14 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
+import {
+  getBaseNameFromMimeType,
+  getExtensionFromMimeType,
+  PageConfig,
+  PathExt,
+  Time,
+  URLExt
+} from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { isValidFileName, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -1896,26 +1903,6 @@ export class DirListing extends Widget {
       return;
     }
 
-    const items = event.dataTransfer?.items;
-    if (!items) {
-      // Fallback to simple upload of files (if any)
-      const files = event.dataTransfer?.files;
-      if (!files || files.length === 0) {
-        return;
-      }
-      const promises = [];
-      for (const file of files) {
-        const promise = this._model.upload(file);
-        promises.push(promise);
-      }
-      Promise.all(promises)
-        .then(() => this._allUploaded.emit())
-        .catch(err => {
-          console.error('Error while uploading files: ', err);
-        });
-      return;
-    }
-
     const uploadEntry = async (entry: FileSystemEntry, path: string) => {
       if (Private.isDirectoryEntry(entry)) {
         const dirPath = await Private.createDirectory(
@@ -1935,21 +1922,150 @@ export class DirListing extends Widget {
       }
     };
 
-    const promises = [];
-    for (const item of items) {
-      const entry = Private.defensiveGetAsEntry(item);
+    const items = event.dataTransfer?.items;
+    if (!items) {
+      return;
+    }
 
+    const uploadPromises = [];
+    for (const item of items) {
+      // file and directory entries both have .kind === 'file'
+      if (item.kind !== 'file') {
+        continue;
+      }
+
+      // Try uploading the file or directory. We first get the file system entry
+      // so that we can handle directories.
+
+      // TODO: we should potentially add support for
+      // item.getAsFileSystemHandle(), which has a more natural promise-based
+      // api, but browser support is currently limited.
+      const entry = item.webkitGetAsEntry();
       if (!entry) {
         continue;
       }
-      const promise = uploadEntry(entry, this._model.path ?? '/');
-      promises.push(promise);
+
+      // Sometimes we have trouble reading a file from entry. For example, in
+      // Safari, dragging and dropping an image with a data uri creates a file
+      // item (see
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images).
+      // However, experiments show that trying to read that file in Safari gives
+      // us a "NotFoundError: Path does not exist" error. So if we happen to see
+      // a file in the root directory, we get it directly as a file as a
+      // fallback. We have to do this here in the code since getAsFile would
+      // just return null if we called it in the async fallback error handler
+      // below (see
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#protected_mode)
+      let file: File | null = null;
+      const isInRootDirectory = entry.fullPath.indexOf('/', 1) === -1;
+      if (Private.isFileEntry(entry) && isInRootDirectory) {
+        file = item.getAsFile();
+      }
+
+      // Try uploading the entry. If that fails, try uploading the file if it
+      // was in the root directory
+      const promise = uploadEntry(entry, this._model.path ?? '/').catch(
+        async err => {
+          if (isInRootDirectory && file) {
+            await this._model.upload(file);
+            // handled error, so just return without rethrowing
+            return;
+          }
+          throw err;
+        }
+      );
+      uploadPromises.push(promise);
     }
-    Promise.all(promises)
-      .then(() => this._allUploaded.emit())
-      .catch(err => {
-        console.error('Error while uploading files: ', err);
-      });
+
+    if (uploadPromises.length === 0) {
+      // There were no files in the data, so we look for a data uri.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_images
+
+      // We are going to assume now that there is only one thing being dropped
+      // and we need to pick the best data type representing the item.
+
+      let filename: string | undefined = undefined;
+      let uri: string | undefined = undefined;
+
+      // First, try to get DownloadURL since it gives us an explicit filename
+      // (format: "mimeType:filename:url")
+      const downloadUrl = event.dataTransfer?.getData('DownloadURL');
+      if (downloadUrl) {
+        const firstColon = downloadUrl.indexOf(':');
+        if (firstColon !== -1) {
+          const secondColon = downloadUrl.indexOf(':', firstColon + 1);
+          if (secondColon !== -1) {
+            filename = downloadUrl.slice(firstColon + 1, secondColon);
+            uri = downloadUrl.slice(secondColon + 1);
+          }
+        }
+      }
+
+      // Fall back to text/uri-list if DownloadURL wasn't available
+      if (!uri) {
+        // https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
+        // indicates 'url' is a shortcut to getting the first url in 'text/uri-list'
+        uri = event.dataTransfer?.getData('url') || undefined;
+        if (!uri) {
+          // 'url' is not supported everywhere, so fall back to 'text/uri-list'
+          const uriList =
+            event.dataTransfer?.getData('text/uri-list') || undefined;
+          if (uriList) {
+            uri = URLExt.parseUriListFirst(uriList) ?? undefined;
+          }
+        }
+      }
+
+      const uploadLocalURI = async (uri: string, filename?: string) => {
+        // For now, to have a safe thing to try first, we only allow local data or blob urls that are image, audio, or video mimetypes.
+        if (
+          !(
+            uri.startsWith('data:image') ||
+            uri.startsWith('data:audio') ||
+            uri.startsWith('data:video') ||
+            uri.startsWith('blob:')
+          )
+        ) {
+          throw new Error(
+            `Can only upload local image, video, or audio files through local data and blob urls`
+          );
+        }
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        // Even though we check the mimetype above, a blob may come back as a
+        // different mimetype, so we check the mimetypes again.
+        if (
+          !(
+            blob.type.startsWith('image/') ||
+            blob.type.startsWith('audio/') ||
+            blob.type.startsWith('video/')
+          )
+        ) {
+          throw new Error(
+            `Can only upload local image, video, or audio files through local data and blob urls`
+          );
+        }
+
+        filename = filename ?? Private.getFilenameFromMimeType(blob.type);
+        const file = new File([blob], filename, { type: blob.type });
+        return this._model.upload(file);
+      };
+
+      // For now, only upload local urls, and only data urls that are explicitly image, audio, or video.
+      if (uri) {
+        uploadPromises.push(uploadLocalURI(uri, filename));
+      }
+    }
+
+    // Only upload (and trigger the allUploaded signal) if we have files to upload.
+    if (uploadPromises.length > 0) {
+      Promise.all(uploadPromises)
+        .then(() => this._allUploaded.emit())
+        .catch(err => {
+          console.error('Error while uploading files: ', err);
+        });
+    }
   }
 
   /**
@@ -3880,26 +3996,13 @@ namespace Private {
     return entry.isFile;
   }
 
-  export function defensiveGetAsEntry(
-    item: DataTransferItem
-  ): FileSystemEntry | null {
-    if (item.webkitGetAsEntry) {
-      return item.webkitGetAsEntry();
-    }
-    if ('getAsEntry' in item) {
-      // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
-      return (item['getAsEntry'] as () => FileSystemEntry | null)();
-    }
-    return null;
-  }
-
   function readEntries(reader: FileSystemDirectoryReader) {
     return new Promise<FileSystemEntry[]>((resolve, reject) =>
       reader.readEntries(resolve, reject)
     );
   }
 
-  export function readFile(entry: FileSystemFileEntry) {
+  export async function readFile(entry: FileSystemFileEntry): Promise<File> {
     return new Promise<File>((resolve, reject) => entry.file(resolve, reject));
   }
 
@@ -3918,6 +4021,27 @@ namespace Private {
       }
     }
     return allEntries;
+  }
+
+  /**
+   * Get a generic filename for media (image/audio/video) based on its MIME type.
+   * Returns a filename like "image-20250112-143052.png" or "audio-20250112-143052.mp3".
+   */
+  export function getFilenameFromMimeType(mimeType: string): string {
+    // Get base name and extension from MIME type using shared utilities
+    const baseName = getBaseNameFromMimeType(mimeType);
+    const extension = getExtensionFromMimeType(mimeType);
+
+    // Add "YYYYMMDD-HHMMSS" timestamp to make the filename probably unique. We
+    // want this in local time for readability, so we can't just use
+    // toISOString().
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
+      now.getDate()
+    )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+    return `${baseName}-${timestamp}.${extension}`;
   }
 }
 

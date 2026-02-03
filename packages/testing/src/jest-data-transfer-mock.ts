@@ -22,17 +22,17 @@ class FileSystemEntryMock implements FileSystemEntry {
   readonly isFile: boolean = false;
   readonly isDirectory: boolean = false;
   readonly name: string;
+  readonly fullPath: string;
 
-  constructor(options: IFileSystemEntryOptions) {
+  constructor(options: IFileSystemEntryOptions, directory: string = '/') {
     this.name = options.name;
+    this.fullPath =
+      directory + (directory.endsWith('/') ? '' : '/') + options.name;
   }
   getParent() {
     throw Error('Not implemented in the mock');
   }
   get filesystem(): FileSystem {
-    throw Error('Not implemented in the mock');
-  }
-  get fullPath(): string {
     throw Error('Not implemented in the mock');
   }
 }
@@ -43,12 +43,15 @@ class FileSystemDirectoryEntryMock
 {
   readonly isFile = false;
   readonly isDirectory = true;
-  constructor(options: IFileSystemDirectoryEntryOptions) {
-    super(options);
+  constructor(
+    options: IFileSystemDirectoryEntryOptions,
+    directory: string = '/'
+  ) {
+    super(options, directory);
     this._files = options.files.map(spec =>
       'file' in spec
-        ? new FileSystemFileEntryMock(spec)
-        : new FileSystemDirectoryEntryMock(spec)
+        ? new FileSystemFileEntryMock(spec, this.fullPath)
+        : new FileSystemDirectoryEntryMock(spec, this.fullPath)
     );
   }
   createReader(): FileSystemDirectoryReader {
@@ -69,8 +72,8 @@ class FileSystemFileEntryMock
 {
   readonly isFile = true;
   readonly isDirectory = false;
-  constructor(options: IFileSystemFileEntryOptions) {
-    super(options);
+  constructor(options: IFileSystemFileEntryOptions, directory: string = '/') {
+    super(options, directory);
     this._file = new File(options.file.bits, options.name);
   }
   file(successCallback: (file: File) => void) {
@@ -105,7 +108,9 @@ class DataTransferItemMock implements DataTransferItem {
     public type: string,
     protected value: string
   ) {
-    this.kind = ['file', 'directory'].includes(type) ? type : 'string';
+    // Directories have kind='file', and type is an empty string, so we are assuming
+    // too much here that type determines if an item is a directory or file.
+    this.kind = ['file', 'directory'].includes(type) ? 'file' : 'string';
   }
   getAsString(callback: (v: string) => undefined): undefined {
     callback(this.value);
@@ -114,9 +119,9 @@ class DataTransferItemMock implements DataTransferItem {
     return null;
   }
   webkitGetAsEntry() {
-    if (this.kind === 'directory') {
+    if (this.type === 'directory') {
       return new FileSystemDirectoryEntryMock(JSON.parse(this.value));
-    } else if (this.kind === 'file') {
+    } else if (this.type === 'file') {
       return new FileSystemFileEntryMock(JSON.parse(this.value));
     }
     return null;

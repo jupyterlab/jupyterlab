@@ -3,7 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { URLExt } from '@jupyterlab/coreutils';
+import {
+  getBaseNameFromMimeType,
+  getExtensionFromMimeType,
+  URLExt
+} from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -196,6 +200,8 @@ export async function renderImage(
   if (unconfined === true) {
     img.classList.add('jp-mod-unconfined');
   }
+
+  Private.makeMediaElementDraggable(img);
 
   // Add the image to the host.
   host.appendChild(img);
@@ -1235,12 +1241,21 @@ namespace Private {
    * Handle the default behavior of nodes.
    */
   export function handleDefaults(node: HTMLElement): void {
-    // Handle image elements.
-    const imgs = node.getElementsByTagName('img');
-    for (let i = 0; i < imgs.length; i++) {
-      if (!imgs[i].alt) {
-        imgs[i].alt = 'Image';
+    for (const img of node.getElementsByTagName('img')) {
+      Private.makeMediaElementDraggable(img);
+      if (!img.alt) {
+        img.alt = 'Image';
       }
+    }
+
+    // Make audio elements draggable
+    for (const audio of node.getElementsByTagName('audio')) {
+      Private.makeMediaElementDraggable(audio);
+    }
+
+    // Make video elements draggable
+    for (const video of node.getElementsByTagName('video')) {
+      Private.makeMediaElementDraggable(video);
     }
   }
 
@@ -1765,5 +1780,84 @@ namespace Private {
       }
     }
     return out.join('');
+  }
+
+  /**
+   * Make an audio or video element draggable by adding drag event handlers.
+   * This allows users to drag media elements (with data URIs) into the file browser.
+   */
+  export function makeMediaElementDraggable(
+    element: HTMLImageElement | HTMLAudioElement | HTMLVideoElement
+  ): void {
+    // Helper to get the source URL, checking both the element and child <source> elements
+    const getSourceUrl = (): string | null => {
+      // Check currentSrc (the actual playing source)
+      if (element.currentSrc?.startsWith('data:')) {
+        return element.currentSrc;
+      }
+
+      // Check the element's src attribute
+      if (element.src?.startsWith('data:')) {
+        return element.src;
+      }
+
+      // Check child <source> elements
+      for (const source of element.getElementsByTagName('source')) {
+        const src = source.src;
+        if (src && src.startsWith('data:')) {
+          return src;
+        }
+      }
+
+      return null;
+    };
+
+    // Check if there's a data URI source
+    const dataUriSource = getSourceUrl();
+    if (!dataUriSource) {
+      return;
+    }
+
+    // Make the element draggable
+    element.setAttribute('draggable', 'true');
+
+    // Add drag start handler
+    element.addEventListener('dragstart', (event: DragEvent) => {
+      if (!event.dataTransfer) {
+        return;
+      }
+
+      // Get the source URL at drag time (in case it changed)
+      const source = getSourceUrl();
+      if (source) {
+        event.dataTransfer.setData('text/uri-list', source);
+
+        // Set DownloadURL for Chrome:
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_data_store#dragging_files_to_an_operating_system_file_explorer
+        // Parse the data URI to get MIME type
+        const parsed = URLExt.parseDataURI(source);
+        if (parsed) {
+          // Generate a timestamped filename
+          const extension = getExtensionFromMimeType(parsed.mimeType);
+          const baseName = getBaseNameFromMimeType(parsed.mimeType);
+
+          const now = new Date();
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          const timestamp = `${now.getFullYear()}${pad(
+            now.getMonth() + 1
+          )}${pad(now.getDate())}-${pad(now.getHours())}${pad(
+            now.getMinutes()
+          )}${pad(now.getSeconds())}`;
+
+          const filename = `${baseName}-${timestamp}.${extension}`;
+
+          event.dataTransfer.setData(
+            'DownloadURL',
+            `${parsed.mimeType}:${filename}:${source}`
+          );
+        }
+        event.dataTransfer.effectAllowed = 'copy';
+      }
+    });
   }
 }

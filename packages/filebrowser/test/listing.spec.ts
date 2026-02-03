@@ -7,8 +7,8 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import type { IFileSystemDirectoryEntryOptions } from '@jupyterlab/testing';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import type { IFileSystemDirectoryEntryOptions, IFileSystemFileEntryOptions } from '@jupyterlab/testing';
+import { framePromise, signalToPromise, sleep } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -106,6 +106,27 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#handleEvent()', () => {
+      it('should upload a file on drag', async () => {
+        const dt = new DataTransfer();
+        const fileMock: IFileSystemFileEntryOptions = {
+          name: 'file.txt',
+          file: {
+            bits: ['content']
+          }
+        };
+        // We set the type to 'file' so our Mock can recognize it as a file.
+        dt.setData('file', JSON.stringify(fileMock));
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+        const topLevel = getItemTitles(dirListing);
+        expect(topLevel).toStrictEqual(['file.txt']);
+      });
+
       it('should upload a nested folder on drag', async () => {
         const dt = new DataTransfer();
         const directoryMock: IFileSystemDirectoryEntryOptions = {
@@ -129,6 +150,7 @@ describe('filebrowser/listing', () => {
             }
           ]
         };
+        // We set the type to 'directory' so our Mock can recognize it as a directory.
         dt.setData('directory', JSON.stringify(directoryMock));
         const event = new DragEvent('drop', { dataTransfer: dt });
         const options = createOptionsForConstructor();
@@ -136,6 +158,7 @@ describe('filebrowser/listing', () => {
         Widget.attach(dirListing, document.body);
         dirListing.handleEvent(event);
         await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
         const topLevel = getItemTitles(dirListing);
         expect(topLevel).toStrictEqual(['test-dir']);
         await dirListing.model.cd('test-dir');
@@ -143,6 +166,222 @@ describe('filebrowser/listing', () => {
         expect(testDir).toEqual(
           expect.arrayContaining(['empty-dir', 'file.txt', 'code.py'])
         );
+      });
+
+      it('should upload an image from data URI on drag', async () => {
+        const dt = new DataTransfer();
+        // Create a simple PNG as a data URI
+        const dataUri =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+        dt.setData('url', dataUri);
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const topLevel = getItemTitles(dirListing);
+        expect(topLevel.length).toBe(1);
+        expect(topLevel[0]).toMatch(/^image-\d{8}-\d{6}\.png$/);
+      });
+
+      it('should upload an audio file from data URI on drag', async () => {
+        const dt = new DataTransfer();
+        // Create a minimal data URI for audio
+        const dataUri =
+          'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA';
+        dt.setData('url', dataUri);
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(1);
+        expect(items[0]).toMatch(/^audio-\d{8}-\d{6}\.wav$/);
+      });
+
+      it('should upload a video file from data URI on drag', async () => {
+        const dt = new DataTransfer();
+        // Create a minimal data URI for video
+        const dataUri = 'data:video/mp4;base64,AAAAIGZ0eXBpc29t';
+        dt.setData('url', dataUri);
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(1);
+        expect(items[0]).toMatch(/^video-\d{8}-\d{6}\.mp4$/);
+      });
+
+      it('should upload a file from blob URI on drag', async () => {
+        const dt = new DataTransfer();
+        // Use a blob URI (format generated by URL.createObjectURL)
+        const blobUri = 'blob:http://localhost/mock-blob-uuid';
+        dt.setData('url', blobUri);
+
+        // Mock fetch to handle blob URIs
+        const blob = new Blob(['test content'], { type: 'image/png' });
+        const fetchSpy = jest
+          .spyOn(global, 'fetch')
+          .mockImplementation(async url => {
+            if (url === blobUri) {
+              return { blob: async () => blob } as Response;
+            }
+            throw new Error(`Unexpected fetch call to ${url}`);
+          });
+
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(1);
+        expect(items[0]).toMatch(/^image-\d{8}-\d{6}\.png$/);
+
+        // Restore fetch
+        fetchSpy.mockRestore();
+      });
+
+      it('should not upload a blob that is not image/audio/video', async () => {
+        const dt = new DataTransfer();
+        // Use a blob URI (format generated by URL.createObjectURL)
+        const blobUri = 'blob:http://localhost/mock-blob-uuid';
+        dt.setData('url', blobUri);
+
+        // Mock fetch to handle blob URIs with non-media type
+        const blob = new Blob(['test content'], { type: 'text/plain' });
+        const fetchSpy = jest
+          .spyOn(global, 'fetch')
+          .mockImplementation(async url => {
+            if (url === blobUri) {
+              return { blob: async () => blob } as Response;
+            }
+            throw new Error(`Unexpected fetch call to ${url}`);
+          });
+
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+
+        dirListing.handleEvent(event);
+        // Should not trigger upload signal for non-media types. We'll test by
+        // waiting for the signal for a few milliseconds.
+        const uploadedPromise = signalToPromise(dirListing.allUploaded).then(
+          () => {
+            throw new Error(
+              'allUploaded should not trigger for non-media types'
+            );
+          }
+        );
+        await Promise.race([sleep(50), uploadedPromise]);
+
+        // Verify no files were uploaded
+        await dirListing.model.refresh();
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(0);
+
+        // Restore fetch
+        fetchSpy.mockRestore();
+      });
+
+      it('should prioritize DownloadURL over other data transfer types', async () => {
+        const dt = new DataTransfer();
+        const dataUri =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+        // Set all three types, DownloadURL should take priority
+        dt.setData('DownloadURL', `image/png:priority-test.png:${dataUri}`);
+        dt.setData('url', dataUri);
+        dt.setData('text/uri-list', dataUri);
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(1);
+        expect(items[0]).toBe('priority-test.png');
+      });
+
+      it('should fallback to url when DownloadURL is not available', async () => {
+        const dt = new DataTransfer();
+        const dataUri =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+        // Set url and uri-list, but not DownloadURL
+        dt.setData('url', dataUri);
+        dt.setData('text/uri-list', 'data:image/jpeg;base64,ABC123');
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(1);
+        // Should use 'url' which is PNG, not uri-list which is JPEG
+        expect(items[0]).toMatch(/^image-\d{8}-\d{6}\.png$/);
+      });
+
+      it('should fallback to text/uri-list when url is not available', async () => {
+        const dt = new DataTransfer();
+        const dataUri = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+        // Only set text/uri-list
+        dt.setData('text/uri-list', dataUri);
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        await signalToPromise(dirListing.allUploaded);
+        await dirListing.model.refresh();
+
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(1);
+        expect(items[0]).toMatch(/^image-\d{8}-\d{6}\.gif$/);
+      });
+
+      it('should ignore non-media data URIs', async () => {
+        const dt = new DataTransfer();
+        // Plain text data URI should not be uploaded
+        const dataUri = 'data:text/plain;base64,SGVsbG8gV29ybGQ=';
+        dt.setData('url', dataUri);
+        const event = new DragEvent('drop', { dataTransfer: dt });
+        const options = createOptionsForConstructor();
+        const dirListing = new TestDirListing(options);
+        Widget.attach(dirListing, document.body);
+        dirListing.handleEvent(event);
+        // Should not trigger upload signal for non-media types. We'll test by
+        // waiting for the signal for a few milliseconds.
+        const uploadedPromise = signalToPromise(dirListing.allUploaded).then(
+          () => {
+            throw new Error(
+              'allUploaded should not trigger for non-media types'
+            );
+          }
+        );
+        await Promise.race([sleep(50), uploadedPromise]);
+        const items = getItemTitles(dirListing);
+        expect(items.length).toBe(0);
       });
     });
 

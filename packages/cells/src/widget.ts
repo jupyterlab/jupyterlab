@@ -2072,18 +2072,17 @@ export abstract class AttachmentsCell<
   private _attachFile(blob: File) {
     const reader = new FileReader();
     reader.onload = evt => {
-      const { href, protocol } = URLExt.parse(reader.result as string);
-      if (protocol !== 'data:') {
+      const parsed = URLExt.parseDataURI(reader.result as string);
+      if (!parsed) {
         return;
       }
-      const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
-      const matches = dataURIRegex.exec(href);
-      if (!matches || matches.length !== 4) {
+
+      const { mimeType, isBase64, data } = parsed;
+      if (!isBase64) {
+        console.error(`Failed to attach ${blob.name} - not base64 encoded`);
         return;
       }
-      const mimeType = matches[1];
-      const encodedData = matches[3];
-      const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
+      const bundle: nbformat.IMimeBundle = { [mimeType]: data };
       const URI = this._generateURI(blob.name);
 
       if (mimeType.startsWith('image/')) {
