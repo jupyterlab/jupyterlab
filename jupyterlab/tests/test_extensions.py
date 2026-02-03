@@ -40,6 +40,41 @@ def test_check_python_version_compatible_current_version():
 
 
 @pytest.mark.parametrize(
+    "requires_python, expected_allowed",
+    (
+        (">=3.6", True),  # Compatible with current Python
+        (">=99.0", False),  # Incompatible - future version
+        (None, True),  # No requirement - should be allowed
+    ),
+)
+@patch("jupyterlab.extensions.pypi.xmlrpc.client")
+async def test_extension_package_allowed_set_from_python_compatibility(
+    mocked_rpcclient, requires_python, expected_allowed
+):
+    """Test that allowed attribute is correctly set based on Python version compatibility."""
+    proxy = Mock(browse=Mock(return_value=[["test-extension", "1.0.0"]]))
+    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
+
+    manager = PyPIExtensionManager()
+
+    async def mock_pkg_metadata(name, version, base_url):
+        return {
+            "name": "test-extension",
+            "summary": "A test extension",
+            "requires_python": requires_python,
+        }
+
+    manager._fetch_package_metadata = mock_pkg_metadata
+
+    extensions, _ = await manager.list_extensions("test")
+
+    assert len(extensions) == 1
+    ext = extensions[0]
+    assert ext.name == "test-extension"
+    assert ext.allowed == expected_allowed
+
+
+@pytest.mark.parametrize(
     "version, expected",
     (
         ("1", "1"),
