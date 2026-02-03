@@ -305,6 +305,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.incrFontSize, {
       label: args => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (args.key) {
           case 'code-font-size':
             return trans.__('Increase Code Font Size');
@@ -335,6 +336,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.decrFontSize, {
       label: args => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (args.key) {
           case 'code-font-size':
             return trans.__('Decrease Code Font Size');

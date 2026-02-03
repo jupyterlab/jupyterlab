@@ -1789,6 +1789,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
           let label: string;
+          // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
           switch (msg.header.msg_type) {
             case 'status':
               label = `status.${

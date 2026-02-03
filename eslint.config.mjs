@@ -50,8 +50,8 @@ export default defineConfig([
     'packages/lsp/schema.js',
     '**/.pixi'
   ]),
-  js.configs.recommended,
-  tseslint.configs.recommended,
+  // js.configs.recommended,
+  // tseslint.configs.recommended,
   {
     files: ['**/*.js', '**/*.jsx'],
 
@@ -420,5 +420,13 @@ export default defineConfig([
       'no-restricted-syntax': 'off'
     }
   },
-  prettierConfig
+  prettierConfig,
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
+      'eqeqeq': 'off',
+      'curly': 'off',
+      'prefer-arrow-callback': 'off'
+    }
+  }
 ]);

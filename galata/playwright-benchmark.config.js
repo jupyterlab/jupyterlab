@@ -21,7 +21,7 @@ module.exports = {
   use: {
     ...baseConfig.use,
     video: 'off',
-    baseURL: process.env.TARGET_URL ?? 'http://127.0.0.1:8888'
+    baseURL: process.env.TARGET_URL || 'http://127.0.0.1:8888'
   },
   preserveOutput: 'failures-only',
   workers: 1

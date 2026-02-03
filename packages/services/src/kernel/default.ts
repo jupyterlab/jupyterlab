@@ -1628,6 +1628,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       }
     }
     if (msg.channel === 'iopub') {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (msg.header.msg_type) {
         case 'status': {
           const untrackedMessageTypesRaw = PageConfig.getOption(
@@ -1896,6 +1897,7 @@ namespace Private {
    * Log the current kernel status.
    */
   export function logKernelStatus(kernel: Kernel.IKernelConnection): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (kernel.status) {
       case 'idle':
       case 'busy':

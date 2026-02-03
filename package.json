@@ -71,7 +71,7 @@
     "docs": "typedoc --options typedoc.js && python scripts/ensure_typedoc_links.py",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --cache --fix .",
-    "eslint:check": "eslint --cache .",
+    "eslint:check": "eslint  --cache '**/*.{js,jsx,ts,tsx}'",
     "eslint:check:typed": "eslint --config eslint.config.typecheck.mjs --cache .",
     "eslint:files": "eslint --fix",
     "eslint:typed": "eslint --config eslint.config.typecheck.mjs --cache --fix .",
