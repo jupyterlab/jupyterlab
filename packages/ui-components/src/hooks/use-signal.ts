@@ -60,7 +60,6 @@ export function useSignal<TSender, TArgs, TSnapshot>(
         signal.disconnect(slot);
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [signal, ...keys]
   );
 
