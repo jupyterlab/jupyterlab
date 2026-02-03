@@ -491,17 +491,17 @@ describe('Debugger', () => {
       MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
     });
     it('should have a body', () => {
-      expect(sidebar.sources.widgets.length).toEqual(1);
+      expect(sidebar.sources?.widgets.length).toEqual(1);
     });
 
     it('should display the source path in the header', () => {
-      const header = sidebar.sources.toolbar;
-      const pathWidget = header.node.innerHTML;
+      const header = sidebar.sources?.toolbar;
+      const pathWidget = header?.node.innerHTML;
       expect(pathWidget).toContain(path);
     });
 
     it('should display the source code in the body', () => {
-      const body = sidebar.sources.widgets[0] as SourcesBody;
+      const body = sidebar.sources?.widgets[0] as SourcesBody;
       const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
       expect(editor.model.sharedModel.getSource()).toEqual(code);
