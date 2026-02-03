@@ -1,12 +1,9 @@
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 import { Notification } from '@jupyterlab/apputils';
-import { FileBrowserModel, IUploadModel } from './model';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-
+import type { FileBrowserModel, IUploadModel } from './model';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 export class UploadNotifications {
   constructor(opts: UploadNotifications.IOptions) {
     this._model = opts.model;
