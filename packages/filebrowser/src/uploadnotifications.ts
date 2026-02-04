@@ -13,12 +13,16 @@ export class UploadNotifications {
     this._model.uploadChanged.connect(this._onUploadChanged, this);
   }
 
-  private _model: FileBrowserModel;
-  private _translator: ITranslator;
-  private _trans: TranslationBundle;
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
 
-  private _uploadNotifications = new Map<string, string>();
-  private _lastUpdateTime = new Map<string, number>();
+    this._isDisposed = true;
+    this._model.uploadChanged.disconnect(this._onUploadChanged, this);
+    this._uploadNotifications.clear();
+    this._lastUpdateTime.clear();
+  }
 
   private _onUploadChanged = (
     _sender: FileBrowserModel,
@@ -123,18 +127,13 @@ export class UploadNotifications {
     }
   };
 
+  private _model: FileBrowserModel;
+  private _translator: ITranslator;
+  private _trans: TranslationBundle;
+
+  private _uploadNotifications = new Map<string, string>();
+  private _lastUpdateTime = new Map<string, number>();
   private _isDisposed = false;
-
-  dispose(): void {
-    if (this._isDisposed) {
-      return;
-    }
-
-    this._isDisposed = true;
-    this._model.uploadChanged.disconnect(this._onUploadChanged, this);
-    this._uploadNotifications.clear();
-    this._lastUpdateTime.clear();
-  }
 }
 
 export namespace UploadNotifications {
