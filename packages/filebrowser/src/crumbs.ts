@@ -409,11 +409,45 @@ export class BreadCrumbs extends Widget {
       const newWidth = this.node.clientWidth;
       if (newWidth !== this._lastContainerWidth) {
         this._lastContainerWidth = newWidth;
+        // Invalidate cached widths on resize
+        this._cachedWidths = null;
         // Force recalculation by clearing previous state
         this._previousState = null;
-        this.update();
+        // Schedule measurement in next animation frame
+        requestAnimationFrame(() => {
+          this._measureElementWidths();
+          this.update();
+        });
       }
     }, 100);
+  }
+
+  /**
+   * Measure element widths from the DOM and cache them.
+   */
+  private _measureElementWidths(): void {
+    const home = this._crumbs[Private.Crumb.Home];
+    const ellipsis = this._crumbs[Private.Crumb.Ellipsis];
+
+    // Find first separator
+    const separators = this.node.querySelectorAll(':scope > span:not([class])');
+    const separator = separators.length > 0 ? separators[0] : null;
+
+    // Measure each rendered breadcrumb item
+    const items = this.node.querySelectorAll(
+      `.${BREADCRUMB_ITEM_CLASS}:not(.${BREADCRUMB_ELLIPSIS_CLASS})`
+    );
+    const itemWidths: number[] = [];
+    items.forEach(item => {
+      itemWidths.push((item as HTMLElement).getBoundingClientRect().width);
+    });
+
+    this._cachedWidths = {
+      home: home.getBoundingClientRect().width || 22,
+      ellipsis: ellipsis.getBoundingClientRect().width || 28,
+      separator: separator?.getBoundingClientRect().width || 4,
+      itemWidths: itemWidths
+    };
   }
 
   /**
@@ -442,49 +476,49 @@ export class BreadCrumbs extends Widget {
       return { left: this._minimumLeftItems, right: this._minimumRightItems };
     }
 
-    const HOME_ICON_WIDTH = 22;
-    const SEPARATOR_WIDTH = 4;
-    const ELLIPSIS_WIDTH = 28;
-    const ITEM_PADDING_MARGIN = 8;
-    const AVG_TEXT_WIDTH = 80;
-    const ITEM_WIDTH = ITEM_PADDING_MARGIN + AVG_TEXT_WIDTH;
+    // Get measurements (cached or defaults)
+    const homeWidth = this._cachedWidths?.home ?? 22;
+    const separatorWidth = this._cachedWidths?.separator ?? 4;
+    const ellipsisWidth = this._cachedWidths?.ellipsis ?? 28;
+    const itemWidths = this._cachedWidths?.itemWidths ?? [];
+    const defaultItemWidth = 88;
 
-    const fixedOverhead = HOME_ICON_WIDTH + SEPARATOR_WIDTH;
-    const ellipsisOverhead = ELLIPSIS_WIDTH + SEPARATOR_WIDTH;
+    const getItemWidth = (i: number): number =>
+      itemWidths[i] ?? defaultItemWidth;
 
-    // Available width for breadcrumb items
+    // Calculate available space
+    const fixedOverhead = homeWidth + separatorWidth;
     const availableForItems = containerWidth - fixedOverhead;
 
-    const widthPerItem = ITEM_WIDTH + SEPARATOR_WIDTH;
-    const maxItemsWithoutEllipsis = Math.floor(
-      availableForItems / widthPerItem
-    );
-
     // If all parts can fit, show all (no ellipsis needed)
-    if (maxItemsWithoutEllipsis >= totalParts) {
+    let totalWidth = 0;
+    for (let i = 0; i < totalParts; i++) {
+      totalWidth += getItemWidth(i) + separatorWidth;
+    }
+    if (totalWidth <= availableForItems) {
       return { left: totalParts, right: 0 };
     }
 
     // Calculate items that can fit with ellipsis
+    const ellipsisOverhead = ellipsisWidth + separatorWidth;
     const availableWithEllipsis = availableForItems - ellipsisOverhead;
-    const maxItemsWithEllipsis = Math.max(
-      0,
-      Math.floor(availableWithEllipsis / widthPerItem)
-    );
 
-    // If we can't fit more than minimums, use minimums
-    if (maxItemsWithEllipsis <= minTotal) {
-      return { left: this._minimumLeftItems, right: this._minimumRightItems };
+    let rightItems = 0;
+    let usedWidth = 0;
+    for (let i = totalParts - 1; i >= 0; i--) {
+      const w = getItemWidth(i) + separatorWidth;
+      if (usedWidth + w <= availableWithEllipsis) {
+        usedWidth += w;
+        rightItems++;
+      } else {
+        break;
+      }
     }
 
-    // Distribute items: prefer right side (most relevant for navigation)
-    const extraItems = maxItemsWithEllipsis - minTotal;
-    const maxExtraRight = totalParts - minTotal;
-    const extraRight = Math.min(extraItems, maxExtraRight);
-
+    // Ensure minimums are respected
     return {
       left: this._minimumLeftItems,
-      right: this._minimumRightItems + extraRight
+      right: Math.max(rightItems, this._minimumRightItems)
     };
   }
 
@@ -500,6 +534,12 @@ export class BreadCrumbs extends Widget {
   private _resizeObserver: ResizeObserver;
   private _lastContainerWidth: number = 0;
   private _resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+  private _cachedWidths: {
+    home: number;
+    separator: number;
+    ellipsis: number;
+    itemWidths: number[];
+  } | null = null;
 }
 
 /**
