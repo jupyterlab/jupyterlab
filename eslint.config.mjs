@@ -3,7 +3,6 @@ import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
 import prettierPlugin from 'eslint-plugin-prettier';
-import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 
@@ -50,8 +49,6 @@ export default defineConfig([
     'packages/lsp/schema.js',
     '**/.pixi'
   ]),
-  // js.configs.recommended,
-  // tseslint.configs.recommended,
   {
     files: ['**/*.js', '**/*.jsx'],
 
@@ -424,8 +421,8 @@ export default defineConfig([
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
-      'eqeqeq': 'off',
-      'curly': 'off',
+      eqeqeq: 'off',
+      curly: 'off',
       'prefer-arrow-callback': 'off'
     }
   }

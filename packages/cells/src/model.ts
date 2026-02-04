@@ -790,7 +790,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
               );
             }
           }
-          const outputs = event.newValues.map(output => output.toJSON());
+          const outputs = event.newValues.map(
+            output => output.toJSON() as nbformat.IOutput
+          );
           codeCell.updateOutputs(
             event.newIndex,
             event.newIndex,
@@ -800,7 +802,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           break;
         }
         case 'set': {
-          const newValues = event.newValues.map(output => output.toJSON());
+          const newValues = event.newValues.map(
+            output => output.toJSON() as nbformat.IOutput
+          );
           codeCell.updateOutputs(
             event.oldIndex,
             event.oldIndex + newValues.length,
@@ -866,7 +870,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
               // For compatibility with older ydoc where a plain object,
               // (rather than a Map instance) could be provided.
               // In a future major release the use of Map will be required.
-              this._outputs.add('toJSON' in output ? output.toJSON() : output);
+              this._outputs.add(
+                'toJSON' in output ? (output as any).toJSON() : output
+              );
             }
           }
         }
