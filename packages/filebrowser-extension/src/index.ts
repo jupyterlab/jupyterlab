@@ -964,7 +964,7 @@ const uploadNotifications: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     factory: IFileBrowserFactory,
-    translator: ITranslator
+    translator: ITranslator | null
   ): void => {
     const { tracker } = factory;
 
