@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.6.0-alpha.2",
-    "@rspack/cli": "^1.7.3",
+    "@rspack/cli": "^1.7.5",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
     "jest": "^29.2.0",

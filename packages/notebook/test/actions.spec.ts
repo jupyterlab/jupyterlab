@@ -1804,6 +1804,26 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).toBe(count - 2);
       });
 
+      it('should paste code cells without outputs when stripOutputs is true', () => {
+        const cell = widget.activeCell as CodeCell;
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: ['some output']
+        });
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, 'below', { stripOutputs: true });
+        const pastedCell = widget.widgets[2] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.outputs.length).toBe(0);
+        expect(pastedCell.model.executionCount).toBeNull();
+        expect(pastedCell.model.sharedModel.getSource()).toBe(
+          cell.model.sharedModel.getSource()
+        );
+      });
+
       it('should emit a signal with cut action', async () => {
         let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(

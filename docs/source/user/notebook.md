@@ -276,3 +276,9 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 **R:**
 
 - [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
+
+(paste-code-cells-without-output)=
+
+## Paste code cells without output
+
+When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.

@@ -44,8 +44,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.7.3",
-    "@rspack/core": "^1.7.3",
+    "@rspack/cli": "^1.7.5",
+    "@rspack/core": "^1.7.5",
     "css-loader": "^6.7.1",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
