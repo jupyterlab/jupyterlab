@@ -10,7 +10,7 @@ let WEBSOCKET: typeof WebSocket;
 if (typeof window === 'undefined') {
   // Mangle the require statements so it does not get picked up in the
   // browser assets.
-  WEBSOCKET = require('ws');
+  WEBSOCKET = eval('require')('ws');
 } else {
   WEBSOCKET = WebSocket;
 }

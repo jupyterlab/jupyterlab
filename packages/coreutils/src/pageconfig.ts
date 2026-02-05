@@ -55,7 +55,7 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
-        const path: any = require('path');
+        const path: any = eval('require')('path');
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
           fullPath = path.resolve(cli['jupyter-config-data']);

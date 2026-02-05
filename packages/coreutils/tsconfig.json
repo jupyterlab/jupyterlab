@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "module": "commonjs",
     "types": ["node"],
     "lib": ["DOM", "ES2018", "ES2020.Intl", "ES2021.Intl"]
   },

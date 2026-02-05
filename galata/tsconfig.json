@@ -6,7 +6,8 @@
     "rootDir": "src",
     "module": "commonjs",
     "types": ["node"],
-    "lib": ["DOM", "DOM.iterable", "es2019.array"]
+    "lib": ["DOM", "DOM.iterable", "es2019.array"],
+    "verbatimModuleSyntax": false
   },
   "include": ["src/**/*"],
   "references": [
