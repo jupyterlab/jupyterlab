@@ -3411,6 +3411,9 @@ export class Notebook extends StaticNotebook {
         const cell = this.widgets[i];
         if (!cell.model.isDisposed && cell.editor) {
           cell.model.selections.delete(cell.editor.uuid);
+          // clear the editor's visual selection to avoid
+          // multiple cells showing highlighted text.
+          cell.editor.setSelections([]);
         }
       }
     }
