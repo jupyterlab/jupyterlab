@@ -919,6 +919,34 @@ describe('docregistry/registry', () => {
         expect(ft[0].name).toBe('test');
       });
 
+      it('should return all file types matching provided pattern', () => {
+        registry.addFileType({
+          name: 'a',
+          // Starts with 'a'
+          pattern: '^a'
+        });
+        registry.addFileType({
+          name: 'b',
+          // Has 'b'
+          pattern: 'b'
+        });
+        registry.addFileType({
+          name: 'c',
+          // Ends with 'c'
+          pattern: 'c$'
+        });
+
+        // Should return all three matches
+        let fts = registry.getFileTypesForPath('abc');
+        expect(fts.length).toBe(3);
+        expect(fts.map(f => f.name)).toEqual(['a', 'b', 'c']);
+
+        // Should return the single match
+        fts = registry.getFileTypesForPath('cba');
+        expect(fts.length).toBe(1);
+        expect(fts.map(f => f.name)).toEqual(['b']);
+      });
+
       it('should returns all file types', () => {
         registry.addFileType({
           name: 'test',
