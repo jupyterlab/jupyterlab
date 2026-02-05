@@ -669,7 +669,7 @@ export class DocumentRegistry implements IDisposable {
     let ft: DocumentRegistry.IFileType | null = null;
     if (model.name || model.path) {
       const name = model.name || PathExt.basename(model.path!);
-      const fts = this.getFileTypesForPath(name);
+      const fts = this._getFileTypesForPath(name, model.type);
       if (fts.length > 0) {
         ft = fts[0];
       }
@@ -711,12 +711,23 @@ export class DocumentRegistry implements IDisposable {
    * @returns An ordered list of matching file types.
    */
   getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+    return this._getFileTypesForPath(path);
+  }
+
+  private _getFileTypesForPath(
+    path: string,
+    type?: string
+  ): DocumentRegistry.IFileType[] {
     const fts: DocumentRegistry.IFileType[] = [];
     const name = PathExt.basename(path);
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return !!(ft.pattern && name.match(ft.pattern) !== null);
+      return !!(
+        (!type || ft.contentType == type) &&
+        ft.pattern &&
+        name.match(ft.pattern) !== null
+      );
     });
     if (ft) {
       fts.push(ft);
@@ -725,9 +736,11 @@ export class DocumentRegistry implements IDisposable {
     // Then look by extension name, starting with the longest
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      const ftSubset = this._fileTypes.filter(ft =>
-        // In Private.extname, the extension is transformed to lower case
-        ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
+      const ftSubset = this._fileTypes.filter(
+        ft =>
+          // In Private.extname, the extension is transformed to lower case
+          (!type || ft.contentType == type) &&
+          ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
       );
       fts.push(...ftSubset);
       ext = '.' + ext.split('.').slice(2).join('.');
