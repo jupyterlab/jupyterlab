@@ -67,11 +67,13 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         return this._workspace.metadata.id;
       }
       labelTitle() {
+        const tabCount =
+          (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
+            ?.widgets?.length ?? 0;
         return trans.__(
           '%1 workspace with %2 tabs, last modified on %3',
           this._workspace.metadata.id,
-          (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
-            ?.widgets?.length,
+          tabCount,
           this._workspace.metadata['last_modified']
         );
       }
