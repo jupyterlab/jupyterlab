@@ -232,7 +232,7 @@ commander
   .option('--dry-run', 'Do not perform actions, just print output')
   .option('--regex', 'Package is a regular expression')
   .option('--lerna', 'Update dependencies in all lerna packages')
-  .option('--yarn', 'Update dependencies in all yarn workspaces packages')
+  .option('--yarn', 'Update dependencies in all yarn workspace packages')
   .option('--path <path>', 'Path to package or monorepo to update')
   .option('--minimal', 'only update if the change is substantial')
   .arguments('<package> [versionspec]')
