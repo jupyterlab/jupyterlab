@@ -26,7 +26,7 @@
     "jupyterlab/tests/mock_packages/interop/*"
   ],
   "scripts": {
-    "_each": "node ./jupyterlab/staging/yarn.js workspaces foreach --exclude '@jupyterlab/repo-top' --topological-dev --topological --verbose",
+    "_each": "node ./jupyterlab/staging/yarn.js workspaces foreach --exclude \"@jupyterlab/repo-top\" --topological-dev --topological --verbose",
     "_eachp": "npm run _each -- --parallel",
     "after:publish:assets": "jlpm && npm run build:utils && node buildutils/lib/publish --skip-publish",
     "analyze": "npm run analyze:dev",
