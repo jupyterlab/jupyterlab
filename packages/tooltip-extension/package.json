@@ -49,7 +49,7 @@
     "@jupyterlab/translation": "^4.6.0-alpha.2",
     "@lumino/algorithm": "^2.0.4",
     "@lumino/coreutils": "^2.2.2",
-    "@lumino/widgets": "^2.7.3"
+    "@lumino/widgets": "^2.7.5"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
