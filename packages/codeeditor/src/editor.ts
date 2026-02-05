@@ -56,8 +56,10 @@ export namespace CodeEditor {
   /**
    * An interface describing editor state coordinates.
    */
-  export interface ICoordinate
-    extends Pick<DOMRectReadOnly, 'left' | 'right' | 'top' | 'bottom'> {}
+  export interface ICoordinate extends Pick<
+    DOMRectReadOnly,
+    'left' | 'right' | 'top' | 'bottom'
+  > {}
 
   /**
    * A range.

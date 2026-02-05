@@ -501,8 +501,9 @@ export namespace AttachmentsCellModel {
   /**
    * The options used to initialize a `AttachmentsCellModel`.
    */
-  export interface IOptions<T extends ISharedCell>
-    extends CellModel.IOptions<T> {
+  export interface IOptions<
+    T extends ISharedCell
+  > extends CellModel.IOptions<T> {
     /**
      * The factory for attachment model creation.
      */
@@ -930,8 +931,10 @@ export namespace CodeCellModel {
   /**
    * The options used to initialize a `CodeCellModel`.
    */
-  export interface IOptions
-    extends Omit<CellModel.IOptions<ISharedCodeCell>, 'cell_type'> {
+  export interface IOptions extends Omit<
+    CellModel.IOptions<ISharedCodeCell>,
+    'cell_type'
+  > {
     /**
      * The factory for output area model creation.
      */

@@ -102,9 +102,8 @@ export async function ensurePackage(
               backwardVersions[data.name][name]
             } || ${seenDeps[name]}`
           );
-          deps[name] = `${backwardVersions[data.name][name]} || ${
-            seenDeps[name]
-          }`;
+          deps[name] =
+            `${backwardVersions[data.name][name]} || ${seenDeps[name]}`;
         } else {
           messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
           deps[name] = seenDeps[name];
@@ -171,8 +170,8 @@ export async function ensurePackage(
     let entryPoint = fs.existsSync(path.join(pkgPath, 'src/index.ts'))
       ? 'src/index.ts'
       : fs.existsSync(path.join(pkgPath, 'src/index.tsx'))
-      ? 'src/index.tsx'
-      : null;
+        ? 'src/index.tsx'
+        : null;
     if (entryPoint) {
       utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
         extends: ['../../typedoc.base.json'],
