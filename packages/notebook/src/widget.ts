@@ -2,42 +2,42 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { DOMUtils, SystemClipboard } from '@jupyterlab/apputils';
-import {
-  Cell,
-  CodeCell,
+import type {
   ICellModel,
   ICodeCellModel,
   IMarkdownCellModel,
-  IRawCellModel,
-  MarkdownCell,
-  RawCell
+  IRawCellModel
 } from '@jupyterlab/cells';
-import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IMapChange } from '@jupyter/ydoc';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { WindowedList } from '@jupyterlab/ui-components';
 import { ArrayExt, findIndex } from '@lumino/algorithm';
 import { JSONExt, MimeData } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import { Drag } from '@lumino/dragdrop';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
-import { CellList } from './celllist';
+import type { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
-import { INotebookHistory } from './history';
-import { INotebookModel } from './model';
+import type { INotebookHistory } from './history';
+import type { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
-import { CodeCellModel } from '../../cells/src/model';
+import type { CodeCellModel } from '../../cells/src/model';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -563,11 +563,14 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   /**
    * A message handler invoked on an `'update-request'` message.
    *
-   * #### Notes
-   * The default implementation of this handler is a no-op.
+   * In defer-like mode, the default logic for inserting cells
+   * is skipped, enabling the notebook to render cells in small
+   * batches, without blocking the UI.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this.notebookConfig.windowingMode === 'defer') {
+    if (
+      ['defer', 'contentVisibility'].includes(this.notebookConfig.windowingMode)
+    ) {
       void this._runOnIdleTime();
     } else {
       super.onUpdateRequest(msg);
@@ -632,11 +635,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         for (const value of args.newValues) {
           this._insertCell(index++, value);
         }
-        this._updateDataWindowedListIndex(
-          args.newIndex,
-          this.model!.cells.length,
-          args.newValues.length
-        );
+        this._updateDataWindowedListIndex(args.newIndex, args.newValues.length);
         break;
       }
       case 'remove':
@@ -645,7 +644,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         }
         this._updateDataWindowedListIndex(
           args.oldIndex,
-          this.model!.cells.length + args.oldValues.length,
           -1 * args.oldValues.length
         );
         // Add default cell if there are no cells remaining.
@@ -883,25 +881,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
   }
 
-  private _updateDataWindowedListIndex(
-    start: number,
-    end: number,
-    delta: number
-  ): void {
-    for (
-      let cellIdx = 0;
-      cellIdx < this.viewportNode.childElementCount;
-      cellIdx++
-    ) {
-      const cell = this.viewportNode.children[cellIdx];
-      const globalIndex = parseInt(
-        (cell as HTMLElement).dataset.windowedListIndex!,
-        10
-      );
-      if (globalIndex >= start && globalIndex < end) {
-        (cell as HTMLElement).dataset.windowedListIndex = `${
-          globalIndex + delta
-        }`;
+  private _updateDataWindowedListIndex(start: number, delta: number): void {
+    for (const cell of this.cellsArray) {
+      const globalIndex = parseInt(cell.dataset.windowedListIndex!, 10);
+      if (globalIndex >= start) {
+        cell.node.dataset.windowedListIndex = `${globalIndex + delta}`;
       }
     }
   }

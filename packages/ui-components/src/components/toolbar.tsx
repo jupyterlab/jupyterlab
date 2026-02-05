@@ -8,13 +8,16 @@ import {
   jpToolbar,
   provideJupyterDesignSystem
 } from '@jupyter/web-components';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { Layout, PanelLayout, Widget } from '@lumino/widgets';
+import type { Layout } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
 import { ellipsesIcon, LabIcon } from '../icon';
@@ -43,6 +46,14 @@ const TOOLBAR_OPENER_NAME = 'toolbar-popup-opener';
  * The class name added to toolbar spacer.
  */
 const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
+
+/**
+ * ARIA attributes shared by toolbar buttons that control menus/popups.
+ */
+type ToolbarAriaMenuButtonProps = Pick<
+  React.AriaAttributes,
+  'aria-haspopup' | 'aria-expanded' | 'aria-controls'
+>;
 
 /**
  * A layout for toolbars.
@@ -771,7 +782,7 @@ export namespace ToolbarButtonComponent {
   /**
    * Interface for ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     className?: string;
     /**
      * Data set of the button
@@ -782,7 +793,7 @@ export namespace ToolbarButtonComponent {
     iconClass?: string;
     iconLabel?: string;
     tooltip?: string;
-    onClick?: () => void;
+    onClick?: (event?: React.SyntheticEvent) => void;
     enabled?: boolean;
     pressed?: boolean;
     pressedIcon?: LabIcon.IMaybeResolvable;
@@ -817,7 +828,7 @@ export function ToolbarButtonComponent(
       ? undefined
       : (event: React.MouseEvent) => {
           if (event.button === 0) {
-            props.onClick?.();
+            props.onClick?.(event);
             // In safari, the focus do not move to the button on click (see
             // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
             (event.target as HTMLElement).focus();
@@ -834,7 +845,7 @@ export function ToolbarButtonComponent(
           // Fire action only when left button is pressed.
           if (event.button === 0) {
             event.preventDefault();
-            props.onClick?.();
+            props.onClick?.(event);
           }
         }
       : undefined;
@@ -842,7 +853,7 @@ export function ToolbarButtonComponent(
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      props.onClick?.();
+      props.onClick?.(event);
     }
   };
 
@@ -870,6 +881,9 @@ export function ToolbarButtonComponent(
       aria-disabled={disabled}
       aria-label={props.label || title}
       aria-pressed={props.pressed}
+      aria-haspopup={props['aria-haspopup']}
+      aria-expanded={props['aria-expanded']}
+      aria-controls={props['aria-controls']}
       {...Private.normalizeDataset(props.dataset)}
       disabled={disabled}
       onClick={handleClick}
@@ -972,8 +986,14 @@ export class ToolbarButton extends ReactWidget {
   /**
    * Returns the click handler for the button
    */
-  get onClick(): () => void {
-    return this._onClick!;
+  get onClick(): (event?: React.SyntheticEvent) => void {
+    return (event?: React.SyntheticEvent) => {
+      // Toggle the `pressed` state of the button when clicked
+      this.pressed = !this.pressed;
+
+      // Call the original click handler, if defined
+      this._onClick(event);
+    };
   }
 
   render(): JSX.Element {
@@ -990,7 +1010,7 @@ export class ToolbarButton extends ReactWidget {
 
   private _pressed: boolean;
   private _enabled: boolean;
-  private _onClick: () => void;
+  private _onClick: (event?: React.SyntheticEvent) => void;
 }
 
 /**
@@ -998,9 +1018,10 @@ export class ToolbarButton extends ReactWidget {
  */
 export namespace CommandToolbarButtonComponent {
   /**
-   * Interface for CommandToolbarButtonComponent props.
+   * Interface for CommandToolbarButtonComponent props. It extends
+   * the ToolbarButtonComponent props.
    */
-  export interface IProps {
+  export interface IProps extends ToolbarAriaMenuButtonProps {
     /**
      * Application commands registry
      */
@@ -1215,7 +1236,8 @@ class ToolbarPopupOpener extends ToolbarButton {
     const trans = (props.translator || nullTranslator).load('jupyterlab');
     super({
       icon: ellipsesIcon,
-      onClick: () => {
+      onClick: event => {
+        event?.preventDefault();
         this.handleClick();
       },
       tooltip: trans.__('More commands')
@@ -1369,6 +1391,13 @@ namespace Private {
     };
     const enabled = commands.isEnabled(id, args);
 
+    const ariaProps: ToolbarAriaMenuButtonProps = options;
+    const {
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
+    } = ariaProps;
+
     return {
       className,
       dataset: { 'data-command': options.id },
@@ -1379,7 +1408,10 @@ namespace Private {
       onClick,
       enabled,
       label: labelOverride ?? label,
-      pressed
+      pressed,
+      'aria-haspopup': ariaHaspopup,
+      'aria-expanded': ariaExpanded,
+      'aria-controls': ariaControls
     };
   }
 

@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   IConfigurableExtension,
   IEditorExtensionFactory
 } from '@jupyterlab/codemirror';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapter';
-import { Document } from '../tokens';
+import type { WidgetLSPAdapter } from './adapter';
+import type { Document } from '../tokens';
 
 /**
  * The CodeEditor.IEditor adapter.

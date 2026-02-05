@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
-  ISessionContext,
   SessionContextDialogs,
   SystemClipboard
 } from '@jupyterlab/apputils';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
-import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
@@ -16,11 +17,12 @@ import {
   EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
-import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context } from '@jupyterlab/docregistry';
 import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
-import { INotebookContent } from '@jupyterlab/nbformat';
+import type { INotebookContent } from '@jupyterlab/nbformat';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
 import {
-  IMarkdownParser,
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
@@ -32,7 +34,8 @@ import { ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import * as defaultContent from './default.json';
-import { INotebookModel, NotebookModel } from './model';
+import type { INotebookModel } from './model';
+import { NotebookModel } from './model';
 import { NotebookModelFactory } from './modelfactory';
 import { NotebookPanel } from './panel';
 import { Notebook, StaticNotebook } from './widget';

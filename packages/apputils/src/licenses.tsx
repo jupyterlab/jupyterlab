@@ -2,21 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ServerConnection } from '@jupyterlab/services';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   jsonIcon,
-  LabIcon,
   markdownIcon,
   spreadsheetIcon,
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { h, VirtualElement } from '@lumino/virtualdom';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
 import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ILicensesClient } from './tokens';
+import type { ILicensesClient } from './tokens';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 const FILTER_SECTION_TITLE_CLASS = 'jp-Licenses-Filters-title';

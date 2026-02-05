@@ -64,7 +64,7 @@ templates_path = ["_templates"]
 # The file extensions of source files.
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {".md": "markdown"}
 
 # The master toctree document.
 master_doc = "index"
@@ -200,6 +200,7 @@ PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
 PLUGINS_LIST_DOC = "extension/plugins_list.md"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
 TOKENS_LIST_DOC = "extension/tokens_list.md"
+TOKENS_BLACKLIST = ["@jupyterlab/services-extension:default-content-provider"]
 
 
 def _clean_command_data(command: dict) -> None:
@@ -216,6 +217,32 @@ def _format_shortcuts(shortcuts: list) -> str:
     return " ".join(f"<kbd>{shortcut}</kbd>" for shortcut in shortcuts) if shortcuts else ""
 
 
+def _format_property(name: str, info: dict, required_args: set, indent: int = 0) -> str:
+    """Format a single property, recursively handling nested properties."""
+    arg_type = info.get("type", "")
+    type_str = (
+        f" (`{', '.join(arg_type) if isinstance(arg_type, list) else arg_type}`)"
+        if arg_type
+        else ""
+    )
+    required_str = " *(required)*" if name in required_args else ""
+    if "enum" in info:
+        enum_values = ", ".join('`"' + str(v) + '"`' for v in info["enum"])
+        enum_str = " - Options: " + enum_values
+    else:
+        enum_str = ""
+    desc_str = f": {info['description']}" if info.get("description") else ""
+
+    line = f"{'  ' * indent}- **{name}**{type_str}{required_str}{enum_str}{desc_str}\n"
+
+    if info.get("properties"):
+        nested_required = set(info.get("required", []))
+        for nested_name, nested_info in info["properties"].items():
+            line += _format_property(nested_name, nested_info, nested_required, indent + 1)
+
+    return line
+
+
 def _format_command_arguments(args_schema: dict) -> str:
     """Format command arguments section."""
     if "properties" not in args_schema or not args_schema["properties"]:
@@ -225,27 +252,7 @@ def _format_command_arguments(args_schema: dict) -> str:
     required_args = set(args_schema.get("required", []))
 
     for arg_name, arg_info in args_schema["properties"].items():
-        arg_desc = arg_info.get("description", "")
-        arg_type = arg_info.get("type", "")
-
-        template += f"- **{arg_name}**"
-
-        if isinstance(arg_type, list):
-            template += f" (`{', '.join(arg_type)}`)"
-        elif arg_type:
-            template += f" (`{arg_type}`)"
-
-        if arg_name in required_args:
-            template += " *(required)*"
-
-        if "enum" in arg_info:
-            enum_values = ", ".join(f'`"{v}"`' for v in arg_info["enum"])
-            template += f" - Options: {enum_values}"
-
-        if arg_desc:
-            template += f": {arg_desc}"
-
-        template += "\n"
+        template += _format_property(arg_name, arg_info, required_args)
 
     return template + "\n"
 
@@ -345,6 +352,9 @@ def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     template = ""
 
     for _name, _description in items.items():
+        if _name in TOKENS_BLACKLIST:
+            continue
+
         # Normalize line continuation indentation to 2 spaces (prettier standard for markdown lists)
         _description = _description.replace("\n    ", "\n  ")
         template += f"- `{_name}`: {_description}\n"
@@ -365,7 +375,7 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 You can now test JupyterLab 4.5.0 Release Candidate · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
+    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
     "icon_links": [
         {
             "name": "jupyter.org",

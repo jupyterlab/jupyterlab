@@ -1,9 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { hpass, VirtualElement } from '@lumino/virtualdom';
-import { DockPanel, TabBar, TabPanel, Widget } from '@lumino/widgets';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { hpass } from '@lumino/virtualdom';
+import type { Widget } from '@lumino/widgets';
+import { DockPanel, TabBar, TabPanel } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 import { addIcon, closeIcon } from '../iconimports';

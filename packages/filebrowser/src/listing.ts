@@ -8,19 +8,13 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, Time } from '@jupyterlab/coreutils';
-import {
-  IDocumentManager,
-  isValidFileName,
-  renameFile
-} from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { isValidFileName, renameFile } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { Contents } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { Contents } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretUpIcon,
@@ -28,19 +22,19 @@ import {
   LabIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt, filter, StringExt } from '@lumino/algorithm';
-import {
-  MimeData,
-  PromiseDelegate,
-  ReadonlyJSONObject
-} from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { Drag } from '@lumino/dragdrop';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
 import { Widget } from '@lumino/widgets';
-import { FilterFileBrowserModel } from './model';
+import type { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to DirListing widget.
@@ -356,6 +350,7 @@ export class DirListing extends Widget {
       this.model.items(),
       state,
       this._sortNotebooksFirst,
+      this._sortFileNamesNaturally,
       this.translator
     );
     this._sortState = state;
@@ -1357,6 +1352,19 @@ export class DirListing extends Widget {
     let previousValue = this._sortNotebooksFirst;
     this._sortNotebooksFirst = isEnabled;
     if (this._sortNotebooksFirst !== previousValue) {
+      this.sort(this._sortState);
+    }
+  }
+
+  /**
+   * Update the setting to sort file names naturally
+   * vs lexicographically. Default is true (natural).
+   * This sorts the items again if the internal value is modified.
+   */
+  setSortFileNamesNaturally(natural: boolean): void {
+    const previousValue = this._sortFileNamesNaturally;
+    this._sortFileNamesNaturally = natural;
+    if (this._sortFileNamesNaturally !== previousValue) {
       this.sort(this._sortState);
     }
   }
@@ -2645,6 +2653,7 @@ export class DirListing extends Widget {
     last_modified: null
   };
   private _sortNotebooksFirst = false;
+  private _sortFileNamesNaturally = true;
   private _allowSingleClick = false;
   private _allowDragDropUpload = true;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
@@ -3679,6 +3688,7 @@ namespace Private {
     items: Iterable<Contents.IModel>,
     state: DirListing.ISortState,
     sortNotebooksFirst: boolean = false,
+    sortFileNamesNaturally: boolean = true,
     translator: ITranslator
   ): Contents.IModel[] {
     const copy = Array.from(items);
@@ -3710,6 +3720,7 @@ namespace Private {
 
     /**
      * Compare two items by their name using `translator.languageCode`, with fallback to `navigator.language`.
+     * When sortFileNamesNaturally is true, uses natural order.
      */
     function compareByName(a: Contents.IModel, b: Contents.IModel) {
       // Wokaround for Chromium invalid language code on CI, see
@@ -3718,19 +3729,17 @@ namespace Private {
       const languageCode = (
         translator.languageCode ?? navigatorLanguage
       ).replace('_', '-');
+      const localeOptions: Intl.CollatorOptions = {
+        numeric: sortFileNamesNaturally,
+        sensitivity: 'base'
+      };
       try {
-        return a.name.localeCompare(b.name, languageCode, {
-          numeric: true,
-          sensitivity: 'base'
-        });
+        return a.name.localeCompare(b.name, languageCode, localeOptions);
       } catch (e) {
         console.warn(
           `localeCompare failed to compare ${a.name} and ${b.name} under languageCode: ${languageCode}`
         );
-        return a.name.localeCompare(b.name, navigatorLanguage, {
-          numeric: true,
-          sensitivity: 'base'
-        });
+        return a.name.localeCompare(b.name, navigatorLanguage, localeOptions);
       }
     }
 

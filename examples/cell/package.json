@@ -1,35 +1,34 @@
 {
   "name": "@jupyterlab/example-cell",
-  "version": "4.5.0-rc.1",
+  "version": "4.6.0-alpha.2",
   "private": true,
   "scripts": {
-    "build": "tsc -p src && webpack",
+    "build": "tsc -p src && rspack",
     "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyter/web-components": "^0.16.6",
     "@jupyter/ydoc": "^3.1.0",
-    "@jupyterlab/application": "^4.5.0-rc.1",
-    "@jupyterlab/apputils": "^4.6.0-rc.1",
-    "@jupyterlab/cells": "^4.5.0-rc.1",
-    "@jupyterlab/codemirror": "^4.5.0-rc.1",
-    "@jupyterlab/completer": "^4.5.0-rc.1",
-    "@jupyterlab/coreutils": "^6.5.0-rc.1",
-    "@jupyterlab/rendermime": "^4.5.0-rc.1",
-    "@jupyterlab/services": "^7.5.0-rc.1",
-    "@jupyterlab/theme-light-extension": "^4.5.0-rc.1",
-    "@jupyterlab/ui-components": "^4.5.0-rc.1",
+    "@jupyterlab/application": "^4.6.0-alpha.2",
+    "@jupyterlab/apputils": "^4.7.0-alpha.2",
+    "@jupyterlab/cells": "^4.6.0-alpha.2",
+    "@jupyterlab/codemirror": "^4.6.0-alpha.2",
+    "@jupyterlab/completer": "^4.6.0-alpha.2",
+    "@jupyterlab/coreutils": "^6.6.0-alpha.2",
+    "@jupyterlab/rendermime": "^4.6.0-alpha.2",
+    "@jupyterlab/services": "^7.6.0-alpha.2",
+    "@jupyterlab/theme-light-extension": "^4.6.0-alpha.2",
+    "@jupyterlab/ui-components": "^4.6.0-alpha.2",
     "@lumino/commands": "^2.3.3",
-    "@lumino/widgets": "^2.7.2"
+    "@lumino/widgets": "^2.7.3"
   },
   "devDependencies": {
+    "@rspack/cli": "^1.7.5",
+    "@rspack/core": "^1.7.5",
     "css-loader": "^6.7.1",
-    "mini-css-extract-plugin": "^2.7.0",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
     "style-loader": "~3.3.1",
-    "typescript": "~5.5.4",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "typescript": "~5.9.3"
   }
 }

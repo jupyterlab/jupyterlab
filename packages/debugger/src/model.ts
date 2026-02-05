@@ -1,21 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDebugger } from './tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+
+import { DebuggerDisplayRegistry } from './displayregistry';
 
 import { BreakpointsModel } from './panels/breakpoints/model';
 
 import { CallstackModel } from './panels/callstack/model';
 
-import { SourcesModel } from './panels/sources/model';
-
 import { KernelSourcesModel } from './panels/kernelSources/model';
 
+import { SourcesModel } from './panels/sources/model';
+
 import { VariablesModel } from './panels/variables/model';
-import { IDebuggerDisplayRegistry } from './tokens';
-import { DebuggerDisplayRegistry } from './displayregistry';
+
+import type { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * A model for a debugger.
@@ -27,7 +30,6 @@ export class DebuggerModel implements IDebugger.Model.IService {
   constructor(options: DebuggerModel.IOptions) {
     const displayRegistry =
       options.displayRegistry ?? new DebuggerDisplayRegistry();
-
     this.breakpoints = new BreakpointsModel({ displayRegistry });
     this.callstack = new CallstackModel({
       displayRegistry
@@ -35,6 +37,8 @@ export class DebuggerModel implements IDebugger.Model.IService {
     this.variables = new VariablesModel();
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged,
+      mimeTypeService: options.mimeTypeService,
+      getSource: options.getSource,
       displayRegistry
     });
     this.kernelSources = new KernelSourcesModel();
@@ -182,8 +186,16 @@ export namespace DebuggerModel {
    */
   export interface IOptions {
     /**
+     * Get source
+     */
+    getSource(): Promise<IDebugger.Source>;
+    /**
      * The display registry.
      */
     displayRegistry?: IDebuggerDisplayRegistry | null;
+    /**
+     * The mimetype services.
+     */
+    mimeTypeService?: IEditorMimeTypeService | null;
   }
 }

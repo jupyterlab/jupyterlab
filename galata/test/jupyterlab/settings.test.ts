@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect, Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { changeCodeFontSize, getFileListFontSize } from './utils';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -86,24 +89,6 @@ test.describe('change font-size', () => {
       el => getComputedStyle(el).fontSize
     );
     return parseInt(newFontSize);
-  };
-  const getFileListFontSize = async (page: IJupyterLabPageFixture) => {
-    const itemElement = page.locator(
-      '.jp-DirListing-content .jp-DirListing-itemText'
-    );
-    await itemElement.waitFor();
-    const newFontSize = await itemElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    return parseInt(newFontSize);
-  };
-  const changeCodeFontSize = async (
-    page: IJupyterLabPageFixture,
-    menuOption
-  ) => {
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
-    await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
   };
 
   test('should Increase Code Font Size', async ({ page }) => {
@@ -489,4 +474,46 @@ test('Read-only cells should remain read-only after changing settings', async ({
   // Assert the first cell is still read-only
   const cell = page.locator('.jp-Notebook-cell').nth(0);
   await expect(cell.locator('.jp-mod-readOnly')).toHaveCount(1);
+});
+test('Setting for "Show Filter Bar by Default" should work on reload', async ({
+  page
+}) => {
+  const filterBox = page.locator(
+    '.jp-FileBrowser-filterBox input[placeholder="Filter files by name"]'
+  );
+
+  await expect(filterBox).toBeHidden();
+
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Show Filter Bar by Default'
+    })
+  );
+
+  const settingContainer = page.locator(
+    '.form-group:has-text("Show Filter Bar by Default")'
+  );
+
+  const settingLabel = settingContainer.locator('label');
+  const modifiedIndicator = settingContainer.locator('.jp-modifiedIndicator');
+  await settingLabel.click();
+  await page.locator('button.jp-RestoreButton').waitFor();
+  await expect(modifiedIndicator).toBeVisible();
+
+  await page.reload({ waitForIsReady: false });
+  await expect(filterBox).toBeVisible();
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Show Filter Bar by Default'
+    })
+  );
+
+  // turn the setting OFF
+  await settingLabel.click();
+  await page.locator('button.jp-RestoreButton').waitFor({ state: 'hidden' });
+  await expect(modifiedIndicator).toBeHidden();
+  await page.reload({ waitForIsReady: false });
+
+  // The filter bar should now be hidden oonce the setting is disabled
+  await expect(filterBox).toBeHidden();
 });

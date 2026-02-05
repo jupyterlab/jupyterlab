@@ -1,21 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   CodeEditor,
-  CodeEditorWrapper,
   IEditorMimeTypeService,
   IEditorServices
 } from '@jupyterlab/codeeditor';
-import {
-  ABCWidgetFactory,
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 import { textEditorIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -55,6 +54,9 @@ export class FileEditor extends Widget {
 
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
+
+    const scrollPastEnd = FileEditor.defaultEditorConfig.scrollPastEnd;
+    this.toggleClass('jp-mod-scrollPastEnd', scrollPastEnd);
 
     void context.ready.then(() => {
       this._onContextReady();

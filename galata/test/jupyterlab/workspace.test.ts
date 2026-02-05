@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
 
 const nbFile = 'simple_notebook.ipynb';

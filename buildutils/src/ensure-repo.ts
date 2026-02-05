@@ -16,11 +16,8 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as utils from './utils';
-import {
-  ensurePackage,
-  ensureUiComponents,
-  IEnsurePackageOptions
-} from './ensure-package';
+import type { IEnsurePackageOptions } from './ensure-package';
+import { ensurePackage, ensureUiComponents } from './ensure-package';
 
 type Dict<T> = { [key: string]: T };
 
@@ -43,13 +40,7 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': [
-    'assert',
-    'child_process',
-    'fs',
-    'path',
-    'webpack'
-  ],
+  '@jupyterlab/buildutils': ['assert', 'child_process', 'fs', 'path'],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['child_process', 'fs', 'path'],
@@ -81,8 +72,6 @@ const UNUSED: Dict<string[]> = {
     'path-browserify',
     'process',
     'style-loader',
-    'terser-webpack-plugin',
-    'webpack-cli',
     'worker-loader',
     'source-map-loader'
   ],
