@@ -775,6 +775,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         await this._updateCellSelection();
         // Clear highlight from previous provider
         await this.clearHighlight();
+        if (previousProviderCell?.editor) {
+          previousProviderCell.editor.setSelections([]);
+        }
         // If we are searching in all cells, we should not change the active
         // provider when switching active cell to preserve current match;
         // if we are searching within selected cells we should update
