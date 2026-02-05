@@ -13,9 +13,11 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { FocusTracker, SingletonLayout, Widget } from '@lumino/widgets';
 import type * as React from 'react';
-import { IPropertyInspector, IPropertyInspectorProvider } from './token';
+import type { IPropertyInspector } from './token';
+import { IPropertyInspectorProvider } from './token';
 
-export { IPropertyInspector, IPropertyInspectorProvider };
+export type { IPropertyInspector };
+export { IPropertyInspectorProvider };
 
 /**
  * The implementation of the PropertyInspector.
