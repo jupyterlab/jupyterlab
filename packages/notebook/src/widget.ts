@@ -283,6 +283,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   /**
+   * Whether the notebook is currently in a search operation.
+   */
+  isSearchActive = false;
+
+  /**
    * The cell factory used by the widget.
    */
   readonly contentFactory: StaticNotebook.IContentFactory;
@@ -3390,6 +3395,9 @@ export class Notebook extends StaticNotebook {
    * spurious cursors.
    */
   private _trimSelections(): void {
+    if (this.isSearchActive) {
+      return;
+    }
     for (let i = 0; i < this.widgets.length; i++) {
       if (i !== this._activeCellIndex) {
         const cell = this.widgets[i];
