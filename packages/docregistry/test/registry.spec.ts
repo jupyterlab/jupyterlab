@@ -737,6 +737,98 @@ describe('docregistry/registry', () => {
         expect(customNotebookType.name).toBe('test_ipynb');
       });
 
+      it('should consider all three: pattern, extension, content type', () => {
+        registry.addFileType({
+          name: 'pattern_and_extension_and_type',
+          pattern: 'foo',
+          extensions: ['.bar'],
+          contentType: 'baz'
+        });
+
+        registry.addFileType({
+          name: 'extension_and_type',
+          extensions: ['.bar'],
+          contentType: 'baz'
+        });
+
+        registry.addFileType({
+          name: 'type',
+          contentType: 'baz'
+        });
+
+        let ft = registry.getFileTypeForModel({
+          path: '/foo.bar',
+          type: 'baz'
+        });
+        expect(ft.name).toBe('pattern_and_extension_and_type');
+
+        ft = registry.getFileTypeForModel({
+          path: '/.bar',
+          type: 'baz'
+        });
+        expect(ft.name).toBe('extension_and_type');
+
+        ft = registry.getFileTypeForModel({
+          type: 'baz'
+        });
+        expect(ft.name).toBe('type');
+      });
+
+      it('should consider both pattern and content type', () => {
+        registry.addFileType({
+          name: 'node_modules_directory',
+          contentType: 'directory',
+          pattern: '^node_modules'
+        });
+
+        registry.addFileType({
+          name: 'node_modules_notebook',
+          contentType: 'notebook',
+          pattern: '^node_modules'
+        });
+
+        const nodeModuleDirFt = registry.getFileTypeForModel({
+          path: '/foo/node_modules',
+          type: 'directory'
+        });
+        expect(nodeModuleDirFt.name).toBe('node_modules_directory');
+
+        const nodeModuleNbFt = registry.getFileTypeForModel({
+          path: '/foo/node_modules.ipynb',
+          type: 'notebook'
+        });
+        expect(nodeModuleNbFt.name).toBe('node_modules_notebook');
+      });
+
+      it('should consider both pattern and file extension', () => {
+        registry.addFileType({
+          name: 'code',
+          extensions: ['.py', '.js']
+        });
+
+        registry.addFileType({
+          name: 'code_backup',
+          extensions: ['.py', '.js'],
+          pattern: 'backup'
+        });
+
+        registry.addFileType({
+          name: 'archive_backup',
+          extensions: ['.zip', '.gz'],
+          pattern: 'backup'
+        });
+
+        const archiveBackupFt = registry.getFileTypeForModel({
+          path: '/foo/my_archive_backup.gz'
+        });
+        expect(archiveBackupFt.name).toBe('archive_backup');
+
+        const codeBackupFt = registry.getFileTypeForModel({
+          path: '/foo/my_code_backup.py'
+        });
+        expect(codeBackupFt.name).toBe('code_backup');
+      });
+
       it('should handle a python file', () => {
         const ft = registry.getFileTypeForModel({
           name: 'foo.py'
@@ -820,15 +912,39 @@ describe('docregistry/registry', () => {
       it('should support pattern matching', () => {
         registry.addFileType({
           name: 'test',
-          extensions: ['.temp'],
           pattern: '.*\\.test$'
         });
 
         const ft = registry.getFileTypesForPath('foo/bar/baz.test');
         expect(ft[0].name).toBe('test');
+      });
 
-        const ft2 = registry.getFileTypesForPath('foo/bar/baz.temp');
-        expect(ft2[0].name).toBe('test');
+      it('should return all file types matching provided pattern', () => {
+        registry.addFileType({
+          name: 'a',
+          // Starts with 'a'
+          pattern: '^a'
+        });
+        registry.addFileType({
+          name: 'b',
+          // Has 'b'
+          pattern: 'b'
+        });
+        registry.addFileType({
+          name: 'c',
+          // Ends with 'c'
+          pattern: 'c$'
+        });
+
+        // Should return all three matches
+        let fts = registry.getFileTypesForPath('abc');
+        expect(fts.length).toBe(3);
+        expect(fts.map(f => f.name)).toEqual(['a', 'b', 'c']);
+
+        // Should return the single match
+        fts = registry.getFileTypesForPath('cba');
+        expect(fts.length).toBe(1);
+        expect(fts.map(f => f.name)).toEqual(['b']);
       });
 
       it('should returns all file types', () => {

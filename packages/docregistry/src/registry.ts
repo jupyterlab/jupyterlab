@@ -662,6 +662,12 @@ export class DocumentRegistry implements IDisposable {
   /**
    * Get the best file type given a contents model.
    *
+   * The order of precedence is defined as:
+   * - matching by pattern (and extension/content type if specified)
+   * - matching by extension (and content type if specified)
+   * - matching by content type only
+   * - fallback to file types defined as defaults for the given content type
+   *
    * @param model - The contents model of interest.
    *
    * @returns The best matching file type.
@@ -670,9 +676,9 @@ export class DocumentRegistry implements IDisposable {
     model: Partial<Contents.IModel>
   ): DocumentRegistry.IFileType {
     let ft: DocumentRegistry.IFileType | null = null;
-    if (model.name || model.path) {
-      const name = model.name || PathExt.basename(model.path!);
-      const fts = this.getFileTypesForPath(name);
+    if (model.name || model.path || model.type) {
+      const name = model.name || PathExt.basename(model.path || '');
+      const fts = this._getFileTypesForPath(name, model.type);
       if (fts.length > 0) {
         ft = fts[0];
       }
@@ -714,28 +720,77 @@ export class DocumentRegistry implements IDisposable {
    * @returns An ordered list of matching file types.
    */
   getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
-    const fts: DocumentRegistry.IFileType[] = [];
+    return this._getFileTypesForPath(path);
+  }
+
+  private _getFileTypesForPath(
+    path: string,
+    type?: string
+  ): DocumentRegistry.IFileType[] {
+    const withPattern: DocumentRegistry.IFileType[] = [];
+    const withExtension: DocumentRegistry.IFileType[] = [];
+    const typeOnly: DocumentRegistry.IFileType[] = [];
     const name = PathExt.basename(path);
 
-    // Look for a pattern match first.
-    let ft = find(this._fileTypes, ft => {
-      return !!(ft.pattern && name.match(ft.pattern) !== null);
-    });
-    if (ft) {
-      fts.push(ft);
-    }
-
-    // Then look by extension name, starting with the longest
+    // Check by extension, longest first
     let ext = Private.extname(name);
     while (ext.length > 1) {
-      const ftSubset = this._fileTypes.filter(ft =>
-        // In Private.extname, the extension is transformed to lower case
-        ft.extensions.map(extension => extension.toLowerCase()).includes(ext)
-      );
-      fts.push(...ftSubset);
+      for (const ft of this._fileTypes) {
+        // Cheap comparison first
+        if (type && ft.contentType !== type) {
+          continue;
+        }
+        // Comparison with cost linear in term of extensions list length second
+        let matchesExtension = false;
+        for (const extension of ft.extensions) {
+          if (extension.toLowerCase() === ext) {
+            matchesExtension = true;
+            break;
+          }
+        }
+        if (!matchesExtension) {
+          continue;
+        }
+        // Expensive pattern matching last if all others conditions were met
+        if (ft.pattern && name.match(ft.pattern) !== null) {
+          // Separate pattern matches as these have a higher priority
+          withPattern.push(ft);
+        } else if (!ft.pattern) {
+          withExtension.push(ft);
+        }
+      }
       ext = '.' + ext.split('.').slice(2).join('.');
     }
-    return fts;
+
+    // Check for pattern match with no extensions
+    for (const ft of this._fileTypes) {
+      if (
+        // Cheap comparisons first
+        !!ft.pattern &&
+        ft.extensions.length === 0 &&
+        (!type || ft.contentType == type) &&
+        // Expensive pattern matching last
+        name.match(ft.pattern) !== null
+      ) {
+        withPattern.push(ft);
+      }
+    }
+
+    // Check for type-only matches (no pattern, no extensions)
+    if (type) {
+      for (const ft of this._fileTypes) {
+        if (
+          ft.contentType == type &&
+          !ft.pattern &&
+          ft.extensions.length === 0
+        ) {
+          typeOnly.push(ft);
+        }
+      }
+    }
+
+    // Return: pattern matches, extension matches, then type-only matches
+    return [...withPattern, ...withExtension, ...typeOnly];
   }
 
   protected translator: ITranslator;
