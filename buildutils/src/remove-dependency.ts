@@ -17,7 +17,7 @@ if (process.argv.length !== 3) {
 const name = process.argv[2];
 
 // Handle the packages
-utils.getLernaPaths().forEach(pkgPath => {
+utils.getYarnPaths().forEach(pkgPath => {
   handlePackage(pkgPath);
 });
 handlePackage(path.resolve('.'));

@@ -64,6 +64,32 @@ export function getLernaPaths(basePath = '.'): string[] {
 }
 
 /**
+ * Get all of the yarn workspace package paths.
+ */
+export function getYarnPaths(basePath = '.'): string[] {
+  basePath = path.resolve(basePath);
+  let packages;
+  try {
+    let baseConfig = require(path.join(basePath, 'package.json'));
+    if (baseConfig.workspaces) {
+      packages = baseConfig.workspaces.packages || baseConfig.workspaces;
+    }
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+      throw new Error(`No yarn workspace list found in ${basePath}`);
+    }
+    throw e;
+  }
+  let paths: string[] = [];
+  for (const config of packages) {
+    paths = paths.concat(glob.sync(path.join(basePath, config)));
+  }
+  return paths.filter(pkgPath => {
+    return fs.existsSync(path.join(pkgPath, 'package.json'));
+  });
+}
+
+/**
  * Get all of the core package paths.
  */
 export function getCorePaths(): string[] {
@@ -300,7 +326,7 @@ export function run(
  */
 export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Pick up all the package versions.
-  const paths = getLernaPaths();
+  const paths = getYarnPaths();
   const locals: Dict<any> = {};
 
   // These two are not part of the workspaces but should be

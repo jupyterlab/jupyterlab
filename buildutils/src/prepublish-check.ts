@@ -12,7 +12,7 @@ utils.exitOnUncaughtException();
 
 utils.run('npm run build:packages');
 
-utils.getLernaPaths().forEach(pkgPath => {
+utils.getYarnPaths().forEach(pkgPath => {
   const pkgData = utils.readJSONFile(path.join(pkgPath, 'package.json'));
   const name = pkgData.name;
 
