@@ -24,6 +24,7 @@ import type {
   IEditorLanguageRegistry,
   IExtensionsHandler
 } from './token';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to CodeMirrorWidget instances.
@@ -93,7 +94,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ],
       model.sharedModel.source
     );
-
+    const cmTextarea = this._editor.contentDOM;
+    if (cmTextarea) {
+      const translator = options.translator ?? nullTranslator;
+      const trans = translator.load('jupyterlab');
+      cmTextarea.setAttribute('aria-label', trans.__('Code editor content'));
+    }
     this._onMimeTypeChanged();
     this._onCursorActivity();
 

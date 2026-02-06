@@ -699,6 +699,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
     widget.inViewportChanged.connect(this._onCellInViewportChanged, this);
     widget.addClass(NB_CELL_CLASS);
+    if (!widget.readOnly) {
+      widget.node.setAttribute('role', 'textbox');
+    }
 
     ArrayExt.insert(this.cellsArray, index, widget);
     this.onCellInserted(index, widget);

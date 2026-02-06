@@ -52,6 +52,7 @@ test.describe('HTML Viewer', () => {
   test('should allow links for trusted file', async ({ page }) => {
     await page
       .getByRole('button', { name: 'Trust HTML' })
+      .first()
       .click({ force: true });
     const frame = await waitForFrame(page, {
       url: url => url.protocol == 'blob:'
