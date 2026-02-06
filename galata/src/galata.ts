@@ -125,6 +125,12 @@ export namespace galata {
      */
     autoGoto?: boolean;
     /**
+     * Whether to reset workspace state before loading the page.
+     *
+     * Default: true
+     */
+    resetWorkspace?: boolean;
+    /**
      * Mock Jupyter Server configuration in-memory or not.
      *
      * Default true
@@ -221,7 +227,8 @@ export namespace galata {
     terminals: Map<string, TerminalAPI.IModel> | null,
     tmpPath: string,
     waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
-    kernels?: Map<string, Kernel.IModel> | null
+    kernels?: Map<string, Kernel.IModel> | null,
+    resetWorkspace?: boolean
   ): Promise<IJupyterLabPageFixture> {
     // Hook the helpers
     const jlabWithPage = addHelpersToPage(
@@ -291,7 +298,9 @@ export namespace galata {
 
     if (autoGoto) {
       // Load and initialize JupyterLab and goto test folder
-      await jlabWithPage.goto(`tree/${tmpPath}`);
+      const path = `tree/${tmpPath}`;
+      // Reset workspace state to avoid stale state from previous runs
+      await jlabWithPage.goto(resetWorkspace ? `${path}?reset` : path);
     }
 
     return jlabWithPage;
@@ -335,6 +344,7 @@ export namespace galata {
       mockState,
       mockTerminals,
       mockUser,
+      resetWorkspace,
       tmpPath
     } = {
       appPath: '/lab',
@@ -346,6 +356,7 @@ export namespace galata {
       mockState: true,
       mockTerminals: true,
       mockUser: true,
+      resetWorkspace: true,
       tmpPath: '',
       ...options
     };
@@ -372,7 +383,8 @@ export namespace galata {
         terminals,
         tmpPath,
         waitForApplication,
-        kernels
+        kernels,
+        resetWorkspace
       ),
       kernels,
       sessions,

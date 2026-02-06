@@ -57,6 +57,12 @@ export type GalataOptions = {
    */
   autoGoto: boolean;
   /**
+   * Whether to reset workspace state when loading the page.
+   *
+   * Default: true.
+   */
+  resetWorkspace: [true, { option: true }];
+  /**
    * Kernels created during the test.
    *
    * Possible values are:
@@ -190,6 +196,12 @@ export const test: TestType<
    * Note: Setting it to false allows to register new route mock-ups for example.
    */
   autoGoto: [true, { option: true }],
+  /**
+   * Whether to reset workspace state when loading the page.
+   *
+   * Default: true.
+   */
+  resetWorkspace: [true, { option: true }],
   /**
    * Kernels created during the test.
    *
