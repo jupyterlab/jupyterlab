@@ -2597,7 +2597,7 @@ __metadata:
     minimatch: ~3.0.4
     os: ~0.1.1
     package-json: ^7.0.0
-    prettier: ~2.6.0
+    prettier: ^3.8.1
     process: ^0.11.10
     rimraf: ~5.0.5
     semver: ^7.5.2
@@ -4699,7 +4699,7 @@ __metadata:
     eslint-plugin-prettier: ~5.0.1
     eslint-plugin-react: ~7.33.2
     lerna: ^7.1.4
-    prettier: ~3.0.0
+    prettier: ^3.8.1
     stylelint: ^15.10.1
     stylelint-config-prettier: ^9.0.3
     stylelint-config-recommended: ^13.0.0
@@ -18751,30 +18751,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^1.19.1":
-  version: 1.19.1
-  resolution: "prettier@npm:1.19.1"
-  bin:
-    prettier: ./bin-prettier.js
-  checksum: bc78219e0f8173a808f4c6c8e0a137dd8ebd4fbe013e63fe1a37a82b48612f17b8ae8e18a992adf802ee2cf7428f14f084e7c2846ca5759cf4013c6e54810e1f
-  languageName: node
-  linkType: hard
-
-"prettier@npm:~2.6.0":
-  version: 2.6.2
-  resolution: "prettier@npm:2.6.2"
-  bin:
-    prettier: bin-prettier.js
-  checksum: 48d08dde8e9fb1f5bccdd205baa7f192e9fc8bc98f86e1b97d919de804e28c806b0e6cc685e4a88211aa7987fa9668f30baae19580d87ced3ed0f2ec6572106f
-  languageName: node
-  linkType: hard
-
-"prettier@npm:~3.0.0":
-  version: 3.0.3
-  resolution: "prettier@npm:3.0.3"
+"prettier@npm:^3.8.1":
+  version: 3.8.1
+  resolution: "prettier@npm:3.8.1"
   bin:
     prettier: bin/prettier.cjs
-  checksum: e10b9af02b281f6c617362ebd2571b1d7fc9fb8a3bd17e371754428cda992e5e8d8b7a046e8f7d3e2da1dcd21aa001e2e3c797402ebb6111b5cd19609dd228e0
+  checksum: 36fe4ecd95751aa17fea70b48afd5086e88002988238112fc1be30a5307af6983e1833be790b0cc1c54702b71f73b12bfec12c05166d7619e3151ab221654297
   languageName: node
   linkType: hard
 
