@@ -1294,6 +1294,7 @@ export class NotebookHelper {
               framesWithoutChange += 1;
             } else {
               framesWithoutChange = 0;
+              content = newContent;
             }
             if (framesWithoutChange < 10) {
               waitUntilNextFrame();
