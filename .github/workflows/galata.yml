@@ -33,6 +33,7 @@ jobs:
             suite: jupyterlab
           - browser: chromium
             project: galata
+            suite: galata
             shard: 1
             shards: 2
           - browser: chromium
