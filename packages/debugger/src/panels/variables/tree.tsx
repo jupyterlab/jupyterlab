@@ -49,6 +49,11 @@ export class VariablesBodyTree extends ReactWidget {
     this.addClass('jp-DebuggerVariables-body');
   }
 
+  set unifiedView(value: boolean) {
+    this._unifiedView = value;
+    this.update();
+  }
+
   /**
    * Render the VariablesBodyTree.
    */
@@ -59,6 +64,28 @@ export class VariablesBodyTree extends ReactWidget {
     const handleSelectVariable = (variable: IDebugger.IVariable) => {
       this.model.selectedVariable = variable;
     };
+
+    if (this._unifiedView && this._scopes.length) {
+      this.removeClass('jp-debuggerVariables-local');
+
+      return (
+        <TreeView className="jp-TreeView">
+          {this._scopes.map(scope => (
+            <TreeItem key={scope.name} expanded>
+              <span className="jp-DebuggerVariables-scope">{scope.name}</span>
+              <VariablesBranch
+                commands={this._commands}
+                service={this._service}
+                data={scope.variables}
+                filter={this._filter}
+                translator={this._translator}
+                handleSelectVariable={handleSelectVariable}
+              />
+            </TreeItem>
+          ))}
+        </TreeView>
+      );
+    }
 
     if (scope?.name !== 'Globals') {
       this.addClass('jp-debuggerVariables-local');
@@ -121,6 +148,7 @@ export class VariablesBodyTree extends ReactWidget {
   private _filter = new Set<string>();
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
+  private _unifiedView = false;
 }
 
 interface IVariablesBranchProps {
