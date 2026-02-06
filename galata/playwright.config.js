@@ -21,8 +21,7 @@ module.exports = {
           // Force slow motion
           slowMo: 30
         }
-      },
-      reporter: baseConfig.reporter
+      }
     },
     {
       name: 'galata',
