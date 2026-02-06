@@ -3,12 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { FilterBox } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
-import { IShortcutUI } from '../types';
+import type { IShortcutUI } from '../types';
 
 export interface IAdvancedOptionsProps {
   toggleSelectors: IShortcutUI['toggleSelectors'];

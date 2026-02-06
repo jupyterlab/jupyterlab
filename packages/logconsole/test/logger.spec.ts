@@ -1,14 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ILogPayload,
-  Logger,
-  LoggerOutputAreaModel,
-  LogLevel
-} from '@jupyterlab/logconsole';
+import type { ILogPayload, LogLevel } from '@jupyterlab/logconsole';
+import { Logger, LoggerOutputAreaModel } from '@jupyterlab/logconsole';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 class SignalLogger<SENDER, ARGS> {
   constructor(signal: ISignal<SENDER, ARGS>) {

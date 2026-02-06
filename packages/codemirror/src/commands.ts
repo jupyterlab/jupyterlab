@@ -11,7 +11,7 @@ import {
   insertTab,
   simplifySelection
 } from '@codemirror/commands';
-import { EditorState, Transaction } from '@codemirror/state';
+import type { EditorState, Transaction } from '@codemirror/state';
 import {
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS,

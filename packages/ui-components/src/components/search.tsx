@@ -5,7 +5,7 @@ import { StringExt } from '@lumino/algorithm';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * The class name added to the filebrowser crumbs node.

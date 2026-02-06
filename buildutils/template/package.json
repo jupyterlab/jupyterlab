@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "4.6.0-alpha.1",
+  "version": "4.6.0-alpha.2",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,10 +37,10 @@
     "watch": "tsc -b --watch"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.6.0-alpha.1",
+    "@jupyterlab/testing": "^4.6.0-alpha.2",
     "@types/jest": "^29.2.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "publishConfig": {
     "access": "public"

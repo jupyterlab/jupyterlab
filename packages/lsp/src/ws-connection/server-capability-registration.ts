@@ -9,7 +9,7 @@
 // but without language deemed unnecessary following the Berne Convention." (Wikipedia).
 // Introduced modifications are BSD licenced, copyright JupyterLab development team.
 
-import {
+import type {
   Registration,
   ServerCapabilities,
   Unregistration

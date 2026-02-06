@@ -4,11 +4,9 @@
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { Sanitizer } from '@jupyterlab/apputils';
 import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
-import {
-  EditorLanguageRegistry,
-  IEditorLanguageRegistry
-} from '@jupyterlab/codemirror';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import type { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 describe('TableOfContentsUtils', () => {
   describe('Markdown', () => {
@@ -513,9 +511,7 @@ front: matter
         const parser: IMarkdownParser = createMarkdownParser(languages);
         const headings = TableOfContentsUtils.filterHeadings(
           await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            maximalDepth
-          }
+          { maximalDepth }
         );
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
@@ -531,9 +527,7 @@ front: matter
 
         const headings = TableOfContentsUtils.filterHeadings(
           await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            numberHeaders
-          }
+          { numberHeaders }
         );
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberHeaders ? '0.0.1. ' : '');

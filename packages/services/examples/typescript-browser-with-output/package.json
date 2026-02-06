@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-outputarea",
-  "version": "4.6.0-alpha.1",
+  "version": "4.6.0-alpha.2",
   "private": true,
   "sideEffects": [
     "style/*"
@@ -16,16 +16,16 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.6.0-alpha.1",
-    "@jupyterlab/outputarea": "^4.6.0-alpha.1",
-    "@jupyterlab/rendermime": "^4.6.0-alpha.1",
-    "@jupyterlab/services": "^7.6.0-alpha.1"
+    "@jupyterlab/coreutils": "^6.6.0-alpha.2",
+    "@jupyterlab/outputarea": "^4.6.0-alpha.2",
+    "@jupyterlab/rendermime": "^4.6.0-alpha.2",
+    "@jupyterlab/services": "^7.6.0-alpha.2"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.7.2",
-    "@rspack/core": "^1.7.2",
+    "@rspack/cli": "^1.7.5",
+    "@rspack/core": "^1.7.5",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4"
+    "typescript": "~5.9.3"
   },
   "styleModule": "style/index.js"
 }
