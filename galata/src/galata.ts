@@ -632,6 +632,12 @@ export namespace galata {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -697,6 +703,12 @@ export namespace galata {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -865,6 +877,12 @@ export namespace galata {
             if (id) {
               if (runners.has(id)) {
                 // Proxy the GET request
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
                 const response = await ctxt.request.fetch(request);
                 if (!response.ok()) {
                   if (!page.isClosed() && !isClosed) {
@@ -897,6 +915,12 @@ export namespace galata {
               }
             } else {
               // Proxy the GET request
+              if (page.isClosed() || isClosed) {
+                console.warn(
+                  `Route handler: aborting ${request.url()} because page/context is closed`
+                );
+                return route.abort();
+              }
               const response = await ctxt.request.fetch(request);
               if (!response.ok()) {
                 if (!page.isClosed() && !isClosed) {
@@ -938,6 +962,12 @@ export namespace galata {
           }
           case 'PATCH': {
             // Proxy the PATCH request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -967,6 +997,12 @@ export namespace galata {
           }
           case 'POST': {
             // Proxy the POST request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
             const response = await ctxt.request.fetch(request);
             if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
@@ -1079,6 +1115,12 @@ export namespace galata {
             if (!id) {
               // Get all settings
               if (settings.length === 0) {
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
                 const response = await ctxt.request.fetch(request);
                 const loadedSettings = (await response.json())
                   .settings as ISettingRegistry.IPlugin[];
@@ -1105,6 +1147,12 @@ export namespace galata {
               // Get specific settings
               let pluginSettings = settings.find(setting => setting.id === id);
               if (!pluginSettings) {
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
                 const response = await ctxt.request.fetch(request);
                 pluginSettings = await response.json();
                 if (pluginSettings) {
