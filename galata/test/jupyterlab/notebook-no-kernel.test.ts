@@ -92,9 +92,7 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
 
     await page.click(
       `.jp-DirListing-item span:has-text("${NOTEBOOK_NAME_2}")`,
-      {
-        button: 'right'
-      }
+      { button: 'right' }
     );
     expect(await page.menu.isAnyOpen()).toBe(true);
     await page.hover('text=Open With');

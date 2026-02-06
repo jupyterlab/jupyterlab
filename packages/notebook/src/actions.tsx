@@ -2557,9 +2557,7 @@ namespace Private {
               `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
             ),
             'warning',
-            {
-              autoClose: false
-            }
+            { autoClose: false }
           );
           return Promise.resolve(false);
         }

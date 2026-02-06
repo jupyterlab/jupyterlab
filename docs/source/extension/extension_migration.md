@@ -282,7 +282,6 @@ and is based on [FAST](https://www.fast.design/) library by Microsoft.
 See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more context on the change.
 
 - Changes the selectors of the `Toolbar` and `ToolbarButtonComponent`.
-
   - The DOM of `Toolbar` is now a `jp-toolbar` component instead of a `div`.
 
   - The DOM of `ToolbarButtonComponent` is now `jp-button` element instead of a `button`.
@@ -312,7 +311,7 @@ See <https://github.com/jupyterlab/frontends-team-compass/issues/143> for more c
 
 - Some CSS rules for `button` with the class `.jp-ToolbarButtonComponent` has been kept for backward compatibility.
 
-  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  These rules are now **deprecated** and will be removed in JupyterLab 5.
   The `button` elements in toolbars must be updated to `jp-button`, from
   [jupyter-ui-toolkit](https://github.com/jupyterlab-contrib/jupyter-ui-toolkit).
 
@@ -529,7 +528,6 @@ bumped their major version (following semver convention). We want to point out p
     \- `@jupyterlab/codemirror-extension:editor-syntax-status` -> `@jupyterlab/fileeditor-extension:editor-syntax-status`
 - `@jupyterlab/completer` from 3.x to 4.x
   : Major version was bumped following major refactor aimed at performance improvements and enabling easier third-party integration.
-
   - Adding custom completion suggestions (items):
     : - In 3.x and earlier adding custom completion items required re-registering the completer connector for each file/cell
     using `register` method of old manager provided by `ICompletionManager` token; in 4.x this token and associated
@@ -596,7 +594,6 @@ bumped their major version (following semver convention). We want to point out p
   - The method `TextModelFactory.createNew` receives a parameter `DocumentModel.IOptions`.
 - `@jupyterlab/documentsearch` from 3.x to 4.x
   : - `@jupyterlab/documentsearch:plugin` has been renamed to `@jupyterlab/documentsearch-extension:plugin`
-
   - `@jupyterlab/documentsearch:labShellWidgetListener` has been renamed to `@jupyterlab/documentsearch-extension:labShellWidgetListener`
 
   This may impact application configuration (for instance if the plugin was disabled).

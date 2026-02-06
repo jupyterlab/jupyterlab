@@ -36,8 +36,7 @@ import type { MessageConnection } from 'vscode-ws-jsonrpc';
  */
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
-> implements IClientRequestHandler
-{
+> implements IClientRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -66,8 +65,7 @@ class ClientRequestHandler<
  */
 class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
-> implements IServerRequestHandler
-{
+> implements IServerRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
