@@ -290,7 +290,7 @@ jobs:
         with:
           name: documentation-report
           path: core/galata/playwright-report
-          if-no-files-found: ignore  # expected when no tests fail (after retries)
+          if-no-files-found: error
 
       - name: Stop JupyterLab
         if: always()
