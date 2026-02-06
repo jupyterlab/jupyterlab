@@ -148,7 +148,7 @@ function reduceItem(
   | ISettingRegistry.IMenuItem
   | { [id: string]: ISettingRegistry.IMenuItem[] }
   | null {
-    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+  // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
   switch (item.type ?? 'command') {
     case 'command':
       if (!commands.includes(item.command)) {
