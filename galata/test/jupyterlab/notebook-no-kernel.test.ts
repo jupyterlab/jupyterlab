@@ -112,7 +112,7 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     await page.waitForFunction(() => {
       return document.querySelectorAll('.jp-NotebookPanel').length === 2;
     });
-  
+
 
     expect(await page.activity.isTabActive(NOTEBOOK_NAME_2)).toBe(true);
 
@@ -125,7 +125,3 @@ test.describe('Opening Two Notebooks with No Kernel', () => {
     expect(await page.kernel.isRunning()).toBe(false);
   });
 });
-
-
-
-
