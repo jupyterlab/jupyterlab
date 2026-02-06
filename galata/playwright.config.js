@@ -5,6 +5,9 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
 module.exports = {
   ...baseConfig,
+  reporter: process.env.CI
+    ? [['blob']]
+    : [['list'], ['html', { open: 'on-failure' }]],
   projects: [
     {
       name: 'documentation',
@@ -18,7 +21,8 @@ module.exports = {
           // Force slow motion
           slowMo: 30
         }
-      }
+      },
+      reporter: baseConfig.reporter
     },
     {
       name: 'galata',
