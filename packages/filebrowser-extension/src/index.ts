@@ -288,6 +288,9 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
             .composite as boolean;
           browser.model.filterDirectories = filterDirectories;
           browser.model.useFuzzyFilter = useFuzzyFilter;
+          const fileSizeDisplayUnit = settings.get('fileSizeDisplayUnit')
+            .composite as 'decimal' | 'binary';
+          browser.fileSizeDisplayUnit = fileSizeDisplayUnit;
         }
         settings.changed.connect(onSettingsChanged);
         onSettingsChanged(settings);
@@ -1064,11 +1067,15 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
     let autoOpen = settings.get('autoOpenUploads').composite as boolean;
     let maxSize =
       (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+    let fileSizeDisplayUnit = settings.get('fileSizeDisplayUnit')
+      .composite as 'decimal' | 'binary';
 
     settings.changed.connect(() => {
       autoOpen = settings.get('autoOpenUploads').composite as boolean;
       maxSize =
         (settings.get('maxAutoOpenSizeMB').composite as number) * 1024 * 1024;
+      fileSizeDisplayUnit = settings.get('fileSizeDisplayUnit')
+        .composite as 'decimal' | 'binary';
     });
 
     // attach to the Uploader after restore
@@ -1123,7 +1130,7 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
               trans.__(
                 'Uploaded %1%2',
                 file.name,
-                file.size ? ` (${formatFileSize(file.size, 1, 1024)})` : ''
+                file.size ? ` (${formatFileSize(file.size, 1, fileSizeDisplayUnit)})` : ''
               ),
               'info',
               {

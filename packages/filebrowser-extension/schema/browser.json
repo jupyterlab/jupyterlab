@@ -254,6 +254,13 @@
       "description": "Whether to allow single click selection on file browser items",
       "default": false
     },
+    "fileSizeDisplayUnit": {
+      "type": "string",
+      "title": "File size display units",
+      "description": "Whether to display file sizes using decimal (KB, MB, GB) or binary (KiB, MiB, GiB) units",
+      "default": "decimal",
+      "enum": ["decimal", "binary"]
+    },
     "autoOpenUploads": {
       "type": "boolean",
       "title": "Auto-open uploads",
