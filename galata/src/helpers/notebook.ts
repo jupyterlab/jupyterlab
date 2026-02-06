@@ -1282,14 +1282,23 @@ export class NotebookHelper {
       // over 10 consecutive animation frames.
       await cell.evaluate((cell: HTMLElement) => {
         let _resolve: () => void;
-        const promise = new Promise<void>(resolve => {
+        let _reject: (reason?: string) => void;
+        const promise = new Promise<void>((resolve, reject) => {
           _resolve = resolve;
+          _reject = reject;
         });
         let framesWithoutChange = 0;
         let content = cell.querySelector('.cm-content')!.innerHTML;
+        let latestContent = content;
+        const timeoutId = window.setTimeout(() => {
+          _reject(
+            `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${content}; Current innerHTML: ${latestContent}`
+          );
+        }, 10000);
         const waitUntilNextFrame = () => {
           window.requestAnimationFrame(() => {
             const newContent = cell.querySelector('.cm-content')!.innerHTML;
+            latestContent = newContent;
             if (content === newContent) {
               framesWithoutChange += 1;
             } else {
@@ -1298,6 +1307,7 @@ export class NotebookHelper {
             if (framesWithoutChange < 10) {
               waitUntilNextFrame();
             } else {
+              window.clearTimeout(timeoutId);
               _resolve();
             }
           });
