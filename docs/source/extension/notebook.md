@@ -102,10 +102,8 @@ corresponding to the cell models in its cell list.
 
 - Each cell widget contains an
   {ts:class}`cells.InputArea`,
-
   - which contains a
     {ts:class}`codeeditor.CodeEditorWrapper`,
-
     - which contains a JavaScript CodeMirror instance.
 
 A
@@ -276,9 +274,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
 /**
  * A notebook widget extension that adds a widget in the notebook header (widget below the toolbar).
  */
-export class WidgetExtension
-  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
-{
+export class WidgetExtension implements DocumentRegistry.IWidgetExtension<
+  NotebookPanel,
+  INotebookModel
+> {
   /**
    * Create a new extension object.
    */
