@@ -453,11 +453,19 @@ test.describe('Jump to execution button', () => {
       page.locator('.jp-Notebook-ExecutionIndicator-jumpButton')
     ).toHaveCount(0);
 
-    // Run first cell
+    // Start executing the first cell (with 2 second sleep)
     void page.notebook.runCell(0, false);
 
+    // Add a cell at the end, it will have index 3 (forth cell)
     await page.notebook.addCell('code', '1');
-    const runPromise = page.notebook.runCell(3, false);
+
+    // Schedule run of the last (fourth) cell we just added.
+    // We cannot use runCell as it relies on selection;
+    // jump action does change selection in the meantime
+    // which was causing this test to randomly fail.
+    await page.notebook.selectCells(3);
+    await page.keyboard.press('Control+Enter');
+    const runPromise = page.notebook.waitForRun(3);
 
     // Hover and verify button exists
     await indicator.hover();
@@ -467,7 +475,6 @@ test.describe('Jump to execution button', () => {
     await expect(jumpButton).toBeVisible();
 
     // Click and scroll to the first cell (currently executing)
-    // TODO: this jumpButton.click fails with a timeout
     await jumpButton.click();
     const firstCell = await page.notebook.getCellLocator(0);
     await firstCell?.waitFor({ state: 'visible', timeout: 1000 });

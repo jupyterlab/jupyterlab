@@ -1398,7 +1398,10 @@ export class NotebookHelper {
   }
 
   /**
-   * Run a given cell
+   * Run a given cell.
+   *
+   * Note: cell exectuion relies on cell selection, thus this method
+   * is not reliable if cell selection changes before it completes.
    *
    * @param cellIndex Cell index
    * @param inplace Whether to stay on the cell or select the next one
