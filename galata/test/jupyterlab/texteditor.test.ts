@@ -137,7 +137,7 @@ ut elit.`
       // We wrap the font size comparisons in `expect().toPass()`
       // because clicking on the menu only triggers the asynchronous
       // update which might take a fraction on second to propagate.
-      expect(async () => {
+      await expect(async () => {
         expect(await getFontSize(page)).toEqual(fontSize + 1);
       }).toPass();
     });
@@ -147,7 +147,7 @@ ut elit.`
       let fontSize = await getFontSize(page);
       await changeFontSize(page, 'Decrease Text Editor Font Size');
 
-      expect(async () => {
+      await expect(async () => {
         expect(await getFontSize(page)).toEqual(fontSize - 1);
       }).toPass();
     });
