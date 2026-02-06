@@ -140,9 +140,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
       });
@@ -169,9 +167,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
         window.galata.off('notification', callback);
@@ -215,9 +211,7 @@ test.describe('listeners', () => {
         setTimeout(() => {
           void window.jupyterapp.commands.execute(
             'apputils:dismiss-notification',
-            {
-              id: n.id
-            }
+            { id: n.id }
           );
         }, 100);
       };

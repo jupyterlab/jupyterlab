@@ -873,9 +873,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
                 : deadline.timeRemaining()
             );
           },
-          {
-            timeout: 3000
-          }
+          { timeout: 3000 }
         );
       }
     }
@@ -2740,7 +2738,7 @@ export class Notebook extends StaticNotebook {
         }
         if (id === queryId) {
           const attribute =
-            this.rendermime.sanitizer.allowNamedProperties ?? false
+            (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
               : 'data-jupyter-id';
           const element = this.node.querySelector(
@@ -2790,7 +2788,7 @@ export class Notebook extends StaticNotebook {
       }
 
       const attribute =
-        this.rendermime.sanitizer.allowNamedProperties ?? false
+        (this.rendermime.sanitizer.allowNamedProperties ?? false)
           ? 'id'
           : 'data-jupyter-id';
       const element = cell.node.querySelector(

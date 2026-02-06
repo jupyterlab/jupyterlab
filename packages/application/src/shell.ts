@@ -1684,8 +1684,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-      ? bars[0]
-      : null;
+        ? bars[0]
+        : null;
   }
 
   /*

@@ -514,8 +514,7 @@ export namespace NotebookModel {
   /**
    * An options object for initializing a notebook model.
    */
-  export interface IOptions
-    extends DocumentRegistry.IModelOptions<ISharedNotebook> {
+  export interface IOptions extends DocumentRegistry.IModelOptions<ISharedNotebook> {
     /**
      * Default cell type.
      */

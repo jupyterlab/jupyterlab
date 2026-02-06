@@ -47,9 +47,7 @@ export function validateProperty(
       }
       if (!valid) {
         throw new Error(
-          `Property '${name}' is not one of the valid values ${JSON.stringify(
-            values
-          )}`
+          `Property '${name}' is not one of the valid values ${JSON.stringify(values)}`
         );
       }
     }
