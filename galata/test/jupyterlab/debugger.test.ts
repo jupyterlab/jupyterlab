@@ -57,6 +57,7 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
+    await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-variables.png'
     );
