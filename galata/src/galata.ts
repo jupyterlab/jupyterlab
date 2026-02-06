@@ -300,7 +300,9 @@ export namespace galata {
       // Load and initialize JupyterLab and goto test folder
       const path = `tree/${tmpPath}`;
       // Reset workspace state to avoid stale state from previous runs
-      await jlabWithPage.goto(resetWorkspace ? `${path}?reset` : path);
+      await jlabWithPage.goto(
+        resetWorkspace !== false ? `${path}?reset` : path
+      );
     }
 
     return jlabWithPage;
