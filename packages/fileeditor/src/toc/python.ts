@@ -73,9 +73,8 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       if (KEYWORDS.flags.includes('d')) {
         hasKeyword = KEYWORDS.exec(line);
       } else {
-        const { default: execWithIndices } = await import(
-          'regexp-match-indices'
-        );
+        const { default: execWithIndices } =
+          await import('regexp-match-indices');
         hasKeyword = execWithIndices(KEYWORDS, line);
       }
       if (hasKeyword) {

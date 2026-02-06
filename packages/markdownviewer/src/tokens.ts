@@ -17,5 +17,4 @@ export const IMarkdownViewerTracker = new Token<IMarkdownViewerTracker>(
 /**
  * A class that tracks markdown viewer widgets.
  */
-export interface IMarkdownViewerTracker
-  extends IWidgetTracker<MarkdownDocument> {}
+export interface IMarkdownViewerTracker extends IWidgetTracker<MarkdownDocument> {}

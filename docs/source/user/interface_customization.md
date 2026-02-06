@@ -219,13 +219,11 @@ Customized menu bar
 The menu are identified by the following ids:
 
 - File menu: `jp-mainmenu-file`
-
   - New file submenu: `jp-mainmenu-file-new`
 
 - Edit menu: `jp-mainmenu-edit`
 
 - View menu: `jp-mainmenu-view`
-
   - Appearance submenu: `jp-mainmenu-view-appearance`
 
 - Run menu: `jp-mainmenu-run`

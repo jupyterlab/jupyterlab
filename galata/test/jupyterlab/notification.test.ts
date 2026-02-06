@@ -74,9 +74,7 @@ test.describe('Toast', () => {
     await handle.waitFor();
 
     expect(await handle.screenshot({ animations: 'disabled' })).toMatchSnapshot(
-      {
-        name: `notification-with-actions.png`
-      }
+      { name: `notification-with-actions.png` }
     );
 
     await Promise.all([
@@ -188,9 +186,7 @@ test.describe('Toast', () => {
       page.evaluate(id => {
         return window.jupyterapp.commands.execute(
           'apputils:dismiss-notification',
-          {
-            id
-          }
+          { id }
         );
       }, id)
     ]);

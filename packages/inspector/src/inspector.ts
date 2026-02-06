@@ -45,9 +45,7 @@ export class InspectorPanel
         `<p>${options.initialContent}</p>`
       );
     } else {
-      const placeholderHeadline = `<h3>${this._trans.__(
-        'No Documentation'
-      )}</h3>`;
+      const placeholderHeadline = `<h3>${this._trans.__('No Documentation')}</h3>`;
       const placeholderText = `<p>${this._trans.__(
         'Move the cursor to a code fragment (e.g. function or object) to request information about it from the kernel attached to the editor.'
       )}</p>`;

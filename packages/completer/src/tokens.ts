@@ -54,8 +54,8 @@ export interface ICompletionContext {
  * The interface to implement a completion provider.
  */
 export interface ICompletionProvider<
-  T extends
-    CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+  T extends CompletionHandler.ICompletionItem =
+    CompletionHandler.ICompletionItem
 > {
   /**
    * Unique identifier of the provider
