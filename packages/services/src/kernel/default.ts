@@ -1481,7 +1481,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         if (model?.execution_state === 'dead') {
           this._updateStatus('dead');
         } else {
-          this._onWSClose(evt);
+          this._onWSClose(evt as CloseEvent);
         }
       } catch (err) {
         // Try again, if there is a network failure
@@ -1807,10 +1807,17 @@ export class KernelConnection implements Kernel.IKernelConnection {
   /**
    * Handle a websocket close event.
    */
-  private _onWSClose = (evt: Event) => {
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent) => {
+    if (this.isDisposed) {
+      return;
     }
+
+    if (evt.code === 1000 || evt.code === 1001) {
+      this._updateConnectionStatus('disconnected');
+      return;
+    }
+
+    this._reconnect();
   };
 
   get hasPendingInput(): boolean {
