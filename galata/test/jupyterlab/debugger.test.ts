@@ -220,7 +220,7 @@ test.describe('Debugger Variables', () => {
     });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
@@ -268,7 +268,7 @@ test.describe('Debugger Variables', () => {
     });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();
@@ -297,7 +297,7 @@ test.describe('Debugger Variables', () => {
     await init({ page, tmpPath });
 
     // Don't wait as it will be blocked.
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed.
     await page.debugger.waitForCallStack();

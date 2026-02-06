@@ -454,17 +454,17 @@ test.describe('Jump to execution button', () => {
     ).toHaveCount(0);
 
     // Start executing the first cell (with 2 second sleep)
-    void page.notebook.runCell(0, false);
+    await page.notebook.runCell(0, { inplace: false });
 
     // Add a cell at the end, it will have index 3 (forth cell)
     await page.notebook.addCell('code', '1');
 
     // Schedule run of the last (fourth) cell we just added.
-    // We cannot use runCell as it relies on selection;
-    // jump action does change selection in the meantime
-    // which was causing this test to randomly fail.
-    await page.notebook.selectCells(3);
-    await page.keyboard.press('Control+Enter');
+    // Because runCell as relies on selection and jump action
+    // does change selection in the meantime (which was causing
+    // this test to randomly fail) we await for run but create
+    // a promise to await for result manually.
+    await page.notebook.runCell(3, { wait: false });
     const runPromise = page.notebook.waitForRun(3);
 
     // Hover and verify button exists

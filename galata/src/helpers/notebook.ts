@@ -1294,7 +1294,6 @@ export class NotebookHelper {
               framesWithoutChange += 1;
             } else {
               framesWithoutChange = 0;
-              content = newContent;
             }
             if (framesWithoutChange < 10) {
               waitUntilNextFrame();
@@ -1402,13 +1401,30 @@ export class NotebookHelper {
    * Run a given cell.
    *
    * Note: cell exectuion relies on cell selection, thus this method
-   * is not reliable if cell selection changes before it completes.
+   * is not reliable if cell selection changes before the cell gets run.
    *
    * @param cellIndex Cell index
-   * @param inplace Whether to stay on the cell or select the next one
+   * @param options Options for runninng cell; for compatibility a boolean can be passed as shorthand for `inplace`
+   * @param options.inplace Whether to stay on the cell or select the next one (default `false`)
+   * @param options.wait Whether to wait for the completion (default `true`)
    * @returns Action success status
    */
-  async runCell(cellIndex: number, inplace?: boolean): Promise<boolean> {
+  async runCell(
+    cellIndex: number,
+    options?:
+      | boolean
+      | {
+          inplace?: boolean;
+          wait?: boolean;
+        }
+  ): Promise<boolean> {
+    if (typeof options === 'boolean') {
+      options = {
+        inplace: options
+      };
+    }
+    const inplace = options?.inplace ?? false;
+    const wait = options?.wait ?? true;
     if (!(await this.isAnyActive())) {
       return false;
     }
@@ -1426,7 +1442,9 @@ export class NotebookHelper {
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
-    await this.waitForRun(cellIndex);
+    if (wait) {
+      await this.waitForRun(cellIndex);
+    }
 
     return true;
   }

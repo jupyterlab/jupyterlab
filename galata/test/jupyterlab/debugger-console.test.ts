@@ -33,7 +33,7 @@ async function setupDebuggerConsole(
   await page.debugger.waitForBreakPoints();
 
   // Run the cell (non-blocking) to hit the breakpoint
-  void page.notebook.runCell(0);
+  await page.notebook.runCell(0, { wait: false });
 
   // Wait for the debugger to stop at the breakpoint
   await page.debugger.waitForCallStack();
@@ -149,6 +149,7 @@ test.describe('Debugger Console', () => {
     await inputArea.press('Shift+Enter');
 
     // Wait for output to appear
+    // TODO remove explicit timeouts
     await page.waitForTimeout(1000);
 
     // Check that the output shows the correct value (42)

@@ -114,7 +114,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -161,7 +161,7 @@ test.describe('Debugger', () => {
     await keyboard.press('Backspace');
     await keyboard.type('except:\n2/0\n', { delay: 100 });
 
-    void page.notebook.runCell(0);
+    await page.notebook.runCell(0, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -189,7 +189,7 @@ test.describe('Debugger', () => {
 
     await menu.locator('li div.lm-Menu-itemLabel:text("raised")').click();
 
-    void page.notebook.runCell(0);
+    await page.notebook.runCell(0, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -248,7 +248,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint and the local variables to be displayed
     await page.debugger.waitForCallStack();
@@ -275,7 +275,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -306,7 +306,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -336,7 +336,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    void page.notebook.runCell(1);
+    await page.notebook.runCell(1, { wait: false });
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
