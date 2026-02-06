@@ -89,7 +89,7 @@ commander
       );
     }
     const pkgs = Array.from(toBump).join(',');
-    let cmd = `jlpm workspaces run --include "${pkgs}" npm version premajor --preid=${preId}`;
+    let cmd = `jlpm workspaces foreach --include "${pkgs}" npm version premajor --preid=${preId}`;
     if (options.force) {
       cmd += ' --yes';
     }

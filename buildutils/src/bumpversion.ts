@@ -80,7 +80,7 @@ commander
       lernaVersion += ' --preid=alpha';
     }
 
-    let cmd = `jlpm workspaces run npm version ${lernaVersion}`;
+    let cmd = `jlpm workspaces foreach npm version ${lernaVersion}`;
     if (opts.force) {
       cmd += ' --yes';
     }
