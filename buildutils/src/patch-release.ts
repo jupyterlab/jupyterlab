@@ -27,7 +27,8 @@ commander
     utils.prebump();
 
     // Version the changed
-    let cmd = `jlpm workspaces foreach npm version patch`;
+    let cmd = `jlpm workspaces foreach run `;
+    cmd += ` npm version patch`;
 
     const oldVersion = utils.getJSVersion('metapackage');
     utils.run(cmd);
