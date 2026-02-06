@@ -52,6 +52,11 @@ test('Open the settings editor with a specific search query', async ({
 });
 
 test.describe('change font-size', () => {
+  // We wrap the font size comparisons in `expect().toPass()`
+  // because clicking on the menu only triggers the asyncronous
+  // update which might take a fraction on second to propagate
+  // due to the settings API network latency. This in past led
+  // to flkay tests.
   const ipynbFileName = 'create_test.ipynb';
 
   const createNewCodeCell = async (page: IJupyterLabPageFixture) => {
@@ -102,10 +107,13 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const newFontSize = await cellElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await cellElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease Code Font Size', async ({ page }) => {
@@ -119,10 +127,13 @@ test.describe('change font-size', () => {
     const cellElement = page.locator(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const newFontSize = await cellElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await cellElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 
   test('should Increase Content Font Size', async ({ page }) => {
@@ -137,10 +148,13 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease Content Font Size', async ({ page }) => {
@@ -155,10 +169,13 @@ test.describe('change font-size', () => {
 
     await page.locator('.jp-FileEditor .cm-content').waitFor();
     const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 
   test('should Increase UI Font Size', async ({ page }) => {
@@ -172,10 +189,13 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize + 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize + 1}px`);
+    }).toPass();
   });
 
   test('should Decrease UI Font Size', async ({ page }) => {
@@ -189,10 +209,13 @@ test.describe('change font-size', () => {
     const fileElement = page.locator(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const newFontSize = await fileElement.evaluate(
-      el => getComputedStyle(el).fontSize
-    );
-    expect(newFontSize).toEqual(`${fontSize - 1}px`);
+
+    await expect(async () => {
+      const newFontSize = await fileElement.evaluate(
+        el => getComputedStyle(el).fontSize
+      );
+      expect(newFontSize).toEqual(`${fontSize - 1}px`);
+    }).toPass();
   });
 });
 

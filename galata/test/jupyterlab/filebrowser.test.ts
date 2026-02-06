@@ -49,12 +49,20 @@ test('File rename input respects UI font size', async ({ page }) => {
     .locator('.jp-DirListing-item:has-text("untitled.txt")')
     .waitFor({ state: 'visible' });
 
+  const initialFontSize = await getFileListFontSize(page);
+
   await changeCodeFontSize(page, 'Increase UI Font Size');
   await changeCodeFontSize(page, 'Increase UI Font Size');
   await changeCodeFontSize(page, 'Increase UI Font Size');
 
-  // Get the filename's font size when we are not renaming
-  const normalFontSize = await getFileListFontSize(page);
+  const normalFontSize = initialFontSize + 3;
+
+  // Wait for the filename's font size to be updated
+  // (it can take a while as this requires three settings API round-trips)
+  await expect(async () => {
+    const fontSize = await getFileListFontSize(page);
+    expect(fontSize).toBe(normalFontSize);
+  }).toPass();
 
   // Trigger rename
   await page
