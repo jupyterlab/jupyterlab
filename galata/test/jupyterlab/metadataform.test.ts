@@ -503,7 +503,7 @@ test.describe('Notebook level and cell type metadata', () => {
 
     // There should be 2 fields displayed.
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot('metadata-level.png');
+    expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -543,18 +543,18 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Create a raw cell and select it.
     await page.notebook.addCell('raw', 'Raw cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Select the code cell again to retrieve full form.
     await page.notebook.selectCells(0);
