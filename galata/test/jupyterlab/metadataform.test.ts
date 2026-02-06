@@ -27,11 +27,6 @@ test.beforeAll(async ({ request, tmpPath }) => {
   );
 });
 
-test.afterAll(async ({ request, tmpPath }) => {
-  const contents = galata.newContentsHelper(request);
-  await contents.deleteDirectory(tmpPath);
-});
-
 /**
  * Activate notebook tools side bar.
  */

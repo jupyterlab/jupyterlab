@@ -581,6 +581,8 @@ test.describe.serial('Table of Contents', () => {
 });
 ```
 
+You generally should not attempt to delete this file manually in your own `afterAll()` callback.
+
 ## Benchmark
 
 Benchmark of JupyterLab is done using Playwright. The actions measured are:

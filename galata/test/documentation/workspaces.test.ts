@@ -30,11 +30,6 @@ test.describe('Workspaces sidebar', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Workspaces context menu', async ({ page }) => {
     // Load the test workspace
     await page.dblclick(

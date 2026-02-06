@@ -32,11 +32,6 @@ test.describe('Workspace', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should reset the workspace', async ({ page, tmpPath }) => {
     await page.goto();
 
@@ -262,11 +257,6 @@ test.describe('Workspace in doc mode', () => {
       path.resolve(__dirname, `./notebooks/${mdFile}`),
       `${tmpPath}/${mdFile}`
     );
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   // Use non-default state to have the running session panel displayed
