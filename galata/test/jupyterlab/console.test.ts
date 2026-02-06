@@ -3,6 +3,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor';
 const CODE_MIRROR_CURSOR = '.cm-cursor';
@@ -138,19 +139,22 @@ print(data.head())`;
       await navigator.clipboard.writeText(code);
     }, pastedCode);
 
+    // Since neither paste, nor intialization of CodeMirror editor
+    // (after moving the prompt position) is instantanious, we only
+    // record height once it stabilised for both before and after.
+
     await page.keyboard.press('ControlOrMeta+v');
 
-    const heightAtBottom = await codeConsoleInput.boundingBox();
-    expect(heightAtBottom).not.toBeNull();
+    const heightAtBottom = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAtBottom).toBeGreaterThan(0);
 
     await page.getByLabel('Change Console Prompt Position').first().click();
     await page.getByText('Prompt to top').click();
 
-    const heightAtTop = await codeConsoleInput.boundingBox();
-    expect(heightAtTop).not.toBeNull();
+    const heightAtTop = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAtTop).toBeGreaterThan(0);
 
-    // TODO: Sometimes fails when it expects 157.3125 but receives 52
-    expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
+    expect(heightAtTop).toBeCloseTo(heightAtBottom, 1);
   });
 
   test('Input prompt continues to auto-resize after code execution', async ({
@@ -230,3 +234,18 @@ print("After execution")`;
     expect(shrunkHeight!.height).toBe(initialHeight!.height);
   });
 });
+
+async function getStabilisedHeight(
+  page: IJupyterLabPageFixture,
+  element: Locator
+) {
+  // Wait for the height to stabilize over 100ms
+  let lastBox: { height: number } | null = null;
+  let currentBox: { height: number } | null = null;
+  do {
+    lastBox = currentBox;
+    await page.waitForTimeout(100);
+    currentBox = await element.boundingBox();
+  } while (!(currentBox && lastBox && currentBox.height === lastBox.height));
+  return currentBox.height;
+}
