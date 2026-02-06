@@ -73,7 +73,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
 
         const widgetCount = layout?.main?.dock?.widgets?.length ?? 0;
 
-        const workspaceId = String(this._workspace.metadata.id ?? this._workspace.metadata.name ?? '');
+        const workspaceId = String(this._workspace.metadata.id ?? '');
         const lastModified =
           this._workspace.metadata['last_modified'] &&
           String(this._workspace.metadata['last_modified']).trim() !== ''

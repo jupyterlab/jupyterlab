@@ -369,9 +369,18 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         const workspace =
           await app.serviceManager.workspaces.fetch(workspaceId);
 
-        const rawLayout =
-          workspace.metadata['layout-restorer:data'] ??
-          workspace.data['layout-restorer:data'];
+        type WorkspaceLayout = {
+          main?: {
+            dock?: {
+              widgets?: unknown[];
+            };
+          };
+        };
+
+        const data = workspace.data as Record<string, unknown>;
+        const rawLayout = data['layout-restorer:data'] as
+          | WorkspaceLayout
+          | undefined;
 
         const widgets = rawLayout?.main?.dock?.widgets;
         const tabs = Array.isArray(widgets) ? widgets.length : 0;
