@@ -10,8 +10,6 @@ import * as utils from './utils';
 commander
   .description('Create a patch release')
   .option('--force', 'Force the upgrade')
-  .option('--all', 'Patch all JS packages instead of the changed ones')
-  .option('--skip-commit', 'Whether to skip commit changes')
   .action((options: any) => {
     utils.exitOnUncaughtException();
 
@@ -29,13 +27,7 @@ commander
     utils.prebump();
 
     // Version the changed
-    let cmd = `lerna version patch --no-git-tag-version --no-push`;
-    if (options.all) {
-      cmd += ' --force-publish=*';
-    }
-    if (options.force) {
-      cmd += ' --yes';
-    }
+    let cmd = `jlpm workspaces run npm version patch`;
 
     const oldVersion = utils.getJSVersion('metapackage');
     utils.run(cmd);

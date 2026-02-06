@@ -89,7 +89,7 @@ commander
       );
     }
     const pkgs = Array.from(toBump).join(',');
-    let cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
+    let cmd = `jlpm workspaces run --include "${pkgs}" npm version premajor --preid=${preId}`;
     if (options.force) {
       cmd += ' --yes';
     }

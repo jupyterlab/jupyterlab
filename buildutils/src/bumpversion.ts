@@ -80,7 +80,7 @@ commander
       lernaVersion += ' --preid=alpha';
     }
 
-    let cmd = `lerna version --no-git-tag-version --force-publish=* --no-push ${lernaVersion}`;
+    let cmd = `jlpm workspaces run npm version ${lernaVersion}`;
     if (opts.force) {
       cmd += ' --yes';
     }
