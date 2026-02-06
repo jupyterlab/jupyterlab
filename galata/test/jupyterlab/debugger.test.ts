@@ -96,6 +96,9 @@ test.describe('Debugger Tests', () => {
 
     await page.debugger.waitForVariables();
     const variablesPanel = await page.debugger.getVariablesPanelLocator();
+    await variablesPanel
+      .getByRole('treeitem', { name: `${globalVar}:` })
+      .waitFor();
     expect
       .soft(await variablesPanel.screenshot())
       .toMatchSnapshot('image-debug-session-global-variables.png');
