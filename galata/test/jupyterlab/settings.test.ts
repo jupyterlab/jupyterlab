@@ -53,10 +53,10 @@ test('Open the settings editor with a specific search query', async ({
 
 test.describe('change font-size', () => {
   // We wrap the font size comparisons in `expect().toPass()`
-  // because clicking on the menu only triggers the asyncronous
+  // because clicking on the menu only triggers the asynchronous
   // update which might take a fraction on second to propagate
   // due to the settings API network latency. This in past led
-  // to flkay tests.
+  // to flaky tests.
   const ipynbFileName = 'create_test.ipynb';
 
   const createNewCodeCell = async (page: IJupyterLabPageFixture) => {
