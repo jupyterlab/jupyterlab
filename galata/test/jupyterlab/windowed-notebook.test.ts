@@ -536,10 +536,13 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .not.toBeVisible();
 
-  await page.getByText('JavaScript injected from HTML').first().waitFor();
-  expect(
-    await page.getByText('JavaScript injected from HTML').count()
-  ).toBeGreaterThan(1);
+  // Use waitFor with function to avoid race condition with setInterval removal
+  await page.waitForFunction(
+    () => {
+      return document.querySelectorAll('[data-origin="html"]').length > 1;
+    },
+    { timeout: 2000 }
+  );
 });
 
 test('should rendered injected JavaScript snippets of out-of-viewport cells', async ({
@@ -554,10 +557,13 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .not.toBeVisible();
 
-  await page.getByText('JavaScript injected header').first().waitFor();
-  expect(
-    await page.getByText('JavaScript injected header').count()
-  ).toBeGreaterThan(1);
+  // Use waitFor with function to avoid race condition with setTimeout removal
+  await page.waitForFunction(
+    () => {
+      return document.querySelectorAll('[data-origin="javascript"]').length > 1;
+    },
+    { timeout: 2000 }
+  );
 });
 
 test('should navigate to a search hit in a out-of-viewport cell', async ({
